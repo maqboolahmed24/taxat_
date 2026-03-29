@@ -1,0 +1,1497 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/experience_delta.schema.json",
+  "title": "ExperienceDelta",
+  "description": "Reconnect-safe Live Observatory patch envelope. This is a read-side UX contract only; it must never be treated as legal command-side truth.",
+  "type": "object",
+  "required": [
+    "manifest_id",
+    "experience_sequence",
+    "frame_epoch",
+    "delivery_class",
+    "shell_route_key",
+    "experience_profile",
+    "posture_state",
+    "semantic_motion",
+    "cause_ref",
+    "attention_policy",
+    "cognitive_budget",
+    "actionability_state",
+    "affected_object_refs",
+    "affected_surface_codes",
+    "occurred_at",
+    "surface_updates"
+  ],
+  "properties": {
+    "manifest_id": {
+      "type": "string"
+    },
+    "experience_sequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "frame_epoch": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "delivery_class": {
+      "type": "string",
+      "enum": [
+        "LIVE",
+        "CATCH_UP",
+        "SNAPSHOT"
+      ]
+    },
+    "shell_route_key": {
+      "type": "string"
+    },
+    "posture_state": {
+      "type": "string",
+      "enum": [
+        "STREAMING",
+        "FROZEN",
+        "CONTAINED",
+        "BRIDGED",
+        "FRACTURED"
+      ]
+    },
+    "semantic_motion": {
+      "type": "string",
+      "enum": [
+        "ORBIT",
+        "TRACE",
+        "SEAL",
+        "RIPPLE",
+        "BRIDGE",
+        "FRACTURE",
+        "ECHO"
+      ]
+    },
+    "cause_ref": {
+      "type": "string"
+    },
+    "connection_state": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "CONNECTED",
+        "RECONNECTING",
+        "CATCHING_UP",
+        "STALE",
+        "DEGRADED",
+        null
+      ]
+    },
+    "activity_state": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "IDLE",
+        "STREAMING",
+        "WAITING_ON_HUMAN",
+        "WAITING_ON_AUTHORITY",
+        "WAITING_ON_LATE_DATA",
+        "RECONNECTING",
+        "REPLAYING",
+        null
+      ]
+    },
+    "truth_state": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "LOCAL_INTENT_ONLY",
+        "PERSISTED_INTERNAL",
+        "AUTHORITY_PENDING",
+        "AUTHORITY_CONFIRMED",
+        "AUTHORITY_REJECTED",
+        "AUTHORITY_UNKNOWN",
+        "AUTHORITY_OUT_OF_BAND",
+        null
+      ]
+    },
+    "checkpoint_state": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "NONE",
+        "SOURCE_COLLECTION",
+        "PROJECTION_PENDING",
+        "HUMAN_REVIEW",
+        "APPROVAL_PENDING",
+        "AUTHORITY_PREFLIGHT",
+        "TRANSMIT_PENDING",
+        "PENDING_ACK",
+        "RECONCILIATION_PENDING",
+        "LATE_DATA_PENDING",
+        "CONFIRMED",
+        "REJECTED",
+        "UNKNOWN",
+        "OUT_OF_BAND",
+        null
+      ]
+    },
+    "truth_origin": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "LOCAL_INTENT",
+        "PERSISTED_STATE",
+        "AUTHORITY_ARTIFACT",
+        "OUT_OF_BAND_DISCOVERY",
+        null
+      ]
+    },
+    "experience_profile": {
+      "type": "string",
+      "enum": [
+        "LOW_NOISE"
+      ],
+      "description": "User-facing shell profile carried on every delta so clients can bind one deterministic renderer. The current contract exposes only the low-noise composite shell."
+    },
+    "attention_state": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "CALM",
+        "NOTICE",
+        "REVIEW",
+        "BLOCKED",
+        "WAITING",
+        "LIMITED",
+        null
+      ]
+    },
+    "primary_object_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "actionability_state": {
+      "type": "string",
+      "description": "Disambiguates whether the shell is presenting one safe next move or explicit NO_SAFE_ACTION semantics. This prevents terminal reload and reconnect from inferring actionability from null checks.",
+      "enum": [
+        "ACTION_AVAILABLE",
+        "NO_SAFE_ACTION"
+      ]
+    },
+    "primary_action_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Machine-stable dominant safe next action when `actionability_state = ACTION_AVAILABLE`. Null is legal only when the shell is explicitly in `NO_SAFE_ACTION` posture."
+    },
+    "no_safe_action_reason_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Machine-stable reason explaining why no safe legal action is currently available."
+    },
+    "secondary_notice_count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "detail_entry_points": {
+      "type": "array",
+      "description": "Ordered low-noise detail modules relevant to the current posture. These are investigation entry points, not alternate command-side truth.",
+      "items": {
+        "$ref": "#/$defs/detailModuleCode"
+      },
+      "default": [],
+      "maxItems": 5,
+      "uniqueItems": true
+    },
+    "suggested_detail_surface_code": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/detailModuleCode"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Least-destructive detail module that should open when the shell needs to route the user from `NO_SAFE_ACTION` or a blocking posture into investigation."
+    },
+    "attention_policy": {
+      "$ref": "#/$defs/attentionPolicy"
+    },
+    "cognitive_budget": {
+      "$ref": "#/$defs/cognitiveBudget"
+    },
+    "active_detail_surface_code": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/detailModuleCode"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Currently expanded low-noise detail module, persisted so reconnect and terminal reload can restore drawer context without route changes."
+    },
+    "focus_anchor_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Stable focused object ref inside the active detail module. Clients SHALL preserve it when the object still exists after a live update."
+    },
+    "shell_stability_token": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "next_checkpoint_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "checkpoint_reason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 160
+    },
+    "plain_reason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 160
+    },
+    "blocked_action_codes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "affected_object_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "affected_surface_codes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/lowNoiseSurfaceCode"
+      },
+      "default": [],
+      "uniqueItems": true,
+      "maxItems": 4
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "surface_updates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/surfaceUpdate"
+      },
+      "minItems": 1,
+      "maxItems": 4
+    },
+    "resume_token": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "is_terminal": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "$defs": {
+    "surfaceCode": {
+      "type": "string",
+      "enum": [
+        "CONTEXT_BAR",
+        "DECISION_SUMMARY",
+        "ACTION_STRIP",
+        "DETAIL_DRAWER",
+        "PULSE_SPINE",
+        "MANIFEST_RIBBON",
+        "HANDOFF_BATON",
+        "DECISION_STAGE",
+        "CONSEQUENCE_RAIL",
+        "EVIDENCE_TIDE",
+        "PACKET_FORGE",
+        "AUTHORITY_TUNNEL",
+        "DRIFT_FIELD",
+        "FOCUS_LENS",
+        "TWIN_PANEL"
+      ]
+    },
+    "lowNoiseSurfaceCode": {
+      "type": "string",
+      "enum": [
+        "CONTEXT_BAR",
+        "DECISION_SUMMARY",
+        "ACTION_STRIP",
+        "DETAIL_DRAWER"
+      ]
+    },
+    "detailModuleCode": {
+      "type": "string",
+      "enum": [
+        "EVIDENCE_TIDE",
+        "PACKET_FORGE",
+        "AUTHORITY_TUNNEL",
+        "DRIFT_FIELD",
+        "FOCUS_LENS",
+        "TWIN_PANEL"
+      ]
+    },
+    "attentionPolicy": {
+      "type": "object",
+      "required": [
+        "policy_version",
+        "attention_state",
+        "primary_surface_code",
+        "primary_object_ref",
+        "actionability_state",
+        "primary_action_code",
+        "no_safe_action_reason_code",
+        "secondary_notice_count",
+        "detail_entry_points",
+        "suggested_detail_surface_code",
+        "ranking_basis",
+        "default_detail_module_code",
+        "visible_warning_count"
+      ],
+      "properties": {
+        "policy_version": {
+          "type": "string"
+        },
+        "attention_state": {
+          "type": "string",
+          "enum": [
+            "CALM",
+            "NOTICE",
+            "REVIEW",
+            "BLOCKED",
+            "WAITING",
+            "LIMITED"
+          ]
+        },
+        "primary_surface_code": {
+          "$ref": "#/$defs/lowNoiseSurfaceCode"
+        },
+        "primary_object_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "actionability_state": {
+          "type": "string",
+          "enum": [
+            "ACTION_AVAILABLE",
+            "NO_SAFE_ACTION"
+          ]
+        },
+        "primary_action_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "no_safe_action_reason_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "secondary_notice_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "detail_entry_points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/detailModuleCode"
+          },
+          "default": [],
+          "maxItems": 5,
+          "uniqueItems": true
+        },
+        "ranking_basis": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "maxItems": 6,
+          "uniqueItems": true
+        },
+        "suggested_detail_surface_code": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/detailModuleCode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "default_detail_module_code": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/detailModuleCode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "visible_warning_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "cognitiveBudget": {
+      "type": "object",
+      "required": [
+        "persistent_surface_limit",
+        "concurrent_primary_limit",
+        "primary_reason_limit",
+        "secondary_action_limit",
+        "visible_warning_limit",
+        "detail_entry_point_limit",
+        "expanded_detail_module_limit"
+      ],
+      "properties": {
+        "persistent_surface_limit": {
+          "type": "integer",
+          "const": 4
+        },
+        "concurrent_primary_limit": {
+          "type": "integer",
+          "const": 1
+        },
+        "primary_reason_limit": {
+          "type": "integer",
+          "const": 3
+        },
+        "secondary_action_limit": {
+          "type": "integer",
+          "const": 2
+        },
+        "visible_warning_limit": {
+          "type": "integer",
+          "const": 1
+        },
+        "detail_entry_point_limit": {
+          "type": "integer",
+          "const": 5
+        },
+        "expanded_detail_module_limit": {
+          "type": "integer",
+          "const": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "emptyStateKind": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "NOT_REQUESTED",
+        "NOT_YET_MATERIALIZED",
+        "LIMITED",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "reasonItem": {
+      "type": "object",
+      "required": [
+        "reason_code",
+        "label"
+      ],
+      "properties": {
+        "reason_code": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 120
+        }
+      },
+      "additionalProperties": false
+    },
+    "contextBarPayload": {
+      "type": "object",
+      "required": [
+        "manifest_label",
+        "period_label",
+        "scope_label",
+        "phase_label",
+        "freshness_label",
+        "truth_origin_label",
+        "connection_label"
+      ],
+      "properties": {
+        "manifest_label": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "period_label": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "scope_label": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "phase_label": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "freshness_label": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "truth_origin_label": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "connection_label": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "owner_label": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 64
+        },
+        "mode_label": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 48
+        },
+        "limitation_label": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 96
+        }
+      },
+      "additionalProperties": false
+    },
+    "decisionSummaryPayload": {
+      "type": "object",
+      "required": [
+        "headline",
+        "primary_issue_state",
+        "reason_items",
+        "additional_reason_count",
+        "uncertainty_statement",
+        "plain_explanation",
+        "empty_state_kind"
+      ],
+      "properties": {
+        "headline": {
+          "type": "string",
+          "maxLength": 96
+        },
+        "primary_issue_state": {
+          "type": "string",
+          "enum": [
+            "CALM",
+            "NOTICE",
+            "REVIEW",
+            "BLOCKED",
+            "WAITING",
+            "LIMITED"
+          ]
+        },
+        "reason_items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/reasonItem"
+          },
+          "maxItems": 3,
+          "uniqueItems": true
+        },
+        "additional_reason_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "uncertainty_statement": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 160
+        },
+        "plain_explanation": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "empty_state_kind": {
+          "$ref": "#/$defs/emptyStateKind"
+        }
+      },
+      "additionalProperties": false
+    },
+    "actionToken": {
+      "type": "object",
+      "required": [
+        "action_code",
+        "label"
+      ],
+      "properties": {
+        "action_code": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "ownership_label": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 64
+        }
+      },
+      "additionalProperties": false
+    },
+    "actionStripPayload": {
+      "type": "object",
+      "required": [
+        "action_state",
+        "primary_action",
+        "secondary_actions",
+        "ownership_label",
+        "waiting_on_label",
+        "blocking_reason",
+        "investigation_entry_point"
+      ],
+      "properties": {
+        "action_state": {
+          "type": "string",
+          "enum": [
+            "ACTIONABLE",
+            "WAITING",
+            "NO_SAFE_ACTION"
+          ]
+        },
+        "primary_action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/actionToken"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "secondary_actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/actionToken"
+          },
+          "maxItems": 2,
+          "uniqueItems": true
+        },
+        "ownership_label": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 64
+        },
+        "waiting_on_label": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 64
+        },
+        "blocking_reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 160
+        },
+        "investigation_entry_point": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/detailModuleCode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "action_state": {
+                "const": "ACTIONABLE"
+              }
+            },
+            "required": [
+              "action_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "primary_action": {
+                "$ref": "#/$defs/actionToken"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "action_state": {
+                "const": "WAITING"
+              }
+            },
+            "required": [
+              "action_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "primary_action": {
+                "type": "null"
+              },
+              "waiting_on_label": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "action_state": {
+                "const": "NO_SAFE_ACTION"
+              }
+            },
+            "required": [
+              "action_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "primary_action": {
+                "type": "null"
+              },
+              "blocking_reason": {
+                "type": "string"
+              },
+              "investigation_entry_point": {
+                "$ref": "#/$defs/detailModuleCode"
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "detailModule": {
+      "type": "object",
+      "required": [
+        "module_code",
+        "entry_label",
+        "entry_reason",
+        "module_state"
+      ],
+      "properties": {
+        "module_code": {
+          "$ref": "#/$defs/detailModuleCode"
+        },
+        "entry_label": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "entry_reason": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "module_state": {
+          "type": "string",
+          "enum": [
+            "READY",
+            "LIMITED",
+            "EMPTY",
+            "MATERIALIZING"
+          ]
+        },
+        "available_action_codes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "detailDrawerPayload": {
+      "type": "object",
+      "required": [
+        "modules",
+        "expanded_module_code",
+        "empty_state_kind",
+        "compare_mode",
+        "audit_mode",
+        "focus_anchor_ref"
+      ],
+      "properties": {
+        "modules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/detailModule"
+          },
+          "uniqueItems": true
+        },
+        "expanded_module_code": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/detailModuleCode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "empty_state_kind": {
+          "$ref": "#/$defs/emptyStateKind"
+        },
+        "compare_mode": {
+          "type": "boolean"
+        },
+        "audit_mode": {
+          "type": "boolean"
+        },
+        "focus_anchor_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "compare_mode": {
+                "const": false
+              },
+              "audit_mode": {
+                "const": false
+              }
+            },
+            "required": [
+              "compare_mode",
+              "audit_mode"
+            ]
+          },
+          "then": {
+            "properties": {
+              "modules": {
+                "maxItems": 5
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "surfaceUpdate": {
+      "type": "object",
+      "required": [
+        "surface_code",
+        "surface_version",
+        "patch_kind",
+        "surface_lifecycle_state",
+        "payload"
+      ],
+      "properties": {
+        "surface_code": {
+          "$ref": "#/$defs/lowNoiseSurfaceCode"
+        },
+        "surface_version": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "patch_kind": {
+          "type": "string",
+          "enum": [
+            "UPSERT_OBJECT",
+            "REPLACE_FRAGMENT",
+            "APPEND_EVENT",
+            "REMOVE_OBJECT",
+            "NOOP"
+          ]
+        },
+        "surface_lifecycle_state": {
+          "type": "string",
+          "enum": [
+            "UNBORN",
+            "MATERIALIZING",
+            "STABLE",
+            "UPDATING",
+            "SUPERSEDED",
+            "LIMITED"
+          ]
+        },
+        "plain_reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 160
+        },
+        "available_action_codes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "blocked_action_codes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "affected_object_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "last_material_change_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "freshness_age": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "limited_by": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "default_visibility": {
+          "type": "string",
+          "enum": [
+            "VISIBLE",
+            "COLLAPSED",
+            "HIDDEN"
+          ]
+        },
+        "attention_tier": {
+          "type": "string",
+          "enum": [
+            "PRIMARY",
+            "SECONDARY",
+            "CONTEXTUAL",
+            "INVESTIGATIVE"
+          ]
+        },
+        "summary_rank": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "payload": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "surface_code": {
+                "const": "CONTEXT_BAR"
+              }
+            },
+            "required": [
+              "surface_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/contextBarPayload"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "surface_code": {
+                "const": "DECISION_SUMMARY"
+              }
+            },
+            "required": [
+              "surface_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/decisionSummaryPayload"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "surface_code": {
+                "const": "ACTION_STRIP"
+              }
+            },
+            "required": [
+              "surface_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/actionStripPayload"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "surface_code": {
+                "const": "DETAIL_DRAWER"
+              }
+            },
+            "required": [
+              "surface_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "$ref": "#/$defs/detailDrawerPayload"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "experienceFrame": {
+      "type": "object",
+      "description": "Optional companion structure for reconnect-safe frame restoration. The same surface object shape is reused by LOAD_OR_BUILD_LATEST_EXPERIENCE_FRAME(...).",
+      "required": [
+        "manifest_id",
+        "frame_epoch",
+        "shell_route_key",
+        "experience_profile",
+        "attention_state",
+        "actionability_state",
+        "detail_entry_points",
+        "attention_policy",
+        "cognitive_budget",
+        "surface_order",
+        "surfaces"
+      ],
+      "properties": {
+        "manifest_id": {
+          "type": "string"
+        },
+        "frame_epoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "shell_route_key": {
+          "type": "string"
+        },
+        "experience_profile": {
+          "type": "string",
+          "enum": [
+            "LOW_NOISE"
+          ]
+        },
+        "attention_state": {
+          "type": "string",
+          "enum": [
+            "CALM",
+            "NOTICE",
+            "REVIEW",
+            "BLOCKED",
+            "WAITING",
+            "LIMITED"
+          ]
+        },
+        "primary_object_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "actionability_state": {
+          "type": "string",
+          "enum": [
+            "ACTION_AVAILABLE",
+            "NO_SAFE_ACTION"
+          ]
+        },
+        "primary_action_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "no_safe_action_reason_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "detail_entry_points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/detailModuleCode"
+          },
+          "default": [],
+          "maxItems": 5,
+          "uniqueItems": true
+        },
+        "suggested_detail_surface_code": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/detailModuleCode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "attention_policy": {
+          "$ref": "#/$defs/attentionPolicy"
+        },
+        "cognitive_budget": {
+          "$ref": "#/$defs/cognitiveBudget"
+        },
+        "active_detail_surface_code": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/detailModuleCode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "focus_anchor_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "shell_stability_token": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "surface_order": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/lowNoiseSurfaceCode"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true
+        },
+        "surfaces": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/lowNoiseSurfaceCode"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/surfaceUpdate"
+          },
+          "required": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "experience_profile": {
+            "const": "LOW_NOISE"
+          }
+        },
+        "required": [
+          "experience_profile"
+        ]
+      },
+      "then": {
+        "required": [
+          "connection_state",
+          "activity_state",
+          "truth_state",
+          "checkpoint_state",
+          "truth_origin",
+          "attention_state",
+          "primary_object_ref",
+          "secondary_notice_count",
+          "detail_entry_points"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "actionability_state": {
+            "const": "ACTION_AVAILABLE"
+          }
+        },
+        "required": [
+          "actionability_state"
+        ]
+      },
+      "then": {
+        "required": [
+          "primary_action_code"
+        ],
+        "properties": {
+          "primary_action_code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "no_safe_action_reason_code": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "actionability_state": {
+            "const": "NO_SAFE_ACTION"
+          }
+        },
+        "required": [
+          "actionability_state"
+        ]
+      },
+      "then": {
+        "required": [
+          "no_safe_action_reason_code",
+          "suggested_detail_surface_code"
+        ],
+        "properties": {
+          "primary_action_code": {
+            "type": "null"
+          },
+          "no_safe_action_reason_code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "suggested_detail_surface_code": {
+            "$ref": "#/$defs/detailModuleCode"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "experience_profile": {
+            "const": "LOW_NOISE"
+          }
+        },
+        "required": [
+          "experience_profile"
+        ]
+      },
+      "then": {
+        "properties": {
+          "surface_updates": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "surface_code": {
+                  "const": "CONTEXT_BAR"
+                }
+              },
+              "required": [
+                "surface_code"
+              ]
+            },
+            "maxContains": 1,
+            "minContains": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "experience_profile": {
+            "const": "LOW_NOISE"
+          }
+        },
+        "required": [
+          "experience_profile"
+        ]
+      },
+      "then": {
+        "properties": {
+          "surface_updates": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "surface_code": {
+                  "const": "DECISION_SUMMARY"
+                }
+              },
+              "required": [
+                "surface_code"
+              ]
+            },
+            "maxContains": 1,
+            "minContains": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "experience_profile": {
+            "const": "LOW_NOISE"
+          }
+        },
+        "required": [
+          "experience_profile"
+        ]
+      },
+      "then": {
+        "properties": {
+          "surface_updates": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "surface_code": {
+                  "const": "ACTION_STRIP"
+                }
+              },
+              "required": [
+                "surface_code"
+              ]
+            },
+            "maxContains": 1,
+            "minContains": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "experience_profile": {
+            "const": "LOW_NOISE"
+          }
+        },
+        "required": [
+          "experience_profile"
+        ]
+      },
+      "then": {
+        "properties": {
+          "surface_updates": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "surface_code": {
+                  "const": "DETAIL_DRAWER"
+                }
+              },
+              "required": [
+                "surface_code"
+              ]
+            },
+            "maxContains": 1,
+            "minContains": 0
+          }
+        }
+      }
+    }
+  ]
+}

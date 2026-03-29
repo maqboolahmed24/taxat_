@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/canonical_fact.schema.json",
+  "title": "CanonicalFact",
+  "type": "object",
+  "required": [
+    "canonical_fact_id",
+    "manifest_id",
+    "artifact_type",
+    "execution_mode",
+    "analysis_only",
+    "non_compliance_config_refs",
+    "counterfactual_basis",
+    "fact_family",
+    "value_payload_ref",
+    "promotion_state",
+    "source_strength_tier",
+    "partition_scope",
+    "contract"
+  ],
+  "properties": {
+    "canonical_fact_id": {
+      "type": "string"
+    },
+    "manifest_id": {
+      "type": "string"
+    },
+    "artifact_type": {
+      "const": "CanonicalFact"
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": [
+        "COMPLIANCE",
+        "ANALYSIS"
+      ]
+    },
+    "analysis_only": {
+      "type": "boolean"
+    },
+    "non_compliance_config_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "counterfactual_basis": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "fact_family": {
+      "type": "string"
+    },
+    "value_payload_ref": {
+      "type": "string"
+    },
+    "promotion_state": {
+      "type": "string",
+      "enum": [
+        "CANDIDATE",
+        "PROVISIONAL",
+        "CANONICAL",
+        "CONTESTED",
+        "SUPERSEDED",
+        "RETIRED"
+      ]
+    },
+    "source_strength_tier": {
+      "type": "string",
+      "enum": [
+        "TIER_1_AUTHORITY_FINAL",
+        "TIER_2_AUTHORITY_REFERENCE",
+        "TIER_3_STRUCTURED_EXTERNAL",
+        "TIER_4_STRUCTURED_INTERNAL",
+        "TIER_5_DOCUMENT_SUPPORT",
+        "TIER_6_DECLARED_ONLY",
+        "TIER_7_INFERRED",
+        "TIER_8_GOVERNANCE_ONLY"
+      ]
+    },
+    "freshness_state": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "CURRENT",
+        "STALE",
+        "EXPIRED",
+        "UNKNOWN",
+        "SUPERSEDED",
+        null
+      ]
+    },
+    "supporting_evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "partition_scope": {
+      "type": "string"
+    },
+    "contract": {
+      "$ref": "./schema_bundle.schema.json#/$defs/artifactContract"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "COMPLIANCE"
+          }
+        },
+        "required": [
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "analysis_only": {
+            "const": false
+          },
+          "non_compliance_config_refs": {
+            "maxItems": 0
+          },
+          "counterfactual_basis": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "ANALYSIS"
+          }
+        },
+        "required": [
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "analysis_only": {
+            "const": true
+          },
+          "counterfactual_basis": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "promotion_state": {
+            "const": "CANONICAL"
+          }
+        },
+        "required": [
+          "promotion_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "supporting_evidence_refs": {
+            "minItems": 1
+          },
+          "source_strength_tier": {
+            "enum": [
+              "TIER_1_AUTHORITY_FINAL",
+              "TIER_2_AUTHORITY_REFERENCE",
+              "TIER_3_STRUCTURED_EXTERNAL",
+              "TIER_4_STRUCTURED_INTERNAL",
+              "TIER_5_DOCUMENT_SUPPORT",
+              "TIER_6_DECLARED_ONLY",
+              "TIER_7_INFERRED",
+              "TIER_8_GOVERNANCE_ONLY"
+            ]
+          },
+          "freshness_state": {
+            "enum": [
+              "CURRENT",
+              "STALE",
+              "EXPIRED",
+              "UNKNOWN",
+              "SUPERSEDED"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

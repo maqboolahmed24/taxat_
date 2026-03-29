@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/snapshot.schema.json",
+  "title": "Snapshot",
+  "type": "object",
+  "required": [
+    "snapshot_id",
+    "manifest_id",
+    "artifact_type",
+    "execution_mode",
+    "analysis_only",
+    "non_compliance_config_refs",
+    "counterfactual_basis",
+    "lifecycle_state",
+    "source_record_set_ref",
+    "evidence_item_set_ref",
+    "candidate_fact_set_ref",
+    "canonical_fact_set_ref",
+    "conflict_set_ref",
+    "quality",
+    "completeness",
+    "created_at",
+    "contract"
+  ],
+  "properties": {
+    "snapshot_id": {
+      "type": "string"
+    },
+    "manifest_id": {
+      "type": "string"
+    },
+    "artifact_type": {
+      "const": "Snapshot"
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": [
+        "COMPLIANCE",
+        "ANALYSIS"
+      ]
+    },
+    "analysis_only": {
+      "type": "boolean"
+    },
+    "non_compliance_config_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "counterfactual_basis": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "BUILT",
+        "VALID",
+        "WARNED",
+        "INVALID",
+        "SUPERSEDED",
+        "RETENTION_LIMITED",
+        "ERASED"
+      ]
+    },
+    "source_record_set_ref": {
+      "type": "string"
+    },
+    "evidence_item_set_ref": {
+      "type": "string"
+    },
+    "candidate_fact_set_ref": {
+      "type": "string"
+    },
+    "canonical_fact_set_ref": {
+      "type": "string"
+    },
+    "conflict_set_ref": {
+      "type": "string"
+    },
+    "quality": {
+      "type": "object",
+      "required": [
+        "data_quality_score"
+      ],
+      "properties": {
+        "data_quality_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "invalid_domain_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "completeness": {
+      "type": "object",
+      "required": [
+        "completeness_score"
+      ],
+      "properties": {
+        "completeness_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "missing_domain_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "created_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "contract": {
+      "$ref": "./schema_bundle.schema.json#/$defs/artifactContract"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "COMPLIANCE"
+          }
+        },
+        "required": [
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "analysis_only": {
+            "const": false
+          },
+          "non_compliance_config_refs": {
+            "maxItems": 0
+          },
+          "counterfactual_basis": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "ANALYSIS"
+          }
+        },
+        "required": [
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "analysis_only": {
+            "const": true
+          },
+          "counterfactual_basis": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

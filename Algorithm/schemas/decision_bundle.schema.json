@@ -1,0 +1,645 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/decision_bundle.schema.json",
+  "title": "DecisionBundle",
+  "type": "object",
+  "required": [
+    "decision_bundle_id",
+    "manifest_id",
+    "artifact_type",
+    "execution_mode",
+    "analysis_only",
+    "non_compliance_config_refs",
+    "counterfactual_basis",
+    "decision_status",
+    "workflow_item_refs",
+    "decision_reason_codes",
+    "outcome_class",
+    "waiting_on",
+    "checkpoint_state",
+    "truth_state",
+    "plain_reason",
+    "reason_codes",
+    "next_action_codes",
+    "blocked_action_codes",
+    "actionability_state",
+    "primary_action_code",
+    "no_safe_action_reason_code",
+    "suggested_detail_surface_code",
+    "active_detail_surface_code",
+    "focus_anchor_ref",
+    "next_checkpoint_at",
+    "persisted_at",
+    "contract"
+  ],
+  "properties": {
+    "decision_bundle_id": {
+      "type": "string"
+    },
+    "manifest_id": {
+      "type": "string"
+    },
+    "artifact_type": {
+      "const": "DecisionBundle"
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": [
+        "COMPLIANCE",
+        "ANALYSIS"
+      ]
+    },
+    "analysis_only": {
+      "type": "boolean"
+    },
+    "non_compliance_config_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "counterfactual_basis": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "decision_status": {
+      "type": "string",
+      "enum": [
+        "COMPLETED",
+        "BLOCKED",
+        "REVIEW_REQUIRED"
+      ],
+      "description": "Backward-compatible terminal posture. Use outcome_class / waiting_on / checkpoint_state to distinguish human review from authority-pending or unknown external states."
+    },
+    "decision_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "workflow_item_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "snapshot_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "compute_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "forecast_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "risk_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "parity_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "trust_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "graph_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "twin_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "filing_packet_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "submission_record_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "outcome_class": {
+      "type": "string",
+      "description": "Replay-safe UX bridge that disambiguates REVIEW_REQUIRED into a specific next-state class without changing the legal DecisionBundle.decision_status enum.",
+      "enum": [
+        "FINAL_SUCCESS",
+        "FINAL_BLOCKED",
+        "HUMAN_REVIEW",
+        "APPROVAL_PENDING",
+        "AUTHORITY_PENDING",
+        "AUTHORITY_UNKNOWN",
+        "LATE_DATA_PENDING",
+        "OUT_OF_BAND_REVIEW"
+      ]
+    },
+    "waiting_on": {
+      "type": "string",
+      "description": "Primary external or human dependency blocking straight-through progression at the moment the bundle was persisted.",
+      "enum": [
+        "NONE",
+        "HUMAN",
+        "APPROVAL",
+        "AUTHORITY",
+        "LATE_DATA",
+        "ASYNC_WORKER"
+      ]
+    },
+    "checkpoint_state": {
+      "type": "string",
+      "description": "Shell-level checkpoint projection copied into the persisted terminal bundle so reloaded views can restore the correct next-step posture.",
+      "enum": [
+        "NONE",
+        "SOURCE_COLLECTION",
+        "PROJECTION_PENDING",
+        "HUMAN_REVIEW",
+        "APPROVAL_PENDING",
+        "AUTHORITY_PREFLIGHT",
+        "TRANSMIT_PENDING",
+        "PENDING_ACK",
+        "RECONCILIATION_PENDING",
+        "LATE_DATA_PENDING",
+        "CONFIRMED",
+        "REJECTED",
+        "UNKNOWN",
+        "OUT_OF_BAND"
+      ]
+    },
+    "truth_state": {
+      "type": "string",
+      "description": "Highest-confidence truth posture visible to the user when the bundle was persisted.",
+      "enum": [
+        "LOCAL_INTENT_ONLY",
+        "PERSISTED_INTERNAL",
+        "AUTHORITY_PENDING",
+        "AUTHORITY_CONFIRMED",
+        "AUTHORITY_REJECTED",
+        "AUTHORITY_UNKNOWN",
+        "AUTHORITY_OUT_OF_BAND"
+      ]
+    },
+    "plain_reason": {
+      "type": "string",
+      "description": "Plain-language explanation of the terminal or review posture.",
+      "minLength": 1
+    },
+    "reason_codes": {
+      "type": "array",
+      "description": "Flattened high-signal reason codes copied from the decisive terminal reasons and gate chain to support queue views and notifications without replay.",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "next_action_codes": {
+      "type": "array",
+      "description": "Minimal next legal actions that should be offered immediately after bundle reload.",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "blocked_action_codes": {
+      "type": "array",
+      "description": "Actions that remain legally or procedurally blocked at bundle time.",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "actionability_state": {
+      "type": "string",
+      "description": "Replay-safe shell actionability bridge. Distinguishes one available safe next action from explicit NO_SAFE_ACTION semantics so terminal reload never infers posture from null checks.",
+      "enum": [
+        "ACTION_AVAILABLE",
+        "NO_SAFE_ACTION"
+      ]
+    },
+    "primary_action_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Dominant safe next action for the terminal shell when `actionability_state = ACTION_AVAILABLE`."
+    },
+    "no_safe_action_reason_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Machine-stable reason explaining why no safe legal action is currently available."
+    },
+    "suggested_detail_surface_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Detail drawer module that should open first when the user must investigate instead of acting directly.",
+      "enum": [
+        "EVIDENCE_TIDE",
+        "PACKET_FORGE",
+        "AUTHORITY_TUNNEL",
+        "DRIFT_FIELD",
+        "FOCUS_LENS",
+        "TWIN_PANEL",
+        null
+      ]
+    },
+    "active_detail_surface_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Detail drawer module that was expanded when the bundle was persisted, copied so terminal reload can restore the same shell context.",
+      "enum": [
+        "EVIDENCE_TIDE",
+        "PACKET_FORGE",
+        "AUTHORITY_TUNNEL",
+        "DRIFT_FIELD",
+        "FOCUS_LENS",
+        "TWIN_PANEL",
+        null
+      ]
+    },
+    "focus_anchor_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Stable focused object ref inside the active detail module when terminal or review posture was persisted."
+    },
+    "next_checkpoint_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "description": "Optional next checkpoint timestamp for authority, approval, projection, or late-data follow-up."
+    },
+    "filing_case_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Current filing case projection ref copied from manifest outputs when available."
+    },
+    "amendment_case_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Current amendment case projection ref copied from manifest outputs when available."
+    },
+    "persisted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the bundle was durably persisted for replay, reload, and queue ordering."
+    },
+    "contract": {
+      "$ref": "./schema_bundle.schema.json#/$defs/artifactContract"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "COMPLIANCE"
+          }
+        },
+        "required": [
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "analysis_only": {
+            "const": false
+          },
+          "non_compliance_config_refs": {
+            "maxItems": 0
+          },
+          "counterfactual_basis": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "ANALYSIS"
+          }
+        },
+        "required": [
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "analysis_only": {
+            "const": true
+          },
+          "counterfactual_basis": {
+            "type": "string",
+            "minLength": 1
+          },
+          "filing_packet_id": {
+            "type": "null"
+          },
+          "submission_record_id": {
+            "type": "null"
+          },
+          "waiting_on": {
+            "not": {
+              "enum": [
+                "AUTHORITY"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision_status": {
+            "enum": [
+              "BLOCKED",
+              "REVIEW_REQUIRED"
+            ]
+          }
+        },
+        "required": [
+          "decision_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision_status": {
+            "const": "BLOCKED"
+          }
+        },
+        "required": [
+          "decision_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "outcome_class": {
+            "const": "FINAL_BLOCKED"
+          },
+          "waiting_on": {
+            "const": "NONE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision_status": {
+            "const": "COMPLETED"
+          }
+        },
+        "required": [
+          "decision_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "outcome_class": {
+            "const": "FINAL_SUCCESS"
+          },
+          "waiting_on": {
+            "const": "NONE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision_status": {
+            "const": "REVIEW_REQUIRED"
+          }
+        },
+        "required": [
+          "decision_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "outcome_class": {
+            "enum": [
+              "HUMAN_REVIEW",
+              "APPROVAL_PENDING",
+              "AUTHORITY_PENDING",
+              "AUTHORITY_UNKNOWN",
+              "LATE_DATA_PENDING",
+              "OUT_OF_BAND_REVIEW"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
+            "const": "HUMAN_REVIEW"
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "waiting_on": {
+            "const": "HUMAN"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
+            "const": "APPROVAL_PENDING"
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "waiting_on": {
+            "const": "APPROVAL"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
+            "enum": [
+              "AUTHORITY_PENDING",
+              "AUTHORITY_UNKNOWN",
+              "OUT_OF_BAND_REVIEW"
+            ]
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "waiting_on": {
+            "const": "AUTHORITY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
+            "const": "LATE_DATA_PENDING"
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "waiting_on": {
+            "const": "LATE_DATA"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "actionability_state": {
+            "const": "ACTION_AVAILABLE"
+          }
+        },
+        "required": [
+          "actionability_state"
+        ]
+      },
+      "then": {
+        "required": [
+          "primary_action_code"
+        ],
+        "properties": {
+          "next_action_codes": {
+            "minItems": 1
+          },
+          "primary_action_code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "no_safe_action_reason_code": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "actionability_state": {
+            "const": "NO_SAFE_ACTION"
+          }
+        },
+        "required": [
+          "actionability_state"
+        ]
+      },
+      "then": {
+        "required": [
+          "no_safe_action_reason_code",
+          "suggested_detail_surface_code"
+        ],
+        "properties": {
+          "next_action_codes": {
+            "maxItems": 0
+          },
+          "primary_action_code": {
+            "type": "null"
+          },
+          "no_safe_action_reason_code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "suggested_detail_surface_code": {
+            "type": "string",
+            "enum": [
+              "EVIDENCE_TIDE",
+              "PACKET_FORGE",
+              "AUTHORITY_TUNNEL",
+              "DRIFT_FIELD",
+              "FOCUS_LENS",
+              "TWIN_PANEL"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

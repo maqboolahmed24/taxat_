@@ -1,0 +1,323 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/trust_summary.schema.json",
+  "title": "TrustSummary",
+  "type": "object",
+  "required": [
+    "trust_id",
+    "manifest_id",
+    "artifact_type",
+    "execution_mode",
+    "analysis_only",
+    "non_compliance_config_refs",
+    "counterfactual_basis",
+    "lifecycle_state",
+    "trust_band",
+    "trust_score",
+    "trust_level",
+    "automation_level",
+    "filing_readiness",
+    "reason_codes",
+    "synthesized_at",
+    "contract"
+  ],
+  "properties": {
+    "trust_id": {
+      "type": "string"
+    },
+    "manifest_id": {
+      "type": "string"
+    },
+    "artifact_type": {
+      "const": "TrustSummary"
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": [
+        "COMPLIANCE",
+        "ANALYSIS"
+      ]
+    },
+    "analysis_only": {
+      "type": "boolean"
+    },
+    "non_compliance_config_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "counterfactual_basis": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "SYNTHESIZED",
+        "SUPERSEDED"
+      ]
+    },
+    "trust_band": {
+      "type": "string",
+      "enum": [
+        "INSUFFICIENT_DATA",
+        "RED",
+        "AMBER",
+        "GREEN"
+      ]
+    },
+    "trust_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "trust_level": {
+      "type": "string",
+      "enum": [
+        "READY",
+        "REVIEW_REQUIRED",
+        "BLOCKED"
+      ]
+    },
+    "automation_level": {
+      "type": "string",
+      "enum": [
+        "ALLOWED",
+        "LIMITED",
+        "BLOCKED"
+      ]
+    },
+    "filing_readiness": {
+      "type": "string",
+      "enum": [
+        "NOT_READY",
+        "READY_REVIEW",
+        "READY_TO_SUBMIT"
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "support_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "required_human_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "synthesized_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "contract": {
+      "$ref": "./schema_bundle.schema.json#/$defs/artifactContract"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "COMPLIANCE"
+          }
+        },
+        "required": [
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "analysis_only": {
+            "const": false
+          },
+          "non_compliance_config_refs": {
+            "maxItems": 0
+          },
+          "counterfactual_basis": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "ANALYSIS"
+          }
+        },
+        "required": [
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "analysis_only": {
+            "const": true
+          },
+          "counterfactual_basis": {
+            "type": "string",
+            "minLength": 1
+          },
+          "automation_level": {
+            "enum": [
+              "LIMITED",
+              "BLOCKED"
+            ]
+          },
+          "filing_readiness": {
+            "enum": [
+              "NOT_READY",
+              "READY_REVIEW"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "trust_level": {
+            "const": "BLOCKED"
+          }
+        },
+        "required": [
+          "trust_level"
+        ]
+      },
+      "then": {
+        "properties": {
+          "automation_level": {
+            "const": "BLOCKED"
+          },
+          "filing_readiness": {
+            "const": "NOT_READY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "required_human_steps": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "required_human_steps"
+        ]
+      },
+      "then": {
+        "properties": {
+          "automation_level": {
+            "enum": [
+              "LIMITED",
+              "BLOCKED"
+            ]
+          },
+          "filing_readiness": {
+            "enum": [
+              "NOT_READY",
+              "READY_REVIEW"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "automation_level": {
+            "const": "ALLOWED"
+          }
+        },
+        "required": [
+          "automation_level"
+        ]
+      },
+      "then": {
+        "properties": {
+          "trust_band": {
+            "const": "GREEN"
+          },
+          "trust_level": {
+            "const": "READY"
+          },
+          "filing_readiness": {
+            "const": "READY_TO_SUBMIT"
+          },
+          "required_human_steps": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "automation_level": {
+            "const": "BLOCKED"
+          }
+        },
+        "required": [
+          "automation_level"
+        ]
+      },
+      "then": {
+        "properties": {
+          "filing_readiness": {
+            "const": "NOT_READY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "filing_readiness": {
+            "const": "READY_TO_SUBMIT"
+          }
+        },
+        "required": [
+          "filing_readiness"
+        ]
+      },
+      "then": {
+        "properties": {
+          "automation_level": {
+            "const": "ALLOWED"
+          },
+          "trust_band": {
+            "const": "GREEN"
+          },
+          "trust_level": {
+            "const": "READY"
+          },
+          "required_human_steps": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

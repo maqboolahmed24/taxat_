@@ -1,0 +1,755 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/client_portal_workspace.schema.json",
+  "title": "ClientPortalWorkspace",
+  "description": "Client-facing task-first workspace projection. This is a read-side UX contract only; it must never be treated as legal command-side truth.",
+  "type": "object",
+  "required": [
+    "workspace_id",
+    "artifact_type",
+    "tenant_id",
+    "client_id",
+    "viewer_role",
+    "route",
+    "navigation_tabs",
+    "status_hero",
+    "task_groups",
+    "document_center",
+    "approval_center",
+    "onboarding_journey",
+    "support_panel",
+    "activity_timeline",
+    "updated_at"
+  ],
+  "properties": {
+    "workspace_id": {
+      "type": "string"
+    },
+    "artifact_type": {
+      "const": "ClientPortalWorkspace"
+    },
+    "tenant_id": {
+      "type": "string"
+    },
+    "client_id": {
+      "type": "string"
+    },
+    "manifest_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "viewer_role": {
+      "type": "string",
+      "enum": [
+        "CLIENT_VIEWER",
+        "CLIENT_CONTRIBUTOR",
+        "CLIENT_SIGNATORY"
+      ]
+    },
+    "route": {
+      "type": "string",
+      "enum": [
+        "HOME",
+        "DOCUMENTS",
+        "APPROVALS",
+        "ONBOARDING",
+        "HELP"
+      ]
+    },
+    "navigation_tabs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/navigationTab"
+      },
+      "minItems": 1,
+      "maxItems": 5,
+      "uniqueItems": true
+    },
+    "status_hero": {
+      "$ref": "#/$defs/statusHero"
+    },
+    "task_groups": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/taskGroup"
+      },
+      "maxItems": 3,
+      "uniqueItems": true
+    },
+    "document_center": {
+      "$ref": "#/$defs/documentCenter"
+    },
+    "approval_center": {
+      "$ref": "#/$defs/approvalCenter"
+    },
+    "onboarding_journey": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/onboardingJourney"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "support_panel": {
+      "$ref": "#/$defs/supportPanel"
+    },
+    "activity_timeline": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/timelineEvent"
+      },
+      "maxItems": 12,
+      "uniqueItems": true,
+      "default": []
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "routeCode": {
+      "type": "string",
+      "enum": [
+        "HOME",
+        "DOCUMENTS",
+        "APPROVALS",
+        "ONBOARDING",
+        "HELP"
+      ]
+    },
+    "actionToken": {
+      "type": "object",
+      "required": [
+        "action_code",
+        "label",
+        "route"
+      ],
+      "properties": {
+        "action_code": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 36
+        },
+        "route": {
+          "$ref": "#/$defs/routeCode"
+        },
+        "requires_step_up": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "navigationTab": {
+      "type": "object",
+      "required": [
+        "label",
+        "route",
+        "active"
+      ],
+      "properties": {
+        "label": {
+          "type": "string",
+          "maxLength": 24
+        },
+        "route": {
+          "$ref": "#/$defs/routeCode"
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "badge_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "progressStep": {
+      "type": "object",
+      "required": [
+        "step_code",
+        "label",
+        "state"
+      ],
+      "properties": {
+        "step_code": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "COMPLETED",
+            "CURRENT",
+            "UPCOMING"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "statusHero": {
+      "type": "object",
+      "required": [
+        "status_code",
+        "headline",
+        "supporting_text",
+        "primary_action",
+        "progress_steps"
+      ],
+      "properties": {
+        "status_code": {
+          "type": "string",
+          "enum": [
+            "ACTION_REQUIRED",
+            "IN_REVIEW",
+            "WAITING_ON_US",
+            "WAITING_ON_AUTHORITY",
+            "READY_TO_SIGN",
+            "COMPLETED",
+            "ONBOARDING_REQUIRED"
+          ]
+        },
+        "headline": {
+          "type": "string",
+          "maxLength": 96
+        },
+        "supporting_text": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "due_label": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 48
+        },
+        "primary_action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/actionToken"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "secondary_action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/actionToken"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "progress_steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/progressStep"
+          },
+          "maxItems": 6,
+          "default": []
+        }
+      },
+      "additionalProperties": false
+    },
+    "task": {
+      "type": "object",
+      "required": [
+        "task_id",
+        "task_type",
+        "label",
+        "status",
+        "route",
+        "primary_action"
+      ],
+      "properties": {
+        "task_id": {
+          "type": "string"
+        },
+        "task_type": {
+          "type": "string",
+          "enum": [
+            "UPLOAD_DOCUMENT",
+            "ANSWER_QUESTION",
+            "VERIFY_IDENTITY",
+            "CONNECT_AUTHORITY",
+            "REVIEW_SUMMARY",
+            "SIGN_DECLARATION",
+            "REQUEST_HELP"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 72
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 180
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "OPEN",
+            "WAITING",
+            "DONE"
+          ]
+        },
+        "due_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "effort_label": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 32
+        },
+        "route": {
+          "$ref": "#/$defs/routeCode"
+        },
+        "primary_action": {
+          "$ref": "#/$defs/actionToken"
+        }
+      },
+      "additionalProperties": false
+    },
+    "taskGroup": {
+      "type": "object",
+      "required": [
+        "group_code",
+        "label",
+        "tasks"
+      ],
+      "properties": {
+        "group_code": {
+          "type": "string",
+          "enum": [
+            "DO_NOW",
+            "COMING_UP",
+            "DONE"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 24
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/task"
+          },
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "uploadItem": {
+      "type": "object",
+      "required": [
+        "upload_session_id",
+        "filename",
+        "transfer_state"
+      ],
+      "properties": {
+        "upload_session_id": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "transfer_state": {
+          "type": "string",
+          "enum": [
+            "QUEUED",
+            "UPLOADING",
+            "SCANNING",
+            "ACCEPTED",
+            "REJECTED",
+            "FAILED"
+          ]
+        },
+        "uploaded_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "documentRequest": {
+      "type": "object",
+      "required": [
+        "request_id",
+        "category",
+        "title",
+        "status",
+        "accepted_file_types",
+        "max_file_size_mb",
+        "uploads"
+      ],
+      "properties": {
+        "request_id": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "IDENTITY",
+            "BANK_STATEMENT",
+            "INVOICE",
+            "RECEIPT",
+            "AUTHORITY_LETTER",
+            "OTHER"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 72
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "OPEN",
+            "UPLOADING",
+            "UNDER_REVIEW",
+            "ACCEPTED",
+            "REJECTED",
+            "EXPIRED"
+          ]
+        },
+        "due_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "help_text": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 180
+        },
+        "accepted_file_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "max_file_size_mb": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "uploads": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/uploadItem"
+          },
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "documentCenter": {
+      "type": "object",
+      "required": [
+        "summary_label",
+        "open_request_count",
+        "requests"
+      ],
+      "properties": {
+        "summary_label": {
+          "type": "string",
+          "maxLength": 96
+        },
+        "open_request_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "requests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/documentRequest"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "last_uploaded_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "approvalPack": {
+      "type": "object",
+      "required": [
+        "approval_pack_id",
+        "title",
+        "status",
+        "summary",
+        "change_highlight_count",
+        "requires_step_up",
+        "primary_action"
+      ],
+      "properties": {
+        "approval_pack_id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 72
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "READY_FOR_CLIENT",
+            "VIEWED",
+            "ACKNOWLEDGED",
+            "STEP_UP_REQUIRED",
+            "SIGNED",
+            "EXPIRED",
+            "SUPERSEDED"
+          ]
+        },
+        "due_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "change_highlight_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "requires_step_up": {
+          "type": "boolean"
+        },
+        "primary_action": {
+          "$ref": "#/$defs/actionToken"
+        }
+      },
+      "additionalProperties": false
+    },
+    "approvalCenter": {
+      "type": "object",
+      "required": [
+        "outstanding_count",
+        "packs"
+      ],
+      "properties": {
+        "outstanding_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "packs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/approvalPack"
+          },
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "onboardingJourney": {
+      "type": "object",
+      "required": [
+        "journey_id",
+        "state",
+        "current_step_label",
+        "completed_step_count",
+        "total_step_count",
+        "next_action"
+      ],
+      "properties": {
+        "journey_id": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "INVITED",
+            "PROFILE_PENDING",
+            "IDENTITY_PENDING",
+            "AUTHORITY_LINK_PENDING",
+            "DOCUMENTS_PENDING",
+            "READY_FOR_REVIEW",
+            "COMPLETED",
+            "EXPIRED",
+            "ABANDONED"
+          ]
+        },
+        "current_step_label": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "completed_step_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_step_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "next_action": {
+          "$ref": "#/$defs/actionToken"
+        }
+      },
+      "additionalProperties": false
+    },
+    "contactOption": {
+      "type": "object",
+      "required": [
+        "channel_code",
+        "label",
+        "action"
+      ],
+      "properties": {
+        "channel_code": {
+          "type": "string",
+          "enum": [
+            "SECURE_MESSAGE",
+            "CALLBACK",
+            "APPOINTMENT",
+            "FAQ"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "availability_label": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 64
+        },
+        "action": {
+          "$ref": "#/$defs/actionToken"
+        }
+      },
+      "additionalProperties": false
+    },
+    "supportPanel": {
+      "type": "object",
+      "required": [
+        "help_headline",
+        "contact_options",
+        "secure_message_allowed",
+        "faq_refs"
+      ],
+      "properties": {
+        "help_headline": {
+          "type": "string",
+          "maxLength": 96
+        },
+        "contact_options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/contactOption"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "secure_message_allowed": {
+          "type": "boolean"
+        },
+        "faq_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "timelineEvent": {
+      "type": "object",
+      "required": [
+        "event_id",
+        "event_kind",
+        "headline",
+        "occurred_at"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string"
+        },
+        "event_kind": {
+          "type": "string",
+          "enum": [
+            "UPLOAD_RECEIVED",
+            "UPLOAD_REJECTED",
+            "APPROVAL_READY",
+            "APPROVAL_SIGNED",
+            "ONBOARDING_STEP_COMPLETED",
+            "SUBMISSION_SENT",
+            "STATUS_UPDATED"
+          ]
+        },
+        "headline": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "detail": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 180
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

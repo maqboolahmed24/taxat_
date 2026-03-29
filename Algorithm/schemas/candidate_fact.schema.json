@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/candidate_fact.schema.json",
+  "title": "CandidateFact",
+  "type": "object",
+  "required": [
+    "candidate_fact_id",
+    "manifest_id",
+    "artifact_type",
+    "execution_mode",
+    "analysis_only",
+    "non_compliance_config_refs",
+    "counterfactual_basis",
+    "fact_family",
+    "value_payload_ref",
+    "source_strength_tier",
+    "promotion_state",
+    "partition_scope",
+    "contract"
+  ],
+  "properties": {
+    "candidate_fact_id": {
+      "type": "string"
+    },
+    "manifest_id": {
+      "type": "string"
+    },
+    "artifact_type": {
+      "const": "CandidateFact"
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": [
+        "COMPLIANCE",
+        "ANALYSIS"
+      ]
+    },
+    "analysis_only": {
+      "type": "boolean"
+    },
+    "non_compliance_config_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "counterfactual_basis": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "fact_family": {
+      "type": "string"
+    },
+    "value_payload_ref": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "source_strength_tier": {
+      "type": "string",
+      "enum": [
+        "TIER_1_AUTHORITY_FINAL",
+        "TIER_2_AUTHORITY_REFERENCE",
+        "TIER_3_STRUCTURED_EXTERNAL",
+        "TIER_4_STRUCTURED_INTERNAL",
+        "TIER_5_DOCUMENT_SUPPORT",
+        "TIER_6_DECLARED_ONLY",
+        "TIER_7_INFERRED",
+        "TIER_8_GOVERNANCE_ONLY"
+      ]
+    },
+    "promotion_state": {
+      "type": "string",
+      "enum": [
+        "CANDIDATE",
+        "PROVISIONAL",
+        "CANONICAL",
+        "CONTESTED",
+        "SUPERSEDED",
+        "RETIRED"
+      ]
+    },
+    "supporting_evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "partition_scope": {
+      "type": "string"
+    },
+    "contract": {
+      "$ref": "./schema_bundle.schema.json#/$defs/artifactContract"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "COMPLIANCE"
+          }
+        },
+        "required": [
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "analysis_only": {
+            "const": false
+          },
+          "non_compliance_config_refs": {
+            "maxItems": 0
+          },
+          "counterfactual_basis": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "ANALYSIS"
+          }
+        },
+        "required": [
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "analysis_only": {
+            "const": true
+          },
+          "counterfactual_basis": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "promotion_state": {
+            "enum": [
+              "PROVISIONAL",
+              "CANONICAL"
+            ]
+          }
+        },
+        "required": [
+          "promotion_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "supporting_evidence_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

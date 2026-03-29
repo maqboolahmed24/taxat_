@@ -1,0 +1,1414 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/run_manifest.schema.json",
+  "title": "RunManifest",
+  "type": "object",
+  "required": [
+    "manifest_id",
+    "manifest_schema_version",
+    "tenant_id",
+    "client_id",
+    "period",
+    "requested_scope",
+    "mode",
+    "run_kind",
+    "principal_context_ref",
+    "environment_ref",
+    "code_build_id",
+    "schema_bundle_hash",
+    "deterministic_seed",
+    "idempotency_key",
+    "lifecycle_state",
+    "created_at",
+    "continuation_set"
+  ],
+  "properties": {
+    "manifest_id": {
+      "type": "string"
+    },
+    "root_manifest_id": {
+      "type": ["string", "null"]
+    },
+    "parent_manifest_id": {
+      "type": ["string", "null"]
+    },
+    "continuation_of_manifest_id": {
+      "type": ["string", "null"]
+    },
+    "replay_of_manifest_id": {
+      "type": ["string", "null"]
+    },
+    "supersedes_manifest_id": {
+      "type": ["string", "null"]
+    },
+    "manifest_generation": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "manifest_schema_version": {
+      "type": "string"
+    },
+    "tenant_id": {
+      "type": "string"
+    },
+    "client_id": {
+      "type": "string"
+    },
+    "business_partitions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "income_source_partitions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "period": {
+      "type": "string"
+    },
+    "requested_scope": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "year_end",
+          "quarterly_update",
+          "estimate_only",
+          "prepare_submission",
+          "submit",
+          "amendment_intent",
+          "amendment_submit"
+        ]
+      },
+      "contains": {
+        "enum": [
+          "year_end",
+          "quarterly_update",
+          "estimate_only"
+        ]
+      },
+      "minContains": 1,
+      "maxContains": 1,
+      "minItems": 1,
+      "uniqueItems": true,
+      "allOf": [
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "amendment_intent"
+                }
+              },
+              {
+                "contains": {
+                  "const": "amendment_submit"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "estimate_only"
+                }
+              },
+              {
+                "contains": {
+                  "enum": [
+                    "prepare_submission",
+                    "submit",
+                    "amendment_intent",
+                    "amendment_submit"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "amendment_intent"
+                }
+              },
+              {
+                "contains": {
+                  "enum": [
+                    "prepare_submission",
+                    "submit"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "amendment_submit"
+                }
+              },
+              {
+                "contains": {
+                  "enum": [
+                    "prepare_submission",
+                    "submit"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "amendment_intent"
+                }
+              },
+              {
+                "not": {
+                  "contains": {
+                    "const": "year_end"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "amendment_submit"
+                }
+              },
+              {
+                "not": {
+                  "contains": {
+                    "const": "year_end"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "submit"
+                }
+              },
+              {
+                "not": {
+                  "contains": {
+                    "const": "prepare_submission"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "COMPLIANCE",
+        "ANALYSIS"
+      ]
+    },
+    "run_kind": {
+      "type": "string",
+      "enum": [
+        "INTERACTIVE",
+        "NIGHTLY",
+        "BACKFILL",
+        "REPLAY",
+        "REMEDIATION",
+        "AMENDMENT",
+        "MIGRATION"
+      ]
+    },
+    "authority_context_ref": {
+      "type": ["string", "null"]
+    },
+    "principal_context_ref": {
+      "type": "string"
+    },
+    "delegation_basis": {
+      "type": ["string", "null"],
+      "enum": [
+        "SELF_ACTING",
+        "CLIENT_GRANTED",
+        "SELF_ASSESSMENT_IMPORTED",
+        "DIGITAL_HANDSHAKE",
+        "TENANT_INTERNAL",
+        "SYSTEM_ASSIGNED",
+        null
+      ]
+    },
+    "authority_link_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "approval_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "override_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "environment_ref": {
+      "type": "string",
+      "enum": [
+        "DEV",
+        "TEST",
+        "UAT",
+        "SANDBOX",
+        "PRODUCTION"
+      ]
+    },
+    "provider_environment_refs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/providerEnvironment"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "code_build_id": {
+      "type": "string"
+    },
+    "code_commit_sha": {
+      "type": ["string", "null"]
+    },
+    "container_image_digest": {
+      "type": ["string", "null"]
+    },
+    "schema_bundle_hash": {
+      "type": "string"
+    },
+    "feature_flag_snapshot_hash": {
+      "type": ["string", "null"]
+    },
+    "config_freeze": {
+      "$ref": "#/$defs/configFreeze"
+    },
+    "input_freeze": {
+      "$ref": "#/$defs/inputFreeze"
+    },
+    "deterministic_seed": {
+      "type": "string"
+    },
+    "idempotency_key": {
+      "type": "string"
+    },
+    "replay_class": {
+      "type": ["string", "null"],
+      "enum": [
+        "STANDARD_REPLAY",
+        "AUDIT_REPLAY",
+        "COUNTERFACTUAL_ANALYSIS",
+        null
+      ]
+    },
+    "non_deterministic_module_allowlist": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "hash_set": {
+      "$ref": "#/$defs/hashSet"
+    },
+    "continuation_set": {
+      "$ref": "#/$defs/continuationSet"
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "ALLOCATED",
+        "FROZEN",
+        "SEALED",
+        "IN_PROGRESS",
+        "COMPLETED",
+        "BLOCKED",
+        "FAILED",
+        "SUPERSEDED",
+        "REPLAY_ONLY",
+        "RETIRED"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "frozen_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "opened_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "sealed_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "superseded_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "retired_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "gating_decisions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/gateDecision"
+      },
+      "default": []
+    },
+    "access_decision": {
+      "$ref": "#/$defs/accessDecision"
+    },
+    "output_refs": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {}
+    },
+    "audit_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "decision_bundle_hash": {
+      "type": ["string", "null"]
+    },
+    "submission_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "drift_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "FROZEN",
+              "SEALED",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "FAILED",
+              "SUPERSEDED",
+              "REPLAY_ONLY",
+              "RETIRED"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "config_freeze",
+          "input_freeze",
+          "hash_set"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "ANALYSIS"
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "requested_scope": {
+            "not": {
+              "contains": {
+                "enum": [
+                  "prepare_submission",
+                  "submit",
+                  "amendment_intent",
+                  "amendment_submit"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "replay_class": {
+            "enum": [
+              "STANDARD_REPLAY",
+              "AUDIT_REPLAY",
+              "COUNTERFACTUAL_ANALYSIS"
+            ]
+          }
+        },
+        "required": [
+          "replay_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "run_kind": {
+            "const": "REPLAY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "run_kind": {
+            "const": "REPLAY"
+          }
+        },
+        "required": [
+          "run_kind"
+        ]
+      },
+      "then": {
+        "required": [
+          "replay_class"
+        ],
+        "properties": {
+          "replay_class": {
+            "enum": [
+              "STANDARD_REPLAY",
+              "AUDIT_REPLAY",
+              "COUNTERFACTUAL_ANALYSIS"
+            ]
+          },
+          "requested_scope": {
+            "not": {
+              "contains": {
+                "enum": [
+                  "submit",
+                  "amendment_submit"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "requested_scope": {
+            "contains": {
+              "enum": [
+                "prepare_submission",
+                "submit",
+                "amendment_intent",
+                "amendment_submit"
+              ]
+            }
+          }
+        },
+        "required": [
+          "requested_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "provider_environment_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "providerEnvironment": {
+      "type": "object",
+      "properties": {
+        "provider_name": {
+          "type": "string"
+        },
+        "provider_environment": {
+          "type": "string"
+        },
+        "api_base_profile": {
+          "type": ["string", "null"]
+        },
+        "api_version": {
+          "type": ["string", "null"]
+        },
+        "schema_version": {
+          "type": ["string", "null"]
+        },
+        "fraud_header_profile_ref": {
+          "type": ["string", "null"]
+        },
+        "token_binding_profile_ref": {
+          "type": ["string", "null"]
+        },
+        "compatible_product_chain_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "provider_name",
+        "provider_environment"
+      ],
+      "additionalProperties": false
+    },
+    "configEntry": {
+      "type": "object",
+      "required": [
+        "config_type",
+        "version_id",
+        "content_hash",
+        "status_at_freeze",
+        "effective_scope",
+        "effective_from",
+        "effective_to",
+        "ccr_id",
+        "test_suite_refs",
+        "provider_api_version",
+        "provider_schema_version",
+        "environment_allowlist",
+        "compatibility_class",
+        "superseded_by_version_id"
+      ],
+      "properties": {
+        "config_type": {
+          "type": "string"
+        },
+        "version_id": {
+          "type": "string"
+        },
+        "content_hash": {
+          "type": "string"
+        },
+        "status_at_freeze": {
+          "type": "string",
+          "enum": [
+            "DRAFT",
+            "CANDIDATE",
+            "VERIFIED",
+            "APPROVED",
+            "DEPRECATED",
+            "REVOKED"
+          ]
+        },
+        "effective_scope": {
+          "type": ["string", "null"]
+        },
+        "effective_from": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "effective_to": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "ccr_id": {
+          "type": ["string", "null"]
+        },
+        "test_suite_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "provider_api_version": {
+          "type": ["string", "null"]
+        },
+        "provider_schema_version": {
+          "type": ["string", "null"]
+        },
+        "environment_allowlist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "compatibility_class": {
+          "type": ["string", "null"]
+        },
+        "superseded_by_version_id": {
+          "type": ["string", "null"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "configFreeze": {
+      "type": "object",
+      "required": [
+        "config_freeze_id",
+        "manifest_id",
+        "artifact_type",
+        "entries",
+        "config_freeze_hash",
+        "approval_snapshot_ref",
+        "materiality_profile_ref",
+        "amendment_materiality_profile_ref",
+        "retention_profile_ref",
+        "provider_contract_profile_ref",
+        "workflow_policy_ref",
+        "override_policy_ref",
+        "masking_export_policy_ref",
+        "canonicalization_rules_ref",
+        "connector_mapping_rules_ref",
+        "parity_threshold_profile_ref",
+        "trust_threshold_profile_ref",
+        "risk_threshold_profile_ref",
+        "evidence_confidence_policy_ref",
+        "computation_rules_ref",
+        "required_config_types_present"
+      ],
+      "properties": {
+        "config_freeze_id": {
+          "type": "string"
+        },
+        "manifest_id": {
+          "type": "string"
+        },
+        "artifact_type": {
+          "const": "ConfigFreeze"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/configEntry"
+          }
+        },
+        "config_freeze_hash": {
+          "type": "string"
+        },
+        "approval_snapshot_ref": {
+          "type": "string"
+        },
+        "materiality_profile_ref": {
+          "type": "string"
+        },
+        "amendment_materiality_profile_ref": {
+          "type": "string"
+        },
+        "retention_profile_ref": {
+          "type": "string"
+        },
+        "provider_contract_profile_ref": {
+          "type": "string"
+        },
+        "workflow_policy_ref": {
+          "type": "string"
+        },
+        "override_policy_ref": {
+          "type": "string"
+        },
+        "masking_export_policy_ref": {
+          "type": "string"
+        },
+        "canonicalization_rules_ref": {
+          "type": "string"
+        },
+        "connector_mapping_rules_ref": {
+          "type": "string"
+        },
+        "parity_threshold_profile_ref": {
+          "type": "string"
+        },
+        "trust_threshold_profile_ref": {
+          "type": "string"
+        },
+        "risk_threshold_profile_ref": {
+          "type": "string"
+        },
+        "evidence_confidence_policy_ref": {
+          "type": "string"
+        },
+        "computation_rules_ref": {
+          "type": "string"
+        },
+        "required_config_types_present": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "COMPUTATION_RULES",
+              "PARITY_THRESHOLDS",
+              "TRUST_THRESHOLDS",
+              "RISK_THRESHOLDS",
+              "WORKFLOW_POLICY",
+              "OVERRIDE_POLICY",
+              "RETENTION_POLICY",
+              "EVIDENCE_CONFIDENCE_POLICY",
+              "CANONICALIZATION_RULES",
+              "CONNECTOR_MAPPING_RULES",
+              "PROVIDER_CONTRACT_PROFILE",
+              "MATERIALITY_PROFILE",
+              "AMENDMENT_MATERIALITY_PROFILE",
+              "MASKING_EXPORT_POLICY"
+            ]
+          },
+          "uniqueItems": true,
+          "minItems": 14
+        }
+      },
+      "additionalProperties": false
+    },
+    "inputFreeze": {
+      "type": "object",
+      "required": [
+        "input_freeze_id",
+        "manifest_id",
+        "artifact_type",
+        "source_plan_ref",
+        "collection_boundary_ref",
+        "source_window_ref",
+        "read_cutoff_at",
+        "source_record_refs",
+        "evidence_item_refs",
+        "candidate_fact_refs",
+        "canonical_fact_refs",
+        "conflict_refs",
+        "late_data_policy_bindings",
+        "normalization_context_ref",
+        "normalization_context_hash",
+        "artifact_contract_refs",
+        "artifact_contract_hash",
+        "input_set_hash",
+        "contract"
+      ],
+      "properties": {
+        "input_freeze_id": {
+          "type": "string"
+        },
+        "manifest_id": {
+          "type": "string"
+        },
+        "artifact_type": {
+          "const": "InputFreeze"
+        },
+        "source_plan_ref": {
+          "type": "string"
+        },
+        "collection_boundary_ref": {
+          "type": "string"
+        },
+        "input_policy_ref": {
+          "type": ["string", "null"]
+        },
+        "source_window_ref": {
+          "type": "string"
+        },
+        "read_cutoff_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "provider_environment_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "provider_api_versions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "provider_schema_versions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "connector_profile_ref": {
+          "type": ["string", "null"]
+        },
+        "connector_build_id": {
+          "type": ["string", "null"]
+        },
+        "cursor_checkpoint_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "request_audit_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "late_data_policy_bindings": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/lateDataPolicyBinding"
+          },
+          "uniqueItems": true
+        },
+        "source_record_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "evidence_item_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "candidate_fact_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "canonical_fact_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "exclusion_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "conflict_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "missing_source_declarations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "stale_source_declarations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "normalization_context_ref": {
+          "type": "string"
+        },
+        "normalization_context_hash": {
+          "type": "string"
+        },
+        "artifact_contract_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "artifact_contract_hash": {
+          "type": "string"
+        },
+        "input_set_hash": {
+          "type": "string"
+        },
+        "contract": {
+          "$ref": "./schema_bundle.schema.json#/$defs/artifactContract"
+        }
+      },
+      "additionalProperties": false
+    },
+    "lateDataPolicyBinding": {
+      "type": "object",
+      "required": [
+        "source_domain",
+        "late_data_policy_ref"
+      ],
+      "properties": {
+        "source_domain": {
+          "type": "string"
+        },
+        "source_class": {
+          "type": ["string", "null"]
+        },
+        "partition_scope_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "late_data_policy_ref": {
+          "type": "string",
+          "enum": [
+            "EXCLUDE_LATE",
+            "SPAWN_CHILD_MANIFEST",
+            "REVIEW_IF_LATE"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "hashSet": {
+      "type": "object",
+      "required": [
+        "config_freeze_hash",
+        "input_set_hash",
+        "manifest_hash"
+      ],
+      "properties": {
+        "config_freeze_hash": {
+          "type": "string"
+        },
+        "input_set_hash": {
+          "type": "string"
+        },
+        "manifest_hash": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "continuationSet": {
+      "type": "object",
+      "required": [
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "supersedes_manifest_id",
+        "manifest_generation",
+        "config_inheritance_mode"
+      ],
+      "properties": {
+        "root_manifest_id": {
+          "type": ["string", "null"]
+        },
+        "parent_manifest_id": {
+          "type": ["string", "null"]
+        },
+        "continuation_of_manifest_id": {
+          "type": ["string", "null"]
+        },
+        "replay_of_manifest_id": {
+          "type": ["string", "null"]
+        },
+        "supersedes_manifest_id": {
+          "type": ["string", "null"]
+        },
+        "manifest_generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "config_inheritance_mode": {
+          "type": ["string", "null"],
+          "description": "How this manifest treated parent frozen config when the lineage branched. Null is allowed for root manifests and same-manifest reuse.",
+          "enum": [
+            "FRESH_CHILD_RESOLUTION",
+            "REPLAY_EXACT",
+            "RECOVERY_EXACT",
+            "HISTORICAL_EXPLICIT",
+            null
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "anyOf": [
+              {
+                "properties": {
+                  "parent_manifest_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "parent_manifest_id"
+                ]
+              },
+              {
+                "properties": {
+                  "continuation_of_manifest_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "continuation_of_manifest_id"
+                ]
+              },
+              {
+                "properties": {
+                  "replay_of_manifest_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "replay_of_manifest_id"
+                ]
+              }
+            ]
+          },
+          "then": {
+            "required": [
+              "config_inheritance_mode"
+            ],
+            "properties": {
+              "config_inheritance_mode": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "accessDecision": {
+      "type": "object",
+      "required": [
+        "decision",
+        "reason_codes",
+        "effective_scope",
+        "masking_rules",
+        "required_approvals",
+        "required_authn_level"
+      ],
+      "properties": {
+        "decision": {
+          "type": "string",
+          "enum": [
+            "ALLOW",
+            "ALLOW_MASKED",
+            "REQUIRE_STEP_UP",
+            "REQUIRE_APPROVAL",
+            "DENY"
+          ]
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "effective_scope": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "string",
+            "enum": [
+              "year_end",
+              "quarterly_update",
+              "estimate_only",
+              "prepare_submission",
+              "submit",
+              "amendment_intent",
+              "amendment_submit"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "masking_rules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "required_approvals": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "required_authn_level": {
+          "type": ["string", "null"],
+          "enum": [
+            "BASIC",
+            "MFA",
+            "STEP_UP",
+            null
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "gateDecision": {
+      "type": "object",
+      "required": [
+        "gate_decision_id",
+        "manifest_id",
+        "gate_code",
+        "gate_class",
+        "decision",
+        "reason_codes",
+        "severity",
+        "overrideability",
+        "policy_version_ref",
+        "decided_at"
+      ],
+      "properties": {
+        "gate_decision_id": {
+          "type": "string"
+        },
+        "manifest_id": {
+          "type": "string"
+        },
+        "gate_code": {
+          "type": "string"
+        },
+        "gate_class": {
+          "type": "string",
+          "enum": [
+            "NON_ACCESS"
+          ]
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "PASS_WITH_NOTICE",
+            "MANUAL_REVIEW",
+            "OVERRIDABLE_BLOCK",
+            "HARD_BLOCK"
+          ]
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "INFO",
+            "NOTICE",
+            "WARNING",
+            "ERROR",
+            "CRITICAL"
+          ]
+        },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": true,
+          "default": {}
+        },
+        "overrideability": {
+          "type": "string",
+          "enum": [
+            "NONE",
+            "SCOPED_OVERRIDE_ALLOWED",
+            "SCOPED_OVERRIDE_REQUIRED",
+            "NON_OVERRIDEABLE"
+          ]
+        },
+        "required_override_scope": {
+          "type": ["string", "null"]
+        },
+        "next_action_codes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "policy_version_ref": {
+          "type": "string"
+        },
+        "decided_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "effective_scope": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "string",
+            "enum": [
+              "year_end",
+              "quarterly_update",
+              "estimate_only",
+              "prepare_submission",
+              "submit",
+              "amendment_intent",
+              "amendment_submit"
+            ]
+          },
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "decision": {
+                "const": "OVERRIDABLE_BLOCK"
+              }
+            },
+            "required": [
+              "decision"
+            ]
+          },
+          "then": {
+            "required": [
+              "required_override_scope"
+            ],
+            "properties": {
+              "overrideability": {
+                "enum": [
+                  "SCOPED_OVERRIDE_ALLOWED",
+                  "SCOPED_OVERRIDE_REQUIRED"
+                ]
+              },
+              "next_action_codes": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "decision": {
+                "const": "HARD_BLOCK"
+              }
+            },
+            "required": [
+              "decision"
+            ]
+          },
+          "then": {
+            "properties": {
+              "overrideability": {
+                "const": "NON_OVERRIDEABLE"
+              },
+              "next_action_codes": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "decision": {
+                "const": "MANUAL_REVIEW"
+              }
+            },
+            "required": [
+              "decision"
+            ]
+          },
+          "then": {
+            "properties": {
+              "next_action_codes": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
