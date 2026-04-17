@@ -1,0 +1,650 @@
+{
+  "contract_version": "FORMULA_THRESHOLDS_V1",
+  "groups": [
+    {
+      "formula_ids": [
+        "data_quality_and_completeness"
+      ],
+      "kind": "ordered_scalar_map",
+      "notes": [
+        "Freshness is a frozen discrete scale, not a free-form interpolation."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L127[freshness_d]"
+      ],
+      "threshold_id": "data_quality_freshness_scale",
+      "values": {
+        "current": 1,
+        "expired": 0,
+        "stale": 0.5,
+        "unknown": 0.25
+      }
+    },
+    {
+      "formula_ids": [
+        "data_quality_and_completeness"
+      ],
+      "kind": "fail_closed_conditions",
+      "notes": [
+        "Structural scoring failures must fail DATA_QUALITY_GATE closed."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L203[dq_structural_failures]"
+      ],
+      "threshold_id": "dq_structural_fail_closed_conditions",
+      "values": [
+        "DQ_INVALID_ERROR_BUDGET",
+        "DQ_CONFIDENCE_WEIGHT_INVALID",
+        "DQ_WEIGHT_PROFILE_INVALID",
+        "LIMITATION_SILENT_AMBIGUITY on filing-critical domain or profile"
+      ]
+    },
+    {
+      "formula_ids": [
+        "record_and_adjustment_compute"
+      ],
+      "kind": "enum",
+      "notes": [
+        "Quarterly totals remain record-layer only under both profiles."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L254[quarterly_basis]"
+      ],
+      "threshold_id": "quarterly_basis_enum",
+      "values": [
+        "PERIODIC",
+        "CUMULATIVE"
+      ]
+    },
+    {
+      "formula_ids": [
+        "risk_scoring",
+        "trust_scoring_bands_and_readiness"
+      ],
+      "kind": "profile_thresholds",
+      "notes": [
+        "Risk thresholds come from the frozen risk profile and trust guard bands."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L348[material_threshold_m]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L951[risk_guard_band]"
+      ],
+      "threshold_id": "risk_blocking_thresholds",
+      "values": {
+        "blocking_threshold_m": "feature-specific in [material_threshold_m,1]",
+        "material_threshold_m": "feature-specific in (0,1]",
+        "risk_automation_guard_trigger": "risk_score >= 40 blocks green automation margin",
+        "risk_guard_band": 2
+      }
+    },
+    {
+      "formula_ids": [
+        "parity_comparison_set_construction",
+        "aggregate_parity",
+        "trust_scoring_bands_and_readiness"
+      ],
+      "kind": "enum",
+      "notes": [
+        "Comparison requirement determines whether missing authority basis is fail-closed or a bounded fallback."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L441[comparison_requirement]"
+      ],
+      "threshold_id": "comparison_requirement_enum",
+      "values": [
+        "MANDATORY",
+        "DESIRABLE",
+        "NOT_REQUIRED"
+      ]
+    },
+    {
+      "formula_ids": [
+        "per_field_parity"
+      ],
+      "kind": "band_thresholds",
+      "notes": [
+        "Threshold-edge replay depends on persisted threshold and floor inputs per fieldDelta."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L483[blocking_ratio_cap]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L499[per_field_classification]"
+      ],
+      "threshold_id": "parity_field_class_thresholds",
+      "values": {
+        "blocking_gte": 2.5,
+        "blocking_ratio_cap_default": 3.0,
+        "match_lt": 0.25,
+        "material_lt": 2.5,
+        "minor_lt": 1.0
+      }
+    },
+    {
+      "formula_ids": [
+        "aggregate_parity"
+      ],
+      "kind": "band_thresholds",
+      "notes": [
+        "Classification uses a strict precedence ladder above the raw score."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L554[aggregate_parity_classification]"
+      ],
+      "threshold_id": "parity_aggregate_thresholds",
+      "values": {
+        "coverage_full_required": 1,
+        "material_pressure_gte": 1.0,
+        "minor_pressure_gte": 0.25
+      }
+    },
+    {
+      "formula_ids": [
+        "evidence_graph_quality"
+      ],
+      "kind": "named_thresholds",
+      "notes": [
+        "These minima drive fail-closed caps rather than advisory annotations."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L642[graph_survivability_minima]"
+      ],
+      "threshold_id": "graph_survivability_minima",
+      "values": {
+        "audit_survivability_min": 0.15,
+        "review_survivability_min": 0.45,
+        "submit_survivability_min": 0.8
+      }
+    },
+    {
+      "formula_ids": [
+        "evidence_graph_quality"
+      ],
+      "kind": "ordered_caps",
+      "notes": [
+        "Graph caps are explicit legal/defensibility ceilings, not derived from raw score percentiles."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L646[graph_quality_caps]"
+      ],
+      "threshold_id": "graph_quality_fail_closed_caps",
+      "values": {
+        "contradicted_target": 39,
+        "missing_proof_bundle_or_explanation_failure": 69,
+        "nonreplayable_or_low_review_survivability": 69,
+        "open_closure": 59,
+        "silent_ambiguity_ratio_gt_0": 29,
+        "stale_or_low_submit_survivability": 79,
+        "unsupported_target": 49
+      }
+    },
+    {
+      "formula_ids": [
+        "trust_authority_uncertainty",
+        "trust_input_admissibility_and_basis",
+        "trust_scoring_bands_and_readiness",
+        "trust_currency_and_recalculation"
+      ],
+      "kind": "numeric",
+      "notes": [
+        "35 is both a reason-code threshold and a live-progression review cap trigger."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L761[authority_review_threshold]"
+      ],
+      "threshold_id": "authority_review_threshold",
+      "values": {
+        "review_limit": 35
+      }
+    },
+    {
+      "formula_ids": [
+        "trust_input_admissibility_and_basis",
+        "trust_scoring_bands_and_readiness",
+        "trust_currency_and_recalculation"
+      ],
+      "kind": "numeric",
+      "notes": [
+        "70 blocks live authority progression and trust-stage automation."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L834[authority_progression_block]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L1004[authority_cap_band_red]"
+      ],
+      "threshold_id": "authority_block_threshold",
+      "values": {
+        "block_limit": 70
+      }
+    },
+    {
+      "formula_ids": [
+        "trustsummary_artifact_binding",
+        "trust_input_admissibility_and_basis",
+        "trust_scoring_bands_and_readiness"
+      ],
+      "kind": "enum",
+      "notes": [
+        "Trust input state stays distinct from score bands and automation/readiness."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L26[trust_input_state_binding]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L795[trust_input_state]"
+      ],
+      "threshold_id": "trust_input_state_enum",
+      "values": [
+        "ADMISSIBLE_CURRENT",
+        "ADMISSIBLE_STALE",
+        "INCOMPLETE",
+        "CONTRADICTED"
+      ]
+    },
+    {
+      "formula_ids": [
+        "trustsummary_artifact_binding",
+        "trust_upstream_gate_cap",
+        "trust_scoring_bands_and_readiness"
+      ],
+      "kind": "enum",
+      "notes": [
+        "Legal progression cannot exceed this frozen upstream cap."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L43[upstream_gate_cap_binding]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L875[upstream_gate_cap]"
+      ],
+      "threshold_id": "upstream_gate_cap_enum",
+      "values": [
+        "AUTO_ELIGIBLE",
+        "NOTICE_ONLY",
+        "REVIEW_ONLY",
+        "BLOCKED"
+      ]
+    },
+    {
+      "formula_ids": [
+        "trustsummary_artifact_binding",
+        "trust_scoring_bands_and_readiness"
+      ],
+      "kind": "band_thresholds",
+      "notes": [
+        "score_band is numeric-only and separate from cap-band restrictions."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L943[score_band]"
+      ],
+      "threshold_id": "trust_score_bands",
+      "values": {
+        "amber_gte": 65,
+        "green_gte": 85,
+        "red_lt": 65
+      }
+    },
+    {
+      "formula_ids": [
+        "trust_scoring_bands_and_readiness"
+      ],
+      "kind": "guard_bands",
+      "notes": [
+        "Exact guard-band constants must be frozen into the trust sensitivity contract."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L949[trust_guard_bands]"
+      ],
+      "threshold_id": "trust_guard_bands",
+      "values": {
+        "amber_guard_band": 2,
+        "authority_allow_guard_band": 2,
+        "authority_block_guard_band": 2,
+        "authority_review_guard_band": 2,
+        "completeness_guard_band": 3,
+        "graph_guard_band": 3,
+        "green_guard_band": 2,
+        "risk_guard_band": 2
+      }
+    },
+    {
+      "formula_ids": [
+        "trustsummary_artifact_binding",
+        "trust_scoring_bands_and_readiness"
+      ],
+      "kind": "enum",
+      "notes": [
+        "Threshold stability is persisted independently of score band."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L29[threshold_stability_binding]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L970[threshold_stability_state]"
+      ],
+      "threshold_id": "threshold_stability_enum",
+      "values": [
+        "STABLE",
+        "EDGE_REVIEW"
+      ]
+    },
+    {
+      "formula_ids": [
+        "trust_scoring_bands_and_readiness"
+      ],
+      "kind": "enum",
+      "notes": [
+        "These codes serialize the active threshold surface directly into the sensitivity contract."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L985[edge_trigger_codes]"
+      ],
+      "threshold_id": "trust_edge_trigger_enum",
+      "values": [
+        "TRUST_GREEN_GUARD_BAND",
+        "TRUST_AMBER_GUARD_BAND",
+        "RISK_AUTOMATION_GUARD_BAND",
+        "COMPLETENESS_GUARD_BAND",
+        "GRAPH_FILING_GUARD_BAND",
+        "AUTHORITY_REVIEW_GUARD_BAND",
+        "AUTHORITY_BLOCK_GUARD_BAND"
+      ]
+    },
+    {
+      "formula_ids": [
+        "trustsummary_artifact_binding",
+        "trust_scoring_bands_and_readiness"
+      ],
+      "kind": "ordered_band_rules",
+      "notes": [
+        "cap_band captures non-score legal and operational ceilings."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L996[cap_band]"
+      ],
+      "threshold_id": "trust_cap_band_rules",
+      "values": {
+        "amber_conditions": [
+          "execution_mode = ANALYSIS",
+          "trust_input_state = ADMISSIBLE_STALE",
+          "threshold_stability_state = EDGE_REVIEW",
+          "risk_automation_margin < risk_guard_band",
+          "upstream_gate_cap = REVIEW_ONLY",
+          "required_human_steps_count > 0",
+          "active_filing_critical_override_count > 0",
+          "critical_retention_limited_count > 0",
+          "unresolved_material_blocking_risk_flag = true",
+          "live_authority_progression_requested and authority_uncertainty_score >= 35",
+          "baseline_submission_state in {UNKNOWN, OUT_OF_BAND_UNRECONCILED}"
+        ],
+        "cap_band_enum": [
+          "INSUFFICIENT_DATA",
+          "RED",
+          "AMBER",
+          "GREEN"
+        ],
+        "insufficient_data_conditions": [
+          "trust_input_state in {INCOMPLETE, CONTRADICTED}",
+          "missing required evidence/authority link/comparison/baseline or silent limitation ambiguity",
+          "completeness_score < 60",
+          "filing-capable run and graph_quality_score < 50"
+        ],
+        "red_conditions": [
+          "unresolved_blocking_risk_flag = true",
+          "upstream_gate_cap = BLOCKED",
+          "live_authority_progression_requested and authority_uncertainty_score >= 70"
+        ],
+        "severity_order": [
+          "GREEN",
+          "AMBER",
+          "RED",
+          "INSUFFICIENT_DATA"
+        ]
+      }
+    },
+    {
+      "formula_ids": [
+        "trustsummary_artifact_binding",
+        "trust_input_admissibility_and_basis",
+        "trust_scoring_bands_and_readiness"
+      ],
+      "kind": "enum",
+      "notes": [
+        "automation_level is a trust-layer capability summary, not an unattended-action permit by itself."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L52[automation_level_binding]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L1046[automation_level]"
+      ],
+      "threshold_id": "automation_level_enum",
+      "values": [
+        "ALLOWED",
+        "LIMITED",
+        "BLOCKED"
+      ]
+    },
+    {
+      "formula_ids": [
+        "trustsummary_artifact_binding",
+        "trust_input_admissibility_and_basis",
+        "trust_scoring_bands_and_readiness"
+      ],
+      "kind": "enum",
+      "notes": [
+        "The readiness bridge is exact and rank-preserving relative to automation_level."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L53[filing_readiness_binding]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L1103[filing_readiness]"
+      ],
+      "threshold_id": "filing_readiness_enum",
+      "values": [
+        "NOT_READY",
+        "READY_REVIEW",
+        "READY_TO_SUBMIT"
+      ]
+    },
+    {
+      "formula_ids": [
+        "trust_scoring_bands_and_readiness"
+      ],
+      "kind": "hard_caps",
+      "notes": [
+        "ANALYSIS mode can compute trust posture but cannot publish greener machine progression."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L1121[analysis_mode_cap]"
+      ],
+      "threshold_id": "analysis_mode_cap",
+      "values": {
+        "max_automation_level": "LIMITED",
+        "max_filing_readiness": "READY_REVIEW",
+        "max_trust_band": "AMBER",
+        "reason_code": "TRUST_ANALYSIS_MODE_CAP"
+      }
+    },
+    {
+      "formula_ids": [
+        "trust_scoring_bands_and_readiness"
+      ],
+      "kind": "hard_caps",
+      "notes": [
+        "Amendment freshness and retroactive caps are part of trust semantics, not post-hoc decoration."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L1139[amendment_freshness_caps]"
+      ],
+      "threshold_id": "amendment_freshness_caps",
+      "values": {
+        "automation_level_max": "LIMITED",
+        "filing_readiness_max": "READY_REVIEW",
+        "predicates": [
+          "same DriftBaselineEnvelope.frozen_hash",
+          "no widened difference_classes or filing-critical deltas",
+          "no widened RetroactiveImpactAnalysis",
+          "no provider-profile or amendment-window change"
+        ]
+      }
+    },
+    {
+      "formula_ids": [
+        "collaboration_orchestration_queue_routing"
+      ],
+      "kind": "ordered_scalar_map",
+      "notes": [
+        "Operational routing still uses frozen scalars rather than UI-local sort weights."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L1168[priority_base_i]"
+      ],
+      "threshold_id": "work_priority_base_map",
+      "values": {
+        "CRITICAL": 1.0,
+        "HIGH": 0.6,
+        "LOW": 0.15,
+        "NORMAL": 0.35,
+        "URGENT": 0.8
+      }
+    },
+    {
+      "formula_ids": [
+        "collaboration_orchestration_queue_routing"
+      ],
+      "kind": "ordered_caps",
+      "notes": [
+        "Resolution confidence caps are fail-closed and deterministic."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L1234[resolution_confidence_caps]"
+      ],
+      "threshold_id": "work_resolution_caps",
+      "values": {
+        "next_action_clarity_zero": 49,
+        "response_or_lane_integrity_zero": 39,
+        "unassigned_item": 69
+      }
+    },
+    {
+      "formula_ids": [
+        "collaboration_orchestration_queue_routing"
+      ],
+      "kind": "profile_threshold",
+      "notes": [
+        "Queue-health floors come from the frozen collaboration routing profile."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L1294[queue_health_floor]"
+      ],
+      "threshold_id": "queue_health_floor",
+      "values": {
+        "queue_health_floor": "profile-defined"
+      }
+    },
+    {
+      "formula_ids": [
+        "client_flow_reliability_and_completion"
+      ],
+      "kind": "thresholds",
+      "notes": [
+        "Flow stability under 60 implies unstable mutation posture unless recovery is the only live mutation."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L1432[flow_stability_threshold]"
+      ],
+      "threshold_id": "client_flow_thresholds",
+      "values": {
+        "flow_stability_unstable_lt": 60
+      }
+    },
+    {
+      "formula_ids": [
+        "client_flow_reliability_and_completion"
+      ],
+      "kind": "hard_overrides",
+      "notes": [
+        "Upload confidence drives governed CTA eligibility, not just a visual confidence meter."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L1463[upload_confidence_overrides]"
+      ],
+      "threshold_id": "upload_confidence_thresholds",
+      "values": {
+        "attached_minimum": 85,
+        "binding_superseded_maximum": 25,
+        "integrity_failed": 0,
+        "malware_quarantined": 0,
+        "submit_attach_minimum": 70
+      }
+    },
+    {
+      "formula_ids": [
+        "client_flow_reliability_and_completion"
+      ],
+      "kind": "ordered_mapping",
+      "notes": [
+        "Published recovery posture must equal the deterministic posture derived from blocker state."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L1512[recovery_posture_mapping]"
+      ],
+      "threshold_id": "recovery_posture_mapping",
+      "values": {
+        "HARD_RESET_REQUIRED": "re-upload or restart required",
+        "INLINE_RESUME": ">= 85 and no guard mismatch",
+        "RECONFIRM_INLINE": "65-84 with in-place rebase or rebinding path",
+        "STALE_REVIEW_REQUIRED": "40-64",
+        "STEP_UP_RETRY": "only blocker is step-up proof",
+        "SUPPORT_REQUIRED": "self-recovery unsafe"
+      }
+    },
+    {
+      "formula_ids": [
+        "client_flow_reliability_and_completion"
+      ],
+      "kind": "hard_overrides",
+      "notes": [
+        "Approval-readiness thresholds are governed control limits, not UI convenience copy."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L1543[approval_readiness_overrides]"
+      ],
+      "threshold_id": "approval_readiness_thresholds",
+      "values": {
+        "sign_now_minimum": 85,
+        "step_up_expired_maximum": 40,
+        "superseded_or_expired": 0
+      }
+    },
+    {
+      "formula_ids": [
+        "client_flow_reliability_and_completion"
+      ],
+      "kind": "band_thresholds",
+      "notes": [
+        "Completion thresholds govern CTA posture under legal reversibility constraints."
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L1596[completion_probability_thresholds]"
+      ],
+      "threshold_id": "completion_probability_thresholds",
+      "values": {
+        "completion_cta_gte": 0.7,
+        "review_affordance_lt": 0.7,
+        "save_or_help_lt": 0.4
+      }
+    }
+  ],
+  "summary": {
+    "core_threshold_group_count": 22,
+    "group_count": 30,
+    "secondary_threshold_group_count": 8,
+    "trust_edge_trigger_enum": [
+      "TRUST_GREEN_GUARD_BAND",
+      "TRUST_AMBER_GUARD_BAND",
+      "RISK_AUTOMATION_GUARD_BAND",
+      "COMPLETENESS_GUARD_BAND",
+      "GRAPH_FILING_GUARD_BAND",
+      "AUTHORITY_REVIEW_GUARD_BAND",
+      "AUTHORITY_BLOCK_GUARD_BAND"
+    ],
+    "trust_probe_order": [
+      "TRUST_SCORE_MINUS_ONE",
+      "TRUST_SCORE_PLUS_ONE",
+      "RISK_SCORE_PLUS_ONE",
+      "AUTHORITY_UNCERTAINTY_PLUS_ONE",
+      "FRESHNESS_INVALIDATED",
+      "INVALID_OVERRIDE_RELIED_UPON"
+    ]
+  }
+}

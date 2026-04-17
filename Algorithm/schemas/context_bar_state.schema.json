@@ -1,0 +1,351 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/context_bar_state.schema.json",
+  "title": "ContextBarState",
+  "description": "Low-noise persistent context strip contract. This schema freezes manifest identity, period, scope, phase, freshness, truth origin, connection posture, and one-time non-live or limitation messaging for the default shell.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "surface_code",
+    "source_module_code",
+    "manifest_label",
+    "period_label",
+    "scope_label",
+    "phase_label",
+    "freshness_state",
+    "truth_origin",
+    "connection_state",
+    "owner_handoff_posture",
+    "owner_label",
+    "mode_posture",
+    "limitation_statement",
+    "full_text_ref"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "ContextBarState"
+    },
+    "surface_code": {
+      "const": "CONTEXT_BAR"
+    },
+    "source_module_code": {
+      "const": "MANIFEST_RIBBON"
+    },
+    "manifest_label": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "period_label": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 48
+    },
+    "scope_label": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 48
+    },
+    "phase_label": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 48
+    },
+    "freshness_state": {
+      "type": "string",
+      "enum": [
+        "FRESH",
+        "STALE",
+        "CATCHING_UP",
+        "DEGRADED"
+      ]
+    },
+    "truth_origin": {
+      "type": "string",
+      "enum": [
+        "LOCAL_INTENT",
+        "PERSISTED_STATE",
+        "AUTHORITY_ARTIFACT",
+        "OUT_OF_BAND_DISCOVERY"
+      ]
+    },
+    "connection_state": {
+      "type": "string",
+      "enum": [
+        "CONNECTED",
+        "RECONNECTING",
+        "CATCHING_UP",
+        "STALE",
+        "DEGRADED"
+      ]
+    },
+    "owner_handoff_posture": {
+      "type": "string",
+      "enum": [
+        "UNASSIGNED",
+        "OWNED",
+        "HANDOFF_PENDING",
+        "WAITING_ON_CUSTOMER",
+        "WAITING_ON_AUTHORITY",
+        "WAITING_ON_REVIEW",
+        "WAITING_ON_APPROVAL"
+      ]
+    },
+    "owner_label": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 48
+    },
+    "mode_posture": {
+      "type": "string",
+      "enum": [
+        "LIVE_COMPLIANCE",
+        "ANALYSIS_ONLY",
+        "REPLAY_ONLY",
+        "MASKED_LIMITED",
+        "READ_ONLY"
+      ]
+    },
+    "limitation_statement": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "full_text_ref": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "owner_handoff_posture": {
+            "const": "UNASSIGNED"
+          }
+        },
+        "required": [
+          "owner_handoff_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "owner_label": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "owner_handoff_posture": {
+            "not": {
+              "const": "UNASSIGNED"
+            }
+          }
+        },
+        "required": [
+          "owner_handoff_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "owner_label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 48
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mode_posture": {
+            "const": "LIVE_COMPLIANCE"
+          }
+        },
+        "required": [
+          "mode_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "freshness_state": {
+            "const": "FRESH"
+          },
+          "connection_state": {
+            "const": "CONNECTED"
+          },
+          "limitation_statement": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mode_posture": {
+            "not": {
+              "const": "LIVE_COMPLIANCE"
+            }
+          }
+        },
+        "required": [
+          "mode_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "limitation_statement": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "connection_state": {
+            "const": "CATCHING_UP"
+          }
+        },
+        "required": [
+          "connection_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "freshness_state": {
+            "const": "CATCHING_UP"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "connection_state": {
+            "const": "STALE"
+          }
+        },
+        "required": [
+          "connection_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "freshness_state": {
+            "const": "STALE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "connection_state": {
+            "const": "DEGRADED"
+          }
+        },
+        "required": [
+          "connection_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "freshness_state": {
+            "const": "DEGRADED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "freshness_state": {
+            "const": "FRESH"
+          }
+        },
+        "required": [
+          "freshness_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "connection_state": {
+            "const": "CONNECTED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "freshness_state": {
+            "const": "CATCHING_UP"
+          }
+        },
+        "required": [
+          "freshness_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "connection_state": {
+            "const": "CATCHING_UP"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "freshness_state": {
+            "const": "STALE"
+          }
+        },
+        "required": [
+          "freshness_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "connection_state": {
+            "const": "STALE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "freshness_state": {
+            "const": "DEGRADED"
+          }
+        },
+        "required": [
+          "freshness_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "connection_state": {
+            "const": "DEGRADED"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

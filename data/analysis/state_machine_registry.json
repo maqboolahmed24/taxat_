@@ -1,0 +1,3370 @@
+{
+  "machines": [
+    {
+      "allowed_transitions": [
+        "PREPARED --bundle_review_complete--> FROZEN",
+        "FROZEN --submission_begin--> SUBMITTED",
+        "SUBMITTED --authority_confirms--> CONFIRMED",
+        "PREPARED --input_change_before_freeze--> VOID",
+        "FROZEN --same_scope_inputs_change--> SUPERSEDED",
+        "SUBMITTED --newer_same_scope_bundle_replaces_active_chain--> SUPERSEDED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L1141[AmendmentBundle.bundle_state]",
+        "Algorithm/state_machines.md::L1159[AmendmentBundle.bundle_state]"
+      ],
+      "authority_precedence_rules": [
+        "authority-originated transitions outrank tenant-originated assumptions where legal state is involved;",
+        "`CONFIRMED` preserves the exact authority-facing package that produced the accepted amendment state ---"
+      ],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [
+        "P16"
+      ],
+      "events": [
+        "bundle_review_complete",
+        "submission_begin",
+        "authority_confirms",
+        "input_change_before_freeze",
+        "same_scope_inputs_change",
+        "newer_same_scope_bundle_replaces_active_chain"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_amendment_bundle_bundle_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "AmendmentBundle",
+      "rationale": "`AmendmentBundle.bundle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/amendment_bundle.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L1141[AmendmentBundle.bundle_state]",
+      "source_section_ids": [
+        "6.22A"
+      ],
+      "state_field": "bundle_state",
+      "states": [
+        "PREPARED",
+        "FROZEN",
+        "SUBMITTED",
+        "CONFIRMED",
+        "VOID",
+        "SUPERSEDED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "CONFIRMED",
+        "SUPERSEDED",
+        "VOID"
+      ],
+      "trigger_modules": [
+        "CONSTRUCT_AMENDMENT_BUNDLE"
+      ]
+    },
+    {
+      "allowed_transitions": [
+        "NOT_ELIGIBLE --eligibility_check_pass--> ELIGIBLE",
+        "NOT_ELIGIBLE --baseline_or_window_unproven--> RECONCILE_REQUIRED",
+        "RECONCILE_REQUIRED --reconciliation_complete--> ELIGIBLE",
+        "ELIGIBLE --intent_required_by_authority_flow--> INTENT_REQUIRED",
+        "INTENT_REQUIRED --intent_sent--> INTENT_SUBMITTED",
+        "INTENT_SUBMITTED --authority_validations_pass--> READY_TO_AMEND",
+        "INTENT_SUBMITTED --freshness_invalidated--> INTENT_REQUIRED",
+        "READY_TO_AMEND --freshness_invalidated--> INTENT_REQUIRED",
+        "READY_TO_AMEND --amendment_submission_sent--> AMEND_SUBMITTED",
+        "AMEND_SUBMITTED --awaiting_ack--> AMEND_PENDING",
+        "AMEND_PENDING --authority_confirms--> AMEND_CONFIRMED",
+        "AMEND_PENDING --authority_rejects--> AMEND_REJECTED",
+        "ELIGIBLE --amendment_window_expires--> WINDOW_CLOSED",
+        "READY_TO_AMEND --amendment_window_expires--> WINDOW_CLOSED",
+        "any_non_superseded_state --same_scope_chain_superseded--> SUPERSEDED",
+        "AMEND_CONFIRMED --later_same_scope_confirmed--> SUPERSEDED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L1090[AmendmentCase.lifecycle_state]",
+        "Algorithm/state_machines.md::L1124[AmendmentCase.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [
+        "authority-originated transitions outrank tenant-originated assumptions where legal state is involved;",
+        "a single engine run MAY record both `intent_sent` and `authority_validations_pass`, but both transitions MUST be auditable"
+      ],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [
+        "P09",
+        "P10",
+        "P14",
+        "P15",
+        "P16",
+        "P17"
+      ],
+      "events": [
+        "eligibility_check_pass",
+        "baseline_or_window_unproven",
+        "reconciliation_complete",
+        "intent_required_by_authority_flow",
+        "intent_sent",
+        "authority_validations_pass",
+        "freshness_invalidated",
+        "amendment_submission_sent",
+        "awaiting_ack",
+        "authority_confirms",
+        "authority_rejects",
+        "amendment_window_expires",
+        "same_scope_chain_superseded",
+        "later_same_scope_confirmed"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_amendment_case_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [
+        "ASSUMPTION_SELECTOR_SOURCE_any_non_superseded_state"
+      ],
+      "object_family": "AmendmentCase",
+      "rationale": "`AmendmentCase.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/amendment_case.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L1090[AmendmentCase.lifecycle_state]",
+      "source_section_ids": [
+        "6.22"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "NOT_ELIGIBLE",
+        "RECONCILE_REQUIRED",
+        "ELIGIBLE",
+        "INTENT_REQUIRED",
+        "INTENT_SUBMITTED",
+        "READY_TO_AMEND",
+        "AMEND_SUBMITTED",
+        "AMEND_PENDING",
+        "AMEND_CONFIRMED",
+        "AMEND_REJECTED",
+        "WINDOW_CLOSED",
+        "SUPERSEDED"
+      ],
+      "supersession_policy": "only one non-superseded amendment chain head may remain active for one exact scope key; historical confirmed or rejected cases SHALL remain queryable after supersession HMRC's year-end guide states that amendments after final declaration are allowed only once final declaration has been completed through software and within the amendment window, and that an intent-to-amend step with validation checks is required before amendment submission is accepted. [5] ---",
+      "terminal_states": [
+        "AMEND_REJECTED",
+        "SUPERSEDED",
+        "WINDOW_CLOSED"
+      ],
+      "trigger_modules": [
+        "AMENDMENT_GATE",
+        "EVALUATE_AMENDMENT_ELIGIBILITY",
+        "EXECUTE_AUTHORITY_CALCULATION_FLOW",
+        "LOAD_AMENDMENT_CASE",
+        "UPSERT_AMENDMENT_CASE",
+        "VALIDATE_AMENDMENT_READINESS_FRESHNESS"
+      ]
+    },
+    {
+      "allowed_transitions": [
+        "ACCEPTED --expiry_window_elapsed--> EXPIRED",
+        "DUPLICATE_REPLAY --expiry_window_elapsed--> EXPIRED",
+        "REJECTED_STALE_VIEW --expiry_window_elapsed--> EXPIRED",
+        "REJECTED_POLICY --expiry_window_elapsed--> EXPIRED",
+        "REJECTED_INVALID --expiry_window_elapsed--> EXPIRED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L1282[ApiCommandReceipt.acceptance_state]",
+        "Algorithm/state_machines.md::L1299[ApiCommandReceipt.acceptance_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [],
+      "events": [
+        "expiry_window_elapsed"
+      ],
+      "machine_class": "release_control",
+      "machine_id": "machine_api_command_receipt_acceptance_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "ApiCommandReceipt",
+      "rationale": "`ApiCommandReceipt.acceptance_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/api_command_receipt.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L1282[ApiCommandReceipt.acceptance_state]",
+      "source_section_ids": [
+        "6.25A"
+      ],
+      "state_field": "acceptance_state",
+      "states": [
+        "ACCEPTED",
+        "DUPLICATE_REPLAY",
+        "REJECTED_STALE_VIEW",
+        "REJECTED_POLICY",
+        "REJECTED_INVALID",
+        "EXPIRED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "EXPIRED"
+      ],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "ACTIVE --retention_limitation--> LIMITED",
+        "ACTIVE --legal_hold_apply--> LEGAL_HOLD",
+        "LIMITED --erasure_requested_or_due--> ERASURE_PENDING",
+        "LEGAL_HOLD --hold_released--> ACTIVE",
+        "ERASURE_PENDING --pseudonymise_first--> PSEUDONYMISED",
+        "ERASURE_PENDING --erasure_complete--> ERASED",
+        "PSEUDONYMISED --final_delete--> ERASED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L1170[ArtifactRetention.lifecycle_state]",
+        "Algorithm/state_machines.md::L1189[ArtifactRetention.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [],
+      "events": [
+        "retention_limitation",
+        "legal_hold_apply",
+        "erasure_requested_or_due",
+        "hold_released",
+        "pseudonymise_first",
+        "erasure_complete",
+        "final_delete"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_artifact_retention_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "ArtifactRetention",
+      "rationale": "`ArtifactRetention.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/artifact_retention.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L1170[ArtifactRetention.lifecycle_state]",
+      "source_section_ids": [
+        "6.23"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "ACTIVE",
+        "LIMITED",
+        "LEGAL_HOLD",
+        "ERASURE_PENDING",
+        "PSEUDONYMISED",
+        "ERASED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "ERASED"
+      ],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "REQUEST_REGISTERED --dispatch_materialized--> DISPATCH_READY",
+        "DISPATCH_READY --exclusive_gateway_claim_and_send_begin--> TRANSMIT_IN_FLIGHT",
+        "DISPATCH_READY --duplicate_bucket_changed_before_send--> ABANDONED",
+        "TRANSMIT_IN_FLIGHT --provider_response_captured--> RESPONSE_CAPTURED",
+        "TRANSMIT_IN_FLIGHT --timeout_envelope_recorded--> RESPONSE_CAPTURED",
+        "RESPONSE_CAPTURED --reconciliation_begin--> RECONCILING",
+        "RESPONSE_CAPTURED --response_terminal_without_reconciliation--> RESOLVED",
+        "RECONCILING --resolution_reached--> RESOLVED",
+        "DISPATCH_READY --binding_invalidated_before_send--> ABANDONED",
+        "TRANSMIT_IN_FLIGHT --exchange_superseded_or_quarantined--> ABANDONED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L909[AuthorityInteractionRecord.lifecycle_state]",
+        "Algorithm/state_machines.md::L932[AuthorityInteractionRecord.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [
+        "authority-originated transitions outrank tenant-originated assumptions where legal state is involved;",
+        "`AuthorityInteractionRecord` SHALL exist before a live authority request becomes visible to the broker or gateway",
+        "immediately before that claim, the gateway SHALL re-check the persisted `duplicate_meaning_key` bucket and latest authority-grounded state for the same exact meaning; if stronger or newer truth exists, the exchange SHALL move to `ABANDONED` or reconciliation rather than transmitting stale bytes",
+        "`send_authorized_token_version_ref` SHALL be non-null only when `send_revalidation_state = CLEAR_TO_SEND`; if that ref differs from the sealed `AuthorityBinding.token_version_ref`, then `send_revalidation_reason_codes[]` SHALL equal `[TOKEN_ROTATED_WITHIN_LINEAGE]`",
+        "`RESOLVED` SHALL require either a terminal `AuthorityResponseEnvelope` or a persisted reconciliation result linked to the same request lineage"
+      ],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [
+        "P16"
+      ],
+      "events": [
+        "dispatch_materialized",
+        "exclusive_gateway_claim_and_send_begin",
+        "duplicate_bucket_changed_before_send",
+        "provider_response_captured",
+        "timeout_envelope_recorded",
+        "reconciliation_begin",
+        "response_terminal_without_reconciliation",
+        "resolution_reached",
+        "binding_invalidated_before_send",
+        "exchange_superseded_or_quarantined"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_authority_interaction_record_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "AuthorityInteractionRecord",
+      "rationale": "`AuthorityInteractionRecord.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "`reconciliation_method`, `max_auto_reconciliation_attempts`, and `reconciliation_cadence_seconds` SHALL be frozen on the interaction so replay, recovery, and continuation cannot inherit a newer live profile",
+      "schema_path": "Algorithm/schemas/authority_interaction_record.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L909[AuthorityInteractionRecord.lifecycle_state]",
+      "source_section_ids": [
+        "6.19A"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "REQUEST_REGISTERED",
+        "DISPATCH_READY",
+        "TRANSMIT_IN_FLIGHT",
+        "RESPONSE_CAPTURED",
+        "RECONCILING",
+        "RESOLVED",
+        "ABANDONED"
+      ],
+      "supersession_policy": "`ABANDONED` MAY retain `send_revalidation_state = BLOCKED` when bytes never left the process, or `send_revalidation_state = CLEAR_TO_SEND` when a previously lawful send later had to be quarantined or superseded before response capture",
+      "terminal_states": [
+        "ABANDONED",
+        "RESOLVED"
+      ],
+      "trigger_modules": [
+        "BUILD_AUTHORITY_REQUEST_ENVELOPE",
+        "RECONCILE_AUTHORITY_STATE",
+        "RESOLVE_AUTHORITY_BINDING",
+        "SUBMISSION_GATE"
+      ]
+    },
+    {
+      "allowed_transitions": [
+        "UNLINKED --oauth_begin--> LINK_INITIATED",
+        "LINK_INITIATED --oauth_success--> AUTHORISED_ACTIVE",
+        "AUTHORISED_ACTIVE --scope_reduced--> AUTHORISED_LIMITED",
+        "AUTHORISED_ACTIVE --token_invalid--> TOKEN_INVALID",
+        "AUTHORISED_ACTIVE --authority_revoke--> REVOKED",
+        "AUTHORISED_ACTIVE --expiry--> EXPIRED",
+        "TOKEN_INVALID --refresh_success--> AUTHORISED_ACTIVE"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L748[AuthorityLink.lifecycle_state]",
+        "Algorithm/state_machines.md::L768[AuthorityLink.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [
+        "authority-originated transitions outrank tenant-originated assumptions where legal state is involved;",
+        "authority-facing operations require `AUTHORISED_ACTIVE` or policy-allowed `AUTHORISED_LIMITED`"
+      ],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [
+        "P01",
+        "P16"
+      ],
+      "events": [
+        "oauth_begin",
+        "oauth_success",
+        "scope_reduced",
+        "token_invalid",
+        "authority_revoke",
+        "expiry",
+        "refresh_success"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_authority_link_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "AuthorityLink",
+      "rationale": "`AuthorityLink.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/authority_link.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L748[AuthorityLink.lifecycle_state]",
+      "source_section_ids": [
+        "6.16"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "UNLINKED",
+        "LINK_INITIATED",
+        "AUTHORISED_ACTIVE",
+        "AUTHORISED_LIMITED",
+        "TOKEN_INVALID",
+        "REVOKED",
+        "EXPIRED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "AUTHORISED_LIMITED",
+        "EXPIRED",
+        "REVOKED"
+      ],
+      "trigger_modules": [
+        "AUTHORIZE",
+        "RESOLVE_AUTHORITY_BINDING"
+      ]
+    },
+    {
+      "allowed_transitions": [
+        "CANDIDATE --promotion_threshold_not_met--> PROVISIONAL",
+        "CANDIDATE --promotion_threshold_met--> CANONICAL",
+        "PROVISIONAL --stronger_support_added--> CANONICAL",
+        "CANONICAL --conflict_detected--> CONTESTED",
+        "CONTESTED --resolution_to_current_fact--> CANONICAL",
+        "CANONICAL --replaced_by_newer_fact--> SUPERSEDED",
+        "SUPERSEDED --retention_expiry--> RETIRED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L353[CanonicalFact.promotion_state]",
+        "Algorithm/state_machines.md::L372[CanonicalFact.promotion_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [
+        "P04"
+      ],
+      "events": [
+        "promotion_threshold_not_met",
+        "promotion_threshold_met",
+        "stronger_support_added",
+        "conflict_detected",
+        "resolution_to_current_fact",
+        "replaced_by_newer_fact",
+        "retention_expiry"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_canonical_fact_promotion_state",
+      "mode_isolation_rules": [
+        "compliance-mode objects may not inherit analysis-mode states;",
+        "only `CANONICAL` facts may drive compliance compute",
+        "`PROVISIONAL` facts may drive analysis if policy allows"
+      ],
+      "notes": [],
+      "object_family": "CanonicalFact",
+      "rationale": "`CanonicalFact.promotion_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/canonical_fact.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L353[CanonicalFact.promotion_state]",
+      "source_section_ids": [
+        "6.8"
+      ],
+      "state_field": "promotion_state",
+      "states": [
+        "CANDIDATE",
+        "PROVISIONAL",
+        "CANONICAL",
+        "CONTESTED",
+        "SUPERSEDED",
+        "RETIRED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "RETIRED"
+      ],
+      "trigger_modules": [
+        "PROMOTE_CANONICAL_FACTS"
+      ]
+    },
+    {
+      "allowed_transitions": [
+        "DRAFT --publish_to_client--> READY_FOR_CLIENT",
+        "READY_FOR_CLIENT --client_opened--> VIEWED",
+        "VIEWED --client_acknowledged--> ACKNOWLEDGED",
+        "ACKNOWLEDGED --step_up_challenge_required--> STEP_UP_REQUIRED",
+        "STEP_UP_REQUIRED --step_up_verified--> ACKNOWLEDGED",
+        "ACKNOWLEDGED --client_signed--> SIGNED",
+        "SIGNED --tenant_countersigned_or_release--> COUNTERSIGNED",
+        "READY_FOR_CLIENT --superseded--> SUPERSEDED",
+        "VIEWED --superseded--> SUPERSEDED",
+        "ACKNOWLEDGED --superseded--> SUPERSEDED",
+        "READY_FOR_CLIENT --pack_expired--> EXPIRED",
+        "VIEWED --pack_expired--> EXPIRED",
+        "ACKNOWLEDGED --pack_expired--> EXPIRED",
+        "READY_FOR_CLIENT --cancelled--> CANCELLED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L1663[ClientApprovalPack.lifecycle_state]",
+        "Algorithm/state_machines.md::L1693[ClientApprovalPack.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [
+        "P15"
+      ],
+      "events": [
+        "publish_to_client",
+        "client_opened",
+        "client_acknowledged",
+        "step_up_challenge_required",
+        "step_up_verified",
+        "client_signed",
+        "tenant_countersigned_or_release",
+        "superseded",
+        "pack_expired",
+        "cancelled"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_client_approval_pack_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "ClientApprovalPack",
+      "rationale": "`ClientApprovalPack.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/client_approval_pack.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L1663[ClientApprovalPack.lifecycle_state]",
+      "source_section_ids": [
+        "6.28"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "DRAFT",
+        "READY_FOR_CLIENT",
+        "VIEWED",
+        "ACKNOWLEDGED",
+        "STEP_UP_REQUIRED",
+        "SIGNED",
+        "COUNTERSIGNED",
+        "EXPIRED",
+        "SUPERSEDED",
+        "CANCELLED"
+      ],
+      "supersession_policy": "any material content change SHALL create a new approval pack and move the older pack to `SUPERSEDED`;",
+      "terminal_states": [
+        "CANCELLED",
+        "COUNTERSIGNED",
+        "EXPIRED",
+        "SUPERSEDED"
+      ],
+      "trigger_modules": [
+        "APPROVAL_STATE"
+      ]
+    },
+    {
+      "allowed_transitions": [
+        "OPEN --upload_started--> UPLOAD_IN_PROGRESS",
+        "UPLOAD_IN_PROGRESS --upload_abandoned--> OPEN",
+        "UPLOAD_IN_PROGRESS --upload_submitted--> SUBMITTED",
+        "SUBMITTED --review_started--> UNDER_REVIEW",
+        "UNDER_REVIEW --accepted--> ACCEPTED",
+        "UNDER_REVIEW --rejected_request_revision--> REJECTED",
+        "REJECTED --replacement_upload_started--> UPLOAD_IN_PROGRESS",
+        "OPEN --request_withdrawn--> WITHDRAWN",
+        "OPEN --due_window_expired--> EXPIRED",
+        "REJECTED --due_window_expired--> EXPIRED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L1611[ClientDocumentRequest.lifecycle_state]",
+        "Algorithm/state_machines.md::L1635[ClientDocumentRequest.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [],
+      "events": [
+        "upload_started",
+        "upload_abandoned",
+        "upload_submitted",
+        "review_started",
+        "accepted",
+        "rejected_request_revision",
+        "replacement_upload_started",
+        "request_withdrawn",
+        "due_window_expired"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_client_document_request_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "ClientDocumentRequest",
+      "rationale": "`ClientDocumentRequest.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "`UPLOAD_IN_PROGRESS --upload_submitted--> SUBMITTED` SHALL require the current upload session to have `bytes_transferred = byte_count`, `integrity_state = VERIFIED`, `request_binding_state in {ORIGINAL_CURRENT, RECONFIRMED_CURRENT}`, `upload_confidence_score >= 70`, and `recovery_posture not in {HARD_RESET_REQUIRED, SUPPORT_REQUIRED}`;",
+      "schema_path": "Algorithm/schemas/client_document_request.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L1611[ClientDocumentRequest.lifecycle_state]",
+      "source_section_ids": [
+        "6.27"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "OPEN",
+        "UPLOAD_IN_PROGRESS",
+        "SUBMITTED",
+        "UNDER_REVIEW",
+        "ACCEPTED",
+        "REJECTED",
+        "WITHDRAWN",
+        "EXPIRED"
+      ],
+      "supersession_policy": "no `ClientUploadSession` may become attached while its request binding is stale or superseded;",
+      "terminal_states": [
+        "ACCEPTED",
+        "EXPIRED",
+        "WITHDRAWN"
+      ],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "INVITED --invite_opened--> PROFILE_PENDING",
+        "PROFILE_PENDING --profile_submitted--> IDENTITY_PENDING",
+        "IDENTITY_PENDING --identity_verified_no_authority_link_required--> DOCUMENTS_PENDING",
+        "IDENTITY_PENDING --identity_verified--> AUTHORITY_LINK_PENDING",
+        "AUTHORITY_LINK_PENDING --authority_link_created--> DOCUMENTS_PENDING",
+        "AUTHORITY_LINK_PENDING --authority_link_not_required--> DOCUMENTS_PENDING",
+        "DOCUMENTS_PENDING --required_documents_submitted--> READY_FOR_REVIEW",
+        "READY_FOR_REVIEW --review_accepted--> COMPLETED",
+        "INVITED --invite_expired--> EXPIRED",
+        "PROFILE_PENDING --journey_abandoned--> ABANDONED",
+        "IDENTITY_PENDING --journey_abandoned--> ABANDONED",
+        "AUTHORITY_LINK_PENDING --journey_abandoned--> ABANDONED",
+        "DOCUMENTS_PENDING --journey_abandoned--> ABANDONED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L1565[ClientOnboardingJourney.lifecycle_state]",
+        "Algorithm/state_machines.md::L1593[ClientOnboardingJourney.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [],
+      "events": [
+        "invite_opened",
+        "profile_submitted",
+        "identity_verified_no_authority_link_required",
+        "identity_verified",
+        "authority_link_created",
+        "authority_link_not_required",
+        "required_documents_submitted",
+        "review_accepted",
+        "invite_expired",
+        "journey_abandoned"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_client_onboarding_journey_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "ClientOnboardingJourney",
+      "rationale": "`ClientOnboardingJourney.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/client_onboarding_journey.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L1565[ClientOnboardingJourney.lifecycle_state]",
+      "source_section_ids": [
+        "6.26"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "INVITED",
+        "PROFILE_PENDING",
+        "IDENTITY_PENDING",
+        "AUTHORITY_LINK_PENDING",
+        "DOCUMENTS_PENDING",
+        "READY_FOR_REVIEW",
+        "COMPLETED",
+        "EXPIRED",
+        "ABANDONED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "ABANDONED",
+        "COMPLETED",
+        "EXPIRED"
+      ],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "NOT_RUN --compute_start--> RUNNING",
+        "RUNNING --compute_success--> COMPUTED",
+        "RUNNING --data_or_policy_block--> BLOCKED",
+        "COMPUTED --newer_manifest_compute--> SUPERSEDED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L382[ComputeResult.lifecycle_state]",
+        "Algorithm/state_machines.md::L397[ComputeResult.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [],
+      "events": [
+        "compute_start",
+        "compute_success",
+        "data_or_policy_block",
+        "newer_manifest_compute"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_compute_result_lifecycle_state",
+      "mode_isolation_rules": [
+        "compliance-mode objects may not inherit analysis-mode states;",
+        "forecast artifacts SHALL never promote a compliance result in place"
+      ],
+      "notes": [],
+      "object_family": "ComputeResult",
+      "rationale": "`ComputeResult.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/compute_result.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L382[ComputeResult.lifecycle_state]",
+      "source_section_ids": [
+        "6.9"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "NOT_RUN",
+        "RUNNING",
+        "COMPUTED",
+        "BLOCKED",
+        "SUPERSEDED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "BLOCKED",
+        "SUPERSEDED"
+      ],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "OPEN --assigned--> UNDER_REVIEW",
+        "UNDER_REVIEW --sent_to_test--> TESTING",
+        "TESTING --pass--> APPROVED",
+        "TESTING --fail--> REJECTED",
+        "APPROVED --deployed--> IMPLEMENTED",
+        "IMPLEMENTED --rollback--> ROLLED_BACK"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L237[ConfigChangeRequest.lifecycle_state]",
+        "Algorithm/state_machines.md::L256[ConfigChangeRequest.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [],
+      "events": [
+        "assigned",
+        "sent_to_test",
+        "pass",
+        "fail",
+        "deployed",
+        "rollback"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_config_change_request_lifecycle_state",
+      "mode_isolation_rules": [
+        "compliance-mode objects may not inherit analysis-mode states;",
+        "every compliance-relevant config version SHALL reference one CCR lineage"
+      ],
+      "notes": [],
+      "object_family": "ConfigChangeRequest",
+      "rationale": "`ConfigChangeRequest.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/config_change_request.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L237[ConfigChangeRequest.lifecycle_state]",
+      "source_section_ids": [
+        "6.4"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "OPEN",
+        "UNDER_REVIEW",
+        "TESTING",
+        "APPROVED",
+        "REJECTED",
+        "IMPLEMENTED",
+        "ROLLED_BACK"
+      ],
+      "supersession_policy": "rollback never mutates the old approved version; it introduces a superseding state ---",
+      "terminal_states": [
+        "REJECTED",
+        "ROLLED_BACK"
+      ],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "DRAFT --submit_for_test--> CANDIDATE",
+        "CANDIDATE --verification_pass--> VERIFIED",
+        "VERIFIED --approval_granted--> APPROVED",
+        "APPROVED --replacement_approved--> DEPRECATED",
+        "APPROVED --urgent_withdrawal--> REVOKED",
+        "DEPRECATED --retired--> RETIRED",
+        "REVOKED --retired--> RETIRED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L207[ConfigVersion.lifecycle_state]",
+        "Algorithm/state_machines.md::L227[ConfigVersion.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [],
+      "events": [
+        "submit_for_test",
+        "verification_pass",
+        "approval_granted",
+        "replacement_approved",
+        "urgent_withdrawal",
+        "retired"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_config_version_lifecycle_state",
+      "mode_isolation_rules": [
+        "compliance-mode objects may not inherit analysis-mode states;",
+        "new compliance runs may freeze only `APPROVED`"
+      ],
+      "notes": [],
+      "object_family": "ConfigVersion",
+      "rationale": "`ConfigVersion.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/config_version.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L207[ConfigVersion.lifecycle_state]",
+      "source_section_ids": [
+        "6.3"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "DRAFT",
+        "CANDIDATE",
+        "VERIFIED",
+        "APPROVED",
+        "DEPRECATED",
+        "REVOKED",
+        "RETIRED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "RETIRED"
+      ],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "PLANNED --canary_start--> CANARY",
+        "PLANNED --emergency_promote_with_override--> PROMOTED",
+        "CANARY --promote--> PROMOTED",
+        "CANARY --abort--> ABORTED",
+        "PROMOTED --rollback--> ROLLED_BACK",
+        "PROMOTED --rollback_unsafe_fail_forward_required--> FAILED_FORWARD",
+        "PROMOTED --emergency_pin--> PINNED",
+        "FAILED_FORWARD --emergency_pin--> PINNED",
+        "PROMOTED --supersede--> SUPERSEDED",
+        "FAILED_FORWARD --supersede--> SUPERSEDED",
+        "PINNED --supersede--> SUPERSEDED",
+        "ABORTED --supersede--> SUPERSEDED",
+        "ROLLED_BACK --supersede--> SUPERSEDED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L1356[DeploymentRelease.rollout_state]",
+        "Algorithm/state_machines.md::L1383[DeploymentRelease.rollout_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [
+        "P05"
+      ],
+      "events": [
+        "canary_start",
+        "emergency_promote_with_override",
+        "promote",
+        "abort",
+        "rollback",
+        "rollback_unsafe_fail_forward_required",
+        "emergency_pin",
+        "supersede"
+      ],
+      "machine_class": "release_control",
+      "machine_id": "machine_deployment_release_rollout_state",
+      "mode_isolation_rules": [
+        "compliance-mode objects may not inherit analysis-mode states;",
+        "`PINNED` freezes the serving baseline or desktop-update channel at a known release while the incident is active; pinning changes rollout posture, not legal/compliance truth;"
+      ],
+      "notes": [],
+      "object_family": "DeploymentRelease",
+      "rationale": "`DeploymentRelease.rollout_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/deployment_release.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L1356[DeploymentRelease.rollout_state]",
+      "source_section_ids": [
+        "6.25D"
+      ],
+      "state_field": "rollout_state",
+      "states": [
+        "PLANNED",
+        "CANARY",
+        "PROMOTED",
+        "FAILED_FORWARD",
+        "PINNED",
+        "ABORTED",
+        "ROLLED_BACK",
+        "SUPERSEDED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "SUPERSEDED"
+      ],
+      "trigger_modules": [
+        "ARTIFACT_CONTRACT_GATE"
+      ]
+    },
+    {
+      "allowed_transitions": [
+        "NOT_ASSESSED --drift_check_complete_no_change--> NO_CHANGE",
+        "NOT_ASSESSED --drift_check_explanation_only--> EXPLANATION_ONLY",
+        "NOT_ASSESSED --drift_check_benign--> BENIGN_DRIFT",
+        "NOT_ASSESSED --drift_check_material--> MATERIAL_REVIEW",
+        "MATERIAL_REVIEW --workflow_spawned--> REVIEW_REQUIRED",
+        "REVIEW_REQUIRED --amendment_needed--> AMENDMENT_REQUIRED",
+        "EXPLANATION_ONLY --accepted--> RESOLVED",
+        "BENIGN_DRIFT --accepted--> RESOLVED",
+        "AMENDMENT_REQUIRED --case_opened--> RESOLVED",
+        "any_non_superseded_state --newer_exact_scope_drift_written--> SUPERSEDED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L1048[DriftRecord.lifecycle_state]",
+        "Algorithm/state_machines.md::L1073[DriftRecord.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [
+        "authority-originated transitions outrank tenant-originated assumptions where legal state is involved;",
+        "drift classification uses the selected highest-precedence exact-scope baseline envelope (`AUTHORITY_CORRECTED > AMENDED > FILED > OUT_OF_BAND > WORKING`), not simply the latest non-filed run"
+      ],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [
+        "P09",
+        "P10",
+        "P17"
+      ],
+      "events": [
+        "drift_check_complete_no_change",
+        "drift_check_explanation_only",
+        "drift_check_benign",
+        "drift_check_material",
+        "workflow_spawned",
+        "amendment_needed",
+        "accepted",
+        "case_opened",
+        "newer_exact_scope_drift_written"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_drift_record_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [
+        "ASSUMPTION_SELECTOR_SOURCE_any_non_superseded_state"
+      ],
+      "object_family": "DriftRecord",
+      "rationale": "`DriftRecord.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/drift_record.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L1048[DriftRecord.lifecycle_state]",
+      "source_section_ids": [
+        "6.21"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "NOT_ASSESSED",
+        "NO_CHANGE",
+        "EXPLANATION_ONLY",
+        "BENIGN_DRIFT",
+        "MATERIAL_REVIEW",
+        "REVIEW_REQUIRED",
+        "AMENDMENT_REQUIRED",
+        "RESOLVED",
+        "SUPERSEDED"
+      ],
+      "supersession_policy": "only one non-superseded drift record may remain active for one exact scope key at a time",
+      "terminal_states": [
+        "NO_CHANGE",
+        "RESOLVED",
+        "SUPERSEDED"
+      ],
+      "trigger_modules": [
+        "DETECT_DRIFT"
+      ]
+    },
+    {
+      "allowed_transitions": [
+        "NOT_BUILT --graph_start--> BUILDING",
+        "BUILDING --graph_complete--> BUILT",
+        "BUILT --retention_limitation--> LIMITED",
+        "BUILT --newer_graph--> SUPERSEDED",
+        "decisive late data, amendment, authority correction, or supersession touching a current filing-critical target SHALL move the graph to `STALE` or `REBUILD_REQUIRED`;",
+        "a graph may return to `BUILT` only after target assessments, proof bundles, and integrity summary are recalculated;",
+        "`REBUILD_REQUIRED` SHALL block straight-through filing progression."
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L543[EvidenceGraph.lifecycle_state]",
+        "Algorithm/state_machines.md::L1738[EvidenceGraph.lifecycle_state]",
+        "Algorithm/state_machines.md::L558[EvidenceGraph.lifecycle_state]",
+        "Algorithm/state_machines.md::L1748[EvidenceGraph.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [
+        "authority-originated transitions outrank tenant-originated assumptions where legal state is involved;",
+        "decisive late data, amendment, authority correction, or supersession touching a current filing-critical target SHALL move the graph to `STALE` or `REBUILD_REQUIRED`;"
+      ],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [],
+      "events": [
+        "graph_start",
+        "graph_complete",
+        "retention_limitation",
+        "newer_graph"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_evidence_graph_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [
+        "ASSUMPTION_MERGED_EVIDENCE_GRAPH_BASE_AND_FILING_PROOF_OVERLAY"
+      ],
+      "object_family": "EvidenceGraph",
+      "rationale": "`EvidenceGraph.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/evidence_graph.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L543[EvidenceGraph.lifecycle_state]",
+      "source_section_ids": [
+        "6.12",
+        "6.30"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "NOT_BUILT",
+        "BUILDING",
+        "BUILT",
+        "LIMITED",
+        "SUPERSEDED",
+        "STALE",
+        "REBUILD_REQUIRED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "LIMITED",
+        "SUPERSEDED"
+      ],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "CAPTURED --extraction_complete--> EXTRACTED",
+        "EXTRACTED --lineage_bound--> LINKED",
+        "LINKED --accepted_as_support--> SUPPORTED",
+        "SUPPORTED --challenge_raised--> CONTESTED",
+        "SUPPORTED --newer_better_evidence--> SUPERSEDED",
+        "SUPPORTED --retention_limitation--> LIMITED",
+        "LIMITED --erasure_complete--> ERASED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L323[EvidenceItem.lifecycle_state]",
+        "Algorithm/state_machines.md::L344[EvidenceItem.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [],
+      "events": [
+        "extraction_complete",
+        "lineage_bound",
+        "accepted_as_support",
+        "challenge_raised",
+        "newer_better_evidence",
+        "retention_limitation",
+        "erasure_complete"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_evidence_item_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [
+        "GAP_SCHEMA_FIELD_NOT_FOUND"
+      ],
+      "object_family": "EvidenceItem",
+      "rationale": "`EvidenceItem.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/evidence_item.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L323[EvidenceItem.lifecycle_state]",
+      "source_section_ids": [
+        "6.7"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "CAPTURED",
+        "EXTRACTED",
+        "LINKED",
+        "SUPPORTED",
+        "CONTESTED",
+        "SUPERSEDED",
+        "LIMITED",
+        "ERASED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "CONTESTED",
+        "ERASED",
+        "SUPERSEDED"
+      ],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "LIVE --epoch_advanced--> REBASED",
+        "LIVE --history_compacted--> REBASED",
+        "LIVE --shell_stability_changed--> REBASED",
+        "LIVE --route_context_changed--> REBASED",
+        "LIVE --session_revoked--> REVOKED",
+        "LIVE --session_binding_changed--> REVOKED",
+        "LIVE --access_binding_changed--> REVOKED",
+        "LIVE --masking_posture_changed--> REVOKED",
+        "LIVE --schema_incompatible--> REVOKED",
+        "LIVE --client_closed--> CLOSED",
+        "LIVE --ttl_elapsed--> EXPIRED",
+        "LIVE --frame_epoch_advanced--> REBASED",
+        "LIVE --session_closed--> CLOSED",
+        "LIVE --session_revoked_or_binding_invalidated--> REVOKED",
+        "REBASED --snapshot_reissued--> LIVE",
+        "REBASED --session_closed--> CLOSED",
+        "REBASED --session_revoked_or_binding_invalidated--> REVOKED",
+        "REBASED --ttl_elapsed--> EXPIRED",
+        "CLOSED --session_revoked_or_binding_invalidated--> REVOKED",
+        "CLOSED --ttl_elapsed--> EXPIRED",
+        "REVOKED --ttl_elapsed--> EXPIRED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L164[ExperienceCursor.cursor_state]",
+        "Algorithm/state_machines.md::L1307[ExperienceCursor.cursor_state]",
+        "Algorithm/state_machines.md::L186[ExperienceCursor.cursor_state]",
+        "Algorithm/state_machines.md::L1329[ExperienceCursor.cursor_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [
+        "machine_workspace_cursor_cursor_state"
+      ],
+      "engine_phase_bindings": [],
+      "events": [
+        "epoch_advanced",
+        "history_compacted",
+        "shell_stability_changed",
+        "route_context_changed",
+        "session_revoked",
+        "session_binding_changed",
+        "access_binding_changed",
+        "masking_posture_changed",
+        "schema_incompatible",
+        "client_closed",
+        "ttl_elapsed",
+        "frame_epoch_advanced",
+        "session_closed",
+        "session_revoked_or_binding_invalidated",
+        "snapshot_reissued"
+      ],
+      "machine_class": "cursor",
+      "machine_id": "machine_experience_cursor_cursor_state",
+      "mode_isolation_rules": [],
+      "notes": [
+        "ASSUMPTION_MERGED_SHARED_CURSOR_AND_OPERATIONAL_CURSOR_RULES",
+        "CONFLICT_REBASED_TERMINALITY_OVERLAY_REQUIRES_IMPLEMENTATION_DECISION",
+        "CONFLICT_TERMINAL_STATE_HAS_EXPLICIT_OUTGOING_EDGE"
+      ],
+      "object_family": "ExperienceCursor",
+      "rationale": "`ExperienceCursor.cursor_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "`REBASED`, `CLOSED`, `REVOKED`, and `EXPIRED` are terminal posture records for that persisted cursor; recovery allocates or returns a successor cursor rather than reopening the old one ---",
+      "schema_path": "Algorithm/schemas/experience_cursor.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L164[ExperienceCursor.cursor_state]",
+      "source_section_ids": [
+        "6.2B",
+        "6.25B"
+      ],
+      "state_field": "cursor_state",
+      "states": [
+        "LIVE",
+        "REBASED",
+        "CLOSED",
+        "REVOKED",
+        "EXPIRED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "CLOSED",
+        "EXPIRED",
+        "REBASED",
+        "REVOKED"
+      ],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "NOT_STARTED --first_manifest_created--> PREPARING",
+        "PREPARING --trust_ready_for_review--> READY_REVIEW",
+        "READY_REVIEW --approval_complete--> READY_TO_SUBMIT",
+        "READY_TO_SUBMIT --trust_invalidated--> READY_REVIEW",
+        "READY_TO_SUBMIT --submission_started--> SUBMITTED_PENDING",
+        "SUBMITTED_PENDING --submission_confirmed--> FILED_CONFIRMED",
+        "SUBMITTED_PENDING --submission_unknown--> FILED_UNKNOWN",
+        "SUBMITTED_PENDING --submission_rejected--> REJECTED",
+        "FILED_UNKNOWN --late_authority_confirmation--> FILED_CONFIRMED",
+        "FILED_UNKNOWN --late_authority_rejection--> REJECTED",
+        "FILED_CONFIRMED --drift_or_authority_context_opens_amendment--> AMENDMENT_ELIGIBLE",
+        "AMENDMENT_ELIGIBLE --amendment_begin--> AMENDMENT_IN_PROGRESS",
+        "AMENDMENT_IN_PROGRESS --amendment_confirmed--> AMENDED_CONFIRMED",
+        "AMENDED_CONFIRMED --closure_policy_met--> CLOSED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L995[FilingCase.lifecycle_state]",
+        "Algorithm/state_machines.md::L1027[FilingCase.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [
+        "authority-originated transitions outrank tenant-originated assumptions where legal state is involved;",
+        "`FILED_UNKNOWN` is not equivalent to filed and SHALL remain review-only until later authority-grounded evidence resolves it to `FILED_CONFIRMED` or `REJECTED`",
+        "when `trust_currency_state = RECALC_REQUIRED`, the case SHALL retain both `trust_invalidation_reason_codes[]` and `trust_invalidation_dependency_refs[]` so the decisive late-data, authority, override, or supersession change is auditable without replay"
+      ],
+      "cross_machine_dependencies": [
+        "machine_submission_record_lifecycle_state"
+      ],
+      "engine_phase_bindings": [
+        "P09",
+        "P11",
+        "P14",
+        "P15",
+        "P16"
+      ],
+      "events": [
+        "first_manifest_created",
+        "trust_ready_for_review",
+        "approval_complete",
+        "trust_invalidated",
+        "submission_started",
+        "submission_confirmed",
+        "submission_unknown",
+        "submission_rejected",
+        "late_authority_confirmation",
+        "late_authority_rejection",
+        "drift_or_authority_context_opens_amendment",
+        "amendment_begin",
+        "amendment_confirmed",
+        "closure_policy_met"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_filing_case_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "FilingCase",
+      "rationale": "`FilingCase.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/filing_case.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L995[FilingCase.lifecycle_state]",
+      "source_section_ids": [
+        "6.20"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "NOT_STARTED",
+        "PREPARING",
+        "READY_REVIEW",
+        "READY_TO_SUBMIT",
+        "SUBMITTED_PENDING",
+        "FILED_CONFIRMED",
+        "FILED_UNKNOWN",
+        "REJECTED",
+        "AMENDMENT_ELIGIBLE",
+        "AMENDMENT_IN_PROGRESS",
+        "AMENDED_CONFIRMED",
+        "CLOSED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "CLOSED",
+        "REJECTED"
+      ],
+      "trigger_modules": [
+        "EXECUTE_AUTHORITY_CALCULATION_FLOW",
+        "UPSERT_FILING_CASE"
+      ]
+    },
+    {
+      "allowed_transitions": [
+        "DRAFT --packet_build_complete--> PREPARED",
+        "PREPARED --approval_complete--> APPROVED_TO_SUBMIT",
+        "APPROVED_TO_SUBMIT --submit_begin--> SUBMITTED",
+        "PREPARED --packet_invalidated--> VOID",
+        "PREPARED --rebuilt_under_new_manifest--> SUPERSEDED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L816[FilingPacket.lifecycle_state]",
+        "Algorithm/state_machines.md::L833[FilingPacket.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [
+        "authority-originated transitions outrank tenant-originated assumptions where legal state is involved;",
+        "persisted `PREPARED` packets SHALL already carry explicit packet-phase `approval_state`, `declared_basis_ack_state`, ordered `notice_step_refs[]`, and sealed calculation lineage when the selected filing path depends on authority calculation",
+        "the `submit_begin` transition SHALL be persisted before, or atomically with, authority transmit"
+      ],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [
+        "P09",
+        "P15",
+        "P16"
+      ],
+      "events": [
+        "packet_build_complete",
+        "approval_complete",
+        "submit_begin",
+        "packet_invalidated",
+        "rebuilt_under_new_manifest"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_filing_packet_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "FilingPacket",
+      "rationale": "`FilingPacket.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/filing_packet.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L816[FilingPacket.lifecycle_state]",
+      "source_section_ids": [
+        "6.18"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "DRAFT",
+        "PREPARED",
+        "APPROVED_TO_SUBMIT",
+        "SUBMITTED",
+        "VOID",
+        "SUPERSEDED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "SUBMITTED",
+        "SUPERSEDED",
+        "VOID"
+      ],
+      "trigger_modules": [
+        "APPROVE_FILING_PACKET",
+        "BUILD_FILING_PACKET",
+        "DECLARED_BASIS_ACK_STATE",
+        "FILING_GATE",
+        "TRANSITION_FILING_PACKET"
+      ]
+    },
+    {
+      "allowed_transitions": [
+        "CALM --notice_detected--> NOTICE",
+        "NOTICE --review_required--> REVIEW",
+        "NOTICE --blocking_issue_detected--> BLOCKED",
+        "REVIEW --blocking_issue_detected--> BLOCKED",
+        "WAITING --authority_resolves_or_worker_finishes--> CALM",
+        "CALM --visibility_limit_changes_actionability--> LIMITED",
+        "NOTICE --visibility_limit_changes_actionability--> LIMITED",
+        "REVIEW --visibility_limit_changes_actionability--> LIMITED",
+        "WAITING --visibility_limit_changes_actionability--> LIMITED",
+        "LIMITED --limit_cleared--> prior_non_limited_attention_state"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L1202[LowNoiseExperienceFrame.attention_state]",
+        "Algorithm/state_machines.md::L1237[LowNoiseExperienceFrame.attention_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [
+        "machine_low_noise_experience_frame_presentation_state",
+        "machine_low_noise_experience_frame_recovery_posture"
+      ],
+      "engine_phase_bindings": [
+        "P13"
+      ],
+      "events": [
+        "notice_detected",
+        "review_required",
+        "blocking_issue_detected",
+        "authority_resolves_or_worker_finishes",
+        "visibility_limit_changes_actionability",
+        "limit_cleared"
+      ],
+      "machine_class": "classification_axis",
+      "machine_id": "machine_low_noise_experience_frame_attention_state",
+      "mode_isolation_rules": [],
+      "notes": [
+        "ASSUMPTION_SELECTOR_TARGET_prior_non_limited_attention_state"
+      ],
+      "object_family": "LowNoiseExperienceFrame",
+      "rationale": "`LowNoiseExperienceFrame.attention_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "these posture states belong to the canonical `LowNoiseExperienceFrame` family and SHALL remain aligned with the same `dominant_question`, `settlement_state`, and `recovery_posture` vocabulary used by route-stable browser and native shells",
+      "schema_path": "Algorithm/schemas/low_noise_experience_frame.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L1202[LowNoiseExperienceFrame.attention_state]",
+      "source_section_ids": [
+        "6.24"
+      ],
+      "state_field": "attention_state",
+      "states": [
+        "CALM",
+        "NOTICE",
+        "REVIEW",
+        "BLOCKED",
+        "WAITING",
+        "LIMITED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [],
+      "trigger_modules": [
+        "BUILD_LIVE_EXPERIENCE_FRAME"
+      ]
+    },
+    {
+      "allowed_transitions": [
+        "DEFAULT --user_opens_detail--> FOCUSED",
+        "FOCUSED --user_enters_compare--> COMPARE",
+        "FOCUSED --user_enters_audit--> AUDIT",
+        "COMPARE --user_exits_compare--> FOCUSED",
+        "AUDIT --user_exits_audit--> FOCUSED",
+        "FOCUSED --user_closes_detail--> DEFAULT"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L1211[LowNoiseExperienceFrame.presentation_state]",
+        "Algorithm/state_machines.md::L1237[LowNoiseExperienceFrame.presentation_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [
+        "machine_low_noise_experience_frame_attention_state",
+        "machine_low_noise_experience_frame_recovery_posture"
+      ],
+      "engine_phase_bindings": [],
+      "events": [
+        "user_opens_detail",
+        "user_enters_compare",
+        "user_enters_audit",
+        "user_exits_compare",
+        "user_exits_audit",
+        "user_closes_detail"
+      ],
+      "machine_class": "classification_axis",
+      "machine_id": "machine_low_noise_experience_frame_presentation_state",
+      "mode_isolation_rules": [],
+      "notes": [
+        "GAP_SCHEMA_FIELD_NOT_FOUND"
+      ],
+      "object_family": "LowNoiseExperienceFrame",
+      "rationale": "`LowNoiseExperienceFrame.presentation_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "these posture states belong to the canonical `LowNoiseExperienceFrame` family and SHALL remain aligned with the same `dominant_question`, `settlement_state`, and `recovery_posture` vocabulary used by route-stable browser and native shells",
+      "schema_path": "Algorithm/schemas/low_noise_experience_frame.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L1211[LowNoiseExperienceFrame.presentation_state]",
+      "source_section_ids": [
+        "6.24"
+      ],
+      "state_field": "presentation_state",
+      "states": [
+        "DEFAULT",
+        "FOCUSED",
+        "COMPARE",
+        "AUDIT"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L1247[LowNoiseExperienceFrame.recovery_posture]",
+        "Algorithm/state_machines.md::L1256[LowNoiseExperienceFrame.recovery_posture]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [
+        "machine_low_noise_experience_frame_attention_state",
+        "machine_low_noise_experience_frame_presentation_state"
+      ],
+      "engine_phase_bindings": [],
+      "events": [],
+      "machine_class": "classification_axis",
+      "machine_id": "machine_low_noise_experience_frame_recovery_posture",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "LowNoiseExperienceFrame",
+      "rationale": "`LowNoiseExperienceFrame.recovery_posture` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "`recovery_posture` decorates the mounted shell; it SHALL NOT silently remount the same routed object into a different shell grammar while the anchored object still resolves",
+      "schema_path": "Algorithm/schemas/low_noise_experience_frame.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L1247[LowNoiseExperienceFrame.recovery_posture]",
+      "source_section_ids": [
+        "6.24A"
+      ],
+      "state_field": "recovery_posture",
+      "states": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "ALLOCATED --selection_started--> SELECTING",
+        "ALLOCATED --global_block--> BLOCKED",
+        "ALLOCATED --system_fault--> FAILED",
+        "SELECTING --selection_completed--> PLANNED",
+        "SELECTING --global_block--> BLOCKED",
+        "SELECTING --system_fault--> FAILED",
+        "PLANNED --batch_started--> RUNNING",
+        "PLANNED --global_block--> BLOCKED",
+        "PLANNED --system_fault--> FAILED",
+        "RUNNING --quiescence_reached--> QUIESCING",
+        "RUNNING --global_block--> BLOCKED",
+        "RUNNING --system_fault--> FAILED",
+        "RUNNING --reclaimed_by_successor--> ABANDONED",
+        "QUIESCING --batch_completed_clean--> COMPLETED",
+        "QUIESCING --batch_completed_with_failures--> COMPLETED_WITH_FAILURES",
+        "QUIESCING --system_fault--> FAILED",
+        "QUIESCING --reclaimed_by_successor--> ABANDONED",
+        "BLOCKED --reclaimed_by_successor--> ABANDONED",
+        "FAILED --reclaimed_by_successor--> ABANDONED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L105[NightlyBatchRun.lifecycle_state]",
+        "Algorithm/state_machines.md::L140[NightlyBatchRun.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [],
+      "events": [
+        "selection_started",
+        "global_block",
+        "system_fault",
+        "selection_completed",
+        "batch_started",
+        "quiescence_reached",
+        "reclaimed_by_successor",
+        "batch_completed_clean",
+        "batch_completed_with_failures"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_nightly_batch_run_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "NightlyBatchRun",
+      "rationale": "`NightlyBatchRun.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "`ABANDONED` SHALL require explicit successor-batch linkage so stale-batch recovery never looks like a silent disappearance. ---",
+      "schema_path": "Algorithm/schemas/nightly_batch_run.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L105[NightlyBatchRun.lifecycle_state]",
+      "source_section_ids": [
+        "6.2A"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "ALLOCATED",
+        "SELECTING",
+        "PLANNED",
+        "RUNNING",
+        "QUIESCING",
+        "COMPLETED",
+        "COMPLETED_WITH_FAILURES",
+        "BLOCKED",
+        "FAILED",
+        "ABANDONED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "ABANDONED",
+        "COMPLETED",
+        "COMPLETED_WITH_FAILURES"
+      ],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "NOT_YET_OPEN --window_open--> OPEN",
+        "OPEN --deadline_approaching--> DUE_SOON",
+        "OPEN --all_internal_gates_pass--> READY_TO_FILE",
+        "READY_TO_FILE --submission_started--> SUBMITTED_PENDING",
+        "SUBMITTED_PENDING --authority_confirms--> MET_CONFIRMED",
+        "OPEN --deadline_passed_without_met--> LATE_UNMET",
+        "DUE_SOON --deadline_passed_without_met--> LATE_UNMET"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L779[ObligationMirror.lifecycle_state]",
+        "Algorithm/state_machines.md::L801[ObligationMirror.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [
+        "authority-originated transitions outrank tenant-originated assumptions where legal state is involved;",
+        "legal \"met\" status follows authority data where available"
+      ],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [
+        "P16"
+      ],
+      "events": [
+        "window_open",
+        "deadline_approaching",
+        "all_internal_gates_pass",
+        "submission_started",
+        "authority_confirms",
+        "deadline_passed_without_met"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_obligation_mirror_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "ObligationMirror",
+      "rationale": "`ObligationMirror.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/obligation_mirror.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L779[ObligationMirror.lifecycle_state]",
+      "source_section_ids": [
+        "6.17"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "NOT_YET_OPEN",
+        "OPEN",
+        "DUE_SOON",
+        "READY_TO_FILE",
+        "SUBMITTED_PENDING",
+        "MET_CONFIRMED",
+        "LATE_UNMET",
+        "NO_LONGER_RELEVANT"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "LATE_UNMET",
+        "MET_CONFIRMED",
+        "NO_LONGER_RELEVANT"
+      ],
+      "trigger_modules": [
+        "RECONCILE_AUTHORITY_STATE",
+        "UPSERT_OBLIGATION_MIRROR"
+      ]
+    },
+    {
+      "allowed_transitions": [
+        "DRAFT --submit--> PENDING_APPROVAL",
+        "PENDING_APPROVAL --approved_now--> APPROVED_ACTIVE",
+        "PENDING_APPROVAL --approved_future--> APPROVED_FUTURE",
+        "PENDING_APPROVAL --rejected--> REJECTED",
+        "APPROVED_FUTURE --effective_date_reached--> APPROVED_ACTIVE",
+        "APPROVED_ACTIVE --expiry_reached--> EXPIRED",
+        "APPROVED_ACTIVE --manual_revoke--> REVOKED",
+        "APPROVED_ACTIVE --new_override_replaces--> SUPERSEDED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L717[Override.lifecycle_state]",
+        "Algorithm/state_machines.md::L739[Override.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [
+        "authority-originated transitions outrank tenant-originated assumptions where legal state is involved;",
+        "overrides may change engine posture, never authority acknowledgement ---"
+      ],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [],
+      "events": [
+        "submit",
+        "approved_now",
+        "approved_future",
+        "rejected",
+        "effective_date_reached",
+        "expiry_reached",
+        "manual_revoke",
+        "new_override_replaces"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_override_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [
+        "GAP_SCHEMA_NOT_FOUND"
+      ],
+      "object_family": "Override",
+      "rationale": "`Override.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": null,
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L717[Override.lifecycle_state]",
+      "source_section_ids": [
+        "6.15"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "DRAFT",
+        "PENDING_APPROVAL",
+        "APPROVED_ACTIVE",
+        "APPROVED_FUTURE",
+        "REJECTED",
+        "EXPIRED",
+        "REVOKED",
+        "SUPERSEDED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "EXPIRED",
+        "REJECTED",
+        "REVOKED",
+        "SUPERSEDED"
+      ],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "NOT_EVALUATED --parity_complete--> EVALUATED",
+        "EVALUATED --newer_parity_run--> SUPERSEDED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L406[ParityResult.lifecycle_state]",
+        "Algorithm/state_machines.md::L425[ParityResult.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [
+        "machine_trust_summary_lifecycle_state",
+        "machine_parity_result_parity_classification"
+      ],
+      "engine_phase_bindings": [
+        "P09"
+      ],
+      "events": [
+        "parity_complete",
+        "newer_parity_run"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_parity_result_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "ParityResult",
+      "rationale": "`ParityResult.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/parity_result.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L406[ParityResult.lifecycle_state]",
+      "source_section_ids": [
+        "6.10"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "NOT_EVALUATED",
+        "EVALUATED",
+        "SUPERSEDED"
+      ],
+      "supersession_policy": "classification must never be overwritten silently; a new parity result supersedes the old one ---",
+      "terminal_states": [
+        "SUPERSEDED"
+      ],
+      "trigger_modules": [
+        "EVALUATE_PARITY",
+        "PARITY_GATE"
+      ]
+    },
+    {
+      "allowed_transitions": [],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L417[ParityResult.parity_classification]",
+        "Algorithm/state_machines.md::L425[ParityResult.parity_classification]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [
+        "machine_parity_result_lifecycle_state"
+      ],
+      "engine_phase_bindings": [],
+      "events": [],
+      "machine_class": "classification_axis",
+      "machine_id": "machine_parity_result_parity_classification",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "ParityResult",
+      "rationale": "`ParityResult.parity_classification` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/parity_result.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L417[ParityResult.parity_classification]",
+      "source_section_ids": [
+        "6.10"
+      ],
+      "state_field": "parity_classification",
+      "states": [
+        "MATCH",
+        "MINOR_DIFFERENCE",
+        "MATERIAL_DIFFERENCE",
+        "BLOCKING_DIFFERENCE",
+        "NOT_COMPARABLE"
+      ],
+      "supersession_policy": "classification must never be overwritten silently; a new parity result supersedes the old one ---",
+      "terminal_states": [],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "a decisive contradiction that remains unresolved SHALL move the bundle to `LIMITED` or `STALE` according to policy;",
+        "any superseding graph version SHALL move the older controlling bundle to `SUPERSEDED`;",
+        "a stale or superseded bundle SHALL remain queryable for historical replay but SHALL NOT remain controlling filing proof;",
+        "stale proof and target posture SHALL retain `staleness_dependency_refs[]` so replay uses the original late-data lineage instead of re-running live late-data scans."
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L1754[ProofBundle.lifecycle_state]",
+        "Algorithm/state_machines.md::L1761[ProofBundle.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [
+        "P08"
+      ],
+      "events": [],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_proof_bundle_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [
+        "GAP_NO_EXPLICIT_EVENT_EDGES_IN_SOURCE_SECTION"
+      ],
+      "object_family": "ProofBundle",
+      "rationale": "`ProofBundle.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/proof_bundle.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L1754[ProofBundle.lifecycle_state]",
+      "source_section_ids": [
+        "6.30"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "GENERATED",
+        "LIMITED",
+        "STALE",
+        "SUPERSEDED"
+      ],
+      "supersession_policy": "any superseding graph version SHALL move the older controlling bundle to `SUPERSEDED`;",
+      "terminal_states": [
+        "LIMITED",
+        "STALE",
+        "SUPERSEDED"
+      ],
+      "trigger_modules": [
+        "RETENTION_EVIDENCE_GATE"
+      ]
+    },
+    {
+      "allowed_transitions": [
+        "REQUESTED --snapshot_complete--> CREATED",
+        "CREATED --restore_drill_passed--> VERIFIED",
+        "CREATED --restore_drill_failed--> QUARANTINED",
+        "VERIFIED --privacy_reconciliation_failed--> QUARANTINED",
+        "QUARANTINED --remediation_and_redrill_passed--> VERIFIED",
+        "CREATED --retention_elapsed--> EXPIRED",
+        "VERIFIED --retention_elapsed--> EXPIRED",
+        "QUARANTINED --retention_elapsed--> EXPIRED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L1458[RecoveryCheckpoint.checkpoint_state]",
+        "Algorithm/state_machines.md::L1477[RecoveryCheckpoint.checkpoint_state]"
+      ],
+      "authority_precedence_rules": [
+        "authority-originated transitions outrank tenant-originated assumptions where legal state is involved;",
+        "`RecoveryCheckpoint` SHALL retain one `recovery_governance_contract{...}`, one `checkpoint_inventory_ref`, one bound `privacy_reconciliation_contract{...}`, one typed `reopen_readiness_state`, and explicit audit, queue-rebuild, authority-rebuild, and authority-binding-revalidation booleans so restore posture is machine-bound;",
+        "`CREATED` may retain partial restore evidence only while `reopen_readiness_state` names the exact blocking gate, including compensating re-erasure, limitation reconciliation, legal-hold review, proof-preservation review, and authority-ambiguity review; it SHALL NOT silently imply that reopen is safe;",
+        "`VERIFIED` requires bound restore evidence, privacy reconciliation, audit continuity, durable queue rebuild verification, authority rebuild, authority binding revalidation, and verified replay-safe plus enquiry-safe limitation posture before reopen is lawful;"
+      ],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [],
+      "events": [
+        "snapshot_complete",
+        "restore_drill_passed",
+        "restore_drill_failed",
+        "privacy_reconciliation_failed",
+        "remediation_and_redrill_passed",
+        "retention_elapsed"
+      ],
+      "machine_class": "release_control",
+      "machine_id": "machine_recovery_checkpoint_checkpoint_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "RecoveryCheckpoint",
+      "rationale": "`RecoveryCheckpoint.checkpoint_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "`RecoveryCheckpoint` SHALL retain one `recovery_governance_contract{...}`, one `checkpoint_inventory_ref`, one bound `privacy_reconciliation_contract{...}`, one typed `reopen_readiness_state`, and explicit audit, queue-rebuild, authority-rebuild, and authority-binding-revalidation booleans so restore posture is machine-bound;",
+      "schema_path": "Algorithm/schemas/recovery_checkpoint.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L1458[RecoveryCheckpoint.checkpoint_state]",
+      "source_section_ids": [
+        "6.25F"
+      ],
+      "state_field": "checkpoint_state",
+      "states": [
+        "REQUESTED",
+        "CREATED",
+        "VERIFIED",
+        "QUARANTINED",
+        "EXPIRED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "EXPIRED"
+      ],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "PENDING --blocking_evidence_detected--> BLOCKED",
+        "BLOCKED --blocking_evidence_reopened--> PENDING",
+        "PENDING --approval_granted--> APPROVED",
+        "BLOCKED --approval_granted--> APPROVED",
+        "BLOCKED --supersede--> SUPERSEDED",
+        "APPROVED --supersede--> SUPERSEDED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L1500[ReleaseVerificationManifest.decision_state]",
+        "Algorithm/state_machines.md::L1516[ReleaseVerificationManifest.decision_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [
+        "P05"
+      ],
+      "events": [
+        "blocking_evidence_detected",
+        "blocking_evidence_reopened",
+        "approval_granted",
+        "supersede"
+      ],
+      "machine_class": "release_control",
+      "machine_id": "machine_release_verification_manifest_decision_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "ReleaseVerificationManifest",
+      "rationale": "`ReleaseVerificationManifest.decision_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "`APPROVED` or `SUPERSEDED` manifests SHALL NOT reopen in place; later promotion or review work SHALL allocate a successor manifest and link supersession explicitly;",
+      "schema_path": "Algorithm/schemas/release_verification_manifest.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L1500[ReleaseVerificationManifest.decision_state]",
+      "source_section_ids": [
+        "6.25G"
+      ],
+      "state_field": "decision_state",
+      "states": [
+        "PENDING",
+        "BLOCKED",
+        "APPROVED",
+        "SUPERSEDED"
+      ],
+      "supersession_policy": "`APPROVED` or `SUPERSEDED` manifests SHALL NOT reopen in place; later promotion or review work SHALL allocate a successor manifest and link supersession explicitly;",
+      "terminal_states": [
+        "SUPERSEDED"
+      ],
+      "trigger_modules": [
+        "ARTIFACT_CONTRACT_GATE"
+      ]
+    },
+    {
+      "allowed_transitions": [],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L1338[RouteStabilityContract.publication_generation]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [],
+      "events": [],
+      "machine_class": "compound_axis",
+      "machine_id": "machine_route_stability_contract_publication_generation",
+      "mode_isolation_rules": [],
+      "notes": [
+        "GAP_NO_FINITE_ENUMERATED_STATES_IN_SOURCE_SECTION"
+      ],
+      "object_family": "RouteStabilityContract",
+      "rationale": "`RouteStabilityContract.publication_generation` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "`publication_generation` SHALL advance monotonically whenever the route-visible truth, mutation safety, or recovery posture changes materially for the mounted route;",
+      "schema_path": "Algorithm/schemas/route_stability_contract.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L1338[RouteStabilityContract.publication_generation]",
+      "source_section_ids": [
+        "6.25C"
+      ],
+      "state_field": "publication_generation",
+      "states": [],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "ALLOCATED --freeze_success--> FROZEN",
+        "ALLOCATED --freeze_blocked--> BLOCKED",
+        "ALLOCATED --system_fault--> BLOCKED",
+        "FROZEN --seal_success--> SEALED",
+        "FROZEN --seal_blocked--> BLOCKED",
+        "FROZEN --system_fault--> BLOCKED",
+        "SEALED --run_started--> IN_PROGRESS",
+        "SEALED --system_fault--> BLOCKED",
+        "IN_PROGRESS --run_completed--> COMPLETED",
+        "IN_PROGRESS --gate_block--> BLOCKED",
+        "IN_PROGRESS --system_fault--> FAILED",
+        "COMPLETED --superseded_by_new_manifest--> SUPERSEDED",
+        "COMPLETED --replay_designation--> REPLAY_ONLY",
+        "SUPERSEDED --retention_expiry--> RETIRED",
+        "REPLAY_ONLY --retention_expiry--> RETIRED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L53[RunManifest.lifecycle_state]",
+        "Algorithm/state_machines.md::L84[RunManifest.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P05",
+        "P06",
+        "P07",
+        "P08",
+        "P09",
+        "P10",
+        "P11",
+        "P12",
+        "P13",
+        "P14",
+        "P15",
+        "P16",
+        "P17",
+        "P18"
+      ],
+      "events": [
+        "freeze_success",
+        "freeze_blocked",
+        "system_fault",
+        "seal_success",
+        "seal_blocked",
+        "run_started",
+        "run_completed",
+        "gate_block",
+        "superseded_by_new_manifest",
+        "replay_designation",
+        "retention_expiry"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_run_manifest_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "RunManifest",
+      "rationale": "`RunManifest.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "a recovery child for an already-started attempt SHALL NOT be allocated while an active start lease still exists for the same attempt lineage",
+      "schema_path": "Algorithm/schemas/run_manifest.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L53[RunManifest.lifecycle_state]",
+      "source_section_ids": [
+        "6.2"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "ALLOCATED",
+        "FROZEN",
+        "SEALED",
+        "IN_PROGRESS",
+        "COMPLETED",
+        "BLOCKED",
+        "FAILED",
+        "SUPERSEDED",
+        "REPLAY_ONLY",
+        "RETIRED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "BLOCKED",
+        "FAILED",
+        "RETIRED"
+      ],
+      "trigger_modules": [
+        "APPEND_MANIFEST_GATES",
+        "BEGIN_CHILD_MANIFEST",
+        "BEGIN_MANIFEST",
+        "CLAIM_MANIFEST_START",
+        "COMPUTE_EXECUTION_BASIS_HASH",
+        "DECIDE_MANIFEST_REUSE_STRATEGY",
+        "FINALIZE_RUN_FAILURE",
+        "FINALIZE_TERMINAL_OUTCOME",
+        "LOAD_AND_VALIDATE_PRIOR_MANIFEST_CONTEXT",
+        "LOAD_FROZEN_POST_SEAL_BASIS",
+        "LOAD_SEALED_RUN_CONTEXT",
+        "MANIFEST_GATE",
+        "RECORD_EVENT",
+        "SEAL_MANIFEST",
+        "TRANSITION_MANIFEST",
+        "UPDATE_MANIFEST_OUTPUTS",
+        "UPDATE_MANIFEST_PRESEAL_CONTEXT",
+        "VALIDATE_EFFECTIVE_SCOPE_BINDING",
+        "VALIDATE_REUSE_SEALED_CONTEXT"
+      ]
+    },
+    {
+      "allowed_transitions": [
+        "PLANNED --start_apply--> APPLYING",
+        "APPLYING --apply_complete--> APPLIED",
+        "APPLIED --start_verify--> VERIFYING",
+        "VERIFYING --verify_success--> VERIFIED",
+        "VERIFIED --start_contract--> CONTRACTING",
+        "CONTRACTING --contract_complete--> CONTRACTED",
+        "APPLYING --halt--> HALTED",
+        "VERIFYING --halt--> HALTED",
+        "CONTRACTING --halt--> HALTED",
+        "APPLYING --fail--> FAILED",
+        "VERIFYING --fail--> FAILED",
+        "CONTRACTING --fail--> FAILED",
+        "HALTED --resume_apply--> APPLYING",
+        "HALTED --resume_verify--> VERIFYING",
+        "HALTED --resume_contract--> CONTRACTING",
+        "VERIFIED --supersede--> SUPERSEDED",
+        "CONTRACTED --supersede--> SUPERSEDED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L1402[SchemaMigrationLedger.phase_state]",
+        "Algorithm/state_machines.md::L1435[SchemaMigrationLedger.phase_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [
+        "P04"
+      ],
+      "events": [
+        "start_apply",
+        "apply_complete",
+        "start_verify",
+        "verify_success",
+        "start_contract",
+        "contract_complete",
+        "halt",
+        "fail",
+        "resume_apply",
+        "resume_verify",
+        "resume_contract",
+        "supersede"
+      ],
+      "machine_class": "release_control",
+      "machine_id": "machine_schema_migration_ledger_phase_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "SchemaMigrationLedger",
+      "rationale": "`SchemaMigrationLedger.phase_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "destructive contract phases SHALL NOT begin before the migration is `VERIFIED`, the compatibility window is closed, and no replay, recovery, or in-flight manifest still depends on the older shape;",
+      "schema_path": "Algorithm/schemas/schema_migration_ledger.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L1402[SchemaMigrationLedger.phase_state]",
+      "source_section_ids": [
+        "6.25E"
+      ],
+      "state_field": "phase_state",
+      "states": [
+        "PLANNED",
+        "APPLYING",
+        "APPLIED",
+        "VERIFYING",
+        "VERIFIED",
+        "CONTRACTING",
+        "CONTRACTED",
+        "HALTED",
+        "FAILED",
+        "SUPERSEDED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "FAILED",
+        "SUPERSEDED"
+      ],
+      "trigger_modules": [
+        "VALIDATE_ARTIFACT"
+      ]
+    },
+    {
+      "allowed_transitions": [
+        "ISSUED --attestation_passed--> ATTESTED",
+        "ISSUED --revoke--> REVOKED",
+        "ATTESTED --activate--> ACTIVE",
+        "ATTESTED --revoke--> REVOKED",
+        "ACTIVE --begin_rotation--> ROTATING",
+        "ROTATING --cutover_complete--> RETIRED",
+        "ROTATING --cutover_aborted--> ACTIVE",
+        "ACTIVE --revoke--> REVOKED",
+        "ROTATING --revoke--> REVOKED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L1532[SecretVersion.rotation_state]",
+        "Algorithm/state_machines.md::L1553[SecretVersion.rotation_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [],
+      "events": [
+        "attestation_passed",
+        "revoke",
+        "activate",
+        "begin_rotation",
+        "cutover_complete",
+        "cutover_aborted"
+      ],
+      "machine_class": "release_control",
+      "machine_id": "machine_secret_version_rotation_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "SecretVersion",
+      "rationale": "`SecretVersion.rotation_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/secret_version.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L1532[SecretVersion.rotation_state]",
+      "source_section_ids": [
+        "6.25H"
+      ],
+      "state_field": "rotation_state",
+      "states": [
+        "ISSUED",
+        "ATTESTED",
+        "ACTIVE",
+        "ROTATING",
+        "RETIRED",
+        "REVOKED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "RETIRED",
+        "REVOKED"
+      ],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "BUILT --validation_pass--> VALID",
+        "BUILT --validation_warn--> WARNED",
+        "BUILT --validation_fail--> INVALID",
+        "VALID --newer_snapshot_for_same_scope--> SUPERSEDED",
+        "WARNED --newer_snapshot_for_same_scope--> SUPERSEDED",
+        "VALID --retention_loss_detected--> RETENTION_LIMITED",
+        "WARNED --retention_loss_detected--> RETENTION_LIMITED",
+        "RETENTION_LIMITED --erasure_complete--> ERASED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L291[Snapshot.lifecycle_state]",
+        "Algorithm/state_machines.md::L312[Snapshot.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [
+        "P04",
+        "P05"
+      ],
+      "events": [
+        "validation_pass",
+        "validation_warn",
+        "validation_fail",
+        "newer_snapshot_for_same_scope",
+        "retention_loss_detected",
+        "erasure_complete"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_snapshot_lifecycle_state",
+      "mode_isolation_rules": [
+        "compliance-mode objects may not inherit analysis-mode states;",
+        "`INVALID` snapshots may exist for audit, but may not support compliance compute"
+      ],
+      "notes": [],
+      "object_family": "Snapshot",
+      "rationale": "`Snapshot.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/snapshot.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L291[Snapshot.lifecycle_state]",
+      "source_section_ids": [
+        "6.6"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "BUILT",
+        "VALID",
+        "WARNED",
+        "INVALID",
+        "SUPERSEDED",
+        "RETENTION_LIMITED",
+        "ERASED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "ERASED",
+        "INVALID",
+        "SUPERSEDED"
+      ],
+      "trigger_modules": [
+        "BUILD_SNAPSHOT",
+        "DATA_QUALITY_GATE",
+        "FREEZE_INPUT_SET",
+        "MEASURE_COMPLETENESS",
+        "PERSIST_PRESTART_TERMINAL_CONTEXT",
+        "VALIDATE"
+      ]
+    },
+    {
+      "allowed_transitions": [
+        "NOT_STARTED --fetch_begin--> FETCHING",
+        "FETCHING --all_sources_returned--> FETCHED",
+        "FETCHING --some_sources_returned_with_gaps--> PARTIAL",
+        "FETCHING --fatal_provider_failure--> FAILED",
+        "PARTIAL --operator_abort--> ABANDONED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L265[SourceCollectionRun.lifecycle_state]",
+        "Algorithm/state_machines.md::L282[SourceCollectionRun.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [
+        "P04"
+      ],
+      "events": [
+        "fetch_begin",
+        "all_sources_returned",
+        "some_sources_returned_with_gaps",
+        "fatal_provider_failure",
+        "operator_abort"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_source_collection_run_lifecycle_state",
+      "mode_isolation_rules": [
+        "compliance-mode objects may not inherit analysis-mode states;",
+        "`FAILED` does not imply system failure; it may lead to a blocked manifest or degraded analysis branch ---"
+      ],
+      "notes": [],
+      "object_family": "SourceCollectionRun",
+      "rationale": "`SourceCollectionRun.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/source_collection_run.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L265[SourceCollectionRun.lifecycle_state]",
+      "source_section_ids": [
+        "6.5"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "NOT_STARTED",
+        "FETCHING",
+        "FETCHED",
+        "PARTIAL",
+        "FAILED",
+        "ABANDONED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "ABANDONED",
+        "FAILED",
+        "FETCHED"
+      ],
+      "trigger_modules": [
+        "PLAN_SOURCE_COLLECTION"
+      ]
+    },
+    {
+      "allowed_transitions": [
+        "INTENT_RECORDED --send_queued--> TRANSMIT_PENDING",
+        "TRANSMIT_PENDING --request_sent--> TRANSMITTED",
+        "TRANSMITTED --awaiting_authority_confirmation--> PENDING_ACK",
+        "TRANSMITTED --authority_immediate_confirm--> CONFIRMED",
+        "TRANSMITTED --authority_immediate_reject--> REJECTED",
+        "PENDING_ACK --authority_confirms--> CONFIRMED",
+        "PENDING_ACK --authority_rejects--> REJECTED",
+        "PENDING_ACK --authority_not_resolved--> UNKNOWN",
+        "UNKNOWN --late_authority_confirms--> CONFIRMED",
+        "UNKNOWN --late_authority_rejects--> REJECTED",
+        "UNKNOWN --out_of_band_state_proved--> OUT_OF_BAND",
+        "OUT_OF_BAND --current_packet_lineage_later_proved--> CONFIRMED",
+        "any_non_confirmed_state --external_filing_detected--> OUT_OF_BAND",
+        "CONFIRMED --new_submission_supersedes--> SUPERSEDED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L850[SubmissionRecord.lifecycle_state]",
+        "Algorithm/state_machines.md::L879[SubmissionRecord.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [
+        "authority-originated transitions outrank tenant-originated assumptions where legal state is involved;",
+        "only authority-backed evidence may enter `CONFIRMED`",
+        "delayed terminal authority evidence may resolve `UNKNOWN` and may correct provisional `OUT_OF_BAND` only through bound authority-grounded correlation for the same exact legal meaning; operator optimism or UI recency alone SHALL never do so",
+        "`PENDING_ACK` may persist only while the frozen reconciliation budget remains open; once that budget is exhausted without decisive authority evidence, the protocol SHALL transition through a named event into `UNKNOWN` or a higher-confidence authority-backed state",
+        "`UNKNOWN` SHALL open or retain reconciliation workflow and SHALL NOT trigger a blind resend of the same authority meaning unless duplicate-gate and idempotent-recovery rules explicitly permit it",
+        "any non-terminal `SubmissionRecord` in `PENDING_ACK` or `UNKNOWN` SHALL pair with an `AuthorityInteractionRecord` whose `reconciliation_budget_state` and `resend_legality_state` remain authoritative for whether the next step is a follow-up read, idempotent recovery only, escalation, or closed no-resend posture",
+        "`superseded_by_submission_id` SHALL be non-null only in `SUPERSEDED` HMRC's APIs support calculation retrieval and final declaration submission through software, but authority acknowledgement remains the decisive legal state. [4] ---"
+      ],
+      "cross_machine_dependencies": [
+        "machine_authority_interaction_record_lifecycle_state",
+        "machine_filing_case_lifecycle_state"
+      ],
+      "engine_phase_bindings": [
+        "P16"
+      ],
+      "events": [
+        "send_queued",
+        "request_sent",
+        "awaiting_authority_confirmation",
+        "authority_immediate_confirm",
+        "authority_immediate_reject",
+        "authority_confirms",
+        "authority_rejects",
+        "authority_not_resolved",
+        "late_authority_confirms",
+        "late_authority_rejects",
+        "out_of_band_state_proved",
+        "current_packet_lineage_later_proved",
+        "external_filing_detected",
+        "new_submission_supersedes"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_submission_record_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [
+        "ASSUMPTION_SELECTOR_SOURCE_any_non_confirmed_state"
+      ],
+      "object_family": "SubmissionRecord",
+      "rationale": "`SubmissionRecord.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "`UNKNOWN` SHALL open or retain reconciliation workflow and SHALL NOT trigger a blind resend of the same authority meaning unless duplicate-gate and idempotent-recovery rules explicitly permit it",
+      "schema_path": "Algorithm/schemas/submission_record.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L850[SubmissionRecord.lifecycle_state]",
+      "source_section_ids": [
+        "6.19"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "INTENT_RECORDED",
+        "TRANSMIT_PENDING",
+        "TRANSMITTED",
+        "PENDING_ACK",
+        "CONFIRMED",
+        "REJECTED",
+        "UNKNOWN",
+        "OUT_OF_BAND",
+        "SUPERSEDED"
+      ],
+      "supersession_policy": "`INTENT_RECORDED`, `TRANSMIT_PENDING`, `TRANSMITTED`, `PENDING_ACK`, `REJECTED`, `UNKNOWN`, and `SUPERSEDED` SHALL retain the bound `packet_ref`, request-lineage fields, and `proof_bundle_ref`/`proof_bundle_hash`; only `OUT_OF_BAND` may represent legal settlement without packet-origin transmit lineage",
+      "terminal_states": [
+        "REJECTED",
+        "SUPERSEDED"
+      ],
+      "trigger_modules": [
+        "BEGIN_SUBMISSION_RECORD",
+        "BUILD_AUTHORITY_REQUEST_ENVELOPE",
+        "EXISTING_SUBMISSIONS",
+        "RECONCILE_AUTHORITY_STATE",
+        "SUBMISSION_GATE",
+        "TRANSITION_SUBMISSION_RECORD",
+        "UPSERT_OBLIGATION_MIRROR"
+      ]
+    },
+    {
+      "allowed_transitions": [],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L473[TrustSummary.automation_level]",
+        "Algorithm/state_machines.md::L496[TrustSummary.automation_level]"
+      ],
+      "authority_precedence_rules": [
+        "`trust_input_basis_contract` is the typed admissibility/currentness boundary; it freezes whether trust inputs were complete, current, contradicted, stale, authority-limited, or human-step-limited and publishes the maximum lawful `automation_level` / `filing_readiness` before score/risk caps; when baseline selection itself is limiting, it also retains the baseline-selection hash and baseline-derived automation ceiling instead of flattening that limit into a generic authority score",
+        "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---"
+      ],
+      "cross_machine_dependencies": [
+        "machine_trust_summary_lifecycle_state",
+        "machine_trust_summary_filing_readiness",
+        "machine_trust_summary_trust_input_state",
+        "machine_trust_summary_trust_band",
+        "machine_trust_summary_score_band",
+        "machine_trust_summary_cap_band",
+        "machine_trust_summary_upstream_gate_cap",
+        "machine_trust_summary_trust_level",
+        "machine_trust_summary_threshold_stability_state"
+      ],
+      "engine_phase_bindings": [],
+      "events": [],
+      "machine_class": "classification_axis",
+      "machine_id": "machine_trust_summary_automation_level",
+      "mode_isolation_rules": [
+        "compliance-mode objects may not inherit analysis-mode states;",
+        "`trust_sensitivity_analysis_contract` is the persisted threshold-introspection boundary; it freezes the current score-versus-cap relation, active guard-band triggers, and the canonical six probe results so review, replay, and policy tuning do not infer threshold fragility from local math",
+        "`threshold_stability_state = EDGE_REVIEW` SHALL also require non-empty `trust_sensitivity_analysis_contract.edge_trigger_codes[]`; `STABLE` SHALL clear them",
+        "`trust_band = GREEN` is legal only when the current trust posture is submission-capable under the frozen trust formulas; analysis mode, upstream review/block posture, or risk below the automation threshold SHALL cap the band at most `AMBER`"
+      ],
+      "notes": [],
+      "object_family": "TrustSummary",
+      "rationale": "`TrustSummary.automation_level` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/trust_summary.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L473[TrustSummary.automation_level]",
+      "source_section_ids": [
+        "6.11"
+      ],
+      "state_field": "automation_level",
+      "states": [
+        "ALLOWED",
+        "LIMITED",
+        "BLOCKED"
+      ],
+      "supersession_policy": "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---",
+      "terminal_states": [],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L447[TrustSummary.cap_band]",
+        "Algorithm/state_machines.md::L496[TrustSummary.cap_band]"
+      ],
+      "authority_precedence_rules": [
+        "`trust_input_basis_contract` is the typed admissibility/currentness boundary; it freezes whether trust inputs were complete, current, contradicted, stale, authority-limited, or human-step-limited and publishes the maximum lawful `automation_level` / `filing_readiness` before score/risk caps; when baseline selection itself is limiting, it also retains the baseline-selection hash and baseline-derived automation ceiling instead of flattening that limit into a generic authority score",
+        "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---"
+      ],
+      "cross_machine_dependencies": [
+        "machine_trust_summary_lifecycle_state",
+        "machine_trust_summary_filing_readiness",
+        "machine_trust_summary_automation_level",
+        "machine_trust_summary_trust_input_state",
+        "machine_trust_summary_trust_band",
+        "machine_trust_summary_score_band",
+        "machine_trust_summary_upstream_gate_cap",
+        "machine_trust_summary_trust_level",
+        "machine_trust_summary_threshold_stability_state"
+      ],
+      "engine_phase_bindings": [],
+      "events": [],
+      "machine_class": "classification_axis",
+      "machine_id": "machine_trust_summary_cap_band",
+      "mode_isolation_rules": [
+        "compliance-mode objects may not inherit analysis-mode states;",
+        "`trust_sensitivity_analysis_contract` is the persisted threshold-introspection boundary; it freezes the current score-versus-cap relation, active guard-band triggers, and the canonical six probe results so review, replay, and policy tuning do not infer threshold fragility from local math",
+        "`threshold_stability_state = EDGE_REVIEW` SHALL also require non-empty `trust_sensitivity_analysis_contract.edge_trigger_codes[]`; `STABLE` SHALL clear them",
+        "`trust_band = GREEN` is legal only when the current trust posture is submission-capable under the frozen trust formulas; analysis mode, upstream review/block posture, or risk below the automation threshold SHALL cap the band at most `AMBER`"
+      ],
+      "notes": [
+        "ASSUMPTION_CAP_BAND_REUSES_TRUST_BAND_VOCABULARY_FROM_SECTION_6_11"
+      ],
+      "object_family": "TrustSummary",
+      "rationale": "`TrustSummary.cap_band` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/trust_summary.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L447[TrustSummary.cap_band]",
+      "source_section_ids": [
+        "6.11"
+      ],
+      "state_field": "cap_band",
+      "states": [
+        "INSUFFICIENT_DATA",
+        "RED",
+        "AMBER",
+        "GREEN"
+      ],
+      "supersession_policy": "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---",
+      "terminal_states": [],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L484[TrustSummary.filing_readiness]",
+        "Algorithm/state_machines.md::L496[TrustSummary.filing_readiness]"
+      ],
+      "authority_precedence_rules": [
+        "`trust_input_basis_contract` is the typed admissibility/currentness boundary; it freezes whether trust inputs were complete, current, contradicted, stale, authority-limited, or human-step-limited and publishes the maximum lawful `automation_level` / `filing_readiness` before score/risk caps; when baseline selection itself is limiting, it also retains the baseline-selection hash and baseline-derived automation ceiling instead of flattening that limit into a generic authority score",
+        "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---"
+      ],
+      "cross_machine_dependencies": [
+        "machine_trust_summary_lifecycle_state",
+        "machine_trust_summary_automation_level",
+        "machine_trust_summary_trust_input_state",
+        "machine_trust_summary_trust_band",
+        "machine_trust_summary_score_band",
+        "machine_trust_summary_cap_band",
+        "machine_trust_summary_upstream_gate_cap",
+        "machine_trust_summary_trust_level",
+        "machine_trust_summary_threshold_stability_state"
+      ],
+      "engine_phase_bindings": [],
+      "events": [],
+      "machine_class": "classification_axis",
+      "machine_id": "machine_trust_summary_filing_readiness",
+      "mode_isolation_rules": [
+        "compliance-mode objects may not inherit analysis-mode states;",
+        "`trust_sensitivity_analysis_contract` is the persisted threshold-introspection boundary; it freezes the current score-versus-cap relation, active guard-band triggers, and the canonical six probe results so review, replay, and policy tuning do not infer threshold fragility from local math",
+        "`threshold_stability_state = EDGE_REVIEW` SHALL also require non-empty `trust_sensitivity_analysis_contract.edge_trigger_codes[]`; `STABLE` SHALL clear them",
+        "`trust_band = GREEN` is legal only when the current trust posture is submission-capable under the frozen trust formulas; analysis mode, upstream review/block posture, or risk below the automation threshold SHALL cap the band at most `AMBER`"
+      ],
+      "notes": [],
+      "object_family": "TrustSummary",
+      "rationale": "`TrustSummary.filing_readiness` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/trust_summary.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L484[TrustSummary.filing_readiness]",
+      "source_section_ids": [
+        "6.11"
+      ],
+      "state_field": "filing_readiness",
+      "states": [
+        "NOT_READY",
+        "READY_REVIEW",
+        "READY_TO_SUBMIT"
+      ],
+      "supersession_policy": "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---",
+      "terminal_states": [],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "SYNTHESIZED --newer_inputs_or_overrides--> SUPERSEDED",
+        "SYNTHESIZED --late_data_or_authority_change--> SUPERSEDED",
+        "SYNTHESIZED --amendment_or_baseline_change--> SUPERSEDED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L435[TrustSummary.lifecycle_state]",
+        "Algorithm/state_machines.md::L496[TrustSummary.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [
+        "authority-originated transitions outrank tenant-originated assumptions where legal state is involved;",
+        "`trust_input_basis_contract` is the typed admissibility/currentness boundary; it freezes whether trust inputs were complete, current, contradicted, stale, authority-limited, or human-step-limited and publishes the maximum lawful `automation_level` / `filing_readiness` before score/risk caps; when baseline selection itself is limiting, it also retains the baseline-selection hash and baseline-derived automation ceiling instead of flattening that limit into a generic authority score",
+        "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---"
+      ],
+      "cross_machine_dependencies": [
+        "machine_trust_summary_filing_readiness",
+        "machine_trust_summary_automation_level",
+        "machine_parity_result_lifecycle_state",
+        "machine_trust_summary_trust_input_state",
+        "machine_trust_summary_trust_band",
+        "machine_trust_summary_score_band",
+        "machine_trust_summary_cap_band",
+        "machine_trust_summary_upstream_gate_cap",
+        "machine_trust_summary_trust_level",
+        "machine_trust_summary_threshold_stability_state"
+      ],
+      "engine_phase_bindings": [
+        "P11"
+      ],
+      "events": [
+        "newer_inputs_or_overrides",
+        "late_data_or_authority_change",
+        "amendment_or_baseline_change"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_trust_summary_lifecycle_state",
+      "mode_isolation_rules": [
+        "compliance-mode objects may not inherit analysis-mode states;",
+        "`trust_sensitivity_analysis_contract` is the persisted threshold-introspection boundary; it freezes the current score-versus-cap relation, active guard-band triggers, and the canonical six probe results so review, replay, and policy tuning do not infer threshold fragility from local math",
+        "`threshold_stability_state = EDGE_REVIEW` SHALL also require non-empty `trust_sensitivity_analysis_contract.edge_trigger_codes[]`; `STABLE` SHALL clear them",
+        "`trust_band = GREEN` is legal only when the current trust posture is submission-capable under the frozen trust formulas; analysis mode, upstream review/block posture, or risk below the automation threshold SHALL cap the band at most `AMBER`"
+      ],
+      "notes": [],
+      "object_family": "TrustSummary",
+      "rationale": "`TrustSummary.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/trust_summary.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L435[TrustSummary.lifecycle_state]",
+      "source_section_ids": [
+        "6.11"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "SYNTHESIZED",
+        "SUPERSEDED"
+      ],
+      "supersession_policy": "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---",
+      "terminal_states": [
+        "SUPERSEDED"
+      ],
+      "trigger_modules": [
+        "ASSESS_TRUST_INPUT_STATE",
+        "SYNTHESIZE_TRUST",
+        "TRUST_GATE"
+      ]
+    },
+    {
+      "allowed_transitions": [],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L454[TrustSummary.score_band]",
+        "Algorithm/state_machines.md::L496[TrustSummary.score_band]"
+      ],
+      "authority_precedence_rules": [
+        "`trust_input_basis_contract` is the typed admissibility/currentness boundary; it freezes whether trust inputs were complete, current, contradicted, stale, authority-limited, or human-step-limited and publishes the maximum lawful `automation_level` / `filing_readiness` before score/risk caps; when baseline selection itself is limiting, it also retains the baseline-selection hash and baseline-derived automation ceiling instead of flattening that limit into a generic authority score",
+        "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---"
+      ],
+      "cross_machine_dependencies": [
+        "machine_trust_summary_lifecycle_state",
+        "machine_trust_summary_filing_readiness",
+        "machine_trust_summary_automation_level",
+        "machine_trust_summary_trust_input_state",
+        "machine_trust_summary_trust_band",
+        "machine_trust_summary_cap_band",
+        "machine_trust_summary_upstream_gate_cap",
+        "machine_trust_summary_trust_level",
+        "machine_trust_summary_threshold_stability_state"
+      ],
+      "engine_phase_bindings": [],
+      "events": [],
+      "machine_class": "classification_axis",
+      "machine_id": "machine_trust_summary_score_band",
+      "mode_isolation_rules": [
+        "compliance-mode objects may not inherit analysis-mode states;",
+        "`trust_sensitivity_analysis_contract` is the persisted threshold-introspection boundary; it freezes the current score-versus-cap relation, active guard-band triggers, and the canonical six probe results so review, replay, and policy tuning do not infer threshold fragility from local math",
+        "`threshold_stability_state = EDGE_REVIEW` SHALL also require non-empty `trust_sensitivity_analysis_contract.edge_trigger_codes[]`; `STABLE` SHALL clear them",
+        "`trust_band = GREEN` is legal only when the current trust posture is submission-capable under the frozen trust formulas; analysis mode, upstream review/block posture, or risk below the automation threshold SHALL cap the band at most `AMBER`"
+      ],
+      "notes": [],
+      "object_family": "TrustSummary",
+      "rationale": "`TrustSummary.score_band` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/trust_summary.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L454[TrustSummary.score_band]",
+      "source_section_ids": [
+        "6.11"
+      ],
+      "state_field": "score_band",
+      "states": [
+        "RED",
+        "AMBER",
+        "GREEN"
+      ],
+      "supersession_policy": "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---",
+      "terminal_states": [],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L479[TrustSummary.threshold_stability_state]",
+        "Algorithm/state_machines.md::L496[TrustSummary.threshold_stability_state]"
+      ],
+      "authority_precedence_rules": [
+        "`trust_input_basis_contract` is the typed admissibility/currentness boundary; it freezes whether trust inputs were complete, current, contradicted, stale, authority-limited, or human-step-limited and publishes the maximum lawful `automation_level` / `filing_readiness` before score/risk caps; when baseline selection itself is limiting, it also retains the baseline-selection hash and baseline-derived automation ceiling instead of flattening that limit into a generic authority score",
+        "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---"
+      ],
+      "cross_machine_dependencies": [
+        "machine_trust_summary_lifecycle_state",
+        "machine_trust_summary_filing_readiness",
+        "machine_trust_summary_automation_level",
+        "machine_trust_summary_trust_input_state",
+        "machine_trust_summary_trust_band",
+        "machine_trust_summary_score_band",
+        "machine_trust_summary_cap_band",
+        "machine_trust_summary_upstream_gate_cap",
+        "machine_trust_summary_trust_level"
+      ],
+      "engine_phase_bindings": [],
+      "events": [],
+      "machine_class": "classification_axis",
+      "machine_id": "machine_trust_summary_threshold_stability_state",
+      "mode_isolation_rules": [
+        "compliance-mode objects may not inherit analysis-mode states;",
+        "`trust_sensitivity_analysis_contract` is the persisted threshold-introspection boundary; it freezes the current score-versus-cap relation, active guard-band triggers, and the canonical six probe results so review, replay, and policy tuning do not infer threshold fragility from local math",
+        "`threshold_stability_state = EDGE_REVIEW` SHALL also require non-empty `trust_sensitivity_analysis_contract.edge_trigger_codes[]`; `STABLE` SHALL clear them",
+        "`trust_band = GREEN` is legal only when the current trust posture is submission-capable under the frozen trust formulas; analysis mode, upstream review/block posture, or risk below the automation threshold SHALL cap the band at most `AMBER`"
+      ],
+      "notes": [],
+      "object_family": "TrustSummary",
+      "rationale": "`TrustSummary.threshold_stability_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/trust_summary.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L479[TrustSummary.threshold_stability_state]",
+      "source_section_ids": [
+        "6.11"
+      ],
+      "state_field": "threshold_stability_state",
+      "states": [
+        "STABLE",
+        "EDGE_REVIEW"
+      ],
+      "supersession_policy": "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---",
+      "terminal_states": [],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L447[TrustSummary.trust_band]",
+        "Algorithm/state_machines.md::L496[TrustSummary.trust_band]"
+      ],
+      "authority_precedence_rules": [
+        "`trust_input_basis_contract` is the typed admissibility/currentness boundary; it freezes whether trust inputs were complete, current, contradicted, stale, authority-limited, or human-step-limited and publishes the maximum lawful `automation_level` / `filing_readiness` before score/risk caps; when baseline selection itself is limiting, it also retains the baseline-selection hash and baseline-derived automation ceiling instead of flattening that limit into a generic authority score",
+        "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---"
+      ],
+      "cross_machine_dependencies": [
+        "machine_trust_summary_lifecycle_state",
+        "machine_trust_summary_filing_readiness",
+        "machine_trust_summary_automation_level",
+        "machine_trust_summary_trust_input_state",
+        "machine_trust_summary_score_band",
+        "machine_trust_summary_cap_band",
+        "machine_trust_summary_upstream_gate_cap",
+        "machine_trust_summary_trust_level",
+        "machine_trust_summary_threshold_stability_state"
+      ],
+      "engine_phase_bindings": [],
+      "events": [],
+      "machine_class": "classification_axis",
+      "machine_id": "machine_trust_summary_trust_band",
+      "mode_isolation_rules": [
+        "compliance-mode objects may not inherit analysis-mode states;",
+        "`trust_sensitivity_analysis_contract` is the persisted threshold-introspection boundary; it freezes the current score-versus-cap relation, active guard-band triggers, and the canonical six probe results so review, replay, and policy tuning do not infer threshold fragility from local math",
+        "`threshold_stability_state = EDGE_REVIEW` SHALL also require non-empty `trust_sensitivity_analysis_contract.edge_trigger_codes[]`; `STABLE` SHALL clear them",
+        "`trust_band = GREEN` is legal only when the current trust posture is submission-capable under the frozen trust formulas; analysis mode, upstream review/block posture, or risk below the automation threshold SHALL cap the band at most `AMBER`"
+      ],
+      "notes": [],
+      "object_family": "TrustSummary",
+      "rationale": "`TrustSummary.trust_band` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/trust_summary.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L447[TrustSummary.trust_band]",
+      "source_section_ids": [
+        "6.11"
+      ],
+      "state_field": "trust_band",
+      "states": [
+        "INSUFFICIENT_DATA",
+        "RED",
+        "AMBER",
+        "GREEN"
+      ],
+      "supersession_policy": "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---",
+      "terminal_states": [],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L440[TrustSummary.trust_input_state]",
+        "Algorithm/state_machines.md::L496[TrustSummary.trust_input_state]"
+      ],
+      "authority_precedence_rules": [
+        "`trust_input_basis_contract` is the typed admissibility/currentness boundary; it freezes whether trust inputs were complete, current, contradicted, stale, authority-limited, or human-step-limited and publishes the maximum lawful `automation_level` / `filing_readiness` before score/risk caps; when baseline selection itself is limiting, it also retains the baseline-selection hash and baseline-derived automation ceiling instead of flattening that limit into a generic authority score",
+        "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---"
+      ],
+      "cross_machine_dependencies": [
+        "machine_trust_summary_lifecycle_state",
+        "machine_trust_summary_filing_readiness",
+        "machine_trust_summary_automation_level",
+        "machine_trust_summary_trust_band",
+        "machine_trust_summary_score_band",
+        "machine_trust_summary_cap_band",
+        "machine_trust_summary_upstream_gate_cap",
+        "machine_trust_summary_trust_level",
+        "machine_trust_summary_threshold_stability_state"
+      ],
+      "engine_phase_bindings": [],
+      "events": [],
+      "machine_class": "classification_axis",
+      "machine_id": "machine_trust_summary_trust_input_state",
+      "mode_isolation_rules": [
+        "compliance-mode objects may not inherit analysis-mode states;",
+        "`trust_sensitivity_analysis_contract` is the persisted threshold-introspection boundary; it freezes the current score-versus-cap relation, active guard-band triggers, and the canonical six probe results so review, replay, and policy tuning do not infer threshold fragility from local math",
+        "`threshold_stability_state = EDGE_REVIEW` SHALL also require non-empty `trust_sensitivity_analysis_contract.edge_trigger_codes[]`; `STABLE` SHALL clear them",
+        "`trust_band = GREEN` is legal only when the current trust posture is submission-capable under the frozen trust formulas; analysis mode, upstream review/block posture, or risk below the automation threshold SHALL cap the band at most `AMBER`"
+      ],
+      "notes": [],
+      "object_family": "TrustSummary",
+      "rationale": "`TrustSummary.trust_input_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/trust_summary.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L440[TrustSummary.trust_input_state]",
+      "source_section_ids": [
+        "6.11"
+      ],
+      "state_field": "trust_input_state",
+      "states": [
+        "ADMISSIBLE_CURRENT",
+        "ADMISSIBLE_STALE",
+        "INCOMPLETE",
+        "CONTRADICTED"
+      ],
+      "supersession_policy": "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---",
+      "terminal_states": [],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L467[TrustSummary.trust_level]",
+        "Algorithm/state_machines.md::L496[TrustSummary.trust_level]"
+      ],
+      "authority_precedence_rules": [
+        "`trust_input_basis_contract` is the typed admissibility/currentness boundary; it freezes whether trust inputs were complete, current, contradicted, stale, authority-limited, or human-step-limited and publishes the maximum lawful `automation_level` / `filing_readiness` before score/risk caps; when baseline selection itself is limiting, it also retains the baseline-selection hash and baseline-derived automation ceiling instead of flattening that limit into a generic authority score",
+        "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---"
+      ],
+      "cross_machine_dependencies": [
+        "machine_trust_summary_lifecycle_state",
+        "machine_trust_summary_filing_readiness",
+        "machine_trust_summary_automation_level",
+        "machine_trust_summary_trust_input_state",
+        "machine_trust_summary_trust_band",
+        "machine_trust_summary_score_band",
+        "machine_trust_summary_cap_band",
+        "machine_trust_summary_upstream_gate_cap",
+        "machine_trust_summary_threshold_stability_state"
+      ],
+      "engine_phase_bindings": [],
+      "events": [],
+      "machine_class": "classification_axis",
+      "machine_id": "machine_trust_summary_trust_level",
+      "mode_isolation_rules": [
+        "compliance-mode objects may not inherit analysis-mode states;",
+        "`trust_sensitivity_analysis_contract` is the persisted threshold-introspection boundary; it freezes the current score-versus-cap relation, active guard-band triggers, and the canonical six probe results so review, replay, and policy tuning do not infer threshold fragility from local math",
+        "`threshold_stability_state = EDGE_REVIEW` SHALL also require non-empty `trust_sensitivity_analysis_contract.edge_trigger_codes[]`; `STABLE` SHALL clear them",
+        "`trust_band = GREEN` is legal only when the current trust posture is submission-capable under the frozen trust formulas; analysis mode, upstream review/block posture, or risk below the automation threshold SHALL cap the band at most `AMBER`"
+      ],
+      "notes": [],
+      "object_family": "TrustSummary",
+      "rationale": "`TrustSummary.trust_level` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/trust_summary.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L467[TrustSummary.trust_level]",
+      "source_section_ids": [
+        "6.11"
+      ],
+      "state_field": "trust_level",
+      "states": [
+        "READY",
+        "REVIEW_REQUIRED",
+        "BLOCKED"
+      ],
+      "supersession_policy": "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---",
+      "terminal_states": [],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L460[TrustSummary.upstream_gate_cap]",
+        "Algorithm/state_machines.md::L496[TrustSummary.upstream_gate_cap]"
+      ],
+      "authority_precedence_rules": [
+        "`trust_input_basis_contract` is the typed admissibility/currentness boundary; it freezes whether trust inputs were complete, current, contradicted, stale, authority-limited, or human-step-limited and publishes the maximum lawful `automation_level` / `filing_readiness` before score/risk caps; when baseline selection itself is limiting, it also retains the baseline-selection hash and baseline-derived automation ceiling instead of flattening that limit into a generic authority score",
+        "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---"
+      ],
+      "cross_machine_dependencies": [
+        "machine_trust_summary_lifecycle_state",
+        "machine_trust_summary_filing_readiness",
+        "machine_trust_summary_automation_level",
+        "machine_trust_summary_trust_input_state",
+        "machine_trust_summary_trust_band",
+        "machine_trust_summary_score_band",
+        "machine_trust_summary_cap_band",
+        "machine_trust_summary_trust_level",
+        "machine_trust_summary_threshold_stability_state"
+      ],
+      "engine_phase_bindings": [],
+      "events": [],
+      "machine_class": "classification_axis",
+      "machine_id": "machine_trust_summary_upstream_gate_cap",
+      "mode_isolation_rules": [
+        "compliance-mode objects may not inherit analysis-mode states;",
+        "`trust_sensitivity_analysis_contract` is the persisted threshold-introspection boundary; it freezes the current score-versus-cap relation, active guard-band triggers, and the canonical six probe results so review, replay, and policy tuning do not infer threshold fragility from local math",
+        "`threshold_stability_state = EDGE_REVIEW` SHALL also require non-empty `trust_sensitivity_analysis_contract.edge_trigger_codes[]`; `STABLE` SHALL clear them",
+        "`trust_band = GREEN` is legal only when the current trust posture is submission-capable under the frozen trust formulas; analysis mode, upstream review/block posture, or risk below the automation threshold SHALL cap the band at most `AMBER`"
+      ],
+      "notes": [],
+      "object_family": "TrustSummary",
+      "rationale": "`TrustSummary.upstream_gate_cap` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/trust_summary.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L460[TrustSummary.upstream_gate_cap]",
+      "source_section_ids": [
+        "6.11"
+      ],
+      "state_field": "upstream_gate_cap",
+      "states": [
+        "AUTO_ELIGIBLE",
+        "NOTICE_ONLY",
+        "REVIEW_ONLY",
+        "BLOCKED"
+      ],
+      "supersession_policy": "any later late-data monitor result, authority-state update, authority-correction baseline, amendment-baseline change, or override lifecycle change that would alter trust inputs SHALL supersede the old trust instead of silently reusing it ---",
+      "terminal_states": [],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "NOT_REQUIRED --reconciliation_needed--> QUEUED",
+        "QUEUED --worker_started--> IN_PROGRESS",
+        "IN_PROGRESS --awaiting_authority_window--> WAITING_ON_AUTHORITY",
+        "IN_PROGRESS --manual_escalation_required--> WAITING_ON_OPERATOR",
+        "WAITING_ON_AUTHORITY --authority_response_received--> IN_PROGRESS",
+        "WAITING_ON_OPERATOR --operator_action_recorded--> IN_PROGRESS",
+        "IN_PROGRESS --resolution_proved--> RESOLVED",
+        "QUEUED --newer_twin_supersedes--> SUPERSEDED",
+        "IN_PROGRESS --newer_twin_supersedes--> SUPERSEDED",
+        "WAITING_ON_AUTHORITY --newer_twin_supersedes--> SUPERSEDED",
+        "WAITING_ON_OPERATOR --newer_twin_supersedes--> SUPERSEDED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L645[TwinReconciliationState.lifecycle_state]",
+        "Algorithm/state_machines.md::L669[TwinReconciliationState.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [
+        "authority-originated transitions outrank tenant-originated assumptions where legal state is involved;",
+        "`WAITING_ON_AUTHORITY` past deadline SHALL open owned workflow rather than silently looping"
+      ],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [],
+      "events": [
+        "reconciliation_needed",
+        "worker_started",
+        "awaiting_authority_window",
+        "manual_escalation_required",
+        "authority_response_received",
+        "operator_action_recorded",
+        "resolution_proved",
+        "newer_twin_supersedes"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_twin_reconciliation_state_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "TwinReconciliationState",
+      "rationale": "`TwinReconciliationState.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/twin_reconciliation_state.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L645[TwinReconciliationState.lifecycle_state]",
+      "source_section_ids": [
+        "6.13B"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "NOT_REQUIRED",
+        "QUEUED",
+        "IN_PROGRESS",
+        "WAITING_ON_AUTHORITY",
+        "WAITING_ON_OPERATOR",
+        "RESOLVED",
+        "SUPERSEDED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "RESOLVED",
+        "SUPERSEDED"
+      ],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "UNAVAILABLE --some_components_materialized--> PARTIAL",
+        "PARTIAL --all_required_components_bound--> ASSEMBLED",
+        "PARTIAL --visibility_or_retention_limit_detected--> LIMITED",
+        "ASSEMBLED --visibility_or_retention_limit_detected--> LIMITED",
+        "ASSEMBLED --freshness_horizon_exceeded--> STALE",
+        "PARTIAL --component_conflict_detected--> CONTRADICTORY",
+        "ASSEMBLED --component_conflict_detected--> CONTRADICTORY",
+        "STALE --refresh_reassembled--> ASSEMBLED",
+        "LIMITED --limitation_resolved--> ASSEMBLED",
+        "CONTRADICTORY --conflict_reconciled--> ASSEMBLED",
+        "PARTIAL --newer_snapshot_available--> SUPERSEDED",
+        "ASSEMBLED --newer_snapshot_available--> SUPERSEDED",
+        "LIMITED --newer_snapshot_available--> SUPERSEDED",
+        "STALE --newer_snapshot_available--> SUPERSEDED",
+        "CONTRADICTORY --newer_snapshot_available--> SUPERSEDED",
+        "UNAVAILABLE --newer_snapshot_available--> SUPERSEDED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L599[TwinStateSnapshot.assembly_state]",
+        "Algorithm/state_machines.md::L628[TwinStateSnapshot.assembly_state]"
+      ],
+      "authority_precedence_rules": [
+        "authority-originated transitions outrank tenant-originated assumptions where legal state is involved;",
+        "an `AUTHORITY` snapshot SHALL reach `ASSEMBLED` only from authority-originated or reconciliation-proven components; internal inference alone SHALL NOT complete the lane"
+      ],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [],
+      "events": [
+        "some_components_materialized",
+        "all_required_components_bound",
+        "visibility_or_retention_limit_detected",
+        "freshness_horizon_exceeded",
+        "component_conflict_detected",
+        "refresh_reassembled",
+        "limitation_resolved",
+        "conflict_reconciled",
+        "newer_snapshot_available"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_twin_state_snapshot_assembly_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "TwinStateSnapshot",
+      "rationale": "`TwinStateSnapshot.assembly_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/twin_state_snapshot.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L599[TwinStateSnapshot.assembly_state]",
+      "source_section_ids": [
+        "6.13A"
+      ],
+      "state_field": "assembly_state",
+      "states": [
+        "ASSEMBLED",
+        "PARTIAL",
+        "LIMITED",
+        "STALE",
+        "CONTRADICTORY",
+        "UNAVAILABLE",
+        "SUPERSEDED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "SUPERSEDED"
+      ],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "NOT_BUILT --twin_complete--> BUILT",
+        "BUILT --source_authority_baseline_or_reconciliation_change--> STALE",
+        "STALE --refresh_complete--> BUILT",
+        "BUILT --newer_manifest_twin--> SUPERSEDED",
+        "STALE --newer_manifest_twin--> SUPERSEDED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L567[TwinView.lifecycle_state]",
+        "Algorithm/state_machines.md::L582[TwinView.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [
+        "authority-originated transitions outrank tenant-originated assumptions where legal state is involved;",
+        "a twin SHALL become `STALE` when any mirrored lane becomes stale, a new authority observation lands, late data changes the internal lane, the selected legal baseline changes, or reconciliation materially changes delta meaning"
+      ],
+      "cross_machine_dependencies": [
+        "machine_twin_state_snapshot_assembly_state",
+        "machine_twin_reconciliation_state_lifecycle_state"
+      ],
+      "engine_phase_bindings": [],
+      "events": [
+        "twin_complete",
+        "source_authority_baseline_or_reconciliation_change",
+        "refresh_complete",
+        "newer_manifest_twin"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_twin_view_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "TwinView",
+      "rationale": "`TwinView.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/twin_view.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L567[TwinView.lifecycle_state]",
+      "source_section_ids": [
+        "6.13"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "NOT_BUILT",
+        "BUILT",
+        "STALE",
+        "SUPERSEDED"
+      ],
+      "supersession_policy": "`BUILT`, `STALE`, and `SUPERSEDED` twins SHALL retain typed `TwinStateSnapshot`, `TwinTimeline`, `TwinMismatchSummary`, `TwinReadinessState`, `TwinReconciliationState`, and `TwinInterpretationState` linkage",
+      "terminal_states": [
+        "SUPERSEDED"
+      ],
+      "trigger_modules": []
+    },
+    {
+      "allowed_transitions": [
+        "OPEN --picked_up--> IN_PROGRESS",
+        "IN_PROGRESS --needs_client_input--> WAITING_ON_CLIENT",
+        "IN_PROGRESS --needs_authority_response--> WAITING_ON_AUTHORITY",
+        "IN_PROGRESS --blocked_condition--> BLOCKED",
+        "WAITING_ON_CLIENT --client_response--> IN_PROGRESS",
+        "WAITING_ON_AUTHORITY --authority_response--> IN_PROGRESS",
+        "IN_PROGRESS --resolved--> DONE",
+        "OPEN --no_longer_relevant--> CANCELLED",
+        "OPEN --superseded_by_new_context--> STALE"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L685[WorkflowItem.lifecycle_state]",
+        "Algorithm/state_machines.md::L708[WorkflowItem.lifecycle_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [],
+      "engine_phase_bindings": [
+        "P09",
+        "P11",
+        "P12",
+        "P14",
+        "P15",
+        "P16",
+        "P17"
+      ],
+      "events": [
+        "picked_up",
+        "needs_client_input",
+        "needs_authority_response",
+        "blocked_condition",
+        "client_response",
+        "authority_response",
+        "resolved",
+        "no_longer_relevant",
+        "superseded_by_new_context"
+      ],
+      "machine_class": "lifecycle",
+      "machine_id": "machine_workflow_item_lifecycle_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "WorkflowItem",
+      "rationale": "`WorkflowItem.lifecycle_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "No explicit successor-allocation rule was named in the source section.",
+      "schema_path": "Algorithm/schemas/workflow_item.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L685[WorkflowItem.lifecycle_state]",
+      "source_section_ids": [
+        "6.14"
+      ],
+      "state_field": "lifecycle_state",
+      "states": [
+        "OPEN",
+        "IN_PROGRESS",
+        "WAITING_ON_CLIENT",
+        "WAITING_ON_AUTHORITY",
+        "BLOCKED",
+        "DONE",
+        "CANCELLED",
+        "STALE"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "BLOCKED",
+        "CANCELLED",
+        "DONE",
+        "STALE"
+      ],
+      "trigger_modules": [
+        "DERIVE_REQUIRED_HUMAN_STEPS",
+        "EMIT_WORKFLOW_ITEM",
+        "PLAN_WORKFLOW",
+        "UPSERT_WORKFLOW_ITEMS"
+      ]
+    },
+    {
+      "allowed_transitions": [
+        "LIVE --epoch_advanced--> REBASED",
+        "LIVE --history_compacted--> REBASED",
+        "LIVE --shell_stability_changed--> REBASED",
+        "LIVE --route_context_changed--> REBASED",
+        "LIVE --session_revoked--> REVOKED",
+        "LIVE --session_binding_changed--> REVOKED",
+        "LIVE --access_binding_changed--> REVOKED",
+        "LIVE --masking_posture_changed--> REVOKED",
+        "LIVE --schema_incompatible--> REVOKED",
+        "LIVE --client_closed--> CLOSED",
+        "LIVE --ttl_elapsed--> EXPIRED"
+      ],
+      "authoritative_source_refs": [
+        "Algorithm/state_machines.md::L164[WorkspaceCursor.cursor_state]",
+        "Algorithm/state_machines.md::L186[WorkspaceCursor.cursor_state]"
+      ],
+      "authority_precedence_rules": [],
+      "cross_machine_dependencies": [
+        "machine_experience_cursor_cursor_state"
+      ],
+      "engine_phase_bindings": [],
+      "events": [
+        "epoch_advanced",
+        "history_compacted",
+        "shell_stability_changed",
+        "route_context_changed",
+        "session_revoked",
+        "session_binding_changed",
+        "access_binding_changed",
+        "masking_posture_changed",
+        "schema_incompatible",
+        "client_closed",
+        "ttl_elapsed"
+      ],
+      "machine_class": "cursor",
+      "machine_id": "machine_workspace_cursor_cursor_state",
+      "mode_isolation_rules": [],
+      "notes": [],
+      "object_family": "WorkspaceCursor",
+      "rationale": "`WorkspaceCursor.cursor_state` is modeled from the canonical state-machine section(s) and normalized into one machine registry row.",
+      "recovery_or_successor_policy": "`REBASED`, `CLOSED`, `REVOKED`, and `EXPIRED` are terminal posture records for that persisted cursor; recovery allocates or returns a successor cursor rather than reopening the old one ---",
+      "schema_path": "Algorithm/schemas/workspace_cursor.schema.json",
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "Algorithm/state_machines.md::L164[WorkspaceCursor.cursor_state]",
+      "source_section_ids": [
+        "6.2B"
+      ],
+      "state_field": "cursor_state",
+      "states": [
+        "LIVE",
+        "REBASED",
+        "CLOSED",
+        "REVOKED",
+        "EXPIRED"
+      ],
+      "supersession_policy": "No explicit supersession policy was named in the source section.",
+      "terminal_states": [
+        "CLOSED",
+        "EXPIRED",
+        "REBASED",
+        "REVOKED"
+      ],
+      "trigger_modules": []
+    }
+  ],
+  "summary": {
+    "machine_class_counts": {
+      "classification_axis": 13,
+      "compound_axis": 1,
+      "cursor": 2,
+      "lifecycle": 31,
+      "release_control": 6
+    },
+    "machine_count": 53,
+    "represented_section_ids": [
+      "6.1",
+      "6.10",
+      "6.11",
+      "6.12",
+      "6.13",
+      "6.13A",
+      "6.13B",
+      "6.14",
+      "6.15",
+      "6.16",
+      "6.17",
+      "6.18",
+      "6.19",
+      "6.19A",
+      "6.2",
+      "6.20",
+      "6.21",
+      "6.22",
+      "6.22A",
+      "6.23",
+      "6.24",
+      "6.24A",
+      "6.25A",
+      "6.25B",
+      "6.25C",
+      "6.25D",
+      "6.25E",
+      "6.25F",
+      "6.25G",
+      "6.25H",
+      "6.26",
+      "6.27",
+      "6.28",
+      "6.29",
+      "6.2A",
+      "6.2B",
+      "6.3",
+      "6.30",
+      "6.4",
+      "6.5",
+      "6.6",
+      "6.7",
+      "6.8",
+      "6.9"
+    ],
+    "transition_count": 382,
+    "transition_kind_counts": {
+      "explicit_event_edge": 375,
+      "prose_rule": 7
+    }
+  }
+}

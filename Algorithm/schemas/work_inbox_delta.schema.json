@@ -1,0 +1,285 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/work_inbox_delta.schema.json",
+  "title": "WorkInboxDelta",
+  "description": "Idempotent live-update patch contract for the staff inbox. This is a collaboration triage UX contract only; it must never be treated as mutation-side truth.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "tenant_id",
+    "inbox_sequence",
+    "delivery_class",
+    "inbox_route_key",
+    "inbox_version",
+    "visibility_partition",
+    "causal_semantic_action_id",
+    "row_upserts",
+    "row_removals",
+    "badge_updates",
+    "occurred_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "WorkInboxDelta"
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inbox_sequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "delivery_class": {
+      "type": "string",
+      "enum": [
+        "LIVE",
+        "CATCH_UP",
+        "SNAPSHOT"
+      ]
+    },
+    "inbox_route_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inbox_version": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "visibility_partition": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/visibility_partition_contract.schema.json"
+        },
+        {
+          "properties": {
+            "partition_scope": {
+              "const": "WORK_INBOX_DELTA"
+            }
+          }
+        }
+      ]
+    },
+    "causal_semantic_action_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "row_upserts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/rowUpsert"
+      },
+      "default": []
+    },
+    "row_removals": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/rowRemoval"
+      },
+      "default": []
+    },
+    "badge_updates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/badgeUpdate"
+      },
+      "default": []
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "rowUpsert": {
+      "type": "object",
+      "required": [
+        "item_id",
+        "row",
+        "order_changed",
+        "defer_reorder_until_focus_exit",
+        "queue_projection_basis_hash"
+      ],
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "row": {
+          "$ref": "./work_inbox_snapshot.schema.json#/$defs/row"
+        },
+        "order_changed": {
+          "type": "boolean"
+        },
+        "defer_reorder_until_focus_exit": {
+          "type": "boolean"
+        },
+        "queue_projection_basis_hash": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "order_changed": {
+                "const": true
+              }
+            },
+            "required": [
+              "order_changed"
+            ]
+          },
+          "then": {
+            "properties": {
+              "defer_reorder_until_focus_exit": {
+                "const": true
+              }
+            }
+          }
+        }
+      ]
+    },
+    "rowRemoval": {
+      "type": "object",
+      "required": [
+        "item_id",
+        "removal_cause",
+        "preserve_until_focus_exit",
+        "queue_projection_basis_hash"
+      ],
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "removal_cause": {
+          "type": "string",
+          "enum": [
+            "FILTER_EXIT",
+            "VISIBILITY_EXIT",
+            "ITEM_CLOSED",
+            "ITEM_SUPERSEDED",
+            "ACCESS_REBIND_REQUIRED"
+          ]
+        },
+        "preserve_until_focus_exit": {
+          "type": "boolean"
+        },
+        "queue_projection_basis_hash": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "removal_cause": {
+                "const": "FILTER_EXIT"
+              }
+            },
+            "required": [
+              "removal_cause"
+            ]
+          },
+          "then": {
+            "properties": {
+              "preserve_until_focus_exit": {
+                "const": true
+              }
+            }
+          }
+        }
+      ]
+    },
+    "badgeUpdate": {
+      "type": "object",
+      "required": [
+        "item_id",
+        "basis_hash",
+        "customer_unread_count",
+        "internal_unread_count",
+        "customer_activity_module_badge_count",
+        "internal_activity_module_badge_count_or_null",
+        "latest_change_lane_or_null"
+      ],
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "basis_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "customer_unread_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "internal_unread_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "customer_activity_module_badge_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "internal_activity_module_badge_count_or_null": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "latest_change_lane_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "CUSTOMER_VISIBLE",
+            "INTERNAL_ONLY",
+            "MIXED_VISIBLE",
+            null
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "delivery_class": {
+            "const": "SNAPSHOT"
+          }
+        },
+        "required": [
+          "delivery_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "causal_semantic_action_id": {
+            "type": "null"
+          },
+          "row_removals": {
+            "maxItems": 0
+          },
+          "badge_updates": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,423 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/compute_result.schema.json",
+  "title": "ComputeResult",
+  "description": "Deterministic compute artifact. This schema freezes one manifest-scoped outcome computation, including execution context, lifecycle state, reportable totals, and any blocking diagnostics.",
+  "type": "object",
+  "required": [
+    "compute_id",
+    "manifest_id",
+    "artifact_type",
+    "execution_mode",
+    "analysis_only",
+    "non_compliance_config_refs",
+    "counterfactual_basis",
+    "lifecycle_state",
+    "rule_version_ref",
+    "reporting_scope",
+    "effective_partition_scope_refs",
+    "basis_profile_ref_or_null",
+    "quarterly_basis_profile_or_null",
+    "adjustment_inclusion_policy",
+    "adjustment_scope_source",
+    "money_profile",
+    "totals",
+    "assumptions",
+    "diagnostic_reason_codes",
+    "diagnostic_artifact_refs",
+    "computed_at",
+    "contract"
+  ],
+  "properties": {
+    "compute_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_type": {
+      "const": "ComputeResult"
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": [
+        "COMPLIANCE",
+        "ANALYSIS"
+      ]
+    },
+    "analysis_only": {
+      "type": "boolean"
+    },
+    "non_compliance_config_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "counterfactual_basis": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "NOT_RUN",
+        "RUNNING",
+        "COMPUTED",
+        "BLOCKED",
+        "SUPERSEDED"
+      ]
+    },
+    "rule_version_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reporting_scope": {
+      "type": "string",
+      "enum": [
+        "year_end",
+        "quarterly_update",
+        "estimate_only"
+      ]
+    },
+    "effective_partition_scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "basis_profile_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "quarterly_basis_profile_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "PERIODIC",
+        "CUMULATIVE",
+        null
+      ]
+    },
+    "adjustment_inclusion_policy": {
+      "type": "string",
+      "enum": [
+        "RECORD_ONLY",
+        "APPLY_SCOPE_FILTERED_ADJUSTMENTS"
+      ]
+    },
+    "adjustment_scope_source": {
+      "type": "string",
+      "enum": [
+        "EXECUTABLE_REPORTING_SCOPE",
+        "COUNTERFACTUAL_ANALYSIS_SCOPE"
+      ]
+    },
+    "money_profile": {
+      "$ref": "./schema_bundle.schema.json#/$defs/moneyProfile"
+    },
+    "totals": {
+      "type": "object",
+      "default": {},
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "$ref": "./schema_bundle.schema.json#/$defs/moneyValue"
+          },
+          {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "./schema_bundle.schema.json#/$defs/moneyValue"
+            }
+          }
+        ]
+      }
+    },
+    "assumptions": {
+      "type": "object",
+      "default": {},
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "diagnostic_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "diagnostic_artifact_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "computed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "contract": {
+      "$ref": "./schema_bundle.schema.json#/$defs/artifactContract"
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "COMPLIANCE"
+          }
+        },
+        "required": [
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "analysis_only": {
+            "const": false
+          },
+          "non_compliance_config_refs": {
+            "maxItems": 0
+          },
+          "counterfactual_basis": {
+            "type": "null"
+          },
+          "adjustment_scope_source": {
+            "const": "EXECUTABLE_REPORTING_SCOPE"
+          },
+          "reporting_scope": {
+            "enum": [
+              "year_end",
+              "quarterly_update",
+              "estimate_only"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "ANALYSIS"
+          }
+        },
+        "required": [
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "analysis_only": {
+            "const": true
+          },
+          "counterfactual_basis": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reporting_scope": {
+            "const": "quarterly_update"
+          }
+        },
+        "required": [
+          "reporting_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "basis_profile_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "quarterly_basis_profile_or_null": {
+            "type": "string",
+            "enum": [
+              "PERIODIC",
+              "CUMULATIVE"
+            ]
+          },
+          "adjustment_inclusion_policy": {
+            "const": "RECORD_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reporting_scope": {
+            "not": {
+              "const": "quarterly_update"
+            }
+          }
+        },
+        "required": [
+          "reporting_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "quarterly_basis_profile_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "adjustment_inclusion_policy": {
+            "const": "APPLY_SCOPE_FILTERED_ADJUSTMENTS"
+          }
+        },
+        "required": [
+          "adjustment_inclusion_policy"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reporting_scope": {
+            "enum": [
+              "year_end",
+              "estimate_only"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "COMPUTED",
+              "SUPERSEDED"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "totals": {
+            "minProperties": 1
+          },
+          "computed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "BLOCKED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "totals": {
+            "maxProperties": 0
+          },
+          "diagnostic_reason_codes": {
+            "minItems": 1
+          },
+          "diagnostic_artifact_refs": {
+            "minItems": 1
+          },
+          "computed_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "NOT_RUN",
+              "RUNNING"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "totals": {
+            "maxProperties": 0
+          },
+          "diagnostic_reason_codes": {
+            "maxItems": 0
+          },
+          "diagnostic_artifact_refs": {
+            "maxItems": 0
+          },
+          "computed_at": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ]
+}

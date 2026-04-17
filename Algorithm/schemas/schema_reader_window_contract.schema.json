@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/schema_reader_window_contract.schema.json",
+  "title": "SchemaReaderWindowContract",
+  "description": "Shared schema-reader compatibility contract. This schema freezes the active writer bundle, the supported reader bundle set, reader_floor_schema_version semantics, protected_historical_bundle_hashes semantics, and the fail-closed policies governing historical manifest continuity, destructive contract timing, rollback safety, fail-forward posture, and replay or restore compatibility.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "compatibility_window_ref",
+    "writer_schema_bundle_hash",
+    "supported_reader_schema_bundle_hashes",
+    "protected_historical_schema_bundle_hashes",
+    "window_state",
+    "historical_manifest_policy",
+    "destructive_change_policy",
+    "rollback_boundary_policy",
+    "fail_forward_policy",
+    "replay_restore_policy"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "SCHEMA_READER_WINDOW_CONTRACT_V1"
+    },
+    "compatibility_window_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "writer_schema_bundle_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "supported_reader_schema_bundle_hashes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "protected_historical_schema_bundle_hashes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "window_state": {
+      "type": "string",
+      "enum": [
+        "EXPAND_ONLY_PREVIOUS_READERS_SUPPORTED",
+        "BACKFILL_IN_PROGRESS_PREVIOUS_READERS_SUPPORTED",
+        "VERIFIED_PREVIOUS_READERS_SUPPORTED",
+        "CONTRACT_ELIGIBLE_WINDOW_CLOSED"
+      ]
+    },
+    "historical_manifest_policy": {
+      "const": "FROZEN_MANIFESTS_REQUIRE_RECORDED_BUNDLE_OR_COMPATIBLE_READER"
+    },
+    "destructive_change_policy": {
+      "const": "DESTRUCTIVE_CHANGE_BLOCKED_UNTIL_WINDOW_CLOSED"
+    },
+    "rollback_boundary_policy": {
+      "const": "ROLLBACK_ALLOWED_ONLY_WHILE_PREVIOUS_READERS_SUPPORTED"
+    },
+    "fail_forward_policy": {
+      "const": "FAIL_FORWARD_REQUIRED_AFTER_WINDOW_CLOSE_OR_BREAKING_CONTRACT"
+    },
+    "replay_restore_policy": {
+      "const": "RESTORE_AND_REPLAY_REQUIRE_WINDOW_COMPATIBLE_READER"
+    }
+  },
+  "additionalProperties": false
+}

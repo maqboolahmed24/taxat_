@@ -31,6 +31,12 @@ They share typography, motion discipline, accessibility standards, and auditabil
 ### A. Decision workspace
 This is the calm-shell workspace described throughout this file and constrained by `low_noise_experience_contract.md`.
 It optimizes for one current posture, one safe next move, and progressive disclosure of forensic depth.
+Across calm-shell, collaboration, investigation, and native detached embodiments, keep the shared
+`OperatorInteractionLayer` pinned to selector profile `OPERATOR_SEMANTIC_SELECTORS_V1`,
+`SAME_OBJECT_SAME_SHELL_INLINE_RECOVERY`,
+`VISIBILITY_SCOPED_LANES_WITH_CURRENT_FIRST_ARTIFACTS`,
+`SUMMARY_FIRST_PLAIN_LANGUAGE_MODULES`, and
+`SUPPORT_ONLY_PARENT_BOUND_CLOSE_RETURNS_FOCUS`.
 
 ### B. Admin/Governance Console
 This is a high-control control-plane interface for tenant configuration, access policy, authority-link operations, retention, and audit investigation.
@@ -39,15 +45,53 @@ It optimizes for comparison, staged mutation, blast-radius review, and append-on
 The Admin/Governance Console is **not** a variant of the calm shell.
 In that surface, visible denials, explicit matrix cells, inventory tables, diff review, and audit sidecars are material features rather than noise.
 When the task involves tenant policy, role or authority-link management, retention, erasure, legal hold, or audit reconstruction, use the governance-console architecture in `admin_governance_console_architecture.md`.
+For the tenant-configuration route specifically:
+
+- preserve the fixed section order `Tenant profile`, `Security posture`, `Authority and environments`,
+  `Connector policy`, `Approval and change control`, and `Notifications & evidence`
+- keep inline policy help inside the active form rather than behind tooltip-only or detached help
+  affordances
+- keep blast-radius review, staged diffs, approval composition, and config history understandable in
+  one shell without hiding consequence review behind modal chains
+- never let a high-risk setting look committed because a field blurred; only explicit stage, submit,
+  discard, or rebase posture may advance it
+- keep the shared `GovernanceInteractionLayer` pinned to one canonical governance-density profile,
+  one canonical inventory/filter grammar, same-shell staged diff and basket continuity, active-slice
+  export binding, and focus-anchor or roving-selection keyboard restoration across all governance
+  routes
 
 ### C. Customer/Client portal
 Client-facing experiences SHALL use `customer_client_portal_experience_contract.md` and a separate task-centric navigation model.
 The client portal SHALL:
 
 - translate gates, trust, workflow, and authority posture into plain-language status, tasks, deadlines, and confirmations
+- keep the `Home` first view in the fixed order `PORTAL_HEADER -> STATUS_HERO -> TASK_QUEUE -> RECENT_ACTIVITY`
+- carry a concise reassurance line in `PORTAL_HEADER` and align the dominant `STATUS_HERO` CTA to one explicit task rather than parallel first-view calls to action
+- keep the `STATUS_HERO` status vocabulary literal and coarse, and keep `TASK_QUEUE` in the fixed
+  bucket order `Do now -> Coming up -> Done` without rendering empty parallel task sections
+- keep portal due labels literal and client-safe: use explicit `Due ...` or `Overdue ...` dates
+  when governed due points exist, otherwise use `No deadline yet`
+- keep the `Documents` route in the fixed order `DOCUMENT_INBOX -> UPLOAD_PANEL -> UPLOAD_STATUS_LIST -> DOCUMENT_HISTORY`
+- require document request cards to expose one clear why-label, one clear due-label, and a separate current artifact target so replacement/retry history never reads as the active document
+- preserve the governed upload affordance set `BROWSE`, `DRAG_DROP`, and `CAMERA_CAPTURE` across browser, native, and responsive embodiments
+- keep the `Approvals` route in the fixed order `APPROVAL_SUMMARY -> CHANGE_DIGEST -> DECLARATION_PANEL -> SIGN_OFF_PANEL`
+- require approval packs to expose one compact change digest, explicit acknowledgement progress,
+  readable declaration preview/download/print actions, one explicit sign-off stage, one explicit
+  step-up checkpoint state, and a receipt state that stays separate from declaration export
+  affordances
+- keep approval review, step-up, signature submission, receipt-pending feedback, and receipt
+  completion inside the same portal shell and the same approval-pack context unless a
+  provider-owned checkpoint explicitly requires external handoff
 - avoid raw reason codes, manifest lineage, graph-first navigation, Packet Forge, and other observatory modules as first-view surfaces
 - limit persistent global navigation to at most five destinations: `Home`, `Documents`, `Approvals`, `Onboarding` when active, and `Help`
+- keep reconnect, stale, degraded, draft-resume, and limitation recovery inside the same mounted
+  portal shell with one promoted support region instead of stacked warning/help treatments
+- keep the shared `PortalInteractionLayer` pinned to task-first spacing, literal client-safe status
+  language, semantic selector profile `PORTAL_SEMANTIC_SELECTORS_V1`, same-shell contextual return,
+  current-primary-history-secondary artifact posture, `STACK_SUPPORT_BELOW_PRIMARY`, and
+  `SUBTLE_CAUSAL_ONLY`
 - optimize for reassurance, low-friction completion, and mobile-first document capture rather than expert investigation
+- use `collaboration_workspace_contract.md` for shared staff/customer request threads and issue-resolution workspaces rather than inventing a separate conversation model
 
 When a proposal mixes staff and client concerns, separate the flows rather than compromise both.
 
@@ -55,8 +99,9 @@ When a proposal mixes staff and client concerns, separate the flows rather than 
 
 ## Production profile precedence
 The observatory language in this document is the semantic underlay, not a requirement that every named artifact be simultaneously visible.
+`frontend_shell_and_interaction_law.md` is the authoritative cross-platform shell and route contract for browser and native product surfaces; it governs shell ownership, same-object continuity, state presentation, artifact handling, accessibility, and UI disclosure fencing across all profiles.
 For the default staff decision workspace, `low_noise_experience_contract.md` takes precedence over any later guidance that would otherwise create competing focal points, persistent multi-rail scan paths, ornamental motion, or parallel primary actions.
-The Admin/Governance Console and customer/client portal use their own dedicated architecture contracts.
+The Admin/Governance Console and customer/client portal use their own dedicated architecture contracts, but they SHALL still obey the cross-platform shell law above.
 
 In production, the interface SHALL behave as a **calm decision workspace powered by an observatory backplane**.
 That means:
@@ -82,6 +127,32 @@ The visual and interaction model should communicate:
 - liveness where authority, workflow, or submission state is moving
 - containment where risk or drift is unresolved
 - progression where one safe next move exists
+
+---
+
+## Structural laws for every surface
+
+Every embodied surface in this product SHALL obey the following laws before any aesthetic preference,
+component novelty, or local workflow convenience:
+
+- same object, same shell
+- one screen, one dominant question, one dominant action
+- when the dominant action is mutation-capable, visible secondary actions remain non-mutating
+- one promoted support region at most unless compare or blocker review requires more
+- calm by default, explicit by exception
+- truth before polish
+- continuity before cleverness
+- summary first, detail on demand
+- edge-case integrity is structural, not finish work
+- accessibility, performance, and observability are design constraints, not validation afterthoughts
+
+These laws apply equally to browser, native desktop, mobile, embedded, and constrained-width
+variants.
+
+Where the owning route contract exposes machine-readable shell metadata, it SHOULD preserve the
+same laws through explicit fields such as `shell_family`, `object_anchor_ref`,
+`dominant_question`, `interaction_layer`, `settlement_state`, and `recovery_posture` so browser,
+native, automation, and support tooling all preserve the same mental model mechanically.
 
 ---
 
@@ -171,6 +242,25 @@ The default product MUST use a calm-shell layout with one vertical reading path 
 The richer observatory surfaces below remain valid as semantic source modules and investigation-mode views only.
 They SHALL NOT appear as concurrent peer regions on first load or during ordinary progression.
 
+### Cross-platform shell morphology
+
+The shell may change topology across wide browser, narrow browser, embedded, or native-window
+contexts, but it SHALL NOT change meaning.
+
+- the same manifest, work item, client request, approval pack, onboarding step, or governance object
+  SHALL preserve the same shell grammar across deep links, route restores, notification opens,
+  rebase recovery, and viewport changes
+- wide layouts MAY place the promoted support region in a drawer, inspector, or sidecar; narrow or
+  embedded layouts SHALL collapse to one promoted support region at a time while keeping the same
+  reading order, active section, and focus anchor
+- status, limitation, draft-resume, and recovery posture SHALL mount inside the existing shell rather
+  than replacing it with a different metaphor or a full-screen loading state
+- inline freshening SHALL preserve object anchor, dominant action posture, and active focus/detail
+  context whenever the same object still exists
+- artifacts such as uploads, approval packs, receipts, exports, and print previews SHALL open with a
+  summary-first handoff card showing current status, governing identity, and current-versus-
+  historical lineage before the full preview or download affordance
+
 ### Investigation-mode source surfaces
 When the user asks for deeper inspection, compare, or audit depth, richer observatory modules may expand as drawer content, focus modes, or explicit deep-work routes.
 They remain valuable, but they are not the default first-view shell.
@@ -221,6 +311,11 @@ Amendment initiation and amendment submission must feel like legally distinct ph
 ## Signature observatory modules
 
 These modules remain valid semantic building blocks, but in the production default they should usually appear through `DETAIL_DRAWER`, focus mode, or explicit investigation/audit routes rather than as simultaneous first-view regions.
+For the calm shell specifically: `Manifest Ribbon` SHALL compress into `CONTEXT_BAR`;
+`Decision Constellation`, `Gate Lattice`, and `Trust Prism` SHALL compress into
+`DECISION_SUMMARY`; `Workflow Choreographer` SHALL compress into `ACTION_STRIP`; and
+`Scope Composer` SHALL remain an explicit pre-manifest composition route rather than becoming a
+fifth persistent shell surface after launch.
 
 ### 1. Scope Composer
 A radial or orbital composition tool for `requested_scope[]`.
@@ -379,6 +474,27 @@ Innovative characteristics:
 Why it matters:
 It reinforces credibility and helps investigations without overwhelming normal users.
 
+### Low-noise detail-drawer binding
+Inside the production `DETAIL_DRAWER`, the user-facing module names are frozen as:
+
+- `EVIDENCE_TIDE` -> `Evidence Prism`
+- `PACKET_FORGE` -> `Packet Forge`
+- `AUTHORITY_TUNNEL` -> `Authority Handshake Tunnel`
+- `DRIFT_FIELD` -> `Drift Ripple Field`
+- `FOCUS_LENS` -> `Audit Echo Panel`
+- `TWIN_PANEL` -> `Twin Lens`
+
+Each entry must lead with one plain-language interpretation line before any visual topology.
+Do not make the user decode a graph, delta arc, ripple field, or tunnel before they understand what
+the module is saying and why it matters.
+
+Interaction posture is frozen as well:
+
+- `Twin Lens` and `Drift Ripple Field` are the lawful explicit compare modules
+- `Audit Echo Panel` is the lawful explicit audit module
+- `Evidence Prism`, `Packet Forge`, and `Authority Handshake Tunnel` remain explanation-first
+  modules inside the same drawer rather than separate high-noise route families
+
 ---
 
 ## Microinteraction rules
@@ -455,16 +571,120 @@ At minimum, define these first-class screens or macro-surfaces for staff/operato
 9. **Audit Echo View** — append-only event and trace inspection
 10. **Admin/Governance Console** — tenant settings, access policy, authority links, retention, and audit control-plane workflows
 
+### Staff inbox / triage rules
+The staff work inbox is not a generic backlog table.
+It is a governed triage surface with a stable semantic reading order.
+
+Rules:
+
+- each row should read in three bands: identity, triage signal, then quick action
+- `waiting_on_actor`, due posture, and split unread badges must stay visible without expanding the
+  row or opening a submenu
+- customer-visible unread and internal-only unread should remain separate badges because they answer
+  different triage questions
+- filter chips should mirror exact active filters and remain keyboard reachable before the row list
+- row quick actions should expose one dominant next move and at most two subordinate moves
+- live updates should refresh in place but defer focused-row reorder or removal until focus leaves
+- row and chip focus should be restorable from stable semantic anchors, not transient table index
+- the inbox should inherit `OperatorInteractionLayer` rather than invent route-local selector,
+  recovery, motion, or current-vs-history artifact behavior; keep recovery/notification posture
+  inline and preserve the same current-first support path used by the surrounding staff bucket
+
+### Customer request-list rules
+`/portal/requests` is not a generic ticket table.
+It is a portal queue surface and should therefore inherit the same portal interaction grammar as the
+rest of the client shell.
+
+Rules:
+
+- keep the queue hierarchy stable and literal: action required first, then review/waiting/completed
+- preserve one dominant customer-safe next move per visible row or explicit `NO_SAFE_ACTION`
+- keep current shared artifacts visually distinct from historical shared artifacts in every row
+- inherit `PortalInteractionLayer` rather than invent route-local spacing, selector grammar,
+  mobile-return behavior, or motion; the request list should feel like the same portal shell that
+  owns the contextual request-detail route
+
+### Collaboration drawer rules
+Shared work-item drawers are not interchangeable accordions.
+
+Rules:
+
+- keep the canonical drawer order `CUSTOMER_ACTIVITY -> INTERNAL_ACTIVITY -> FILES ->
+  LINKED_CONTEXT -> AUDIT_TRAIL` for staff and `CUSTOMER_ACTIVITY -> FILES` for customer-safe
+  projection
+- keep customer-visible and internal activity as separate modules with separate badges; do not merge
+  those lanes into one blended conversation or one blended unread count
+- show new activity by badging the inactive module and adding a quiet marker inside that module's
+  header; do not steal focus by auto-switching the expanded module
+- render `FILES` as explicit visibility buckets with `Shared with customer` before `Internal only`
+  on staff routes, and keep the current shared artifact visually distinct from shared history
+- treat `LINKED_CONTEXT` and `AUDIT_TRAIL` as investigation modules rather than as the default
+  landing surface for ordinary writable work
+
+### Collaboration composer rules
+The collaboration composer is a governed publish surface, not a generic chat box.
+
+Rules:
+
+- keep the composer reading order `COMPOSER_SWITCHER -> DRAFT_EDITOR -> ATTACHMENT_PICKER ->
+  PUBLISH_CONFIRMATION`
+- staff collaboration routes should default to the internal-note lane; switching into a
+  customer-visible publish path must be explicit and visibly labeled `Shared with customer`
+- request-for-info drafting should remain distinct from generic customer-visible comments so the
+  user can see whether they are asking a new question or answering the current one
+- preserve unsent drafts across refresh, reconnect, and stale rebase; rebase may block publish, but
+  it must not wipe the draft
+- staged attachments should inherit the currently selected publish visibility and require explicit
+  confirmation before customer-visible send
+
 ### Additional governance-console routes
 The Admin/Governance Console is specified in `admin_governance_console_architecture.md`.
+Across all governance routes:
+
+- filter chips must mirror the exact active route filters in canonical dimension order rather than
+  ad-hoc local summaries
+- ordinary inspectors, drawers, and redocked auxiliary surfaces must stay non-modal so resize,
+  stale rebase, and deep inspection do not erase comparison context
+- compaction may redock support surfaces, but it must not reset the mounted selection, focus anchor,
+  change basket, staged diff, guided handshake step, or active query slice while the same governed
+  object still resolves
+
 At minimum, define these routes or equivalent route families:
 
 1. **Governance Overview** — pending approvals, stale authority links, retention exceptions, and audit hotspots
+   The overview must keep one dominant attention summary plus worklist-backed supporting widgets so
+   no governance count, strip, or hotspot tape becomes a dead-end summary tile.
 2. **Tenant Configuration** — tenant profile, security posture, connector and authority environment policy, and change-control staging
+   The route must preserve staged diff and change-basket context through resize and rebase; reviewed
+   before/after posture is not allowed to collapse into blur-commit or modal-only review.
 3. **Access & Roles** — principal directory, role templates, permission matrix, delegation visibility, and policy simulation
+   The access route must preserve the reading order `PRINCIPAL_DIRECTORY -> WORKSPACE_CANVAS ->
+   ACCESS_INSPECTOR -> AUTHORITY_CHAIN_PANEL -> POLICY_SIMULATOR`, keep matrix-cell focus stable
+   under keyboard navigation and responsive collapse, and render the distinct `ALLOW`,
+   `ALLOW_MASKED`, `REQUIRE_STEP_UP`, `REQUIRE_APPROVAL`, and `DENY` outcomes as a layered
+   authority explanation rather than a generic pass/fail badge.
 4. **Authority Links** — client-scoped authority-link inventory, binding health, relink/unlink flows, and handshake history
+   The route must preserve the reading order `INVENTORY_RAIL -> WORKSPACE_CANVAS -> AUDIT_SIDECAR`,
+   keep the selected link and handshake step stable across collapse and refresh, render
+   token/client mismatch, delegation gaps, and environment drift as first-class status surfaces,
+   and keep the workspace module order `AuthorityLinkIdentityCard -> BindingHealthTimeline ->
+   HandshakeHistory -> AffectedOperationList -> PreflightChecklist`. Link and relink flows must use
+   a guided handshake stepper with explicit preflight checks rather than raw credential capture.
 5. **Retention & Privacy** — policy matrix, legal holds, erasure queue, and retention impact previews
+   The route must preserve the reading order `INVENTORY_RAIL -> WORKSPACE_CANVAS ->
+   RETENTION_IMPACT_PREVIEW -> AUDIT_SIDECAR`, keep the active mode explicit as `POLICIES`,
+   `LEGAL_HOLDS`, or `ERASURE`, keep statutory and legal blockers visible inline rather than hidden
+   in event text, keep the policy matrix readable with fixed row/column context, and keep
+   destructive erasure flows staged through review or approval posture rather than one-click delete
+   affordances.
 6. **Audit & Investigations** — append-only audit workbench, correlation filters, object-neighborhood reconstruction, and export controls
+   The route must preserve the reading order `INVENTORY_RAIL -> WORKSPACE_CANVAS ->
+   EVENT_DIFF_INSPECTOR -> AUDIT_SIDECAR`, keep one explicit selected event and one explicit focus
+   anchor under resize and rebase, keep the workbench module order
+   `AuditTape -> ObjectNeighborhood`, expose both upstream and downstream context around the
+   selected event, keep before/after change nuclei visible before any raw payload affordance, and
+   bind export controls to the active filtered slice so masked, approval-gated, and denied export
+   states never drift away from the current investigation context.
 
 ---
 
@@ -476,9 +696,16 @@ onto desktop primitives rather than browser route stacks.
   the main workspace window.
 - `DETAIL_DRAWER` SHOULD usually become a trailing inspector or detachable secondary pane rather than a
   route transition.
+- the primary macOS workspace window SHOULD publish one `NativeOperatorWorkspaceScene` so the
+  region order, mounted object anchor, detached-inspector posture, restoration state, and native
+  shortcut grammar remain explicit and testable.
 - multi-manifest work SHOULD prefer multiple windows or tabbed windows over deep nested tab stacks.
 - primary actions MUST be reachable through visible controls, keyboard shortcuts, and menu/command
   surfaces.
+- detached inspectors MUST remain support-only and MUST NOT introduce a second authoritative action
+  strip for the mounted object.
+- focus shortcuts SHOULD cover sidebar, primary canvas, and inspector targets explicitly, and scene
+  restoration SHOULD reopen the same object anchor or fail with an explicit invalidation reason.
 - dense evidence, audit, and comparison tables MAY use AppKit-backed views where native virtualization
   and column control materially improve investigation quality.
 - authority handoff, policy references, and HMRC-only tasks SHOULD open in the system browser rather
@@ -517,8 +744,15 @@ For every major UI surface, define a matching Playwright or XCUITest contract wi
 ### Selector strategy
 Use semantic `data-testid` attributes that reflect domain objects rather than visual styling. For
 native macOS surfaces, mirror the same identifiers through stable `accessibilityIdentifier` values.
+For staff/operator routes, these anchors correspond to
+`OperatorInteractionLayer.selector_profile = OPERATOR_SEMANTIC_SELECTORS_V1`.
 Examples:
 
+- `shell-family`
+- `object-anchor`
+- `dominant-question`
+- `settlement-state`
+- `recovery-posture`
 - `context-bar`
 - `decision-summary`
 - `action-strip`
@@ -537,6 +771,14 @@ Examples:
 - `workflow-choreographer`
 - `audit-echo-panel`
 - `consequence-rail`
+- `work-inbox`
+- `customer-activity`
+- `internal-activity`
+- `linked-context`
+- `audit-trail`
+- `native-identity-header`
+- `native-summary-card`
+- `native-detail-body`
 
 ### Governance-console selector strategy
 When the broader product is implementing the Admin/Governance Console, add selectors that reflect control-plane semantics rather than visual chrome.
@@ -553,12 +795,59 @@ Examples:
 - `policy-simulator`
 - `authority-link-inventory`
 - `authority-link-detail`
+- `authority-link-handshake-stepper`
+- `binding-health-timeline`
+- `handshake-history`
+- `affected-operation-list`
+- `preflight-checklist`
 - `retention-policy-matrix`
 - `legal-hold-register`
 - `erasure-queue`
 - `audit-investigation-workbench`
+- `object-neighborhood`
 - `audit-sidecar`
 - `blast-radius-panel`
+
+### Portal selector strategy
+Client-facing routes need the same semantic selector discipline as staff and governance surfaces.
+These anchors correspond to `PortalInteractionLayer.selector_profile = PORTAL_SEMANTIC_SELECTORS_V1`.
+Examples:
+
+- `portal-header`
+- `portal-route-tabs`
+- `status-hero`
+- `task-queue`
+- `document-inbox`
+- `upload-panel`
+- `upload-status-list`
+- `approval-summary`
+- `change-digest`
+- `declaration-panel`
+- `sign-off-panel`
+- `onboarding-stepper`
+- `step-workspace`
+- `support-panel`
+- `portal-inline-recovery`
+- `portal-limitation-notice`
+- `portal-receipt`
+- `portal-current-artifact`
+- `portal-history-list`
+- `request-detail-workspace`
+
+### Portal onboarding rules
+Portal onboarding is a guided route, not a long-lived wizard product.
+
+Rules:
+
+- keep the reading order `WELCOME_PANEL -> ONBOARDING_STEPPER -> STEP_WORKSPACE -> SUPPORT_PANEL`
+- keep exactly one primary onboarding step active at a time; completed steps should collapse into
+  short reviewable summaries rather than stay open as parallel forms
+- show save-and-return posture explicitly as live resume, reconfirmation-required, stale-review, or
+  terminal-not-available rather than inferring it from missing draft UI
+- use `STEP_WORKSPACE` to distinguish active-step work, reconfirmation review, stale review,
+  completion summary, and terminal exit/support handling
+- once onboarding completes or exits, remove the dedicated onboarding shell and drop the user back
+  into normal portal routes with a clear summary instead of leaving a permanent wizard destination
 
 ### What to test with Playwright / XCUITest
 At minimum, cover:
@@ -574,6 +863,10 @@ At minimum, cover:
 9. navigate the full experience using only keyboard input
 10. capture visual baselines for each trust and gate posture
 11. verify reduced-motion mode preserves clarity without ornamental transitions
+12. collapse the same object from wide to narrow layout and assert the route, dominant action, and
+    focus anchor remain stable while support regions reduce to one promoted region
+13. open current and historical artifacts for the same object and assert the current artifact remains
+    the default handoff target while historical variants stay explicitly secondary
 
 ### Design deliverables should include validation notes
 Whenever you propose a new screen or component, include:

@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/shell_dominance_contract.schema.json",
+  "title": "ShellDominanceContract",
+  "description": "Cross-shell salience contract. Freezes which surface owns the dominant question, which surface owns the dominant action posture, whether the shell has one safe next action or explicit NO_SAFE_ACTION, which promoted support surface stays subordinate, whether compare or audit multi-focus is explicit, and the shared renderer policies that forbid client-local hierarchy reinvention.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "summary_action_alignment_policy",
+    "dominant_question_surface_code",
+    "dominant_action_surface_code",
+    "dominant_action_ref_or_null",
+    "safe_action_state",
+    "promoted_support_surface_code_or_null",
+    "support_surface_role",
+    "supplemental_queue_policy",
+    "parallel_primary_posture",
+    "explicit_multifocus_mode",
+    "renderer_salience_policy",
+    "responsive_collapse_policy",
+    "detached_support_policy"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "SHELL_DOMINANCE_V1"
+    },
+    "summary_action_alignment_policy": {
+      "const": "SAME_DOMINANT_QUESTION"
+    },
+    "dominant_question_surface_code": {
+      "$ref": "#/$defs/surfaceCode"
+    },
+    "dominant_action_surface_code": {
+      "$ref": "#/$defs/surfaceCode"
+    },
+    "dominant_action_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "safe_action_state": {
+      "type": "string",
+      "enum": [
+        "ACTION_AVAILABLE",
+        "NO_SAFE_ACTION"
+      ]
+    },
+    "promoted_support_surface_code_or_null": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/supportSurfaceCode"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "support_surface_role": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "SUBORDINATE",
+        "INVESTIGATION",
+        "RECOVERY"
+      ]
+    },
+    "supplemental_queue_policy": {
+      "type": "string",
+      "enum": [
+        "NOT_APPLICABLE",
+        "PRIMARY_ACTION_MIRROR_ONLY",
+        "SECONDARY_TO_PRIMARY_ACTION"
+      ]
+    },
+    "parallel_primary_posture": {
+      "const": "DISALLOWED"
+    },
+    "explicit_multifocus_mode": {
+      "type": "string",
+      "enum": [
+        "DEFAULT",
+        "COMPARE",
+        "AUDIT"
+      ]
+    },
+    "renderer_salience_policy": {
+      "const": "SERVER_AUTHORED_ONLY"
+    },
+    "responsive_collapse_policy": {
+      "const": "PRESERVE_DOMINANT_SUMMARY_AND_ACTION"
+    },
+    "detached_support_policy": {
+      "const": "SUPPORT_ONLY_NEVER_PRIMARY"
+    }
+  },
+  "$defs": {
+    "surfaceCode": {
+      "type": "string",
+      "enum": [
+        "CONTEXT_BAR",
+        "DECISION_SUMMARY",
+        "ACTION_STRIP",
+        "DETAIL_DRAWER",
+        "STATUS_HERO",
+        "TASK_QUEUE",
+        "DOCUMENT_CENTER",
+        "APPROVAL_CENTER",
+        "STEP_WORKSPACE",
+        "SUPPORT_PANEL",
+        "LIMITATION_NOTICE",
+        "DRAFT_RESUME",
+        "ATTENTION_SUMMARY",
+        "WORKSPACE_CANVAS",
+        "AUDIT_SIDECAR",
+        "BLAST_RADIUS_PANEL",
+        "DIFF_PANEL",
+        "EXPORT_ELIGIBILITY_PANEL",
+        "APPROVAL_PANEL",
+        "PRIMARY_CANVAS",
+        "TRAILING_INSPECTOR"
+      ]
+    },
+    "supportSurfaceCode": {
+      "type": "string",
+      "enum": [
+        "DETAIL_DRAWER",
+        "SUPPORT_PANEL",
+        "LIMITATION_NOTICE",
+        "DRAFT_RESUME",
+        "AUDIT_SIDECAR",
+        "BLAST_RADIUS_PANEL",
+        "DIFF_PANEL",
+        "EXPORT_ELIGIBILITY_PANEL",
+        "APPROVAL_PANEL",
+        "TRAILING_INSPECTOR"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "support_surface_role": {
+            "const": "NONE"
+          }
+        },
+        "required": [
+          "support_surface_role"
+        ]
+      },
+      "then": {
+        "properties": {
+          "promoted_support_surface_code_or_null": {
+            "type": "null"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "promoted_support_surface_code_or_null": {
+            "$ref": "#/$defs/supportSurfaceCode"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "explicit_multifocus_mode": {
+            "enum": [
+              "COMPARE",
+              "AUDIT"
+            ]
+          }
+        },
+        "required": [
+          "explicit_multifocus_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "support_surface_role": {
+            "enum": [
+              "INVESTIGATION",
+              "RECOVERY"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,527 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/gate_admissibility_record.schema.json",
+  "title": "GateAdmissibilityRecord",
+  "description": "Blocking-gate admissibility record. This schema captures whether a suite result is eligible to satisfy a release gate without quarantine, waiver, freshness, or mixed-candidate defects.",
+  "type": "object",
+  "required": [
+    "admissibility_id",
+    "suite_result_ref",
+    "suite_family",
+    "candidate_environment_ref",
+    "artifact_digest",
+    "candidate_identity_hash",
+    "candidate_identity_contract",
+    "schema_bundle_hash",
+    "schema_reader_window_contract",
+    "schema_bundle_compatibility_gate_contract",
+    "migration_plan_ref",
+    "authority_sandbox_coverage_contract_or_null",
+    "supported_client_window_ref",
+    "restore_drill_ref",
+    "restore_checkpoint_ref",
+    "deterministic_golden_pack_ref",
+    "candidate_identity_match",
+    "freshness_verified",
+    "contract_window_consistent",
+    "rerun_scope_preserved",
+    "quarantine_state",
+    "admissibility_state",
+    "evaluated_at",
+    "reason_codes"
+  ],
+  "properties": {
+    "admissibility_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "suite_result_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "suite_family": {
+      "type": "string",
+      "enum": [
+        "SCHEMA_COMPATIBILITY",
+        "DETERMINISTIC_AND_STATE_MACHINE",
+        "NORTHBOUND_API",
+        "AUTHORITY_SANDBOX",
+        "OPERATOR_CLIENT",
+        "SECURITY",
+        "PERFORMANCE_AND_CANARY",
+        "RESTORE_DRILL",
+        "MIGRATION_VERIFICATION",
+        "SUPPLY_CHAIN",
+        "SUITE_ADMISSIBILITY"
+      ]
+    },
+    "candidate_environment_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_identity_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_identity_contract": {
+      "$ref": "https://taxat.dev/schemas/release_candidate_identity_contract.schema.json"
+    },
+    "schema_bundle_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema_reader_window_contract": {
+      "$ref": "https://taxat.dev/schemas/schema_reader_window_contract.schema.json"
+    },
+    "schema_bundle_compatibility_gate_contract": {
+      "$ref": "https://taxat.dev/schemas/schema_bundle_compatibility_gate_contract.schema.json"
+    },
+    "migration_plan_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "authority_sandbox_coverage_contract_or_null": {
+      "anyOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/authority_sandbox_coverage_contract.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "supported_client_window_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "restore_drill_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "restore_checkpoint_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "deterministic_golden_pack_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "candidate_identity_match": {
+      "type": "boolean"
+    },
+    "freshness_verified": {
+      "type": "boolean"
+    },
+    "contract_window_consistent": {
+      "type": "boolean"
+    },
+    "rerun_scope_preserved": {
+      "type": "boolean"
+    },
+    "quarantine_state": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "FLAKE_QUARANTINED",
+        "MUTED",
+        "MANUAL_WAIVER"
+      ]
+    },
+    "admissibility_state": {
+      "type": "string",
+      "enum": [
+        "ADMISSIBLE",
+        "INADMISSIBLE"
+      ]
+    },
+    "evaluated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "suite_family": {
+            "const": "AUTHORITY_SANDBOX"
+          }
+        },
+        "required": [
+          "suite_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "authority_sandbox_coverage_contract_or_null": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "authority_sandbox_coverage_contract_or_null": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "authority_sandbox_coverage_contract_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "suite_family": {
+            "const": "AUTHORITY_SANDBOX"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "suite_family": {
+            "const": "DETERMINISTIC_AND_STATE_MACHINE"
+          }
+        },
+        "required": [
+          "suite_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "deterministic_golden_pack_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "deterministic_golden_pack_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "deterministic_golden_pack_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "suite_family": {
+            "const": "DETERMINISTIC_AND_STATE_MACHINE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "admissibility_state": {
+            "const": "ADMISSIBLE"
+          }
+        },
+        "required": [
+          "admissibility_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "candidate_identity_match": {
+            "const": true
+          },
+          "freshness_verified": {
+            "const": true
+          },
+          "contract_window_consistent": {
+            "const": true
+          },
+          "rerun_scope_preserved": {
+            "const": true
+          },
+          "quarantine_state": {
+            "const": "NONE"
+          },
+          "reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "quarantine_state": {
+            "enum": [
+              "FLAKE_QUARANTINED",
+              "MUTED",
+              "MANUAL_WAIVER"
+            ]
+          }
+        },
+        "required": [
+          "quarantine_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "admissibility_state": {
+            "const": "INADMISSIBLE"
+          },
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "suite_family": {
+            "const": "RESTORE_DRILL"
+          }
+        },
+        "required": [
+          "suite_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "restore_drill_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "restore_checkpoint_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "restore_drill_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "restore_drill_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "suite_family": {
+            "const": "RESTORE_DRILL"
+          },
+          "restore_checkpoint_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "restore_checkpoint_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "restore_checkpoint_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "suite_family": {
+            "const": "RESTORE_DRILL"
+          },
+          "restore_drill_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "suite_family": {
+            "const": "MIGRATION_VERIFICATION"
+          }
+        },
+        "required": [
+          "suite_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "migration_plan_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "suite_family": {
+            "const": "OPERATOR_CLIENT"
+          }
+        },
+        "required": [
+          "suite_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "supported_client_window_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "candidate_identity_match": {
+            "const": false
+          }
+        },
+        "required": [
+          "candidate_identity_match"
+        ]
+      },
+      "then": {
+        "properties": {
+          "admissibility_state": {
+            "const": "INADMISSIBLE"
+          },
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "freshness_verified": {
+            "const": false
+          }
+        },
+        "required": [
+          "freshness_verified"
+        ]
+      },
+      "then": {
+        "properties": {
+          "admissibility_state": {
+            "const": "INADMISSIBLE"
+          },
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "contract_window_consistent": {
+            "const": false
+          }
+        },
+        "required": [
+          "contract_window_consistent"
+        ]
+      },
+      "then": {
+        "properties": {
+          "admissibility_state": {
+            "const": "INADMISSIBLE"
+          },
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "rerun_scope_preserved": {
+            "const": false
+          }
+        },
+        "required": [
+          "rerun_scope_preserved"
+        ]
+      },
+      "then": {
+        "properties": {
+          "admissibility_state": {
+            "const": "INADMISSIBLE"
+          },
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reason_codes": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "reason_codes"
+        ]
+      },
+      "then": {
+        "properties": {
+          "admissibility_state": {
+            "const": "INADMISSIBLE"
+          }
+        }
+      }
+    }
+  ]
+}

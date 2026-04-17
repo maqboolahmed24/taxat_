@@ -1,0 +1,23 @@
+# Run Engine Branch and Terminalization Matrix
+
+| Branch ID | Phase | Trigger | True Path | False Path | Terminal Outcome |
+| --- | --- | --- | --- | --- | --- |
+| `BR_ACCESS_BLOCKED_EARLY_RETURN` | `P01` | Authorization or access-scope binding fails before any manifest allocation. | Return `ACCESS_BLOCKED_RESPONSE(...)` with low-noise posture envelope. | Continue into runtime-scope resolution and manifest-strategy selection. | Terminal before manifest allocation. |
+| `BR_INVALID_SCOPE_OR_PRIOR_CONTEXT` | `P02` | Runtime scope grammar or prior-manifest context fails validation. | Return `ERROR(...)` before manifest allocation or reuse. | Proceed to manifest reuse / continuation / replay selection. | Hard stop before manifest allocation. |
+| `BR_EXISTING_DECISION_BUNDLE_RETURN` | `P02` | The run matches a terminal manifest lineage whose `DecisionBundle` may be safely reused. | Return the existing `DecisionBundle` instead of allocating a continuation child. | Continue into fresh, continuation, or replay manifest work. | Terminal via idempotent bundle reuse. |
+| `BR_MANIFEST_REUSE_VS_CONTINUATION_VS_REPLAY` | `P03` | Reuse strategy chooses fresh manifest, same-manifest reuse, continuation child, or replay child. | Lineage refs, inheritance modes, and branch-decision audit context are frozen into manifest context. | n/a | Nonterminal lineage fork that governs the rest of the run. |
+| `BR_LATE_DATA_SPAWN_REVIEW_EXCLUDE` | `P04` | Late data appears while building or reusing the pre-seal context. | Spawn child, surface review posture, or exclude late data according to policy bindings. | Continue with the sealed pre-start basis. | Usually nonterminal, but may force review or child lineage before seal. |
+| `BR_PRESEAL_BLOCKED_VS_SEALED` | `P05` | The ordered pre-seal gates resolve as block/review or allow seal. | Persist pre-start terminal context or review-required posture and stop before `RunStarted`. | Seal the manifest and permit later `RunStarted` claim. | Blocked or review-required pre-start outcome vs nonterminal sealed success. |
+| `BR_PRESTART_VS_POSTSTART_SYSTEM_FAULT` | `P05` | A system fault happens before `RunStarted` or after command-side start. | Pre-start faults finalize `BLOCKED` even if the manifest already sealed. | Post-start faults use started-run failure handling and may enter `FAILED` semantics. | Boundary between blocked pre-start and failed post-start posture. |
+| `BR_REPLAY_REUSES_FROZEN_POSTSEAL_BASIS` | `P04` | The request is a replay-capable lineage path with frozen post-seal basis available. | Reuse the frozen post-seal basis and replay from deterministic lineage-bound artifacts. | Build or recover a fresh pre-seal basis under ordinary collection rules. | Nonterminal lineage reuse that constrains later compute and audit expectations. |
+| `BR_EARLY_FILING_READINESS_TERMINALIZATION` | `P09` | Authority or filing-readiness validation yields non-pass posture before packet preparation. | Emit filing or amendment gate posture and finalize blocked/review-required outcome early. | Proceed into drift, trust, amendment, and filing packet work. | Early blocked or review-required terminalization. |
+| `BR_TRUST_POSTURE_TERMINALIZATION` | `P13` | Trust posture is already decisive and no later amendment or filing stage remains required. | Publish live projections and return a terminal bundle from trust posture. | Continue into amendment and filing stages. | Completed, blocked, or review-required terminalization before filing logic. |
+| `BR_AMENDMENT_INTENT_VS_AMENDMENT_SUBMIT` | `P14` | Runtime scope requests amendment intent, amendment submit, or neither. | Intent-to-amend readiness and later submit readiness remain distinct state-machine progressions. | No amendment progression occurs and filing logic remains ordinary. | May terminalize blocked/review-required on amendment gate or continue to filing. |
+| `BR_SUBMIT_VS_NON_SUBMIT` | `P16` | Runtime scope requests actual submission and the packet is approved to submit. | Execute governed transmit, bounded recovery, and authority reconciliation. | End without transmit while retaining packet or trust posture as the latest truth. | May remain pending external confirmation, complete, or block/review depending on authority outcome. |
+
+## Coverage Notes
+
+- Same-manifest retry returns the existing `DecisionBundle` instead of allocating a continuation child.
+- Replay remains frozen-basis reuse, not a fresh authority read.
+- Pre-start blocked posture is distinct from post-start failure posture.
+- Trust-posture terminalization and filing-readiness terminalization are both captured explicitly.

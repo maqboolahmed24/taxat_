@@ -9,18 +9,46 @@
         "set_id",
         "manifest_id",
         "artifact_type",
+        "normalization_context_ref",
+        "conflict_detection_policy_ref",
+        "business_partition_refs",
         "items",
+        "open_conflict_ids",
+        "blocking_conflict_ids",
+        "resolution_frontier",
+        "open_conflict_count",
+        "blocking_conflict_count",
+        "dominant_blocking_class",
         "contract"
       ],
       "properties": {
         "set_id": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "manifest_id": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "artifact_type": {
           "const": "ConflictSet"
+        },
+        "normalization_context_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "conflict_detection_policy_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "business_partition_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
         },
         "items": {
           "type": "array",
@@ -28,6 +56,54 @@
             "$ref": "./conflict_record.schema.json"
           },
           "uniqueItems": true
+        },
+        "open_conflict_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "blocking_conflict_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "resolution_frontier": {
+          "type": "string",
+          "enum": [
+            "CLEAR",
+            "MONITORING_ONLY",
+            "BLOCKING_PRESENT"
+          ]
+        },
+        "open_conflict_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blocking_conflict_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dominant_blocking_class": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "BLOCKS_AUTOMATION",
+            "BLOCKS_REVIEW_PROGRESS",
+            "BLOCKS_FILING",
+            "BLOCKS_AMENDMENT",
+            "BLOCKS_ERASURE",
+            "BLOCKS_RUN",
+            "BLOCKS_AUTHORITY_CALL",
+            null
+          ]
         },
         "contract": {
           "$ref": "./schema_bundle.schema.json#/$defs/artifactContract"
@@ -38,21 +114,609 @@
       "type": "object",
       "required": [
         "artifact_contract_hash",
+        "item_identity_hash",
+        "unresolved_conflict_hash",
+        "produced_at",
         "set_hash"
       ],
       "properties": {
         "artifact_contract_hash": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
+        },
+        "item_identity_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unresolved_conflict_hash": {
+          "type": "string",
+          "minLength": 1
         },
         "set_hash": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "produced_at": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "open_conflict_count": {
+            "const": 0
+          }
+        },
+        "required": [
+          "open_conflict_count"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resolution_frontier": {
+            "const": "CLEAR"
+          },
+          "blocking_conflict_count": {
+            "const": 0
+          },
+          "open_conflict_ids": {
+            "maxItems": 0
+          },
+          "blocking_conflict_ids": {
+            "maxItems": 0
+          },
+          "dominant_blocking_class": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resolution_frontier": {
+            "const": "CLEAR"
+          }
+        },
+        "required": [
+          "resolution_frontier"
+        ]
+      },
+      "then": {
+        "properties": {
+          "open_conflict_count": {
+            "const": 0
+          },
+          "blocking_conflict_count": {
+            "const": 0
+          },
+          "open_conflict_ids": {
+            "maxItems": 0
+          },
+          "blocking_conflict_ids": {
+            "maxItems": 0
+          },
+          "dominant_blocking_class": {
+            "type": "null"
+          },
+          "items": {
+            "not": {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "resolution_state": {
+                    "enum": [
+                      "OPEN",
+                      "IN_PROGRESS",
+                      "MONITORING"
+                    ]
+                  }
+                },
+                "required": [
+                  "resolution_state"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "open_conflict_count": {
+            "minimum": 1
+          },
+          "blocking_conflict_count": {
+            "const": 0
+          }
+        },
+        "required": [
+          "open_conflict_count",
+          "blocking_conflict_count"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resolution_frontier": {
+            "const": "MONITORING_ONLY"
+          },
+          "dominant_blocking_class": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resolution_frontier": {
+            "const": "MONITORING_ONLY"
+          }
+        },
+        "required": [
+          "resolution_frontier"
+        ]
+      },
+      "then": {
+        "properties": {
+          "open_conflict_count": {
+            "minimum": 1
+          },
+          "blocking_conflict_count": {
+            "const": 0
+          },
+          "open_conflict_ids": {
+            "minItems": 1
+          },
+          "blocking_conflict_ids": {
+            "maxItems": 0
+          },
+          "dominant_blocking_class": {
+            "type": "null"
+          },
+          "items": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "blocking_class": {
+                  "const": "NON_BLOCKING"
+                },
+                "resolution_state": {
+                  "enum": [
+                    "OPEN",
+                    "IN_PROGRESS",
+                    "MONITORING"
+                  ]
+                }
+              },
+              "required": [
+                "blocking_class",
+                "resolution_state"
+              ]
+            },
+            "not": {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "blocking_class": {
+                    "enum": [
+                      "BLOCKS_AUTOMATION",
+                      "BLOCKS_REVIEW_PROGRESS",
+                      "BLOCKS_FILING",
+                      "BLOCKS_AMENDMENT",
+                      "BLOCKS_ERASURE",
+                      "BLOCKS_RUN",
+                      "BLOCKS_AUTHORITY_CALL"
+                    ]
+                  },
+                  "resolution_state": {
+                    "enum": [
+                      "OPEN",
+                      "IN_PROGRESS",
+                      "MONITORING"
+                    ]
+                  }
+                },
+                "required": [
+                  "blocking_class",
+                  "resolution_state"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "blocking_conflict_count": {
+            "minimum": 1
+          }
+        },
+        "required": [
+          "blocking_conflict_count"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resolution_frontier": {
+            "const": "BLOCKING_PRESENT"
+          },
+          "dominant_blocking_class": {
+            "type": "string",
+            "enum": [
+              "BLOCKS_AUTOMATION",
+              "BLOCKS_REVIEW_PROGRESS",
+              "BLOCKS_FILING",
+              "BLOCKS_AMENDMENT",
+              "BLOCKS_ERASURE",
+              "BLOCKS_RUN",
+              "BLOCKS_AUTHORITY_CALL"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resolution_frontier": {
+            "const": "BLOCKING_PRESENT"
+          }
+        },
+        "required": [
+          "resolution_frontier"
+        ]
+      },
+      "then": {
+        "properties": {
+          "open_conflict_count": {
+            "minimum": 1
+          },
+          "blocking_conflict_count": {
+            "minimum": 1
+          },
+          "open_conflict_ids": {
+            "minItems": 1
+          },
+          "blocking_conflict_ids": {
+            "minItems": 1
+          },
+          "dominant_blocking_class": {
+            "type": "string",
+            "enum": [
+              "BLOCKS_AUTOMATION",
+              "BLOCKS_REVIEW_PROGRESS",
+              "BLOCKS_FILING",
+              "BLOCKS_AMENDMENT",
+              "BLOCKS_ERASURE",
+              "BLOCKS_RUN",
+              "BLOCKS_AUTHORITY_CALL"
+            ]
+          },
+          "items": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "blocking_class": {
+                  "enum": [
+                    "BLOCKS_AUTOMATION",
+                    "BLOCKS_REVIEW_PROGRESS",
+                    "BLOCKS_FILING",
+                    "BLOCKS_AMENDMENT",
+                    "BLOCKS_ERASURE",
+                    "BLOCKS_RUN",
+                    "BLOCKS_AUTHORITY_CALL"
+                  ]
+                },
+                "resolution_state": {
+                  "enum": [
+                    "OPEN",
+                    "IN_PROGRESS",
+                    "MONITORING"
+                  ]
+                }
+              },
+              "required": [
+                "blocking_class",
+                "resolution_state"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "dominant_blocking_class": {
+            "type": "string",
+            "enum": [
+              "BLOCKS_AUTOMATION",
+              "BLOCKS_REVIEW_PROGRESS",
+              "BLOCKS_FILING",
+              "BLOCKS_AMENDMENT",
+              "BLOCKS_ERASURE",
+              "BLOCKS_RUN",
+              "BLOCKS_AUTHORITY_CALL"
+            ]
+          }
+        },
+        "required": [
+          "dominant_blocking_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resolution_frontier": {
+            "const": "BLOCKING_PRESENT"
+          },
+          "blocking_conflict_count": {
+            "minimum": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "dominant_blocking_class": {
+            "const": "BLOCKS_AUTOMATION"
+          }
+        },
+        "required": [
+          "dominant_blocking_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "items": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "blocking_class": {
+                  "const": "BLOCKS_AUTOMATION"
+                },
+                "resolution_state": {
+                  "enum": [
+                    "OPEN",
+                    "IN_PROGRESS",
+                    "MONITORING"
+                  ]
+                }
+              },
+              "required": [
+                "blocking_class",
+                "resolution_state"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "dominant_blocking_class": {
+            "const": "BLOCKS_REVIEW_PROGRESS"
+          }
+        },
+        "required": [
+          "dominant_blocking_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "items": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "blocking_class": {
+                  "const": "BLOCKS_REVIEW_PROGRESS"
+                },
+                "resolution_state": {
+                  "enum": [
+                    "OPEN",
+                    "IN_PROGRESS",
+                    "MONITORING"
+                  ]
+                }
+              },
+              "required": [
+                "blocking_class",
+                "resolution_state"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "dominant_blocking_class": {
+            "const": "BLOCKS_FILING"
+          }
+        },
+        "required": [
+          "dominant_blocking_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "items": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "blocking_class": {
+                  "const": "BLOCKS_FILING"
+                },
+                "resolution_state": {
+                  "enum": [
+                    "OPEN",
+                    "IN_PROGRESS",
+                    "MONITORING"
+                  ]
+                }
+              },
+              "required": [
+                "blocking_class",
+                "resolution_state"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "dominant_blocking_class": {
+            "const": "BLOCKS_AMENDMENT"
+          }
+        },
+        "required": [
+          "dominant_blocking_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "items": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "blocking_class": {
+                  "const": "BLOCKS_AMENDMENT"
+                },
+                "resolution_state": {
+                  "enum": [
+                    "OPEN",
+                    "IN_PROGRESS",
+                    "MONITORING"
+                  ]
+                }
+              },
+              "required": [
+                "blocking_class",
+                "resolution_state"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "dominant_blocking_class": {
+            "const": "BLOCKS_ERASURE"
+          }
+        },
+        "required": [
+          "dominant_blocking_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "items": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "blocking_class": {
+                  "const": "BLOCKS_ERASURE"
+                },
+                "resolution_state": {
+                  "enum": [
+                    "OPEN",
+                    "IN_PROGRESS",
+                    "MONITORING"
+                  ]
+                }
+              },
+              "required": [
+                "blocking_class",
+                "resolution_state"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "dominant_blocking_class": {
+            "const": "BLOCKS_RUN"
+          }
+        },
+        "required": [
+          "dominant_blocking_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "items": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "blocking_class": {
+                  "const": "BLOCKS_RUN"
+                },
+                "resolution_state": {
+                  "enum": [
+                    "OPEN",
+                    "IN_PROGRESS",
+                    "MONITORING"
+                  ]
+                }
+              },
+              "required": [
+                "blocking_class",
+                "resolution_state"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "dominant_blocking_class": {
+            "const": "BLOCKS_AUTHORITY_CALL"
+          }
+        },
+        "required": [
+          "dominant_blocking_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "items": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "blocking_class": {
+                  "const": "BLOCKS_AUTHORITY_CALL"
+                },
+                "resolution_state": {
+                  "enum": [
+                    "OPEN",
+                    "IN_PROGRESS",
+                    "MONITORING"
+                  ]
+                }
+              },
+              "required": [
+                "blocking_class",
+                "resolution_state"
+              ]
+            }
+          }
         }
       }
     }

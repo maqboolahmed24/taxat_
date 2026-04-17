@@ -1,0 +1,2830 @@
+{
+  "composite_shell_surfaces": [
+    "CONTEXT_BAR",
+    "DECISION_SUMMARY",
+    "ACTION_STRIP",
+    "DETAIL_DRAWER"
+  ],
+  "lane_taxonomy": [
+    "CALLER_AND_SCOPE",
+    "AUTHORIZATION",
+    "MANIFEST_AND_LINEAGE",
+    "CONFIG_AND_FREEZE",
+    "SOURCE_COLLECTION_AND_CANONICALIZATION",
+    "PRESEAL_GATES",
+    "POSTSEAL_DAG",
+    "AUTHORITY_CONTEXT",
+    "DRIFT_AND_AMENDMENT",
+    "TRUST_AND_WORKFLOW",
+    "FILING_AND_SUBMISSION",
+    "LIVE_EXPERIENCE",
+    "RETENTION_AND_TERMINALIZATION"
+  ],
+  "mandatory_edge_cases": [
+    "`raw_requested_scope[]` is preserved for audit while `runtime_scope[]` drives downstream semantics.",
+    "`masking_context` remains read-side only and must not affect compute, filing, or transport.",
+    "Same-manifest retry against a terminal manifest returns the existing `DecisionBundle`.",
+    "A pre-start system fault after `SEALED` but before `RunStarted` still finalizes `BLOCKED`.",
+    "Replay may reuse frozen post-seal basis instead of inventing a fresh authority read.",
+    "`AMENDMENT_GATE` is forbidden during drift preparation and occurs later in the run.",
+    "Authority-owned truth and out-of-band corrections stay distinct from internal progression state."
+  ],
+  "phase_count": 18,
+  "phases": [
+    {
+      "artifact_writes": [],
+      "audit_events": [],
+      "branch_rows": [
+        {
+          "branch_family": "access_blocked_early_return",
+          "branch_id": "BR_ACCESS_BLOCKED_EARLY_RETURN",
+          "false_path": "Continue into runtime-scope resolution and manifest-strategy selection.",
+          "phase_id": "P01",
+          "phase_name": "access early return",
+          "source_refs": [
+            "Algorithm/core_engine.md",
+            "Algorithm/exact_gate_logic_and_decision_tables.md",
+            "Algorithm/low_noise_experience_contract.md"
+          ],
+          "terminal_outcome": "Terminal before manifest allocation.",
+          "trigger_condition": "Authorization or access-scope binding fails before any manifest allocation.",
+          "true_path": "Return `ACCESS_BLOCKED_RESPONSE(...)` with low-noise posture envelope."
+        }
+      ],
+      "branch_tags": [
+        "access early return",
+        "runtime scope bind"
+      ],
+      "called_modules": [
+        "AUTHORIZE",
+        "ACCESS_BLOCKED_RESPONSE",
+        "ENFORCE_ACCESS_SCOPE_AND_MASKING",
+        "VALIDATE_EFFECTIVE_SCOPE_BINDING"
+      ],
+      "entry_conditions": [
+        "RUN_ENGINE receives `raw_requested_scope[]`, principal context, and any authority-binding context.",
+        "`masking_context` may be present for read-side rendering, but execution semantics remain unmasked."
+      ],
+      "exit_conditions": [
+        "`runtime_scope[]` is bound from authorization and becomes the only downstream scope vocabulary.",
+        "Access-blocked requests may return a low-noise access response before any manifest allocation."
+      ],
+      "failure_exit_paths": [
+        "`ACCESS_BLOCKED_RESPONSE(...)` returns a bounded low-noise posture envelope without allocating a manifest."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "CALLER_AND_SCOPE",
+        "AUTHORIZATION"
+      ],
+      "lane_highlights": {
+        "AUTHORIZATION": [
+          {
+            "kind": "branch",
+            "label": "runtime scope bind"
+          },
+          {
+            "kind": "terminal",
+            "label": "ERROR"
+          },
+          {
+            "kind": "module",
+            "label": "AUTHORIZE"
+          },
+          {
+            "kind": "module",
+            "label": "ACCESS_BLOCKED_RESPONSE"
+          }
+        ],
+        "CALLER_AND_SCOPE": [
+          {
+            "kind": "branch",
+            "label": "access early return"
+          },
+          {
+            "kind": "module",
+            "label": "VALIDATE_EFFECTIVE_SCOPE_BINDING"
+          }
+        ]
+      },
+      "live_experience": {
+        "cause_refs": [],
+        "command_vs_read_side_boundary": "Every `ExperienceDelta` remains read-side only; command truth and state transitions must already be durable.",
+        "composite_shell_surfaces": [
+          "CONTEXT_BAR",
+          "DECISION_SUMMARY",
+          "ACTION_STRIP",
+          "DETAIL_DRAWER"
+        ],
+        "notes": [
+          "Low-noise shells keep one mounted route keyed by `manifest_id`.",
+          "Reduced-motion clients must preserve semantics without relying on motion tokens."
+        ],
+        "ordered_index": 1,
+        "phase_codes": [],
+        "phase_id": "P01",
+        "phase_name": "Authorize and bind execution scope",
+        "posture_states": [],
+        "semantic_motions": [],
+        "source_heading_or_logical_block": "Algorithm/core_engine.md::L145[Authorize_and_bind_execution_scope]",
+        "surface_modules": []
+      },
+      "notes": [
+        "The shell defaults to `LOW_NOISE` and keeps the access result separate from later manifest lifecycle state."
+      ],
+      "ordered_index": 1,
+      "phase_id": "P01",
+      "phase_label": "1. Authorize and bind execution scope",
+      "phase_name": "Authorize and bind execution scope",
+      "return_paths": [
+        "ERROR"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L145[Authorize_and_bind_execution_scope]",
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/exact_gate_logic_and_decision_tables.md",
+        "Algorithm/observability_and_audit_contract.md",
+        "Algorithm/low_noise_experience_contract.md"
+      ],
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [],
+      "audit_events": [
+        "ExistingDecisionBundleReturned"
+      ],
+      "branch_rows": [
+        {
+          "branch_family": "invalid_scope_or_prior_context",
+          "branch_id": "BR_INVALID_SCOPE_OR_PRIOR_CONTEXT",
+          "false_path": "Proceed to manifest reuse / continuation / replay selection.",
+          "phase_id": "P02",
+          "phase_name": "scope and prior-context validation",
+          "source_refs": [
+            "Algorithm/core_engine.md",
+            "Algorithm/replay_and_reproducibility_contract.md"
+          ],
+          "terminal_outcome": "Hard stop before manifest allocation.",
+          "trigger_condition": "Runtime scope grammar or prior-manifest context fails validation.",
+          "true_path": "Return `ERROR(...)` before manifest allocation or reuse."
+        },
+        {
+          "branch_family": "existing_decision_bundle_return",
+          "branch_id": "BR_EXISTING_DECISION_BUNDLE_RETURN",
+          "false_path": "Continue into fresh, continuation, or replay manifest work.",
+          "phase_id": "P02",
+          "phase_name": "same-manifest retry bundle return",
+          "source_refs": [
+            "Algorithm/core_engine.md",
+            "Algorithm/state_machines.md",
+            "Algorithm/observability_and_audit_contract.md"
+          ],
+          "terminal_outcome": "Terminal via idempotent bundle reuse.",
+          "trigger_condition": "The run matches a terminal manifest lineage whose `DecisionBundle` may be safely reused.",
+          "true_path": "Return the existing `DecisionBundle` instead of allocating a continuation child."
+        }
+      ],
+      "branch_tags": [
+        "reuse decision",
+        "bundle return"
+      ],
+      "called_modules": [
+        "COMPUTE_SCOPE_FLAGS",
+        "VALIDATE_SCOPE_GRAMMAR",
+        "LOAD_AND_VALIDATE_PRIOR_MANIFEST_CONTEXT",
+        "DECIDE_MANIFEST_REUSE_STRATEGY",
+        "RECORD_EVENT",
+        "LOAD_EXISTING_DECISION_BUNDLE",
+        "RESOLVE_CONFIG_FOR_REQUEST",
+        "CONTINUATION_REUSES_FROZEN_INPUT"
+      ],
+      "entry_conditions": [
+        "Authorization resolved a usable `runtime_scope[]` and access binding.",
+        "Any prior manifest lineage must be loaded before config inheritance or reuse decisions are chosen."
+      ],
+      "exit_conditions": [
+        "Scope grammar, reporting intent, prior-manifest context, and config inheritance mode are resolved.",
+        "A same-manifest terminal retry may short-circuit to an existing `DecisionBundle`."
+      ],
+      "failure_exit_paths": [
+        "`ERROR(...)` exits on invalid scope grammar or irrecoverable prior-manifest context.",
+        "`ExistingDecisionBundleReturned` may short-circuit same-manifest retries against terminal lineage."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "CALLER_AND_SCOPE",
+        "MANIFEST_AND_LINEAGE",
+        "CONFIG_AND_FREEZE"
+      ],
+      "lane_highlights": {
+        "CALLER_AND_SCOPE": [
+          {
+            "kind": "branch",
+            "label": "reuse decision"
+          },
+          {
+            "kind": "module",
+            "label": "COMPUTE_SCOPE_FLAGS"
+          },
+          {
+            "kind": "module",
+            "label": "VALIDATE_SCOPE_GRAMMAR"
+          }
+        ],
+        "CONFIG_AND_FREEZE": [
+          {
+            "kind": "module",
+            "label": "RESOLVE_CONFIG_FOR_REQUEST"
+          },
+          {
+            "kind": "module",
+            "label": "CONTINUATION_REUSES_FROZEN_INPUT"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "branch",
+            "label": "bundle return"
+          },
+          {
+            "kind": "terminal",
+            "label": "ERROR"
+          },
+          {
+            "kind": "terminal",
+            "label": "LOAD_EXISTING_DECISION_BUNDLE"
+          },
+          {
+            "kind": "module",
+            "label": "LOAD_AND_VALIDATE_PRIOR_MANIFEST_CONTEXT"
+          }
+        ]
+      },
+      "live_experience": {
+        "cause_refs": [],
+        "command_vs_read_side_boundary": "Every `ExperienceDelta` remains read-side only; command truth and state transitions must already be durable.",
+        "composite_shell_surfaces": [
+          "CONTEXT_BAR",
+          "DECISION_SUMMARY",
+          "ACTION_STRIP",
+          "DETAIL_DRAWER"
+        ],
+        "notes": [
+          "Low-noise shells keep one mounted route keyed by `manifest_id`.",
+          "Reduced-motion clients must preserve semantics without relying on motion tokens."
+        ],
+        "ordered_index": 2,
+        "phase_codes": [],
+        "phase_id": "P02",
+        "phase_name": "Resolve scope intent, validate runtime grammar, load any prior manifest, and choose config inheritance",
+        "posture_states": [],
+        "semantic_motions": [],
+        "source_heading_or_logical_block": "Algorithm/core_engine.md::L185[Resolve_scope_intent_validate_runtime_grammar_load_any_prior_manifest_and_choose_config_inheritance]",
+        "surface_modules": []
+      },
+      "notes": [
+        "Config inheritance is frozen as a manifest-strategy choice, not a renderer-side preference."
+      ],
+      "ordered_index": 2,
+      "phase_id": "P02",
+      "phase_label": "2. Resolve scope intent, validate runtime grammar, load any prior manifest, and choose config inheritance",
+      "phase_name": "Resolve scope intent, validate runtime grammar, load any prior manifest, and choose config inheritance",
+      "return_paths": [
+        "ERROR",
+        "LOAD_EXISTING_DECISION_BUNDLE"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L185[Resolve_scope_intent_validate_runtime_grammar_load_any_prior_manifest_and_choose_config_inheritance]",
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/replay_and_reproducibility_contract.md",
+        "Algorithm/manifest_and_config_freeze_contract.md",
+        "Algorithm/observability_and_audit_contract.md"
+      ],
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [],
+      "audit_events": [
+        "ManifestAllocated",
+        "ManifestContextReused",
+        "ContinuationChildAllocated",
+        "ConfigInheritanceResolved",
+        "InputInheritanceResolved",
+        "AccessScopeBound"
+      ],
+      "branch_rows": [
+        {
+          "branch_family": "manifest_branch_selection",
+          "branch_id": "BR_MANIFEST_REUSE_VS_CONTINUATION_VS_REPLAY",
+          "false_path": "n/a",
+          "phase_id": "P03",
+          "phase_name": "manifest strategy selection",
+          "source_refs": [
+            "Algorithm/core_engine.md",
+            "Algorithm/manifest_and_config_freeze_contract.md",
+            "Algorithm/replay_and_reproducibility_contract.md",
+            "Algorithm/observability_and_audit_contract.md"
+          ],
+          "terminal_outcome": "Nonterminal lineage fork that governs the rest of the run.",
+          "trigger_condition": "Reuse strategy chooses fresh manifest, same-manifest reuse, continuation child, or replay child.",
+          "true_path": "Lineage refs, inheritance modes, and branch-decision audit context are frozen into manifest context."
+        }
+      ],
+      "branch_tags": [
+        "manifest allocated",
+        "child lineage"
+      ],
+      "called_modules": [
+        "BEGIN_MANIFEST",
+        "RECORD_EVENT",
+        "VALIDATE_REUSE_SEALED_CONTEXT",
+        "BEGIN_CHILD_MANIFEST",
+        "FREEZE_CONFIG",
+        "UPDATE_MANIFEST_PRESEAL_CONTEXT",
+        "VALIDATE_MANIFEST_LINEAGE_PROJECTION"
+      ],
+      "entry_conditions": [
+        "The run knows whether it is a fresh manifest, same-manifest reuse, continuation child, or replay child.",
+        "Config inheritance and input inheritance choices are available."
+      ],
+      "exit_conditions": [
+        "A manifest context is allocated, reused, or continued with durable lineage refs.",
+        "The live-experience stream is initialized with `shell_route_key = manifest_id` and monotonic sequencing."
+      ],
+      "failure_exit_paths": [
+        "Lineage validation failures stop the run before pre-seal source work starts."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "MANIFEST_AND_LINEAGE",
+        "CONFIG_AND_FREEZE",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "CONFIG_AND_FREEZE": [
+          {
+            "kind": "branch",
+            "label": "child lineage"
+          },
+          {
+            "kind": "module",
+            "label": "FREEZE_CONFIG"
+          },
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_PRESEAL_CONTEXT"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "branch",
+            "label": "manifest allocated"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "event",
+            "label": "ManifestAllocated"
+          },
+          {
+            "kind": "terminal",
+            "label": "ERROR"
+          }
+        ]
+      },
+      "live_experience": {
+        "cause_refs": [
+          "ManifestAllocated"
+        ],
+        "command_vs_read_side_boundary": "Every `ExperienceDelta` remains read-side only; command truth and state transitions must already be durable.",
+        "composite_shell_surfaces": [
+          "CONTEXT_BAR",
+          "DECISION_SUMMARY",
+          "ACTION_STRIP",
+          "DETAIL_DRAWER"
+        ],
+        "notes": [
+          "Low-noise shells keep one mounted route keyed by `manifest_id`.",
+          "Reduced-motion clients must preserve semantics without relying on motion tokens."
+        ],
+        "ordered_index": 3,
+        "phase_codes": [
+          "ALLOCATED"
+        ],
+        "phase_id": "P03",
+        "phase_name": "Allocate, continue, or reuse manifest context and initialize the live experience stream",
+        "posture_states": [
+          "STREAMING"
+        ],
+        "semantic_motions": [
+          "ORBIT"
+        ],
+        "source_heading_or_logical_block": "Algorithm/core_engine.md::L259[Allocate_continue_or_reuse_manifest_context_and_initialize_the_live_experience_stream]",
+        "surface_modules": [
+          "PULSE_SPINE",
+          "MANIFEST_RIBBON",
+          "HANDOFF_BATON",
+          "DECISION_STAGE",
+          "CONSEQUENCE_RAIL"
+        ]
+      },
+      "notes": [
+        "This is the phase that binds raw request lineage to the stable manifest route and shell continuity contract."
+      ],
+      "ordered_index": 3,
+      "phase_id": "P03",
+      "phase_label": "3. Allocate, continue, or reuse manifest context and initialize the live experience stream",
+      "phase_name": "Allocate, continue, or reuse manifest context and initialize the live experience stream",
+      "return_paths": [
+        "ERROR"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L259[Allocate_continue_or_reuse_manifest_context_and_initialize_the_live_experience_stream]",
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/manifest_and_config_freeze_contract.md",
+        "Algorithm/state_machines.md",
+        "Algorithm/low_noise_experience_contract.md"
+      ],
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [],
+      "audit_events": [
+        "ReplayPreflightValidated",
+        "SourceCollectionStarted",
+        "SourceCollectionCompleted",
+        "LateDataDetected",
+        "SnapshotBuilt",
+        "SnapshotValidated"
+      ],
+      "branch_rows": [
+        {
+          "branch_family": "late_data_policy",
+          "branch_id": "BR_LATE_DATA_SPAWN_REVIEW_EXCLUDE",
+          "false_path": "Continue with the sealed pre-start basis.",
+          "phase_id": "P04",
+          "phase_name": "late-data classification",
+          "source_refs": [
+            "Algorithm/core_engine.md",
+            "Algorithm/late_data_authority_correction_and_replay_propagation_contract.md",
+            "Algorithm/manifest_and_config_freeze_contract.md"
+          ],
+          "terminal_outcome": "Usually nonterminal, but may force review or child lineage before seal.",
+          "trigger_condition": "Late data appears while building or reusing the pre-seal context.",
+          "true_path": "Spawn child, surface review posture, or exclude late data according to policy bindings."
+        },
+        {
+          "branch_family": "replay_basis_reuse",
+          "branch_id": "BR_REPLAY_REUSES_FROZEN_POSTSEAL_BASIS",
+          "false_path": "Build or recover a fresh pre-seal basis under ordinary collection rules.",
+          "phase_id": "P04",
+          "phase_name": "replay basis selection",
+          "source_refs": [
+            "Algorithm/core_engine.md",
+            "Algorithm/replay_and_reproducibility_contract.md",
+            "Algorithm/manifest_and_config_freeze_contract.md"
+          ],
+          "terminal_outcome": "Nonterminal lineage reuse that constrains later compute and audit expectations.",
+          "trigger_condition": "The request is a replay-capable lineage path with frozen post-seal basis available.",
+          "true_path": "Reuse the frozen post-seal basis and replay from deterministic lineage-bound artifacts."
+        }
+      ],
+      "branch_tags": [
+        "sealed reuse",
+        "late-data fork"
+      ],
+      "called_modules": [
+        "VALIDATE_REPLAY_PRECONDITIONS",
+        "RECORD_EVENT",
+        "LOAD_SEALED_RUN_CONTEXT",
+        "PLAN_SOURCE_COLLECTION",
+        "FREEZE_COLLECTION_BOUNDARY",
+        "MATERIALIZE_SOURCE_WINDOW",
+        "PROMOTE_CANONICAL_FACTS",
+        "BUILD_ARTIFACT_SET",
+        "FREEZE_NORMALIZATION_CONTEXT",
+        "BUILD_SNAPSHOT",
+        "VALIDATE",
+        "MEASURE_COMPLETENESS",
+        "LOAD_SCHEMA_BUNDLE",
+        "ARTIFACT_CONTENT_HASH",
+        "FREEZE_INPUT_SET",
+        "DECLARED_EXCLUSIONS",
+        "DECLARE_MISSING_SOURCES",
+        "DECLARE_STALE_SOURCES",
+        "VALIDATE_ARTIFACT",
+        "COMPUTE_EXECUTION_BASIS_HASH",
+        "UPDATE_MANIFEST_PRESEAL_CONTEXT"
+      ],
+      "entry_conditions": [
+        "A manifest exists but has not yet sealed a pre-start execution context.",
+        "The run knows whether it may reuse a sealed pre-start context or must rebuild one from source collection."
+      ],
+      "exit_conditions": [
+        "Either a reusable sealed pre-start basis is loaded, or a fresh source/canonicalization pipeline has built the frozen input set.",
+        "Late-data posture, collection boundary, artifact set, and execution basis hash inputs are known."
+      ],
+      "failure_exit_paths": [
+        "Irrecoverable source-collection or replay-precondition failures stop before manifest sealing."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "SOURCE_COLLECTION_AND_CANONICALIZATION",
+        "CONFIG_AND_FREEZE",
+        "MANIFEST_AND_LINEAGE"
+      ],
+      "lane_highlights": {
+        "CONFIG_AND_FREEZE": [
+          {
+            "kind": "branch",
+            "label": "late-data fork"
+          },
+          {
+            "kind": "module",
+            "label": "FREEZE_COLLECTION_BOUNDARY"
+          },
+          {
+            "kind": "module",
+            "label": "FREEZE_NORMALIZATION_CONTEXT"
+          },
+          {
+            "kind": "module",
+            "label": "LOAD_SCHEMA_BUNDLE"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "module",
+            "label": "VALIDATE_REPLAY_PRECONDITIONS"
+          },
+          {
+            "kind": "module",
+            "label": "LOAD_SEALED_RUN_CONTEXT"
+          }
+        ],
+        "PRESEAL_GATES": [
+          {
+            "kind": "module",
+            "label": "VALIDATE_ARTIFACT"
+          }
+        ],
+        "SOURCE_COLLECTION_AND_CANONICALIZATION": [
+          {
+            "kind": "branch",
+            "label": "sealed reuse"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "module",
+            "label": "BUILD_ARTIFACT_SET"
+          },
+          {
+            "kind": "terminal",
+            "label": "ERROR"
+          }
+        ]
+      },
+      "live_experience": {
+        "cause_refs": [
+          "PrestartContextReused",
+          "SourceCollectionStarted",
+          "SourceCollectionCompleted",
+          "LateDataClassified",
+          "SnapshotValidated"
+        ],
+        "command_vs_read_side_boundary": "Every `ExperienceDelta` remains read-side only; command truth and state transitions must already be durable.",
+        "composite_shell_surfaces": [
+          "CONTEXT_BAR",
+          "DECISION_SUMMARY",
+          "ACTION_STRIP",
+          "DETAIL_DRAWER"
+        ],
+        "notes": [
+          "Low-noise shells keep one mounted route keyed by `manifest_id`.",
+          "Reduced-motion clients must preserve semantics without relying on motion tokens."
+        ],
+        "ordered_index": 4,
+        "phase_codes": [
+          "PRESEAL_REUSED",
+          "SOURCE_COLLECTION",
+          "SOURCE_COLLECTION_COMPLETED",
+          "SNAPSHOT_VALIDATED"
+        ],
+        "phase_id": "P04",
+        "phase_name": "Load or build the sealed pre-start context using a barriered, partition-aware execution plan",
+        "posture_states": [
+          "FROZEN",
+          "STREAMING",
+          "CONTAINED"
+        ],
+        "semantic_motions": [
+          "ECHO",
+          "TRACE",
+          "RIPPLE"
+        ],
+        "source_heading_or_logical_block": "Algorithm/core_engine.md::L417[Load_or_build_the_sealed_pre-start_context_using_a_barriered_partition-aware_execution_plan]",
+        "surface_modules": [
+          "DECISION_STAGE",
+          "EVIDENCE_TIDE",
+          "CONSEQUENCE_RAIL",
+          "FOCUS_LENS"
+        ]
+      },
+      "notes": [
+        "`masking_context` is expressly barred from source planning, canonicalization, filing, and transport semantics."
+      ],
+      "ordered_index": 4,
+      "phase_id": "P04",
+      "phase_label": "4. Load or build the sealed pre-start context using a barriered, partition-aware execution plan",
+      "phase_name": "Load or build the sealed pre-start context using a barriered, partition-aware execution plan",
+      "return_paths": [
+        "ERROR"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L417[Load_or_build_the_sealed_pre-start_context_using_a_barriered_partition-aware_execution_plan]",
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/manifest_and_config_freeze_contract.md",
+        "Algorithm/late_data_authority_correction_and_replay_propagation_contract.md",
+        "Algorithm/state_machines.md"
+      ],
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [
+        "ConfigFreeze",
+        "InputFreeze",
+        "SourcePlan",
+        "SourceWindow",
+        "CollectionBoundary",
+        "NormalizationContext",
+        "SourceRecordSet",
+        "EvidenceItemSet",
+        "CandidateFactSet",
+        "ConflictSet",
+        "CanonicalFactSet",
+        "Snapshot"
+      ],
+      "audit_events": [
+        "ManifestFrozen",
+        "ManifestSealed"
+      ],
+      "branch_rows": [
+        {
+          "branch_family": "preseal_gate_outcome",
+          "branch_id": "BR_PRESEAL_BLOCKED_VS_SEALED",
+          "false_path": "Seal the manifest and permit later `RunStarted` claim.",
+          "phase_id": "P05",
+          "phase_name": "ordered pre-seal gate chain",
+          "source_refs": [
+            "Algorithm/core_engine.md",
+            "Algorithm/invariants_and_gates.md",
+            "Algorithm/exact_gate_logic_and_decision_tables.md"
+          ],
+          "terminal_outcome": "Blocked or review-required pre-start outcome vs nonterminal sealed success.",
+          "trigger_condition": "The ordered pre-seal gates resolve as block/review or allow seal.",
+          "true_path": "Persist pre-start terminal context or review-required posture and stop before `RunStarted`."
+        },
+        {
+          "branch_family": "fault_boundary",
+          "branch_id": "BR_PRESTART_VS_POSTSTART_SYSTEM_FAULT",
+          "false_path": "Post-start faults use started-run failure handling and may enter `FAILED` semantics.",
+          "phase_id": "P05",
+          "phase_name": "system fault boundary",
+          "source_refs": [
+            "Algorithm/core_engine.md",
+            "Algorithm/state_machines.md"
+          ],
+          "terminal_outcome": "Boundary between blocked pre-start and failed post-start posture.",
+          "trigger_condition": "A system fault happens before `RunStarted` or after command-side start.",
+          "true_path": "Pre-start faults finalize `BLOCKED` even if the manifest already sealed."
+        }
+      ],
+      "branch_tags": [
+        "pre-seal block",
+        "sealed success"
+      ],
+      "called_modules": [
+        "FINALIZE_RUN_FAILURE",
+        "TRANSITION_MANIFEST",
+        "RECORD_EVENT",
+        "MANIFEST_GATE",
+        "ARTIFACT_CONTRACT_GATE",
+        "INPUT_BOUNDARY_GATE",
+        "DECLARED_EXCLUSIONS",
+        "DATA_QUALITY_GATE",
+        "BUILD_PRESEAL_GATE_EVALUATION",
+        "PERSIST_PRESTART_TERMINAL_CONTEXT",
+        "FINALIZE_TERMINAL_OUTCOME",
+        "WRITE_ARTIFACT",
+        "RETENTION_TAG",
+        "PERSIST_GATE_BATCH",
+        "UPDATE_MANIFEST_PRESEAL_CONTEXT",
+        "SEAL_MANIFEST"
+      ],
+      "entry_conditions": [
+        "Pre-seal artifacts, input freeze, and schema bundle are available or explicitly reused.",
+        "The manifest is not yet started, so failures remain pre-start outcomes."
+      ],
+      "exit_conditions": [
+        "Ordered pre-seal gates are persisted and either bind a blocked/review posture or allow sealing.",
+        "When a new pre-start context was built, the manifest is sealed exactly once."
+      ],
+      "failure_exit_paths": [
+        "`FINALIZE_TERMINAL_OUTCOME(...)` persists blocked or review-required pre-start outcomes.",
+        "`FINALIZE_RUN_FAILURE(...)` captures irrecoverable pre-start failure without starting the run."
+      ],
+      "gate_evaluations": [
+        "MANIFEST_GATE",
+        "ARTIFACT_CONTRACT_GATE",
+        "INPUT_BOUNDARY_GATE",
+        "DATA_QUALITY_GATE"
+      ],
+      "lane_focus": [
+        "PRESEAL_GATES",
+        "MANIFEST_AND_LINEAGE",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "CONFIG_AND_FREEZE": [
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_PRESEAL_CONTEXT"
+          },
+          {
+            "kind": "module",
+            "label": "SEAL_MANIFEST"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "branch",
+            "label": "sealed success"
+          },
+          {
+            "kind": "module",
+            "label": "FINALIZE_RUN_FAILURE"
+          },
+          {
+            "kind": "module",
+            "label": "TRANSITION_MANIFEST"
+          },
+          {
+            "kind": "terminal",
+            "label": "FINALIZE_TERMINAL_OUTCOME"
+          }
+        ],
+        "PRESEAL_GATES": [
+          {
+            "kind": "branch",
+            "label": "pre-seal block"
+          },
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "gate",
+            "label": "MANIFEST_GATE"
+          }
+        ],
+        "RETENTION_AND_TERMINALIZATION": [
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          },
+          {
+            "kind": "module",
+            "label": "RETENTION_TAG"
+          },
+          {
+            "kind": "artifact",
+            "label": "Snapshot"
+          }
+        ]
+      },
+      "live_experience": {
+        "cause_refs": [
+          "PresealBlocked",
+          "ManifestSealed"
+        ],
+        "command_vs_read_side_boundary": "Every `ExperienceDelta` remains read-side only; command truth and state transitions must already be durable.",
+        "composite_shell_surfaces": [
+          "CONTEXT_BAR",
+          "DECISION_SUMMARY",
+          "ACTION_STRIP",
+          "DETAIL_DRAWER"
+        ],
+        "notes": [
+          "Low-noise shells keep one mounted route keyed by `manifest_id`.",
+          "Reduced-motion clients must preserve semantics without relying on motion tokens."
+        ],
+        "ordered_index": 5,
+        "phase_codes": [
+          "PRESEAL_GATES",
+          "PRESEAL_BLOCKED",
+          "SEALED"
+        ],
+        "phase_id": "P05",
+        "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+        "posture_states": [
+          "FRACTURED",
+          "FROZEN"
+        ],
+        "semantic_motions": [
+          "FRACTURE",
+          "SEAL"
+        ],
+        "source_heading_or_logical_block": "Algorithm/core_engine.md::L836[Evaluate_the_ordered_pre-seal_gate_chain_persist_pre-start_blocked_context_if_needed_and_seal_only_when_a_new_pre-start_context_was_built]",
+        "surface_modules": [
+          "MANIFEST_RIBBON",
+          "DECISION_STAGE",
+          "CONSEQUENCE_RAIL"
+        ]
+      },
+      "notes": [
+        "The seal step is atomic with the pre-start persistence boundary, which makes later replay and reuse defensible."
+      ],
+      "ordered_index": 5,
+      "phase_id": "P05",
+      "phase_label": "5. Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+      "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+      "return_paths": [
+        "FINALIZE_RUN_FAILURE",
+        "FINALIZE_TERMINAL_OUTCOME"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L836[Evaluate_the_ordered_pre-seal_gate_chain_persist_pre-start_blocked_context_if_needed_and_seal_only_when_a_new_pre-start_context_was_built]",
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/invariants_and_gates.md",
+        "Algorithm/exact_gate_logic_and_decision_tables.md",
+        "Algorithm/manifest_and_config_freeze_contract.md"
+      ],
+      "transaction_spans": [
+        {
+          "label": "Persist pre-start context and seal when eligible",
+          "lane_end": "PRESEAL_GATES",
+          "lane_start": "MANIFEST_AND_LINEAGE"
+        }
+      ]
+    },
+    {
+      "artifact_writes": [],
+      "audit_events": [
+        "FrozenPostSealBasisLoaded",
+        "RunStartClaimRejected",
+        "RunStarted"
+      ],
+      "branch_rows": [],
+      "branch_tags": [
+        "start claim",
+        "single writer"
+      ],
+      "called_modules": [
+        "LOAD_FROZEN_POST_SEAL_BASIS",
+        "RECORD_EVENT",
+        "SEED",
+        "CLAIM_MANIFEST_START",
+        "LOAD_EXISTING_DECISION_BUNDLE"
+      ],
+      "entry_conditions": [
+        "A sealed manifest exists and has not yet been legally started by another writer.",
+        "The post-seal execution plan can be published only if a manifest-start claim succeeds."
+      ],
+      "exit_conditions": [
+        "A compare-and-swap manifest-start lease is claimed and the first post-seal DAG is atomically published.",
+        "`RunStarted` occurs only after a sealed manifest exists."
+      ],
+      "failure_exit_paths": [
+        "Start-claim rejection or invalid manifest posture stops progression before worker execution begins."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "MANIFEST_AND_LINEAGE",
+        "POSTSEAL_DAG"
+      ],
+      "lane_highlights": {
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "branch",
+            "label": "start claim"
+          },
+          {
+            "kind": "terminal",
+            "label": "LOAD_EXISTING_DECISION_BUNDLE"
+          },
+          {
+            "kind": "module",
+            "label": "LOAD_FROZEN_POST_SEAL_BASIS"
+          },
+          {
+            "kind": "module",
+            "label": "CLAIM_MANIFEST_START"
+          }
+        ],
+        "POSTSEAL_DAG": [
+          {
+            "kind": "branch",
+            "label": "single writer"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "terminal",
+            "label": "ERROR"
+          },
+          {
+            "kind": "event",
+            "label": "RunStartClaimRejected"
+          }
+        ]
+      },
+      "live_experience": {
+        "cause_refs": [
+          "RunStarted"
+        ],
+        "command_vs_read_side_boundary": "Every `ExperienceDelta` remains read-side only; command truth and state transitions must already be durable.",
+        "composite_shell_surfaces": [
+          "CONTEXT_BAR",
+          "DECISION_SUMMARY",
+          "ACTION_STRIP",
+          "DETAIL_DRAWER"
+        ],
+        "notes": [
+          "Low-noise shells keep one mounted route keyed by `manifest_id`.",
+          "Reduced-motion clients must preserve semantics without relying on motion tokens."
+        ],
+        "ordered_index": 6,
+        "phase_codes": [
+          "POST_SEAL_COMMANDS"
+        ],
+        "phase_id": "P06",
+        "phase_name": "Claim the sealed manifest and publish the post-seal command DAG atomically",
+        "posture_states": [
+          "STREAMING"
+        ],
+        "semantic_motions": [
+          "TRACE"
+        ],
+        "source_heading_or_logical_block": "Algorithm/core_engine.md::L1014[Claim_the_sealed_manifest_and_publish_the_post-seal_command_DAG_atomically]",
+        "surface_modules": [
+          "DECISION_STAGE",
+          "EVIDENCE_TIDE"
+        ]
+      },
+      "notes": [
+        "This is the strongest visible proof that the sealed manifest precedes `RunStarted` and worker fan-out."
+      ],
+      "ordered_index": 6,
+      "phase_id": "P06",
+      "phase_label": "6. Claim the sealed manifest and publish the post-seal command DAG atomically",
+      "phase_name": "Claim the sealed manifest and publish the post-seal command DAG atomically",
+      "return_paths": [
+        "ERROR",
+        "LOAD_EXISTING_DECISION_BUNDLE"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L1014[Claim_the_sealed_manifest_and_publish_the_post-seal_command_DAG_atomically]",
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/state_machines.md",
+        "Algorithm/observability_and_audit_contract.md"
+      ],
+      "transaction_spans": [
+        {
+          "label": "Claim manifest start and publish DAG",
+          "lane_end": "POSTSEAL_DAG",
+          "lane_start": "MANIFEST_AND_LINEAGE"
+        }
+      ]
+    },
+    {
+      "artifact_writes": [],
+      "audit_events": [
+        "HistoricalAuthorityBasisReused",
+        "HistoricalLateDataBasisReused",
+        "ComputeCompleted",
+        "ForecastCompleted",
+        "RiskScored",
+        "GraphBuilt"
+      ],
+      "branch_rows": [],
+      "branch_tags": [
+        "stage reuse",
+        "projection lag"
+      ],
+      "called_modules": [
+        "FINALIZE_RUN_FAILURE",
+        "RECORD_EVENT",
+        "COLLECTION_LATE_DATA_BINDINGS",
+        "UPDATE_MANIFEST_OUTPUTS",
+        "SELECT_PRIMARY_PROOF_BUNDLE_REF"
+      ],
+      "entry_conditions": [
+        "The post-seal DAG is durable and a single writer owns the manifest-start lease.",
+        "Workers must persist first-class artifacts before any completion signal becomes visible."
+      ],
+      "exit_conditions": [
+        "Mandatory post-seal artifacts are adopted into manifest outputs.",
+        "Projection lag may continue, but command-side truth has the required compute, risk, graph, and related outputs."
+      ],
+      "failure_exit_paths": [
+        "Missing mandatory stage artifacts or invalid adopted outputs escalate as run failure after start."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "POSTSEAL_DAG",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "LIVE_EXPERIENCE": [
+          {
+            "kind": "branch",
+            "label": "projection lag"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "terminal",
+            "label": "FINALIZE_RUN_FAILURE"
+          },
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_OUTPUTS"
+          },
+          {
+            "kind": "module",
+            "label": "SELECT_PRIMARY_PROOF_BUNDLE_REF"
+          }
+        ],
+        "POSTSEAL_DAG": [
+          {
+            "kind": "branch",
+            "label": "stage reuse"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "event",
+            "label": "HistoricalAuthorityBasisReused"
+          },
+          {
+            "kind": "event",
+            "label": "HistoricalLateDataBasisReused"
+          }
+        ],
+        "SOURCE_COLLECTION_AND_CANONICALIZATION": [
+          {
+            "kind": "module",
+            "label": "COLLECTION_LATE_DATA_BINDINGS"
+          }
+        ]
+      },
+      "live_experience": {
+        "cause_refs": [
+          "PostSealCommandsCompleted"
+        ],
+        "command_vs_read_side_boundary": "Every `ExperienceDelta` remains read-side only; command truth and state transitions must already be durable.",
+        "composite_shell_surfaces": [
+          "CONTEXT_BAR",
+          "DECISION_SUMMARY",
+          "ACTION_STRIP",
+          "DETAIL_DRAWER"
+        ],
+        "notes": [
+          "Low-noise shells keep one mounted route keyed by `manifest_id`.",
+          "Reduced-motion clients must preserve semantics without relying on motion tokens."
+        ],
+        "ordered_index": 7,
+        "phase_codes": [
+          "ANALYTICS_READY"
+        ],
+        "phase_id": "P07",
+        "phase_name": "Await post-seal command DAG completion and adopt mandatory outputs",
+        "posture_states": [
+          "STREAMING"
+        ],
+        "semantic_motions": [
+          "TRACE"
+        ],
+        "source_heading_or_logical_block": "Algorithm/core_engine.md::L1144[Await_post-seal_command_DAG_completion_and_adopt_mandatory_outputs]",
+        "surface_modules": [
+          "DECISION_STAGE",
+          "EVIDENCE_TIDE",
+          "FOCUS_LENS"
+        ]
+      },
+      "notes": [
+        "The DAG boundary separates command truth from slower read-model materialization without losing lineage determinism."
+      ],
+      "ordered_index": 7,
+      "phase_id": "P07",
+      "phase_label": "7. Await post-seal command DAG completion and adopt mandatory outputs",
+      "phase_name": "Await post-seal command DAG completion and adopt mandatory outputs",
+      "return_paths": [
+        "FINALIZE_RUN_FAILURE"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L1144[Await_post-seal_command_DAG_completion_and_adopt_mandatory_outputs]",
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/observability_and_audit_contract.md",
+        "Algorithm/low_noise_experience_contract.md"
+      ],
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [
+        "GateDecisionRecord"
+      ],
+      "audit_events": [
+        "GateEvaluated"
+      ],
+      "branch_rows": [],
+      "branch_tags": [
+        "retention gate"
+      ],
+      "called_modules": [
+        "RETENTION_EVIDENCE_GATE",
+        "WRITE_ARTIFACT",
+        "RECORD_EVENT",
+        "APPEND_MANIFEST_GATES"
+      ],
+      "entry_conditions": [
+        "Core compute, risk, graph, and retained evidence posture are available after post-seal adoption."
+      ],
+      "exit_conditions": [
+        "The retention evidence gate is recorded and becomes part of the ordered non-access gate chain."
+      ],
+      "failure_exit_paths": [
+        "This phase records binding posture but does not itself finalize the run; terminalization happens in later decisive branches."
+      ],
+      "gate_evaluations": [
+        "RETENTION_EVIDENCE_GATE"
+      ],
+      "lane_focus": [
+        "RETENTION_AND_TERMINALIZATION",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "AUTHORITY_CONTEXT": [
+          {
+            "kind": "gate",
+            "label": "RETENTION_EVIDENCE_GATE"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "module",
+            "label": "APPEND_MANIFEST_GATES"
+          }
+        ],
+        "RETENTION_AND_TERMINALIZATION": [
+          {
+            "kind": "branch",
+            "label": "retention gate"
+          },
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          },
+          {
+            "kind": "artifact",
+            "label": "GateDecisionRecord"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          }
+        ]
+      },
+      "live_experience": {
+        "cause_refs": [],
+        "command_vs_read_side_boundary": "Every `ExperienceDelta` remains read-side only; command truth and state transitions must already be durable.",
+        "composite_shell_surfaces": [
+          "CONTEXT_BAR",
+          "DECISION_SUMMARY",
+          "ACTION_STRIP",
+          "DETAIL_DRAWER"
+        ],
+        "notes": [
+          "Low-noise shells keep one mounted route keyed by `manifest_id`.",
+          "Reduced-motion clients must preserve semantics without relying on motion tokens."
+        ],
+        "ordered_index": 8,
+        "phase_codes": [
+          "RETENTION_GATE"
+        ],
+        "phase_id": "P08",
+        "phase_name": "Retention evidence gate",
+        "posture_states": [],
+        "semantic_motions": [],
+        "source_heading_or_logical_block": "Algorithm/core_engine.md::L1256[Retention_evidence_gate]",
+        "surface_modules": []
+      },
+      "notes": [
+        "Retention limitations are legal constraints on what can be shown or relied upon, not client-side decoration."
+      ],
+      "ordered_index": 8,
+      "phase_id": "P08",
+      "phase_label": "8. Retention evidence gate",
+      "phase_name": "Retention evidence gate",
+      "return_paths": [],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L1256[Retention_evidence_gate]",
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/invariants_and_gates.md",
+        "Algorithm/low_noise_experience_contract.md"
+      ],
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [
+        "DriftBaselineEnvelope",
+        "RetroactiveImpactAnalysis",
+        "DriftRecord",
+        "AmendmentWindowContext",
+        "GateDecisionRecord",
+        "ParityResult"
+      ],
+      "audit_events": [
+        "BaselineSelected",
+        "DriftRetroactiveImpactAnalyzed",
+        "DriftSuperseded",
+        "DriftDetected",
+        "DriftClassified",
+        "AmendmentWindowEvaluated",
+        "IntentToAmendTriggered",
+        "GateEvaluated",
+        "WorkflowOpened",
+        "ParityEvaluated"
+      ],
+      "branch_rows": [
+        {
+          "branch_family": "early_filing_readiness_terminalization",
+          "branch_id": "BR_EARLY_FILING_READINESS_TERMINALIZATION",
+          "false_path": "Proceed into drift, trust, amendment, and filing packet work.",
+          "phase_id": "P09",
+          "phase_name": "authority and filing-readiness short-circuit",
+          "source_refs": [
+            "Algorithm/core_engine.md",
+            "Algorithm/exact_gate_logic_and_decision_tables.md",
+            "Algorithm/observability_and_audit_contract.md"
+          ],
+          "terminal_outcome": "Early blocked or review-required terminalization.",
+          "trigger_condition": "Authority or filing-readiness validation yields non-pass posture before packet preparation.",
+          "true_path": "Emit filing or amendment gate posture and finalize blocked/review-required outcome early."
+        }
+      ],
+      "branch_tags": [
+        "parity gate",
+        "early filing terminal"
+      ],
+      "called_modules": [
+        "EXECUTE_AUTHORITY_CALCULATION_FLOW",
+        "SELECT_DRIFT_BASELINE",
+        "WRITE_ARTIFACT",
+        "RECORD_EVENT",
+        "BUILD_DRIFT_DELTA_VECTOR",
+        "CLASSIFY_TEMPORAL_POSITION",
+        "ANALYZE_RETROACTIVE_IMPACT",
+        "DETECT_DRIFT",
+        "MATERIALIZE_AMENDMENT_WINDOW_CONTEXT",
+        "EVALUATE_AMENDMENT_ELIGIBILITY",
+        "UPSERT_AMENDMENT_CASE",
+        "UPDATE_MANIFEST_OUTPUTS",
+        "AMENDMENT_GATE",
+        "APPEND_MANIFEST_GATES",
+        "PLAN_WORKFLOW",
+        "UPSERT_WORKFLOW_ITEMS",
+        "SELECT_PRIMARY_PROOF_BUNDLE_REF",
+        "FINALIZE_TERMINAL_OUTCOME",
+        "FILING_GATE",
+        "OBLIGATION_STATUS",
+        "LOAD_OVERRIDES",
+        "EVALUATE_PARITY",
+        "PARITY_GATE"
+      ],
+      "entry_conditions": [
+        "Non-access pre-trust gate context is available and the run can consult authority-facing comparison basis.",
+        "Authority state must remain distinct from internal progression state and packet intent."
+      ],
+      "exit_conditions": [
+        "Authority comparison basis, parity result, and parity gate posture are persisted.",
+        "Early filing-readiness or amendment-intent terminalization may already have returned."
+      ],
+      "failure_exit_paths": [
+        "`FINALIZE_TERMINAL_OUTCOME(...)` may return early for filing-readiness or amendment-intent validation failure."
+      ],
+      "gate_evaluations": [
+        "AMENDMENT_GATE",
+        "FILING_GATE",
+        "PARITY_GATE"
+      ],
+      "lane_focus": [
+        "AUTHORITY_CONTEXT",
+        "FILING_AND_SUBMISSION",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "AUTHORITY_CONTEXT": [
+          {
+            "kind": "branch",
+            "label": "parity gate"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          },
+          {
+            "kind": "artifact",
+            "label": "GateDecisionRecord"
+          }
+        ],
+        "DRIFT_AND_AMENDMENT": [
+          {
+            "kind": "gate",
+            "label": "AMENDMENT_GATE"
+          },
+          {
+            "kind": "module",
+            "label": "SELECT_DRIFT_BASELINE"
+          },
+          {
+            "kind": "module",
+            "label": "BUILD_DRIFT_DELTA_VECTOR"
+          }
+        ],
+        "FILING_AND_SUBMISSION": [
+          {
+            "kind": "branch",
+            "label": "early filing terminal"
+          },
+          {
+            "kind": "gate",
+            "label": "FILING_GATE"
+          },
+          {
+            "kind": "module",
+            "label": "OBLIGATION_STATUS"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "terminal",
+            "label": "FINALIZE_TERMINAL_OUTCOME"
+          },
+          {
+            "kind": "module",
+            "label": "APPEND_MANIFEST_GATES"
+          },
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_OUTPUTS"
+          }
+        ],
+        "POSTSEAL_DAG": [
+          {
+            "kind": "module",
+            "label": "SELECT_PRIMARY_PROOF_BUNDLE_REF"
+          }
+        ],
+        "TRUST_AND_WORKFLOW": [
+          {
+            "kind": "module",
+            "label": "PLAN_WORKFLOW"
+          },
+          {
+            "kind": "module",
+            "label": "UPSERT_WORKFLOW_ITEMS"
+          }
+        ]
+      },
+      "live_experience": {
+        "cause_refs": [
+          "IntentToAmendTriggered",
+          "WorkflowOpened"
+        ],
+        "command_vs_read_side_boundary": "Every `ExperienceDelta` remains read-side only; command truth and state transitions must already be durable.",
+        "composite_shell_surfaces": [
+          "CONTEXT_BAR",
+          "DECISION_SUMMARY",
+          "ACTION_STRIP",
+          "DETAIL_DRAWER"
+        ],
+        "notes": [
+          "Low-noise shells keep one mounted route keyed by `manifest_id`.",
+          "Reduced-motion clients must preserve semantics without relying on motion tokens."
+        ],
+        "ordered_index": 9,
+        "phase_codes": [
+          "AMENDMENT_READINESS_EARLY",
+          "EARLY_FILING_READINESS",
+          "PARITY_GATE"
+        ],
+        "phase_id": "P09",
+        "phase_name": "Authority context, comparison basis, parity, and parity gate",
+        "posture_states": [
+          "CONTAINED"
+        ],
+        "semantic_motions": [
+          "RIPPLE",
+          "ECHO"
+        ],
+        "source_heading_or_logical_block": "Algorithm/core_engine.md::L1293[Authority_context_comparison_basis_parity_and_parity_gate]",
+        "surface_modules": [
+          "DRIFT_FIELD",
+          "CONSEQUENCE_RAIL"
+        ]
+      },
+      "notes": [
+        "Authority calculations use controlled outbox + inbox recovery, so inline waits never invent unnormalized external truth."
+      ],
+      "ordered_index": 9,
+      "phase_id": "P09",
+      "phase_label": "9. Authority context, comparison basis, parity, and parity gate",
+      "phase_name": "Authority context, comparison basis, parity, and parity gate",
+      "return_paths": [
+        "FINALIZE_TERMINAL_OUTCOME"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L1293[Authority_context_comparison_basis_parity_and_parity_gate]",
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/exact_gate_logic_and_decision_tables.md",
+        "Algorithm/observability_and_audit_contract.md",
+        "Algorithm/late_data_authority_correction_and_replay_propagation_contract.md"
+      ],
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [
+        "DriftBaselineEnvelope",
+        "RetroactiveImpactAnalysis",
+        "DriftRecord",
+        "AmendmentWindowContext"
+      ],
+      "audit_events": [
+        "BaselineSelected",
+        "DriftRetroactiveImpactAnalyzed",
+        "DriftSuperseded",
+        "DriftDetected",
+        "DriftClassified",
+        "AmendmentWindowEvaluated",
+        "AmendmentEligibilityEvaluated"
+      ],
+      "branch_rows": [],
+      "branch_tags": [
+        "drift baseline",
+        "no amendment gate"
+      ],
+      "called_modules": [
+        "SELECT_DRIFT_BASELINE",
+        "WRITE_ARTIFACT",
+        "RECORD_EVENT",
+        "BUILD_DRIFT_DELTA_VECTOR",
+        "CLASSIFY_TEMPORAL_POSITION",
+        "ANALYZE_RETROACTIVE_IMPACT",
+        "DETECT_DRIFT",
+        "MATERIALIZE_AMENDMENT_WINDOW_CONTEXT",
+        "EVALUATE_AMENDMENT_ELIGIBILITY",
+        "UPSERT_AMENDMENT_CASE",
+        "UPDATE_MANIFEST_OUTPUTS",
+        "LOAD_AMENDMENT_CASE",
+        "FINALIZE_RUN_FAILURE"
+      ],
+      "entry_conditions": [
+        "Authority comparison and parity posture are known.",
+        "The run can select the lawful drift baseline and evaluate retroactive impact."
+      ],
+      "exit_conditions": [
+        "Drift, amendment-window context, retroactive impact, and amendment case posture are prepared for later gates."
+      ],
+      "failure_exit_paths": [
+        "No direct terminalization occurs here; this phase prepares downstream drift/amendment consequences only."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "DRIFT_AND_AMENDMENT"
+      ],
+      "lane_highlights": {
+        "DRIFT_AND_AMENDMENT": [
+          {
+            "kind": "branch",
+            "label": "drift baseline"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          },
+          {
+            "kind": "module",
+            "label": "SELECT_DRIFT_BASELINE"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_OUTPUTS"
+          },
+          {
+            "kind": "module",
+            "label": "LOAD_AMENDMENT_CASE"
+          },
+          {
+            "kind": "module",
+            "label": "FINALIZE_RUN_FAILURE"
+          }
+        ]
+      },
+      "live_experience": {
+        "cause_refs": [
+          "DriftDetected"
+        ],
+        "command_vs_read_side_boundary": "Every `ExperienceDelta` remains read-side only; command truth and state transitions must already be durable.",
+        "composite_shell_surfaces": [
+          "CONTEXT_BAR",
+          "DECISION_SUMMARY",
+          "ACTION_STRIP",
+          "DETAIL_DRAWER"
+        ],
+        "notes": [
+          "Low-noise shells keep one mounted route keyed by `manifest_id`.",
+          "Reduced-motion clients must preserve semantics without relying on motion tokens."
+        ],
+        "ordered_index": 10,
+        "phase_codes": [],
+        "phase_id": "P10",
+        "phase_name": "Drift posture and amendment posture preparation",
+        "posture_states": [
+          "CONTAINED"
+        ],
+        "semantic_motions": [
+          "RIPPLE"
+        ],
+        "source_heading_or_logical_block": "Algorithm/core_engine.md::L1621[Drift_posture_and_amendment_posture_preparation]",
+        "surface_modules": [
+          "DRIFT_FIELD",
+          "CONSEQUENCE_RAIL"
+        ]
+      },
+      "notes": [
+        "This phase protects the semantic distinction between drift diagnosis and amendment permissioning."
+      ],
+      "ordered_index": 10,
+      "phase_id": "P10",
+      "phase_label": "10. Drift posture and amendment posture preparation",
+      "phase_name": "Drift posture and amendment posture preparation",
+      "return_paths": [],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L1621[Drift_posture_and_amendment_posture_preparation]",
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/late_data_authority_correction_and_replay_propagation_contract.md",
+        "Algorithm/state_machines.md"
+      ],
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [
+        "TrustSummary",
+        "GateDecisionRecord"
+      ],
+      "audit_events": [
+        "TrustSynthesized",
+        "GateEvaluated"
+      ],
+      "branch_rows": [],
+      "branch_tags": [
+        "trust gate"
+      ],
+      "called_modules": [
+        "DERIVE_REQUIRED_HUMAN_STEPS",
+        "ASSESS_TRUST_INPUT_STATE",
+        "LOAD_OVERRIDES",
+        "SYNTHESIZE_TRUST",
+        "WRITE_ARTIFACT",
+        "RECORD_EVENT",
+        "TRUST_GATE",
+        "APPEND_MANIFEST_GATES",
+        "UPSERT_FILING_CASE",
+        "UPDATE_MANIFEST_OUTPUTS"
+      ],
+      "entry_conditions": [
+        "Parity, retention, drift, and override context are available."
+      ],
+      "exit_conditions": [
+        "Trust summary, trust gate, and command-side filing case posture are persisted."
+      ],
+      "failure_exit_paths": [
+        "This phase does not directly return, but its gate posture may trigger trust-based terminalization in the next read-model phase."
+      ],
+      "gate_evaluations": [
+        "TRUST_GATE"
+      ],
+      "lane_focus": [
+        "TRUST_AND_WORKFLOW"
+      ],
+      "lane_highlights": {
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_OUTPUTS"
+          },
+          {
+            "kind": "module",
+            "label": "APPEND_MANIFEST_GATES"
+          }
+        ],
+        "TRUST_AND_WORKFLOW": [
+          {
+            "kind": "branch",
+            "label": "trust gate"
+          },
+          {
+            "kind": "module",
+            "label": "LOAD_OVERRIDES"
+          },
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          }
+        ]
+      },
+      "live_experience": {
+        "cause_refs": [
+          "TrustSynthesized"
+        ],
+        "command_vs_read_side_boundary": "Every `ExperienceDelta` remains read-side only; command truth and state transitions must already be durable.",
+        "composite_shell_surfaces": [
+          "CONTEXT_BAR",
+          "DECISION_SUMMARY",
+          "ACTION_STRIP",
+          "DETAIL_DRAWER"
+        ],
+        "notes": [
+          "Low-noise shells keep one mounted route keyed by `manifest_id`.",
+          "Reduced-motion clients must preserve semantics without relying on motion tokens."
+        ],
+        "ordered_index": 11,
+        "phase_codes": [
+          "TRUST_GATE",
+          "TRUST_READY"
+        ],
+        "phase_id": "P11",
+        "phase_name": "Trust synthesis and command-side case state",
+        "posture_states": [
+          "CONTAINED"
+        ],
+        "semantic_motions": [
+          "TRACE"
+        ],
+        "source_heading_or_logical_block": "Algorithm/core_engine.md::L1747[Trust_synthesis_and_command-side_case_state]",
+        "surface_modules": [
+          "DECISION_STAGE",
+          "PACKET_FORGE"
+        ]
+      },
+      "notes": [
+        "Trust is the command-side synthesis of parity, risk, retention, authority context, and override legality."
+      ],
+      "ordered_index": 11,
+      "phase_id": "P11",
+      "phase_label": "11. Trust synthesis and command-side case state",
+      "phase_name": "Trust synthesis and command-side case state",
+      "return_paths": [],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L1747[Trust_synthesis_and_command-side_case_state]",
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/invariants_and_gates.md",
+        "Algorithm/exact_gate_logic_and_decision_tables.md"
+      ],
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [],
+      "audit_events": [
+        "WorkflowOpened",
+        "WorkflowResolved"
+      ],
+      "branch_rows": [],
+      "branch_tags": [
+        "workflow refresh"
+      ],
+      "called_modules": [
+        "PLAN_WORKFLOW",
+        "UPSERT_WORKFLOW_ITEMS",
+        "RECORD_EVENT"
+      ],
+      "entry_conditions": [
+        "Trust posture and the ordered gate chain are stable enough to emit operator workflow consequences."
+      ],
+      "exit_conditions": [
+        "Workflow items and immediate-consequence posture are refreshed for the current manifest."
+      ],
+      "failure_exit_paths": [
+        "No direct terminal return occurs here."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "TRUST_AND_WORKFLOW",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "TRUST_AND_WORKFLOW": [
+          {
+            "kind": "branch",
+            "label": "workflow refresh"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "module",
+            "label": "PLAN_WORKFLOW"
+          },
+          {
+            "kind": "module",
+            "label": "UPSERT_WORKFLOW_ITEMS"
+          }
+        ]
+      },
+      "live_experience": {
+        "cause_refs": [],
+        "command_vs_read_side_boundary": "Every `ExperienceDelta` remains read-side only; command truth and state transitions must already be durable.",
+        "composite_shell_surfaces": [
+          "CONTEXT_BAR",
+          "DECISION_SUMMARY",
+          "ACTION_STRIP",
+          "DETAIL_DRAWER"
+        ],
+        "notes": [
+          "Low-noise shells keep one mounted route keyed by `manifest_id`.",
+          "Reduced-motion clients must preserve semantics without relying on motion tokens."
+        ],
+        "ordered_index": 12,
+        "phase_codes": [],
+        "phase_id": "P12",
+        "phase_name": "Workflow planning and immediate consequence refresh",
+        "posture_states": [],
+        "semantic_motions": [
+          "ECHO"
+        ],
+        "source_heading_or_logical_block": "Algorithm/core_engine.md::L1859[Workflow_planning_and_immediate_consequence_refresh]",
+        "surface_modules": [
+          "CONSEQUENCE_RAIL"
+        ]
+      },
+      "notes": [
+        "Workflow remains downstream of gate posture; it does not replace or reinterpret decisive legal state."
+      ],
+      "ordered_index": 12,
+      "phase_id": "P12",
+      "phase_label": "12. Workflow planning and immediate consequence refresh",
+      "phase_name": "Workflow planning and immediate consequence refresh",
+      "return_paths": [],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L1859[Workflow_planning_and_immediate_consequence_refresh]",
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/low_noise_experience_contract.md",
+        "Algorithm/observability_and_audit_contract.md"
+      ],
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [],
+      "audit_events": [
+        "TwinBuilt"
+      ],
+      "branch_rows": [
+        {
+          "branch_family": "trust_posture_terminalization",
+          "branch_id": "BR_TRUST_POSTURE_TERMINALIZATION",
+          "false_path": "Continue into amendment and filing stages.",
+          "phase_id": "P13",
+          "phase_name": "trust-posture terminalization",
+          "source_refs": [
+            "Algorithm/core_engine.md",
+            "Algorithm/low_noise_experience_contract.md"
+          ],
+          "terminal_outcome": "Completed, blocked, or review-required terminalization before filing logic.",
+          "trigger_condition": "Trust posture is already decisive and no later amendment or filing stage remains required.",
+          "true_path": "Publish live projections and return a terminal bundle from trust posture."
+        }
+      ],
+      "branch_tags": [
+        "trust terminal",
+        "projection refresh"
+      ],
+      "called_modules": [
+        "RECORD_EVENT",
+        "UPDATE_MANIFEST_OUTPUTS",
+        "BUILD_LIVE_EXPERIENCE_FRAME",
+        "SELECT_PRIMARY_PROOF_BUNDLE_REF",
+        "FINALIZE_TERMINAL_OUTCOME"
+      ],
+      "entry_conditions": [
+        "The run has stable trust posture and can publish live read-model projections for the shell.",
+        "Projection workers must remain read-side only and may finish after `DecisionBundle` persistence."
+      ],
+      "exit_conditions": [
+        "Composite low-noise shell surfaces are refreshed and the run either proceeds onward or terminalizes on trust posture."
+      ],
+      "failure_exit_paths": [
+        "`FINALIZE_TERMINAL_OUTCOME(...)` may return on decisive trust posture before amendment or filing stages."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "LIVE_EXPERIENCE",
+        "TRUST_AND_WORKFLOW",
+        "RETENTION_AND_TERMINALIZATION"
+      ],
+      "lane_highlights": {
+        "LIVE_EXPERIENCE": [
+          {
+            "kind": "branch",
+            "label": "trust terminal"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "event",
+            "label": "TwinBuilt"
+          },
+          {
+            "kind": "module",
+            "label": "BUILD_LIVE_EXPERIENCE_FRAME"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "terminal",
+            "label": "FINALIZE_TERMINAL_OUTCOME"
+          },
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_OUTPUTS"
+          }
+        ],
+        "POSTSEAL_DAG": [
+          {
+            "kind": "module",
+            "label": "SELECT_PRIMARY_PROOF_BUNDLE_REF"
+          }
+        ],
+        "TRUST_AND_WORKFLOW": [
+          {
+            "kind": "branch",
+            "label": "projection refresh"
+          }
+        ]
+      },
+      "live_experience": {
+        "cause_refs": [
+          "ExperienceFrameRefreshed",
+          "ProjectionSidecarsMaterialized"
+        ],
+        "command_vs_read_side_boundary": "Every `ExperienceDelta` remains read-side only; command truth and state transitions must already be durable.",
+        "composite_shell_surfaces": [
+          "CONTEXT_BAR",
+          "DECISION_SUMMARY",
+          "ACTION_STRIP",
+          "DETAIL_DRAWER"
+        ],
+        "notes": [
+          "Low-noise shells keep one mounted route keyed by `manifest_id`.",
+          "Reduced-motion clients must preserve semantics without relying on motion tokens."
+        ],
+        "ordered_index": 13,
+        "phase_codes": [],
+        "phase_id": "P13",
+        "phase_name": "Publish live read-model projections and conditionally terminalize on trust posture",
+        "posture_states": [],
+        "semantic_motions": [
+          "ECHO"
+        ],
+        "source_heading_or_logical_block": "Algorithm/core_engine.md::L1912[Publish_live_read-model_projections_and_conditionally_terminalize_on_trust_posture]",
+        "surface_modules": []
+      },
+      "notes": [
+        "This phase is the clearest command-truth versus read-side boundary: `ExperienceDelta` is operational, not the legal record."
+      ],
+      "ordered_index": 13,
+      "phase_id": "P13",
+      "phase_label": "13. Publish live read-model projections and conditionally terminalize on trust posture",
+      "phase_name": "Publish live read-model projections and conditionally terminalize on trust posture",
+      "return_paths": [
+        "FINALIZE_TERMINAL_OUTCOME"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L1912[Publish_live_read-model_projections_and_conditionally_terminalize_on_trust_posture]",
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/low_noise_experience_contract.md",
+        "Algorithm/observability_and_audit_contract.md"
+      ],
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [
+        "GateDecisionRecord"
+      ],
+      "audit_events": [
+        "AmendmentFreshnessInvalidated",
+        "GateEvaluated",
+        "WorkflowOpened",
+        "DriftReviewEscalated",
+        "IntentToAmendTriggered",
+        "IntentToAmendValidated"
+      ],
+      "branch_rows": [
+        {
+          "branch_family": "amendment_progression_split",
+          "branch_id": "BR_AMENDMENT_INTENT_VS_AMENDMENT_SUBMIT",
+          "false_path": "No amendment progression occurs and filing logic remains ordinary.",
+          "phase_id": "P14",
+          "phase_name": "amendment intent vs amendment submit",
+          "source_refs": [
+            "Algorithm/core_engine.md",
+            "Algorithm/state_machines.md",
+            "Algorithm/exact_gate_logic_and_decision_tables.md"
+          ],
+          "terminal_outcome": "May terminalize blocked/review-required on amendment gate or continue to filing.",
+          "trigger_condition": "Runtime scope requests amendment intent, amendment submit, or neither.",
+          "true_path": "Intent-to-amend readiness and later submit readiness remain distinct state-machine progressions."
+        }
+      ],
+      "branch_tags": [
+        "amendment gate",
+        "intent vs submit"
+      ],
+      "called_modules": [
+        "VALIDATE_AMENDMENT_READINESS_FRESHNESS",
+        "RECORD_EVENT",
+        "AMENDMENT_GATE",
+        "WRITE_ARTIFACT",
+        "APPEND_MANIFEST_GATES",
+        "PLAN_WORKFLOW",
+        "UPSERT_WORKFLOW_ITEMS",
+        "SELECT_PRIMARY_PROOF_BUNDLE_REF",
+        "FINALIZE_TERMINAL_OUTCOME",
+        "EXECUTE_AUTHORITY_CALCULATION_FLOW",
+        "UPSERT_AMENDMENT_CASE",
+        "UPDATE_MANIFEST_OUTPUTS"
+      ],
+      "entry_conditions": [
+        "Amendment-related scope was requested or amendment posture otherwise needs decisive evaluation.",
+        "Drift and amendment-preparation artifacts are already persisted from phase 10."
+      ],
+      "exit_conditions": [
+        "`AMENDMENT_GATE` and any intent-to-amend readiness posture are persisted.",
+        "The run either continues with a ready amendment path or terminalizes with blocked/review posture."
+      ],
+      "failure_exit_paths": [
+        "`FINALIZE_TERMINAL_OUTCOME(...)` returns when amendment gate posture is blocking or review-required."
+      ],
+      "gate_evaluations": [
+        "AMENDMENT_GATE"
+      ],
+      "lane_focus": [
+        "DRIFT_AND_AMENDMENT",
+        "FILING_AND_SUBMISSION",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "AUTHORITY_CONTEXT": [
+          {
+            "kind": "module",
+            "label": "EXECUTE_AUTHORITY_CALCULATION_FLOW"
+          }
+        ],
+        "DRIFT_AND_AMENDMENT": [
+          {
+            "kind": "branch",
+            "label": "amendment gate"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "gate",
+            "label": "AMENDMENT_GATE"
+          },
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          }
+        ],
+        "FILING_AND_SUBMISSION": [
+          {
+            "kind": "branch",
+            "label": "intent vs submit"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "terminal",
+            "label": "FINALIZE_TERMINAL_OUTCOME"
+          },
+          {
+            "kind": "module",
+            "label": "APPEND_MANIFEST_GATES"
+          },
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_OUTPUTS"
+          }
+        ],
+        "POSTSEAL_DAG": [
+          {
+            "kind": "module",
+            "label": "SELECT_PRIMARY_PROOF_BUNDLE_REF"
+          }
+        ],
+        "TRUST_AND_WORKFLOW": [
+          {
+            "kind": "module",
+            "label": "PLAN_WORKFLOW"
+          },
+          {
+            "kind": "module",
+            "label": "UPSERT_WORKFLOW_ITEMS"
+          }
+        ]
+      },
+      "live_experience": {
+        "cause_refs": [
+          "WorkflowOpened",
+          "IntentToAmendTriggered",
+          "IntentToAmendValidated"
+        ],
+        "command_vs_read_side_boundary": "Every `ExperienceDelta` remains read-side only; command truth and state transitions must already be durable.",
+        "composite_shell_surfaces": [
+          "CONTEXT_BAR",
+          "DECISION_SUMMARY",
+          "ACTION_STRIP",
+          "DETAIL_DRAWER"
+        ],
+        "notes": [
+          "Low-noise shells keep one mounted route keyed by `manifest_id`.",
+          "Reduced-motion clients must preserve semantics without relying on motion tokens."
+        ],
+        "ordered_index": 14,
+        "phase_codes": [
+          "AMENDMENT_GATE",
+          "AMENDMENT_GATE_POST_INTENT"
+        ],
+        "phase_id": "P14",
+        "phase_name": "Amendment gate and intent-to-amend progression",
+        "posture_states": [
+          "CONTAINED",
+          "BRIDGED"
+        ],
+        "semantic_motions": [
+          "ECHO",
+          "RIPPLE",
+          "BRIDGE"
+        ],
+        "source_heading_or_logical_block": "Algorithm/core_engine.md::L2159[Amendment_gate_and_intent-to-amend_progression]",
+        "surface_modules": [
+          "CONSEQUENCE_RAIL",
+          "DRIFT_FIELD"
+        ]
+      },
+      "notes": [
+        "This is the first lawful place the engine may evaluate `AMENDMENT_GATE`; drift preparation alone is not enough."
+      ],
+      "ordered_index": 14,
+      "phase_id": "P14",
+      "phase_label": "14. Amendment gate and intent-to-amend progression",
+      "phase_name": "Amendment gate and intent-to-amend progression",
+      "return_paths": [
+        "FINALIZE_TERMINAL_OUTCOME"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L2159[Amendment_gate_and_intent-to-amend_progression]",
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/exact_gate_logic_and_decision_tables.md",
+        "Algorithm/state_machines.md"
+      ],
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [
+        "GateDecisionRecord",
+        "FilingPacket"
+      ],
+      "audit_events": [
+        "GateEvaluated",
+        "WorkflowOpened",
+        "FilingPacketPrepared"
+      ],
+      "branch_rows": [],
+      "branch_tags": [
+        "filing gate",
+        "packet harden"
+      ],
+      "called_modules": [
+        "CHECK_TRUST_CURRENCY",
+        "LOAD_OVERRIDES",
+        "FILING_GATE",
+        "OBLIGATION_STATUS",
+        "WRITE_ARTIFACT",
+        "RECORD_EVENT",
+        "APPEND_MANIFEST_GATES",
+        "PLAN_WORKFLOW",
+        "UPSERT_WORKFLOW_ITEMS",
+        "SELECT_PRIMARY_PROOF_BUNDLE_REF",
+        "FINALIZE_TERMINAL_OUTCOME",
+        "EXECUTE_AUTHORITY_CALCULATION_FLOW",
+        "UPSERT_FILING_CASE",
+        "UPDATE_MANIFEST_OUTPUTS",
+        "BUILD_FILING_PACKET",
+        "FINALIZE_RUN_FAILURE",
+        "APPROVAL_STATE",
+        "DECLARED_BASIS_ACK_STATE",
+        "DERIVE_PACKET_NOTICE_STEPS",
+        "RESOLVE_FILING_NOTICES",
+        "APPROVE_FILING_PACKET"
+      ],
+      "entry_conditions": [
+        "Filing-related scope is requested or amendment submit requires packet preparation.",
+        "Trust, parity, authority context, and amendment posture are available."
+      ],
+      "exit_conditions": [
+        "Filing-readiness context and `FILING_GATE` posture are persisted.",
+        "A filing packet may be prepared and hardened to `APPROVED_TO_SUBMIT` when lawful."
+      ],
+      "failure_exit_paths": [
+        "`FINALIZE_TERMINAL_OUTCOME(...)` returns for blocked or review-required filing posture.",
+        "`FINALIZE_RUN_FAILURE(...)` guards packet-manifest binding mismatch.",
+        "`ERROR(AMENDMENT_CASE_NOT_READY_TO_SUBMIT)` prevents invalid amendment submission."
+      ],
+      "gate_evaluations": [
+        "FILING_GATE"
+      ],
+      "lane_focus": [
+        "AUTHORITY_CONTEXT",
+        "FILING_AND_SUBMISSION",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "AUTHORITY_CONTEXT": [
+          {
+            "kind": "branch",
+            "label": "filing gate"
+          },
+          {
+            "kind": "module",
+            "label": "CHECK_TRUST_CURRENCY"
+          },
+          {
+            "kind": "module",
+            "label": "LOAD_OVERRIDES"
+          },
+          {
+            "kind": "module",
+            "label": "EXECUTE_AUTHORITY_CALCULATION_FLOW"
+          }
+        ],
+        "FILING_AND_SUBMISSION": [
+          {
+            "kind": "branch",
+            "label": "packet harden"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "gate",
+            "label": "FILING_GATE"
+          },
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "terminal",
+            "label": "FINALIZE_TERMINAL_OUTCOME"
+          },
+          {
+            "kind": "module",
+            "label": "APPEND_MANIFEST_GATES"
+          },
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_OUTPUTS"
+          }
+        ],
+        "POSTSEAL_DAG": [
+          {
+            "kind": "module",
+            "label": "SELECT_PRIMARY_PROOF_BUNDLE_REF"
+          }
+        ],
+        "TRUST_AND_WORKFLOW": [
+          {
+            "kind": "module",
+            "label": "PLAN_WORKFLOW"
+          },
+          {
+            "kind": "module",
+            "label": "UPSERT_WORKFLOW_ITEMS"
+          },
+          {
+            "kind": "module",
+            "label": "APPROVAL_STATE"
+          }
+        ]
+      },
+      "live_experience": {
+        "cause_refs": [
+          "WorkflowOpened",
+          "FilingPacketPrepared",
+          "FilingPacketApproved"
+        ],
+        "command_vs_read_side_boundary": "Every `ExperienceDelta` remains read-side only; command truth and state transitions must already be durable.",
+        "composite_shell_surfaces": [
+          "CONTEXT_BAR",
+          "DECISION_SUMMARY",
+          "ACTION_STRIP",
+          "DETAIL_DRAWER"
+        ],
+        "notes": [
+          "Low-noise shells keep one mounted route keyed by `manifest_id`.",
+          "Reduced-motion clients must preserve semantics without relying on motion tokens."
+        ],
+        "ordered_index": 15,
+        "phase_codes": [
+          "FILING_GATE_MODE_BLOCK",
+          "FILING_GATE_PREPACKET",
+          "FILING_GATE_YEAR_END_CALC",
+          "FILING_GATE"
+        ],
+        "phase_id": "P15",
+        "phase_name": "Authority calculation, filing readiness, packet preparation, and filing gate",
+        "posture_states": [
+          "CONTAINED",
+          "FROZEN"
+        ],
+        "semantic_motions": [
+          "ECHO",
+          "SEAL"
+        ],
+        "source_heading_or_logical_block": "Algorithm/core_engine.md::L2454[Authority_calculation_filing_readiness_packet_preparation_and_filing_gate]",
+        "surface_modules": [
+          "CONSEQUENCE_RAIL",
+          "PACKET_FORGE"
+        ]
+      },
+      "notes": [
+        "Internal filing intent and packet hardening remain distinct from authority-owned acceptance or confirmation."
+      ],
+      "ordered_index": 15,
+      "phase_id": "P15",
+      "phase_label": "15. Authority calculation, filing readiness, packet preparation, and filing gate",
+      "phase_name": "Authority calculation, filing readiness, packet preparation, and filing gate",
+      "return_paths": [
+        "FINALIZE_TERMINAL_OUTCOME"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L2454[Authority_calculation_filing_readiness_packet_preparation_and_filing_gate]",
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/exact_gate_logic_and_decision_tables.md",
+        "Algorithm/state_machines.md",
+        "Algorithm/low_noise_experience_contract.md"
+      ],
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [
+        "AmendmentBundle",
+        "AuthorityOperation",
+        "AuthorityBinding",
+        "AuthorityRequestEnvelope",
+        "GateDecisionRecord",
+        "SubmissionRecord",
+        "FilingPacket",
+        "AuthorityInteractionRecord"
+      ],
+      "audit_events": [
+        "AmendmentBundlePrepared",
+        "AuthorityOperationPlanned",
+        "AuthorityRequestBuilt",
+        "GateEvaluated",
+        "WorkflowOpened",
+        "AmendmentSubmitted",
+        "SubmissionAttempted",
+        "AuthorityReconciliationResolved",
+        "SubmissionConfirmed",
+        "SubmissionRejected",
+        "OutOfBandStateObserved",
+        "SubmissionUnknown",
+        "SubmissionReconciled",
+        "AmendmentConfirmed"
+      ],
+      "branch_rows": [
+        {
+          "branch_family": "submit_vs_non_submit",
+          "branch_id": "BR_SUBMIT_VS_NON_SUBMIT",
+          "false_path": "End without transmit while retaining packet or trust posture as the latest truth.",
+          "phase_id": "P16",
+          "phase_name": "submission execution split",
+          "source_refs": [
+            "Algorithm/core_engine.md",
+            "Algorithm/state_machines.md",
+            "Algorithm/observability_and_audit_contract.md"
+          ],
+          "terminal_outcome": "May remain pending external confirmation, complete, or block/review depending on authority outcome.",
+          "trigger_condition": "Runtime scope requests actual submission and the packet is approved to submit.",
+          "true_path": "Execute governed transmit, bounded recovery, and authority reconciliation."
+        }
+      ],
+      "branch_tags": [
+        "submission gate",
+        "ack vs recovery"
+      ],
+      "called_modules": [
+        "CONSTRUCT_AMENDMENT_BUNDLE",
+        "WRITE_ARTIFACT",
+        "UPDATE_MANIFEST_OUTPUTS",
+        "RECORD_EVENT",
+        "RESOLVE_AUTHORITY_OPERATION",
+        "RESOLVE_AUTHORITY_BINDING",
+        "CANONICALIZE_AUTHORITY_REQUEST",
+        "DERIVE_AUTHORITY_REQUEST_HASHES",
+        "BUILD_AUTHORITY_REQUEST_ENVELOPE",
+        "SUBMISSION_GATE",
+        "EXISTING_SUBMISSIONS",
+        "APPEND_MANIFEST_GATES",
+        "PLAN_WORKFLOW",
+        "UPSERT_WORKFLOW_ITEMS",
+        "SELECT_PRIMARY_PROOF_BUNDLE_REF",
+        "FINALIZE_TERMINAL_OUTCOME",
+        "UPSERT_AMENDMENT_CASE",
+        "BEGIN_SUBMISSION_RECORD",
+        "TRANSITION_SUBMISSION_RECORD",
+        "TRANSITION_FILING_PACKET",
+        "UPSERT_FILING_CASE",
+        "RECONCILE_AUTHORITY_STATE",
+        "EMIT_WORKFLOW_ITEM",
+        "UPSERT_OBLIGATION_MIRROR"
+      ],
+      "entry_conditions": [
+        "A filing packet is approved for submit and runtime scope actually requests submission.",
+        "Submission must still pass send-time dedupe, binding, and gate checks."
+      ],
+      "exit_conditions": [
+        "Submission gate posture, submission record state, authority request lineage, and any reconciliation outputs are persisted.",
+        "The live shell now distinguishes transmit-pending, pending-ack, confirmed, rejected, unknown, and out-of-band authority posture."
+      ],
+      "failure_exit_paths": [
+        "`FINALIZE_TERMINAL_OUTCOME(...)` returns when `SUBMISSION_GATE` blocks or requires review before transmit."
+      ],
+      "gate_evaluations": [
+        "SUBMISSION_GATE"
+      ],
+      "lane_focus": [
+        "FILING_AND_SUBMISSION",
+        "AUTHORITY_CONTEXT",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "AUTHORITY_CONTEXT": [
+          {
+            "kind": "branch",
+            "label": "ack vs recovery"
+          },
+          {
+            "kind": "module",
+            "label": "RESOLVE_AUTHORITY_OPERATION"
+          },
+          {
+            "kind": "module",
+            "label": "RESOLVE_AUTHORITY_BINDING"
+          },
+          {
+            "kind": "module",
+            "label": "CANONICALIZE_AUTHORITY_REQUEST"
+          }
+        ],
+        "DRIFT_AND_AMENDMENT": [
+          {
+            "kind": "module",
+            "label": "UPSERT_AMENDMENT_CASE"
+          },
+          {
+            "kind": "module",
+            "label": "CONSTRUCT_AMENDMENT_BUNDLE"
+          }
+        ],
+        "FILING_AND_SUBMISSION": [
+          {
+            "kind": "branch",
+            "label": "submission gate"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          },
+          {
+            "kind": "event",
+            "label": "WorkflowOpened"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_OUTPUTS"
+          },
+          {
+            "kind": "terminal",
+            "label": "FINALIZE_TERMINAL_OUTCOME"
+          },
+          {
+            "kind": "module",
+            "label": "APPEND_MANIFEST_GATES"
+          }
+        ],
+        "POSTSEAL_DAG": [
+          {
+            "kind": "module",
+            "label": "SELECT_PRIMARY_PROOF_BUNDLE_REF"
+          }
+        ],
+        "TRUST_AND_WORKFLOW": [
+          {
+            "kind": "module",
+            "label": "EMIT_WORKFLOW_ITEM"
+          },
+          {
+            "kind": "module",
+            "label": "PLAN_WORKFLOW"
+          },
+          {
+            "kind": "module",
+            "label": "UPSERT_WORKFLOW_ITEMS"
+          }
+        ]
+      },
+      "live_experience": {
+        "cause_refs": [
+          "AuthorityRequestBuilt",
+          "WorkflowOpened",
+          "SubmissionAttempted",
+          "SubmissionAwaitingAuthorityConfirmation",
+          "SubmissionTransmitStillPending",
+          "SubmissionReconciled"
+        ],
+        "command_vs_read_side_boundary": "Every `ExperienceDelta` remains read-side only; command truth and state transitions must already be durable.",
+        "composite_shell_surfaces": [
+          "CONTEXT_BAR",
+          "DECISION_SUMMARY",
+          "ACTION_STRIP",
+          "DETAIL_DRAWER"
+        ],
+        "notes": [
+          "Low-noise shells keep one mounted route keyed by `manifest_id`.",
+          "Reduced-motion clients must preserve semantics without relying on motion tokens."
+        ],
+        "ordered_index": 16,
+        "phase_codes": [
+          "SUBMISSION_GATE"
+        ],
+        "phase_id": "P16",
+        "phase_name": "Submission enqueue, governed transmit, inbox-normalized recovery, and bounded reconciliation",
+        "posture_states": [
+          "STREAMING",
+          "CONTAINED"
+        ],
+        "semantic_motions": [
+          "TRACE",
+          "ECHO"
+        ],
+        "source_heading_or_logical_block": "Algorithm/core_engine.md::L2965[Submission_enqueue_governed_transmit_inbox-normalized_recovery_and_bounded_reconciliation]",
+        "surface_modules": [
+          "AUTHORITY_TUNNEL",
+          "CONSEQUENCE_RAIL",
+          "PULSE_SPINE",
+          "PACKET_FORGE"
+        ]
+      },
+      "notes": [
+        "Authority-owned truth and out-of-band corrections remain separate from the engine's internal packet and submission intent states."
+      ],
+      "ordered_index": 16,
+      "phase_id": "P16",
+      "phase_label": "16. Submission enqueue, governed transmit, inbox-normalized recovery, and bounded reconciliation",
+      "phase_name": "Submission enqueue, governed transmit, inbox-normalized recovery, and bounded reconciliation",
+      "return_paths": [
+        "FINALIZE_TERMINAL_OUTCOME"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L2965[Submission_enqueue_governed_transmit_inbox-normalized_recovery_and_bounded_reconciliation]",
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/observability_and_audit_contract.md",
+        "Algorithm/state_machines.md",
+        "Algorithm/low_noise_experience_contract.md"
+      ],
+      "transaction_spans": [
+        {
+          "label": "Queue transmit intent and advance packet/submission state",
+          "lane_end": "AUTHORITY_CONTEXT",
+          "lane_start": "FILING_AND_SUBMISSION"
+        }
+      ]
+    },
+    {
+      "artifact_writes": [
+        "DriftBaselineEnvelope",
+        "RetroactiveImpactAnalysis",
+        "DriftRecord",
+        "AmendmentWindowContext"
+      ],
+      "audit_events": [
+        "BaselineSelected",
+        "DriftRetroactiveImpactAnalyzed",
+        "DriftSuperseded",
+        "DriftDetected",
+        "DriftClassified",
+        "AmendmentWindowEvaluated",
+        "AuthorityAcceptedStateInternallySuperseded",
+        "AmendmentEligibilityEvaluated",
+        "WorkflowOpened",
+        "DriftReviewEscalated"
+      ],
+      "branch_rows": [],
+      "branch_tags": [
+        "post-authority drift"
+      ],
+      "called_modules": [
+        "SELECT_DRIFT_BASELINE",
+        "WRITE_ARTIFACT",
+        "RECORD_EVENT",
+        "BUILD_DRIFT_DELTA_VECTOR",
+        "CLASSIFY_TEMPORAL_POSITION",
+        "ANALYZE_RETROACTIVE_IMPACT",
+        "DETECT_DRIFT",
+        "MATERIALIZE_AMENDMENT_WINDOW_CONTEXT",
+        "EVALUATE_AMENDMENT_ELIGIBILITY",
+        "UPSERT_AMENDMENT_CASE",
+        "UPDATE_MANIFEST_OUTPUTS",
+        "EMIT_WORKFLOW_ITEM"
+      ],
+      "entry_conditions": [
+        "A submission exists and reconciliation has produced some authority-side truth or ambiguity."
+      ],
+      "exit_conditions": [
+        "Post-authority drift, retroactive impact, amendment window, and amendment case refresh are persisted.",
+        "Workflow escalation opens when authority-confirmed state is internally superseded or further drift action is needed."
+      ],
+      "failure_exit_paths": [
+        "No direct return occurs here; this phase prepares any post-authority follow-up that survives terminalization."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "DRIFT_AND_AMENDMENT",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "DRIFT_AND_AMENDMENT": [
+          {
+            "kind": "branch",
+            "label": "post-authority drift"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          },
+          {
+            "kind": "module",
+            "label": "SELECT_DRIFT_BASELINE"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_OUTPUTS"
+          }
+        ],
+        "TRUST_AND_WORKFLOW": [
+          {
+            "kind": "module",
+            "label": "EMIT_WORKFLOW_ITEM"
+          }
+        ]
+      },
+      "live_experience": {
+        "cause_refs": [
+          "PostAuthorityDriftEvaluated",
+          "WorkflowOpened"
+        ],
+        "command_vs_read_side_boundary": "Every `ExperienceDelta` remains read-side only; command truth and state transitions must already be durable.",
+        "composite_shell_surfaces": [
+          "CONTEXT_BAR",
+          "DECISION_SUMMARY",
+          "ACTION_STRIP",
+          "DETAIL_DRAWER"
+        ],
+        "notes": [
+          "Low-noise shells keep one mounted route keyed by `manifest_id`.",
+          "Reduced-motion clients must preserve semantics without relying on motion tokens."
+        ],
+        "ordered_index": 17,
+        "phase_codes": [],
+        "phase_id": "P17",
+        "phase_name": "Post-authority drift monitoring",
+        "posture_states": [
+          "CONTAINED"
+        ],
+        "semantic_motions": [
+          "RIPPLE",
+          "ECHO"
+        ],
+        "source_heading_or_logical_block": "Algorithm/core_engine.md::L3465[Post-authority_drift_monitoring]",
+        "surface_modules": [
+          "DRIFT_FIELD",
+          "CONSEQUENCE_RAIL"
+        ]
+      },
+      "notes": [
+        "This phase preserves the difference between accepted authority truth and the engine's later observation of new contradictions or amendment need."
+      ],
+      "ordered_index": 17,
+      "phase_id": "P17",
+      "phase_label": "17. Post-authority drift monitoring",
+      "phase_name": "Post-authority drift monitoring",
+      "return_paths": [],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L3465[Post-authority_drift_monitoring]",
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/late_data_authority_correction_and_replay_propagation_contract.md",
+        "Algorithm/low_noise_experience_contract.md"
+      ],
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [],
+      "audit_events": [],
+      "branch_rows": [],
+      "branch_tags": [
+        "terminal bundle",
+        "checkpoint normalize"
+      ],
+      "called_modules": [
+        "SELECT_PRIMARY_PROOF_BUNDLE_REF",
+        "FINALIZE_TERMINAL_OUTCOME"
+      ],
+      "entry_conditions": [
+        "Command-side work is done, or the run is waiting on bounded external confirmation.",
+        "The engine must normalize terminal workflow refs and shell checkpoint vocabulary before returning."
+      ],
+      "exit_conditions": [
+        "A terminal `DecisionBundle` is persisted with final reasons, retained refs, and normalized workflow posture.",
+        "The live shell is refreshed into terminal posture without losing authority-pending or out-of-band distinctions."
+      ],
+      "failure_exit_paths": [
+        "The phase itself is the final terminalization and return path for successful, blocked, or externally pending outcomes."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "RETENTION_AND_TERMINALIZATION",
+        "LIVE_EXPERIENCE",
+        "MANIFEST_AND_LINEAGE"
+      ],
+      "lane_highlights": {
+        "LIVE_EXPERIENCE": [
+          {
+            "kind": "branch",
+            "label": "checkpoint normalize"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "terminal",
+            "label": "FINALIZE_TERMINAL_OUTCOME"
+          }
+        ],
+        "POSTSEAL_DAG": [
+          {
+            "kind": "module",
+            "label": "SELECT_PRIMARY_PROOF_BUNDLE_REF"
+          }
+        ],
+        "RETENTION_AND_TERMINALIZATION": [
+          {
+            "kind": "branch",
+            "label": "terminal bundle"
+          }
+        ]
+      },
+      "live_experience": {
+        "cause_refs": [
+          "TerminalFinalization"
+        ],
+        "command_vs_read_side_boundary": "Every `ExperienceDelta` remains read-side only; command truth and state transitions must already be durable.",
+        "composite_shell_surfaces": [
+          "CONTEXT_BAR",
+          "DECISION_SUMMARY",
+          "ACTION_STRIP",
+          "DETAIL_DRAWER"
+        ],
+        "notes": [
+          "Low-noise shells keep one mounted route keyed by `manifest_id`.",
+          "Reduced-motion clients must preserve semantics without relying on motion tokens."
+        ],
+        "ordered_index": 18,
+        "phase_codes": [
+          "TERMINAL"
+        ],
+        "phase_id": "P18",
+        "phase_name": "Terminal finalization and return",
+        "posture_states": [],
+        "semantic_motions": [],
+        "source_heading_or_logical_block": "Algorithm/core_engine.md::L3571[Terminal_finalization_and_return]",
+        "surface_modules": [
+          "PULSE_SPINE",
+          "MANIFEST_RIBBON",
+          "DECISION_STAGE",
+          "CONSEQUENCE_RAIL",
+          "AUTHORITY_TUNNEL"
+        ]
+      },
+      "notes": [
+        "The terminal live-experience frame is operational read-side state only; it is not the legal record of what happened."
+      ],
+      "ordered_index": 18,
+      "phase_id": "P18",
+      "phase_label": "18. Terminal finalization and return",
+      "phase_name": "Terminal finalization and return",
+      "return_paths": [
+        "FINALIZE_TERMINAL_OUTCOME"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L3571[Terminal_finalization_and_return]",
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/observability_and_audit_contract.md",
+        "Algorithm/state_machines.md",
+        "Algorithm/low_noise_experience_contract.md"
+      ],
+      "transaction_spans": []
+    }
+  ],
+  "summary": {
+    "artifact_write_count": 50,
+    "event_count": 98,
+    "gate_count": 16,
+    "live_experience_update_count": 49,
+    "return_path_count": 38,
+    "step_count": 905,
+    "transaction_primitive_count": 12
+  },
+  "test_ids": [
+    "artifact-capsule",
+    "branch-chip",
+    "event-pin",
+    "experience-update-list",
+    "gate-node",
+    "lane-CALLER_AND_SCOPE",
+    "lane-canvas",
+    "phase-rail",
+    "phase-row-01",
+    "run-engine-atlas",
+    "selected-phase-detail",
+    "transaction-span"
+  ]
+}

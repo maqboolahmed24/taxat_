@@ -1,0 +1,486 @@
+{
+  "rows": [
+    {
+      "consumer_phase_refs": [
+        {
+          "binding_class": "consumer",
+          "module_name": "ACCESS_BLOCKED_RESPONSE",
+          "phase_id": "P01",
+          "phase_name": "Authorize and bind execution scope",
+          "row_id": "P01-S003",
+          "source_ref": "Algorithm/core_engine.md::L149[ACCESS_GATE]",
+          "statement": "if access_decision.decision in {DENY, REQUIRE_STEP_UP, REQUIRE_APPROVAL}: return ACCESS_BLOCKED_RESPONSE(reason=access_decision)"
+        },
+        {
+          "binding_class": "consumer",
+          "module_name": "ENFORCE_ACCESS_SCOPE_AND_MASKING",
+          "phase_id": "P01",
+          "phase_name": "Authorize and bind execution scope",
+          "row_id": "P01-S004",
+          "source_ref": "Algorithm/core_engine.md::L150[ACCESS_GATE]",
+          "statement": "if access_decision.decision not in {ALLOW, ALLOW_MASKED}: return ERROR(INVALID_ACCESS_DECISION)"
+        },
+        {
+          "binding_class": "consumer",
+          "module_name": "ENFORCE_ACCESS_SCOPE_AND_MASKING",
+          "phase_id": "P01",
+          "phase_name": "Authorize and bind execution scope",
+          "row_id": "P01-S022",
+          "source_ref": "Algorithm/core_engine.md::L171[ACCESS_GATE]",
+          "statement": "if `access_decision.decision = ALLOW_MASKED`, bind `masking_context` only to downstream render, export, and read-model projection steps"
+        }
+      ],
+      "evaluation_phase_refs": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "AUTHORIZE",
+          "phase_id": "P01",
+          "phase_name": "Authorize and bind execution scope",
+          "row_id": "P01-S002",
+          "source_ref": "Algorithm/core_engine.md::L148[ACCESS_GATE]",
+          "statement": "access_decision = AUTHORIZE(principal, tenant_id, client_id, period, raw_requested_scope, mode, run_kind)"
+        }
+      ],
+      "gate_code": "ACCESS_GATE",
+      "module_bindings": [
+        "AUTHORIZE",
+        "ACCESS_BLOCKED_RESPONSE",
+        "ENFORCE_ACCESS_SCOPE_AND_MASKING"
+      ],
+      "rationale": "Phase and module bindings for `ACCESS_GATE` normalized from the run-engine step ledger and module catalog.",
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L266[ACCESS_GATE]"
+    },
+    {
+      "consumer_phase_refs": [
+        {
+          "binding_class": "consumer",
+          "module_name": "inline_consumer",
+          "phase_id": "P05",
+          "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+          "row_id": "P05-S003",
+          "source_ref": "Algorithm/core_engine.md::L840[MANIFEST_GATE]",
+          "statement": "required gate order `[MANIFEST_GATE, ARTIFACT_CONTRACT_GATE, INPUT_BOUNDARY_GATE, DATA_QUALITY_GATE]`, the exact ordered pre-seal gate-decision ids, the blocked-versus-ready seal disposition, and"
+        },
+        {
+          "binding_class": "consumer",
+          "module_name": "inline_consumer",
+          "phase_id": "P05",
+          "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+          "row_id": "P05-S020",
+          "source_ref": "Algorithm/core_engine.md::L889[MANIFEST_GATE]",
+          "statement": "preseal_gate_records = EMIT_ORDERED_GATES( manifest, [ gate_manifest, gate_contracts, gate_boundary, gate_quality ], required_order=[ \"MANIFEST_GATE\", \"ARTIFACT_CONTRACT_GATE\", \"INPUT_BOUNDARY_GATE\", \"DATA_QUALITY_GATE\" ], persist_immediately=false )"
+        }
+      ],
+      "evaluation_phase_refs": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "MANIFEST_GATE",
+          "phase_id": "P05",
+          "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+          "row_id": "P05-S016",
+          "source_ref": "Algorithm/core_engine.md::L858[MANIFEST_GATE]",
+          "statement": "gate_manifest = MANIFEST_GATE( manifest, cfg_freeze, input_freeze, manifest.schema_bundle_hash, PROVIDER_ENVIRONMENT_REFS(collection_boundary) )"
+        }
+      ],
+      "gate_code": "MANIFEST_GATE",
+      "module_bindings": [
+        "MANIFEST_GATE",
+        "inline_consumer"
+      ],
+      "rationale": "Phase and module bindings for `MANIFEST_GATE` normalized from the run-engine step ledger and module catalog.",
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L332[MANIFEST_GATE]"
+    },
+    {
+      "consumer_phase_refs": [
+        {
+          "binding_class": "consumer",
+          "module_name": "inline_consumer",
+          "phase_id": "P05",
+          "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+          "row_id": "P05-S003",
+          "source_ref": "Algorithm/core_engine.md::L840[ARTIFACT_CONTRACT_GATE]",
+          "statement": "required gate order `[MANIFEST_GATE, ARTIFACT_CONTRACT_GATE, INPUT_BOUNDARY_GATE, DATA_QUALITY_GATE]`, the exact ordered pre-seal gate-decision ids, the blocked-versus-ready seal disposition, and"
+        },
+        {
+          "binding_class": "consumer",
+          "module_name": "inline_consumer",
+          "phase_id": "P05",
+          "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+          "row_id": "P05-S020",
+          "source_ref": "Algorithm/core_engine.md::L889[ARTIFACT_CONTRACT_GATE]",
+          "statement": "preseal_gate_records = EMIT_ORDERED_GATES( manifest, [ gate_manifest, gate_contracts, gate_boundary, gate_quality ], required_order=[ \"MANIFEST_GATE\", \"ARTIFACT_CONTRACT_GATE\", \"INPUT_BOUNDARY_GATE\", \"DATA_QUALITY_GATE\" ], persist_immediately=false )"
+        }
+      ],
+      "evaluation_phase_refs": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "ARTIFACT_CONTRACT_GATE",
+          "phase_id": "P05",
+          "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+          "row_id": "P05-S017",
+          "source_ref": "Algorithm/core_engine.md::L866[ARTIFACT_CONTRACT_GATE]",
+          "statement": "gate_contracts = ARTIFACT_CONTRACT_GATE( schema_bundle, source_plan, source_window, collection_boundary, normalization_context, source_record_set, evidence_item_set, candidate_fact_set, conflict_set, canonical_fact_set, snapshot, input_freeze )"
+        }
+      ],
+      "gate_code": "ARTIFACT_CONTRACT_GATE",
+      "module_bindings": [
+        "ARTIFACT_CONTRACT_GATE",
+        "inline_consumer"
+      ],
+      "rationale": "Phase and module bindings for `ARTIFACT_CONTRACT_GATE` normalized from the run-engine step ledger and module catalog.",
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L428[ARTIFACT_CONTRACT_GATE]"
+    },
+    {
+      "consumer_phase_refs": [
+        {
+          "binding_class": "consumer",
+          "module_name": "inline_consumer",
+          "phase_id": "P05",
+          "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+          "row_id": "P05-S003",
+          "source_ref": "Algorithm/core_engine.md::L840[INPUT_BOUNDARY_GATE]",
+          "statement": "required gate order `[MANIFEST_GATE, ARTIFACT_CONTRACT_GATE, INPUT_BOUNDARY_GATE, DATA_QUALITY_GATE]`, the exact ordered pre-seal gate-decision ids, the blocked-versus-ready seal disposition, and"
+        },
+        {
+          "binding_class": "consumer",
+          "module_name": "inline_consumer",
+          "phase_id": "P05",
+          "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+          "row_id": "P05-S020",
+          "source_ref": "Algorithm/core_engine.md::L889[INPUT_BOUNDARY_GATE]",
+          "statement": "preseal_gate_records = EMIT_ORDERED_GATES( manifest, [ gate_manifest, gate_contracts, gate_boundary, gate_quality ], required_order=[ \"MANIFEST_GATE\", \"ARTIFACT_CONTRACT_GATE\", \"INPUT_BOUNDARY_GATE\", \"DATA_QUALITY_GATE\" ], persist_immediately=false )"
+        }
+      ],
+      "evaluation_phase_refs": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "INPUT_BOUNDARY_GATE",
+          "phase_id": "P05",
+          "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+          "row_id": "P05-S018",
+          "source_ref": "Algorithm/core_engine.md::L881[INPUT_BOUNDARY_GATE]",
+          "statement": "gate_boundary = INPUT_BOUNDARY_GATE( input_freeze, collection_boundary, DECLARED_EXCLUSIONS(input_freeze) )"
+        }
+      ],
+      "gate_code": "INPUT_BOUNDARY_GATE",
+      "module_bindings": [
+        "INPUT_BOUNDARY_GATE",
+        "inline_consumer"
+      ],
+      "rationale": "Phase and module bindings for `INPUT_BOUNDARY_GATE` normalized from the run-engine step ledger and module catalog.",
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L484[INPUT_BOUNDARY_GATE]"
+    },
+    {
+      "consumer_phase_refs": [
+        {
+          "binding_class": "consumer",
+          "module_name": "inline_consumer",
+          "phase_id": "P05",
+          "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+          "row_id": "P05-S003",
+          "source_ref": "Algorithm/core_engine.md::L840[DATA_QUALITY_GATE]",
+          "statement": "required gate order `[MANIFEST_GATE, ARTIFACT_CONTRACT_GATE, INPUT_BOUNDARY_GATE, DATA_QUALITY_GATE]`, the exact ordered pre-seal gate-decision ids, the blocked-versus-ready seal disposition, and"
+        },
+        {
+          "binding_class": "consumer",
+          "module_name": "inline_consumer",
+          "phase_id": "P05",
+          "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+          "row_id": "P05-S020",
+          "source_ref": "Algorithm/core_engine.md::L889[DATA_QUALITY_GATE]",
+          "statement": "preseal_gate_records = EMIT_ORDERED_GATES( manifest, [ gate_manifest, gate_contracts, gate_boundary, gate_quality ], required_order=[ \"MANIFEST_GATE\", \"ARTIFACT_CONTRACT_GATE\", \"INPUT_BOUNDARY_GATE\", \"DATA_QUALITY_GATE\" ], persist_immediately=false )"
+        }
+      ],
+      "evaluation_phase_refs": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "DATA_QUALITY_GATE",
+          "phase_id": "P05",
+          "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+          "row_id": "P05-S019",
+          "source_ref": "Algorithm/core_engine.md::L887[DATA_QUALITY_GATE]",
+          "statement": "gate_quality = DATA_QUALITY_GATE(snapshot, cfg)"
+        }
+      ],
+      "gate_code": "DATA_QUALITY_GATE",
+      "module_bindings": [
+        "DATA_QUALITY_GATE",
+        "inline_consumer"
+      ],
+      "rationale": "Phase and module bindings for `DATA_QUALITY_GATE` normalized from the run-engine step ledger and module catalog.",
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L540[DATA_QUALITY_GATE]"
+    },
+    {
+      "consumer_phase_refs": [],
+      "evaluation_phase_refs": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "RETENTION_EVIDENCE_GATE",
+          "phase_id": "P08",
+          "phase_name": "Retention evidence gate",
+          "row_id": "P08-S001",
+          "source_ref": "Algorithm/core_engine.md::L1258[RETENTION_EVIDENCE_GATE]",
+          "statement": "gate_retention = RETENTION_EVIDENCE_GATE( graph.quality.graph_quality_score, graph.quality.critical_path_coverage, graph.quality.critical_retention_limited_count, graph.quality.critical_evidence_erased_count, DERIVE_WEIGHTED_PATH_SURVIVABILITY(graph), DERIVE_LIMITATION_CLARITY_RATIO(graph), DERIVE_CRITICAL_SILENT_LIMITATION_COUNT(graph), DERIVE_NONCRITICAL_SILENT_LIMITATION_COUNT(graph), graph.quality.inferred_critical_path_ratio, graph.quality.proof_bundle_coverage, graph.quality.unsupported_critical_target_count, graph.quality.contradicted_critical_target_count, graph.quality.stale_critical_target_count, graph.quality.replay_failure_target_count, graph.integrity_summary.open_critical_target_count, graph.integrity_summary.missing_proof_bundle_target_count, DERIVE_CRITICAL_EXPLANATION_FAILURE_COUNT(graph), DERIVE_NONCRITICAL_EXPLANATION_FAILURE_COUNT(graph) )"
+        }
+      ],
+      "gate_code": "RETENTION_EVIDENCE_GATE",
+      "module_bindings": [
+        "RETENTION_EVIDENCE_GATE"
+      ],
+      "rationale": "Phase and module bindings for `RETENTION_EVIDENCE_GATE` normalized from the run-engine step ledger and module catalog.",
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L620[RETENTION_EVIDENCE_GATE]"
+    },
+    {
+      "consumer_phase_refs": [
+        {
+          "binding_class": "consumer",
+          "module_name": "inline_consumer",
+          "phase_id": "P09",
+          "phase_name": "Authority context, comparison basis, parity, and parity gate",
+          "row_id": "P09-S076",
+          "source_ref": "Algorithm/core_engine.md::L1615[PARITY_GATE]",
+          "statement": "SYNC_LIVE_EXPERIENCE_FROM_GATES( manifest, [gate_parity], phase_code=\"PARITY_GATE\" )"
+        }
+      ],
+      "evaluation_phase_refs": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "PARITY_GATE",
+          "phase_id": "P09",
+          "phase_name": "Authority context, comparison basis, parity, and parity gate",
+          "row_id": "P09-S071",
+          "source_ref": "Algorithm/core_engine.md::L1601[PARITY_GATE]",
+          "statement": "gate_parity = PARITY_GATE( parity, cfg.parity_rules, overrides=LOAD_OVERRIDES(active_override_refs) )"
+        }
+      ],
+      "gate_code": "PARITY_GATE",
+      "module_bindings": [
+        "PARITY_GATE",
+        "inline_consumer"
+      ],
+      "rationale": "Phase and module bindings for `PARITY_GATE` normalized from the run-engine step ledger and module catalog.",
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L719[PARITY_GATE]"
+    },
+    {
+      "consumer_phase_refs": [
+        {
+          "binding_class": "consumer",
+          "module_name": "inline_consumer",
+          "phase_id": "P05",
+          "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+          "row_id": "P05-S048",
+          "source_ref": "Algorithm/core_engine.md::L999[TRUST_GATE]",
+          "statement": "pre-seal decisions in `{PASS_WITH_NOTICE, MANUAL_REVIEW}` remain binding unresolved posture after seal; sealing does not clear them, and later `TRUST_GATE` / `FILING_GATE` SHALL consume them from `non_access_gate_records`"
+        },
+        {
+          "binding_class": "consumer",
+          "module_name": "inline_consumer",
+          "phase_id": "P11",
+          "phase_name": "Trust synthesis and command-side case state",
+          "row_id": "P11-S018",
+          "source_ref": "Algorithm/core_engine.md::L1838[TRUST_GATE]",
+          "statement": "SYNC_LIVE_EXPERIENCE_FROM_GATES( manifest, [gate_trust], phase_code=\"TRUST_GATE\" )"
+        }
+      ],
+      "evaluation_phase_refs": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "TRUST_GATE",
+          "phase_id": "P11",
+          "phase_name": "Trust synthesis and command-side case state",
+          "row_id": "P11-S009",
+          "source_ref": "Algorithm/core_engine.md::L1800[TRUST_GATE]",
+          "statement": "gate_trust = TRUST_GATE( non_access_gate_records, trust, required_human_steps=pre_trust_human_steps )"
+        }
+      ],
+      "gate_code": "TRUST_GATE",
+      "module_bindings": [
+        "TRUST_GATE",
+        "inline_consumer"
+      ],
+      "rationale": "Phase and module bindings for `TRUST_GATE` normalized from the run-engine step ledger and module catalog.",
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L787[TRUST_GATE]"
+    },
+    {
+      "consumer_phase_refs": [
+        {
+          "binding_class": "consumer",
+          "module_name": "inline_consumer",
+          "phase_id": "P10",
+          "phase_name": "Drift posture and amendment posture preparation",
+          "row_id": "P10-S030",
+          "source_ref": "Algorithm/core_engine.md::L1745[AMENDMENT_GATE]",
+          "statement": "no `AMENDMENT_GATE` may be evaluated in this step"
+        },
+        {
+          "binding_class": "consumer",
+          "module_name": "inline_consumer",
+          "phase_id": "P14",
+          "phase_name": "Amendment gate and intent-to-amend progression",
+          "row_id": "P14-S010",
+          "source_ref": "Algorithm/core_engine.md::L2193[AMENDMENT_GATE]",
+          "statement": "SYNC_LIVE_EXPERIENCE_FROM_GATES( manifest, [amendment_gate], phase_code=\"AMENDMENT_GATE\" )"
+        }
+      ],
+      "evaluation_phase_refs": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "AMENDMENT_GATE",
+          "phase_id": "P09",
+          "phase_name": "Authority context, comparison basis, parity, and parity gate",
+          "row_id": "P09-S039",
+          "source_ref": "Algorithm/core_engine.md::L1422[AMENDMENT_GATE]",
+          "statement": "amendment_gate = AMENDMENT_GATE( baseline, amendment_window.window_state, drift.materiality_class, drift.difference_classes, retroactive_impact, amendment_case.freshness_state, amendment.intent_status if exists(amendment.intent_status) else amendment_case.lifecycle_state, authority_state, runtime_scope, amendment_readiness_context=amendment_calc )"
+        },
+        {
+          "binding_class": "evaluation",
+          "module_name": "AMENDMENT_GATE",
+          "phase_id": "P14",
+          "phase_name": "Amendment gate and intent-to-amend progression",
+          "row_id": "P14-S005",
+          "source_ref": "Algorithm/core_engine.md::L2175[AMENDMENT_GATE]",
+          "statement": "amendment_gate = AMENDMENT_GATE( baseline, amendment_window.window_state, drift.materiality_class, drift.difference_classes, retroactive_impact, amendment_case.freshness_state, amendment.intent_status if exists(amendment.intent_status) else amendment_case.lifecycle_state, authority_state, runtime_scope, amendment_readiness_context=LOAD_READINESS_CONTEXT(amendment_case) if exists(amendment_case.readiness_context_ref) else None )"
+        },
+        {
+          "binding_class": "evaluation",
+          "module_name": "AMENDMENT_GATE",
+          "phase_id": "P14",
+          "phase_name": "Amendment gate and intent-to-amend progression",
+          "row_id": "P14-S044",
+          "source_ref": "Algorithm/core_engine.md::L2367[AMENDMENT_GATE]",
+          "statement": "decisive_amendment_gate = AMENDMENT_GATE( baseline, amendment_window.window_state, drift.materiality_class, drift.difference_classes, retroactive_impact, amendment_case.freshness_state, amendment_case.lifecycle_state, authority_state, runtime_scope, amendment_readiness_context=amendment_calc )"
+        }
+      ],
+      "gate_code": "AMENDMENT_GATE",
+      "module_bindings": [
+        "AMENDMENT_GATE",
+        "inline_consumer"
+      ],
+      "rationale": "Phase and module bindings for `AMENDMENT_GATE` normalized from the run-engine step ledger and module catalog.",
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L1125[AMENDMENT_GATE]"
+    },
+    {
+      "consumer_phase_refs": [
+        {
+          "binding_class": "consumer",
+          "module_name": "inline_consumer",
+          "phase_id": "P05",
+          "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+          "row_id": "P05-S048",
+          "source_ref": "Algorithm/core_engine.md::L999[FILING_GATE]",
+          "statement": "pre-seal decisions in `{PASS_WITH_NOTICE, MANUAL_REVIEW}` remain binding unresolved posture after seal; sealing does not clear them, and later `TRUST_GATE` / `FILING_GATE` SHALL consume them from `non_access_gate_records`"
+        },
+        {
+          "binding_class": "consumer",
+          "module_name": "inline_consumer",
+          "phase_id": "P15",
+          "phase_name": "Authority calculation, filing readiness, packet preparation, and filing gate",
+          "row_id": "P15-S079",
+          "source_ref": "Algorithm/core_engine.md::L2846[FILING_GATE]",
+          "statement": "SYNC_LIVE_EXPERIENCE_FROM_GATES( manifest, [filing_gate], phase_code=\"FILING_GATE\" )"
+        }
+      ],
+      "evaluation_phase_refs": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "FILING_GATE",
+          "phase_id": "P09",
+          "phase_name": "Authority context, comparison basis, parity, and parity gate",
+          "row_id": "P09-S057",
+          "source_ref": "Algorithm/core_engine.md::L1503[FILING_GATE]",
+          "statement": "early_filing_gate = FILING_GATE( access_decision, manifest.lifecycle_state, mode, None, None, upstream_gate_records=non_access_gate_records, obligation_status=OBLIGATION_STATUS(authority_state), filing_packet_state=None, authority_link_state=authority_link_state, approval_state=pretrust_approval_state, declared_basis_ack_state=NOT_APPLICABLE, runtime_scope=runtime_scope, amendment_posture=None, overrides=LOAD_OVERRIDES(active_override_refs), filing_notice_steps=[], late_data_status=late_data_status, late_data_policy_bindings=late_data_policy_bindings, filing_readiness_context=filing_calculation, trust_currency_state=NOT_APPLICABLE_PRETRUST, trust_currency_reason_codes=[] )"
+        },
+        {
+          "binding_class": "evaluation",
+          "module_name": "FILING_GATE",
+          "phase_id": "P15",
+          "phase_name": "Authority calculation, filing readiness, packet preparation, and filing gate",
+          "row_id": "P15-S006",
+          "source_ref": "Algorithm/core_engine.md::L2477[FILING_GATE]",
+          "statement": "filing_gate = FILING_GATE( access_decision, manifest.lifecycle_state, mode, trust, parity, upstream_gate_records=non_access_gate_records, obligation_status=OBLIGATION_STATUS(authority_state), filing_packet_state=None, authority_link_state=authority_link_state, approval_state=pretrust_approval_state, declared_basis_ack_state=NOT_APPLICABLE, runtime_scope=runtime_scope, amendment_posture=amendment_case if exists(amendment_case) else amendment, overrides=LOAD_OVERRIDES(active_override_refs), filing_notice_steps=[], late_data_status=late_data_status, late_data_policy_bindings=late_data_policy_bindings, filing_readiness_context=None, trust_currency_state=trust_currency.state, trust_currency_reason_codes=trust_currency.reason_codes )"
+        },
+        {
+          "binding_class": "evaluation",
+          "module_name": "FILING_GATE",
+          "phase_id": "P15",
+          "phase_name": "Authority calculation, filing readiness, packet preparation, and filing gate",
+          "row_id": "P15-S021",
+          "source_ref": "Algorithm/core_engine.md::L2555[FILING_GATE]",
+          "statement": "filing_gate = FILING_GATE( access_decision, manifest.lifecycle_state, mode, trust, parity, upstream_gate_records=non_access_gate_records, obligation_status=OBLIGATION_STATUS(authority_state), filing_packet_state=None, authority_link_state=authority_link_state, approval_state=pretrust_approval_state, declared_basis_ack_state=NOT_APPLICABLE, runtime_scope=runtime_scope, amendment_posture=amendment_case if exists(amendment_case) else amendment, overrides=LOAD_OVERRIDES(active_override_refs), filing_notice_steps=[], late_data_status=late_data_status, late_data_policy_bindings=late_data_policy_bindings, filing_readiness_context=None, trust_currency_state=trust_currency.state, trust_currency_reason_codes=trust_currency.reason_codes )"
+        },
+        {
+          "binding_class": "evaluation",
+          "module_name": "FILING_GATE",
+          "phase_id": "P15",
+          "phase_name": "Authority calculation, filing readiness, packet preparation, and filing gate",
+          "row_id": "P15-S039",
+          "source_ref": "Algorithm/core_engine.md::L2655[FILING_GATE]",
+          "statement": "filing_gate = FILING_GATE( access_decision, manifest.lifecycle_state, mode, trust, parity, upstream_gate_records=non_access_gate_records, obligation_status=OBLIGATION_STATUS(authority_state), filing_packet_state=None, authority_link_state=authority_link_state, approval_state=pretrust_approval_state, declared_basis_ack_state=NOT_APPLICABLE, runtime_scope=runtime_scope, amendment_posture=amendment_case if exists(amendment_case) else amendment, overrides=LOAD_OVERRIDES(active_override_refs), filing_notice_steps=[], late_data_status=late_data_status, late_data_policy_bindings=late_data_policy_bindings, filing_readiness_context=filing_calculation, trust_currency_state=trust_currency.state, trust_currency_reason_codes=trust_currency.reason_codes )"
+        },
+        {
+          "binding_class": "evaluation",
+          "module_name": "FILING_GATE",
+          "phase_id": "P15",
+          "phase_name": "Authority calculation, filing readiness, packet preparation, and filing gate",
+          "row_id": "P15-S072",
+          "source_ref": "Algorithm/core_engine.md::L2816[FILING_GATE]",
+          "statement": "filing_gate = FILING_GATE( access_decision, manifest.lifecycle_state, mode, trust, parity, upstream_gate_records=non_access_gate_records, obligation_status=OBLIGATION_STATUS(authority_state), filing_packet_state=packet.lifecycle_state, authority_link_state=authority_link_state, approval_state=approval_state, declared_basis_ack_state=declared_basis_ack_state, runtime_scope=runtime_scope, amendment_posture=amendment_case if exists(amendment_case) else amendment, overrides=LOAD_OVERRIDES(active_override_refs), filing_notice_steps=filing_notice_steps, late_data_status=late_data_status, late_data_policy_bindings=late_data_policy_bindings, filing_readiness_context=filing_calculation if exists(filing_calculation) else None, trust_currency_state=trust_currency.state, trust_currency_reason_codes=trust_currency.reason_codes )"
+        }
+      ],
+      "gate_code": "FILING_GATE",
+      "module_bindings": [
+        "FILING_GATE",
+        "inline_consumer"
+      ],
+      "rationale": "Phase and module bindings for `FILING_GATE` normalized from the run-engine step ledger and module catalog.",
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L880[FILING_GATE]"
+    },
+    {
+      "consumer_phase_refs": [
+        {
+          "binding_class": "consumer",
+          "module_name": "inline_consumer",
+          "phase_id": "P16",
+          "phase_name": "Submission enqueue, governed transmit, inbox-normalized recovery, and bounded reconciliation",
+          "row_id": "P16-S032",
+          "source_ref": "Algorithm/core_engine.md::L3078[SUBMISSION_GATE]",
+          "statement": "SYNC_LIVE_EXPERIENCE_FROM_GATES( manifest, [submission_gate], phase_code=\"SUBMISSION_GATE\" )"
+        }
+      ],
+      "evaluation_phase_refs": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "SUBMISSION_GATE",
+          "phase_id": "P16",
+          "phase_name": "Submission enqueue, governed transmit, inbox-normalized recovery, and bounded reconciliation",
+          "row_id": "P16-S027",
+          "source_ref": "Algorithm/core_engine.md::L3060[SUBMISSION_GATE]",
+          "statement": "submission_gate = SUBMISSION_GATE( packet.payload_hash, packet.manifest_binding_hash, expected_packet_manifest_binding_hash, request.idempotency_key, EXISTING_SUBMISSIONS(client_id, operation), binding, request.request_body_hash, packet.lifecycle_state, runtime_scope, amendment_case if exists(amendment_case) else amendment )"
+        }
+      ],
+      "gate_code": "SUBMISSION_GATE",
+      "module_bindings": [
+        "SUBMISSION_GATE",
+        "inline_consumer"
+      ],
+      "rationale": "Phase and module bindings for `SUBMISSION_GATE` normalized from the run-engine step ledger and module catalog.",
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L1060[SUBMISSION_GATE]"
+    }
+  ],
+  "summary": {
+    "consumer_ref_count": 19,
+    "evaluation_ref_count": 17,
+    "row_count": 11
+  }
+}

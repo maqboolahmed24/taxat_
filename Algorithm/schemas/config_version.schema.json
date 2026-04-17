@@ -1,0 +1,351 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/config_version.schema.json",
+  "title": "ConfigVersion",
+  "description": "Governed immutable configuration-version contract. This schema freezes lifecycle state, named transition lineage, approval and verification evidence, and supersession or revocation posture for one deployable config bundle.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "version_id",
+    "config_type",
+    "lifecycle_state",
+    "state_transition_contract",
+    "content_hash",
+    "effective_scope",
+    "approvals",
+    "verification_evidence_ref_or_null",
+    "approved_at_or_null",
+    "superseded_by_version_id_or_null",
+    "revocation_reason_code_or_null",
+    "retired_at_or_null",
+    "state_changed_at",
+    "created_at",
+    "audit_refs",
+    "provenance_refs"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "ConfigVersion"
+    },
+    "version_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "config_type": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "CANDIDATE",
+        "VERIFIED",
+        "APPROVED",
+        "DEPRECATED",
+        "REVOKED",
+        "RETIRED"
+      ]
+    },
+    "state_transition_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/state_transition_contract.schema.json"
+        },
+        {
+          "properties": {
+            "object_family": {
+              "const": "CONFIG_VERSION"
+            },
+            "machine_code": {
+              "const": "CONFIG_VERSION_LIFECYCLE_V1"
+            },
+            "state_field_name": {
+              "const": "lifecycle_state"
+            }
+          }
+        }
+      ]
+    },
+    "content_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "effective_scope": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "verification_evidence_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "approved_at_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "superseded_by_version_id_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "revocation_reason_code_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "retired_at_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "state_changed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "audit_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "provenance_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "DRAFT",
+              "CANDIDATE"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "approvals": {
+            "maxItems": 0
+          },
+          "verification_evidence_ref_or_null": {
+            "type": "null"
+          },
+          "approved_at_or_null": {
+            "type": "null"
+          },
+          "superseded_by_version_id_or_null": {
+            "type": "null"
+          },
+          "revocation_reason_code_or_null": {
+            "type": "null"
+          },
+          "retired_at_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "VERIFIED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "verification_evidence_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "approved_at_or_null": {
+            "type": "null"
+          },
+          "superseded_by_version_id_or_null": {
+            "type": "null"
+          },
+          "revocation_reason_code_or_null": {
+            "type": "null"
+          },
+          "retired_at_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "APPROVED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "approvals": {
+            "minItems": 1
+          },
+          "verification_evidence_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "approved_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "superseded_by_version_id_or_null": {
+            "type": "null"
+          },
+          "revocation_reason_code_or_null": {
+            "type": "null"
+          },
+          "retired_at_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "DEPRECATED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "approvals": {
+            "minItems": 1
+          },
+          "verification_evidence_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "approved_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "superseded_by_version_id_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "revocation_reason_code_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "REVOKED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "approvals": {
+            "minItems": 1
+          },
+          "verification_evidence_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "approved_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "superseded_by_version_id_or_null": {
+            "type": "null"
+          },
+          "revocation_reason_code_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "RETIRED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retired_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

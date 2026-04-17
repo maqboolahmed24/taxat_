@@ -1,0 +1,298 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/late_data_indicator.schema.json",
+  "title": "LateDataIndicator",
+  "description": "Atomic late-data indicator derived from the frozen source plan and collection boundary. This contract records how post-cutoff drift or newly observed payloads were detected before policy aggregation and filing-gate consumption.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "indicator_id",
+    "manifest_id",
+    "collection_boundary_ref",
+    "source_plan_ref",
+    "binding_ref",
+    "source_domain",
+    "source_class",
+    "partition_scope_refs",
+    "runtime_scope_refs",
+    "indicator_type",
+    "detection_basis",
+    "late_data_policy_ref",
+    "severity",
+    "temporal_classification_contract",
+    "discovered_at",
+    "request_audit_ref",
+    "source_record_ref",
+    "evidence_ref",
+    "indicator_hash",
+    "reason_codes"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "LateDataIndicator"
+    },
+    "indicator_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "collection_boundary_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_plan_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "binding_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_class": {
+      "$ref": "./late_data_policy_binding.schema.json#/$defs/sourceClassOrNull"
+    },
+    "partition_scope_refs": {
+      "$ref": "./late_data_policy_binding.schema.json#/$defs/partitionScopeRefs"
+    },
+    "runtime_scope_refs": {
+      "$ref": "./late_data_policy_binding.schema.json#/$defs/runtimeScopeRefs"
+    },
+    "indicator_type": {
+      "type": "string",
+      "enum": [
+        "POST_CUTOFF_RECORD",
+        "CURSOR_ADVANCED",
+        "REVISION_ADVANCED",
+        "SCHEMA_VERSION_ADVANCED",
+        "FRESHNESS_SLO_BREACH"
+      ]
+    },
+    "detection_basis": {
+      "type": "string",
+      "enum": [
+        "REQUEST_AUDIT",
+        "CURSOR_CHECKPOINT",
+        "REVISION_MARKER",
+        "SOURCE_RECORD_TIMESTAMP",
+        "PROVIDER_SCHEMA_SIGNAL",
+        "FRESHNESS_EVALUATION"
+      ]
+    },
+    "late_data_policy_ref": {
+      "$ref": "./late_data_policy_binding.schema.json#/$defs/lateDataPolicyRef"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "NOTICE",
+        "MANUAL_REVIEW",
+        "CHILD_MANIFEST_REQUIRED"
+      ]
+    },
+    "temporal_classification_contract": {
+      "$ref": "./late_data_temporal_contract.schema.json"
+    },
+    "discovered_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "request_audit_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "source_record_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "evidence_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "indicator_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "severity": {
+            "const": "NOTICE"
+          }
+        },
+        "required": [
+          "severity"
+        ]
+      },
+      "then": {
+        "properties": {
+          "late_data_policy_ref": {
+            "const": "EXCLUDE_LATE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "severity": {
+            "const": "MANUAL_REVIEW"
+          }
+        },
+        "required": [
+          "severity"
+        ]
+      },
+      "then": {
+        "properties": {
+          "late_data_policy_ref": {
+            "const": "REVIEW_IF_LATE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "severity": {
+            "const": "CHILD_MANIFEST_REQUIRED"
+          }
+        },
+        "required": [
+          "severity"
+        ]
+      },
+      "then": {
+        "properties": {
+          "late_data_policy_ref": {
+            "const": "SPAWN_CHILD_MANIFEST"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "detection_basis": {
+            "const": "REQUEST_AUDIT"
+          }
+        },
+        "required": [
+          "detection_basis"
+        ]
+      },
+      "then": {
+        "properties": {
+          "request_audit_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "detection_basis": {
+            "const": "SOURCE_RECORD_TIMESTAMP"
+          }
+        },
+        "required": [
+          "detection_basis"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_record_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "detection_basis": {
+            "const": "FRESHNESS_EVALUATION"
+          }
+        },
+        "required": [
+          "detection_basis"
+        ]
+      },
+      "then": {
+        "properties": {
+          "evidence_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "anyOf": [
+        {
+          "properties": {
+            "request_audit_ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "request_audit_ref"
+          ]
+        },
+        {
+          "properties": {
+            "source_record_ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "source_record_ref"
+          ]
+        },
+        {
+          "properties": {
+            "evidence_ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "evidence_ref"
+          ]
+        }
+      ]
+    }
+  ],
+  "additionalProperties": false
+}

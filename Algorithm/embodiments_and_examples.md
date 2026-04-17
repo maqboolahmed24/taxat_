@@ -5,6 +5,11 @@
 This section SHALL provide worked, implementation-grade embodiments of the engine. It is not a UX
 appendix and not a marketing scenario list. Its job is to prove that the invention can be carried out
 across the most important operating modes, edge cases, and authority interactions.
+`constraint_traceability_register.json` is the live machine-checkable map from named constraints to
+their authoritative refs and example/vector coverage; this file supplies the worked embodiments
+referenced by that register.
+The embodiment corpus SHALL also crosswalk back to the current system objective families through
+`constraint_traceability_register.json`.
 
 WIPO's drafting guidance makes this section strategically important: the number of
 embodiments/examples depends on claim scope, many engineering inventions may be sufficiently supported
@@ -12,7 +17,7 @@ by one main embodiment plus alternatives, and claims are generalizations from on
 embodiments/examples. Broader or more abstract claim scope therefore benefits from fuller worked
 embodiments. [1]
 
-## 15.1 Purpose
+## 16.1 Purpose
 
 The embodiments and examples section SHALL do three things at once:
 
@@ -20,7 +25,7 @@ The embodiments and examples section SHALL do three things at once:
 2. give test authors reusable scenario fixtures
 3. give patent counsel and reviewers enabling, technically coherent examples
 
-## 15.2 Required structure for every embodiment
+## 16.2 Required structure for every embodiment
 
 Every embodiment SHALL include the following subsections:
 
@@ -30,8 +35,10 @@ Every embodiment SHALL include the following subsections:
 - `Actors and authority posture`
 - `Initial conditions`
 - `Input/source mix`
-- `Manifest mode and run kind`
-- `Frozen config profile`
+- `Execution mode and artifact posture`
+- `Authorized runtime scope and run kind`
+- `Frozen config/provider profile`
+- `Baseline submission state and comparison requirement`
 - `Execution path`
 - `Gate outcomes`
 - `Authority interactions`
@@ -39,15 +46,30 @@ Every embodiment SHALL include the following subsections:
 - `Failure/edge conditions`
 - `Technical effect demonstrated`
 
+Where an embodiment exercises parity, trust, filing, amendment, or analysis behavior, it SHALL also
+state the current contract inputs explicitly rather than relying on narrative shorthand. At minimum,
+the embodiment SHALL declare the applicable values for:
+
+- `execution_mode`
+- `analysis_only`
+- `counterfactual_basis` when `execution_mode = ANALYSIS`
+- authorized `runtime_scope[]`
+- `baseline_submission_state`
+- `comparison_requirement` where parity or authority comparison semantics are material
+
+Expected gate outcomes SHALL be written in canonical gate order and SHALL identify the concrete gate
+decision enum. Any non-`PASS` example SHOULD also name the decisive reason-code family or blocking
+basis so the embodiment can be turned into a deterministic fixture.
+
 Each embodiment SHOULD also map to:
 
 - one structured test vector in `test_vectors.md`
 - one or more sample JSON fixtures
 - one graph/query expectation where provenance is important
 
-## 15.3 Minimum embodiment set
+## 16.3 Minimum embodiment set
 
-The current pack should include at least the following embodiment set.
+This corpus SHALL include at least the following embodiment set.
 
 ### Embodiment 1 - Direct-subject quarterly update from structured records
 
@@ -174,19 +196,23 @@ calculation, show the result, and submit final declaration. [3]
 ### Embodiment 5 - Final declaration blocked by material parity divergence
 
 **Purpose**
-Show how parity blocks straight-through progression.
+Show how mandatory authority-comparison divergence or coverage loss blocks straight-through progression.
 
 **Initial conditions**
-- authority comparison available
-- material difference detected in critical field(s)
+- `comparison_requirement = MANDATORY`
+- authority comparison basis is required for the requested final-declaration scope
+- either a material difference is detected in critical field(s) or the required comparison basis is incomplete/non-comparable
 
 **Execution path**
-compute -> parity evaluation -> parity gate returns `OVERRIDABLE_BLOCK` or `HARD_BLOCK` -> trust
-remains `AMBER/RED` -> filing readiness capped at review or blocked.
+compute -> parity evaluation under frozen comparison policy -> if critical material/blocking
+divergence exists, `PARITY_GATE` returns `OVERRIDABLE_BLOCK` or `HARD_BLOCK`; if required comparison
+coverage is incomplete, `parity_classification = NOT_COMPARABLE` and `PARITY_GATE` returns
+`HARD_BLOCK` -> trust falls to `RED` or `INSUFFICIENT_DATA` -> filing readiness stays
+`READY_REVIEW` or `NOT_READY`, never straight-through submit.
 
 **Optional branch**
 approved scoped parity override creates new manifest branch and allows reviewer progression, but does
-not alter authority truth.
+not alter authority truth and does not convert a mandatory non-comparable basis into a pass state.
 
 **Technical effect demonstrated**
 The engine prevents silent filing under unresolved internal-versus-authority divergence.
@@ -220,15 +246,17 @@ within the amendment window and follow an intent-to-amend / confirm-amendment fl
 ### Embodiment 7 - Out-of-band filing discovered by authority reconciliation
 
 **Purpose**
-Show safe handling when legal state exists outside the current packet chain.
+Show safe handling when legal state exists outside the active packet chain.
 
 **Initial conditions**
 - software has a working case
 - authority indicates the obligation or final state is already satisfied externally
 
 **Execution path**
-authority read/reconcile -> `OUT_OF_BAND` submission state -> reconciliation workflow -> internal trust
-capped at review -> no blind amendment or duplicate filing.
+authority read/reconcile -> emit `OutOfBandStateObserved` -> freeze
+`baseline_submission_state = OUT_OF_BAND_UNRECONCILED` -> reconciliation workflow ->
+live-progression trust/filing posture capped at `READY_REVIEW` or `NOT_READY` -> no blind
+amendment or duplicate filing.
 
 **Technical effect demonstrated**
 The engine preserves legal correctness by refusing to fabricate continuity where the legal baseline is
@@ -282,8 +310,10 @@ Show separation between exploratory analysis and compliance truth.
 - draft/candidate config is being tested
 
 **Execution path**
-create child manifest in `ANALYSIS` mode -> freeze non-compliance config -> recompute/parity/trust
-under counterfactual basis -> mark outputs `analysis_only`.
+create child manifest with `execution_mode = ANALYSIS` and `analysis_only = true` -> freeze
+`non_compliance_config_refs[]` and `counterfactual_basis` -> recompute/parity/trust under analysis
+policy -> keep outputs analysis-only -> cap `automation_level` at `LIMITED`/`BLOCKED` and
+`filing_readiness` at `READY_REVIEW`/`NOT_READY`.
 
 **Technical effect demonstrated**
 The engine can explore alternative rule/config outcomes without contaminating compliance artifacts.
@@ -327,7 +357,34 @@ The HMRC-compatible software estate may involve one product or multiple products
 HMRC's end-to-end guidance is framed around software integrating with HMRC APIs within those broader
 user journeys. [5]
 
-## 15.4 Embodiment template for the pack
+## 16.3A Objective-family coverage map
+
+The twelve minimum embodiments above cover the engine core, authority progression, amendment,
+retention, replay-safe explainability, and multi-product operation. The full scenario corpus is
+completed by `test_vectors.md`, which extends those embodiments across the end-to-end system
+objective families so the reference layer matches the current blueprint architecture.
+
+- `TV-01..TV-12` extend the core engine, authority, drift, retention, and multi-product embodiments
+  into fixture-oriented execution scenarios.
+- `TV-13..TV-25` cover low-noise shell continuity, command idempotency, northbound recovery, release,
+  cache isolation, and replay-safe lifecycle guarantees.
+- `TV-26..TV-31` cover client portal home, uploads, approvals, onboarding, accessibility, and
+  contextual same-shell recovery.
+- `TV-32..TV-39A` cover collaboration, staff inbox, customer request list, governance read models,
+  and responsive same-object continuity.
+- `TV-40..TV-50` cover replay exactness, recovery lineage, twin-state comparison, and
+  authority-reconciliation edge conditions.
+- `TV-51..TV-54` cover nightly-autopilot recovery, digest publication, and operator-ready escalation.
+- `TV-55..TV-62` cover trust, filing-readiness invalidation, proof closure, and explanation failure
+  posture.
+- `TV-63..TV-70` cover amendment freshness, supersession, delayed acknowledgement, duplicate-send
+  suppression, and authority-ingress quarantine behavior.
+
+This split is deliberate: the minimum embodiments stay readable enough for enabling disclosure, while
+the extended test-vector ranges keep the current portal, governance, staff/operator, and replay
+families synchronized with the end-to-end system objective.
+
+## 16.4 Embodiment template for the pack
 
 For consistency, each embodiment should be written in this structure:
 
@@ -345,12 +402,21 @@ For consistency, each embodiment should be written in this structure:
 **Input/source mix**
 [List]
 
-**Frozen context**
-- mode
+**Execution mode and artifact posture**
+- execution_mode
+- analysis_only
+- counterfactual_basis (if analysis)
+
+**Authorized scope and run kind**
+- authorized runtime_scope[]
 - run kind
+
+**Frozen context**
 - config profile
 - provider profile
 - business partitions
+- baseline_submission_state
+- comparison_requirement (if parity/authority comparison applies)
 - authority state assumptions
 
 **Execution sequence**
@@ -360,8 +426,8 @@ For consistency, each embodiment should be written in this structure:
 3. ...
 
 **Expected gate outcomes**
-- gate -> decision
-- gate -> decision
+- gate_code -> decision
+- gate_code -> decision
 
 **Expected artifacts**
 [List]
@@ -375,7 +441,7 @@ For consistency, each embodiment should be written in this structure:
 **Technical effect demonstrated**
 [One paragraph]
 
-## 15.5 Example fixture rule
+## 16.5 Example fixture rule
 
 Every embodiment SHOULD have:
 
@@ -393,7 +459,7 @@ That lets the same embodiment serve:
 - QA/UAT
 - regression testing
 
-## 15.6 One-sentence summary
+## 16.6 One-sentence summary
 
 The embodiments and examples section turns the engine from a strong abstract architecture into an
 enabling, testable, patent-supportive disclosure by showing exactly how the system behaves in its main

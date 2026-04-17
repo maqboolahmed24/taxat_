@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/authority_truth_contract.schema.json",
+  "title": "AuthorityTruthContract",
+  "description": "Shared authority-of-record versus internal-truth separation contract. This schema freezes whether an artifact is the authority runtime ledger, an ingress checkpoint, the durable settlement ledger, an internal mirror, workflow coordination state, or a customer-safe projection; it also makes pending, unknown, and out-of-band authority posture explicitly non-confirming, forbids ingress normalization from mutating legal state before checkpointed correlation, forbids override or accepted-risk posture from masquerading as authority confirmation, and requires late authority corrections to reopen downstream mirrors and projections.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "boundary_scope",
+    "truth_surface_role",
+    "surface_specific_binding_policy",
+    "authority_confirmation_policy",
+    "non_confirming_state_policy",
+    "normalization_gate_policy",
+    "mirror_projection_policy",
+    "unresolved_projection_policy",
+    "override_confirmation_policy",
+    "correction_propagation_policy"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "AUTHORITY_TRUTH_V1"
+    },
+    "boundary_scope": {
+      "type": "string",
+      "enum": [
+        "AUTHORITY_INTERACTION_RECORD",
+        "AUTHORITY_INGRESS_RECEIPT",
+        "SUBMISSION_RECORD",
+        "OBLIGATION_MIRROR",
+        "WORKFLOW_ITEM",
+        "CLIENT_TIMELINE_EVENT"
+      ]
+    },
+    "truth_surface_role": {
+      "type": "string",
+      "enum": [
+        "AUTHORITY_RUNTIME_LEDGER",
+        "AUTHORITY_INGRESS_CHECKPOINT",
+        "AUTHORITY_SETTLEMENT_LEDGER",
+        "INTERNAL_OBLIGATION_MIRROR",
+        "INTERNAL_WORKFLOW_COORDINATION",
+        "CUSTOMER_SAFE_STATUS_PROJECTION"
+      ]
+    },
+    "surface_specific_binding_policy": {
+      "type": "string",
+      "enum": [
+        "INTERACTION_RESPONSE_MEANING_CONTROLS_SETTLEMENT",
+        "INGRESS_RECEIPT_MUST_NOT_DECIDE_TRUTH_UNTIL_BOUND",
+        "SUBMISSION_LEDGER_IS_AUTHORITY_RESULT_ONLY",
+        "MIRROR_IS_INTERNAL_VIEW_WITH_EXPLICIT_AUTHORITY_STATE",
+        "WORKFLOW_IS_COORDINATION_ONLY_WITH_EXPLICIT_AUTHORITY_STATE",
+        "TIMELINE_IS_CUSTOMER_SAFE_AND_EXPLICIT_ABOUT_AUTHORITY_STATE"
+      ]
+    },
+    "authority_confirmation_policy": {
+      "const": "ONLY_AUTHORITY_EVIDENCE_MAY_CONFIRM"
+    },
+    "non_confirming_state_policy": {
+      "const": "PENDING_UNKNOWN_OUT_OF_BAND_TYPED_AND_NON_CONFIRMING"
+    },
+    "normalization_gate_policy": {
+      "const": "CHECKPOINT_AND_CORRELATE_BEFORE_MUTATION"
+    },
+    "mirror_projection_policy": {
+      "const": "INTERNAL_MIRRORS_AND_PROJECTIONS_SUBORDINATE_TO_AUTHORITY"
+    },
+    "unresolved_projection_policy": {
+      "const": "UNRESOLVED_AUTHORITY_MUST_NOT_RENDER_AS_CONFIRMED"
+    },
+    "override_confirmation_policy": {
+      "const": "OVERRIDE_AND_ACCEPTED_RISK_NEVER_CONFIRM"
+    },
+    "correction_propagation_policy": {
+      "const": "AUTHORITY_CORRECTIONS_REOPEN_DOWNSTREAM_STATE"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "truth_surface_role": {
+            "const": "AUTHORITY_RUNTIME_LEDGER"
+          }
+        },
+        "required": [
+          "truth_surface_role"
+        ]
+      },
+      "then": {
+        "properties": {
+          "surface_specific_binding_policy": {
+            "const": "INTERACTION_RESPONSE_MEANING_CONTROLS_SETTLEMENT"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "truth_surface_role": {
+            "const": "AUTHORITY_INGRESS_CHECKPOINT"
+          }
+        },
+        "required": [
+          "truth_surface_role"
+        ]
+      },
+      "then": {
+        "properties": {
+          "surface_specific_binding_policy": {
+            "const": "INGRESS_RECEIPT_MUST_NOT_DECIDE_TRUTH_UNTIL_BOUND"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "truth_surface_role": {
+            "const": "AUTHORITY_SETTLEMENT_LEDGER"
+          }
+        },
+        "required": [
+          "truth_surface_role"
+        ]
+      },
+      "then": {
+        "properties": {
+          "surface_specific_binding_policy": {
+            "const": "SUBMISSION_LEDGER_IS_AUTHORITY_RESULT_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "truth_surface_role": {
+            "const": "INTERNAL_OBLIGATION_MIRROR"
+          }
+        },
+        "required": [
+          "truth_surface_role"
+        ]
+      },
+      "then": {
+        "properties": {
+          "surface_specific_binding_policy": {
+            "const": "MIRROR_IS_INTERNAL_VIEW_WITH_EXPLICIT_AUTHORITY_STATE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "truth_surface_role": {
+            "const": "INTERNAL_WORKFLOW_COORDINATION"
+          }
+        },
+        "required": [
+          "truth_surface_role"
+        ]
+      },
+      "then": {
+        "properties": {
+          "surface_specific_binding_policy": {
+            "const": "WORKFLOW_IS_COORDINATION_ONLY_WITH_EXPLICIT_AUTHORITY_STATE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "truth_surface_role": {
+            "const": "CUSTOMER_SAFE_STATUS_PROJECTION"
+          }
+        },
+        "required": [
+          "truth_surface_role"
+        ]
+      },
+      "then": {
+        "properties": {
+          "surface_specific_binding_policy": {
+            "const": "TIMELINE_IS_CUSTOMER_SAFE_AND_EXPLICIT_ABOUT_AUTHORITY_STATE"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

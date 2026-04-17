@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/work_queue_health_contract.schema.json",
+  "title": "WorkQueueHealthContract",
+  "description": "Persisted queue-health derivation contract for operator inbox views. This schema freezes the routing-profile identity, queue-health score and floor, intervention recommendation, and the rule that live ordering follows persisted canonical row tuples rather than client-local counters or clocks.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "queue_scope",
+    "routing_profile_code",
+    "routing_profile_hash",
+    "queue_route_key",
+    "basis_hash",
+    "queue_health_score",
+    "queue_pressure_score",
+    "queue_health_floor",
+    "queue_health_state",
+    "intervention_recommendation_state",
+    "ordering_policy",
+    "focus_safe_live_update_policy",
+    "reason_codes"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "WORK_QUEUE_HEALTH_V1"
+    },
+    "queue_scope": {
+      "type": "string",
+      "enum": [
+        "WORK_INBOX_SNAPSHOT"
+      ]
+    },
+    "routing_profile_code": {
+      "const": "COLLABORATION_ROUTING_FORMULA_V1"
+    },
+    "routing_profile_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "queue_route_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "basis_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "queue_health_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "queue_pressure_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "queue_health_floor": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "queue_health_state": {
+      "type": "string",
+      "enum": [
+        "HEALTHY",
+        "DEGRADED",
+        "SATURATED"
+      ]
+    },
+    "intervention_recommendation_state": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "REBALANCE",
+        "STAFFING_REVIEW",
+        "MANUAL_TRIAGE"
+      ]
+    },
+    "ordering_policy": {
+      "const": "CANONICAL_SORT_KEY_ONLY"
+    },
+    "focus_safe_live_update_policy": {
+      "const": "DEFER_TO_ROUTING_CONTINUITY_STATE"
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "maxItems": 6,
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "queue_health_state": {
+            "const": "HEALTHY"
+          }
+        },
+        "required": [
+          "queue_health_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "intervention_recommendation_state": {
+            "const": "NONE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "queue_health_state": {
+            "const": "SATURATED"
+          }
+        },
+        "required": [
+          "queue_health_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "intervention_recommendation_state": {
+            "enum": [
+              "STAFFING_REVIEW",
+              "MANUAL_TRIAGE"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

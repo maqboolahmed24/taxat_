@@ -1,0 +1,422 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/temporal_propagation_event.schema.json",
+  "title": "TemporalPropagationEvent",
+  "description": "Durable cross-boundary temporal control event. This schema freezes when late data, authority correction, out-of-band discovery, or temporal uncertainty must invalidate trust, stale proofs, rebuild scope-sliced baselines, reopen mirrors, invalidate amendment readiness, and constrain replay to historical event reuse instead of fresh reinterpretation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifact_type",
+    "temporal_event_id",
+    "manifest_id",
+    "event_class",
+    "active_exact_scope_key",
+    "affected_scope_refs",
+    "affected_submission_refs",
+    "source_late_data_monitor_ref_or_null",
+    "source_late_data_finding_refs",
+    "source_authority_basis_refs",
+    "source_baseline_envelope_ref_or_null",
+    "source_drift_ref_or_null",
+    "trust_effect",
+    "proof_effect",
+    "baseline_effect",
+    "retroactive_effect",
+    "amendment_effect",
+    "replay_effect",
+    "mirror_reopen_effect",
+    "historical_reuse_policy",
+    "reason_codes",
+    "emitted_at",
+    "event_hash"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "TemporalPropagationEvent"
+    },
+    "temporal_event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_class": {
+      "type": "string",
+      "enum": [
+        "LATE_DATA_INVALIDATION",
+        "AUTHORITY_CORRECTION",
+        "OUT_OF_BAND_DISCOVERY",
+        "TEMPORAL_UNCERTAINTY_BLOCK"
+      ]
+    },
+    "active_exact_scope_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "affected_scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "affected_submission_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "source_late_data_monitor_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "source_late_data_finding_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "source_authority_basis_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "source_baseline_envelope_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "source_drift_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "trust_effect": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "RECALC_REQUIRED"
+      ]
+    },
+    "proof_effect": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "STALE_REVALIDATION_REQUIRED"
+      ]
+    },
+    "baseline_effect": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "SCOPE_SLICED_REBUILD_REQUIRED"
+      ]
+    },
+    "retroactive_effect": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "ANALYSIS_REQUIRED"
+      ]
+    },
+    "amendment_effect": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "INVALIDATE_READINESS_REUSE",
+        "RECONCILE_FIRST"
+      ]
+    },
+    "replay_effect": {
+      "type": "string",
+      "enum": [
+        "NOT_MATERIAL",
+        "HISTORICAL_EVENT_REQUIRED",
+        "LIMITED_COMPARISON_ONLY"
+      ]
+    },
+    "mirror_reopen_effect": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "REOPEN_REQUIRED"
+      ]
+    },
+    "historical_reuse_policy": {
+      "const": "NO_FRESH_RECLASSIFICATION"
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "emitted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "event_hash": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "event_class": {
+            "const": "LATE_DATA_INVALIDATION"
+          }
+        },
+        "required": [
+          "event_class"
+        ]
+      },
+      "then": {
+        "anyOf": [
+          {
+            "properties": {
+              "source_late_data_monitor_ref_or_null": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          {
+            "properties": {
+              "source_late_data_finding_refs": {
+                "minItems": 1
+              }
+            }
+          }
+        ],
+        "properties": {
+          "trust_effect": {
+            "const": "RECALC_REQUIRED"
+          },
+          "proof_effect": {
+            "const": "STALE_REVALIDATION_REQUIRED"
+          },
+          "amendment_effect": {
+            "enum": [
+              "INVALIDATE_READINESS_REUSE",
+              "RECONCILE_FIRST"
+            ]
+          },
+          "replay_effect": {
+            "const": "HISTORICAL_EVENT_REQUIRED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_class": {
+            "const": "AUTHORITY_CORRECTION"
+          }
+        },
+        "required": [
+          "event_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_authority_basis_refs": {
+            "minItems": 1
+          },
+          "trust_effect": {
+            "const": "RECALC_REQUIRED"
+          },
+          "proof_effect": {
+            "const": "STALE_REVALIDATION_REQUIRED"
+          },
+          "baseline_effect": {
+            "const": "SCOPE_SLICED_REBUILD_REQUIRED"
+          },
+          "amendment_effect": {
+            "enum": [
+              "INVALIDATE_READINESS_REUSE",
+              "RECONCILE_FIRST"
+            ]
+          },
+          "replay_effect": {
+            "const": "HISTORICAL_EVENT_REQUIRED"
+          },
+          "mirror_reopen_effect": {
+            "const": "REOPEN_REQUIRED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_class": {
+            "const": "OUT_OF_BAND_DISCOVERY"
+          }
+        },
+        "required": [
+          "event_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_authority_basis_refs": {
+            "minItems": 1
+          },
+          "trust_effect": {
+            "const": "RECALC_REQUIRED"
+          },
+          "proof_effect": {
+            "const": "STALE_REVALIDATION_REQUIRED"
+          },
+          "baseline_effect": {
+            "const": "SCOPE_SLICED_REBUILD_REQUIRED"
+          },
+          "amendment_effect": {
+            "const": "RECONCILE_FIRST"
+          },
+          "replay_effect": {
+            "const": "HISTORICAL_EVENT_REQUIRED"
+          },
+          "mirror_reopen_effect": {
+            "const": "REOPEN_REQUIRED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_class": {
+            "const": "TEMPORAL_UNCERTAINTY_BLOCK"
+          }
+        },
+        "required": [
+          "event_class"
+        ]
+      },
+      "then": {
+        "anyOf": [
+          {
+            "properties": {
+              "source_late_data_monitor_ref_or_null": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          {
+            "properties": {
+              "source_late_data_finding_refs": {
+                "minItems": 1
+              }
+            }
+          }
+        ],
+        "properties": {
+          "trust_effect": {
+            "const": "RECALC_REQUIRED"
+          },
+          "proof_effect": {
+            "const": "STALE_REVALIDATION_REQUIRED"
+          },
+          "amendment_effect": {
+            "const": "RECONCILE_FIRST"
+          },
+          "replay_effect": {
+            "const": "LIMITED_COMPARISON_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "retroactive_effect": {
+            "const": "ANALYSIS_REQUIRED"
+          }
+        },
+        "required": [
+          "retroactive_effect"
+        ]
+      },
+      "then": {
+        "properties": {
+          "affected_submission_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "amendment_effect": {
+            "const": "NONE"
+          }
+        },
+        "required": [
+          "amendment_effect"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retroactive_effect": {
+            "enum": [
+              "NONE",
+              "ANALYSIS_REQUIRED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "baseline_effect": {
+            "const": "NONE"
+          }
+        },
+        "required": [
+          "baseline_effect"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_baseline_envelope_ref_or_null": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

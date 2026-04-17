@@ -1,0 +1,433 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/state_transition_contract.schema.json",
+  "title": "StateTransitionContract",
+  "description": "Shared lifecycle-transition contract. This schema freezes the active machine identity, named transition event, previous-to-current state tuple, audit evidence, and fail-closed illegal-transition policy for persisted control-object state machines.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "object_family",
+    "machine_code",
+    "state_field_name",
+    "current_state",
+    "previous_state_or_null",
+    "transition_event_code",
+    "transition_applied_at",
+    "transition_audit_ref",
+    "transition_application_policy",
+    "illegal_transition_policy",
+    "concurrency_guard_policy",
+    "terminal_reentry_policy",
+    "recovery_supersession_policy",
+    "audit_evidence_policy",
+    "typed_rejection_family"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "STATE_TRANSITION_CONTRACT_V1"
+    },
+    "object_family": {
+      "type": "string",
+      "enum": [
+        "RUN_MANIFEST",
+        "NIGHTLY_BATCH_RUN",
+        "CONFIG_VERSION",
+        "CONFIG_CHANGE_REQUEST",
+        "SOURCE_COLLECTION_RUN",
+        "SNAPSHOT",
+        "WORKFLOW_ITEM",
+        "FILING_CASE",
+        "FILING_PACKET",
+        "SUBMISSION_RECORD",
+        "RECOVERY_CHECKPOINT",
+        "SCHEMA_MIGRATION_LEDGER",
+        "DEPLOYMENT_RELEASE",
+        "RELEASE_VERIFICATION_MANIFEST"
+      ]
+    },
+    "machine_code": {
+      "type": "string",
+      "enum": [
+        "RUN_MANIFEST_LIFECYCLE_V1",
+        "NIGHTLY_BATCH_RUN_LIFECYCLE_V1",
+        "CONFIG_VERSION_LIFECYCLE_V1",
+        "CONFIG_CHANGE_REQUEST_LIFECYCLE_V1",
+        "SOURCE_COLLECTION_RUN_LIFECYCLE_V1",
+        "SNAPSHOT_LIFECYCLE_V1",
+        "WORKFLOW_ITEM_LIFECYCLE_V1",
+        "FILING_CASE_LIFECYCLE_V1",
+        "FILING_PACKET_LIFECYCLE_V1",
+        "SUBMISSION_RECORD_LIFECYCLE_V1",
+        "RECOVERY_CHECKPOINT_LIFECYCLE_V1",
+        "SCHEMA_MIGRATION_LEDGER_PHASE_V1",
+        "DEPLOYMENT_RELEASE_ROLLOUT_V1",
+        "RELEASE_VERIFICATION_MANIFEST_DECISION_V1"
+      ]
+    },
+    "state_field_name": {
+      "type": "string",
+      "enum": [
+        "lifecycle_state",
+        "checkpoint_state",
+        "phase_state",
+        "rollout_state",
+        "decision_state"
+      ]
+    },
+    "current_state": {
+      "type": "string",
+      "minLength": 1
+    },
+    "previous_state_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "transition_event_code": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "transition_applied_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "transition_audit_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "transition_application_policy": {
+      "const": "NAMED_EVENT_ONLY"
+    },
+    "illegal_transition_policy": {
+      "const": "REJECT_WITH_TYPED_REASON_AND_NO_PARTIAL_WRITE"
+    },
+    "concurrency_guard_policy": {
+      "const": "COMPARE_AND_SWAP_OR_SINGLE_WRITER_LEASE"
+    },
+    "terminal_reentry_policy": {
+      "const": "TERMINAL_STATES_REQUIRE_NEW_LINEAGE"
+    },
+    "recovery_supersession_policy": {
+      "const": "RECOVERY_AND_SUPERSESSION_ALLOCATE_SUCCESSOR_OR_SUPERSEDING_LINEAGE"
+    },
+    "audit_evidence_policy": {
+      "const": "EVERY_TRANSITION_RETAINS_AUDIT_EVENT_REF"
+    },
+    "typed_rejection_family": {
+      "const": "ILLEGAL_STATE_TRANSITION"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "object_family": {
+            "const": "RUN_MANIFEST"
+          }
+        },
+        "required": [
+          "object_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "machine_code": {
+            "const": "RUN_MANIFEST_LIFECYCLE_V1"
+          },
+          "state_field_name": {
+            "const": "lifecycle_state"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "object_family": {
+            "const": "NIGHTLY_BATCH_RUN"
+          }
+        },
+        "required": [
+          "object_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "machine_code": {
+            "const": "NIGHTLY_BATCH_RUN_LIFECYCLE_V1"
+          },
+          "state_field_name": {
+            "const": "lifecycle_state"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "object_family": {
+            "const": "CONFIG_VERSION"
+          }
+        },
+        "required": [
+          "object_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "machine_code": {
+            "const": "CONFIG_VERSION_LIFECYCLE_V1"
+          },
+          "state_field_name": {
+            "const": "lifecycle_state"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "object_family": {
+            "const": "CONFIG_CHANGE_REQUEST"
+          }
+        },
+        "required": [
+          "object_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "machine_code": {
+            "const": "CONFIG_CHANGE_REQUEST_LIFECYCLE_V1"
+          },
+          "state_field_name": {
+            "const": "lifecycle_state"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "object_family": {
+            "const": "SOURCE_COLLECTION_RUN"
+          }
+        },
+        "required": [
+          "object_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "machine_code": {
+            "const": "SOURCE_COLLECTION_RUN_LIFECYCLE_V1"
+          },
+          "state_field_name": {
+            "const": "lifecycle_state"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "object_family": {
+            "const": "SNAPSHOT"
+          }
+        },
+        "required": [
+          "object_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "machine_code": {
+            "const": "SNAPSHOT_LIFECYCLE_V1"
+          },
+          "state_field_name": {
+            "const": "lifecycle_state"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "object_family": {
+            "const": "WORKFLOW_ITEM"
+          }
+        },
+        "required": [
+          "object_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "machine_code": {
+            "const": "WORKFLOW_ITEM_LIFECYCLE_V1"
+          },
+          "state_field_name": {
+            "const": "lifecycle_state"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "object_family": {
+            "const": "FILING_CASE"
+          }
+        },
+        "required": [
+          "object_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "machine_code": {
+            "const": "FILING_CASE_LIFECYCLE_V1"
+          },
+          "state_field_name": {
+            "const": "lifecycle_state"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "object_family": {
+            "const": "FILING_PACKET"
+          }
+        },
+        "required": [
+          "object_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "machine_code": {
+            "const": "FILING_PACKET_LIFECYCLE_V1"
+          },
+          "state_field_name": {
+            "const": "lifecycle_state"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "object_family": {
+            "const": "SUBMISSION_RECORD"
+          }
+        },
+        "required": [
+          "object_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "machine_code": {
+            "const": "SUBMISSION_RECORD_LIFECYCLE_V1"
+          },
+          "state_field_name": {
+            "const": "lifecycle_state"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "object_family": {
+            "const": "RECOVERY_CHECKPOINT"
+          }
+        },
+        "required": [
+          "object_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "machine_code": {
+            "const": "RECOVERY_CHECKPOINT_LIFECYCLE_V1"
+          },
+          "state_field_name": {
+            "const": "checkpoint_state"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "object_family": {
+            "const": "SCHEMA_MIGRATION_LEDGER"
+          }
+        },
+        "required": [
+          "object_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "machine_code": {
+            "const": "SCHEMA_MIGRATION_LEDGER_PHASE_V1"
+          },
+          "state_field_name": {
+            "const": "phase_state"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "object_family": {
+            "const": "DEPLOYMENT_RELEASE"
+          }
+        },
+        "required": [
+          "object_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "machine_code": {
+            "const": "DEPLOYMENT_RELEASE_ROLLOUT_V1"
+          },
+          "state_field_name": {
+            "const": "rollout_state"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "object_family": {
+            "const": "RELEASE_VERIFICATION_MANIFEST"
+          }
+        },
+        "required": [
+          "object_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "machine_code": {
+            "const": "RELEASE_VERIFICATION_MANIFEST_DECISION_V1"
+          },
+          "state_field_name": {
+            "const": "decision_state"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

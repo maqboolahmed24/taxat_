@@ -1,0 +1,290 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/amendment_window_context.schema.json",
+  "title": "AmendmentWindowContext",
+  "description": "Frozen authority- and provider-grounded amendment-window evaluation for one exact scope.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "amendment_window_context_id",
+    "manifest_id",
+    "execution_mode_boundary_contract",
+    "baseline_envelope_ref",
+    "window_anchor_basis",
+    "scope_refs",
+    "statutory_filing_deadline",
+    "final_declaration_confirmed_at",
+    "window_opens_at",
+    "window_closes_at",
+    "window_state",
+    "provider_profile_ref",
+    "authority_basis_ref",
+    "eligible_scope_refs",
+    "blocked_scope_refs",
+    "reason_codes",
+    "evaluated_at",
+    "stale_after_at",
+    "evaluation_hash"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "AmendmentWindowContext"
+    },
+    "amendment_window_context_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_mode_boundary_contract": {
+      "$ref": "https://taxat.dev/schemas/execution_mode_boundary_contract.schema.json"
+    },
+    "baseline_envelope_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "window_anchor_basis": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "statutory_filing_deadline": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "final_declaration_confirmed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "window_opens_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "window_closes_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "window_state": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "CLOSED",
+        "UNPROVEN"
+      ]
+    },
+    "provider_profile_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "authority_basis_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "eligible_scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "blocked_scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "evaluated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "stale_after_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "evaluation_hash": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "window_state": {
+            "const": "OPEN"
+          }
+        },
+        "required": [
+          "window_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "provider_profile_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "authority_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "window_closes_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "final_declaration_confirmed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "eligible_scope_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "window_state": {
+            "const": "CLOSED"
+          }
+        },
+        "required": [
+          "window_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "provider_profile_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "authority_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "final_declaration_confirmed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "window_closes_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "eligible_scope_refs": {
+            "maxItems": 0
+          },
+          "blocked_scope_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "window_state": {
+            "const": "UNPROVEN"
+          }
+        },
+        "required": [
+          "window_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "eligible_scope_refs": {
+            "maxItems": 0
+          },
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "blocked_scope_refs": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "blocked_scope_refs"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "eligible_scope_refs": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "eligible_scope_refs"
+        ]
+      },
+      "then": {
+        "properties": {
+          "window_state": {
+            "const": "OPEN"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

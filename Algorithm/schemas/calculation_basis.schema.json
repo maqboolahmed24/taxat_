@@ -1,0 +1,379 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/calculation_basis.schema.json",
+  "title": "CalculationBasis",
+  "description": "Authority-calculation basis contract. This schema freezes the basis payload selected from a calculation result, its reuse posture, and the confirmation or supersession lineage that governs later filing or amendment stages.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "calculation_basis_id",
+    "calculation_id",
+    "calculation_request_ref",
+    "manifest_id",
+    "calculation_type",
+    "basis_type",
+    "basis_status",
+    "basis_payload_ref",
+    "basis_hash",
+    "parity_reusable",
+    "filing_reusable",
+    "user_confirmation_ref",
+    "reason_codes",
+    "captured_at",
+    "confirmed_at",
+    "superseded_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "CalculationBasis"
+    },
+    "calculation_basis_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "calculation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "calculation_request_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "calculation_type": {
+      "type": "string",
+      "enum": [
+        "in-year",
+        "intent-to-finalise",
+        "intent-to-amend",
+        "final-declaration"
+      ]
+    },
+    "basis_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "basis_status": {
+      "type": "string",
+      "enum": [
+        "PROVISIONAL",
+        "CONFIRMED",
+        "REJECTED",
+        "SUPERSEDED"
+      ]
+    },
+    "basis_payload_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "basis_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "parity_reusable": {
+      "type": "boolean"
+    },
+    "filing_reusable": {
+      "type": "boolean"
+    },
+    "user_confirmation_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "confirmed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "superseded_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "basis_status": {
+            "const": "PROVISIONAL"
+          }
+        },
+        "required": [
+          "basis_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parity_reusable": {
+            "const": false
+          },
+          "filing_reusable": {
+            "const": false
+          },
+          "user_confirmation_ref": {
+            "type": "null"
+          },
+          "confirmed_at": {
+            "type": "null"
+          },
+          "superseded_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "basis_status": {
+            "const": "CONFIRMED"
+          }
+        },
+        "required": [
+          "basis_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "basis_payload_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "basis_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "user_confirmation_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "confirmed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "superseded_at": {
+            "type": "null"
+          }
+        },
+        "anyOf": [
+          {
+            "properties": {
+              "parity_reusable": {
+                "const": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "filing_reusable": {
+                "const": true
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "basis_status": {
+            "const": "REJECTED"
+          }
+        },
+        "required": [
+          "basis_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parity_reusable": {
+            "const": false
+          },
+          "filing_reusable": {
+            "const": false
+          },
+          "user_confirmation_ref": {
+            "type": "null"
+          },
+          "confirmed_at": {
+            "type": "null"
+          },
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "basis_status": {
+            "const": "SUPERSEDED"
+          }
+        },
+        "required": [
+          "basis_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "basis_payload_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "basis_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "parity_reusable": {
+            "const": false
+          },
+          "filing_reusable": {
+            "const": false
+          },
+          "superseded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "anyOf": [
+          {
+            "properties": {
+              "parity_reusable": {
+                "const": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "filing_reusable": {
+                "const": true
+              }
+            }
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "basis_payload_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "basis_hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "anyOf": [
+          {
+            "properties": {
+              "parity_reusable": {
+                "const": true
+              }
+            },
+            "required": [
+              "parity_reusable"
+            ]
+          },
+          {
+            "properties": {
+              "filing_reusable": {
+                "const": true
+              }
+            },
+            "required": [
+              "filing_reusable"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "basis_status": {
+            "const": "CONFIRMED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "user_confirmation_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "user_confirmation_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "basis_status": {
+            "enum": [
+              "CONFIRMED",
+              "SUPERSEDED"
+            ]
+          },
+          "confirmed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "superseded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "superseded_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "basis_status": {
+            "const": "SUPERSEDED"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

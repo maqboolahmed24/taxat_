@@ -1,0 +1,33 @@
+flowchart LR
+  subgraph EXT["External Authority / External Actor"]
+    HMRC["HMRC / Authority of Record"]
+    USERS["Reporting subject / delegate / signatory"]
+    SOURCES["Banks / ledgers / document providers / external systems"]
+  end
+  subgraph PRODUCT["Broader Product Outside Core"]
+    SURFACES["UI / portal / governance / routing / native scenes"]
+    NORTHBOUND["API gateway / session management / SSE snapshot transport"]
+    RUNTIME["Vault / storage / queue / cache / observability / release / DR"]
+  end
+  subgraph EDGE["Controlled Edge"]
+    CONNECTORS["Connector runtime / OCR / scoped fetch transport"]
+    GATEWAY["Authority gateway / ingress checkpoint / callback capture"]
+  end
+  subgraph CORE["Core Engine"]
+    MANIFEST["Run initiation / manifest strategy / config freeze"]
+    SNAPSHOT["Intake governance / Snapshot / canonicalization / quality"]
+    DECISION["Compute / parity / trust / gates / workflow"]
+    LEGAL["Filing packet / request identity / ack interpretation / drift"]
+    GOVERNANCE["Read-side posture / replay lineage / retention / explainability"]
+  end
+  USERS -->|"authenticated requests, signatory evidence"| MANIFEST
+  SOURCES -->|"raw records, documents, declarations"| CONNECTORS
+  CONNECTORS -->|"payload refs only"| SNAPSHOT
+  MANIFEST --> SNAPSHOT --> DECISION --> LEGAL --> GOVERNANCE
+  HMRC -->|"authority acknowledgements, status, calculations"| GATEWAY
+  GATEWAY -->|"authenticated receipts and normalized responses"| LEGAL
+  DECISION -->|"engine-authored posture and workflow"| NORTHBOUND
+  NORTHBOUND -->|"delivery only"| SURFACES
+  RUNTIME -. "supports, secures, stores, but does not redefine truth" .-> CORE
+  SURFACES -. "consume but may not reinterpret semantics" .-> NORTHBOUND
+  CORE -->|"guide, request, compare, record, or react"| HMRC

@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/recovery_governance_contract.schema.json",
+  "title": "RecoveryGovernanceContract",
+  "description": "Shared recovery-governance contract. This schema freezes the authoritative workload criticality tier, checkpoint evidence policy, durable queue-rebuild policy, authority-mutation revalidation policy, checkpoint_reopen_policy semantics, rollback boundary, and fail-forward governance used by recovery checkpoints and deployment records.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "boundary_scope",
+    "protected_workload_class",
+    "recovery_tier_class",
+    "rpo_class",
+    "rto_class",
+    "boundary_specific_binding_policy",
+    "checkpoint_inventory_policy",
+    "checkpoint_evidence_policy",
+    "privacy_reconciliation_policy",
+    "compensating_re_erasure_policy",
+    "limitation_reconciliation_policy",
+    "queue_recovery_policy",
+    "authority_recovery_policy",
+    "reopen_gate_policy",
+    "rollback_boundary_policy",
+    "fail_forward_policy",
+    "failover_audit_policy"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "RECOVERY_GOVERNANCE_V1"
+    },
+    "boundary_scope": {
+      "type": "string",
+      "enum": [
+        "RECOVERY_CHECKPOINT",
+        "DEPLOYMENT_RELEASE"
+      ]
+    },
+    "protected_workload_class": {
+      "type": "string",
+      "enum": [
+        "CONTROL_PLANE_LEGAL_TRUTH",
+        "REBUILDABLE_PROJECTION",
+        "DISPOSABLE_RUNTIME_CACHE"
+      ]
+    },
+    "recovery_tier_class": {
+      "type": "string",
+      "enum": [
+        "TIER_0_CONTROL_PLANE",
+        "TIER_1_REBUILDABLE",
+        "TIER_2_DISPOSABLE"
+      ]
+    },
+    "rpo_class": {
+      "type": "string",
+      "enum": [
+        "RPO_15M",
+        "RPO_4H",
+        "RPO_BEST_EFFORT"
+      ]
+    },
+    "rto_class": {
+      "type": "string",
+      "enum": [
+        "RTO_60M",
+        "RTO_4H",
+        "RTO_24H"
+      ]
+    },
+    "boundary_specific_binding_policy": {
+      "type": "string",
+      "enum": [
+        "CHECKPOINT_RETAINS_INVENTORY_RESTORE_EVIDENCE_AND_REOPEN_GATES",
+        "RELEASE_RETAINS_ROLLBACK_BOUNDARY_AND_FAIL_FORWARD_GOVERNANCE"
+      ]
+    },
+    "checkpoint_inventory_policy": {
+      "const": "CHECKPOINTS_REQUIRED_AND_INVENTORY_LINKED"
+    },
+    "checkpoint_evidence_policy": {
+      "const": "VERIFIED_CHECKPOINT_REQUIRES_BOUND_RESTORE_DRILL"
+    },
+    "privacy_reconciliation_policy": {
+      "const": "POST_RESTORE_PRIVACY_RECONCILIATION_REQUIRED_BEFORE_REOPEN"
+    },
+    "compensating_re_erasure_policy": {
+      "const": "RESURRECTED_RESTRICTED_DATA_REQUIRES_TYPED_COMPENSATING_RE_ERASURE"
+    },
+    "limitation_reconciliation_policy": {
+      "const": "REPLAY_AND_ENQUIRY_LIMITATIONS_MUST_REMAIN_REOPEN_SAFE"
+    },
+    "queue_recovery_policy": {
+      "const": "QUEUES_REBUILT_FROM_DURABLE_TRUTH_ONLY"
+    },
+    "authority_recovery_policy": {
+      "const": "AUTHORITY_MUTATIONS_REQUIRE_LINEAGE_AND_BINDING_REVALIDATION"
+    },
+    "reopen_gate_policy": {
+      "const": "REOPEN_BLOCKED_UNTIL_RESTORE_PRIVACY_AUDIT_QUEUE_AND_AUTHORITY_PASS"
+    },
+    "rollback_boundary_policy": {
+      "const": "ROLLBACK_ONLY_WHILE_SCHEMA_WINDOW_COMPATIBLE"
+    },
+    "fail_forward_policy": {
+      "const": "FAIL_FORWARD_REQUIRES_COMPENSATING_RELEASE_AND_OWNER"
+    },
+    "failover_audit_policy": {
+      "const": "FAILOVER_AND_FAILBACK_REQUIRE_AUDITABLE_OWNER"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "boundary_scope": {
+            "const": "RECOVERY_CHECKPOINT"
+          }
+        },
+        "required": [
+          "boundary_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "boundary_specific_binding_policy": {
+            "const": "CHECKPOINT_RETAINS_INVENTORY_RESTORE_EVIDENCE_AND_REOPEN_GATES"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "boundary_scope": {
+            "const": "DEPLOYMENT_RELEASE"
+          }
+        },
+        "required": [
+          "boundary_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "boundary_specific_binding_policy": {
+            "const": "RELEASE_RETAINS_ROLLBACK_BOUNDARY_AND_FAIL_FORWARD_GOVERNANCE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "protected_workload_class": {
+            "const": "CONTROL_PLANE_LEGAL_TRUTH"
+          }
+        },
+        "required": [
+          "protected_workload_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "recovery_tier_class": {
+            "const": "TIER_0_CONTROL_PLANE"
+          },
+          "rpo_class": {
+            "const": "RPO_15M"
+          },
+          "rto_class": {
+            "const": "RTO_60M"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "protected_workload_class": {
+            "const": "REBUILDABLE_PROJECTION"
+          }
+        },
+        "required": [
+          "protected_workload_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "recovery_tier_class": {
+            "const": "TIER_1_REBUILDABLE"
+          },
+          "rpo_class": {
+            "const": "RPO_4H"
+          },
+          "rto_class": {
+            "const": "RTO_4H"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "protected_workload_class": {
+            "const": "DISPOSABLE_RUNTIME_CACHE"
+          }
+        },
+        "required": [
+          "protected_workload_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "recovery_tier_class": {
+            "const": "TIER_2_DISPOSABLE"
+          },
+          "rpo_class": {
+            "const": "RPO_BEST_EFFORT"
+          },
+          "rto_class": {
+            "const": "RTO_24H"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,807 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/authority_link.schema.json",
+  "title": "AuthorityLink",
+  "description": "Durable external-authority edge contract. This schema freezes the client and reporting-subject binding, delegated scope coverage, token-binding lineage, and link health posture used by preflight, send-time revalidation, and governance inventory.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "authority_link_id",
+    "tenant_id",
+    "client_id",
+    "reporting_subject_ref",
+    "authority_name",
+    "authority_scope",
+    "provider_environment",
+    "provider_api_version",
+    "authorised_party_ref",
+    "delegation_grant_ref",
+    "partition_scope_refs",
+    "token_binding_profile_ref",
+    "validated_at",
+    "expires_at",
+    "revoked_at",
+    "superseded_by_link_id",
+    "lifecycle_state",
+    "binding_health",
+    "delegation_state",
+    "token_client_binding_state",
+    "source_evidence_refs",
+    "blocked_reason_codes",
+    "last_binding_check_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "AuthorityLink"
+    },
+    "authority_link_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "client_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reporting_subject_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_environment": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_api_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authorised_party_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "delegation_grant_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "partition_scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "token_binding_profile_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "validated_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "revoked_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "superseded_by_link_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "UNLINKED",
+        "LINK_INITIATED",
+        "AUTHORISED_ACTIVE",
+        "AUTHORISED_LIMITED",
+        "TOKEN_INVALID",
+        "REVOKED",
+        "EXPIRED",
+        "SUPERSEDED"
+      ]
+    },
+    "binding_health": {
+      "type": "string",
+      "enum": [
+        "HEALTHY",
+        "LIMITED_SCOPE",
+        "EXPIRING_SOON",
+        "TOKEN_INVALID",
+        "CLIENT_BINDING_MISMATCH",
+        "DELEGATION_GAP",
+        "ENVIRONMENT_DRIFT",
+        "REVOKED",
+        "EXPIRED",
+        "UNLINKED",
+        "UNKNOWN"
+      ]
+    },
+    "delegation_state": {
+      "type": "string",
+      "enum": [
+        "NOT_REQUIRED",
+        "SATISFIED",
+        "LIMITED",
+        "MISSING",
+        "EXPIRED",
+        "UNKNOWN"
+      ]
+    },
+    "token_client_binding_state": {
+      "type": "string",
+      "enum": [
+        "BOUND",
+        "MISMATCH",
+        "UNVERIFIED"
+      ]
+    },
+    "source_evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "blocked_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "last_binding_check_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "token_client_binding_state": {
+            "const": "MISMATCH"
+          }
+        },
+        "required": [
+          "token_client_binding_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "binding_health": {
+            "const": "CLIENT_BINDING_MISMATCH"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "binding_health": {
+            "const": "CLIENT_BINDING_MISMATCH"
+          }
+        },
+        "required": [
+          "binding_health"
+        ]
+      },
+      "then": {
+        "properties": {
+          "token_client_binding_state": {
+            "const": "MISMATCH"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "binding_health": {
+            "enum": [
+              "HEALTHY",
+              "EXPIRING_SOON"
+            ]
+          }
+        },
+        "required": [
+          "binding_health"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "AUTHORISED_ACTIVE"
+          },
+          "token_client_binding_state": {
+            "const": "BOUND"
+          },
+          "delegation_state": {
+            "enum": [
+              "NOT_REQUIRED",
+              "SATISFIED"
+            ]
+          },
+          "blocked_reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "delegation_state": {
+            "const": "NOT_REQUIRED"
+          }
+        },
+        "required": [
+          "delegation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "delegation_grant_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "delegation_grant_ref": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "delegation_grant_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "delegation_state": {
+            "const": "NOT_REQUIRED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "delegation_state": {
+            "enum": [
+              "SATISFIED",
+              "LIMITED",
+              "MISSING",
+              "EXPIRED",
+              "UNKNOWN"
+            ]
+          }
+        },
+        "required": [
+          "delegation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "delegation_grant_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "delegation_state": {
+            "enum": [
+              "MISSING",
+              "EXPIRED"
+            ]
+          }
+        },
+        "required": [
+          "delegation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "binding_health": {
+            "const": "DELEGATION_GAP"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "binding_health": {
+            "const": "DELEGATION_GAP"
+          }
+        },
+        "required": [
+          "binding_health"
+        ]
+      },
+      "then": {
+        "properties": {
+          "delegation_state": {
+            "enum": [
+              "MISSING",
+              "EXPIRED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "delegation_state": {
+            "const": "LIMITED"
+          }
+        },
+        "required": [
+          "delegation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "binding_health": {
+            "const": "LIMITED_SCOPE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "binding_health": {
+            "const": "LIMITED_SCOPE"
+          }
+        },
+        "required": [
+          "binding_health"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "AUTHORISED_LIMITED"
+          },
+          "delegation_state": {
+            "const": "LIMITED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "UNLINKED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "binding_health": {
+            "const": "UNLINKED"
+          },
+          "token_binding_profile_ref": {
+            "type": "null"
+          },
+          "validated_at": {
+            "type": "null"
+          },
+          "last_binding_check_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "LINK_INITIATED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "validated_at": {
+            "type": "null"
+          },
+          "last_binding_check_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "binding_health": {
+            "const": "UNLINKED"
+          }
+        },
+        "required": [
+          "binding_health"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "UNLINKED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "AUTHORISED_ACTIVE"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "binding_health": {
+            "enum": [
+              "HEALTHY",
+              "EXPIRING_SOON"
+            ]
+          },
+          "token_binding_profile_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "validated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_binding_check_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "blocked_reason_codes": {
+            "maxItems": 0
+          },
+          "revoked_at": {
+            "type": "null"
+          },
+          "superseded_by_link_id": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "AUTHORISED_LIMITED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "token_binding_profile_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "validated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_binding_check_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "blocked_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "TOKEN_INVALID"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "binding_health": {
+            "const": "TOKEN_INVALID"
+          },
+          "token_binding_profile_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "blocked_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "binding_health": {
+            "const": "TOKEN_INVALID"
+          }
+        },
+        "required": [
+          "binding_health"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "TOKEN_INVALID"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "REVOKED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "binding_health": {
+            "const": "REVOKED"
+          },
+          "revoked_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "blocked_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "EXPIRED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "binding_health": {
+            "const": "EXPIRED"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "blocked_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "revoked_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "revoked_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "REVOKED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "binding_health": {
+            "const": "REVOKED"
+          }
+        },
+        "required": [
+          "binding_health"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "REVOKED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "binding_health": {
+            "const": "EXPIRED"
+          }
+        },
+        "required": [
+          "binding_health"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "EXPIRED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "SUPERSEDED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "superseded_by_link_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "blocked_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "superseded_by_link_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "superseded_by_link_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "SUPERSEDED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "binding_health": {
+            "enum": [
+              "HEALTHY",
+              "EXPIRING_SOON"
+            ]
+          }
+        },
+        "required": [
+          "binding_health"
+        ]
+      },
+      "then": {
+        "properties": {
+          "blocked_reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "binding_health": {
+            "not": {
+              "enum": [
+                "HEALTHY",
+                "EXPIRING_SOON"
+              ]
+            }
+          }
+        },
+        "required": [
+          "binding_health"
+        ]
+      },
+      "then": {
+        "properties": {
+          "blocked_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

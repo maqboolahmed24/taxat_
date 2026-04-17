@@ -1,0 +1,591 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/compensation_record.schema.json",
+  "title": "CompensationRecord",
+  "description": "Compensating-action contract for partial stateful progression. This schema freezes compensation mode, lifecycle posture, forensic anchors, and verification requirements so downstream state is preserved or reconciled rather than silently rewound.",
+  "type": "object",
+  "required": [
+    "compensation_id",
+    "error_id",
+    "manifest_id",
+    "root_manifest_id",
+    "failure_resolution_contract",
+    "owner_type",
+    "owner_ref",
+    "compensation_mode",
+    "retention_class",
+    "artifact_retention_ref",
+    "workflow_item_id",
+    "target_object_refs",
+    "compensation_status",
+    "compensation_steps_ref",
+    "compensated_at",
+    "verification_ref",
+    "resolution_basis_ref",
+    "closure_evidence_refs",
+    "created_at",
+    "superseded_by_compensation_id",
+    "audit_refs",
+    "provenance_refs"
+  ],
+  "properties": {
+    "compensation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "error_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "root_manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "failure_resolution_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/failure_resolution_contract.schema.json"
+        },
+        {
+          "properties": {
+            "lifecycle_role": {
+              "const": "COMPENSATION_RECORD"
+            },
+            "role_specific_binding_policy": {
+              "const": "COMPENSATION_RETAINS_OWNER_VERIFICATION_AND_CLOSURE"
+            }
+          }
+        }
+      ]
+    },
+    "owner_type": {
+      "type": "string",
+      "enum": [
+        "SYSTEM",
+        "SERVICE_OPERATOR",
+        "REVIEWER",
+        "APPROVER",
+        "TENANT_ADMIN",
+        "SECURITY_OPERATOR"
+      ]
+    },
+    "owner_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "compensation_mode": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "MARK_AS_VOID",
+        "MARK_AS_SUPERSEDED",
+        "REVERT_DERIVED_ONLY",
+        "OPEN_RECONCILIATION",
+        "PRESERVE_AND_LIMIT",
+        "REQUIRE_MANUAL_SETTLEMENT"
+      ]
+    },
+    "retention_class": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "regulated_record",
+        "derived_artifact",
+        "operational_log",
+        "analytics_projection",
+        "policy_governed_other",
+        null
+      ]
+    },
+    "artifact_retention_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "workflow_item_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "target_object_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "compensation_status": {
+      "type": "string",
+      "enum": [
+        "PLANNED",
+        "IN_PROGRESS",
+        "APPLIED",
+        "VERIFIED",
+        "FAILED",
+        "CANCELLED",
+        "SUPERSEDED"
+      ]
+    },
+    "compensation_steps_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "compensated_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "verification_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "resolution_basis_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "closure_evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "superseded_by_compensation_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "audit_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "provenance_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "owner_type": {
+            "const": "SYSTEM"
+          }
+        },
+        "required": [
+          "owner_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "owner_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "owner_type": {
+            "enum": [
+              "SERVICE_OPERATOR",
+              "REVIEWER",
+              "APPROVER",
+              "TENANT_ADMIN",
+              "SECURITY_OPERATOR"
+            ]
+          }
+        },
+        "required": [
+          "owner_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "owner_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "retention_class": {
+            "type": "string",
+            "enum": [
+              "regulated_record",
+              "derived_artifact",
+              "operational_log",
+              "analytics_projection",
+              "policy_governed_other"
+            ]
+          }
+        },
+        "required": [
+          "retention_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "artifact_retention_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "artifact_retention_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "artifact_retention_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retention_class": {
+            "type": "string",
+            "enum": [
+              "regulated_record",
+              "derived_artifact",
+              "operational_log",
+              "analytics_projection",
+              "policy_governed_other"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "compensation_status": {
+            "enum": [
+              "PLANNED",
+              "IN_PROGRESS"
+            ]
+          }
+        },
+        "required": [
+          "compensation_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "compensated_at": {
+            "type": "null"
+          },
+          "verification_ref": {
+            "type": "null"
+          },
+          "resolution_basis_ref": {
+            "type": "null"
+          },
+          "closure_evidence_refs": {
+            "maxItems": 0
+          },
+          "superseded_by_compensation_id": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "compensation_status": {
+            "enum": [
+              "FAILED",
+              "CANCELLED"
+            ]
+          }
+        },
+        "required": [
+          "compensation_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "compensated_at": {
+            "type": "null"
+          },
+          "verification_ref": {
+            "type": "null"
+          },
+          "resolution_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "closure_evidence_refs": {
+            "minItems": 1
+          },
+          "superseded_by_compensation_id": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "compensation_status": {
+            "const": "APPLIED"
+          }
+        },
+        "required": [
+          "compensation_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "compensated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "verification_ref": {
+            "type": "null"
+          },
+          "resolution_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "closure_evidence_refs": {
+            "minItems": 1
+          },
+          "superseded_by_compensation_id": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "compensation_status": {
+            "const": "VERIFIED"
+          }
+        },
+        "required": [
+          "compensation_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "compensated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "verification_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resolution_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "closure_evidence_refs": {
+            "minItems": 1
+          },
+          "superseded_by_compensation_id": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "compensation_status": {
+            "const": "SUPERSEDED"
+          }
+        },
+        "required": [
+          "compensation_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "superseded_by_compensation_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "verification_ref": {
+            "type": "null"
+          },
+          "resolution_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "closure_evidence_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "verification_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "verification_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "compensation_status": {
+            "const": "VERIFIED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "superseded_by_compensation_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "superseded_by_compensation_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "compensation_status": {
+            "const": "SUPERSEDED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "compensation_mode": {
+            "const": "NONE"
+          }
+        },
+        "required": [
+          "compensation_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "compensation_status": {
+            "enum": [
+              "APPLIED",
+              "VERIFIED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "compensation_mode": {
+            "const": "PRESERVE_AND_LIMIT"
+          }
+        },
+        "required": [
+          "compensation_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retention_class": {
+            "type": "string",
+            "enum": [
+              "regulated_record",
+              "derived_artifact",
+              "operational_log",
+              "analytics_projection",
+              "policy_governed_other"
+            ]
+          },
+          "artifact_retention_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "compensation_mode": {
+            "enum": [
+              "OPEN_RECONCILIATION",
+              "REQUIRE_MANUAL_SETTLEMENT"
+            ]
+          }
+        },
+        "required": [
+          "compensation_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "workflow_item_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

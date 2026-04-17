@@ -1,0 +1,338 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/retroactive_impact_analysis.schema.json",
+  "title": "RetroactiveImpactAnalysis",
+  "description": "Bounded retroactivity and replay contract for post-finalisation drift or authority changes.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "retroactive_impact_id",
+    "manifest_id",
+    "execution_mode_boundary_contract",
+    "drift_ref",
+    "baseline_envelope_ref",
+    "temporal_propagation_event_ref",
+    "impacted_scope_refs",
+    "impacted_submission_refs",
+    "earliest_affected_effective_at",
+    "latest_affected_effective_at",
+    "bounded_retroactivity_class",
+    "late_data_interaction_class",
+    "replay_requirement",
+    "restatement_required",
+    "restatement_scope_refs",
+    "reason_codes",
+    "analyzed_at",
+    "analysis_hash"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "RetroactiveImpactAnalysis"
+    },
+    "retroactive_impact_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_mode_boundary_contract": {
+      "$ref": "https://taxat.dev/schemas/execution_mode_boundary_contract.schema.json"
+    },
+    "drift_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "baseline_envelope_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "temporal_propagation_event_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "impacted_scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "impacted_submission_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "earliest_affected_effective_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "latest_affected_effective_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "bounded_retroactivity_class": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "CURRENT_SCOPE_ONLY",
+        "RESTATE_PRIOR_POSITION",
+        "REOPEN_CHAIN_REPLAY",
+        "AUTHORITY_RECONCILIATION_REQUIRED"
+      ]
+    },
+    "late_data_interaction_class": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "CURRENT_SCOPE_ONLY",
+        "RESTATE_PRIOR_POSITION",
+        "AUTHORITY_CORRECTION_ONLY",
+        "CONTRADICTORY"
+      ]
+    },
+    "replay_requirement": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "CONTINUATION_CHILD",
+        "EXACT_REPLAY",
+        "RECONCILE_FIRST"
+      ]
+    },
+    "restatement_required": {
+      "type": "boolean"
+    },
+    "restatement_scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "analyzed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "analysis_hash": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "restatement_required": {
+            "const": true
+          }
+        },
+        "required": [
+          "restatement_required"
+        ]
+      },
+      "then": {
+        "properties": {
+          "restatement_scope_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "restatement_required": {
+            "const": false
+          }
+        },
+        "required": [
+          "restatement_required"
+        ]
+      },
+      "then": {
+        "properties": {
+          "restatement_scope_refs": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "restatement_scope_refs": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "restatement_scope_refs"
+        ]
+      },
+      "then": {
+        "properties": {
+          "restatement_required": {
+            "const": true
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "bounded_retroactivity_class": {
+            "enum": [
+              "CURRENT_SCOPE_ONLY",
+              "RESTATE_PRIOR_POSITION",
+              "REOPEN_CHAIN_REPLAY",
+              "AUTHORITY_RECONCILIATION_REQUIRED"
+            ]
+          }
+        },
+        "required": [
+          "bounded_retroactivity_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "impacted_scope_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "bounded_retroactivity_class": {
+            "const": "NONE"
+          }
+        },
+        "required": [
+          "bounded_retroactivity_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "impacted_scope_refs": {
+            "maxItems": 0
+          },
+          "impacted_submission_refs": {
+            "maxItems": 0
+          },
+          "earliest_affected_effective_at": {
+            "type": "null"
+          },
+          "latest_affected_effective_at": {
+            "type": "null"
+          },
+          "replay_requirement": {
+            "const": "NONE"
+          },
+          "restatement_required": {
+            "const": false
+          },
+          "restatement_scope_refs": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "bounded_retroactivity_class": {
+            "enum": [
+              "RESTATE_PRIOR_POSITION",
+              "REOPEN_CHAIN_REPLAY",
+              "AUTHORITY_RECONCILIATION_REQUIRED"
+            ]
+          }
+        },
+        "required": [
+          "bounded_retroactivity_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "impacted_submission_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "impacted_submission_refs": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "impacted_submission_refs"
+        ]
+      },
+      "then": {
+        "properties": {
+          "bounded_retroactivity_class": {
+            "enum": [
+              "RESTATE_PRIOR_POSITION",
+              "REOPEN_CHAIN_REPLAY",
+              "AUTHORITY_RECONCILIATION_REQUIRED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "late_data_interaction_class": {
+            "const": "CONTRADICTORY"
+          }
+        },
+        "required": [
+          "late_data_interaction_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "replay_requirement": {
+            "const": "RECONCILE_FIRST"
+          },
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

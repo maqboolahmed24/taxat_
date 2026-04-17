@@ -1,0 +1,349 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/late_data_retroactive_impact_simulation.schema.json",
+  "title": "LateDataRetroactiveImpactSimulation",
+  "description": "Counterfactual replay-only late-data simulator. This schema freezes one historical replay basis together with the canonical five temporal-class scenarios and their bounded retroactive, trust, proof, and amendment consequences so reviewers can inspect current-only, explanation-only, amendment-triggering, replay-triggering, and review-blocking posture without mutating live legal truth.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifact_type",
+    "simulation_id",
+    "execution_mode_boundary_contract",
+    "basis_contract",
+    "scenario_results",
+    "current_only_count",
+    "explanation_only_count",
+    "amendment_triggering_count",
+    "replay_triggering_count",
+    "review_blocked_count",
+    "simulated_by_principal_ref",
+    "simulated_at",
+    "simulation_hash"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "LateDataRetroactiveImpactSimulation"
+    },
+    "simulation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_mode_boundary_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/execution_mode_boundary_contract.schema.json"
+        },
+        {
+          "properties": {
+            "run_kind": {
+              "const": "REPLAY"
+            },
+            "replay_class_or_null": {
+              "const": "COUNTERFACTUAL_ANALYSIS"
+            },
+            "execution_mode": {
+              "const": "ANALYSIS"
+            },
+            "analysis_only": {
+              "const": true
+            },
+            "execution_posture": {
+              "const": "REPLAY_COUNTERFACTUAL"
+            },
+            "legal_effect_boundary": {
+              "const": "COUNTERFACTUAL_REPLAY_READ_ONLY"
+            },
+            "counterfactual_basis": {
+              "const": "LATE_DATA_RETROACTIVE_IMPACT_SIMULATION"
+            }
+          }
+        }
+      ]
+    },
+    "basis_contract": {
+      "$ref": "https://taxat.dev/schemas/late_data_retroactive_impact_simulation_basis_contract.schema.json"
+    },
+    "scenario_results": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/$defs/scenarioResult"
+      }
+    },
+    "current_only_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "explanation_only_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "amendment_triggering_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "replay_triggering_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "review_blocked_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "simulated_by_principal_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "simulated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "simulation_hash": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "temporalClass": {
+      "type": "string",
+      "enum": [
+        "PRE_CUTOFF_PREEXISTING_LATE_ARRIVAL",
+        "POST_CUTOFF_DISCOVERY_PRE_BASELINE_FACT",
+        "AUTHORITY_POSTING_LAG",
+        "TRUE_POST_BASELINE_EVENT",
+        "TEMPORALLY_UNPROVED"
+      ]
+    },
+    "baselineScopeClass": {
+      "type": "string",
+      "enum": [
+        "CURRENT_SCOPE",
+        "PRIOR_SUBMISSION_CHAIN"
+      ]
+    },
+    "legalEffectBasis": {
+      "type": "string",
+      "enum": [
+        "EFFECTIVE_TIME",
+        "VISIBILITY_TIME",
+        "AUTHORITY_PUBLICATION_TIME",
+        "UNKNOWN"
+      ]
+    },
+    "temporalCertaintyState": {
+      "type": "string",
+      "enum": [
+        "PROVED",
+        "UNPROVED"
+      ]
+    },
+    "lateDataStatus": {
+      "type": "string",
+      "enum": [
+        "NO_LATE_DATA",
+        "EXCLUDED_LATE_ONLY",
+        "REVIEW_REQUIRED",
+        "SPAWN_CHILD_MANIFEST_REQUIRED"
+      ]
+    },
+    "highestLegalConsequence": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "CURRENT_SCOPE_INVALIDATION",
+        "RETROACTIVE_IMPACT_REVIEW",
+        "TEMPORAL_UNCERTAINTY_BLOCK"
+      ]
+    },
+    "boundedRetroactivityClass": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "CURRENT_SCOPE_ONLY",
+        "RESTATE_PRIOR_POSITION",
+        "REOPEN_CHAIN_REPLAY",
+        "AUTHORITY_RECONCILIATION_REQUIRED"
+      ]
+    },
+    "replayRequirement": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "CONTINUATION_CHILD",
+        "EXACT_REPLAY",
+        "RECONCILE_FIRST"
+      ]
+    },
+    "trustCurrencyState": {
+      "type": "string",
+      "enum": [
+        "CURRENT",
+        "RECALC_REQUIRED"
+      ]
+    },
+    "proofEffect": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "STALE_REVALIDATION_REQUIRED"
+      ]
+    },
+    "amendmentEffect": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "INVALIDATE_READINESS_REUSE",
+        "RECONCILE_FIRST"
+      ]
+    },
+    "outcomeClass": {
+      "type": "string",
+      "enum": [
+        "CURRENT_ONLY",
+        "EXPLANATION_ONLY",
+        "AMENDMENT_TRIGGERING",
+        "REPLAY_TRIGGERING",
+        "REVIEW_BLOCKED"
+      ]
+    },
+    "historicalPositionHandling": {
+      "type": "string",
+      "enum": [
+        "NO_HISTORICAL_MUTATION_NEEDED",
+        "BOUNDED_CONTINUATION_OR_REPLAY_REQUIRED",
+        "RECONCILIATION_BEFORE_ANY_MUTATION"
+      ]
+    },
+    "scenarioResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scenario_case_code",
+        "t_effective_or_null",
+        "t_visible_or_null",
+        "t_discovered",
+        "baseline_scope_class",
+        "filing_critical_baseline_touch",
+        "decisive_proof_path_touch",
+        "legal_effect_basis",
+        "temporal_certainty_state",
+        "late_data_status",
+        "highest_legal_consequence",
+        "bounded_retroactivity_class",
+        "replay_requirement",
+        "restatement_required",
+        "impacted_scope_refs",
+        "impacted_submission_refs",
+        "restatement_scope_refs",
+        "trust_currency_state",
+        "proof_effect",
+        "amendment_effect",
+        "historical_position_handling",
+        "simulation_outcome_class",
+        "reason_codes"
+      ],
+      "properties": {
+        "scenario_case_code": {
+          "$ref": "#/$defs/temporalClass"
+        },
+        "t_effective_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "t_visible_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "t_discovered": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "baseline_scope_class": {
+          "$ref": "#/$defs/baselineScopeClass"
+        },
+        "filing_critical_baseline_touch": {
+          "type": "boolean"
+        },
+        "decisive_proof_path_touch": {
+          "type": "boolean"
+        },
+        "legal_effect_basis": {
+          "$ref": "#/$defs/legalEffectBasis"
+        },
+        "temporal_certainty_state": {
+          "$ref": "#/$defs/temporalCertaintyState"
+        },
+        "late_data_status": {
+          "$ref": "#/$defs/lateDataStatus"
+        },
+        "highest_legal_consequence": {
+          "$ref": "#/$defs/highestLegalConsequence"
+        },
+        "bounded_retroactivity_class": {
+          "$ref": "#/$defs/boundedRetroactivityClass"
+        },
+        "replay_requirement": {
+          "$ref": "#/$defs/replayRequirement"
+        },
+        "restatement_required": {
+          "type": "boolean"
+        },
+        "impacted_scope_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "impacted_submission_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "restatement_scope_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "trust_currency_state": {
+          "$ref": "#/$defs/trustCurrencyState"
+        },
+        "proof_effect": {
+          "$ref": "#/$defs/proofEffect"
+        },
+        "amendment_effect": {
+          "$ref": "#/$defs/amendmentEffect"
+        },
+        "historical_position_handling": {
+          "$ref": "#/$defs/historicalPositionHandling"
+        },
+        "simulation_outcome_class": {
+          "$ref": "#/$defs/outcomeClass"
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}

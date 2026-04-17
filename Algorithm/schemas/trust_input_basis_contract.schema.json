@@ -1,0 +1,875 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/trust_input_basis_contract.schema.json",
+  "title": "TrustInputBasisContract",
+  "description": "Frozen trust-input admissibility and currentness contract. This schema records the typed basis states, freshness sources, and progression ceilings that bound trust synthesis before score, risk, or upstream gate posture are combined. Downstream consumers use this contract to distinguish incomplete, contradicted, stale, and current trust inputs without re-deriving the basis from unrelated artifacts.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "basis_contract_hash",
+    "input_presence_state",
+    "manifest_binding_state",
+    "lifecycle_binding_state",
+    "consistency_state",
+    "limitation_semantics_state",
+    "freshness_state",
+    "freshness_dependency_classes",
+    "authority_progression_state",
+    "baseline_progression_state",
+    "baseline_selection_contract_hash_or_null",
+    "baseline_automation_ceiling",
+    "baseline_limitation_reason_codes",
+    "late_data_invalidation_state",
+    "override_dependency_state",
+    "human_step_state",
+    "trust_input_state",
+    "execution_mode_boundary_contract",
+    "automation_ceiling",
+    "filing_readiness_ceiling",
+    "input_reason_codes",
+    "blocking_dependency_refs",
+    "trust_fresh_until"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "TRUST_INPUT_BASIS_V1"
+    },
+    "basis_contract_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "input_presence_state": {
+      "type": "string",
+      "enum": [
+        "COMPLETE",
+        "INCOMPLETE"
+      ]
+    },
+    "manifest_binding_state": {
+      "type": "string",
+      "enum": [
+        "ACTIVE_MANIFEST_OR_ADMITTED_LINEAGE",
+        "MANIFEST_MISMATCH"
+      ]
+    },
+    "lifecycle_binding_state": {
+      "type": "string",
+      "enum": [
+        "CURRENT_UNSUPERSEDED",
+        "SUPERSEDED_OR_REPLACED"
+      ]
+    },
+    "consistency_state": {
+      "type": "string",
+      "enum": [
+        "CONSISTENT",
+        "CONTRADICTED"
+      ]
+    },
+    "limitation_semantics_state": {
+      "type": "string",
+      "enum": [
+        "EXPLICIT_LIMITATIONS_ONLY",
+        "SILENT_LIMITATION_AMBIGUITY"
+      ]
+    },
+    "freshness_state": {
+      "type": "string",
+      "enum": [
+        "CURRENT",
+        "STALE_OR_INVALIDATED",
+        "NO_EXPIRING_DEPENDENCIES"
+      ]
+    },
+    "freshness_dependency_classes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "AUTHORITY_STATE",
+          "LATE_DATA_MONITOR",
+          "OVERRIDE_LIFECYCLE",
+          "EXTERNAL_BASELINE"
+        ]
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "authority_progression_state": {
+      "type": "string",
+      "enum": [
+        "NOT_REQUESTED_OR_NOT_APPLICABLE",
+        "CLEAR",
+        "REVIEW_LIMITED",
+        "BLOCKED"
+      ]
+    },
+    "baseline_progression_state": {
+      "type": "string",
+      "enum": [
+        "MATCHED_OR_FILED",
+        "UNKNOWN_OR_OUT_OF_BAND",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "baseline_selection_contract_hash_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "baseline_automation_ceiling": {
+      "type": "string",
+      "enum": [
+        "ALLOWED",
+        "LIMITED",
+        "BLOCKED"
+      ]
+    },
+    "baseline_limitation_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "late_data_invalidation_state": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "INVALIDATING_FINDING_PRESENT"
+      ]
+    },
+    "override_dependency_state": {
+      "type": "string",
+      "enum": [
+        "NO_ACTIVE_OR_VALID_OVERRIDES",
+        "INVALID_OVERRIDE_RELIED_UPON"
+      ]
+    },
+    "human_step_state": {
+      "type": "string",
+      "enum": [
+        "CLEARED",
+        "UNRESOLVED_PRETRUST_STEPS"
+      ]
+    },
+    "trust_input_state": {
+      "type": "string",
+      "enum": [
+        "ADMISSIBLE_CURRENT",
+        "ADMISSIBLE_STALE",
+        "INCOMPLETE",
+        "CONTRADICTED"
+      ]
+    },
+    "execution_mode_boundary_contract": {
+      "$ref": "https://taxat.dev/schemas/execution_mode_boundary_contract.schema.json"
+    },
+    "automation_ceiling": {
+      "type": "string",
+      "enum": [
+        "ALLOWED",
+        "LIMITED",
+        "BLOCKED"
+      ]
+    },
+    "filing_readiness_ceiling": {
+      "type": "string",
+      "enum": [
+        "READY_TO_SUBMIT",
+        "READY_REVIEW",
+        "NOT_READY"
+      ]
+    },
+    "input_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "blocking_dependency_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "trust_fresh_until": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "baseline_progression_state": {
+            "const": "NOT_APPLICABLE"
+          }
+        },
+        "required": [
+          "baseline_progression_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "baseline_selection_contract_hash_or_null": {
+            "type": "null"
+          },
+          "baseline_limitation_reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "baseline_progression_state": {
+            "const": "UNKNOWN_OR_OUT_OF_BAND"
+          }
+        },
+        "required": [
+          "baseline_progression_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "baseline_automation_ceiling": {
+            "const": "BLOCKED"
+          },
+          "baseline_limitation_reason_codes": {
+            "contains": {
+              "const": "TRUST_BASELINE_UNRESOLVED"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "baseline_automation_ceiling": {
+            "const": "ALLOWED"
+          }
+        },
+        "required": [
+          "baseline_automation_ceiling"
+        ]
+      },
+      "then": {
+        "properties": {
+          "baseline_limitation_reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "baseline_automation_ceiling": {
+            "enum": [
+              "LIMITED",
+              "BLOCKED"
+            ]
+          }
+        },
+        "required": [
+          "baseline_automation_ceiling"
+        ]
+      },
+      "then": {
+        "properties": {
+          "baseline_limitation_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "input_presence_state": {
+            "const": "INCOMPLETE"
+          }
+        },
+        "required": [
+          "input_presence_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "trust_input_state": {
+            "const": "INCOMPLETE"
+          },
+          "automation_ceiling": {
+            "const": "BLOCKED"
+          },
+          "filing_readiness_ceiling": {
+            "const": "NOT_READY"
+          },
+          "input_reason_codes": {
+            "contains": {
+              "const": "TRUST_INPUT_INCOMPLETE"
+            }
+          },
+          "blocking_dependency_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "anyOf": [
+          {
+            "properties": {
+              "manifest_binding_state": {
+                "const": "MANIFEST_MISMATCH"
+              }
+            },
+            "required": [
+              "manifest_binding_state"
+            ]
+          },
+          {
+            "properties": {
+              "lifecycle_binding_state": {
+                "const": "SUPERSEDED_OR_REPLACED"
+              }
+            },
+            "required": [
+              "lifecycle_binding_state"
+            ]
+          },
+          {
+            "properties": {
+              "consistency_state": {
+                "const": "CONTRADICTED"
+              }
+            },
+            "required": [
+              "consistency_state"
+            ]
+          },
+          {
+            "properties": {
+              "limitation_semantics_state": {
+                "const": "SILENT_LIMITATION_AMBIGUITY"
+              }
+            },
+            "required": [
+              "limitation_semantics_state"
+            ]
+          },
+          {
+            "properties": {
+              "override_dependency_state": {
+                "const": "INVALID_OVERRIDE_RELIED_UPON"
+              }
+            },
+            "required": [
+              "override_dependency_state"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "trust_input_state": {
+            "const": "CONTRADICTED"
+          },
+          "automation_ceiling": {
+            "const": "BLOCKED"
+          },
+          "filing_readiness_ceiling": {
+            "const": "NOT_READY"
+          },
+          "input_reason_codes": {
+            "contains": {
+              "const": "TRUST_INPUT_CONTRADICTION"
+            }
+          },
+          "blocking_dependency_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "override_dependency_state": {
+            "const": "INVALID_OVERRIDE_RELIED_UPON"
+          }
+        },
+        "required": [
+          "override_dependency_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "input_reason_codes": {
+            "contains": {
+              "const": "TRUST_OVERRIDE_INVALID"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "late_data_invalidation_state": {
+            "const": "INVALIDATING_FINDING_PRESENT"
+          }
+        },
+        "required": [
+          "late_data_invalidation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "freshness_state": {
+            "const": "STALE_OR_INVALIDATED"
+          },
+          "automation_ceiling": {
+            "enum": [
+              "LIMITED",
+              "BLOCKED"
+            ]
+          },
+          "filing_readiness_ceiling": {
+            "enum": [
+              "READY_REVIEW",
+              "NOT_READY"
+            ]
+          },
+          "input_reason_codes": {
+            "contains": {
+              "const": "TRUST_INPUT_STALE"
+            }
+          },
+          "blocking_dependency_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "late_data_invalidation_state": {
+            "const": "INVALIDATING_FINDING_PRESENT"
+          }
+        },
+        "required": [
+          "late_data_invalidation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "input_reason_codes": {
+            "contains": {
+              "const": "TRUST_RECALCULATION_REQUIRED"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "freshness_dependency_classes": {
+            "maxItems": 0
+          }
+        },
+        "required": [
+          "freshness_dependency_classes"
+        ]
+      },
+      "then": {
+        "properties": {
+          "freshness_state": {
+            "const": "NO_EXPIRING_DEPENDENCIES"
+          },
+          "trust_fresh_until": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "freshness_dependency_classes": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "freshness_dependency_classes"
+        ]
+      },
+      "then": {
+        "properties": {
+          "freshness_state": {
+            "enum": [
+              "CURRENT",
+              "STALE_OR_INVALIDATED"
+            ]
+          },
+          "trust_fresh_until": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "freshness_state": {
+            "const": "STALE_OR_INVALIDATED"
+          }
+        },
+        "required": [
+          "freshness_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "trust_input_state": {
+            "enum": [
+              "ADMISSIBLE_STALE",
+              "INCOMPLETE",
+              "CONTRADICTED"
+            ]
+          },
+          "automation_ceiling": {
+            "enum": [
+              "LIMITED",
+              "BLOCKED"
+            ]
+          },
+          "filing_readiness_ceiling": {
+            "enum": [
+              "READY_REVIEW",
+              "NOT_READY"
+            ]
+          },
+          "input_reason_codes": {
+            "contains": {
+              "const": "TRUST_INPUT_STALE"
+            }
+          },
+          "blocking_dependency_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "authority_progression_state": {
+            "const": "REVIEW_LIMITED"
+          }
+        },
+        "required": [
+          "authority_progression_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "automation_ceiling": {
+            "enum": [
+              "LIMITED",
+              "BLOCKED"
+            ]
+          },
+          "filing_readiness_ceiling": {
+            "enum": [
+              "READY_REVIEW",
+              "NOT_READY"
+            ]
+          },
+          "input_reason_codes": {
+            "contains": {
+              "const": "TRUST_AUTHORITY_STATE_UNRESOLVED"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "authority_progression_state": {
+            "const": "BLOCKED"
+          }
+        },
+        "required": [
+          "authority_progression_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "automation_ceiling": {
+            "const": "BLOCKED"
+          },
+          "filing_readiness_ceiling": {
+            "const": "NOT_READY"
+          },
+          "input_reason_codes": {
+            "contains": {
+              "const": "TRUST_AUTHORITY_STATE_UNRESOLVED"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "baseline_progression_state": {
+            "const": "UNKNOWN_OR_OUT_OF_BAND"
+          }
+        },
+        "required": [
+          "baseline_progression_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "automation_ceiling": {
+            "enum": [
+              "LIMITED",
+              "BLOCKED"
+            ]
+          },
+          "filing_readiness_ceiling": {
+            "enum": [
+              "READY_REVIEW",
+              "NOT_READY"
+            ]
+          },
+          "input_reason_codes": {
+            "contains": {
+              "const": "TRUST_AUTHORITY_STATE_UNRESOLVED"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "human_step_state": {
+            "const": "UNRESOLVED_PRETRUST_STEPS"
+          }
+        },
+        "required": [
+          "human_step_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "automation_ceiling": {
+            "enum": [
+              "LIMITED",
+              "BLOCKED"
+            ]
+          },
+          "filing_readiness_ceiling": {
+            "enum": [
+              "READY_REVIEW",
+              "NOT_READY"
+            ]
+          },
+          "input_reason_codes": {
+            "contains": {
+              "const": "TRUST_REQUIRED_HUMAN_STEPS"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "trust_input_state": {
+            "const": "ADMISSIBLE_CURRENT"
+          }
+        },
+        "required": [
+          "trust_input_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "input_presence_state": {
+            "const": "COMPLETE"
+          },
+          "manifest_binding_state": {
+            "const": "ACTIVE_MANIFEST_OR_ADMITTED_LINEAGE"
+          },
+          "lifecycle_binding_state": {
+            "const": "CURRENT_UNSUPERSEDED"
+          },
+          "consistency_state": {
+            "const": "CONSISTENT"
+          },
+          "limitation_semantics_state": {
+            "const": "EXPLICIT_LIMITATIONS_ONLY"
+          },
+          "freshness_state": {
+            "enum": [
+              "CURRENT",
+              "NO_EXPIRING_DEPENDENCIES"
+            ]
+          },
+          "authority_progression_state": {
+            "enum": [
+              "NOT_REQUESTED_OR_NOT_APPLICABLE",
+              "CLEAR"
+            ]
+          },
+          "baseline_progression_state": {
+            "enum": [
+              "MATCHED_OR_FILED",
+              "NOT_APPLICABLE"
+            ]
+          },
+          "late_data_invalidation_state": {
+            "const": "NONE"
+          },
+          "override_dependency_state": {
+            "const": "NO_ACTIVE_OR_VALID_OVERRIDES"
+          },
+          "human_step_state": {
+            "const": "CLEARED"
+          },
+          "automation_ceiling": {
+            "const": "ALLOWED"
+          },
+          "filing_readiness_ceiling": {
+            "const": "READY_TO_SUBMIT"
+          },
+          "input_reason_codes": {
+            "maxItems": 0
+          },
+          "blocking_dependency_refs": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "trust_input_state": {
+            "const": "ADMISSIBLE_STALE"
+          }
+        },
+        "required": [
+          "trust_input_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "automation_ceiling": {
+            "enum": [
+              "LIMITED",
+              "BLOCKED"
+            ]
+          },
+          "filing_readiness_ceiling": {
+            "enum": [
+              "READY_REVIEW",
+              "NOT_READY"
+            ]
+          },
+          "input_reason_codes": {
+            "contains": {
+              "const": "TRUST_INPUT_STALE"
+            }
+          },
+          "blocking_dependency_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "automation_ceiling": {
+            "const": "ALLOWED"
+          }
+        },
+        "required": [
+          "automation_ceiling"
+        ]
+      },
+      "then": {
+        "properties": {
+          "filing_readiness_ceiling": {
+            "const": "READY_TO_SUBMIT"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "automation_ceiling": {
+            "const": "LIMITED"
+          }
+        },
+        "required": [
+          "automation_ceiling"
+        ]
+      },
+      "then": {
+        "properties": {
+          "filing_readiness_ceiling": {
+            "const": "READY_REVIEW"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "automation_ceiling": {
+            "const": "BLOCKED"
+          }
+        },
+        "required": [
+          "automation_ceiling"
+        ]
+      },
+      "then": {
+        "properties": {
+          "filing_readiness_ceiling": {
+            "const": "NOT_READY"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

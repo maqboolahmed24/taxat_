@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/upload_request_binding_contract.schema.json",
+  "title": "UploadRequestBindingContract",
+  "description": "Governed upload-session binding contract. This schema freezes the request identity and allocated request version for a resumable upload session while publishing the currently live request version, the explicit rebinding posture, and the fail-closed policies that prevent reconnect or replay from silently rebinding staged bytes onto a different request meaning.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "frozen_tenant_id",
+    "frozen_client_id",
+    "frozen_request_id",
+    "request_identity_ref",
+    "frozen_request_version_ref",
+    "live_request_version_ref",
+    "request_binding_state",
+    "binding_resolution_basis",
+    "resume_identity_policy",
+    "duplicate_session_policy",
+    "duplicate_file_policy",
+    "inflight_rebase_policy",
+    "stale_completion_policy",
+    "attachment_authority_policy",
+    "next_action_authority_policy",
+    "cross_device_resume_policy",
+    "frozen_binding_scope_hash",
+    "rebase_detected_at_or_null"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "UPLOAD_REQUEST_BINDING_V1"
+    },
+    "frozen_tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "frozen_client_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "frozen_request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_identity_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "frozen_request_version_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "live_request_version_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_binding_state": {
+      "type": "string",
+      "enum": [
+        "ORIGINAL_CURRENT",
+        "RECONFIRMED_CURRENT",
+        "RECONFIRMATION_REQUIRED",
+        "SUPERSEDED"
+      ]
+    },
+    "binding_resolution_basis": {
+      "type": "string",
+      "enum": [
+        "ORIGINAL_FROZEN_REQUEST",
+        "EXPLICIT_RECONFIRMATION",
+        "ACTIVE_REQUEST_REBASE_PENDING_CONFIRMATION",
+        "ACTIVE_REQUEST_SUPERSEDED"
+      ]
+    },
+    "resume_identity_policy": {
+      "const": "RESUME_EXISTING_SESSION_ONLY"
+    },
+    "duplicate_session_policy": {
+      "const": "NO_DUPLICATE_SESSION_ON_RECONNECT"
+    },
+    "duplicate_file_policy": {
+      "const": "REUSE_FROZEN_STORAGE_REF_ON_RESUME_OR_RETRY"
+    },
+    "inflight_rebase_policy": {
+      "const": "IN_FLIGHT_REBASE_PRESERVES_SESSION_UNTIL_TRANSFER_TERMINATES"
+    },
+    "stale_completion_policy": {
+      "const": "STALE_BYTES_NEVER_SATISFY_CURRENT_REQUEST"
+    },
+    "attachment_authority_policy": {
+      "const": "ATTACH_ONLY_TO_CURRENT_OR_RECONFIRMED_REQUEST"
+    },
+    "next_action_authority_policy": {
+      "const": "TRANSFER_AND_BINDING_STATE_DETERMINE_NEXT_ACTION"
+    },
+    "cross_device_resume_policy": {
+      "const": "CROSS_DEVICE_RESUME_REUSES_EXISTING_SESSION"
+    },
+    "frozen_binding_scope_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rebase_detected_at_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "request_binding_state": {
+            "const": "ORIGINAL_CURRENT"
+          }
+        },
+        "required": [
+          "request_binding_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "binding_resolution_basis": {
+            "const": "ORIGINAL_FROZEN_REQUEST"
+          },
+          "rebase_detected_at_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "request_binding_state": {
+            "const": "RECONFIRMED_CURRENT"
+          }
+        },
+        "required": [
+          "request_binding_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "binding_resolution_basis": {
+            "const": "EXPLICIT_RECONFIRMATION"
+          },
+          "rebase_detected_at_or_null": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "request_binding_state": {
+            "const": "RECONFIRMATION_REQUIRED"
+          }
+        },
+        "required": [
+          "request_binding_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "binding_resolution_basis": {
+            "const": "ACTIVE_REQUEST_REBASE_PENDING_CONFIRMATION"
+          },
+          "rebase_detected_at_or_null": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "request_binding_state": {
+            "const": "SUPERSEDED"
+          }
+        },
+        "required": [
+          "request_binding_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "binding_resolution_basis": {
+            "const": "ACTIVE_REQUEST_SUPERSEDED"
+          },
+          "rebase_detected_at_or_null": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

@@ -12,22 +12,36 @@
     "non_compliance_config_refs",
     "counterfactual_basis",
     "lifecycle_state",
+    "state_transition_contract",
     "source_record_set_ref",
+    "source_record_set_hash",
     "evidence_item_set_ref",
+    "evidence_item_set_hash",
     "candidate_fact_set_ref",
+    "candidate_fact_set_hash",
     "canonical_fact_set_ref",
+    "canonical_fact_set_hash",
     "conflict_set_ref",
+    "conflict_set_hash",
     "quality",
     "completeness",
+    "superseded_by_snapshot_id_or_null",
+    "retention_limitation_ref_or_null",
+    "erasure_proof_ref_or_null",
+    "state_changed_at",
     "created_at",
+    "audit_refs",
+    "provenance_refs",
     "contract"
   ],
   "properties": {
     "snapshot_id": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "manifest_id": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "artifact_type": {
       "const": "Snapshot"
@@ -45,7 +59,8 @@
     "non_compliance_config_refs": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
       },
       "default": [],
       "uniqueItems": true
@@ -54,7 +69,8 @@
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "minLength": 1
     },
     "lifecycle_state": {
       "type": "string",
@@ -68,20 +84,65 @@
         "ERASED"
       ]
     },
+    "state_transition_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/state_transition_contract.schema.json"
+        },
+        {
+          "properties": {
+            "object_family": {
+              "const": "SNAPSHOT"
+            },
+            "machine_code": {
+              "const": "SNAPSHOT_LIFECYCLE_V1"
+            },
+            "state_field_name": {
+              "const": "lifecycle_state"
+            }
+          }
+        }
+      ]
+    },
     "source_record_set_ref": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
+    },
+    "source_record_set_hash": {
+      "type": "string",
+      "minLength": 1
     },
     "evidence_item_set_ref": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_item_set_hash": {
+      "type": "string",
+      "minLength": 1
     },
     "candidate_fact_set_ref": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_fact_set_hash": {
+      "type": "string",
+      "minLength": 1
     },
     "canonical_fact_set_ref": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
+    },
+    "canonical_fact_set_hash": {
+      "type": "string",
+      "minLength": 1
     },
     "conflict_set_ref": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
+    },
+    "conflict_set_hash": {
+      "type": "string",
+      "minLength": 1
     },
     "quality": {
       "type": "object",
@@ -97,7 +158,8 @@
         "reason_codes": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "default": [],
           "uniqueItems": true
@@ -105,7 +167,8 @@
         "invalid_domain_refs": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "default": [],
           "uniqueItems": true
@@ -127,7 +190,8 @@
         "reason_codes": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "default": [],
           "uniqueItems": true
@@ -135,7 +199,8 @@
         "missing_domain_refs": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "default": [],
           "uniqueItems": true
@@ -143,18 +208,115 @@
       },
       "additionalProperties": false
     },
-    "created_at": {
+    "superseded_by_snapshot_id_or_null": {
       "type": [
         "string",
         "null"
       ],
+      "minLength": 1
+    },
+    "retention_limitation_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "erasure_proof_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "state_changed_at": {
+      "type": "string",
       "format": "date-time"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "audit_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "provenance_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
     },
     "contract": {
       "$ref": "./schema_bundle.schema.json#/$defs/artifactContract"
     }
   },
   "allOf": [
+    {
+      "if": {
+        "properties": {
+          "analysis_only": {
+            "const": true
+          }
+        },
+        "required": [
+          "analysis_only"
+        ]
+      },
+      "then": {
+        "properties": {
+          "execution_mode": {
+            "const": "ANALYSIS"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "analysis_only": {
+            "const": false
+          }
+        },
+        "required": [
+          "analysis_only"
+        ]
+      },
+      "then": {
+        "properties": {
+          "execution_mode": {
+            "const": "COMPLIANCE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "counterfactual_basis": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "counterfactual_basis"
+        ]
+      },
+      "then": {
+        "properties": {
+          "execution_mode": {
+            "const": "ANALYSIS"
+          }
+        }
+      }
+    },
     {
       "if": {
         "properties": {
@@ -197,6 +359,149 @@
             "const": true
           },
           "counterfactual_basis": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "WARNED",
+              "INVALID"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "anyOf": [
+          {
+            "properties": {
+              "quality": {
+                "properties": {
+                  "reason_codes": {
+                    "minItems": 1
+                  }
+                }
+              }
+            }
+          },
+          {
+            "properties": {
+              "completeness": {
+                "properties": {
+                  "reason_codes": {
+                    "minItems": 1
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "BUILT",
+              "VALID",
+              "WARNED",
+              "INVALID"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "superseded_by_snapshot_id_or_null": {
+            "type": "null"
+          },
+          "retention_limitation_ref_or_null": {
+            "type": "null"
+          },
+          "erasure_proof_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "SUPERSEDED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "superseded_by_snapshot_id_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "retention_limitation_ref_or_null": {
+            "type": "null"
+          },
+          "erasure_proof_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "RETENTION_LIMITED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "superseded_by_snapshot_id_or_null": {
+            "type": "null"
+          },
+          "retention_limitation_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "ERASED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "superseded_by_snapshot_id_or_null": {
+            "type": "null"
+          },
+          "erasure_proof_ref_or_null": {
             "type": "string",
             "minLength": 1
           }

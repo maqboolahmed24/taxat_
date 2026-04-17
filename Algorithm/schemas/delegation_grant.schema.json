@@ -1,0 +1,434 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/delegation_grant.schema.json",
+  "title": "DelegationGrant",
+  "description": "First-class delegation-grant contract for client-scoped authority action. This schema freezes delegate identity, delegated authority and partition scope, imported-basis freshness, and supersession or revocation posture so client authority cannot be reconstructed from ambient session state.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "delegation_grant_id",
+    "tenant_id",
+    "reporting_subject_ref",
+    "delegate_ref",
+    "delegate_class",
+    "authority_scope_refs",
+    "partition_scope_refs",
+    "basis_type",
+    "basis_evidence_refs",
+    "effective_from",
+    "expires_at",
+    "revoked_at",
+    "superseded_by_grant_id",
+    "lifecycle_state",
+    "last_validated_at",
+    "imported_evidence_fresh_until",
+    "limitation_reason_codes"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "DelegationGrant"
+    },
+    "delegation_grant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reporting_subject_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "delegate_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "delegate_class": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "HUMAN",
+        "EXTERNAL",
+        "ROLE_GROUP",
+        "SERVICE",
+        null
+      ]
+    },
+    "authority_scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "partition_scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "basis_type": {
+      "type": "string",
+      "enum": [
+        "CLIENT_GRANTED",
+        "SELF_ASSESSMENT_IMPORTED",
+        "DIGITAL_HANDSHAKE"
+      ]
+    },
+    "basis_evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "effective_from": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "revoked_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "superseded_by_grant_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "PENDING_VALIDATION",
+        "ACTIVE",
+        "LIMITED_SCOPE",
+        "REVOKED",
+        "EXPIRED",
+        "SUPERSEDED"
+      ]
+    },
+    "last_validated_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "imported_evidence_fresh_until": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "limitation_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "anyOf": [
+        {
+          "properties": {
+            "delegate_ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "delegate_class": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "if": {
+        "properties": {
+          "basis_type": {
+            "const": "CLIENT_GRANTED"
+          }
+        },
+        "required": [
+          "basis_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "delegate_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "basis_type": {
+            "enum": [
+              "SELF_ASSESSMENT_IMPORTED",
+              "DIGITAL_HANDSHAKE"
+            ]
+          }
+        },
+        "required": [
+          "basis_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "imported_evidence_fresh_until": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "basis_type": {
+            "const": "CLIENT_GRANTED"
+          }
+        },
+        "required": [
+          "basis_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "imported_evidence_fresh_until": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "imported_evidence_fresh_until": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "imported_evidence_fresh_until"
+        ]
+      },
+      "then": {
+        "properties": {
+          "basis_type": {
+            "enum": [
+              "SELF_ASSESSMENT_IMPORTED",
+              "DIGITAL_HANDSHAKE"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "revoked_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "revoked_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "REVOKED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "superseded_by_grant_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "superseded_by_grant_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "SUPERSEDED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "PENDING_VALIDATION"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "last_validated_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "ACTIVE"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "last_validated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revoked_at": {
+            "type": "null"
+          },
+          "superseded_by_grant_id": {
+            "type": "null"
+          },
+          "limitation_reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "LIMITED_SCOPE"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "last_validated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "limitation_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "REVOKED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "revoked_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "EXPIRED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "SUPERSEDED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "superseded_by_grant_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

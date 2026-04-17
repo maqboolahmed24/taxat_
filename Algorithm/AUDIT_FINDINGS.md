@@ -1,7 +1,31 @@
 # Forensic Audit Findings
 
-This repository is a specification-first algorithm package. The findings below were identified during
-forensic review; each would produce incorrect or unsafe runtime implementations if left unresolved.
+This repository is a specification-first algorithm package. The defects below were identified during
+forensic review; they are contract, schema, state-machine, determinism, control-flow, and
+operator-experience defects that would produce incorrect or unsafe runtime implementations if left
+unresolved.
+
+## Current status
+
+All numbered findings in this ledger are historical material defects that are now closed by the
+current blueprint corpus. `AUDIT_FINDINGS.md` remains authoritative for what was found,
+`contract_integrity_requirements.md` remains authoritative for the standing ambiguity that must stay
+closed, and `PATCH_RESOLUTION_INDEX.md` remains authoritative for the concrete repair mechanisms
+that keep the defects from drifting back.
+
+No material finding may remain unowned or open at the current blueprint stage. Any future
+forensic-grade defect SHALL either be added here with an explicit closure path or block later
+corpus and acceptance closure until that path exists.
+
+## Forensic Finding Closure Register
+
+| Finding Range | Status | Owning Prompt Stages | Authoritative Corpus | Resolution Mechanism Families |
+| --- | --- | --- | --- | --- |
+| AF-01..AF-19 | RESOLVED | SYS-00, BE-06, BE-07, BE-09, BE-21, BE-22, SYS-01 | `contract_integrity_requirements.md` Manifest, lineage, and gate integrity; `manifest_and_config_freeze_contract.md`; `exact_gate_logic_and_decision_tables.md`; `northbound_api_and_session_contract.md`; `data_model.md` | Manifest, decision, and authority coherence; Validator and toolchain cohesion |
+| AF-20..AF-40 | RESOLVED | SYS-00, BE-08, BE-09, BE-10, BE-22 | `contract_integrity_requirements.md` Decision artifacts, evidence, and data-model integrity; `canonical_source_and_evidence_taxonomy.md`; `provenance_graph_semantics.md`; `defensible_filing_graph_contract.md`; `data_model.md` | Provenance-path integrity; Trust and set-wrapper integrity; Proof-graph integrity |
+| AF-41..AF-59 | RESOLVED | SYS-00, BE-09, BE-13, BE-16, BE-22 | `contract_integrity_requirements.md` Compute, trust, and amendment logic integrity; `compute_parity_and_trust_formulas.md`; `exact_gate_logic_and_decision_tables.md`; `amendment_and_drift_semantics.md`; `state_machines.md` | Manifest, decision, and authority coherence; Documentation repairs |
+| AF-60..AF-62 | RESOLVED | SYS-00, BE-14, BE-15, BE-23 | `contract_integrity_requirements.md` Authority interaction integrity; `authority_interaction_protocol.md`; `schemas/authority_request_envelope.schema.json`; `schemas/authority_response_envelope.schema.json`; `schemas/authority_interaction_record.schema.json` | Manifest, decision, and authority coherence |
+| AF-63..AF-80 | RESOLVED | SYS-00, FE-19, FE-25, FE-26, FE-32, FE-33, SYS-01 | `contract_integrity_requirements.md` Experience and presentation contract integrity; `low_noise_experience_contract.md`; `frontend_shell_and_interaction_law.md`; `UIUX_DESIGN_SKILL.md`; `schemas/experience_delta.schema.json` | Calm-shell integrity; Documentation repairs; Identifier and routing hardening |
 
 1. **Amendment scope lacked a required year-end basis.** Root cause: `requested_scope` allowed `amendment_intent` / `amendment_submit` without `year_end`. Impact: amendment flows could be instantiated against an invalid reporting basis.
 2. **Submit scope was not chained to preparation scope.** Root cause: `submit` could appear without `prepare_submission`. Impact: live filing could skip packet-preparation invariants and preflight checks.

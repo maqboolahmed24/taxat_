@@ -1,0 +1,674 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/authorization_decision.schema.json",
+  "title": "AuthorizationDecision",
+  "description": "Structured AUTHORIZE(...) result contract. This schema freezes access outcome, effective scope, masking, approval or step-up posture, governance mutation bounded-safe posture where applicable, and the exact access-binding hash that downstream stale-view and authority logic depend on.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "decision_id",
+    "principal_context_ref",
+    "resource_class",
+    "action_family",
+    "decision",
+    "reason_codes",
+    "effective_scope",
+    "effective_partition_scope_refs",
+    "masking_rules",
+    "required_approvals",
+    "required_authn_level",
+    "policy_snapshot_hash",
+    "access_binding_hash",
+    "dependency_topology_hash",
+    "simulation_basis_hash",
+    "delegation_snapshot_refs",
+    "authority_link_snapshot_refs",
+    "authority_layer_boundary",
+    "bounded_safe_mutation",
+    "approval_requirement",
+    "evaluated_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "AuthorizationDecision"
+    },
+    "decision_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "principal_context_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resource_class": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_family": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "ALLOW",
+        "ALLOW_MASKED",
+        "REQUIRE_STEP_UP",
+        "REQUIRE_APPROVAL",
+        "DENY"
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "effective_scope": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "enum": [
+            "year_end",
+            "quarterly_update",
+            "estimate_only"
+          ]
+        }
+      ],
+      "items": {
+        "type": "string",
+        "enum": [
+          "year_end",
+          "quarterly_update",
+          "estimate_only",
+          "prepare_submission",
+          "submit",
+          "amendment_intent",
+          "amendment_submit"
+        ]
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "effective_partition_scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "masking_rules": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "required_approvals": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "required_authn_level": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "BASIC",
+        "MFA",
+        "STEP_UP",
+        null
+      ]
+    },
+    "policy_snapshot_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "access_binding_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dependency_topology_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "simulation_basis_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "delegation_snapshot_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "authority_link_snapshot_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "authority_layer_boundary": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/authority_layer_boundary_contract.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "binding_scope_class": {
+              "const": "AUTHORIZATION_DECISION"
+            }
+          }
+        }
+      ]
+    },
+    "bounded_safe_mutation": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "enum": [
+        0,
+        1,
+        null
+      ]
+    },
+    "approval_requirement": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "NOT_REQUIRED",
+        "SINGLE_APPROVER",
+        "DUAL_APPROVER",
+        "SECURITY_REVIEW",
+        "CHANGE_ADVISORY_QUORUM",
+        null
+      ]
+    },
+    "evaluated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "bounded_safe_mutation": {
+            "const": 1
+          }
+        },
+        "required": [
+          "bounded_safe_mutation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "approval_requirement": {
+            "const": "NOT_REQUIRED"
+          },
+          "dependency_topology_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "simulation_basis_hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "bounded_safe_mutation": {
+            "const": 0
+          }
+        },
+        "required": [
+          "bounded_safe_mutation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "approval_requirement": {
+            "enum": [
+              "SINGLE_APPROVER",
+              "DUAL_APPROVER",
+              "SECURITY_REVIEW",
+              "CHANGE_ADVISORY_QUORUM"
+            ]
+          },
+          "dependency_topology_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "simulation_basis_hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "simulation_basis_hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "simulation_basis_hash"
+        ]
+      },
+      "then": {
+        "properties": {
+          "dependency_topology_hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "dependency_topology_hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "dependency_topology_hash"
+        ]
+      },
+      "then": {
+        "properties": {
+          "simulation_basis_hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "approval_requirement": {
+            "const": "NOT_REQUIRED"
+          }
+        },
+        "required": [
+          "approval_requirement"
+        ]
+      },
+      "then": {
+        "properties": {
+          "bounded_safe_mutation": {
+            "const": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "approval_requirement": {
+            "enum": [
+              "SINGLE_APPROVER",
+              "DUAL_APPROVER",
+              "SECURITY_REVIEW",
+              "CHANGE_ADVISORY_QUORUM"
+            ]
+          }
+        },
+        "required": [
+          "approval_requirement"
+        ]
+      },
+      "then": {
+        "properties": {
+          "bounded_safe_mutation": {
+            "const": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "bounded_safe_mutation": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "bounded_safe_mutation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "approval_requirement": {
+            "type": "null"
+          },
+          "dependency_topology_hash": {
+            "type": "null"
+          },
+          "simulation_basis_hash": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "approval_requirement": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "approval_requirement"
+        ]
+      },
+      "then": {
+        "properties": {
+          "bounded_safe_mutation": {
+            "type": "null"
+          },
+          "dependency_topology_hash": {
+            "type": "null"
+          },
+          "simulation_basis_hash": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "required_authn_level": {
+            "enum": [
+              "MFA",
+              "STEP_UP"
+            ]
+          }
+        },
+        "required": [
+          "required_authn_level"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision": {
+            "const": "REQUIRE_STEP_UP"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "required_approvals": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "required_approvals"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision": {
+            "const": "REQUIRE_APPROVAL"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "masking_rules": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "masking_rules"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision": {
+            "const": "ALLOW_MASKED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effective_scope": {
+            "maxItems": 0
+          }
+        },
+        "required": [
+          "effective_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision": {
+            "const": "DENY"
+          },
+          "effective_partition_scope_refs": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "ALLOW",
+              "ALLOW_MASKED",
+              "REQUIRE_APPROVAL",
+              "DENY"
+            ]
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "required_authn_level": {
+            "const": null
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "ALLOW",
+              "ALLOW_MASKED",
+              "REQUIRE_STEP_UP",
+              "DENY"
+            ]
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "required_approvals": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "ALLOW",
+              "REQUIRE_STEP_UP",
+              "REQUIRE_APPROVAL",
+              "DENY"
+            ]
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "masking_rules": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "DENY"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "effective_scope": {
+            "maxItems": 0
+          },
+          "effective_partition_scope_refs": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "not": {
+              "const": "DENY"
+            }
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "effective_scope": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "ALLOW_MASKED"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "masking_rules": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "REQUIRE_APPROVAL"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "required_approvals": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "REQUIRE_STEP_UP"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "required_authn_level": {
+            "enum": [
+              "MFA",
+              "STEP_UP"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

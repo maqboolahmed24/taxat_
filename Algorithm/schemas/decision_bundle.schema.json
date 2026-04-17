@@ -11,14 +11,18 @@
     "analysis_only",
     "non_compliance_config_refs",
     "counterfactual_basis",
+    "execution_mode_boundary_contract",
     "decision_status",
     "workflow_item_refs",
     "decision_reason_codes",
+    "dominant_reason_code",
     "outcome_class",
     "waiting_on",
     "checkpoint_state",
     "truth_state",
+    "truth_boundary_contract",
     "plain_reason",
+    "decision_explainability_contract",
     "reason_codes",
     "next_action_codes",
     "blocked_action_codes",
@@ -30,14 +34,17 @@
     "focus_anchor_ref",
     "next_checkpoint_at",
     "persisted_at",
-    "contract"
+    "contract",
+    "primary_proof_bundle_ref"
   ],
   "properties": {
     "decision_bundle_id": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "manifest_id": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "artifact_type": {
       "const": "DecisionBundle"
@@ -55,7 +62,8 @@
     "non_compliance_config_refs": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
       },
       "default": [],
       "uniqueItems": true
@@ -64,7 +72,11 @@
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "minLength": 1
+    },
+    "execution_mode_boundary_contract": {
+      "$ref": "https://taxat.dev/schemas/execution_mode_boundary_contract.schema.json"
     },
     "decision_status": {
       "type": "string",
@@ -78,16 +90,22 @@
     "decision_reason_codes": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
       },
-      "default": [],
       "uniqueItems": true,
-      "minItems": 1
+      "minItems": 1,
+      "maxItems": 3
+    },
+    "dominant_reason_code": {
+      "type": "string",
+      "minLength": 1
     },
     "workflow_item_refs": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
       },
       "default": [],
       "uniqueItems": true
@@ -96,61 +114,71 @@
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "minLength": 1
     },
     "compute_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "minLength": 1
     },
     "forecast_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "minLength": 1
     },
     "risk_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "minLength": 1
     },
     "parity_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "minLength": 1
     },
     "trust_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "minLength": 1
     },
     "graph_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "minLength": 1
     },
     "twin_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "minLength": 1
     },
     "filing_packet_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "minLength": 1
     },
     "submission_record_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "minLength": 1
     },
     "outcome_class": {
       "type": "string",
@@ -174,8 +202,7 @@
         "HUMAN",
         "APPROVAL",
         "AUTHORITY",
-        "LATE_DATA",
-        "ASYNC_WORKER"
+        "LATE_DATA"
       ]
     },
     "checkpoint_state": {
@@ -211,38 +238,87 @@
         "AUTHORITY_OUT_OF_BAND"
       ]
     },
+    "truth_boundary_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/command_truth_boundary_contract.schema.json"
+        },
+        {
+          "properties": {
+            "artifact_role": {
+              "const": "READ_SIDE_PROJECTION"
+            },
+            "authoritative_record_families": {
+              "const": [
+                "RUN_MANIFEST",
+                "GATE_DECISION_RECORD",
+                "WORKFLOW_ITEM",
+                "AUTHORITY_INTERACTION_RECORD",
+                "AUDIT_EVENT"
+              ]
+            },
+            "observable_projection_families": {
+              "const": []
+            }
+          }
+        }
+      ]
+    },
     "plain_reason": {
       "type": "string",
       "description": "Plain-language explanation of the terminal or review posture.",
-      "minLength": 1
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "decision_explainability_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/decision_explainability_contract.schema.json"
+        },
+        {
+          "properties": {
+            "artifact_family": {
+              "const": "DECISION_BUNDLE"
+            },
+            "plain_text_field_name": {
+              "const": "plain_reason"
+            }
+          }
+        }
+      ]
     },
     "reason_codes": {
       "type": "array",
       "description": "Flattened high-signal reason codes copied from the decisive terminal reasons and gate chain to support queue views and notifications without replay.",
       "items": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
       },
-      "default": [],
       "uniqueItems": true,
-      "minItems": 1
+      "minItems": 1,
+      "maxItems": 8
     },
     "next_action_codes": {
       "type": "array",
       "description": "Minimal next legal actions that should be offered immediately after bundle reload.",
       "items": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
       },
       "default": [],
-      "uniqueItems": true
+      "uniqueItems": true,
+      "maxItems": 3
     },
     "blocked_action_codes": {
       "type": "array",
       "description": "Actions that remain legally or procedurally blocked at bundle time.",
       "items": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
       },
       "default": [],
-      "uniqueItems": true
+      "uniqueItems": true,
+      "maxItems": 8
     },
     "actionability_state": {
       "type": "string",
@@ -257,6 +333,7 @@
         "string",
         "null"
       ],
+      "minLength": 1,
       "description": "Dominant safe next action for the terminal shell when `actionability_state = ACTION_AVAILABLE`."
     },
     "no_safe_action_reason_code": {
@@ -264,6 +341,7 @@
         "string",
         "null"
       ],
+      "minLength": 1,
       "description": "Machine-stable reason explaining why no safe legal action is currently available."
     },
     "suggested_detail_surface_code": {
@@ -303,6 +381,7 @@
         "string",
         "null"
       ],
+      "minLength": 1,
       "description": "Stable focused object ref inside the active detail module when terminal or review posture was persisted."
     },
     "next_checkpoint_at": {
@@ -318,6 +397,7 @@
         "string",
         "null"
       ],
+      "minLength": 1,
       "description": "Current filing case projection ref copied from manifest outputs when available."
     },
     "amendment_case_id": {
@@ -325,7 +405,16 @@
         "string",
         "null"
       ],
+      "minLength": 1,
       "description": "Current amendment case projection ref copied from manifest outputs when available."
+    },
+    "replay_attestation_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "description": "Replay-comparison artifact ref copied from the manifest when this bundle belongs to a replay child."
     },
     "persisted_at": {
       "type": "string",
@@ -334,9 +423,164 @@
     },
     "contract": {
       "$ref": "./schema_bundle.schema.json#/$defs/artifactContract"
+    },
+    "primary_proof_bundle_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "description": "Primary proof bundle ref copied into the bundle so filing-capable terminal posture can be explained without re-ranking graph paths on reload."
     }
   },
   "allOf": [
+    {
+      "if": {
+        "properties": {
+          "analysis_only": {
+            "const": true
+          }
+        },
+        "required": [
+          "analysis_only"
+        ]
+      },
+      "then": {
+        "properties": {
+          "execution_mode": {
+            "const": "ANALYSIS"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "analysis_only": {
+            "const": false
+          }
+        },
+        "required": [
+          "analysis_only"
+        ]
+      },
+      "then": {
+        "properties": {
+          "execution_mode": {
+            "const": "COMPLIANCE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "counterfactual_basis": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "counterfactual_basis"
+        ]
+      },
+      "then": {
+        "properties": {
+          "execution_mode": {
+            "const": "ANALYSIS"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "focus_anchor_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "focus_anchor_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "active_detail_surface_code": {
+            "type": "string",
+            "enum": [
+              "EVIDENCE_TIDE",
+              "PACKET_FORGE",
+              "AUTHORITY_TUNNEL",
+              "DRIFT_FIELD",
+              "FOCUS_LENS",
+              "TWIN_PANEL"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "primary_proof_bundle_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "primary_proof_bundle_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "graph_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "twin_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "twin_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "graph_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "parity_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "active_detail_surface_code": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "active_detail_surface_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "focus_anchor_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
     {
       "if": {
         "properties": {
@@ -388,10 +632,22 @@
           "submission_record_id": {
             "type": "null"
           },
+          "primary_proof_bundle_ref": {
+            "type": "null"
+          },
           "waiting_on": {
             "not": {
               "enum": [
                 "AUTHORITY"
+              ]
+            }
+          },
+          "outcome_class": {
+            "not": {
+              "enum": [
+                "AUTHORITY_PENDING",
+                "AUTHORITY_UNKNOWN",
+                "OUT_OF_BAND_REVIEW"
               ]
             }
           }
@@ -438,6 +694,18 @@
           },
           "waiting_on": {
             "const": "NONE"
+          },
+          "checkpoint_state": {
+            "enum": [
+              "NONE",
+              "REJECTED"
+            ]
+          },
+          "truth_state": {
+            "enum": [
+              "PERSISTED_INTERNAL",
+              "AUTHORITY_REJECTED"
+            ]
           }
         }
       }
@@ -460,6 +728,18 @@
           },
           "waiting_on": {
             "const": "NONE"
+          },
+          "checkpoint_state": {
+            "enum": [
+              "NONE",
+              "CONFIRMED"
+            ]
+          },
+          "truth_state": {
+            "enum": [
+              "PERSISTED_INTERNAL",
+              "AUTHORITY_CONFIRMED"
+            ]
           }
         }
       }
@@ -505,6 +785,12 @@
         "properties": {
           "waiting_on": {
             "const": "HUMAN"
+          },
+          "checkpoint_state": {
+            "const": "HUMAN_REVIEW"
+          },
+          "truth_state": {
+            "const": "PERSISTED_INTERNAL"
           }
         }
       }
@@ -524,6 +810,12 @@
         "properties": {
           "waiting_on": {
             "const": "APPROVAL"
+          },
+          "checkpoint_state": {
+            "const": "APPROVAL_PENDING"
+          },
+          "truth_state": {
+            "const": "PERSISTED_INTERNAL"
           }
         }
       }
@@ -555,6 +847,76 @@
       "if": {
         "properties": {
           "outcome_class": {
+            "const": "AUTHORITY_PENDING"
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "checkpoint_state": {
+            "enum": [
+              "TRANSMIT_PENDING",
+              "PENDING_ACK",
+              "RECONCILIATION_PENDING"
+            ]
+          },
+          "truth_state": {
+            "const": "AUTHORITY_PENDING"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
+            "const": "AUTHORITY_UNKNOWN"
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "UNKNOWN"
+          },
+          "truth_state": {
+            "const": "AUTHORITY_UNKNOWN"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
+            "const": "OUT_OF_BAND_REVIEW"
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "OUT_OF_BAND"
+          },
+          "truth_state": {
+            "const": "AUTHORITY_OUT_OF_BAND"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
             "const": "LATE_DATA_PENDING"
           }
         },
@@ -566,6 +928,443 @@
         "properties": {
           "waiting_on": {
             "const": "LATE_DATA"
+          },
+          "checkpoint_state": {
+            "const": "LATE_DATA_PENDING"
+          },
+          "truth_state": {
+            "const": "PERSISTED_INTERNAL"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
+            "enum": [
+              "APPROVAL_PENDING",
+              "AUTHORITY_PENDING",
+              "AUTHORITY_UNKNOWN",
+              "LATE_DATA_PENDING"
+            ]
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "next_checkpoint_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "waiting_on": {
+            "const": "NONE"
+          }
+        },
+        "required": [
+          "waiting_on"
+        ]
+      },
+      "then": {
+        "properties": {
+          "next_checkpoint_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "checkpoint_state": {
+            "enum": [
+              "CONFIRMED",
+              "REJECTED",
+              "OUT_OF_BAND"
+            ]
+          }
+        },
+        "required": [
+          "checkpoint_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "CONFIRMED"
+          }
+        },
+        "required": [
+          "checkpoint_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_status": {
+            "const": "COMPLETED"
+          },
+          "outcome_class": {
+            "const": "FINAL_SUCCESS"
+          },
+          "waiting_on": {
+            "const": "NONE"
+          },
+          "truth_state": {
+            "const": "AUTHORITY_CONFIRMED"
+          },
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "REJECTED"
+          }
+        },
+        "required": [
+          "checkpoint_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_status": {
+            "const": "BLOCKED"
+          },
+          "outcome_class": {
+            "const": "FINAL_BLOCKED"
+          },
+          "waiting_on": {
+            "const": "NONE"
+          },
+          "truth_state": {
+            "const": "AUTHORITY_REJECTED"
+          },
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "UNKNOWN"
+          }
+        },
+        "required": [
+          "checkpoint_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_status": {
+            "const": "REVIEW_REQUIRED"
+          },
+          "outcome_class": {
+            "const": "AUTHORITY_UNKNOWN"
+          },
+          "waiting_on": {
+            "const": "AUTHORITY"
+          },
+          "truth_state": {
+            "const": "AUTHORITY_UNKNOWN"
+          },
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "OUT_OF_BAND"
+          }
+        },
+        "required": [
+          "checkpoint_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_status": {
+            "const": "REVIEW_REQUIRED"
+          },
+          "outcome_class": {
+            "const": "OUT_OF_BAND_REVIEW"
+          },
+          "waiting_on": {
+            "const": "AUTHORITY"
+          },
+          "truth_state": {
+            "const": "AUTHORITY_OUT_OF_BAND"
+          },
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
+            "enum": [
+              "AUTHORITY_PENDING",
+              "AUTHORITY_UNKNOWN"
+            ]
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "workflow_item_refs": {
+            "minItems": 1
+          },
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "truth_state": {
+            "const": "AUTHORITY_CONFIRMED"
+          }
+        },
+        "required": [
+          "truth_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_status": {
+            "const": "COMPLETED"
+          },
+          "outcome_class": {
+            "const": "FINAL_SUCCESS"
+          },
+          "waiting_on": {
+            "const": "NONE"
+          },
+          "checkpoint_state": {
+            "const": "CONFIRMED"
+          },
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "truth_state": {
+            "const": "AUTHORITY_REJECTED"
+          }
+        },
+        "required": [
+          "truth_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_status": {
+            "const": "BLOCKED"
+          },
+          "outcome_class": {
+            "const": "FINAL_BLOCKED"
+          },
+          "waiting_on": {
+            "const": "NONE"
+          },
+          "checkpoint_state": {
+            "const": "REJECTED"
+          },
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "truth_state": {
+            "const": "AUTHORITY_UNKNOWN"
+          }
+        },
+        "required": [
+          "truth_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_status": {
+            "const": "REVIEW_REQUIRED"
+          },
+          "outcome_class": {
+            "const": "AUTHORITY_UNKNOWN"
+          },
+          "waiting_on": {
+            "const": "AUTHORITY"
+          },
+          "checkpoint_state": {
+            "const": "UNKNOWN"
+          },
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "truth_state": {
+            "const": "AUTHORITY_OUT_OF_BAND"
+          }
+        },
+        "required": [
+          "truth_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_status": {
+            "const": "REVIEW_REQUIRED"
+          },
+          "outcome_class": {
+            "const": "OUT_OF_BAND_REVIEW"
+          },
+          "waiting_on": {
+            "const": "AUTHORITY"
+          },
+          "checkpoint_state": {
+            "const": "OUT_OF_BAND"
+          },
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
+            "enum": [
+              "HUMAN_REVIEW",
+              "APPROVAL_PENDING",
+              "LATE_DATA_PENDING",
+              "OUT_OF_BAND_REVIEW"
+            ]
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "workflow_item_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "primary_action_code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "primary_action_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "actionability_state": {
+            "const": "ACTION_AVAILABLE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "no_safe_action_reason_code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "no_safe_action_reason_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "actionability_state": {
+            "const": "NO_SAFE_ACTION"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "suggested_detail_surface_code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "suggested_detail_surface_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "actionability_state": {
+            "const": "NO_SAFE_ACTION"
           }
         }
       }
@@ -594,6 +1393,9 @@
             "minLength": 1
           },
           "no_safe_action_reason_code": {
+            "type": "null"
+          },
+          "suggested_detail_surface_code": {
             "type": "null"
           }
         }

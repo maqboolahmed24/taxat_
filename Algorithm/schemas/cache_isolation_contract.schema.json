@@ -1,0 +1,395 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/cache_isolation_contract.schema.json",
+  "title": "CacheIsolationContract",
+  "description": "Shared cache-isolation contract. This schema freezes tenant, principal, session, access, masking, route, object, projection version, visibility-partition, and preview-selection identity together with exact-match reuse and purge policies so northbound caches, CDN layers, local persistence, and reusable previews cannot widen visibility through weak cache keys or stale hydration envelopes.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "cache_scope_class",
+    "tenant_id",
+    "client_id_or_null",
+    "principal_class",
+    "session_binding_hash",
+    "access_binding_hash_or_null",
+    "masking_posture_fingerprint_or_null",
+    "shell_stability_ref_or_null",
+    "route_identity_ref",
+    "canonical_object_ref",
+    "shell_family",
+    "projection_version_ref",
+    "cache_partition_ref",
+    "visibility_cache_partition_key_or_null",
+    "customer_safe_projection",
+    "preview_subject_ref_or_null",
+    "delivery_binding_hash",
+    "shared_cache_reuse_policy",
+    "shared_layer_cache_policy",
+    "local_storage_reuse_policy",
+    "hydration_guard_policy",
+    "scope_narrowing_invalidation_policy",
+    "preview_export_reuse_policy",
+    "delivery_revalidation_policy",
+    "temporary_artifact_policy"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "CACHE_ISOLATION_V1"
+    },
+    "cache_scope_class": {
+      "type": "string",
+      "enum": [
+        "LOW_NOISE_FRAME",
+        "WORKSPACE_SNAPSHOT",
+        "WORK_INBOX_SNAPSHOT",
+        "CLIENT_PORTAL_WORKSPACE",
+        "CUSTOMER_REQUEST_LIST",
+        "TENANT_GOVERNANCE_SNAPSHOT",
+        "GOVERNANCE_POLICY_SNAPSHOT",
+        "PRINCIPAL_ACCESS_VIEW",
+        "ROLE_TEMPLATE_MATRIX",
+        "NATIVE_OPERATOR_WORKSPACE_SCENE",
+        "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE"
+      ]
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "client_id_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "principal_class": {
+      "type": "string",
+      "minLength": 1
+    },
+    "session_binding_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "access_binding_hash_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "masking_posture_fingerprint_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "shell_stability_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "route_identity_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "canonical_object_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "shell_family": {
+      "type": "string",
+      "minLength": 1
+    },
+    "projection_version_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cache_partition_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "visibility_cache_partition_key_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "customer_safe_projection": {
+      "type": "boolean"
+    },
+    "preview_subject_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "delivery_binding_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "shared_cache_reuse_policy": {
+      "const": "EXACT_SECURITY_CONTEXT_ONLY"
+    },
+    "shared_layer_cache_policy": {
+      "const": "NO_CDN_OR_PROXY_REUSE_WITHOUT_IDENTICAL_CONTEXT"
+    },
+    "local_storage_reuse_policy": {
+      "const": "PURGE_ON_TENANT_PRINCIPAL_SESSION_ACCESS_MASKING_OR_ROUTE_DRIFT"
+    },
+    "hydration_guard_policy": {
+      "const": "REJECT_ON_CONTEXT_ROUTE_VERSION_OR_PREVIEW_MISMATCH"
+    },
+    "scope_narrowing_invalidation_policy": {
+      "const": "PURGE_BROADER_VARIANTS_ON_ACCESS_OR_MASKING_NARROWING"
+    },
+    "preview_export_reuse_policy": {
+      "const": "ROUTE_AND_SELECTION_BOUND_CURRENT_ONLY"
+    },
+    "delivery_revalidation_policy": {
+      "const": "PREVIEW_EXPORT_AND_DOWNLOAD_REQUIRE_EXACT_BINDING"
+    },
+    "temporary_artifact_policy": {
+      "const": "TEMP_FILES_AND_NATIVE_PREVIEW_PURGED_ON_BINDING_DRIFT"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "cache_scope_class": {
+            "enum": [
+              "LOW_NOISE_FRAME",
+              "WORKSPACE_SNAPSHOT",
+              "WORK_INBOX_SNAPSHOT",
+              "CLIENT_PORTAL_WORKSPACE",
+              "CUSTOMER_REQUEST_LIST",
+              "NATIVE_OPERATOR_WORKSPACE_SCENE",
+              "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE"
+            ]
+          }
+        },
+        "required": [
+          "cache_scope_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "access_binding_hash_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "masking_posture_fingerprint_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cache_scope_class": {
+            "enum": [
+              "WORKSPACE_SNAPSHOT",
+              "WORK_INBOX_SNAPSHOT",
+              "CLIENT_PORTAL_WORKSPACE",
+              "CUSTOMER_REQUEST_LIST"
+            ]
+          }
+        },
+        "required": [
+          "cache_scope_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "visibility_cache_partition_key_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cache_scope_class": {
+            "enum": [
+              "TENANT_GOVERNANCE_SNAPSHOT",
+              "GOVERNANCE_POLICY_SNAPSHOT",
+              "PRINCIPAL_ACCESS_VIEW",
+              "ROLE_TEMPLATE_MATRIX"
+            ]
+          }
+        },
+        "required": [
+          "cache_scope_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "access_binding_hash_or_null": {
+            "type": "null"
+          },
+          "masking_posture_fingerprint_or_null": {
+            "type": "null"
+          },
+          "visibility_cache_partition_key_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "customer_safe_projection": {
+            "const": true
+          }
+        },
+        "required": [
+          "customer_safe_projection"
+        ]
+      },
+      "then": {
+        "properties": {
+          "visibility_cache_partition_key_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "access_binding_hash_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "masking_posture_fingerprint_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cache_scope_class": {
+            "const": "CLIENT_PORTAL_WORKSPACE"
+          }
+        },
+        "required": [
+          "cache_scope_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "customer_safe_projection": {
+            "const": true
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cache_scope_class": {
+            "const": "CUSTOMER_REQUEST_LIST"
+          }
+        },
+        "required": [
+          "cache_scope_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "customer_safe_projection": {
+            "const": true
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cache_scope_class": {
+            "enum": [
+              "LOW_NOISE_FRAME",
+              "WORK_INBOX_SNAPSHOT",
+              "TENANT_GOVERNANCE_SNAPSHOT",
+              "GOVERNANCE_POLICY_SNAPSHOT",
+              "PRINCIPAL_ACCESS_VIEW",
+              "ROLE_TEMPLATE_MATRIX",
+              "NATIVE_OPERATOR_WORKSPACE_SCENE",
+              "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE"
+            ]
+          }
+        },
+        "required": [
+          "cache_scope_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "customer_safe_projection": {
+            "const": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cache_scope_class": {
+            "const": "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE"
+          }
+        },
+        "required": [
+          "cache_scope_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "preview_subject_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cache_scope_class": {
+            "enum": [
+              "LOW_NOISE_FRAME",
+              "WORKSPACE_SNAPSHOT",
+              "WORK_INBOX_SNAPSHOT",
+              "CLIENT_PORTAL_WORKSPACE",
+              "CUSTOMER_REQUEST_LIST",
+              "TENANT_GOVERNANCE_SNAPSHOT",
+              "GOVERNANCE_POLICY_SNAPSHOT",
+              "PRINCIPAL_ACCESS_VIEW",
+              "ROLE_TEMPLATE_MATRIX",
+              "NATIVE_OPERATOR_WORKSPACE_SCENE"
+            ]
+          }
+        },
+        "required": [
+          "cache_scope_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "preview_subject_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

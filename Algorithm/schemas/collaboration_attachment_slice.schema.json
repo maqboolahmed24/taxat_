@@ -1,0 +1,320 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/collaboration_attachment_slice.schema.json",
+  "title": "CollaborationAttachmentSlice",
+  "description": "Visibility-scoped collaboration attachment read contract. This schema freezes the route-visible workspace guard spine, file-visibility filter echo, current-vs-history partitioning, and latest snapshot anchor so inline refresh does not leak internal-only files or collapse current and historical attachments together.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "item_id",
+    "workspace_route_key",
+    "viewer_scope",
+    "visibility_class",
+    "workspace_version",
+    "shell_stability_token",
+    "visibility_partition",
+    "access_binding_hash",
+    "masking_posture_fingerprint",
+    "customer_safe_projection",
+    "active_filters",
+    "focus_anchor_ref_or_null",
+    "current_attachment_refs",
+    "historical_attachment_refs",
+    "artifact_selection",
+    "artifact_affordance",
+    "latest_workspace_snapshot_ref",
+    "returned_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "CollaborationAttachmentSlice"
+    },
+    "item_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workspace_route_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "viewer_scope": {
+      "type": "string",
+      "enum": [
+        "STAFF_FULL",
+        "CUSTOMER_VISIBLE"
+      ]
+    },
+    "visibility_class": {
+      "type": "string",
+      "enum": [
+        "CUSTOMER_VISIBLE",
+        "INTERNAL_ONLY"
+      ]
+    },
+    "workspace_version": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "shell_stability_token": {
+      "type": "string",
+      "minLength": 1
+    },
+    "visibility_partition": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/visibility_partition_contract.schema.json"
+        },
+        {
+          "properties": {
+            "partition_scope": {
+              "const": "COLLABORATION_ATTACHMENT_SLICE"
+            }
+          }
+        }
+      ]
+    },
+    "access_binding_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "masking_posture_fingerprint": {
+      "type": "string",
+      "minLength": 1
+    },
+    "customer_safe_projection": {
+      "anyOf": [
+        {
+          "allOf": [
+            {
+              "$ref": "https://taxat.dev/schemas/customer_safe_projection_contract.schema.json"
+            },
+            {
+              "properties": {
+                "boundary_scope": {
+                  "const": "COLLABORATION_ATTACHMENT_SLICE"
+                },
+                "projection_audience": {
+                  "const": "CUSTOMER_COLLABORATION"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "active_filters": {
+      "$ref": "#/$defs/activeFilters"
+    },
+    "focus_anchor_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "current_attachment_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "historical_attachment_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "artifact_selection": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/artifact_selection_contract.schema.json"
+        },
+        {
+          "properties": {
+            "selection_scope": {
+              "const": "COLLABORATION_ATTACHMENT_SLICE"
+            }
+          }
+        }
+      ]
+    },
+    "artifact_affordance": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/artifact_affordance_contract.schema.json"
+        },
+        {
+          "properties": {
+            "affordance_scope": {
+              "const": "COLLABORATION_ATTACHMENT_SLICE"
+            }
+          }
+        }
+      ]
+    },
+    "latest_workspace_snapshot_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "returned_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "activeFilters": {
+      "type": "object",
+      "required": [
+        "visibility_class",
+        "request_info_ref_or_null",
+        "include_history",
+        "include_pending_placeholders"
+      ],
+      "properties": {
+        "visibility_class": {
+          "type": "string",
+          "enum": [
+            "CUSTOMER_VISIBLE",
+            "INTERNAL_ONLY"
+          ]
+        },
+        "request_info_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "include_history": {
+          "type": "boolean"
+        },
+        "include_pending_placeholders": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "viewer_scope": {
+            "const": "CUSTOMER_VISIBLE"
+          }
+        },
+        "required": [
+          "viewer_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "visibility_class": {
+            "const": "CUSTOMER_VISIBLE"
+          },
+          "customer_safe_projection": {
+            "type": "object"
+          },
+          "active_filters": {
+            "properties": {
+              "visibility_class": {
+                "const": "CUSTOMER_VISIBLE"
+              },
+              "include_pending_placeholders": {
+                "const": false
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "visibility_class": {
+            "const": "INTERNAL_ONLY"
+          }
+        },
+        "required": [
+          "visibility_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "viewer_scope": {
+            "const": "STAFF_FULL"
+          },
+          "customer_safe_projection": {
+            "type": "null"
+          },
+          "active_filters": {
+            "properties": {
+              "visibility_class": {
+                "const": "INTERNAL_ONLY"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "visibility_class": {
+            "const": "CUSTOMER_VISIBLE"
+          }
+        },
+        "required": [
+          "visibility_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "active_filters": {
+            "properties": {
+              "visibility_class": {
+                "const": "CUSTOMER_VISIBLE"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "active_filters": {
+            "properties": {
+              "include_history": {
+                "const": false
+              }
+            },
+            "required": [
+              "include_history"
+            ]
+          }
+        },
+        "required": [
+          "active_filters"
+        ]
+      },
+      "then": {
+        "properties": {
+          "historical_attachment_refs": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ]
+}

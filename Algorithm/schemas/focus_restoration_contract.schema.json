@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/focus_restoration_contract.schema.json",
+  "title": "FocusRestorationContract",
+  "description": "Grouped focus-restoration contract. This schema freezes the originally requested focus anchor, the focus anchor actually restored now, one explicit restoration disposition, and one explicit reason whenever refresh, reconnect, deep-link entry, notification-open, resize, or native scene restoration cannot land on the exact prior focus target.",
+  "type": "object",
+  "required": [
+    "requested_focus_anchor_ref_or_null",
+    "resolved_focus_anchor_ref_or_null",
+    "restoration_disposition",
+    "restoration_reason_code_or_null"
+  ],
+  "properties": {
+    "requested_focus_anchor_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "resolved_focus_anchor_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "restoration_disposition": {
+      "type": "string",
+      "enum": [
+        "EXACT_FOCUS",
+        "REMAPPED_FOCUS",
+        "OBJECT_SUMMARY",
+        "PARENT_RETURN",
+        "INVALIDATED"
+      ]
+    },
+    "restoration_reason_code_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "restoration_disposition": {
+            "const": "EXACT_FOCUS"
+          }
+        },
+        "required": [
+          "restoration_disposition"
+        ]
+      },
+      "then": {
+        "properties": {
+          "restoration_reason_code_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "restoration_disposition": {
+            "const": "REMAPPED_FOCUS"
+          }
+        },
+        "required": [
+          "restoration_disposition"
+        ]
+      },
+      "then": {
+        "properties": {
+          "requested_focus_anchor_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resolved_focus_anchor_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "restoration_reason_code_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "restoration_disposition": {
+            "enum": [
+              "OBJECT_SUMMARY",
+              "PARENT_RETURN",
+              "INVALIDATED"
+            ]
+          }
+        },
+        "required": [
+          "restoration_disposition"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resolved_focus_anchor_ref_or_null": {
+            "type": "null"
+          },
+          "restoration_reason_code_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

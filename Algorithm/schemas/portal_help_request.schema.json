@@ -1,0 +1,479 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/portal_help_request.schema.json",
+  "title": "PortalHelpRequest",
+  "description": "Customer portal help-request contract. This schema freezes the exact route, focus anchor, and context that triggered a support request so help flows preserve case context and do not force the client to restate the case.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "help_request_id",
+    "tenant_id",
+    "client_id",
+    "manifest_id",
+    "item_id",
+    "request_info_ref",
+    "source_focus_anchor_ref",
+    "source_route",
+    "support_channel",
+    "reason_family",
+    "subject_line",
+    "body_ref",
+    "case_context_refs",
+    "opened_by_ref",
+    "lifecycle_state",
+    "opened_at",
+    "acknowledged_at",
+    "response_ref",
+    "responded_at",
+    "closed_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "PortalHelpRequest"
+    },
+    "help_request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "client_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "item_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "request_info_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "source_focus_anchor_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_route": {
+      "type": "string",
+      "enum": [
+        "HOME",
+        "DOCUMENTS",
+        "APPROVALS",
+        "ONBOARDING",
+        "HELP",
+        "REQUEST_DETAIL"
+      ]
+    },
+    "support_channel": {
+      "type": "string",
+      "enum": [
+        "PORTAL_HELP",
+        "CONTEXTUAL_REQUEST"
+      ]
+    },
+    "reason_family": {
+      "type": "string",
+      "enum": [
+        "STATUS_QUESTION",
+        "DOCUMENT_HELP",
+        "APPROVAL_HELP",
+        "ONBOARDING_HELP",
+        "ACCESS_HELP",
+        "GENERAL_HELP"
+      ]
+    },
+    "subject_line": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "body_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "case_context_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "opened_by_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "ACKNOWLEDGED",
+        "RESPONDED",
+        "CLOSED"
+      ]
+    },
+    "opened_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "acknowledged_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "response_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "responded_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "closed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "support_channel": {
+            "const": "CONTEXTUAL_REQUEST"
+          }
+        },
+        "required": [
+          "support_channel"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_route": {
+            "const": "REQUEST_DETAIL"
+          },
+          "request_info_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "item_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_focus_anchor_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "request_info_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "request_info_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_route": {
+            "const": "REQUEST_DETAIL"
+          },
+          "item_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_focus_anchor_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "source_route": {
+            "const": "REQUEST_DETAIL"
+          }
+        },
+        "required": [
+          "source_route"
+        ]
+      },
+      "then": {
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_focus_anchor_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reason_family": {
+            "const": "DOCUMENT_HELP"
+          }
+        },
+        "required": [
+          "reason_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_route": {
+            "enum": [
+              "DOCUMENTS",
+              "REQUEST_DETAIL"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reason_family": {
+            "const": "APPROVAL_HELP"
+          }
+        },
+        "required": [
+          "reason_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_route": {
+            "const": "APPROVALS"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reason_family": {
+            "const": "ONBOARDING_HELP"
+          }
+        },
+        "required": [
+          "reason_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_route": {
+            "const": "ONBOARDING"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reason_family": {
+            "const": "ACCESS_HELP"
+          }
+        },
+        "required": [
+          "reason_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_route": {
+            "enum": [
+              "HELP",
+              "ONBOARDING"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reason_family": {
+            "const": "GENERAL_HELP"
+          }
+        },
+        "required": [
+          "reason_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_route": {
+            "const": "HELP"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "OPEN"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "acknowledged_at": {
+            "type": "null"
+          },
+          "response_ref": {
+            "type": "null"
+          },
+          "responded_at": {
+            "type": "null"
+          },
+          "closed_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "ACKNOWLEDGED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "acknowledged_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "response_ref": {
+            "type": "null"
+          },
+          "responded_at": {
+            "type": "null"
+          },
+          "closed_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "RESPONDED",
+              "CLOSED"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "acknowledged_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "response_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "responded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "closed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "closed_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "CLOSED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "CLOSED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "closed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

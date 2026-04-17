@@ -51,7 +51,11 @@ The invention specifically covers the coordinated technical method that:
 11. treats authority acknowledgement as the legal state trigger, rather than assuming submission success
     from internal intent;
 12. detects post-decision drift and recommends review or amendment when materially justified; and
-13. applies retention, expiry, erasure, and limitation propagation across all generated artifacts.
+13. applies retention, expiry, erasure, and limitation propagation across all generated artifacts;
+14. preserves replay, recovery, continuation, and supersession lineage as governed engine decisions,
+    not incidental infrastructure behavior; and
+15. generates machine-stable read-side posture artifacts whose semantics remain authoritative even when
+    delivered through product APIs, streams, or native/browser clients.
 
 ### The inventive center
 
@@ -66,7 +70,7 @@ of the following elements as one coherent engine:
 - authority-acknowledged state handling,
 - and drift-aware post-decision governance.
 
-That combination creates a technical result the current pack is already aiming at: a replayable decision
+That combination creates the technical result this corpus specifies: a replayable decision
 state in which every material output is reproducible, every automation step is policy-bounded, every
 filing state is authority-grounded, and every review outcome is explainable back to evidence.
 
@@ -100,7 +104,7 @@ The technical effect of the invention is that the engine can produce a decision 
 
 ### Preferred embodiment boundary
 
-For the current pack, the preferred embodiment should be stated as:
+For this corpus, the preferred embodiment is:
 
 > a multi-tenant evidence-linked decision engine for recurring tax compliance workflows in which
 > customers or agents maintain digital records, evaluate in-year and end-of-year positions,
@@ -137,13 +141,17 @@ The following functions are inside the engine boundary:
 - accept an authenticated request context;
 - evaluate whether the requested action is allowed for the given tenant, client, period, scope, mode,
   and run kind;
-- create or reuse a `RunManifest`.
+- create or reuse a `RunManifest`;
+- decide whether same-manifest reuse, replay, recovery, continuation, or fresh-child branching is
+  legally and technically permitted for the requested scope.
 
 #### 2. Config freeze and execution envelope
 
 - resolve rule versions, policy versions, thresholds, materiality settings, connector profile refs,
   and retention profile refs;
-- bind them immutably to the run.
+- bind them immutably to the run;
+- preserve execution-mode separation so analysis/counterfactual configuration cannot silently
+  authorize live compliance progression.
 
 #### 3. Evidence acquisition as engine-controlled intake
 
@@ -151,6 +159,7 @@ The engine may instruct the controlled edge to fetch external data, but the engi
 
 - the decision to request data,
 - the mapping of returned payload references into run scope,
+- the partition/obligation scope those payloads are allowed to satisfy,
 - and the rule that no fetched data becomes canonical until it is normalized into the `Snapshot`.
 
 #### 4. Canonicalization and data-quality formation
@@ -163,7 +172,9 @@ The engine may instruct the controlled edge to fetch external data, but the engi
 #### 5. Outcome computation
 
 - compute regulated-reporting outcomes from the canonical snapshot;
-- optionally produce forecast artifacts in analysis-safe separation.
+- optionally produce forecast artifacts in analysis-safe separation;
+- ensure modeled, exploratory, or counterfactual outputs remain segregated from live compliance truth,
+  filing-capable posture, and authority-facing mutation paths.
 
 #### 6. Risk, parity, and trust
 
@@ -196,7 +207,30 @@ The engine may invoke a controlled authority submission channel, but inside the 
 - request hash binding,
 - packet-to-manifest linkage,
 - `SubmissionRecord` persistence,
-- and acknowledgement-state interpretation (`CONFIRMED`, `PENDING`, `REJECTED`, `UNKNOWN`).
+- authenticated and correlation-safe ingestion of authority callbacks, poll results, or imported
+  authority artifacts before legal-state mutation,
+- and acknowledgement-state interpretation (`CONFIRMED`, `PENDING`, `REJECTED`, `UNKNOWN`,
+  `OUT_OF_BAND`).
+
+#### 10A. Read-side legal posture projection
+
+The transport and client runtime are outside the core engine, but the semantic content of
+engine-authored posture is inside it.
+The engine therefore owns:
+
+- `DecisionBundle` production,
+- the semantic content of route-visible read models such as `LowNoiseExperienceFrame`,
+  `NativeOperatorWorkspaceScene`, `NativeOperatorSecondaryWindowScene`, `ClientPortalWorkspace`,
+  `CustomerRequestListSnapshot`, `WorkspaceSnapshot`, `WorkInboxSnapshot`,
+  `TenantGovernanceSnapshot`, `GovernancePolicySnapshot`, `PrincipalAccessView`,
+  `RoleTemplateMatrix`, `AuthorityLinkInventoryItem`, `RetentionGovernanceFrame`, and
+  `AuditInvestigationFrame`,
+- advisory posture artifacts such as `GovernanceAccessSimulation`,
+- shared interaction contracts such as `PortalInteractionLayer`, `OperatorInteractionLayer`, and
+  `GovernanceInteractionLayer`,
+- `ExperienceDelta` / snapshot semantics,
+- machine-stable reason, actionability, and checkpoint/truth posture,
+- and the rule that clients may consume but not reinterpret those legal-posture artifacts.
 
 #### 11. Drift and amendment recommendation
 
@@ -221,6 +255,9 @@ These are platform-adjacent services, not part of the inventive engine itself:
 - staff console, client portal, and admin console;
 - northbound product API gateway, browser/session management, native-desktop session restoration, and
   live-experience stream transport;
+- platform routing, local scene restoration, and window choreography that consume but do not redefine
+  the engine-authored portal, operator, governance, inbox, request-list, and audit workbench
+  semantics;
 - token vault and OAuth session maintenance;
 - connector worker execution and retry orchestration;
 - OCR or document extraction runtime;
@@ -233,6 +270,8 @@ These are platform-adjacent services, not part of the inventive engine itself:
 
 These are necessary to operate the product, but they are not the engine's inventive heart. The engine
 calls them or depends on them through interfaces.
+They deliver engine-authored artifacts and commands, but SHALL NOT redefine engine-owned manifest,
+authorization, legal-state, or read-side posture semantics locally.
 
 One especially important example is OAuth token handling for authority APIs. HMRC's user-restricted model
 allows software to hold multiple OAuth 2.0 tokens for an agent and requires the software to use the
@@ -298,6 +337,10 @@ External payloads are inputs, not canonical facts, until transformed into a `Sna
 A filing is not legally "done" because the engine built a packet or sent a request. It becomes legally
 acknowledged only when the authority state supports that conclusion.
 
+Boundary ingress note: external callbacks, authority polls, imported notices, and other authority-side
+messages remain outside-engine signals until the engine authenticates, correlates, normalizes, and
+persists them as governed authority artifacts.
+
 #### Boundary Rule 4 - The engine owns parity and trust, not HMRC's own calculations
 
 Authority calculations are authoritative comparison inputs, not replaceable by internal optimism. [4]
@@ -309,6 +352,18 @@ that amendments fall within the permitted amendment window, and that an intent-t
 validations are followed. The engine therefore decides "recommend amendment / eligible to attempt
 amendment," but amendment acceptance is authority-controlled. [5]
 
+#### Boundary Rule 5A - The engine owns lineage-safe replay, recovery, and continuation decisions
+
+Whether a prior manifest may be reused, replayed, recovered, superseded, or continued is part of the
+engine's governed decisioning spine, not a generic queue, session, or infrastructure concern.
+
+#### Boundary Rule 5B - The engine owns exact-scope posture, not client-wide flattening
+
+Client, period, business-partition, income-source-partition, and obligation scope remain distinct
+inside the engine boundary.
+Product surfaces may summarize them, but the engine SHALL NOT flatten separate legal scopes into one
+generic client-wide posture.
+
 #### Boundary Rule 6 - The engine may guide users to HMRC online services, but does not absorb HMRC-only tasks
 
 That handoff should be treated as a formal boundary crossing. [3]
@@ -317,6 +372,12 @@ That handoff should be treated as a formal boundary crossing. [3]
 
 For every state created inside the boundary, the engine must be able to explain the state from manifest
 to evidence, config, override, and authority acknowledgement.
+
+#### Boundary Rule 8 - The engine owns compliance-vs-analysis segregation
+
+The engine may model exploratory or advisory outcomes, but analysis-mode, replay-only, or
+counterfactual outputs SHALL NOT mutate compliance truth or acquire authority-facing legal effect
+unless a separately authorized compliance path is executed.
 
 ---
 

@@ -1,0 +1,901 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/authority_operation_profile.schema.json",
+  "title": "AuthorityOperationProfile",
+  "description": "Frozen provider contract profile for one authority operation family. This schema preserves method, path, required executable scope, fraud-header posture, idempotency semantics, response interpretation, reconciliation budget, and reconciliation-owned unresolved retry posture so authority behavior stays outside mutable business logic.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "profile_id",
+    "operation_family",
+    "authority_name",
+    "authority_product_profile",
+    "provider_environment",
+    "provider_api_version",
+    "transport_rules",
+    "required_scopes",
+    "fraud_header_profile_ref",
+    "fraud_header_exemption_reason",
+    "idempotency_strategy",
+    "success_response_rules",
+    "pending_unknown_rules",
+    "reconciliation_rules",
+    "legal_state_rules"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "AuthorityOperationProfile"
+    },
+    "profile_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operation_family": {
+      "type": "string",
+      "enum": [
+        "AUTH_READ_REFERENCE",
+        "AUTH_READ_OBLIGATIONS",
+        "AUTH_READ_CALCULATION",
+        "AUTH_CREATE_OR_AMEND_DATA",
+        "AUTH_DELETE_DATA",
+        "AUTH_TRIGGER_CALCULATION",
+        "AUTH_SUBMIT_FINAL_DECLARATION",
+        "AUTH_SUBMIT_PERIODIC_UPDATE",
+        "AUTH_SUBMIT_POST_FINALISATION_AMENDMENT",
+        "AUTH_RECONCILE_STATUS"
+      ]
+    },
+    "authority_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority_product_profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_environment": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_api_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "transport_rules": {
+      "$ref": "#/$defs/transportRules"
+    },
+    "required_scopes": {
+      "$ref": "./authority_operation.schema.json#/$defs/scopeArray"
+    },
+    "fraud_header_profile_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "fraud_header_exemption_reason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "idempotency_strategy": {
+      "type": "string",
+      "enum": [
+        "NOT_REQUIRED",
+        "REQUEST_HASH",
+        "IDEMPOTENCY_KEY",
+        "REQUEST_HASH_AND_IDEMPOTENCY_KEY"
+      ]
+    },
+    "success_response_rules": {
+      "$ref": "#/$defs/successResponseRules"
+    },
+    "pending_unknown_rules": {
+      "$ref": "#/$defs/pendingUnknownRules"
+    },
+    "reconciliation_rules": {
+      "$ref": "#/$defs/reconciliationRules"
+    },
+    "legal_state_rules": {
+      "$ref": "#/$defs/legalStateRules"
+    }
+  },
+  "$defs": {
+    "transportRules": {
+      "type": "object",
+      "required": [
+        "http_method",
+        "path_template",
+        "canonical_query_mode",
+        "payload_required",
+        "response_body_expected",
+        "timeout_profile_ref",
+        "transmit_policy_ref"
+      ],
+      "properties": {
+        "http_method": {
+          "type": "string",
+          "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+          ]
+        },
+        "path_template": {
+          "type": "string",
+          "minLength": 1
+        },
+        "canonical_query_mode": {
+          "type": "string",
+          "enum": [
+            "SORTED_KEYS",
+            "DECLARED_ORDER"
+          ]
+        },
+        "payload_required": {
+          "type": "boolean"
+        },
+        "response_body_expected": {
+          "type": "boolean"
+        },
+        "timeout_profile_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "transmit_policy_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "successResponseRules": {
+      "type": "object",
+      "required": [
+        "success_status_codes",
+        "response_class",
+        "extraction_rule_refs",
+        "confirmed_state_on_success"
+      ],
+      "properties": {
+        "success_status_codes": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "response_class": {
+          "type": "string",
+          "enum": [
+            "SUCCESS_BODY_REQUIRED",
+            "SUCCESS_BODY_OPTIONAL",
+            "SUCCESS_NO_BODY_ALLOWED"
+          ]
+        },
+        "extraction_rule_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "confirmed_state_on_success": {
+          "type": "string",
+          "enum": [
+            "NO_LEGAL_STATE_CHANGE",
+            "PENDING_ACK",
+            "CONFIRMED"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "pendingUnknownRules": {
+      "type": "object",
+      "required": [
+        "timeout_maps_to",
+        "no_body_maps_to",
+        "retry_class",
+        "escalation_required"
+      ],
+      "properties": {
+        "timeout_maps_to": {
+          "type": "string",
+          "enum": [
+            "PENDING_ACK",
+            "UNKNOWN"
+          ]
+        },
+        "no_body_maps_to": {
+          "type": "string",
+          "enum": [
+            "PENDING_ACK",
+            "UNKNOWN",
+            "CONFIRMED"
+          ]
+        },
+        "retry_class": {
+          "type": "string",
+          "enum": [
+            "NO_RETRY",
+            "SAFE_RETRY",
+            "RECONCILE_THEN_RETRY",
+            "HUMAN_REVIEW_THEN_RETRY",
+            "REBUILD_THEN_RETRY",
+            "MANUAL_INTERVENTION_REQUIRED"
+          ]
+        },
+        "escalation_required": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "reconciliationRules": {
+      "type": "object",
+      "required": [
+        "method",
+        "max_auto_reconciliation_attempts",
+        "cadence_seconds",
+        "deadline_derivation_rule",
+        "escalation_policy_ref",
+        "authoritative_result_source"
+      ],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "NONE",
+            "READ_AFTER_WRITE",
+            "POLL_STATUS",
+            "POLL_OBLIGATIONS",
+            "MANUAL_ONLY"
+          ]
+        },
+        "max_auto_reconciliation_attempts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cadence_seconds": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "deadline_derivation_rule": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "escalation_policy_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "authoritative_result_source": {
+          "type": "string",
+          "enum": [
+            "DIRECT_RESPONSE",
+            "FOLLOW_UP_READ",
+            "OBLIGATION_MIRROR",
+            "MANUAL_REVIEW"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "legalStateRules": {
+      "type": "object",
+      "required": [
+        "authoritative_state_source",
+        "timeout_default_state",
+        "accepted_pending_state",
+        "out_of_band_state_allowed",
+        "amendment_requires_confirmed_finalisation"
+      ],
+      "properties": {
+        "authoritative_state_source": {
+          "type": "string",
+          "enum": [
+            "DIRECT_ACK",
+            "OBLIGATION_MIRROR",
+            "CALCULATION_READ",
+            "RECONCILIATION_RESULT"
+          ]
+        },
+        "timeout_default_state": {
+          "type": "string",
+          "enum": [
+            "PENDING_ACK",
+            "UNKNOWN"
+          ]
+        },
+        "accepted_pending_state": {
+          "type": "string",
+          "enum": [
+            "PENDING_ACK",
+            "UNKNOWN"
+          ]
+        },
+        "out_of_band_state_allowed": {
+          "type": "boolean"
+        },
+        "amendment_requires_confirmed_finalisation": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "oneOf": [
+        {
+          "properties": {
+            "fraud_header_profile_ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "fraud_header_exemption_reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "if": {
+        "properties": {
+          "transport_rules": {
+            "properties": {
+              "http_method": {
+                "enum": [
+                  "GET",
+                  "DELETE"
+                ]
+              }
+            },
+            "required": [
+              "http_method"
+            ]
+          }
+        },
+        "required": [
+          "transport_rules"
+        ]
+      },
+      "then": {
+        "properties": {
+          "transport_rules": {
+            "properties": {
+              "payload_required": {
+                "const": false
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "transport_rules": {
+            "properties": {
+              "http_method": {
+                "enum": [
+                  "POST",
+                  "PUT",
+                  "PATCH"
+                ]
+              }
+            },
+            "required": [
+              "http_method"
+            ]
+          }
+        },
+        "required": [
+          "transport_rules"
+        ]
+      },
+      "then": {
+        "properties": {
+          "transport_rules": {
+            "properties": {
+              "payload_required": {
+                "const": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "success_response_rules": {
+            "properties": {
+              "response_class": {
+                "const": "SUCCESS_BODY_REQUIRED"
+              }
+            },
+            "required": [
+              "response_class"
+            ]
+          }
+        },
+        "required": [
+          "success_response_rules"
+        ]
+      },
+      "then": {
+        "properties": {
+          "success_response_rules": {
+            "properties": {
+              "extraction_rule_refs": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_rules": {
+            "properties": {
+              "method": {
+                "const": "NONE"
+              }
+            },
+            "required": [
+              "method"
+            ]
+          }
+        },
+        "required": [
+          "reconciliation_rules"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reconciliation_rules": {
+            "properties": {
+              "max_auto_reconciliation_attempts": {
+                "const": 0
+              },
+              "cadence_seconds": {
+                "type": "null"
+              },
+              "deadline_derivation_rule": {
+                "type": "null"
+              },
+              "escalation_policy_ref": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_rules": {
+            "properties": {
+              "method": {
+                "const": "MANUAL_ONLY"
+              }
+            },
+            "required": [
+              "method"
+            ]
+          }
+        },
+        "required": [
+          "reconciliation_rules"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reconciliation_rules": {
+            "properties": {
+              "max_auto_reconciliation_attempts": {
+                "const": 0
+              },
+              "cadence_seconds": {
+                "type": "null"
+              },
+              "deadline_derivation_rule": {
+                "type": "string",
+                "minLength": 1
+              },
+              "escalation_policy_ref": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_rules": {
+            "properties": {
+              "method": {
+                "enum": [
+                  "READ_AFTER_WRITE",
+                  "POLL_STATUS",
+                  "POLL_OBLIGATIONS"
+                ]
+              }
+            },
+            "required": [
+              "method"
+            ]
+          }
+        },
+        "required": [
+          "reconciliation_rules"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reconciliation_rules": {
+            "properties": {
+              "max_auto_reconciliation_attempts": {
+                "minimum": 1
+              },
+              "cadence_seconds": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "deadline_derivation_rule": {
+                "type": "string",
+                "minLength": 1
+              },
+              "escalation_policy_ref": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_rules": {
+            "properties": {
+              "method": {
+                "const": "NONE"
+              }
+            },
+            "required": [
+              "method"
+            ]
+          }
+        },
+        "required": [
+          "reconciliation_rules"
+        ]
+      },
+      "then": {
+        "properties": {
+          "pending_unknown_rules": {
+            "properties": {
+              "retry_class": {
+                "enum": [
+                  "HUMAN_REVIEW_THEN_RETRY",
+                  "MANUAL_INTERVENTION_REQUIRED"
+                ]
+              },
+              "escalation_required": {
+                "const": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_rules": {
+            "properties": {
+              "method": {
+                "const": "MANUAL_ONLY"
+              }
+            },
+            "required": [
+              "method"
+            ]
+          }
+        },
+        "required": [
+          "reconciliation_rules"
+        ]
+      },
+      "then": {
+        "properties": {
+          "pending_unknown_rules": {
+            "properties": {
+              "retry_class": {
+                "enum": [
+                  "HUMAN_REVIEW_THEN_RETRY",
+                  "MANUAL_INTERVENTION_REQUIRED"
+                ]
+              },
+              "escalation_required": {
+                "const": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_rules": {
+            "properties": {
+              "method": {
+                "enum": [
+                  "READ_AFTER_WRITE",
+                  "POLL_STATUS",
+                  "POLL_OBLIGATIONS"
+                ]
+              }
+            },
+            "required": [
+              "method"
+            ]
+          }
+        },
+        "required": [
+          "reconciliation_rules"
+        ]
+      },
+      "then": {
+        "properties": {
+          "pending_unknown_rules": {
+            "properties": {
+              "retry_class": {
+                "enum": [
+                  "RECONCILE_THEN_RETRY",
+                  "HUMAN_REVIEW_THEN_RETRY",
+                  "MANUAL_INTERVENTION_REQUIRED"
+                ]
+              },
+              "escalation_required": {
+                "const": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "idempotency_strategy": {
+            "const": "NOT_REQUIRED"
+          }
+        },
+        "required": [
+          "idempotency_strategy"
+        ]
+      },
+      "then": {
+        "properties": {
+          "transport_rules": {
+            "properties": {
+              "http_method": {
+                "const": "GET"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation_family": {
+            "const": "AUTH_SUBMIT_PERIODIC_UPDATE"
+          }
+        },
+        "required": [
+          "operation_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "required_scopes": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "quarterly_update"
+                }
+              },
+              {
+                "contains": {
+                  "const": "submit"
+                }
+              }
+            ]
+          },
+          "idempotency_strategy": {
+            "not": {
+              "const": "NOT_REQUIRED"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation_family": {
+            "const": "AUTH_SUBMIT_FINAL_DECLARATION"
+          }
+        },
+        "required": [
+          "operation_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "required_scopes": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "year_end"
+                }
+              },
+              {
+                "contains": {
+                  "const": "submit"
+                }
+              }
+            ]
+          },
+          "idempotency_strategy": {
+            "not": {
+              "const": "NOT_REQUIRED"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation_family": {
+            "const": "AUTH_SUBMIT_POST_FINALISATION_AMENDMENT"
+          }
+        },
+        "required": [
+          "operation_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "required_scopes": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "year_end"
+                }
+              },
+              {
+                "contains": {
+                  "const": "amendment_submit"
+                }
+              }
+            ]
+          },
+          "idempotency_strategy": {
+            "not": {
+              "const": "NOT_REQUIRED"
+            }
+          },
+          "legal_state_rules": {
+            "properties": {
+              "amendment_requires_confirmed_finalisation": {
+                "const": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation_family": {
+            "const": "AUTH_TRIGGER_CALCULATION"
+          }
+        },
+        "required": [
+          "operation_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "required_scopes": {
+            "not": {
+              "contains": {
+                "enum": [
+                  "submit",
+                  "amendment_submit"
+                ]
+              }
+            }
+          },
+          "idempotency_strategy": {
+            "not": {
+              "const": "NOT_REQUIRED"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operation_family": {
+            "enum": [
+              "AUTH_READ_REFERENCE",
+              "AUTH_READ_OBLIGATIONS",
+              "AUTH_READ_CALCULATION",
+              "AUTH_RECONCILE_STATUS"
+            ]
+          }
+        },
+        "required": [
+          "operation_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "required_scopes": {
+            "not": {
+              "contains": {
+                "enum": [
+                  "submit",
+                  "amendment_submit"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

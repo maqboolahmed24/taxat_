@@ -1,0 +1,368 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/deterministic_golden_pack.schema.json",
+  "title": "DeterministicGoldenPack",
+  "description": "Candidate-bound deterministic golden-fixture contract. This schema freezes the exact byte-stable module outputs, explicit null-slot expectations, exact-decimal field values, named state-machine transitions, replay-hash comparisons, and deterministic cadence fixtures used by the blocking deterministic and state-machine suite.",
+  "type": "object",
+  "required": [
+    "golden_pack_id",
+    "artifact_type",
+    "contract_version",
+    "golden_pack_hash",
+    "candidate_identity_hash",
+    "candidate_identity_contract",
+    "schema_bundle_hash",
+    "config_bundle_hash",
+    "canonical_serialization_policy",
+    "exact_decimal_policy",
+    "null_slot_policy",
+    "replay_comparison_policy",
+    "state_transition_policy",
+    "cadence_policy",
+    "module_fixtures",
+    "state_transition_fixtures",
+    "replay_fixtures",
+    "cadence_fixtures"
+  ],
+  "properties": {
+    "golden_pack_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_type": {
+      "const": "DeterministicGoldenPack"
+    },
+    "contract_version": {
+      "const": "DETERMINISTIC_GOLDEN_PACK_V1"
+    },
+    "golden_pack_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_identity_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_identity_contract": {
+      "$ref": "https://taxat.dev/schemas/release_candidate_identity_contract.schema.json"
+    },
+    "schema_bundle_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "config_bundle_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "canonical_serialization_policy": {
+      "const": "CANONICAL_JSON_SORTED_KEYS_UTF8"
+    },
+    "exact_decimal_policy": {
+      "const": "EXACT_DECIMAL_STRING_NO_LOCALE_NO_EXPONENT"
+    },
+    "null_slot_policy": {
+      "const": "EXPLICIT_NULL_SLOTS_RETAINED_IN_ORDERED_PAYLOADS"
+    },
+    "replay_comparison_policy": {
+      "const": "GOLDEN_FIXTURES_BIND_CANDIDATE_SCHEMA_SCOPE_AND_EXPECTED_HASHES"
+    },
+    "state_transition_policy": {
+      "const": "STATE_MACHINE_FIXTURES_REQUIRE_NAMED_PREVIOUS_AND_CURRENT_STATE"
+    },
+    "cadence_policy": {
+      "const": "DETERMINISTIC_RETRY_AND_RECONCILIATION_CADENCE_NO_RANDOM_JITTER"
+    },
+    "module_fixtures": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/moduleFixture"
+      },
+      "minItems": 1
+    },
+    "state_transition_fixtures": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/stateTransitionFixture"
+      },
+      "minItems": 1
+    },
+    "replay_fixtures": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/replayFixture"
+      },
+      "minItems": 1
+    },
+    "cadence_fixtures": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/cadenceFixture"
+      },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "decimalFieldExpectation": {
+      "type": "object",
+      "required": [
+        "field_path",
+        "decimal_value"
+      ],
+      "properties": {
+        "field_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decimal_value": {
+          "type": "string",
+          "pattern": "^-?(0|[1-9]\\d*)(\\.\\d+)?$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "orderedArrayExpectation": {
+      "type": "object",
+      "required": [
+        "field_path",
+        "ordering_policy",
+        "expected_values"
+      ],
+      "properties": {
+        "field_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ordering_policy": {
+          "const": "PRESERVE_DECLARED_ORDER"
+        },
+        "expected_values": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "moduleFixture": {
+      "type": "object",
+      "required": [
+        "fixture_id",
+        "module_code",
+        "artifact_family",
+        "scope_binding_hash",
+        "canonical_payload_hash",
+        "expected_null_field_paths",
+        "expected_decimal_fields",
+        "expected_ordered_array_fields",
+        "fixture_binding_policy"
+      ],
+      "properties": {
+        "fixture_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "module_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_family": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope_binding_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "canonical_payload_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expected_null_field_paths": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "expected_decimal_fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/decimalFieldExpectation"
+          },
+          "minItems": 1
+        },
+        "expected_ordered_array_fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/orderedArrayExpectation"
+          },
+          "minItems": 1
+        },
+        "fixture_binding_policy": {
+          "const": "CANDIDATE_SCHEMA_SCOPE_BOUND"
+        }
+      },
+      "additionalProperties": false
+    },
+    "stateTransitionFixture": {
+      "type": "object",
+      "required": [
+        "fixture_id",
+        "scope_binding_hash",
+        "state_transition_contract",
+        "expected_current_state",
+        "expected_previous_state_or_null",
+        "expected_transition_event_code",
+        "transition_binding_policy"
+      ],
+      "properties": {
+        "fixture_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope_binding_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state_transition_contract": {
+          "$ref": "https://taxat.dev/schemas/state_transition_contract.schema.json"
+        },
+        "expected_current_state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expected_previous_state_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "expected_transition_event_code": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "transition_binding_policy": {
+          "const": "NAMED_STATE_MACHINE_TUPLE_AND_EVENT"
+        }
+      },
+      "additionalProperties": false
+    },
+    "replayFixture": {
+      "type": "object",
+      "required": [
+        "fixture_id",
+        "scope_binding_hash",
+        "replay_class",
+        "comparison_mode",
+        "expected_outcome_class",
+        "expected_execution_basis_hash",
+        "expected_deterministic_outcome_hash",
+        "comparison_binding_policy"
+      ],
+      "properties": {
+        "fixture_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope_binding_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "replay_class": {
+          "type": "string",
+          "enum": [
+            "STANDARD_REPLAY",
+            "AUDIT_REPLAY",
+            "COUNTERFACTUAL_ANALYSIS"
+          ]
+        },
+        "comparison_mode": {
+          "type": "string",
+          "enum": [
+            "EXACT_HASH_MATCH",
+            "COUNTERFACTUAL_DECLARED",
+            "LIMITED_HISTORICAL_COMPARISON",
+            "BASIS_INCOMPLETE",
+            "BASIS_CORRUPT"
+          ]
+        },
+        "expected_outcome_class": {
+          "type": "string",
+          "enum": [
+            "EXACT_MATCH",
+            "EXPECTED_EQUIVALENCE",
+            "EXPECTED_DIFFERENCE",
+            "LIMITED_COMPARABLE",
+            "BASIS_INCOMPLETE",
+            "BASIS_CORRUPT",
+            "UNEXPECTED_MISMATCH"
+          ]
+        },
+        "expected_execution_basis_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expected_deterministic_outcome_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "comparison_binding_policy": {
+          "const": "CANDIDATE_SCHEMA_SCOPE_AND_HASH_BOUND"
+        }
+      },
+      "additionalProperties": false
+    },
+    "cadenceFixture": {
+      "type": "object",
+      "required": [
+        "fixture_id",
+        "scope_binding_hash",
+        "cadence_family",
+        "attempt_index",
+        "expected_cadence_seconds",
+        "jitter_policy",
+        "schedule_derivation_basis"
+      ],
+      "properties": {
+        "fixture_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope_binding_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cadence_family": {
+          "type": "string",
+          "enum": [
+            "RETRY",
+            "RECONCILIATION"
+          ]
+        },
+        "attempt_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "expected_cadence_seconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "jitter_policy": {
+          "const": "NONE"
+        },
+        "schedule_derivation_basis": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

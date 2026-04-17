@@ -1,0 +1,389 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/execution_mode_boundary_contract.schema.json",
+  "title": "ExecutionModeBoundaryContract",
+  "description": "Frozen execution-mode and legal-effect boundary contract. This schema preserves the manifest run kind, replay posture, common execution-context field group, and the derived live-versus-modeled consequence boundary so downstream artifacts do not infer compliance meaning from partial lineage.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "boundary_hash",
+    "run_kind",
+    "replay_class_or_null",
+    "execution_mode",
+    "analysis_only",
+    "non_compliance_config_refs",
+    "counterfactual_basis",
+    "execution_posture",
+    "legal_effect_boundary",
+    "disclosure_reason_codes"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "EXECUTION_MODE_BOUNDARY_V1"
+    },
+    "boundary_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_kind": {
+      "type": "string",
+      "enum": [
+        "INTERACTIVE",
+        "NIGHTLY",
+        "BACKFILL",
+        "REPLAY",
+        "REMEDIATION",
+        "AMENDMENT",
+        "MIGRATION"
+      ]
+    },
+    "replay_class_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "STANDARD_REPLAY",
+        "AUDIT_REPLAY",
+        "COUNTERFACTUAL_ANALYSIS",
+        null
+      ]
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": [
+        "COMPLIANCE",
+        "ANALYSIS"
+      ]
+    },
+    "analysis_only": {
+      "type": "boolean"
+    },
+    "non_compliance_config_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "counterfactual_basis": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "execution_posture": {
+      "type": "string",
+      "enum": [
+        "LIVE_COMPLIANCE",
+        "LIVE_ANALYSIS",
+        "REPLAY_COMPLIANCE",
+        "REPLAY_COUNTERFACTUAL"
+      ]
+    },
+    "legal_effect_boundary": {
+      "type": "string",
+      "enum": [
+        "COMPLIANCE_CAPABLE",
+        "MODELED_READ_ONLY",
+        "HISTORICAL_REPLAY_READ_ONLY",
+        "COUNTERFACTUAL_REPLAY_READ_ONLY"
+      ]
+    },
+    "disclosure_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "COMPLIANCE"
+          }
+        },
+        "required": [
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "analysis_only": {
+            "const": false
+          },
+          "non_compliance_config_refs": {
+            "maxItems": 0
+          },
+          "counterfactual_basis": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "ANALYSIS"
+          }
+        },
+        "required": [
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "analysis_only": {
+            "const": true
+          },
+          "counterfactual_basis": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "run_kind": {
+            "const": "REPLAY"
+          }
+        },
+        "required": [
+          "run_kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "replay_class_or_null": {
+            "enum": [
+              "STANDARD_REPLAY",
+              "AUDIT_REPLAY",
+              "COUNTERFACTUAL_ANALYSIS"
+            ]
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "replay_class_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "run_kind": {
+            "const": "REPLAY"
+          },
+          "replay_class_or_null": {
+            "enum": [
+              "STANDARD_REPLAY",
+              "AUDIT_REPLAY"
+            ]
+          }
+        },
+        "required": [
+          "run_kind",
+          "replay_class_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "execution_mode": {
+            "const": "COMPLIANCE"
+          },
+          "execution_posture": {
+            "const": "REPLAY_COMPLIANCE"
+          },
+          "legal_effect_boundary": {
+            "const": "HISTORICAL_REPLAY_READ_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "run_kind": {
+            "const": "REPLAY"
+          },
+          "replay_class_or_null": {
+            "const": "COUNTERFACTUAL_ANALYSIS"
+          }
+        },
+        "required": [
+          "run_kind",
+          "replay_class_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "execution_mode": {
+            "const": "ANALYSIS"
+          },
+          "execution_posture": {
+            "const": "REPLAY_COUNTERFACTUAL"
+          },
+          "legal_effect_boundary": {
+            "const": "COUNTERFACTUAL_REPLAY_READ_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "run_kind": {
+            "not": {
+              "const": "REPLAY"
+            }
+          },
+          "execution_mode": {
+            "const": "COMPLIANCE"
+          }
+        },
+        "required": [
+          "run_kind",
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "execution_posture": {
+            "const": "LIVE_COMPLIANCE"
+          },
+          "legal_effect_boundary": {
+            "const": "COMPLIANCE_CAPABLE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "run_kind": {
+            "not": {
+              "const": "REPLAY"
+            }
+          },
+          "execution_mode": {
+            "const": "ANALYSIS"
+          }
+        },
+        "required": [
+          "run_kind",
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "execution_posture": {
+            "const": "LIVE_ANALYSIS"
+          },
+          "legal_effect_boundary": {
+            "const": "MODELED_READ_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "legal_effect_boundary": {
+            "const": "COMPLIANCE_CAPABLE"
+          }
+        },
+        "required": [
+          "legal_effect_boundary"
+        ]
+      },
+      "then": {
+        "properties": {
+          "execution_posture": {
+            "const": "LIVE_COMPLIANCE"
+          },
+          "disclosure_reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "execution_posture": {
+            "const": "LIVE_ANALYSIS"
+          }
+        },
+        "required": [
+          "execution_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "disclosure_reason_codes": {
+            "contains": {
+              "const": "ANALYSIS_ONLY_POSTURE"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "execution_posture": {
+            "const": "REPLAY_COMPLIANCE"
+          }
+        },
+        "required": [
+          "execution_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "disclosure_reason_codes": {
+            "contains": {
+              "const": "REPLAY_NON_LIVE_POSTURE"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "execution_posture": {
+            "const": "REPLAY_COUNTERFACTUAL"
+          }
+        },
+        "required": [
+          "execution_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "disclosure_reason_codes": {
+            "contains": {
+              "const": "COUNTERFACTUAL_REPLAY_POSTURE"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

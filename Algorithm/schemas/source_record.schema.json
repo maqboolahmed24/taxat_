@@ -10,7 +10,10 @@
     "collection_boundary_ref",
     "source_class",
     "provider",
+    "provider_account_ref",
+    "capture_method",
     "captured_at",
+    "effective_period",
     "tenant_id",
     "client_id",
     "business_partition",
@@ -19,66 +22,83 @@
     "ingestion_run_ref",
     "source_strength_tier",
     "freshness_state",
+    "retention_tag",
+    "erasure_state",
     "contract"
   ],
   "properties": {
     "source_record_id": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "manifest_id": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "artifact_type": {
       "const": "SourceRecord"
     },
     "collection_boundary_ref": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "source_class": {
-      "type": "string"
+      "type": "string",
+      "enum": [
+        "AUTHORITY_ACKNOWLEDGEMENT",
+        "AUTHORITY_REFERENCE",
+        "INSTITUTIONAL_FEED",
+        "BOOKS_OF_ENTRY",
+        "DOCUMENTARY_EVIDENCE",
+        "DECLARED_ASSERTION",
+        "DETERMINISTIC_DERIVATION",
+        "PROBABILISTIC_INFERENCE",
+        "GOVERNANCE_ARTIFACT"
+      ]
     },
     "provider": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "provider_account_ref": {
-      "type": [
-        "string",
-        "null"
-      ]
+      "type": "string",
+      "minLength": 1
     },
     "capture_method": {
-      "type": [
-        "string",
-        "null"
-      ]
+      "type": "string",
+      "minLength": 1
     },
     "captured_at": {
       "type": "string",
       "format": "date-time"
     },
     "effective_period": {
-      "type": [
-        "string",
-        "null"
-      ]
+      "type": "string",
+      "minLength": 1
     },
     "tenant_id": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "client_id": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "business_partition": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "raw_hash": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "raw_payload_ref": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "ingestion_run_ref": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "source_strength_tier": {
       "type": "string",
@@ -103,9 +123,112 @@
         "SUPERSEDED"
       ]
     },
+    "retention_tag": {
+      "$ref": "./retention_tag.schema.json"
+    },
+    "erasure_state": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "LIMITED",
+        "LEGAL_HOLD",
+        "ERASURE_PENDING",
+        "PSEUDONYMISED",
+        "ERASED"
+      ]
+    },
     "contract": {
       "$ref": "./schema_bundle.schema.json#/$defs/artifactContract"
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "erasure_state": {
+            "const": "LEGAL_HOLD"
+          }
+        },
+        "required": [
+          "erasure_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retention_tag": {
+            "type": "object",
+            "properties": {
+              "legal_hold_state": {
+                "enum": [
+                  "ACTIVE",
+                  "RELEASE_ELIGIBLE"
+                ]
+              }
+            },
+            "required": [
+              "legal_hold_state"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "erasure_state": {
+            "const": "ERASURE_PENDING"
+          }
+        },
+        "required": [
+          "erasure_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retention_tag": {
+            "type": "object",
+            "properties": {
+              "erasure_eligibility": {
+                "const": "ELIGIBLE"
+              }
+            },
+            "required": [
+              "erasure_eligibility"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "erasure_state": {
+            "enum": [
+              "PSEUDONYMISED",
+              "ERASED"
+            ]
+          }
+        },
+        "required": [
+          "erasure_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retention_tag": {
+            "type": "object",
+            "properties": {
+              "erasure_eligibility": {
+                "const": "ELIGIBLE"
+              }
+            },
+            "required": [
+              "erasure_eligibility"
+            ]
+          }
+        }
+      }
+    }
+  ],
   "additionalProperties": false
 }

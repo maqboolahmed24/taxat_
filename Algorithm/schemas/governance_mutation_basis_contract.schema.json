@@ -1,0 +1,258 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/governance_mutation_basis_contract.schema.json",
+  "title": "GovernanceMutationBasisContract",
+  "description": "Shared simulation-to-commit continuity contract for governance mutations. This schema freezes the exact authorization binding, policy snapshot, topology basis, simulation basis, reviewed mutation-hazard identity, approval posture, confidence posture, and canonical contract hash that staged UI state, command envelopes, and durable receipts must preserve or stale-reject.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "basis_contract_hash",
+    "policy_snapshot_hash",
+    "access_binding_hash",
+    "dependency_topology_hash",
+    "simulation_basis_hash",
+    "hazard_contract_hash",
+    "commit_authority_posture",
+    "approval_requirement",
+    "bounded_safe_mutation",
+    "required_approvals",
+    "simulation_confidence_score",
+    "predictability_score"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "GOVERNANCE_MUTATION_BASIS_CONTRACT_V1"
+    },
+    "basis_contract_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_snapshot_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "access_binding_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dependency_topology_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "simulation_basis_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "hazard_contract_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "commit_authority_posture": {
+      "type": "string",
+      "enum": [
+        "PREVIEW_ONLY",
+        "APPROVAL_GATED",
+        "BOUNDED_SAFE"
+      ]
+    },
+    "approval_requirement": {
+      "type": "string",
+      "enum": [
+        "NOT_REQUIRED",
+        "SINGLE_APPROVER",
+        "DUAL_APPROVER",
+        "SECURITY_REVIEW",
+        "CHANGE_ADVISORY_QUORUM"
+      ]
+    },
+    "bounded_safe_mutation": {
+      "type": "integer",
+      "enum": [
+        0,
+        1
+      ]
+    },
+    "required_approvals": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "simulation_confidence_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "predictability_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "bounded_safe_mutation": {
+            "const": 1
+          }
+        },
+        "required": [
+          "bounded_safe_mutation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "approval_requirement": {
+            "const": "NOT_REQUIRED"
+          },
+          "required_approvals": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "bounded_safe_mutation": {
+            "const": 0
+          }
+        },
+        "required": [
+          "bounded_safe_mutation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "approval_requirement": {
+            "enum": [
+              "SINGLE_APPROVER",
+              "DUAL_APPROVER",
+              "SECURITY_REVIEW",
+              "CHANGE_ADVISORY_QUORUM"
+            ]
+          },
+          "required_approvals": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "approval_requirement": {
+            "const": "NOT_REQUIRED"
+          }
+        },
+        "required": [
+          "approval_requirement"
+        ]
+      },
+      "then": {
+        "properties": {
+          "bounded_safe_mutation": {
+            "const": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "commit_authority_posture": {
+            "const": "PREVIEW_ONLY"
+          }
+        },
+        "required": [
+          "commit_authority_posture"
+        ]
+      },
+      "then": {
+        "anyOf": [
+          {
+            "properties": {
+              "simulation_confidence_score": {
+                "maximum": 79
+              }
+            },
+            "required": [
+              "simulation_confidence_score"
+            ]
+          },
+          {
+            "properties": {
+              "predictability_score": {
+                "maximum": 74
+              }
+            },
+            "required": [
+              "predictability_score"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "commit_authority_posture": {
+            "const": "APPROVAL_GATED"
+          }
+        },
+        "required": [
+          "commit_authority_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "simulation_confidence_score": {
+            "minimum": 80
+          },
+          "predictability_score": {
+            "minimum": 75
+          },
+          "bounded_safe_mutation": {
+            "const": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "commit_authority_posture": {
+            "const": "BOUNDED_SAFE"
+          }
+        },
+        "required": [
+          "commit_authority_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "simulation_confidence_score": {
+            "minimum": 80
+          },
+          "predictability_score": {
+            "minimum": 75
+          },
+          "bounded_safe_mutation": {
+            "const": 1
+          },
+          "approval_requirement": {
+            "const": "NOT_REQUIRED"
+          },
+          "required_approvals": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

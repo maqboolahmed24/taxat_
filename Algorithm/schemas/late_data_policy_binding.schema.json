@@ -1,0 +1,217 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/late_data_policy_binding.schema.json",
+  "title": "LateDataPolicyBinding",
+  "description": "Ordered late-data policy binding projected from the frozen intake boundary. This contract freezes which source domain, optional source class, partition scope, and runtime scope map to which late-data policy after seal.",
+  "type": "object",
+  "required": [
+    "binding_id",
+    "source_domain",
+    "source_class",
+    "partition_scope_refs",
+    "runtime_scope_refs",
+    "late_data_policy_ref",
+    "binding_scope",
+    "precedence_rank"
+  ],
+  "properties": {
+    "binding_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_class": {
+      "$ref": "#/$defs/sourceClassOrNull"
+    },
+    "partition_scope_refs": {
+      "$ref": "#/$defs/partitionScopeRefs"
+    },
+    "runtime_scope_refs": {
+      "$ref": "#/$defs/runtimeScopeRefs"
+    },
+    "late_data_policy_ref": {
+      "$ref": "#/$defs/lateDataPolicyRef"
+    },
+    "binding_scope": {
+      "$ref": "#/$defs/bindingScope"
+    },
+    "precedence_rank": {
+      "type": "integer",
+      "minimum": 1
+    }
+  },
+  "$defs": {
+    "sourceClass": {
+      "type": "string",
+      "enum": [
+        "AUTHORITY_ACKNOWLEDGEMENT",
+        "AUTHORITY_REFERENCE",
+        "INSTITUTIONAL_FEED",
+        "BOOKS_OF_ENTRY",
+        "DOCUMENTARY_EVIDENCE",
+        "DECLARED_ASSERTION",
+        "DETERMINISTIC_DERIVATION",
+        "PROBABILISTIC_INFERENCE",
+        "GOVERNANCE_ARTIFACT"
+      ]
+    },
+    "sourceClassOrNull": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "AUTHORITY_ACKNOWLEDGEMENT",
+        "AUTHORITY_REFERENCE",
+        "INSTITUTIONAL_FEED",
+        "BOOKS_OF_ENTRY",
+        "DOCUMENTARY_EVIDENCE",
+        "DECLARED_ASSERTION",
+        "DETERMINISTIC_DERIVATION",
+        "PROBABILISTIC_INFERENCE",
+        "GOVERNANCE_ARTIFACT",
+        null
+      ]
+    },
+    "partitionScopeRefs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "runtimeScopeRefs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "year_end",
+          "quarterly_update",
+          "estimate_only",
+          "prepare_submission",
+          "submit",
+          "amendment_intent",
+          "amendment_submit"
+        ]
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "lateDataPolicyRef": {
+      "type": "string",
+      "enum": [
+        "EXCLUDE_LATE",
+        "SPAWN_CHILD_MANIFEST",
+        "REVIEW_IF_LATE"
+      ]
+    },
+    "bindingScope": {
+      "type": "string",
+      "enum": [
+        "DOMAIN_WIDE",
+        "SOURCE_CLASS",
+        "PARTITION_SCOPED",
+        "RUNTIME_SCOPED"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "binding_scope": {
+            "const": "DOMAIN_WIDE"
+          }
+        },
+        "required": [
+          "binding_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_class": {
+            "type": "null"
+          },
+          "partition_scope_refs": {
+            "maxItems": 0
+          },
+          "runtime_scope_refs": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "binding_scope": {
+            "const": "SOURCE_CLASS"
+          }
+        },
+        "required": [
+          "binding_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_class": {
+            "$ref": "#/$defs/sourceClass"
+          },
+          "partition_scope_refs": {
+            "maxItems": 0
+          },
+          "runtime_scope_refs": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "binding_scope": {
+            "const": "PARTITION_SCOPED"
+          }
+        },
+        "required": [
+          "binding_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "partition_scope_refs": {
+            "minItems": 1
+          },
+          "runtime_scope_refs": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "binding_scope": {
+            "const": "RUNTIME_SCOPED"
+          }
+        },
+        "required": [
+          "binding_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "runtime_scope_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

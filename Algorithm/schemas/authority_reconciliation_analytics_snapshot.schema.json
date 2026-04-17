@@ -1,0 +1,288 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/authority_reconciliation_analytics_snapshot.schema.json",
+  "title": "AuthorityReconciliationAnalyticsSnapshot",
+  "description": "Replay-safe reconciliation economics snapshot. This schema aggregates budget burn, unresolved ambiguity, resend refusal, escalation latency, and restore/resume behavior for one authority operation profile from durable reconciliation-control contracts rather than transport retry logs.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "snapshot_id",
+    "authority_operation_profile_ref",
+    "provider_environment",
+    "operation_family",
+    "window_started_at",
+    "window_ended_at",
+    "interaction_refs",
+    "total_interaction_count",
+    "budget_state_counts",
+    "outcome_class_counts",
+    "resend_refusal_reason_counts",
+    "escalation_reason_counts",
+    "unresolved_ambiguity_count",
+    "deadline_expiry_count",
+    "escalated_count",
+    "blind_resend_blocked_count",
+    "replay_resume_count",
+    "average_attempts_consumed",
+    "max_attempts_consumed",
+    "escalation_latency_seconds_p95_or_null",
+    "tuning_recommendation_codes",
+    "source_policy",
+    "generated_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "AuthorityReconciliationAnalyticsSnapshot"
+    },
+    "snapshot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority_operation_profile_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_environment": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operation_family": {
+      "type": "string",
+      "minLength": 1
+    },
+    "window_started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "window_ended_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "interaction_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "total_interaction_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "budget_state_counts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/budgetCountEntry"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "outcome_class_counts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/outcomeCountEntry"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "resend_refusal_reason_counts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/resendReasonCountEntry"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "escalation_reason_counts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/stringCountEntry"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "unresolved_ambiguity_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "deadline_expiry_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "escalated_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blind_resend_blocked_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "replay_resume_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "average_attempts_consumed": {
+      "type": "number",
+      "minimum": 0
+    },
+    "max_attempts_consumed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "escalation_latency_seconds_p95_or_null": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "tuning_recommendation_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "NO_CHANGE_RECOMMENDED",
+          "INCREASE_DEADLINE_WINDOW",
+          "DECREASE_DEADLINE_WINDOW",
+          "INCREASE_AUTO_ATTEMPT_BUDGET",
+          "DECREASE_AUTO_ATTEMPT_BUDGET",
+          "INCREASE_CADENCE_INTERVAL",
+          "DECREASE_CADENCE_INTERVAL",
+          "REVIEW_PROVIDER_AMBIGUITY",
+          "REQUIRE_MANUAL_ESCALATION_EARLIER"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "source_policy": {
+      "const": "DURABLE_RECONCILIATION_CONTROL_CONTRACTS_ONLY"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "budgetCountEntry": {
+      "type": "object",
+      "required": [
+        "code",
+        "count"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "NOT_OPENED",
+            "ACTIVE",
+            "EXHAUSTED",
+            "ESCALATED",
+            "CLOSED"
+          ]
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcomeCountEntry": {
+      "type": "object",
+      "required": [
+        "code",
+        "count"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "NO_RESPONSE_YET",
+            "PENDING_ACK",
+            "UNKNOWN",
+            "AMBIGUOUS",
+            "OUT_OF_BAND",
+            "CONFIRMED",
+            "REJECTED",
+            "ESCALATED"
+          ]
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "resendReasonCountEntry": {
+      "type": "object",
+      "required": [
+        "code",
+        "count"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "AUTO_RECONCILIATION_BUDGET_EXHAUSTED",
+            "RECONCILIATION_DEADLINE_EXPIRED",
+            "CONTRADICTORY_AUTHORITY_EVIDENCE",
+            "OUT_OF_BAND_AUTHORITY_STATE_PRESENT",
+            "DUPLICATE_BUCKET_OCCUPIED",
+            "STRONGER_EXTERNAL_TRUTH_PRESENT",
+            "TERMINAL_AUTHORITY_STATE_RECORDED",
+            "INTERACTION_FINALIZED_NO_RESEND"
+          ]
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "stringCountEntry": {
+      "type": "object",
+      "required": [
+        "code",
+        "count"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "escalated_count": {
+            "const": 0
+          }
+        },
+        "required": [
+          "escalated_count"
+        ]
+      },
+      "then": {
+        "properties": {
+          "escalation_latency_seconds_p95_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/decision_explainability_contract.schema.json",
+  "title": "DecisionExplainabilityContract",
+  "description": "Shared persisted explainability contract for gate, trust, and terminal decision artifacts. This schema freezes dominant-reason selection, stable ordered reason emission, bounded prefix compression, semantic qualifier disclosure, action-projection posture, and the rule that read surfaces must consume persisted backend explanation instead of replaying metrics or the full gate chain.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "artifact_family",
+    "grammar_profile_code",
+    "reason_order_policy",
+    "dominant_reason_selection_policy",
+    "summary_source_policy",
+    "compression_policy",
+    "compression_reason_cap",
+    "ordered_reason_codes",
+    "dominant_reason_code",
+    "compressed_reason_codes",
+    "suppressed_reason_count",
+    "semantic_qualifiers",
+    "action_projection_state",
+    "plain_text_field_name",
+    "plain_text_character_limit"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "DECISION_EXPLAINABILITY_V1"
+    },
+    "artifact_family": {
+      "type": "string",
+      "enum": [
+        "GATE_DECISION_RECORD",
+        "TRUST_SUMMARY",
+        "DECISION_BUNDLE"
+      ]
+    },
+    "grammar_profile_code": {
+      "const": "LOW_NOISE_DECISION_GRAMMAR_V1"
+    },
+    "reason_order_policy": {
+      "const": "DOMINANT_REASON_FIRST_CANONICAL_PRIORITY"
+    },
+    "dominant_reason_selection_policy": {
+      "const": "FIRST_ORDERED_REASON_IS_DOMINANT"
+    },
+    "summary_source_policy": {
+      "const": "READ_SURFACES_MUST_USE_PERSISTED_FIELDS"
+    },
+    "compression_policy": {
+      "const": "PREFIX_COMPRESS_ORDERED_REASON_CODES_WITH_SUPPRESSED_COUNT"
+    },
+    "compression_reason_cap": {
+      "const": 3
+    },
+    "ordered_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "maxItems": 8,
+      "uniqueItems": true
+    },
+    "dominant_reason_code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "compressed_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "maxItems": 3,
+      "uniqueItems": true
+    },
+    "suppressed_reason_count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 7
+    },
+    "semantic_qualifiers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "AUTHORITY_STATE",
+          "LIMITATION_STATE",
+          "OVERRIDE_STATE",
+          "ACTIONABILITY_STATE"
+        ]
+      },
+      "default": [],
+      "maxItems": 4,
+      "uniqueItems": true
+    },
+    "action_projection_state": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "NEXT_ACTIONS_INCLUDED",
+        "PRIMARY_ACTION_INCLUDED",
+        "NO_SAFE_ACTION_DISCLOSED"
+      ]
+    },
+    "plain_text_field_name": {
+      "type": "string",
+      "enum": [
+        "plain_explanation",
+        "plain_summary",
+        "plain_reason"
+      ]
+    },
+    "plain_text_character_limit": {
+      "const": 200
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "artifact_family": {
+            "const": "GATE_DECISION_RECORD"
+          }
+        },
+        "required": [
+          "artifact_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "action_projection_state": {
+            "enum": [
+              "NONE",
+              "NEXT_ACTIONS_INCLUDED"
+            ]
+          },
+          "plain_text_field_name": {
+            "const": "plain_explanation"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "artifact_family": {
+            "const": "TRUST_SUMMARY"
+          }
+        },
+        "required": [
+          "artifact_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "action_projection_state": {
+            "const": "NONE"
+          },
+          "plain_text_field_name": {
+            "const": "plain_summary"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "artifact_family": {
+            "const": "DECISION_BUNDLE"
+          }
+        },
+        "required": [
+          "artifact_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "action_projection_state": {
+            "enum": [
+              "PRIMARY_ACTION_INCLUDED",
+              "NO_SAFE_ACTION_DISCLOSED"
+            ]
+          },
+          "plain_text_field_name": {
+            "const": "plain_reason"
+          }
+        }
+      }
+    }
+  ]
+}

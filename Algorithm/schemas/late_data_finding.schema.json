@@ -1,0 +1,467 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/late_data_finding.schema.json",
+  "title": "LateDataFinding",
+  "description": "Policy-resolved late-data finding for a sealed manifest. This contract aggregates one or more indicators into a gate-consumable outcome that either excludes late data, opens manual review, or requires child-manifest branching.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "finding_id",
+    "manifest_id",
+    "indicator_refs",
+    "binding_ref",
+    "source_domain",
+    "source_class",
+    "partition_scope_refs",
+    "runtime_scope_refs",
+    "late_data_policy_ref",
+    "severity",
+    "temporal_classification_contract",
+    "finding_state",
+    "active_manifest_effect",
+    "child_manifest_ref",
+    "workflow_item_ref",
+    "superseded_by_finding_ref",
+    "discovered_at",
+    "resolved_at",
+    "reason_codes"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "LateDataFinding"
+    },
+    "finding_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "indicator_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "binding_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_class": {
+      "$ref": "./late_data_policy_binding.schema.json#/$defs/sourceClassOrNull"
+    },
+    "partition_scope_refs": {
+      "$ref": "./late_data_policy_binding.schema.json#/$defs/partitionScopeRefs"
+    },
+    "runtime_scope_refs": {
+      "$ref": "./late_data_policy_binding.schema.json#/$defs/runtimeScopeRefs"
+    },
+    "late_data_policy_ref": {
+      "$ref": "./late_data_policy_binding.schema.json#/$defs/lateDataPolicyRef"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "NOTICE",
+        "MANUAL_REVIEW",
+        "CHILD_MANIFEST_REQUIRED"
+      ]
+    },
+    "temporal_classification_contract": {
+      "$ref": "./late_data_temporal_contract.schema.json"
+    },
+    "finding_state": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "EXCLUDED_FROM_ACTIVE_MANIFEST",
+        "REVIEW_REQUIRED",
+        "CHILD_MANIFEST_SPAWNED",
+        "SUPERSEDED"
+      ]
+    },
+    "active_manifest_effect": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "NOTICE_ONLY",
+        "REVIEW_REQUIRED",
+        "OUT_OF_SCOPE_CHILD_REQUIRED"
+      ]
+    },
+    "child_manifest_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "workflow_item_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "superseded_by_finding_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "discovered_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resolved_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "severity": {
+            "const": "NOTICE"
+          }
+        },
+        "required": [
+          "severity"
+        ]
+      },
+      "then": {
+        "properties": {
+          "late_data_policy_ref": {
+            "const": "EXCLUDE_LATE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "severity": {
+            "const": "MANUAL_REVIEW"
+          }
+        },
+        "required": [
+          "severity"
+        ]
+      },
+      "then": {
+        "properties": {
+          "late_data_policy_ref": {
+            "const": "REVIEW_IF_LATE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "severity": {
+            "const": "CHILD_MANIFEST_REQUIRED"
+          }
+        },
+        "required": [
+          "severity"
+        ]
+      },
+      "then": {
+        "properties": {
+          "late_data_policy_ref": {
+            "const": "SPAWN_CHILD_MANIFEST"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "severity": {
+            "const": "NOTICE"
+          }
+        },
+        "required": [
+          "severity"
+        ],
+        "not": {
+          "properties": {
+            "finding_state": {
+              "const": "SUPERSEDED"
+            }
+          },
+          "required": [
+            "finding_state"
+          ]
+        }
+      },
+      "then": {
+        "properties": {
+          "active_manifest_effect": {
+            "const": "NOTICE_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "severity": {
+            "const": "MANUAL_REVIEW"
+          }
+        },
+        "required": [
+          "severity"
+        ],
+        "not": {
+          "properties": {
+            "finding_state": {
+              "const": "SUPERSEDED"
+            }
+          },
+          "required": [
+            "finding_state"
+          ]
+        }
+      },
+      "then": {
+        "properties": {
+          "active_manifest_effect": {
+            "const": "REVIEW_REQUIRED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "severity": {
+            "const": "CHILD_MANIFEST_REQUIRED"
+          }
+        },
+        "required": [
+          "severity"
+        ],
+        "not": {
+          "properties": {
+            "finding_state": {
+              "const": "SUPERSEDED"
+            }
+          },
+          "required": [
+            "finding_state"
+          ]
+        }
+      },
+      "then": {
+        "properties": {
+          "active_manifest_effect": {
+            "const": "OUT_OF_SCOPE_CHILD_REQUIRED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "finding_state": {
+            "const": "OPEN"
+          }
+        },
+        "required": [
+          "finding_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "child_manifest_ref": {
+            "type": "null"
+          },
+          "workflow_item_ref": {
+            "type": "null"
+          },
+          "superseded_by_finding_ref": {
+            "type": "null"
+          },
+          "resolved_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "finding_state": {
+            "const": "EXCLUDED_FROM_ACTIVE_MANIFEST"
+          }
+        },
+        "required": [
+          "finding_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "late_data_policy_ref": {
+            "const": "EXCLUDE_LATE"
+          },
+          "child_manifest_ref": {
+            "type": "null"
+          },
+          "workflow_item_ref": {
+            "type": "null"
+          },
+          "superseded_by_finding_ref": {
+            "type": "null"
+          },
+          "resolved_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "finding_state": {
+            "const": "REVIEW_REQUIRED"
+          }
+        },
+        "required": [
+          "finding_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "late_data_policy_ref": {
+            "const": "REVIEW_IF_LATE"
+          },
+          "workflow_item_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "child_manifest_ref": {
+            "type": "null"
+          },
+          "superseded_by_finding_ref": {
+            "type": "null"
+          },
+          "resolved_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "finding_state": {
+            "const": "CHILD_MANIFEST_SPAWNED"
+          }
+        },
+        "required": [
+          "finding_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "late_data_policy_ref": {
+            "const": "SPAWN_CHILD_MANIFEST"
+          },
+          "child_manifest_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "workflow_item_ref": {
+            "type": "null"
+          },
+          "superseded_by_finding_ref": {
+            "type": "null"
+          },
+          "resolved_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "finding_state": {
+            "const": "SUPERSEDED"
+          }
+        },
+        "required": [
+          "finding_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "active_manifest_effect": {
+            "const": "NONE"
+          },
+          "superseded_by_finding_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resolved_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "temporal_classification_contract": {
+            "properties": {
+              "retroactive_impact_required": {
+                "const": true
+              }
+            },
+            "required": [
+              "retroactive_impact_required"
+            ]
+          }
+        },
+        "required": [
+          "temporal_classification_contract"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

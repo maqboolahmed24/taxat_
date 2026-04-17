@@ -15,15 +15,34 @@
     "value_payload_ref",
     "promotion_state",
     "source_strength_tier",
+    "retention_tag",
+    "erasure_state",
+    "freshness_state",
+    "collection_boundary_ref",
+    "normalization_context_ref",
+    "source_record_refs",
+    "source_record_lineage_hash",
+    "supporting_evidence_refs",
+    "evidence_lineage_hash",
     "partition_scope",
+    "partition_scope_refs",
+    "partition_isolation_state",
+    "visibility_basis",
+    "promoted_from_candidate_fact_refs",
+    "canonical_identity_hash",
+    "dedupe_key",
+    "conflict_membership_refs",
+    "promotion_record",
     "contract"
   ],
   "properties": {
     "canonical_fact_id": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "manifest_id": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "artifact_type": {
       "const": "CanonicalFact"
@@ -41,7 +60,8 @@
     "non_compliance_config_refs": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
       },
       "default": [],
       "uniqueItems": true
@@ -50,18 +70,31 @@
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "minLength": 1
     },
     "fact_family": {
-      "type": "string"
+      "type": "string",
+      "enum": [
+        "TRANSACTION_FACT",
+        "RECORD_FACT",
+        "CATEGORY_TOTAL_FACT",
+        "ADJUSTMENT_FACT",
+        "PROFILE_FACT",
+        "OBLIGATION_FACT",
+        "SUBMISSION_STATE_FACT",
+        "AUTHORITY_COMPARISON_FACT",
+        "RISK_FEATURE_FACT",
+        "WORKFLOW_CONTEXT_FACT"
+      ]
     },
     "value_payload_ref": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "promotion_state": {
       "type": "string",
       "enum": [
-        "CANDIDATE",
         "PROVISIONAL",
         "CANONICAL",
         "CONTESTED",
@@ -82,33 +115,417 @@
         "TIER_8_GOVERNANCE_ONLY"
       ]
     },
+    "retention_tag": {
+      "$ref": "./retention_tag.schema.json"
+    },
+    "erasure_state": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "LIMITED",
+        "LEGAL_HOLD",
+        "ERASURE_PENDING",
+        "PSEUDONYMISED",
+        "ERASED"
+      ]
+    },
     "freshness_state": {
-      "type": [
-        "string",
-        "null"
-      ],
+      "type": "string",
       "enum": [
         "CURRENT",
         "STALE",
         "EXPIRED",
         "UNKNOWN",
-        "SUPERSEDED",
-        null
+        "SUPERSEDED"
       ]
+    },
+    "collection_boundary_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "normalization_context_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_record_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "source_record_lineage_hash": {
+      "type": "string",
+      "minLength": 1
     },
     "supporting_evidence_refs": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "evidence_lineage_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "partition_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "partition_scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "maxItems": 1,
+      "uniqueItems": true
+    },
+    "partition_isolation_state": {
+      "const": "EXACT_SINGLE_PARTITION"
+    },
+    "visibility_basis": {
+      "const": "UNMASKED_AUTHORITATIVE_ONLY"
+    },
+    "promoted_from_candidate_fact_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "canonical_identity_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dedupe_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "conflict_membership_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
       },
       "default": [],
       "uniqueItems": true
     },
-    "partition_scope": {
-      "type": "string"
+    "promotion_record": {
+      "$ref": "#/$defs/promotionRecord"
+    },
+    "adjustment_binding": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/adjustmentBinding"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     },
     "contract": {
       "$ref": "./schema_bundle.schema.json#/$defs/artifactContract"
+    }
+  },
+  "$defs": {
+    "promotionRecord": {
+      "type": "object",
+      "required": [
+        "promotion_activity_ref",
+        "conflict_set_ref",
+        "resolution_frontier_at_promotion",
+        "blocking_conflict_ids_at_promotion",
+        "blocking_conflict_count_at_promotion",
+        "promotion_rule_ref",
+        "approved_override_ref_or_null",
+        "promoted_at",
+        "frozen_collection_boundary_required",
+        "evidence_lineage_complete",
+        "visibility_safe_for_authority"
+      ],
+      "properties": {
+        "promotion_activity_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "conflict_set_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "resolution_frontier_at_promotion": {
+          "type": "string",
+          "enum": [
+            "CLEAR",
+            "MONITORING_ONLY",
+            "BLOCKING_PRESENT"
+          ]
+        },
+        "blocking_conflict_ids_at_promotion": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "blocking_conflict_count_at_promotion": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "promotion_rule_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approved_override_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "promoted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "frozen_collection_boundary_required": {
+          "const": true
+        },
+        "evidence_lineage_complete": {
+          "const": true
+        },
+        "visibility_safe_for_authority": {
+          "const": true
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "blocking_conflict_count_at_promotion": {
+                "const": 0
+              }
+            },
+            "required": [
+              "blocking_conflict_count_at_promotion"
+            ]
+          },
+          "then": {
+            "properties": {
+              "blocking_conflict_ids_at_promotion": {
+                "maxItems": 0
+              },
+              "resolution_frontier_at_promotion": {
+                "enum": [
+                  "CLEAR",
+                  "MONITORING_ONLY"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "blocking_conflict_count_at_promotion": {
+                "minimum": 1
+              }
+            },
+            "required": [
+              "blocking_conflict_count_at_promotion"
+            ]
+          },
+          "then": {
+            "properties": {
+              "blocking_conflict_ids_at_promotion": {
+                "minItems": 1
+              },
+              "resolution_frontier_at_promotion": {
+                "const": "BLOCKING_PRESENT"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "adjustmentBinding": {
+      "type": "object",
+      "required": [
+        "applicable_reporting_scopes",
+        "quarterly_basis_profile",
+        "time_window_basis",
+        "window_start_date_or_null",
+        "window_end_date_or_null",
+        "partition_application",
+        "analysis_mode_treatment"
+      ],
+      "properties": {
+        "applicable_reporting_scopes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "year_end",
+              "quarterly_update",
+              "estimate_only"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "quarterly_basis_profile": {
+          "type": "string",
+          "enum": [
+            "NOT_APPLICABLE",
+            "PERIODIC",
+            "CUMULATIVE"
+          ]
+        },
+        "time_window_basis": {
+          "type": "string",
+          "enum": [
+            "FULL_TAX_YEAR",
+            "CURRENT_QUARTER_ONLY",
+            "TAX_YEAR_TO_DATE",
+            "EXPLICIT_WINDOW"
+          ]
+        },
+        "window_start_date_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "window_end_date_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "partition_application": {
+          "type": "string",
+          "enum": [
+            "EXACT_PARTITION_ONLY"
+          ]
+        },
+        "analysis_mode_treatment": {
+          "type": "string",
+          "enum": [
+            "MATCH_COMPLIANCE_BASIS",
+            "COUNTERFACTUAL_ONLY"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "time_window_basis": {
+                "const": "EXPLICIT_WINDOW"
+              }
+            },
+            "required": [
+              "time_window_basis"
+            ]
+          },
+          "then": {
+            "properties": {
+              "window_start_date_or_null": {
+                "type": "string",
+                "format": "date"
+              },
+              "window_end_date_or_null": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "time_window_basis": {
+                "not": {
+                  "const": "EXPLICIT_WINDOW"
+                }
+              }
+            },
+            "required": [
+              "time_window_basis"
+            ]
+          },
+          "then": {
+            "properties": {
+              "window_start_date_or_null": {
+                "type": "null"
+              },
+              "window_end_date_or_null": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "applicable_reporting_scopes": {
+                "contains": {
+                  "const": "quarterly_update"
+                }
+              }
+            },
+            "required": [
+              "applicable_reporting_scopes"
+            ]
+          },
+          "then": {
+            "properties": {
+              "quarterly_basis_profile": {
+                "enum": [
+                  "PERIODIC",
+                  "CUMULATIVE"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "applicable_reporting_scopes": {
+                "not": {
+                  "contains": {
+                    "const": "quarterly_update"
+                  }
+                }
+              }
+            },
+            "required": [
+              "applicable_reporting_scopes"
+            ]
+          },
+          "then": {
+            "properties": {
+              "quarterly_basis_profile": {
+                "const": "NOT_APPLICABLE"
+              }
+            }
+          }
+        }
+      ]
     }
   },
   "allOf": [
@@ -140,6 +557,49 @@
     {
       "if": {
         "properties": {
+          "fact_family": {
+            "const": "ADJUSTMENT_FACT"
+          }
+        },
+        "required": [
+          "fact_family"
+        ]
+      },
+      "then": {
+        "required": [
+          "adjustment_binding"
+        ],
+        "properties": {
+          "adjustment_binding": {
+            "$ref": "#/$defs/adjustmentBinding"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "fact_family": {
+            "not": {
+              "const": "ADJUSTMENT_FACT"
+            }
+          }
+        },
+        "required": [
+          "fact_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "adjustment_binding": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
           "execution_mode": {
             "const": "ANALYSIS"
           }
@@ -156,6 +616,177 @@
           "counterfactual_basis": {
             "type": "string",
             "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "promotion_state": {
+            "const": "CANONICAL"
+          }
+        },
+        "required": [
+          "promotion_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "promotion_record": {
+            "type": "object",
+            "properties": {
+              "blocking_conflict_count_at_promotion": {
+                "const": 0
+              },
+              "resolution_frontier_at_promotion": {
+                "enum": [
+                  "CLEAR",
+                  "MONITORING_ONLY"
+                ]
+              }
+            },
+            "required": [
+              "blocking_conflict_count_at_promotion",
+              "resolution_frontier_at_promotion"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "promotion_state": {
+            "const": "CONTESTED"
+          }
+        },
+        "required": [
+          "promotion_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "conflict_membership_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "COMPLIANCE"
+          },
+          "fact_family": {
+            "const": "ADJUSTMENT_FACT"
+          }
+        },
+        "required": [
+          "execution_mode",
+          "fact_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "adjustment_binding": {
+            "type": "object",
+            "properties": {
+              "analysis_mode_treatment": {
+                "const": "MATCH_COMPLIANCE_BASIS"
+              }
+            },
+            "required": [
+              "analysis_mode_treatment"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "erasure_state": {
+            "const": "LEGAL_HOLD"
+          }
+        },
+        "required": [
+          "erasure_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retention_tag": {
+            "type": "object",
+            "properties": {
+              "legal_hold_state": {
+                "enum": [
+                  "ACTIVE",
+                  "RELEASE_ELIGIBLE"
+                ]
+              }
+            },
+            "required": [
+              "legal_hold_state"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "erasure_state": {
+            "const": "ERASURE_PENDING"
+          }
+        },
+        "required": [
+          "erasure_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retention_tag": {
+            "type": "object",
+            "properties": {
+              "erasure_eligibility": {
+                "const": "ELIGIBLE"
+              }
+            },
+            "required": [
+              "erasure_eligibility"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "erasure_state": {
+            "enum": [
+              "PSEUDONYMISED",
+              "ERASED"
+            ]
+          }
+        },
+        "required": [
+          "erasure_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retention_tag": {
+            "type": "object",
+            "properties": {
+              "erasure_eligibility": {
+                "const": "ELIGIBLE"
+              }
+            },
+            "required": [
+              "erasure_eligibility"
+            ]
           }
         }
       }

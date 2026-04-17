@@ -1,0 +1,353 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/schema_bundle_compatibility_gate_contract.schema.json",
+  "title": "SchemaBundleCompatibilityGateContract",
+  "description": "Shared schema-bundle compatibility gate contract. This schema freezes the exact reader-window, migration chronology, historical-manifest protection, replay/restore safety, native supported-client window posture, and rollback-versus-fail-forward boundary that release evidence must bind before promotion or destructive schema contract.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "compatibility_gate_hash",
+    "candidate_identity_hash",
+    "candidate_identity_contract",
+    "schema_bundle_hash",
+    "compatibility_window_ref",
+    "reader_window_state",
+    "schema_reader_window_contract",
+    "migration_plan_ref_or_null",
+    "migration_ledger_refs",
+    "supported_client_window_ref_or_null",
+    "historical_manifest_guard_state",
+    "replay_restore_guard_state",
+    "native_client_window_state",
+    "migration_chronology_state",
+    "destructive_contract_state",
+    "rollback_boundary_state",
+    "reason_codes",
+    "historical_manifest_policy",
+    "destructive_change_policy",
+    "rollback_boundary_policy",
+    "fail_forward_policy",
+    "replay_restore_policy",
+    "client_persistence_policy",
+    "evidence_binding_policy"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "SCHEMA_BUNDLE_COMPATIBILITY_GATE_V1"
+    },
+    "compatibility_gate_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_identity_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_identity_contract": {
+      "$ref": "https://taxat.dev/schemas/release_candidate_identity_contract.schema.json"
+    },
+    "schema_bundle_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "compatibility_window_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reader_window_state": {
+      "type": "string",
+      "enum": [
+        "EXPAND_ONLY_PREVIOUS_READERS_SUPPORTED",
+        "BACKFILL_IN_PROGRESS_PREVIOUS_READERS_SUPPORTED",
+        "VERIFIED_PREVIOUS_READERS_SUPPORTED",
+        "CONTRACT_ELIGIBLE_WINDOW_CLOSED"
+      ]
+    },
+    "schema_reader_window_contract": {
+      "$ref": "https://taxat.dev/schemas/schema_reader_window_contract.schema.json"
+    },
+    "migration_plan_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "migration_ledger_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "supported_client_window_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "historical_manifest_guard_state": {
+      "type": "string",
+      "enum": [
+        "PROTECTED",
+        "BLOCKED"
+      ]
+    },
+    "replay_restore_guard_state": {
+      "type": "string",
+      "enum": [
+        "PROTECTED",
+        "BLOCKED"
+      ]
+    },
+    "native_client_window_state": {
+      "type": "string",
+      "enum": [
+        "NOT_APPLICABLE",
+        "VERIFIED_COMPATIBLE",
+        "BLOCKED"
+      ]
+    },
+    "migration_chronology_state": {
+      "type": "string",
+      "enum": [
+        "NOT_REQUIRED",
+        "EXPAND_ONLY",
+        "BACKFILL_IN_PROGRESS",
+        "VERIFIED_PREVIOUS_READERS_SUPPORTED",
+        "CONTRACT_WINDOW_CLOSED"
+      ]
+    },
+    "destructive_contract_state": {
+      "type": "string",
+      "enum": [
+        "BLOCKED_UNTIL_WINDOW_CLOSE",
+        "ELIGIBLE_AFTER_WINDOW_CLOSE"
+      ]
+    },
+    "rollback_boundary_state": {
+      "type": "string",
+      "enum": [
+        "ROLLBACK_ALLOWED",
+        "FAIL_FORWARD_ONLY"
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "historical_manifest_policy": {
+      "const": "FROZEN_MANIFESTS_REQUIRE_RECORDED_BUNDLE_OR_COMPATIBLE_READER"
+    },
+    "destructive_change_policy": {
+      "const": "DESTRUCTIVE_CHANGE_BLOCKED_UNTIL_WINDOW_CLOSED"
+    },
+    "rollback_boundary_policy": {
+      "const": "ROLLBACK_ALLOWED_ONLY_WHILE_PREVIOUS_READERS_SUPPORTED"
+    },
+    "fail_forward_policy": {
+      "const": "FAIL_FORWARD_REQUIRED_AFTER_WINDOW_CLOSE_OR_BREAKING_CONTRACT"
+    },
+    "replay_restore_policy": {
+      "const": "RESTORE_AND_REPLAY_REQUIRE_WINDOW_COMPATIBLE_READER"
+    },
+    "client_persistence_policy": {
+      "const": "SERVER_SCHEMA_GATE_REQUIRES_SUPPORTED_CLIENT_WINDOW_COMPATIBILITY"
+    },
+    "evidence_binding_policy": {
+      "const": "EXACT_CANDIDATE_READER_WINDOW_AND_CLIENT_WINDOW_BINDING_REQUIRED"
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "migration_plan_ref_or_null": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "migration_plan_ref_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "migration_ledger_refs": {
+            "maxItems": 0
+          },
+          "migration_chronology_state": {
+            "const": "NOT_REQUIRED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "migration_plan_ref_or_null": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "migration_plan_ref_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "migration_ledger_refs": {
+            "minItems": 1
+          },
+          "migration_chronology_state": {
+            "enum": [
+              "EXPAND_ONLY",
+              "BACKFILL_IN_PROGRESS",
+              "VERIFIED_PREVIOUS_READERS_SUPPORTED",
+              "CONTRACT_WINDOW_CLOSED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "supported_client_window_ref_or_null": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "supported_client_window_ref_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "native_client_window_state": {
+            "const": "NOT_APPLICABLE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "supported_client_window_ref_or_null": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "supported_client_window_ref_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "native_client_window_state": {
+            "enum": [
+              "VERIFIED_COMPATIBLE",
+              "BLOCKED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reader_window_state": {
+            "enum": [
+              "EXPAND_ONLY_PREVIOUS_READERS_SUPPORTED",
+              "BACKFILL_IN_PROGRESS_PREVIOUS_READERS_SUPPORTED",
+              "VERIFIED_PREVIOUS_READERS_SUPPORTED"
+            ]
+          }
+        },
+        "required": [
+          "reader_window_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "destructive_contract_state": {
+            "const": "BLOCKED_UNTIL_WINDOW_CLOSE"
+          },
+          "rollback_boundary_state": {
+            "const": "ROLLBACK_ALLOWED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reader_window_state": {
+            "const": "CONTRACT_ELIGIBLE_WINDOW_CLOSED"
+          }
+        },
+        "required": [
+          "reader_window_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "destructive_contract_state": {
+            "const": "ELIGIBLE_AFTER_WINDOW_CLOSE"
+          },
+          "rollback_boundary_state": {
+            "const": "FAIL_FORWARD_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "anyOf": [
+          {
+            "properties": {
+              "historical_manifest_guard_state": {
+                "const": "BLOCKED"
+              }
+            },
+            "required": [
+              "historical_manifest_guard_state"
+            ]
+          },
+          {
+            "properties": {
+              "replay_restore_guard_state": {
+                "const": "BLOCKED"
+              }
+            },
+            "required": [
+              "replay_restore_guard_state"
+            ]
+          },
+          {
+            "properties": {
+              "native_client_window_state": {
+                "const": "BLOCKED"
+              }
+            },
+            "required": [
+              "native_client_window_state"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ]
+}

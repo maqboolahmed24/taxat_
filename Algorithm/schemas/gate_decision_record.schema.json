@@ -1,0 +1,999 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/gate_decision_record.schema.json",
+  "title": "GateDecisionRecord",
+  "description": "Non-access gate decision contract. This schema freezes ordered gate identity, canonical execution scope, frozen decision basis lineage, override-resolution outcome, and next legal actions for one manifest-scoped gate evaluation.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "gate_decision_id",
+    "manifest_id",
+    "gate_code",
+    "gate_stage_index",
+    "gate_class",
+    "decision",
+    "reason_codes",
+    "dominant_reason_code",
+    "plain_explanation",
+    "decision_explainability_contract",
+    "severity",
+    "gate_semantics_contract",
+    "truth_boundary_contract",
+    "metrics",
+    "decision_basis_ref",
+    "input_artifact_refs",
+    "prerequisite_gate_refs",
+    "blocking_dependency_refs",
+    "overrideability",
+    "override_resolution_state",
+    "active_override_refs",
+    "required_override_scope",
+    "next_action_codes",
+    "policy_version_ref",
+    "decided_at",
+    "effective_scope"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "GateDecisionRecord"
+    },
+    "gate_decision_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "gate_code": {
+      "type": "string",
+      "enum": [
+        "MANIFEST_GATE",
+        "ARTIFACT_CONTRACT_GATE",
+        "INPUT_BOUNDARY_GATE",
+        "DATA_QUALITY_GATE",
+        "RETENTION_EVIDENCE_GATE",
+        "PARITY_GATE",
+        "TRUST_GATE",
+        "AMENDMENT_GATE",
+        "FILING_GATE",
+        "SUBMISSION_GATE"
+      ]
+    },
+    "gate_stage_index": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10
+    },
+    "gate_class": {
+      "type": "string",
+      "enum": [
+        "NON_ACCESS"
+      ]
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "PASS_WITH_NOTICE",
+        "MANUAL_REVIEW",
+        "OVERRIDABLE_BLOCK",
+        "HARD_BLOCK"
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "maxItems": 8,
+      "uniqueItems": true
+    },
+    "dominant_reason_code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "plain_explanation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "decision_explainability_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/decision_explainability_contract.schema.json"
+        },
+        {
+          "properties": {
+            "artifact_family": {
+              "const": "GATE_DECISION_RECORD"
+            },
+            "plain_text_field_name": {
+              "const": "plain_explanation"
+            }
+          }
+        }
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "INFO",
+        "NOTICE",
+        "WARNING",
+        "ERROR",
+        "CRITICAL"
+      ]
+    },
+    "gate_semantics_contract": {
+      "$ref": "https://taxat.dev/schemas/gate_semantics_contract.schema.json"
+    },
+    "truth_boundary_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/command_truth_boundary_contract.schema.json"
+        },
+        {
+          "properties": {
+            "artifact_role": {
+              "const": "COMMAND_SIDE_AUTHORITY"
+            },
+            "authoritative_record_families": {
+              "const": [
+                "RUN_MANIFEST",
+                "GATE_DECISION_RECORD",
+                "AUDIT_EVENT"
+              ]
+            },
+            "observable_projection_families": {
+              "const": []
+            }
+          }
+        }
+      ]
+    },
+    "metrics": {
+      "type": "object",
+      "default": {},
+      "additionalProperties": true
+    },
+    "decision_basis_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "input_artifact_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true
+    },
+    "prerequisite_gate_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "maxItems": 9,
+      "uniqueItems": true
+    },
+    "blocking_dependency_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "maxItems": 8,
+      "uniqueItems": true
+    },
+    "overrideability": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "SCOPED_OVERRIDE_ALLOWED",
+        "SCOPED_OVERRIDE_REQUIRED",
+        "NON_OVERRIDEABLE"
+      ]
+    },
+    "override_resolution_state": {
+      "type": "string",
+      "enum": [
+        "NOT_APPLICABLE",
+        "NO_VALID_OVERRIDE",
+        "VALID_OVERRIDE_ACTIVE"
+      ]
+    },
+    "active_override_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "maxItems": 8,
+      "uniqueItems": true
+    },
+    "required_override_scope": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "next_action_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "maxItems": 6,
+      "uniqueItems": true
+    },
+    "policy_version_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decided_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "effective_scope": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "enum": [
+            "year_end",
+            "quarterly_update",
+            "estimate_only"
+          ]
+        }
+      ],
+      "items": {
+        "type": "string",
+        "enum": [
+          "year_end",
+          "quarterly_update",
+          "estimate_only",
+          "prepare_submission",
+          "submit",
+          "amendment_intent",
+          "amendment_submit"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 5,
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "oneOf": [
+        {
+          "properties": {
+            "effective_scope": {
+              "prefixItems": [
+                {
+                  "const": "year_end"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "properties": {
+            "effective_scope": {
+              "prefixItems": [
+                {
+                  "const": "quarterly_update"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "properties": {
+            "effective_scope": {
+              "prefixItems": [
+                {
+                  "const": "estimate_only"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "if": {
+        "properties": {
+          "effective_scope": {
+            "contains": {
+              "const": "year_end"
+            }
+          }
+        },
+        "required": [
+          "effective_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "effective_scope": {
+            "not": {
+              "contains": {
+                "enum": [
+                  "quarterly_update",
+                  "estimate_only"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effective_scope": {
+            "contains": {
+              "const": "quarterly_update"
+            }
+          }
+        },
+        "required": [
+          "effective_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "effective_scope": {
+            "not": {
+              "contains": {
+                "enum": [
+                  "year_end",
+                  "estimate_only"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effective_scope": {
+            "contains": {
+              "const": "estimate_only"
+            }
+          }
+        },
+        "required": [
+          "effective_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "effective_scope": {
+            "not": {
+              "contains": {
+                "enum": [
+                  "year_end",
+                  "quarterly_update"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_code": {
+            "const": "MANIFEST_GATE"
+          }
+        },
+        "required": [
+          "gate_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "gate_stage_index": {
+            "const": 1
+          },
+          "prerequisite_gate_refs": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_code": {
+            "const": "ARTIFACT_CONTRACT_GATE"
+          }
+        },
+        "required": [
+          "gate_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "gate_stage_index": {
+            "const": 2
+          },
+          "prerequisite_gate_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_code": {
+            "const": "INPUT_BOUNDARY_GATE"
+          }
+        },
+        "required": [
+          "gate_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "gate_stage_index": {
+            "const": 3
+          },
+          "prerequisite_gate_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_code": {
+            "const": "DATA_QUALITY_GATE"
+          }
+        },
+        "required": [
+          "gate_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "gate_stage_index": {
+            "const": 4
+          },
+          "prerequisite_gate_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_code": {
+            "const": "RETENTION_EVIDENCE_GATE"
+          }
+        },
+        "required": [
+          "gate_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "gate_stage_index": {
+            "const": 5
+          },
+          "prerequisite_gate_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_code": {
+            "const": "PARITY_GATE"
+          }
+        },
+        "required": [
+          "gate_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "gate_stage_index": {
+            "const": 6
+          },
+          "prerequisite_gate_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_code": {
+            "const": "TRUST_GATE"
+          }
+        },
+        "required": [
+          "gate_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "gate_stage_index": {
+            "const": 7
+          },
+          "prerequisite_gate_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_code": {
+            "const": "AMENDMENT_GATE"
+          }
+        },
+        "required": [
+          "gate_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "gate_stage_index": {
+            "const": 8
+          },
+          "prerequisite_gate_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_code": {
+            "const": "FILING_GATE"
+          }
+        },
+        "required": [
+          "gate_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "gate_stage_index": {
+            "const": 9
+          },
+          "prerequisite_gate_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "gate_code": {
+            "const": "SUBMISSION_GATE"
+          }
+        },
+        "required": [
+          "gate_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "gate_stage_index": {
+            "const": 10
+          },
+          "prerequisite_gate_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "PASS",
+              "PASS_WITH_NOTICE",
+              "MANUAL_REVIEW"
+            ]
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "overrideability": {
+            "const": "NONE"
+          },
+          "override_resolution_state": {
+            "enum": [
+              "NOT_APPLICABLE",
+              "VALID_OVERRIDE_ACTIVE"
+            ]
+          },
+          "required_override_scope": {
+            "const": null
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "OVERRIDABLE_BLOCK"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "overrideability": {
+            "enum": [
+              "SCOPED_OVERRIDE_ALLOWED",
+              "SCOPED_OVERRIDE_REQUIRED"
+            ]
+          },
+          "override_resolution_state": {
+            "const": "NO_VALID_OVERRIDE"
+          },
+          "active_override_refs": {
+            "maxItems": 0
+          },
+          "required_override_scope": {
+            "type": "string",
+            "minLength": 1
+          },
+          "next_action_codes": {
+            "minItems": 1
+          },
+          "severity": {
+            "const": "ERROR"
+          },
+          "gate_semantics_contract": {
+            "properties": {
+              "decision_rank": {
+                "const": 3
+              },
+              "progression_rank": {
+                "const": 0
+              },
+              "blocking_class": {
+                "const": "BLOCKED"
+              },
+              "progression_semantics": {
+                "const": "BLOCKED"
+              },
+              "override_dependency_state": {
+                "const": "OVERRIDE_REQUIRED_MISSING"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "HARD_BLOCK"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "overrideability": {
+            "const": "NON_OVERRIDEABLE"
+          },
+          "override_resolution_state": {
+            "const": "NOT_APPLICABLE"
+          },
+          "active_override_refs": {
+            "maxItems": 0
+          },
+          "required_override_scope": {
+            "const": null
+          },
+          "next_action_codes": {
+            "minItems": 1
+          },
+          "severity": {
+            "const": "CRITICAL"
+          },
+          "gate_semantics_contract": {
+            "properties": {
+              "decision_rank": {
+                "const": 4
+              },
+              "progression_rank": {
+                "const": 0
+              },
+              "blocking_class": {
+                "const": "BLOCKED"
+              },
+              "progression_semantics": {
+                "const": "BLOCKED"
+              },
+              "override_dependency_state": {
+                "const": "OVERRIDE_FORBIDDEN"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "PASS"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "next_action_codes": {
+            "maxItems": 0
+          },
+          "blocking_dependency_refs": {
+            "maxItems": 0
+          },
+          "severity": {
+            "const": "INFO"
+          },
+          "gate_semantics_contract": {
+            "properties": {
+              "decision_rank": {
+                "const": 0
+              },
+              "progression_rank": {
+                "const": 2
+              },
+              "blocking_class": {
+                "const": "NON_BLOCKING"
+              },
+              "progression_semantics": {
+                "const": "AUTOMATED_CONTINUE"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "PASS_WITH_NOTICE"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "blocking_dependency_refs": {
+            "maxItems": 0
+          },
+          "severity": {
+            "const": "NOTICE"
+          },
+          "gate_semantics_contract": {
+            "properties": {
+              "decision_rank": {
+                "const": 1
+              },
+              "progression_rank": {
+                "const": 2
+              },
+              "blocking_class": {
+                "const": "NON_BLOCKING"
+              },
+              "progression_semantics": {
+                "const": "AUTOMATED_CONTINUE_WITH_NOTICE"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "MANUAL_REVIEW"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "next_action_codes": {
+            "minItems": 1
+          },
+          "severity": {
+            "const": "WARNING"
+          },
+          "gate_semantics_contract": {
+            "properties": {
+              "decision_rank": {
+                "const": 2
+              },
+              "progression_rank": {
+                "const": 1
+              },
+              "blocking_class": {
+                "const": "REVIEW_REQUIRED"
+              },
+              "progression_semantics": {
+                "const": "REVIEW_ONLY"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "override_resolution_state": {
+            "const": "NO_VALID_OVERRIDE"
+          }
+        },
+        "required": [
+          "override_resolution_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision": {
+            "const": "OVERRIDABLE_BLOCK"
+          },
+          "overrideability": {
+            "enum": [
+              "SCOPED_OVERRIDE_ALLOWED",
+              "SCOPED_OVERRIDE_REQUIRED"
+            ]
+          },
+          "required_override_scope": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "override_resolution_state": {
+            "const": "VALID_OVERRIDE_ACTIVE"
+          }
+        },
+        "required": [
+          "override_resolution_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "PASS",
+              "PASS_WITH_NOTICE",
+              "MANUAL_REVIEW"
+            ]
+          },
+          "overrideability": {
+            "const": "NONE"
+          },
+          "required_override_scope": {
+            "const": null
+          },
+          "active_override_refs": {
+            "minItems": 1
+          },
+          "gate_semantics_contract": {
+            "properties": {
+              "override_dependency_state": {
+                "const": "VALID_OVERRIDE_GOVERNED"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "override_resolution_state": {
+            "const": "NOT_APPLICABLE"
+          },
+          "decision": {
+            "enum": [
+              "PASS",
+              "PASS_WITH_NOTICE",
+              "MANUAL_REVIEW"
+            ]
+          }
+        },
+        "required": [
+          "override_resolution_state",
+          "decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "gate_semantics_contract": {
+            "properties": {
+              "override_dependency_state": {
+                "const": "OVERRIDE_INDEPENDENT"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "override_resolution_state": {
+            "enum": [
+              "NOT_APPLICABLE",
+              "NO_VALID_OVERRIDE"
+            ]
+          }
+        },
+        "required": [
+          "override_resolution_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "active_override_refs": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

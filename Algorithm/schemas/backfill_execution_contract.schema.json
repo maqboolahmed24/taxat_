@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/backfill_execution_contract.schema.json",
+  "title": "BackfillExecutionContract",
+  "description": "Shared backfill-governance contract. This schema freezes whether a migration requires backfill, the current execution state, the exact target bundle, and the fail-closed idempotency and meaning-preservation policies for schema evolution.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "migration_id",
+    "target_version",
+    "target_schema_bundle_hash",
+    "execution_requirement",
+    "execution_state",
+    "idempotency_policy",
+    "meaning_preservation_policy",
+    "lineage_recording_policy",
+    "retry_safety_policy",
+    "affected_artifact_types",
+    "backfill_audit_refs"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "BACKFILL_EXECUTION_CONTRACT_V1"
+    },
+    "migration_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_schema_bundle_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_requirement": {
+      "type": "string",
+      "enum": [
+        "NO_BACKFILL_REQUIRED",
+        "IDEMPOTENT_BACKFILL_REQUIRED"
+      ]
+    },
+    "execution_state": {
+      "type": "string",
+      "enum": [
+        "NOT_APPLICABLE",
+        "PLANNED",
+        "IN_PROGRESS",
+        "COMPLETE",
+        "HALTED",
+        "FAILED"
+      ]
+    },
+    "idempotency_policy": {
+      "const": "REENTRANT_UPSERT_OR_COMPARE_AND_SWAP_ONLY"
+    },
+    "meaning_preservation_policy": {
+      "const": "HISTORICAL_MEANING_IMMUTABLE_APPEND_OR_DERIVE_ONLY"
+    },
+    "lineage_recording_policy": {
+      "const": "EVERY_BACKFILL_WRITE_RETAINS_LEDGER_AND_AUDIT_LINEAGE"
+    },
+    "retry_safety_policy": {
+      "const": "DUPLICATE_SAFE_AND_PARTIAL_PROGRESS_RESUMABLE"
+    },
+    "affected_artifact_types": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "backfill_audit_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "execution_requirement": {
+            "const": "NO_BACKFILL_REQUIRED"
+          }
+        },
+        "required": [
+          "execution_requirement"
+        ]
+      },
+      "then": {
+        "properties": {
+          "execution_state": {
+            "const": "NOT_APPLICABLE"
+          },
+          "affected_artifact_types": {
+            "maxItems": 0
+          },
+          "backfill_audit_refs": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "execution_requirement": {
+            "const": "IDEMPOTENT_BACKFILL_REQUIRED"
+          }
+        },
+        "required": [
+          "execution_requirement"
+        ]
+      },
+      "then": {
+        "properties": {
+          "execution_state": {
+            "enum": [
+              "PLANNED",
+              "IN_PROGRESS",
+              "COMPLETE",
+              "HALTED",
+              "FAILED"
+            ]
+          },
+          "affected_artifact_types": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "execution_state": {
+            "enum": [
+              "COMPLETE",
+              "HALTED",
+              "FAILED"
+            ]
+          }
+        },
+        "required": [
+          "execution_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "backfill_audit_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

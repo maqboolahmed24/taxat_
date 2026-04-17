@@ -1,0 +1,299 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/authority_calculation_request.schema.json",
+  "title": "AuthorityCalculationRequest",
+  "description": "Authority-calculation request contract. This schema freezes the intended calculation path, runtime scope, request-envelope linkage, and modeled-vs-live request posture for one calculation handshake.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "calculation_request_id",
+    "manifest_id",
+    "tenant_id",
+    "client_id",
+    "calculation_type",
+    "authority_scope",
+    "provider_environment",
+    "operation_profile_ref",
+    "authority_operation_ref",
+    "target_obligation_ref",
+    "runtime_scope",
+    "scope_execution_binding",
+    "access_binding_hash",
+    "request_state",
+    "live_authority_call_executed",
+    "request_envelope_ref",
+    "authority_interaction_ref",
+    "reason_codes",
+    "requested_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "AuthorityCalculationRequest"
+    },
+    "calculation_request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "client_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "calculation_type": {
+      "type": "string",
+      "enum": [
+        "in-year",
+        "intent-to-finalise",
+        "intent-to-amend",
+        "final-declaration"
+      ]
+    },
+    "authority_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_environment": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operation_profile_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority_operation_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "target_obligation_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "runtime_scope": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "scope_execution_binding": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/scope_execution_binding.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "binding_scope_class": {
+              "const": "AUTHORITY_CALCULATION_REQUEST"
+            }
+          }
+        }
+      ]
+    },
+    "access_binding_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_state": {
+      "type": "string",
+      "enum": [
+        "MODELED_ONLY",
+        "TRIGGERED",
+        "RETRIEVE_PENDING",
+        "RETRIEVED",
+        "SUPERSEDED"
+      ]
+    },
+    "live_authority_call_executed": {
+      "type": "boolean"
+    },
+    "request_envelope_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "authority_interaction_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "live_authority_call_executed": {
+            "const": false
+          }
+        },
+        "required": [
+          "live_authority_call_executed"
+        ]
+      },
+      "then": {
+        "properties": {
+          "request_state": {
+            "const": "MODELED_ONLY"
+          },
+          "authority_operation_ref": {
+            "type": "null"
+          },
+          "request_envelope_ref": {
+            "type": "null"
+          },
+          "authority_interaction_ref": {
+            "type": "null"
+          },
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "live_authority_call_executed": {
+            "const": true
+          }
+        },
+        "required": [
+          "live_authority_call_executed"
+        ]
+      },
+      "then": {
+        "properties": {
+          "request_state": {
+            "enum": [
+              "TRIGGERED",
+              "RETRIEVE_PENDING",
+              "RETRIEVED",
+              "SUPERSEDED"
+            ]
+          },
+          "authority_operation_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request_envelope_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "authority_interaction_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "calculation_type": {
+            "const": "intent-to-amend"
+          }
+        },
+        "required": [
+          "calculation_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "runtime_scope": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "amendment_intent"
+                }
+              },
+              {
+                "not": {
+                  "contains": {
+                    "enum": [
+                      "prepare_submission",
+                      "submit",
+                      "amendment_submit"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "calculation_type": {
+            "enum": [
+              "in-year",
+              "intent-to-finalise",
+              "final-declaration"
+            ]
+          }
+        },
+        "required": [
+          "calculation_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "runtime_scope": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "prepare_submission"
+                }
+              },
+              {
+                "not": {
+                  "contains": {
+                    "enum": [
+                      "amendment_intent",
+                      "submit",
+                      "amendment_submit"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

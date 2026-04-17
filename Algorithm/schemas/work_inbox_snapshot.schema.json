@@ -1,0 +1,1099 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/work_inbox_snapshot.schema.json",
+  "title": "WorkInboxSnapshot",
+  "description": "Reconnect-safe staff inbox read-side projection. This is a collaboration triage UX contract only; it must never be treated as mutation-side truth. The snapshot keeps the shared operator shell spine explicit and also binds the shared operator interaction layer so queue selectors, inline recovery, preview posture, current-vs-history treatment, and subtle motion stay aligned with the rest of the staff/operator bucket.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "tenant_id",
+    "shell_family",
+    "inbox_route_key",
+    "dominant_question",
+    "settlement_state",
+    "recovery_posture",
+    "interaction_layer",
+    "viewer_mode",
+    "active_filters",
+    "queue_health_score",
+    "queue_health_contract",
+    "inbox_version",
+    "last_published_sequence",
+    "resume_token",
+    "cache_isolation_contract",
+    "visibility_partition",
+    "access_binding_hash",
+    "masking_posture_fingerprint",
+    "rows",
+    "selected_item_ref",
+    "selected_focus_anchor_ref_or_null"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "WorkInboxSnapshot"
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "shell_family": {
+      "const": "CALM_SHELL"
+    },
+    "inbox_route_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dominant_question": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "settlement_state": {
+      "$ref": "#/$defs/settlementState"
+    },
+    "recovery_posture": {
+      "$ref": "#/$defs/recoveryPosture"
+    },
+    "interaction_layer": {
+      "$ref": "https://taxat.dev/schemas/operator_interaction_layer.schema.json"
+    },
+    "viewer_mode": {
+      "type": "string",
+      "enum": [
+        "STAFF_MUTATING",
+        "STAFF_READ_ONLY"
+      ]
+    },
+    "active_filters": {
+      "$ref": "#/$defs/activeFilters"
+    },
+    "queue_health_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "queue_health_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/work_queue_health_contract.schema.json"
+        },
+        {
+          "properties": {
+            "queue_scope": {
+              "const": "WORK_INBOX_SNAPSHOT"
+            }
+          }
+        }
+      ]
+    },
+    "inbox_version": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "last_published_sequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "resume_token": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cache_isolation_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/cache_isolation_contract.schema.json"
+        },
+        {
+          "properties": {
+            "cache_scope_class": {
+              "const": "WORK_INBOX_SNAPSHOT"
+            }
+          }
+        }
+      ]
+    },
+    "visibility_partition": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/visibility_partition_contract.schema.json"
+        },
+        {
+          "properties": {
+            "partition_scope": {
+              "const": "WORK_INBOX_SNAPSHOT"
+            }
+          }
+        }
+      ]
+    },
+    "access_binding_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "masking_posture_fingerprint": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/row"
+      },
+      "default": []
+    },
+    "selected_item_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "selected_focus_anchor_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "settlementState": {
+      "type": "string",
+      "enum": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ]
+    },
+    "recoveryPosture": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ]
+    },
+    "workflowLifecycleState": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "IN_PROGRESS",
+        "WAITING_ON_CLIENT",
+        "WAITING_ON_AUTHORITY",
+        "BLOCKED",
+        "DONE",
+        "CANCELLED",
+        "STALE"
+      ]
+    },
+    "waitingOnActor": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "CUSTOMER",
+        "STAFF",
+        "AUTHORITY",
+        "SYSTEM"
+      ]
+    },
+    "dueState": {
+      "type": "string",
+      "enum": [
+        "ON_TRACK",
+        "DUE_SOON",
+        "OVERDUE",
+        "BREACHED"
+      ]
+    },
+    "customerStatusProjection": {
+      "type": "string",
+      "enum": [
+        "UNDER_REVIEW",
+        "ACTION_REQUIRED",
+        "WAITING_ON_CONFIRMATION",
+        "RESOLVED",
+        "CLOSED"
+      ]
+    },
+    "filterChipCode": {
+      "type": "string",
+      "enum": [
+        "MINE",
+        "UNASSIGNED",
+        "ESCALATED",
+        "WAITING_ON_CUSTOMER",
+        "OVERDUE",
+        "BLOCKED",
+        "RESOLVED_RECENTLY"
+      ]
+    },
+    "activeFilters": {
+      "type": "object",
+      "required": [
+        "assignee_scope",
+        "lifecycle_states",
+        "waiting_on_actors",
+        "due_states",
+        "customer_status_projections",
+        "selected_filter_chips",
+        "escalation_only",
+        "include_resolved_recently"
+      ],
+      "properties": {
+        "assignee_scope": {
+          "type": "string",
+          "enum": [
+            "ALL",
+            "MINE",
+            "UNASSIGNED"
+          ]
+        },
+        "lifecycle_states": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/workflowLifecycleState"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "waiting_on_actors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/waitingOnActor"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "due_states": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dueState"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "customer_status_projections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/customerStatusProjection"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "selected_filter_chips": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/filterChipCode"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "escalation_only": {
+          "type": "boolean"
+        },
+        "include_resolved_recently": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "assignee_scope": {
+                "const": "MINE"
+              }
+            },
+            "required": [
+              "assignee_scope"
+            ]
+          },
+          "then": {
+            "properties": {
+              "selected_filter_chips": {
+                "contains": {
+                  "const": "MINE"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "assignee_scope": {
+                "const": "UNASSIGNED"
+              }
+            },
+            "required": [
+              "assignee_scope"
+            ]
+          },
+          "then": {
+            "properties": {
+              "selected_filter_chips": {
+                "contains": {
+                  "const": "UNASSIGNED"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "escalation_only": {
+                "const": true
+              }
+            },
+            "required": [
+              "escalation_only"
+            ]
+          },
+          "then": {
+            "properties": {
+              "selected_filter_chips": {
+                "contains": {
+                  "const": "ESCALATED"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "waiting_on_actors": {
+                "contains": {
+                  "const": "CUSTOMER"
+                }
+              }
+            },
+            "required": [
+              "waiting_on_actors"
+            ]
+          },
+          "then": {
+            "properties": {
+              "selected_filter_chips": {
+                "contains": {
+                  "const": "WAITING_ON_CUSTOMER"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "due_states": {
+                "contains": {
+                  "const": "OVERDUE"
+                }
+              }
+            },
+            "required": [
+              "due_states"
+            ]
+          },
+          "then": {
+            "properties": {
+              "selected_filter_chips": {
+                "contains": {
+                  "const": "OVERDUE"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "due_states": {
+                "contains": {
+                  "const": "BREACHED"
+                }
+              }
+            },
+            "required": [
+              "due_states"
+            ]
+          },
+          "then": {
+            "properties": {
+              "selected_filter_chips": {
+                "contains": {
+                  "const": "OVERDUE"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "lifecycle_states": {
+                "contains": {
+                  "const": "BLOCKED"
+                }
+              }
+            },
+            "required": [
+              "lifecycle_states"
+            ]
+          },
+          "then": {
+            "properties": {
+              "selected_filter_chips": {
+                "contains": {
+                  "const": "BLOCKED"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "include_resolved_recently": {
+                "const": true
+              }
+            },
+            "required": [
+              "include_resolved_recently"
+            ]
+          },
+          "then": {
+            "properties": {
+              "selected_filter_chips": {
+                "contains": {
+                  "const": "RESOLVED_RECENTLY"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selected_filter_chips": {
+                "contains": {
+                  "const": "MINE"
+                }
+              }
+            },
+            "required": [
+              "selected_filter_chips"
+            ]
+          },
+          "then": {
+            "properties": {
+              "assignee_scope": {
+                "const": "MINE"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selected_filter_chips": {
+                "contains": {
+                  "const": "UNASSIGNED"
+                }
+              }
+            },
+            "required": [
+              "selected_filter_chips"
+            ]
+          },
+          "then": {
+            "properties": {
+              "assignee_scope": {
+                "const": "UNASSIGNED"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selected_filter_chips": {
+                "contains": {
+                  "const": "ESCALATED"
+                }
+              }
+            },
+            "required": [
+              "selected_filter_chips"
+            ]
+          },
+          "then": {
+            "properties": {
+              "escalation_only": {
+                "const": true
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selected_filter_chips": {
+                "contains": {
+                  "const": "WAITING_ON_CUSTOMER"
+                }
+              }
+            },
+            "required": [
+              "selected_filter_chips"
+            ]
+          },
+          "then": {
+            "properties": {
+              "waiting_on_actors": {
+                "contains": {
+                  "const": "CUSTOMER"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selected_filter_chips": {
+                "contains": {
+                  "const": "OVERDUE"
+                }
+              }
+            },
+            "required": [
+              "selected_filter_chips"
+            ]
+          },
+          "then": {
+            "anyOf": [
+              {
+                "properties": {
+                  "due_states": {
+                    "contains": {
+                      "const": "OVERDUE"
+                    }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "due_states": {
+                    "contains": {
+                      "const": "BREACHED"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selected_filter_chips": {
+                "contains": {
+                  "const": "BLOCKED"
+                }
+              }
+            },
+            "required": [
+              "selected_filter_chips"
+            ]
+          },
+          "then": {
+            "properties": {
+              "lifecycle_states": {
+                "contains": {
+                  "const": "BLOCKED"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selected_filter_chips": {
+                "contains": {
+                  "const": "RESOLVED_RECENTLY"
+                }
+              }
+            },
+            "required": [
+              "selected_filter_chips"
+            ]
+          },
+          "then": {
+            "properties": {
+              "include_resolved_recently": {
+                "const": true
+              }
+            }
+          }
+        }
+      ]
+    },
+    "sortKey": {
+      "type": "object",
+      "required": [
+        "collaboration_priority_score",
+        "escalation_rank",
+        "effective_due_at",
+        "resolution_confidence_score",
+        "queue_entered_at",
+        "item_id"
+      ],
+      "properties": {
+        "collaboration_priority_score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "escalation_rank": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "effective_due_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "resolution_confidence_score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "queue_entered_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "item_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "rowActions": {
+      "type": "object",
+      "required": [
+        "actionability_state",
+        "primary_action_code",
+        "secondary_action_codes",
+        "available_action_codes",
+        "blocked_action_codes",
+        "available_action_bindings",
+        "authoritative_action"
+      ],
+      "properties": {
+        "actionability_state": {
+          "type": "string",
+          "enum": [
+            "ACTION_AVAILABLE",
+            "NO_SAFE_ACTION"
+          ]
+        },
+        "primary_action_code": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[A-Z][A-Z0-9_]*$",
+          "minLength": 1
+        },
+        "secondary_action_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "minLength": 1
+          },
+          "default": [],
+          "maxItems": 2,
+          "uniqueItems": true
+        },
+        "available_action_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "minLength": 1
+          },
+          "default": [],
+          "maxItems": 4,
+          "uniqueItems": true
+        },
+        "blocked_action_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "minLength": 1
+          },
+          "default": [],
+          "maxItems": 8,
+          "uniqueItems": true
+        },
+        "available_action_bindings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "action_code",
+              "mutation_precondition_binding_or_null"
+            ],
+            "properties": {
+              "action_code": {
+                "type": "string",
+                "pattern": "^[A-Z][A-Z0-9_]*$",
+                "minLength": 1
+              },
+              "mutation_precondition_binding_or_null": {
+                "anyOf": [
+                  {
+                    "$ref": "https://taxat.dev/schemas/mutation_precondition_binding.schema.json"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "default": [],
+          "maxItems": 4
+        },
+        "authoritative_action": {
+          "allOf": [
+            {
+              "$ref": "https://taxat.dev/schemas/action_authority_contract.schema.json"
+            },
+            {
+              "properties": {
+                "projection_scope": {
+                  "const": "WORK_INBOX_ROW_ACTIONS"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "actionability_state": {
+                "const": "ACTION_AVAILABLE"
+              }
+            },
+            "required": [
+              "actionability_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "primary_action_code": {
+                "type": "string",
+                "minLength": 1
+              },
+              "available_action_codes": {
+                "minItems": 1
+              },
+              "available_action_bindings": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "actionability_state": {
+                "const": "NO_SAFE_ACTION"
+              }
+            },
+            "required": [
+              "actionability_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "primary_action_code": {
+                "type": "null"
+              },
+              "available_action_codes": {
+                "maxItems": 0
+              },
+              "available_action_bindings": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    "row": {
+      "type": "object",
+      "required": [
+        "item_id",
+        "focus_anchor_ref",
+        "sort_key",
+        "queue_projection",
+        "title",
+        "client_label",
+        "period_label",
+        "internal_lifecycle_state",
+        "customer_status_projection",
+        "assignee_label",
+        "waiting_on_actor",
+        "due_state",
+        "effective_due_at",
+        "last_activity_at",
+        "customer_unread_count",
+        "internal_unread_count",
+        "escalation_active",
+        "collaboration_priority_score",
+        "escalation_rank",
+        "resolution_confidence_score",
+        "sla_pressure_score",
+        "queue_entered_at",
+        "row_actions"
+      ],
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "focus_anchor_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sort_key": {
+          "$ref": "#/$defs/sortKey"
+        },
+        "queue_projection": {
+          "allOf": [
+            {
+              "$ref": "https://taxat.dev/schemas/collaboration_queue_projection_contract.schema.json"
+            },
+            {
+              "properties": {
+                "projection_scope": {
+                  "const": "WORK_INBOX_ROW"
+                }
+              }
+            }
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "client_label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "period_label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "internal_lifecycle_state": {
+          "$ref": "#/$defs/workflowLifecycleState"
+        },
+        "customer_status_projection": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "UNDER_REVIEW",
+            "ACTION_REQUIRED",
+            "WAITING_ON_CONFIRMATION",
+            "RESOLVED",
+            "CLOSED",
+            null
+          ]
+        },
+        "assignee_label": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "waiting_on_actor": {
+          "$ref": "#/$defs/waitingOnActor"
+        },
+        "due_state": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "ON_TRACK",
+            "DUE_SOON",
+            "OVERDUE",
+            "BREACHED",
+            null
+          ]
+        },
+        "effective_due_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "last_activity_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "customer_unread_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "internal_unread_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "escalation_active": {
+          "type": "boolean"
+        },
+        "collaboration_priority_score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "escalation_rank": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "resolution_confidence_score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "sla_pressure_score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "queue_entered_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "row_actions": {
+          "$ref": "#/$defs/rowActions"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "properties": {
+        "interaction_layer": {
+          "properties": {
+            "recovery_notice_surface": {
+              "const": "CONTEXT_BAR"
+            },
+            "notification_surface": {
+              "const": "CONTEXT_BAR"
+            },
+            "artifact_preview_surface": {
+              "const": "DETAIL_DRAWER"
+            }
+          },
+          "required": [
+            "recovery_notice_surface",
+            "notification_surface",
+            "artifact_preview_surface"
+          ]
+        }
+      },
+      "required": [
+        "interaction_layer"
+      ]
+    },
+    {
+      "if": {
+        "properties": {
+          "rows": {
+            "maxItems": 0
+          }
+        },
+        "required": [
+          "rows"
+        ]
+      },
+      "then": {
+        "properties": {
+          "selected_item_ref": {
+            "type": "null"
+          },
+          "selected_focus_anchor_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "selected_item_ref": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "selected_item_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "selected_focus_anchor_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "selected_item_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "selected_item_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "selected_focus_anchor_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

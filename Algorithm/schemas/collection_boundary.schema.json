@@ -7,28 +7,58 @@
     "collection_boundary_id",
     "manifest_id",
     "artifact_type",
+    "source_plan_ref",
     "source_window_id",
     "read_cutoff_at",
     "connector_profile_ref",
     "connector_build_id",
+    "collection_boundary_hash",
+    "boundary_coverage_state",
     "source_boundaries",
     "contract"
   ],
   "properties": {
-    "collection_boundary_id": { "type": "string" },
-    "manifest_id": { "type": "string" },
+    "collection_boundary_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
     "artifact_type": { "const": "CollectionBoundary" },
-    "source_window_id": { "type": "string" },
+    "source_plan_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_window_id": {
+      "type": "string",
+      "minLength": 1
+    },
     "read_cutoff_at": {
       "type": "string",
       "format": "date-time"
     },
-    "connector_profile_ref": { "type": "string" },
-    "connector_build_id": { "type": "string" },
+    "connector_profile_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "connector_build_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "collection_boundary_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "boundary_coverage_state": {
+      "const": "EXPLICIT_SOURCE_DOMAIN_ACCOUNTING"
+    },
     "source_boundaries": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/sourceBoundary" }
+      "items": { "$ref": "#/$defs/sourceBoundary" },
+      "uniqueItems": true
     },
     "contract": {
       "$ref": "./schema_bundle.schema.json#/$defs/artifactContract"
@@ -39,6 +69,9 @@
       "type": "object",
       "required": [
         "source_domain",
+        "source_class",
+        "partition_scope_refs",
+        "runtime_scope_refs",
         "provider_environment_ref",
         "provider_api_version",
         "provider_schema_version",
@@ -46,31 +79,99 @@
         "revision_ref",
         "request_audit_refs",
         "completeness_expectation_ref",
-        "late_data_policy_ref"
+        "late_data_policy_ref",
+        "boundary_disposition"
       ],
       "properties": {
-        "source_domain": { "type": "string" },
-        "provider_environment_ref": { "type": "string" },
-        "provider_api_version": { "type": "string" },
-        "provider_schema_version": { "type": "string" },
-        "cursor_checkpoint_ref": { "type": "string" },
-        "revision_ref": { "type": "string" },
+        "source_domain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_class": {
+          "$ref": "./late_data_policy_binding.schema.json#/$defs/sourceClassOrNull"
+        },
+        "partition_scope_refs": {
+          "$ref": "./late_data_policy_binding.schema.json#/$defs/partitionScopeRefs"
+        },
+        "runtime_scope_refs": {
+          "$ref": "./late_data_policy_binding.schema.json#/$defs/runtimeScopeRefs"
+        },
+        "provider_environment_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider_api_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider_schema_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cursor_checkpoint_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "revision_ref": {
+          "type": "string",
+          "minLength": 1
+        },
         "request_audit_refs": {
           "type": "array",
-          "items": { "type": "string" },
-          "default": []
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
         },
         "page_request_audit_refs": {
           "type": "array",
-          "items": { "type": "string" },
-          "default": []
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
         },
-        "completeness_expectation_ref": { "type": "string" },
-        "late_data_policy_ref": {
+        "completeness_expectation_ref": {
           "type": "string",
-          "enum": ["EXCLUDE_LATE", "SPAWN_CHILD_MANIFEST", "REVIEW_IF_LATE"]
+          "minLength": 1
+        },
+        "late_data_policy_ref": {
+          "$ref": "./late_data_policy_binding.schema.json#/$defs/lateDataPolicyRef"
+        },
+        "boundary_disposition": {
+          "type": "string",
+          "enum": [
+            "IN_SCOPE_COLLECTED",
+            "NO_DATA_CONFIRMED_AT_CUTOFF",
+            "EXCLUDED_BY_POLICY",
+            "MISSING_AT_CUTOFF",
+            "STALE_AT_CUTOFF"
+          ]
         }
       },
+      "allOf": [
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "request_audit_refs": {
+                  "minItems": 1
+                }
+              }
+            },
+            {
+              "properties": {
+                "page_request_audit_refs": {
+                  "minItems": 1
+                }
+              }
+            }
+          ]
+        }
+      ],
       "additionalProperties": false
     }
   },

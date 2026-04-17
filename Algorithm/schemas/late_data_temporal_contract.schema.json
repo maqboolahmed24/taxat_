@@ -1,0 +1,275 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/late_data_temporal_contract.schema.json",
+  "title": "LateDataTemporalContract",
+  "description": "Replay-safe temporal classification contract for one late-data indicator or finding. This schema freezes cutoff, effective, visibility, and discovery timing together with baseline interaction and downstream invalidation posture so late discoveries are not reinterpreted from raw timestamps alone.",
+  "type": "object",
+  "required": [
+    "classification_profile_code",
+    "temporal_classification",
+    "temporal_certainty_state",
+    "legal_effect_basis",
+    "baseline_scope_class",
+    "filing_critical_baseline_touch",
+    "t_cutoff",
+    "t_effective_or_null",
+    "t_visible_or_null",
+    "t_discovered",
+    "retroactive_impact_required",
+    "trust_invalidation_required",
+    "proof_staleness_required",
+    "amendment_reuse_invalidated",
+    "replay_lineage_policy",
+    "reason_codes"
+  ],
+  "properties": {
+    "classification_profile_code": {
+      "const": "LATE_DATA_TEMPORAL_V1"
+    },
+    "temporal_classification": {
+      "type": "string",
+      "enum": [
+        "TEMPORALLY_UNPROVED",
+        "AUTHORITY_POSTING_LAG",
+        "TRUE_POST_BASELINE_EVENT",
+        "PRE_CUTOFF_PREEXISTING_LATE_ARRIVAL",
+        "POST_CUTOFF_DISCOVERY_PRE_BASELINE_FACT"
+      ]
+    },
+    "temporal_certainty_state": {
+      "type": "string",
+      "enum": [
+        "PROVED",
+        "UNPROVED"
+      ]
+    },
+    "legal_effect_basis": {
+      "type": "string",
+      "enum": [
+        "EFFECTIVE_TIME",
+        "VISIBILITY_TIME",
+        "AUTHORITY_PUBLICATION_TIME",
+        "UNKNOWN"
+      ]
+    },
+    "baseline_scope_class": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "CURRENT_SCOPE",
+        "PRIOR_SUBMISSION_CHAIN"
+      ]
+    },
+    "filing_critical_baseline_touch": {
+      "type": "boolean"
+    },
+    "t_cutoff": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "t_effective_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "t_visible_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "t_discovered": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "retroactive_impact_required": {
+      "type": "boolean"
+    },
+    "trust_invalidation_required": {
+      "type": "boolean"
+    },
+    "proof_staleness_required": {
+      "type": "boolean"
+    },
+    "amendment_reuse_invalidated": {
+      "type": "boolean"
+    },
+    "replay_lineage_policy": {
+      "const": "HISTORICAL_LINEAGE_ONLY"
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "temporal_classification": {
+            "const": "TEMPORALLY_UNPROVED"
+          }
+        },
+        "required": [
+          "temporal_classification"
+        ]
+      },
+      "then": {
+        "properties": {
+          "temporal_certainty_state": {
+            "const": "UNPROVED"
+          },
+          "legal_effect_basis": {
+            "const": "UNKNOWN"
+          },
+          "trust_invalidation_required": {
+            "const": true
+          },
+          "proof_staleness_required": {
+            "const": true
+          },
+          "amendment_reuse_invalidated": {
+            "const": true
+          },
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "temporal_classification": {
+            "const": "AUTHORITY_POSTING_LAG"
+          }
+        },
+        "required": [
+          "temporal_classification"
+        ]
+      },
+      "then": {
+        "properties": {
+          "temporal_certainty_state": {
+            "const": "PROVED"
+          },
+          "legal_effect_basis": {
+            "const": "AUTHORITY_PUBLICATION_TIME"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "baseline_scope_class": {
+            "const": "PRIOR_SUBMISSION_CHAIN"
+          }
+        },
+        "required": [
+          "baseline_scope_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retroactive_impact_required": {
+            "const": true
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "filing_critical_baseline_touch": {
+            "const": true
+          }
+        },
+        "required": [
+          "filing_critical_baseline_touch"
+        ]
+      },
+      "then": {
+        "properties": {
+          "baseline_scope_class": {
+            "enum": [
+              "CURRENT_SCOPE",
+              "PRIOR_SUBMISSION_CHAIN"
+            ]
+          },
+          "trust_invalidation_required": {
+            "const": true
+          },
+          "proof_staleness_required": {
+            "const": true
+          },
+          "amendment_reuse_invalidated": {
+            "const": true
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "anyOf": [
+          {
+            "properties": {
+              "retroactive_impact_required": {
+                "const": true
+              }
+            },
+            "required": [
+              "retroactive_impact_required"
+            ]
+          },
+          {
+            "properties": {
+              "trust_invalidation_required": {
+                "const": true
+              }
+            },
+            "required": [
+              "trust_invalidation_required"
+            ]
+          },
+          {
+            "properties": {
+              "proof_staleness_required": {
+                "const": true
+              }
+            },
+            "required": [
+              "proof_staleness_required"
+            ]
+          },
+          {
+            "properties": {
+              "amendment_reuse_invalidated": {
+                "const": true
+              }
+            },
+            "required": [
+              "amendment_reuse_invalidated"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,466 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/retention_tag.schema.json",
+  "title": "RetentionTag",
+  "description": "Canonical persisted retention/privacy tag. This contract freezes operative expiry, legal-hold lineage, erasure-decision basis, limitation semantics, and proof or authority-ambiguity blockers for an authoritative or evidence-bearing object.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "retention_tag_id",
+    "retention_class",
+    "anchor_event",
+    "anchor_timestamp",
+    "minimum_expiry_at",
+    "policy_expiry_at",
+    "effective_expiry_at",
+    "legal_hold_state",
+    "legal_hold_ref",
+    "legal_hold_changed_at",
+    "erasure_eligibility",
+    "erasure_decided_at",
+    "erasure_reason_codes",
+    "pseudonymisation_mode",
+    "limitation_behavior",
+    "limitation_reason_codes",
+    "retention_basis_ref",
+    "proof_preservation_basis_ref",
+    "authority_ambiguity_ref"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "RetentionTag"
+    },
+    "retention_tag_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "retention_class": {
+      "type": "string",
+      "enum": [
+        "regulated_record",
+        "derived_artifact",
+        "operational_log",
+        "analytics_projection",
+        "policy_governed_other"
+      ]
+    },
+    "anchor_event": {
+      "type": "string",
+      "minLength": 1
+    },
+    "anchor_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "minimum_expiry_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "policy_expiry_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "effective_expiry_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "legal_hold_state": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "ACTIVE",
+        "RELEASE_ELIGIBLE",
+        "RELEASED"
+      ]
+    },
+    "legal_hold_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "legal_hold_changed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "erasure_eligibility": {
+      "type": "string",
+      "enum": [
+        "ELIGIBLE",
+        "BLOCKED_LEGAL_HOLD",
+        "BLOCKED_STATUTORY_MINIMUM",
+        "BLOCKED_PROOF_PRESERVATION",
+        "BLOCKED_AUTHORITY_AMBIGUITY"
+      ]
+    },
+    "erasure_decided_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "erasure_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "pseudonymisation_mode": {
+      "type": "string",
+      "minLength": 1
+    },
+    "limitation_behavior": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "SURVIVE_WITH_LIMITATION_NOTES",
+        "EXPIRED_PLACEHOLDER_ONLY",
+        "PSEUDONYMISED_SURVIVAL"
+      ]
+    },
+    "limitation_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "retention_basis_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "proof_preservation_basis_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "authority_ambiguity_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "legal_hold_state": {
+            "const": "ACTIVE"
+          }
+        },
+        "required": [
+          "legal_hold_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "legal_hold_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "legal_hold_changed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "erasure_eligibility": {
+            "const": "BLOCKED_LEGAL_HOLD"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "legal_hold_state": {
+            "const": "RELEASE_ELIGIBLE"
+          }
+        },
+        "required": [
+          "legal_hold_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "legal_hold_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "legal_hold_changed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "erasure_eligibility": {
+            "const": "BLOCKED_LEGAL_HOLD"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "legal_hold_state": {
+            "const": "RELEASED"
+          }
+        },
+        "required": [
+          "legal_hold_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "legal_hold_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "legal_hold_changed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "erasure_eligibility": {
+            "not": {
+              "const": "BLOCKED_LEGAL_HOLD"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "legal_hold_state": {
+            "const": "NONE"
+          }
+        },
+        "required": [
+          "legal_hold_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "legal_hold_ref": {
+            "type": "null"
+          },
+          "legal_hold_changed_at": {
+            "type": "null"
+          },
+          "erasure_eligibility": {
+            "not": {
+              "const": "BLOCKED_LEGAL_HOLD"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "legal_hold_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "legal_hold_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "legal_hold_state": {
+            "enum": [
+              "ACTIVE",
+              "RELEASE_ELIGIBLE",
+              "RELEASED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "legal_hold_changed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "legal_hold_changed_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "legal_hold_state": {
+            "enum": [
+              "ACTIVE",
+              "RELEASE_ELIGIBLE",
+              "RELEASED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "limitation_behavior": {
+            "const": "NONE"
+          }
+        },
+        "required": [
+          "limitation_behavior"
+        ]
+      },
+      "then": {
+        "properties": {
+          "limitation_reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "limitation_behavior": {
+            "not": {
+              "const": "NONE"
+            }
+          }
+        },
+        "required": [
+          "limitation_behavior"
+        ]
+      },
+      "then": {
+        "properties": {
+          "limitation_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "erasure_eligibility": {
+            "const": "BLOCKED_PROOF_PRESERVATION"
+          }
+        },
+        "required": [
+          "erasure_eligibility"
+        ]
+      },
+      "then": {
+        "properties": {
+          "proof_preservation_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "authority_ambiguity_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "proof_preservation_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "proof_preservation_basis_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "erasure_eligibility": {
+            "const": "BLOCKED_PROOF_PRESERVATION"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "erasure_eligibility": {
+            "const": "BLOCKED_AUTHORITY_AMBIGUITY"
+          }
+        },
+        "required": [
+          "erasure_eligibility"
+        ]
+      },
+      "then": {
+        "properties": {
+          "authority_ambiguity_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "proof_preservation_basis_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "authority_ambiguity_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "authority_ambiguity_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "erasure_eligibility": {
+            "const": "BLOCKED_AUTHORITY_AMBIGUITY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "erasure_eligibility": {
+            "enum": [
+              "ELIGIBLE",
+              "BLOCKED_LEGAL_HOLD",
+              "BLOCKED_STATUTORY_MINIMUM"
+            ]
+          }
+        },
+        "required": [
+          "erasure_eligibility"
+        ]
+      },
+      "then": {
+        "properties": {
+          "proof_preservation_basis_ref": {
+            "type": "null"
+          },
+          "authority_ambiguity_ref": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

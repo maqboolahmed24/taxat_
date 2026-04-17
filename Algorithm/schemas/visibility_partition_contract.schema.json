@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/visibility_partition_contract.schema.json",
+  "title": "VisibilityPartitionContract",
+  "description": "Shared visibility-partition contract. This schema freezes audience class, allowed visibility lanes, access and masking basis, cache partition key, badge semantics, ordering semantics, limited-state presentation, export scope, and fallback discovery posture so read-side projections, stream events, notifications, and caches never rely on client-side concealment alone.",
+  "type": "object",
+  "required": [
+    "partition_scope",
+    "audience_class",
+    "allowed_visibility_classes",
+    "access_binding_hash",
+    "masking_posture_fingerprint",
+    "cache_partition_key",
+    "badge_counter_policy",
+    "ordering_side_channel_policy",
+    "limited_state_presentation",
+    "export_scope_policy",
+    "fallback_discovery_policy"
+  ],
+  "properties": {
+    "partition_scope": {
+      "type": "string",
+      "enum": [
+        "WORKSPACE_SNAPSHOT",
+        "WORKSPACE_STREAM_EVENT",
+        "WORK_INBOX_SNAPSHOT",
+        "WORK_INBOX_DELTA",
+        "CLIENT_PORTAL_WORKSPACE",
+        "CUSTOMER_REQUEST_LIST",
+        "COLLABORATION_ACTIVITY_SLICE",
+        "COLLABORATION_ATTACHMENT_SLICE",
+        "WORK_ITEM_NOTIFICATION"
+      ]
+    },
+    "audience_class": {
+      "type": "string",
+      "enum": [
+        "STAFF",
+        "CUSTOMER_COLLABORATION",
+        "CLIENT_PORTAL"
+      ]
+    },
+    "allowed_visibility_classes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "CUSTOMER_VISIBLE",
+          "INTERNAL_ONLY"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 2,
+      "uniqueItems": true
+    },
+    "access_binding_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "masking_posture_fingerprint": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cache_partition_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "badge_counter_policy": {
+      "type": "string",
+      "enum": [
+        "SPLIT_LANE_COUNTS",
+        "SURFACE_VISIBLE_ONLY",
+        "NO_BADGES"
+      ]
+    },
+    "ordering_side_channel_policy": {
+      "type": "string",
+      "enum": [
+        "VISIBLE_EVENTS_ONLY",
+        "SEGMENTED_VISIBLE_EVENTS_ONLY",
+        "CANONICAL_LIST_ONLY"
+      ]
+    },
+    "limited_state_presentation": {
+      "const": "EXPLICIT_LIMITATION_NOTICE"
+    },
+    "export_scope_policy": {
+      "const": "MOUNTED_ROUTE_VISIBILITY_ONLY"
+    },
+    "fallback_discovery_policy": {
+      "const": "NO_CROSS_PARTITION_DISCOVERY"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "audience_class": {
+            "enum": [
+              "CUSTOMER_COLLABORATION",
+              "CLIENT_PORTAL"
+            ]
+          }
+        },
+        "required": [
+          "audience_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "allowed_visibility_classes": {
+            "const": [
+              "CUSTOMER_VISIBLE"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "badge_counter_policy": {
+            "const": "SPLIT_LANE_COUNTS"
+          }
+        },
+        "required": [
+          "badge_counter_policy"
+        ]
+      },
+      "then": {
+        "properties": {
+          "allowed_visibility_classes": {
+            "const": [
+              "CUSTOMER_VISIBLE",
+              "INTERNAL_ONLY"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

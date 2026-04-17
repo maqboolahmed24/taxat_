@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The current blueprint is strong on authority binding, manifest sealing, auditability, and retention,
+This architecture is strong on authority binding, manifest sealing, auditability, and retention,
 but it does not yet define the broader product threat model or the runtime controls required to
 operate the engine safely in production. This contract closes that gap.
 
@@ -43,6 +43,10 @@ The broader product SHALL enforce:
 - session rotation after privilege elevation or step-up completion;
 - explicit session revocation audit on logout, compromise response, or administrator invalidation.
 
+`ActorSession`, `PrincipalContext`, and any reusable `AuthorizationDecision` payload SHALL validate
+against dedicated contracts in `schemas/` so browser, native, and automation security posture
+remains machine-readable instead of being reconstructed from client-specific transport behavior.
+
 ## 3. Secret, key, and token handling
 
 The broader product SHALL isolate secrets and authority credentials from ordinary application storage.
@@ -50,11 +54,26 @@ The broader product SHALL isolate secrets and authority credentials from ordinar
 - raw authority access/refresh tokens SHALL live only in a governed token vault or secret store;
 - outbox messages, queues, read models, and general logs SHALL carry only opaque refs such as
   `token_binding_ref`, never raw tokens;
+- any queued authority mutation SHALL revalidate the usable token version against the persisted
+  `binding_lineage_ref` immediately before send; token rotation is legal only inside the same
+  subject/client/scope lineage and SHALL NOT silently rebind a request to a different authority link
+  or different reporting subject; queued send SHALL also remain bound to the same
+  `access_binding_hash`, `policy_snapshot_hash`, and any required satisfied step-up/approval state;
+- any exceptional-authority path SHALL stay bound to the same tenant, client, partition scope, and
+  token lineage as the persisted authority path; it SHALL NOT be used to swap subjects, widen hidden
+  scope, or bypass the permanent prohibitions frozen on `ExceptionalAuthorityGrant`;
 - object payload encryption SHALL use per-tenant or per-sensitivity envelope keys rooted in KMS/HSM
   controlled master keys;
 - `SecretVersion` SHALL be versioned, attestable, and rotatable without ambiguous cutover;
 - key and secret rotation SHALL be auditable and SHALL fail closed if attestation or version binding
   is unknown.
+
+`SecretVersion` SHALL validate against its dedicated schema so attestation, active-use windows,
+cutover start, retirement, and revocation are serialized consistently across runtime, release, and
+restore controls.
+Retired versions SHALL therefore retain the rotation-start timestamp and historical-read window,
+revoked versions SHALL bind explicit revocation reason and chronology, and no secret lineage may
+self-supersede or invert attestation/activation/cutover time.
 
 ## 4. Browser, native-client, API, and transport hardening
 
@@ -86,7 +105,27 @@ The runtime topology SHALL assume zero trust between service boundaries.
 - external fetchers SHALL use explicit allowlists and SSRF-resistant URL validation;
 - inbound callbacks or worker results SHALL enter through a transactional inbox/dedupe layer before
   any state transition or artifact adoption;
+- authority-provider callbacks, poll payloads, or gateway-recovered responses SHALL additionally
+  authenticate the provider channel, compute a provider-delivery dedupe key, and bind the payload to
+  the expected request lineage before any legal-state mutation;
 - audit, manifest-control, and token-vault paths SHALL remain isolated from public ingress.
+
+That authenticated ingress checkpoint SHALL persist a first-class `AuthorityIngressReceipt` before
+response normalization or state mutation so quarantine, dedupe, and request-lineage proof survive
+transport retries and asynchronous recovery flows.
+The same checkpoint SHALL also publish one grouped `authority_ingress_proof_contract{...}` reused by
+asynchronous `AuthorityResponseEnvelope`, request-backed `SubmissionRecord`, and authority-settling
+`ObligationMirror` artifacts so later mutation or replay cannot reconstruct ingress authentication
+or lineage proof from transport-local memory.
+Bound or normalized ingress receipts SHALL therefore retain the concrete `authority_reference`,
+`request_hash`, `idempotency_key`, `bound_interaction_ref`, and at least one audit-event reference
+for the authenticated checkpoint they prove; normalized-response refs SHALL appear only on
+`receipt_state = NORMALIZED`; duplicate-suppressed ingress SHALL retain a non-null
+`canonical_ingress_receipt_ref` and SHALL NOT emit a second normalized response; and quarantine
+timestamps or reason codes SHALL appear only on `receipt_state = QUARANTINED`, where
+`reconciliation_owner_ref` is mandatory. A lone `authority_reference` match SHALL therefore remain
+quarantined as `BOUND_WITH_AUTHORITY_REFERENCE_ONLY` rather than being treated as sufficient legal
+correlation.
 
 ## 6. Data protection, privacy, and cache safety
 
@@ -114,6 +153,11 @@ The broader product SHALL require:
 - release admission that verifies signature, digest, provenance, and schema compatibility before
   promote/canary.
 
+`BuildArtifact` SHALL keep `distribution_targets[]` in canonical order, SHALL require desktop
+notarization and hardened-runtime evidence whenever `MACOS_DESKTOP` is shipped, and SHALL clear
+those desktop-only evidence refs when the desktop target is absent so release identity does not
+silently overclaim native hardening posture.
+
 ## 8. Operational security release gates
 
 The default production gate SHALL block promotion when any of the following is true:
@@ -139,8 +183,15 @@ The default production gate SHALL block promotion when any of the following is t
 7. no privileged action without step-up/approval state where policy requires it
 8. no production desktop client without signature, notarization, and hardened-runtime policy
    compliance
+9. no live authority mutation send after binding-lineage drift, token/client rebinding, or
+   authority-link revocation
+10. no authority callback, poll result, or recovery payload may mutate legal state before authenticated
+    ingress, dedupe, and request-lineage correlation complete
 
 ## 10. One-sentence summary
 
 The runtime hardening contract ensures the surrounding product cannot compromise the engine through weak
 sessions, weak secrets, weak transport, or weak release hygiene.
+## FE-25 Cache Isolation
+
+Runtime hardening now treats cache reuse as a security boundary rather than a performance-only concern. `cache_isolation_contract` freezes the exact security context required for reuse and requires purge-or-reject behavior on tenant, principal, session, access, masking, route, projection-version, or preview drift so stale or broader content cannot be revived from local or shared caches. That contract now also freezes one canonical `delivery_binding_hash` plus exact revalidation and temporary-artifact purge policies so preview, download, signed URL, Quick Look, and temp-file flows cannot reuse a broader or stale cache identity after the invoking security context has moved.

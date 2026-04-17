@@ -183,6 +183,18 @@ derived from digital records every 3 months, while accounting or tax adjustments
 before those quarterly updates are sent. That means the engine must preserve a hard distinction between
 record-layer facts and adjustment-layer facts. [6]
 
+Every `ADJUSTMENT_FACT` SHALL also carry an explicit schema-backed adjustment binding that freezes:
+
+- `applicable_reporting_scopes[]`
+- `quarterly_basis_profile`
+- `time_window_basis`
+- `partition_application = EXACT_PARTITION_ONLY`
+- `analysis_mode_treatment`
+
+This binding exists so compute, parity, amendment, and replay paths do not have to infer whether an
+adjustment belongs to quarterly, year-end, estimate-only, or counterfactual analysis posture from a
+free-form payload.
+
 ## 4.5 Strength tiers
 
 Each `SourceRecord`, `EvidenceItem`, `CandidateFact`, and `CanonicalFact` SHALL carry a `source_strength_tier`.
@@ -249,10 +261,16 @@ Every `SourceRecord` SHALL carry, at minimum:
 - `raw_hash`
 - `raw_payload_ref`
 - `ingestion_run_ref`
+- `retention_tag`
+- `erasure_state`
 
 For the current MTD embodiment, the engine SHALL preserve the fields needed to support digital records
 with amount, date, and category, and SHALL preserve per-business partitioning because separate
 businesses require separate records and separate quarterly updates. [5]
+
+`retention_tag` SHALL carry the first-class persisted `RetentionTag` object. `erasure_state` SHALL
+remain aligned with `ArtifactRetention.lifecycle_state` so raw-source retention posture does not
+drift from the canonical privacy-control plane.
 
 ## 4.9 Evidence-item metadata
 
@@ -269,6 +287,13 @@ Every `EvidenceItem` SHALL carry:
 - `erasure_state`
 - `business_partition`
 - `period_partition`
+
+`retention_tag` SHALL carry the first-class persisted `RetentionTag` object rather than a free-form
+string marker. `erasure_state` SHALL remain aligned with `ArtifactRetention.lifecycle_state` so
+retention and evidence projections do not drift.
+`extraction_method`, `extraction_confidence`, and `lineage_refs[]` SHALL remain non-null once the
+evidence item is materialized; low confidence is lawful, but an evidence item SHALL NOT become a
+support artifact whose extraction basis is structurally unknown.
 
 ## 4.10 Canonical promotion states
 
@@ -288,6 +313,21 @@ Promotion to `CANONICAL` SHALL require all of the following:
 3. required fields present for that fact family
 4. no unresolved blocking conflict
 5. confidence at or above policy threshold, or explicit approved override
+
+`CandidateFact` and `CanonicalFact` artifacts SHALL therefore preserve explicit confidence,
+supporting evidence linkage, and freshness posture where applicable. The engine SHALL NOT promote a
+fact across the compliance freeze boundary by implying support from collection context alone.
+
+Canonical promotion SHALL also preserve:
+
+- exact `collection_boundary_ref`
+- exact `normalization_context_ref`
+- exact single-partition binding
+- replayable `source_record_refs[]`
+- replayable `supporting_evidence_refs[]`
+- deterministic lineage hashes for source-record and evidence membership
+- explicit conflict posture at promotion time
+- explicit promotion activity lineage
 
 A fact SHALL remain `PROVISIONAL` where it is usable for analysis but not for compliance-grade filing.
 
@@ -342,6 +382,9 @@ The engine SHALL maintain strict partitioning by:
 This is mandatory in the current tax embodiment because HMRC requires separate digital records and
 separate quarterly updates for separate businesses and relevant income sources. [5]
 
+`CandidateFact` and `CanonicalFact` SHALL therefore bind exactly one partition scope. Cross-partition
+inconsistency is represented as conflict posture, never as widened canonical fact scope.
+
 ## 4.13 Conflict taxonomy
 
 Every unresolved inconsistency SHALL be persisted as a `ConflictRecord` with one of the following
@@ -357,6 +400,34 @@ minimum types:
 - `MISSING_REQUIRED_FIELD`
 - `LOW_CONFIDENCE_EXTRACTION`
 - `OUT_OF_PERIOD_RECORD`
+
+## 4.13A Conflict-set semantics
+
+`ConflictSet` is the authoritative wrapper over the manifest-scoped conflict population used by
+snapshotting, input freezing, and gate evaluation.
+
+It SHALL preserve both:
+
+- the full persisted conflict membership for replay and audit (`items[]`, `item_identity_hash`), and
+- the unresolved frontier that still affects execution posture (`open_conflict_ids[]`,
+  `blocking_conflict_ids[]`, `unresolved_conflict_hash`, `resolution_frontier`,
+  `open_conflict_count`, `blocking_conflict_count`, `dominant_blocking_class`)
+
+It SHALL also carry:
+
+- `normalization_context_ref` so conflict outcomes remain tied to the exact frozen mapping,
+  canonicalization, and promotion rules that produced them
+- `conflict_detection_policy_ref` so threshold or rule-profile drift never masquerades as the same
+  conflict frontier under a new policy basis
+- `business_partition_refs[]` so cross-partition and same-partition conflicts can be replayed
+  without inferring the affected business scope from item bodies alone
+
+`resolution_frontier` SHALL mean:
+
+- `CLEAR` - no unresolved conflicts remain
+- `MONITORING_ONLY` - unresolved conflicts remain, but none currently block automated execution
+- `BLOCKING_PRESENT` - at least one unresolved conflict currently blocks automation, review
+  progression, filing, amendment, erasure, run completion, or authority interaction
 
 ## 4.14 Precedence rules
 
@@ -420,6 +491,8 @@ The engine SHALL prohibit the following:
 - treating inference as authority acknowledgement
 - mixing facts across business partitions to satisfy completeness artificially
 - silently dropping lower-precedence evidence when conflicts exist
+- promoting masked, redacted, or customer-safe projections into canonical truth
+- promoting a candidate to `CANONICAL` while `blocking_conflict_count_at_promotion > 0`
 
 ## 4.19 One-sentence summary
 

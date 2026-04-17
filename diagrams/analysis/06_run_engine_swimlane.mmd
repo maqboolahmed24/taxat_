@@ -1,0 +1,51 @@
+flowchart TB
+  classDef phase fill:#121721,stroke:#5AA9FF,color:#F5F7FA,stroke-width:1px;
+  classDef branch fill:#181E29,stroke:#E7B04B,color:#F5F7FA,stroke-width:1px;
+  classDef terminal fill:#181E29,stroke:#E96B6B,color:#F5F7FA,stroke-width:1px;
+
+  P01["P01 Authorize and bind execution scope\nCALLER_AND_SCOPE / AUTHORIZATION"]:::phase
+  P02["P02 Resolve scope intent, validate runtime grammar, load any prior manifest, and choose config inheritance\nCALLER_AND_SCOPE / MANIFEST_AND_LINEAGE"]:::phase
+  P03["P03 Allocate, continue, or reuse manifest context and initialize the live experience stream\nMANIFEST_AND_LINEAGE / CONFIG_AND_FREEZE"]:::phase
+  P04["P04 Load or build the sealed pre-start context using a barriered, partition-aware execution plan\nSOURCE_COLLECTION_AND_CANONICALIZATION / CONFIG_AND_FREEZE"]:::phase
+  P05["P05 Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built\nPRESEAL_GATES / MANIFEST_AND_LINEAGE"]:::phase
+  P06["P06 Claim the sealed manifest and publish the post-seal command DAG atomically\nMANIFEST_AND_LINEAGE / POSTSEAL_DAG"]:::phase
+  P07["P07 Await post-seal command DAG completion and adopt mandatory outputs\nPOSTSEAL_DAG / LIVE_EXPERIENCE"]:::phase
+  P08["P08 Retention evidence gate\nRETENTION_AND_TERMINALIZATION / LIVE_EXPERIENCE"]:::phase
+  P09["P09 Authority context, comparison basis, parity, and parity gate\nAUTHORITY_CONTEXT / FILING_AND_SUBMISSION"]:::phase
+  P10["P10 Drift posture and amendment posture preparation\nDRIFT_AND_AMENDMENT"]:::phase
+  P11["P11 Trust synthesis and command-side case state\nTRUST_AND_WORKFLOW"]:::phase
+  P12["P12 Workflow planning and immediate consequence refresh\nTRUST_AND_WORKFLOW / LIVE_EXPERIENCE"]:::phase
+  P13["P13 Publish live read-model projections and conditionally terminalize on trust posture\nLIVE_EXPERIENCE / TRUST_AND_WORKFLOW"]:::phase
+  P14["P14 Amendment gate and intent-to-amend progression\nDRIFT_AND_AMENDMENT / FILING_AND_SUBMISSION"]:::phase
+  P15["P15 Authority calculation, filing readiness, packet preparation, and filing gate\nAUTHORITY_CONTEXT / FILING_AND_SUBMISSION"]:::phase
+  P16["P16 Submission enqueue, governed transmit, inbox-normalized recovery, and bounded reconciliation\nFILING_AND_SUBMISSION / AUTHORITY_CONTEXT"]:::phase
+  P17["P17 Post-authority drift monitoring\nDRIFT_AND_AMENDMENT / LIVE_EXPERIENCE"]:::phase
+  P18["P18 Terminal finalization and return\nRETENTION_AND_TERMINALIZATION / LIVE_EXPERIENCE"]:::phase
+  P01 --> P02 --> P03 --> P04 --> P05 --> P06 --> P07 --> P08 --> P09 --> P10 --> P11 --> P12 --> P13 --> P14 --> P15 --> P16 --> P17 --> P18
+
+  BR_ACCESS{"Access blocked?"}:::branch
+  TERM_ACCESS["Early access-blocked return"]:::terminal
+  P01 --> BR_ACCESS
+  BR_ACCESS -->|yes| TERM_ACCESS
+  BR_ACCESS -->|no| P02
+
+  BR_PRESEAL{"Pre-seal gates allow seal?"}:::branch
+  TERM_PRESTART["Blocked or review pre-start outcome"]:::terminal
+  P05 --> BR_PRESEAL
+  BR_PRESEAL -->|no| TERM_PRESTART
+  BR_PRESEAL -->|yes| P06
+
+  BR_TRUST{"Trust terminalization?"}:::branch
+  TERM_TRUST["Trust posture terminal bundle"]:::terminal
+  P13 --> BR_TRUST
+  BR_TRUST -->|yes| TERM_TRUST
+  BR_TRUST -->|no| P14
+
+  BR_SUBMIT{"Submit path requested?"}:::branch
+  TERM_PENDING["Review-required pending authority confirmation"]:::terminal
+  P16 --> BR_SUBMIT
+  BR_SUBMIT -->|no| P17
+  BR_SUBMIT -->|yes| TERM_PENDING
+
+  TERM_FINAL["Terminal finalization and return"]:::terminal
+  P18 --> TERM_FINAL

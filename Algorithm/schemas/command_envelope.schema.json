@@ -1,0 +1,917 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/command_envelope.schema.json",
+  "title": "CommandEnvelope",
+  "description": "Northbound command-request contract. This schema freezes client-generated idempotency, explicit mutation precondition profiles, target scoping, portal/workspace/request stale-view guards, governance simulation-basis guards where applicable, and payload routing for product-facing writes before they become durable command receipts.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "command_id",
+    "command_type",
+    "idempotency_key",
+    "actor_session_ref",
+    "target_scope_class",
+    "tenant_id",
+    "client_id",
+    "manifest_id",
+    "work_item_id",
+    "governance_target_ref",
+    "period",
+    "requested_scope",
+    "if_match_decision_bundle_hash",
+    "if_match_shell_stability_token",
+    "if_match_frame_epoch",
+    "if_match_work_item_version",
+    "if_match_internal_head_sequence",
+    "if_match_customer_head_sequence",
+    "if_match_request_state_version",
+    "if_match_approval_pack_hash",
+    "if_match_client_portal_workspace_version",
+    "if_match_policy_snapshot_hash",
+    "if_match_dependency_topology_hash",
+    "simulation_basis_hash",
+    "mutation_basis_contract",
+    "truth_boundary_contract",
+    "mutation_precondition_binding",
+    "payload",
+    "requested_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "CommandEnvelope"
+    },
+    "command_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "command_type": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actor_session_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_scope_class": {
+      "type": "string",
+      "enum": [
+        "MANIFEST",
+        "WORK_ITEM",
+        "GOVERNANCE"
+      ]
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "client_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "work_item_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "governance_target_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "period": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "requested_scope": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "if_match_decision_bundle_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "if_match_shell_stability_token": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "if_match_frame_epoch": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "if_match_work_item_version": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "if_match_internal_head_sequence": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "if_match_customer_head_sequence": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "if_match_request_state_version": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "if_match_approval_pack_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "if_match_client_portal_workspace_version": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "if_match_policy_snapshot_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "if_match_dependency_topology_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "simulation_basis_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "mutation_basis_contract": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "https://taxat.dev/schemas/governance_mutation_basis_contract.schema.json"
+        }
+      ]
+    },
+    "truth_boundary_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/command_truth_boundary_contract.schema.json"
+        },
+        {
+          "properties": {
+            "artifact_role": {
+              "const": "COMMAND_REQUEST"
+            },
+            "authoritative_record_families": {
+              "const": [
+                "RUN_MANIFEST",
+                "WORKFLOW_ITEM",
+                "GOVERNANCE_DOMAIN_OBJECT"
+              ]
+            },
+            "observable_projection_families": {
+              "const": [
+                "DECISION_BUNDLE",
+                "EXPERIENCE_DELTA",
+                "LOW_NOISE_EXPERIENCE_FRAME",
+                "WORKSPACE_SNAPSHOT",
+                "CLIENT_PORTAL_WORKSPACE",
+                "GOVERNANCE_POLICY_SNAPSHOT",
+                "CLIENT_APPROVAL_PACK"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "mutation_precondition_binding": {
+      "$ref": "https://taxat.dev/schemas/mutation_precondition_binding.schema.json"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "target_scope_class": {
+            "const": "MANIFEST"
+          }
+        },
+        "required": [
+          "target_scope_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "manifest_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "work_item_id": {
+            "type": "null"
+          },
+          "governance_target_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "target_scope_class": {
+            "const": "WORK_ITEM"
+          }
+        },
+        "required": [
+          "target_scope_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "manifest_id": {
+            "type": "null"
+          },
+          "work_item_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "governance_target_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "target_scope_class": {
+            "const": "GOVERNANCE"
+          }
+        },
+        "required": [
+          "target_scope_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "manifest_id": {
+            "type": "null"
+          },
+          "work_item_id": {
+            "type": "null"
+          },
+          "governance_target_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "if_match_policy_snapshot_hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "governance_target_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "governance_target_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "target_scope_class": {
+            "const": "GOVERNANCE"
+          },
+          "manifest_id": {
+            "type": "null"
+          },
+          "work_item_id": {
+            "type": "null"
+          },
+          "if_match_policy_snapshot_hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "manifest_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "manifest_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "target_scope_class": {
+            "const": "MANIFEST"
+          },
+          "work_item_id": {
+            "type": "null"
+          },
+          "governance_target_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "work_item_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "work_item_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "target_scope_class": {
+            "const": "WORK_ITEM"
+          },
+          "manifest_id": {
+            "type": "null"
+          },
+          "governance_target_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "anyOf": [
+          {
+            "properties": {
+              "if_match_work_item_version": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "if_match_work_item_version"
+            ]
+          },
+          {
+            "properties": {
+              "if_match_internal_head_sequence": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "if_match_internal_head_sequence"
+            ]
+          },
+          {
+            "properties": {
+              "if_match_customer_head_sequence": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "if_match_customer_head_sequence"
+            ]
+          },
+          {
+            "properties": {
+              "if_match_request_state_version": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "if_match_request_state_version"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "target_scope_class": {
+            "const": "WORK_ITEM"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "client_id": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "client_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "if_match_client_portal_workspace_version": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "if_match_client_portal_workspace_version": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "if_match_client_portal_workspace_version"
+        ]
+      },
+      "then": {
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "command_type": {
+            "enum": [
+              "CLIENT_PORTAL_COMPLETE_ONBOARDING_STEP",
+              "CLIENT_PORTAL_FINALIZE_UPLOAD",
+              "CLIENT_PORTAL_REQUEST_HELP"
+            ]
+          },
+          "target_scope_class": {
+            "enum": [
+              "MANIFEST",
+              "WORK_ITEM"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "if_match_request_state_version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "if_match_request_state_version"
+        ]
+      },
+      "then": {
+        "properties": {
+          "command_type": {
+            "const": "RESPOND_TO_REQUEST_INFO"
+          },
+          "target_scope_class": {
+            "const": "WORK_ITEM"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "if_match_policy_snapshot_hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "if_match_policy_snapshot_hash"
+        ]
+      },
+      "then": {
+        "properties": {
+          "target_scope_class": {
+            "const": "GOVERNANCE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_type": {
+            "enum": [
+              "ASSIGN_WORK_ITEM",
+              "REASSIGN_WORK_ITEM",
+              "ESCALATE_WORK_ITEM",
+              "CHANGE_WORK_ITEM_STATUS",
+              "SET_WORK_ITEM_DUE_DATES"
+            ]
+          }
+        },
+        "required": [
+          "command_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "target_scope_class": {
+            "const": "WORK_ITEM"
+          },
+          "if_match_work_item_version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "if_match_shell_stability_token": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_type": {
+            "const": "ADD_INTERNAL_NOTE"
+          }
+        },
+        "required": [
+          "command_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "target_scope_class": {
+            "const": "WORK_ITEM"
+          },
+          "if_match_internal_head_sequence": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "if_match_work_item_version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "if_match_shell_stability_token": {
+            "type": "string",
+            "minLength": 1
+          },
+          "if_match_customer_head_sequence": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_type": {
+            "enum": [
+              "ADD_CUSTOMER_COMMENT",
+              "REQUEST_CUSTOMER_INFO",
+              "RESPOND_TO_REQUEST_INFO"
+            ]
+          }
+        },
+        "required": [
+          "command_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "target_scope_class": {
+            "const": "WORK_ITEM"
+          },
+          "if_match_customer_head_sequence": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "if_match_work_item_version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "if_match_shell_stability_token": {
+            "type": "string",
+            "minLength": 1
+          },
+          "if_match_internal_head_sequence": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_type": {
+            "const": "RESPOND_TO_REQUEST_INFO"
+          }
+        },
+        "required": [
+          "command_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "target_scope_class": {
+            "const": "WORK_ITEM"
+          },
+          "if_match_work_item_version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "if_match_request_state_version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_type": {
+            "enum": [
+              "CLIENT_PORTAL_COMPLETE_ONBOARDING_STEP",
+              "CLIENT_PORTAL_FINALIZE_UPLOAD",
+              "CLIENT_PORTAL_REQUEST_HELP"
+            ]
+          }
+        },
+        "required": [
+          "command_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target_scope_class": {
+            "not": {
+              "const": "GOVERNANCE"
+            }
+          },
+          "if_match_client_portal_workspace_version": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_type": {
+            "enum": [
+              "CLIENT_PORTAL_ACKNOWLEDGE_APPROVAL_PACK",
+              "CLIENT_PORTAL_SIGN_APPROVAL_PACK"
+            ]
+          }
+        },
+        "required": [
+          "command_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target_scope_class": {
+            "const": "MANIFEST"
+          },
+          "manifest_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "if_match_decision_bundle_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "if_match_shell_stability_token": {
+            "type": "string",
+            "minLength": 1
+          },
+          "if_match_frame_epoch": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "if_match_approval_pack_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "if_match_client_portal_workspace_version": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_type": {
+            "pattern": "^ADMIN_"
+          }
+        },
+        "required": [
+          "command_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "target_scope_class": {
+            "const": "GOVERNANCE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "if_match_dependency_topology_hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "if_match_dependency_topology_hash"
+        ]
+      },
+      "then": {
+        "properties": {
+          "target_scope_class": {
+            "const": "GOVERNANCE"
+          },
+          "if_match_policy_snapshot_hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "simulation_basis_hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "simulation_basis_hash"
+        ]
+      },
+      "then": {
+        "properties": {
+          "target_scope_class": {
+            "const": "GOVERNANCE"
+          },
+          "if_match_policy_snapshot_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "if_match_dependency_topology_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "mutation_basis_contract": {
+            "$ref": "https://taxat.dev/schemas/governance_mutation_basis_contract.schema.json"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mutation_basis_contract": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "mutation_basis_contract"
+        ]
+      },
+      "then": {
+        "properties": {
+          "target_scope_class": {
+            "const": "GOVERNANCE"
+          },
+          "if_match_policy_snapshot_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "if_match_dependency_topology_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "simulation_basis_hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "target_scope_class": {
+            "enum": [
+              "MANIFEST",
+              "WORK_ITEM"
+            ]
+          }
+        },
+        "required": [
+          "target_scope_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "if_match_dependency_topology_hash": {
+            "type": "null"
+          },
+          "mutation_basis_contract": {
+            "type": "null"
+          },
+          "simulation_basis_hash": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,515 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/nightly_portfolio_simulation_basis_contract.schema.json",
+  "title": "NightlyPortfolioSimulationBasisContract",
+  "description": "Non-mutating nightly portfolio what-if basis contract. This schema freezes one coherent nightly source-batch set, the exact persisted selection-entry coverage set, the modeled-only execution boundary hash, baseline release or schema identity, and the declared counterfactual knobs so nightly what-if projections remain deterministic and never fall back to live queue or manifest queries.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "basis_contract_hash",
+    "execution_mode_boundary_hash",
+    "tenant_id",
+    "nightly_window_key",
+    "source_batch_run_refs",
+    "source_batch_set_hash",
+    "source_batch_count",
+    "source_batch_window_state",
+    "source_batch_recovery_state",
+    "covered_selection_entry_refs",
+    "covered_selection_entry_count",
+    "baseline_selection_universe_hash",
+    "baseline_policy_snapshot_hash",
+    "baseline_autopilot_policy_hash",
+    "baseline_release_verification_manifest_ref",
+    "baseline_schema_bundle_hash",
+    "baseline_code_build_id",
+    "baseline_environment_ref",
+    "baseline_global_concurrency_profile",
+    "counterfactual_policy_snapshot_hash_or_null",
+    "counterfactual_autopilot_policy_hash_or_null",
+    "counterfactual_release_verification_manifest_ref_or_null",
+    "counterfactual_release_candidate_identity_contract_or_null",
+    "counterfactual_global_concurrency_profile_or_null",
+    "counterfactual_reason_codes",
+    "candidate_counterfactuals",
+    "truth_source_policy",
+    "selection_projection_policy",
+    "digest_projection_policy",
+    "non_execution_boundary_policy",
+    "release_identity_policy",
+    "successor_recovery_policy",
+    "diff_explainability_policy"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "NIGHTLY_PORTFOLIO_SIMULATION_BASIS_V1"
+    },
+    "basis_contract_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_mode_boundary_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nightly_window_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_batch_run_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "source_batch_set_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_batch_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "source_batch_window_state": {
+      "const": "SINGLE_NIGHTLY_WINDOW"
+    },
+    "source_batch_recovery_state": {
+      "type": "string",
+      "enum": [
+        "SINGLE_BATCH",
+        "SUCCESSOR_RECOVERY_CHAIN"
+      ]
+    },
+    "covered_selection_entry_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "covered_selection_entry_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "baseline_selection_universe_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "baseline_policy_snapshot_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "baseline_autopilot_policy_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "baseline_release_verification_manifest_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "baseline_schema_bundle_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "baseline_code_build_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "baseline_environment_ref": {
+      "type": "string",
+      "enum": [
+        "DEV",
+        "TEST",
+        "UAT",
+        "SANDBOX",
+        "PRODUCTION"
+      ]
+    },
+    "baseline_global_concurrency_profile": {
+      "$ref": "#/$defs/globalConcurrencyProfile"
+    },
+    "counterfactual_policy_snapshot_hash_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "counterfactual_autopilot_policy_hash_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "counterfactual_release_verification_manifest_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "counterfactual_release_candidate_identity_contract_or_null": {
+      "anyOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/release_candidate_identity_contract.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "counterfactual_global_concurrency_profile_or_null": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/globalConcurrencyProfile"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "counterfactual_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "candidate_counterfactuals": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/candidateCounterfactual"
+      },
+      "default": []
+    },
+    "truth_source_policy": {
+      "const": "PERSISTED_NIGHTLY_BATCH_SELECTION_DIGEST_AND_RELEASE_TRUTH_ONLY"
+    },
+    "selection_projection_policy": {
+      "const": "REPLAY_SELECTION_ENTRIES_WITHOUT_LIVE_REQUERY"
+    },
+    "digest_projection_policy": {
+      "const": "REPLAY_BASELINE_DIGEST_PARTITION_AND_APPLY_EXPLICIT_DIFFS_ONLY"
+    },
+    "non_execution_boundary_policy": {
+      "const": "STEP_UP_APPROVAL_RELEASE_AND_AUTHORITY_AMBIGUITY_REMAIN_BLOCKING"
+    },
+    "release_identity_policy": {
+      "const": "COUNTERFACTUAL_RELEASE_REQUIRES_EXACT_CANDIDATE_AND_SCHEMA_BINDING"
+    },
+    "successor_recovery_policy": {
+      "const": "SOURCE_BATCH_SET_MAY_INCLUDE_SUCCESSOR_CHAIN_FOR_ONE_WINDOW_ONLY"
+    },
+    "diff_explainability_policy": {
+      "const": "EVERY_BUCKET_ORDER_AND_HIGHLIGHT_CHANGE_REQUIRES_REASON_CODE_DIFFS"
+    }
+  },
+  "$defs": {
+    "globalConcurrencyProfile": {
+      "type": "object",
+      "required": [
+        "global_manifest_limit",
+        "per_shard_manifest_limit",
+        "authority_transmit_limit",
+        "per_client_serialization",
+        "heartbeat_interval_seconds",
+        "stale_heartbeat_after_seconds",
+        "soft_stability_rho",
+        "hard_stability_rho",
+        "retry_capacity_fraction",
+        "base_deficit_quantum_minutes"
+      ],
+      "properties": {
+        "global_manifest_limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "per_shard_manifest_limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "authority_transmit_limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "per_client_serialization": {
+          "type": "boolean"
+        },
+        "heartbeat_interval_seconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "stale_heartbeat_after_seconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "soft_stability_rho": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "hard_stability_rho": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "retry_capacity_fraction": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "base_deficit_quantum_minutes": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "candidateCounterfactual": {
+      "type": "object",
+      "required": [
+        "selection_entry_ref",
+        "candidate_identity_hash",
+        "counterfactual_policy_outcome",
+        "counterfactual_authority_outcome",
+        "counterfactual_retry_outcome",
+        "counterfactual_release_outcome",
+        "reason_codes"
+      ],
+      "properties": {
+        "selection_entry_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidate_identity_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "counterfactual_policy_outcome": {
+          "type": "string",
+          "enum": [
+            "BASELINE",
+            "ALLOW",
+            "REVIEW_REQUIRED",
+            "DENY"
+          ]
+        },
+        "counterfactual_authority_outcome": {
+          "type": "string",
+          "enum": [
+            "BASELINE",
+            "CLEAR",
+            "WAITING",
+            "AMBIGUOUS"
+          ]
+        },
+        "counterfactual_retry_outcome": {
+          "type": "string",
+          "enum": [
+            "BASELINE",
+            "READY",
+            "DEFER"
+          ]
+        },
+        "counterfactual_release_outcome": {
+          "type": "string",
+          "enum": [
+            "BASELINE",
+            "ADMISSIBLE",
+            "INADMISSIBLE"
+          ]
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "source_batch_count": {
+            "const": 1
+          }
+        },
+        "required": [
+          "source_batch_count"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_batch_recovery_state": {
+            "const": "SINGLE_BATCH"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "source_batch_count": {
+            "minimum": 2
+          }
+        },
+        "required": [
+          "source_batch_count"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_batch_recovery_state": {
+            "const": "SUCCESSOR_RECOVERY_CHAIN"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "counterfactual_policy_snapshot_hash_or_null": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "counterfactual_policy_snapshot_hash_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "counterfactual_autopilot_policy_hash_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "counterfactual_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "counterfactual_autopilot_policy_hash_or_null": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "counterfactual_autopilot_policy_hash_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "counterfactual_policy_snapshot_hash_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "counterfactual_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "counterfactual_release_verification_manifest_ref_or_null": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "counterfactual_release_verification_manifest_ref_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "counterfactual_release_candidate_identity_contract_or_null": {
+            "type": "object"
+          },
+          "counterfactual_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "counterfactual_release_candidate_identity_contract_or_null": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "counterfactual_release_candidate_identity_contract_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "counterfactual_release_verification_manifest_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "counterfactual_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "counterfactual_global_concurrency_profile_or_null": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "counterfactual_global_concurrency_profile_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "counterfactual_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "candidate_counterfactuals": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "candidate_counterfactuals"
+        ]
+      },
+      "then": {
+        "properties": {
+          "diff_explainability_policy": {
+            "const": "EVERY_BUCKET_ORDER_AND_HIGHLIGHT_CHANGE_REQUIRES_REASON_CODE_DIFFS"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

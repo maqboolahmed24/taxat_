@@ -1,0 +1,418 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/authority_ingress_correlation_contract.schema.json",
+  "title": "AuthorityIngressCorrelationContract",
+  "description": "Durable ingress-correlation explainability contract. This schema freezes the provider-visible identity claims extracted from one persisted authority ingress payload together with the exact compared request-lineage candidates and fail-closed resolution posture so ambiguous, weak-bound, and unbound ingress remains explainable without transport logs or legal-state mutation from raw memory.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "bound_artifact_type",
+    "correlation_status",
+    "lineage_binding_basis",
+    "comparison_set_state",
+    "resolution_state",
+    "extracted_authority_reference_or_null",
+    "extracted_request_hash_or_null",
+    "extracted_idempotency_key_or_null",
+    "extracted_identity_namespace_hash_or_null",
+    "extracted_duplicate_meaning_key_or_null",
+    "candidate_lineages",
+    "correlation_reason_codes",
+    "request_lineage_comparison_policy",
+    "legal_mutation_policy"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "AUTHORITY_INGRESS_CORRELATION_CONTRACT_V1"
+    },
+    "bound_artifact_type": {
+      "const": "AuthorityIngressReceipt"
+    },
+    "correlation_status": {
+      "type": "string",
+      "enum": [
+        "BOUND",
+        "BOUND_WITH_AUTHORITY_REFERENCE_ONLY",
+        "AMBIGUOUS",
+        "UNBOUND"
+      ]
+    },
+    "lineage_binding_basis": {
+      "type": "string",
+      "enum": [
+        "REQUEST_HASH_EXACT",
+        "IDEMPOTENCY_TUPLE_EXACT",
+        "REQUEST_HASH_AND_TUPLE_EXACT",
+        "AUTHORITY_REFERENCE_ONLY",
+        "AMBIGUOUS_MULTI_MATCH",
+        "UNBOUND_NO_MATCH"
+      ]
+    },
+    "comparison_set_state": {
+      "type": "string",
+      "enum": [
+        "ONE_EXACT_MATCH",
+        "WEAK_MATCH_ONLY",
+        "MULTI_MATCH",
+        "NO_MATCH",
+        "MISSING_PROVIDER_KEYS"
+      ]
+    },
+    "resolution_state": {
+      "type": "string",
+      "enum": [
+        "EXACT_BOUND",
+        "WEAK_AUTHORITY_REFERENCE_ONLY",
+        "AMBIGUOUS_MULTI_MATCH",
+        "UNBOUND_NO_MATCH",
+        "UNBOUND_MISSING_IDENTITY_CLAIMS"
+      ]
+    },
+    "extracted_authority_reference_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "extracted_request_hash_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "extracted_idempotency_key_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "extracted_identity_namespace_hash_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "extracted_duplicate_meaning_key_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "candidate_lineages": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/candidateLineage"
+      },
+      "default": []
+    },
+    "correlation_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "request_lineage_comparison_policy": {
+      "const": "PERSISTED_REQUEST_LINEAGE_ONLY_NO_TRANSPORT_MEMORY"
+    },
+    "legal_mutation_policy": {
+      "const": "NO_DIRECT_LEGAL_STATE_MUTATION_FROM_CORRELATION"
+    }
+  },
+  "$defs": {
+    "candidateLineage": {
+      "type": "object",
+      "required": [
+        "candidate_rank",
+        "interaction_ref",
+        "authority_reference_or_null",
+        "request_hash_or_null",
+        "idempotency_key_or_null",
+        "identity_namespace_hash_or_null",
+        "duplicate_meaning_key_or_null",
+        "latest_submission_record_ref_or_null",
+        "latest_obligation_mirror_ref_or_null",
+        "match_basis_codes",
+        "divergence_reason_codes"
+      ],
+      "properties": {
+        "candidate_rank": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "interaction_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authority_reference_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "request_hash_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "idempotency_key_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "identity_namespace_hash_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "duplicate_meaning_key_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "latest_submission_record_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "latest_obligation_mirror_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "match_basis_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "AUTHORITY_REFERENCE_MATCH",
+              "DUPLICATE_MEANING_KEY_MATCH",
+              "IDEMPOTENCY_KEY_MATCH",
+              "IDENTITY_NAMESPACE_HASH_MATCH",
+              "REQUEST_HASH_MATCH"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "divergence_reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "correlation_status": {
+            "const": "BOUND"
+          }
+        },
+        "required": [
+          "correlation_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lineage_binding_basis": {
+            "enum": [
+              "REQUEST_HASH_EXACT",
+              "IDEMPOTENCY_TUPLE_EXACT",
+              "REQUEST_HASH_AND_TUPLE_EXACT"
+            ]
+          },
+          "comparison_set_state": {
+            "const": "ONE_EXACT_MATCH"
+          },
+          "resolution_state": {
+            "const": "EXACT_BOUND"
+          },
+          "candidate_lineages": {
+            "minItems": 1,
+            "maxItems": 1
+          },
+          "extracted_authority_reference_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "correlation_status": {
+            "const": "BOUND_WITH_AUTHORITY_REFERENCE_ONLY"
+          }
+        },
+        "required": [
+          "correlation_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lineage_binding_basis": {
+            "const": "AUTHORITY_REFERENCE_ONLY"
+          },
+          "comparison_set_state": {
+            "const": "WEAK_MATCH_ONLY"
+          },
+          "resolution_state": {
+            "const": "WEAK_AUTHORITY_REFERENCE_ONLY"
+          },
+          "candidate_lineages": {
+            "minItems": 1,
+            "maxItems": 1
+          },
+          "extracted_authority_reference_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "correlation_status": {
+            "const": "AMBIGUOUS"
+          }
+        },
+        "required": [
+          "correlation_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lineage_binding_basis": {
+            "const": "AMBIGUOUS_MULTI_MATCH"
+          },
+          "comparison_set_state": {
+            "const": "MULTI_MATCH"
+          },
+          "resolution_state": {
+            "const": "AMBIGUOUS_MULTI_MATCH"
+          },
+          "candidate_lineages": {
+            "minItems": 2
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "correlation_status": {
+            "const": "UNBOUND"
+          }
+        },
+        "required": [
+          "correlation_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lineage_binding_basis": {
+            "const": "UNBOUND_NO_MATCH"
+          },
+          "candidate_lineages": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "correlation_status": {
+            "const": "UNBOUND"
+          },
+          "extracted_authority_reference_or_null": {
+            "type": "null"
+          },
+          "extracted_request_hash_or_null": {
+            "type": "null"
+          },
+          "extracted_idempotency_key_or_null": {
+            "type": "null"
+          },
+          "extracted_identity_namespace_hash_or_null": {
+            "type": "null"
+          },
+          "extracted_duplicate_meaning_key_or_null": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "correlation_status",
+          "extracted_authority_reference_or_null",
+          "extracted_request_hash_or_null",
+          "extracted_idempotency_key_or_null",
+          "extracted_identity_namespace_hash_or_null",
+          "extracted_duplicate_meaning_key_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "comparison_set_state": {
+            "const": "MISSING_PROVIDER_KEYS"
+          },
+          "resolution_state": {
+            "const": "UNBOUND_MISSING_IDENTITY_CLAIMS"
+          }
+        }
+      },
+      "else": {
+        "if": {
+          "properties": {
+            "correlation_status": {
+              "const": "UNBOUND"
+            }
+          },
+          "required": [
+            "correlation_status"
+          ]
+        },
+        "then": {
+          "properties": {
+            "comparison_set_state": {
+              "const": "NO_MATCH"
+            },
+            "resolution_state": {
+              "const": "UNBOUND_NO_MATCH"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

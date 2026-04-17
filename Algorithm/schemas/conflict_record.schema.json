@@ -13,25 +13,45 @@
     "reason_codes",
     "blocking_class",
     "resolution_state",
-    "contract"
+    "contract",
+    "contradiction_class",
+    "decisive_target_refs",
+    "evidence_refs",
+    "authority_position_refs",
+    "supersedes_conflict_id"
   ],
   "properties": {
     "conflict_id": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "manifest_id": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "artifact_type": {
       "const": "ConflictRecord"
     },
     "conflict_type": {
-      "type": "string"
+      "type": "string",
+      "enum": [
+        "DUPLICATE_CANDIDATE",
+        "AMOUNT_MISMATCH",
+        "DATE_CONFLICT",
+        "CATEGORY_CONFLICT",
+        "BUSINESS_PARTITION_CONFLICT",
+        "SOURCE_PRECEDENCE_CONFLICT",
+        "AUTHORITY_DIFFERENCE",
+        "MISSING_REQUIRED_FIELD",
+        "LOW_CONFIDENCE_EXTRACTION",
+        "OUT_OF_PERIOD_RECORD"
+      ]
     },
     "involved_fact_refs": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
       },
       "minItems": 2,
       "uniqueItems": true
@@ -49,20 +69,112 @@
     "reason_codes": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
       },
       "minItems": 1,
       "uniqueItems": true
     },
     "blocking_class": {
-      "type": "string"
+      "type": "string",
+      "enum": [
+        "NON_BLOCKING",
+        "BLOCKS_AUTOMATION",
+        "BLOCKS_REVIEW_PROGRESS",
+        "BLOCKS_FILING",
+        "BLOCKS_AMENDMENT",
+        "BLOCKS_ERASURE",
+        "BLOCKS_RUN",
+        "BLOCKS_AUTHORITY_CALL"
+      ]
     },
     "resolution_state": {
-      "type": "string"
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "IN_PROGRESS",
+        "MONITORING",
+        "RESOLVED",
+        "ACCEPTED_RISK",
+        "SUPERSEDED",
+        "CANCELLED"
+      ]
     },
     "contract": {
       "$ref": "./schema_bundle.schema.json#/$defs/artifactContract"
+    },
+    "contradiction_class": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "SOFT_CONTRADICTION",
+        "DECISIVE_CONTRADICTION",
+        "AUTHORITY_DIVERGENCE"
+      ]
+    },
+    "decisive_target_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "authority_position_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "supersedes_conflict_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "contradiction_class": {
+            "enum": [
+              "DECISIVE_CONTRADICTION",
+              "AUTHORITY_DIVERGENCE"
+            ]
+          }
+        },
+        "required": [
+          "contradiction_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decisive_target_refs": {
+            "minItems": 1
+          },
+          "blocking_class": {
+            "not": {
+              "const": "NON_BLOCKING"
+            }
+          }
+        }
+      }
+    }
+  ]
 }

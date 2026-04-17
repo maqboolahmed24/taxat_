@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/filing_notice_step.schema.json",
+  "title": "FilingNoticeStep",
+  "description": "Packet-local customer notice step. This schema freezes declaration-basis, disclaimer, and packet-local approval prompts that are allowed to block packet promotion without changing pre-trust posture.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "notice_step_id",
+    "manifest_id",
+    "packet_id",
+    "step_code",
+    "lifecycle_state",
+    "reason_codes",
+    "scope_refs",
+    "packet_refs",
+    "created_at",
+    "resolved_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "FilingNoticeStep"
+    },
+    "notice_step_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packet_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "step_code": {
+      "type": "string",
+      "enum": [
+        "DECLARED_BASIS_ACK_REQUIRED",
+        "DISCLAIMER_ACK_REQUIRED",
+        "PACKET_APPROVAL_REQUIRED"
+      ]
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "SATISFIED",
+        "UNSATISFIABLE"
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "packet_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resolved_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "PENDING"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resolved_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "SATISFIED",
+              "UNSATISFIABLE"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resolved_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

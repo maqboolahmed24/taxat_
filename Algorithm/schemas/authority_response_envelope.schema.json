@@ -1,0 +1,994 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/authority_response_envelope.schema.json",
+  "title": "AuthorityResponseEnvelope",
+  "description": "Normalized authority response observation artifact. This contract freezes provider ingress source, correlation posture, source-derivation lineage, legal-effect posture, response class, retry semantics, and timeout/no-body handling for authority exchanges without collapsing multi-source meaning into a last-writer-wins result.",
+  "type": "object",
+  "required": [
+    "response_id",
+    "request_id",
+    "received_at",
+    "provider_received_at",
+    "http_status",
+    "response_headers_ref",
+    "response_body_ref",
+    "response_body_hash",
+    "authority_reference",
+    "response_source",
+    "provider_delivery_ref",
+    "inbox_receipt_ref",
+    "ingress_receipt_ref",
+    "authority_ingress_proof_contract",
+    "derivation_posture",
+    "legal_effect_posture",
+    "supersedes_response_id",
+    "corroborates_response_ids",
+    "conflicting_response_ids",
+    "recovery_basis_response_id",
+    "correlation_status",
+    "response_class",
+    "retry_class"
+  ],
+  "properties": {
+    "response_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "received_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "provider_received_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "http_status": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 100,
+      "maximum": 599
+    },
+    "response_headers_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "response_body_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "response_body_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority_reference": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "response_source": {
+      "type": "string",
+      "enum": [
+        "INLINE_HTTP",
+        "CALLBACK",
+        "POLL",
+        "TRANSPORT_TIMEOUT",
+        "RECOVERY_READ"
+      ]
+    },
+    "provider_delivery_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "inbox_receipt_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "ingress_receipt_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "authority_ingress_proof_contract": {
+      "anyOf": [
+        {
+          "allOf": [
+            {
+              "$ref": "https://taxat.dev/schemas/authority_ingress_proof_contract.schema.json"
+            },
+            {
+              "properties": {
+                "binding_scope_class": {
+                  "const": "AUTHORITY_RESPONSE_ENVELOPE"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "derivation_posture": {
+      "type": "string",
+      "enum": [
+        "PRIMARY_OBSERVATION",
+        "CORROBORATING_OBSERVATION",
+        "SUPERSEDES_TIMEOUT_PLACEHOLDER",
+        "CONFLICTING_OBSERVATION",
+        "TIMEOUT_PLACEHOLDER"
+      ]
+    },
+    "legal_effect_posture": {
+      "type": "string",
+      "enum": [
+        "DIRECT_STATE_MUTATION",
+        "PROVISIONAL_STATE_MUTATION",
+        "RECONCILIATION_ONLY",
+        "NO_STATE_MUTATION"
+      ]
+    },
+    "supersedes_response_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "corroborates_response_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "conflicting_response_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "recovery_basis_response_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "correlation_status": {
+      "type": "string",
+      "enum": [
+        "BOUND",
+        "BOUND_WITH_AUTHORITY_REFERENCE_ONLY",
+        "AMBIGUOUS",
+        "UNBOUND"
+      ]
+    },
+    "response_class": {
+      "type": "string",
+      "enum": [
+        "ACK_SUCCESS",
+        "ACK_ACCEPTED_PENDING",
+        "ACK_REJECTED_VALIDATION",
+        "ACK_REJECTED_AUTH",
+        "ACK_RETRYABLE_FAILURE",
+        "ACK_TIMEOUT_OR_NO_RESOLUTION",
+        "ACK_EXTERNAL_STATE_DISCOVERED",
+        "ACK_AMBIGUOUS_CORRELATION",
+        "ACK_INCONSISTENT_STATE"
+      ]
+    },
+    "retry_class": {
+      "type": "string",
+      "enum": [
+        "NO_RETRY",
+        "SAFE_RETRY",
+        "RECONCILE_THEN_RETRY",
+        "HUMAN_REVIEW_THEN_RETRY",
+        "REBUILD_THEN_RETRY",
+        "MANUAL_INTERVENTION_REQUIRED"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "provider_delivery_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "provider_delivery_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_source": {
+            "enum": [
+              "CALLBACK",
+              "POLL",
+              "RECOVERY_READ"
+            ]
+          },
+          "inbox_receipt_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ingress_receipt_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "inbox_receipt_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "inbox_receipt_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_source": {
+            "enum": [
+              "CALLBACK",
+              "POLL",
+              "RECOVERY_READ"
+            ]
+          },
+          "provider_delivery_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ingress_receipt_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "response_source": {
+            "const": "TRANSPORT_TIMEOUT"
+          }
+        },
+        "required": [
+          "response_source"
+        ]
+      },
+      "then": {
+        "properties": {
+          "provider_received_at": {
+            "type": "null"
+          },
+          "http_status": {
+            "type": "null"
+          },
+          "response_headers_ref": {
+            "type": "null"
+          },
+          "response_body_ref": {
+            "type": "null"
+          },
+          "response_body_hash": {
+            "const": "<NONE>"
+          },
+          "authority_reference": {
+            "type": "null"
+          },
+          "provider_delivery_ref": {
+            "type": "null"
+          },
+          "inbox_receipt_ref": {
+            "type": "null"
+          },
+          "authority_ingress_proof_contract": {
+            "type": "null"
+          },
+          "ingress_receipt_ref": {
+            "type": "null"
+          },
+          "derivation_posture": {
+            "const": "TIMEOUT_PLACEHOLDER"
+          },
+          "legal_effect_posture": {
+            "const": "PROVISIONAL_STATE_MUTATION"
+          },
+          "supersedes_response_id": {
+            "type": "null"
+          },
+          "corroborates_response_ids": {
+            "maxItems": 0
+          },
+          "conflicting_response_ids": {
+            "maxItems": 0
+          },
+          "recovery_basis_response_id": {
+            "type": "null"
+          },
+          "response_class": {
+            "const": "ACK_TIMEOUT_OR_NO_RESOLUTION"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "response_source": {
+            "enum": [
+              "CALLBACK",
+              "POLL",
+              "RECOVERY_READ"
+            ]
+          }
+        },
+        "required": [
+          "response_source"
+        ]
+      },
+      "then": {
+        "properties": {
+          "provider_delivery_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "inbox_receipt_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "authority_ingress_proof_contract": {
+            "type": "object"
+          },
+          "ingress_receipt_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "response_source": {
+            "const": "INLINE_HTTP"
+          }
+        },
+        "required": [
+          "response_source"
+        ]
+      },
+      "then": {
+        "properties": {
+          "provider_delivery_ref": {
+            "type": "null"
+          },
+          "inbox_receipt_ref": {
+            "type": "null"
+          },
+          "authority_ingress_proof_contract": {
+            "type": "null"
+          },
+          "ingress_receipt_ref": {
+            "type": "null"
+          },
+          "recovery_basis_response_id": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "response_class": {
+            "const": "ACK_TIMEOUT_OR_NO_RESOLUTION"
+          }
+        },
+        "required": [
+          "response_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "authority_ingress_proof_contract": {
+            "type": "null"
+          },
+          "response_source": {
+            "const": "TRANSPORT_TIMEOUT"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "response_class": {
+            "enum": [
+              "ACK_SUCCESS",
+              "ACK_ACCEPTED_PENDING",
+              "ACK_REJECTED_VALIDATION",
+              "ACK_REJECTED_AUTH",
+              "ACK_RETRYABLE_FAILURE",
+              "ACK_EXTERNAL_STATE_DISCOVERED"
+            ]
+          }
+        },
+        "required": [
+          "response_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "correlation_status": {
+            "enum": [
+              "BOUND",
+              "BOUND_WITH_AUTHORITY_REFERENCE_ONLY"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "response_class": {
+            "enum": [
+              "ACK_SUCCESS",
+              "ACK_ACCEPTED_PENDING",
+              "ACK_REJECTED_VALIDATION",
+              "ACK_REJECTED_AUTH",
+              "ACK_RETRYABLE_FAILURE"
+            ]
+          }
+        },
+        "required": [
+          "response_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "correlation_status": {
+            "const": "BOUND"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "response_class": {
+            "const": "ACK_EXTERNAL_STATE_DISCOVERED"
+          }
+        },
+        "required": [
+          "response_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "correlation_status": {
+            "const": "BOUND"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "correlation_status": {
+            "const": "BOUND_WITH_AUTHORITY_REFERENCE_ONLY"
+          }
+        },
+        "required": [
+          "correlation_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "authority_reference": {
+            "type": "string",
+            "minLength": 1
+          },
+          "response_class": {
+            "const": "ACK_INCONSISTENT_STATE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "response_body_hash": {
+            "const": "<NONE>"
+          }
+        },
+        "required": [
+          "response_body_hash"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_body_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "response_body_ref": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "response_body_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_body_hash": {
+            "const": "<NONE>"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "response_source": {
+            "const": "RECOVERY_READ"
+          }
+        },
+        "required": [
+          "response_source"
+        ]
+      },
+      "then": {
+        "properties": {
+          "recovery_basis_response_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "derivation_posture": {
+            "enum": [
+              "CORROBORATING_OBSERVATION",
+              "SUPERSEDES_TIMEOUT_PLACEHOLDER",
+              "CONFLICTING_OBSERVATION"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "derivation_posture": {
+            "const": "PRIMARY_OBSERVATION"
+          }
+        },
+        "required": [
+          "derivation_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "legal_effect_posture": {
+            "const": "DIRECT_STATE_MUTATION"
+          },
+          "supersedes_response_id": {
+            "type": "null"
+          },
+          "corroborates_response_ids": {
+            "maxItems": 0
+          },
+          "conflicting_response_ids": {
+            "maxItems": 0
+          },
+          "recovery_basis_response_id": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "derivation_posture": {
+            "const": "CORROBORATING_OBSERVATION"
+          }
+        },
+        "required": [
+          "derivation_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "legal_effect_posture": {
+            "const": "NO_STATE_MUTATION"
+          },
+          "supersedes_response_id": {
+            "type": "null"
+          },
+          "corroborates_response_ids": {
+            "minItems": 1
+          },
+          "conflicting_response_ids": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "derivation_posture": {
+            "const": "SUPERSEDES_TIMEOUT_PLACEHOLDER"
+          }
+        },
+        "required": [
+          "derivation_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_source": {
+            "enum": [
+              "CALLBACK",
+              "POLL",
+              "RECOVERY_READ"
+            ]
+          },
+          "legal_effect_posture": {
+            "const": "RECONCILIATION_ONLY"
+          },
+          "supersedes_response_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "corroborates_response_ids": {
+            "maxItems": 0
+          },
+          "conflicting_response_ids": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "derivation_posture": {
+            "const": "CONFLICTING_OBSERVATION"
+          }
+        },
+        "required": [
+          "derivation_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "legal_effect_posture": {
+            "const": "RECONCILIATION_ONLY"
+          },
+          "response_class": {
+            "const": "ACK_INCONSISTENT_STATE"
+          },
+          "supersedes_response_id": {
+            "type": "null"
+          },
+          "corroborates_response_ids": {
+            "maxItems": 0
+          },
+          "conflicting_response_ids": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "derivation_posture": {
+            "const": "TIMEOUT_PLACEHOLDER"
+          }
+        },
+        "required": [
+          "derivation_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_source": {
+            "const": "TRANSPORT_TIMEOUT"
+          },
+          "legal_effect_posture": {
+            "const": "PROVISIONAL_STATE_MUTATION"
+          },
+          "supersedes_response_id": {
+            "type": "null"
+          },
+          "corroborates_response_ids": {
+            "maxItems": 0
+          },
+          "conflicting_response_ids": {
+            "maxItems": 0
+          },
+          "recovery_basis_response_id": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "legal_effect_posture": {
+            "const": "PROVISIONAL_STATE_MUTATION"
+          }
+        },
+        "required": [
+          "legal_effect_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_class": {
+            "const": "ACK_TIMEOUT_OR_NO_RESOLUTION"
+          },
+          "derivation_posture": {
+            "const": "TIMEOUT_PLACEHOLDER"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "legal_effect_posture": {
+            "const": "NO_STATE_MUTATION"
+          }
+        },
+        "required": [
+          "legal_effect_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "derivation_posture": {
+            "const": "CORROBORATING_OBSERVATION"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "supersedes_response_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "supersedes_response_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "derivation_posture": {
+            "const": "SUPERSEDES_TIMEOUT_PLACEHOLDER"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "corroborates_response_ids": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "corroborates_response_ids"
+        ]
+      },
+      "then": {
+        "properties": {
+          "derivation_posture": {
+            "const": "CORROBORATING_OBSERVATION"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "conflicting_response_ids": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "conflicting_response_ids"
+        ]
+      },
+      "then": {
+        "properties": {
+          "derivation_posture": {
+            "const": "CONFLICTING_OBSERVATION"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "recovery_basis_response_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "recovery_basis_response_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_source": {
+            "const": "RECOVERY_READ"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "ingress_receipt_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "ingress_receipt_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_source": {
+            "enum": [
+              "CALLBACK",
+              "POLL",
+              "RECOVERY_READ"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "response_body_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "response_body_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_body_hash": {
+            "not": {
+              "const": "<NONE>"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "correlation_status": {
+            "enum": [
+              "AMBIGUOUS",
+              "UNBOUND"
+            ]
+          }
+        },
+        "required": [
+          "correlation_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_class": {
+            "const": "ACK_AMBIGUOUS_CORRELATION"
+          },
+          "legal_effect_posture": {
+            "const": "RECONCILIATION_ONLY"
+          },
+          "retry_class": {
+            "enum": [
+              "RECONCILE_THEN_RETRY",
+              "HUMAN_REVIEW_THEN_RETRY",
+              "MANUAL_INTERVENTION_REQUIRED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "response_class": {
+            "const": "ACK_INCONSISTENT_STATE"
+          }
+        },
+        "required": [
+          "response_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "correlation_status": {
+            "enum": [
+              "BOUND",
+              "BOUND_WITH_AUTHORITY_REFERENCE_ONLY"
+            ]
+          },
+          "legal_effect_posture": {
+            "const": "RECONCILIATION_ONLY"
+          },
+          "retry_class": {
+            "enum": [
+              "RECONCILE_THEN_RETRY",
+              "HUMAN_REVIEW_THEN_RETRY",
+              "MANUAL_INTERVENTION_REQUIRED"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

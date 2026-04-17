@@ -1,0 +1,292 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/canary_health_summary.schema.json",
+  "title": "CanaryHealthSummary",
+  "description": "Canary release health summary. This schema freezes the SLO and error-budget posture used to judge whether a release candidate remains promotable after limited exposure.",
+  "type": "object",
+  "required": [
+    "canary_summary_id",
+    "candidate_environment_ref",
+    "build_artifact_ref",
+    "artifact_digest",
+    "candidate_identity_hash",
+    "candidate_identity_contract",
+    "canary_fraction",
+    "slo_profile_ref",
+    "error_budget_profile_ref",
+    "latency_budget_state",
+    "error_budget_state",
+    "health_gate_state",
+    "abort_recommended",
+    "summary_ref",
+    "evaluated_at"
+  ],
+  "properties": {
+    "canary_summary_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_environment_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "build_artifact_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_identity_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_identity_contract": {
+      "$ref": "https://taxat.dev/schemas/release_candidate_identity_contract.schema.json"
+    },
+    "canary_fraction": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "exclusiveMaximum": 1
+    },
+    "slo_profile_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "error_budget_profile_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "latency_budget_state": {
+      "type": "string",
+      "enum": [
+        "WITHIN_BUDGET",
+        "BREACHED"
+      ]
+    },
+    "error_budget_state": {
+      "type": "string",
+      "enum": [
+        "WITHIN_BUDGET",
+        "BREACHED"
+      ]
+    },
+    "health_gate_state": {
+      "type": "string",
+      "enum": [
+        "GREEN",
+        "AMBER",
+        "RED"
+      ]
+    },
+    "abort_recommended": {
+      "type": "boolean"
+    },
+    "summary_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evaluated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "health_gate_state": {
+            "const": "GREEN"
+          }
+        },
+        "required": [
+          "health_gate_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "latency_budget_state": {
+            "const": "WITHIN_BUDGET"
+          },
+          "error_budget_state": {
+            "const": "WITHIN_BUDGET"
+          },
+          "abort_recommended": {
+            "const": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "health_gate_state": {
+            "const": "AMBER"
+          }
+        },
+        "required": [
+          "health_gate_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "abort_recommended": {
+            "const": false
+          }
+        },
+        "anyOf": [
+          {
+            "properties": {
+              "latency_budget_state": {
+                "const": "BREACHED"
+              }
+            }
+          },
+          {
+            "properties": {
+              "error_budget_state": {
+                "const": "BREACHED"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "abort_recommended": {
+            "const": true
+          }
+        },
+        "required": [
+          "abort_recommended"
+        ]
+      },
+      "then": {
+        "properties": {
+          "health_gate_state": {
+            "const": "RED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "latency_budget_state": {
+            "const": "WITHIN_BUDGET"
+          },
+          "error_budget_state": {
+            "const": "WITHIN_BUDGET"
+          }
+        },
+        "required": [
+          "latency_budget_state",
+          "error_budget_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "health_gate_state": {
+            "const": "GREEN"
+          },
+          "abort_recommended": {
+            "const": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "latency_budget_state": {
+            "const": "BREACHED"
+          }
+        },
+        "required": [
+          "latency_budget_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "health_gate_state": {
+            "enum": [
+              "AMBER",
+              "RED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "error_budget_state": {
+            "const": "BREACHED"
+          }
+        },
+        "required": [
+          "error_budget_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "health_gate_state": {
+            "enum": [
+              "AMBER",
+              "RED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "latency_budget_state": {
+            "const": "BREACHED"
+          },
+          "error_budget_state": {
+            "const": "BREACHED"
+          }
+        },
+        "required": [
+          "latency_budget_state",
+          "error_budget_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "health_gate_state": {
+            "const": "RED"
+          },
+          "abort_recommended": {
+            "const": true
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "health_gate_state": {
+            "const": "RED"
+          }
+        },
+        "required": [
+          "health_gate_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "abort_recommended": {
+            "const": true
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,293 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/collaboration_entry.schema.json",
+  "title": "CollaborationEntry",
+  "description": "Append-only collaboration activity contract. This schema freezes thread ordering, causal reply lineage, semantic action identity, request-for-info lineage, and visibility-safe entry typing for shared work-item activity.",
+  "type": "object",
+  "required": [
+    "entry_id",
+    "item_id",
+    "thread_id",
+    "thread_sequence",
+    "entry_type",
+    "visibility_class",
+    "causal_parent_entry_ref",
+    "body_ref",
+    "attachment_refs",
+    "actor_ref",
+    "created_at",
+    "command_id",
+    "semantic_action_id",
+    "command_receipt_ref",
+    "audit_event_ref",
+    "request_info_ref",
+    "redaction_state"
+  ],
+  "properties": {
+    "entry_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "item_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "thread_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "thread_sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "entry_type": {
+      "type": "string",
+      "enum": [
+        "COMMENT",
+        "NOTE",
+        "STATUS_CHANGE",
+        "ASSIGNMENT_CHANGE",
+        "ESCALATION",
+        "REQUEST_INFO",
+        "REQUEST_INFO_RESPONSE",
+        "ATTACHMENT_ONLY",
+        "SYSTEM"
+      ]
+    },
+    "visibility_class": {
+      "type": "string",
+      "enum": [
+        "CUSTOMER_VISIBLE",
+        "INTERNAL_ONLY"
+      ]
+    },
+    "causal_parent_entry_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "body_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "attachment_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "actor_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "command_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "semantic_action_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "command_receipt_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "audit_event_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_info_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "redaction_state": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "REDACTED"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "entry_type": {
+            "const": "NOTE"
+          }
+        },
+        "required": [
+          "entry_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "visibility_class": {
+            "const": "INTERNAL_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "entry_type": {
+            "enum": [
+              "ASSIGNMENT_CHANGE",
+              "ESCALATION"
+            ]
+          }
+        },
+        "required": [
+          "entry_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "visibility_class": {
+            "const": "INTERNAL_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "entry_type": {
+            "enum": [
+              "REQUEST_INFO",
+              "REQUEST_INFO_RESPONSE"
+            ]
+          }
+        },
+        "required": [
+          "entry_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "visibility_class": {
+            "const": "CUSTOMER_VISIBLE"
+          },
+          "request_info_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "causal_parent_entry_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "entry_type": {
+            "not": {
+              "const": "ATTACHMENT_ONLY"
+            }
+          }
+        },
+        "required": [
+          "entry_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "body_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "entry_type": {
+            "const": "ATTACHMENT_ONLY"
+          }
+        },
+        "required": [
+          "entry_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "body_ref": {
+            "type": "null"
+          },
+          "attachment_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "entry_type": {
+            "not": {
+              "enum": [
+                "REQUEST_INFO",
+                "REQUEST_INFO_RESPONSE"
+              ]
+            }
+          }
+        },
+        "required": [
+          "entry_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "request_info_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "entry_type": {
+            "not": {
+              "const": "REQUEST_INFO_RESPONSE"
+            }
+          }
+        },
+        "required": [
+          "entry_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "causal_parent_entry_ref": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

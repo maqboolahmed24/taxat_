@@ -1,0 +1,5259 @@
+{
+  "dependencies": [
+    {
+      "dependency_kind": "shared_helper",
+      "rationale": "Shared clamping and stable summation govern domain scoring.",
+      "source_formula_id": "standard_normalization_rules",
+      "target_formula_id": "data_quality_and_completeness"
+    },
+    {
+      "dependency_kind": "shared_helper",
+      "rationale": "Money rounding and exact-decimal aggregation boundary rules govern compute.",
+      "source_formula_id": "standard_normalization_rules",
+      "target_formula_id": "record_and_adjustment_compute"
+    },
+    {
+      "dependency_kind": "shared_helper",
+      "rationale": "Forecast point and Monte Carlo outputs use round_money and deterministic seed handling.",
+      "source_formula_id": "standard_normalization_rules",
+      "target_formula_id": "forecast"
+    },
+    {
+      "dependency_kind": "shared_helper",
+      "rationale": "round_score and clamp01 normalize risk.",
+      "source_formula_id": "standard_normalization_rules",
+      "target_formula_id": "risk_scoring"
+    },
+    {
+      "dependency_kind": "shared_helper",
+      "rationale": "Exact-decimal delta handling and minimum floors rely on normalization helpers.",
+      "source_formula_id": "standard_normalization_rules",
+      "target_formula_id": "per_field_parity"
+    },
+    {
+      "dependency_kind": "shared_helper",
+      "rationale": "safe_unit and stable ordering control graph-path quality.",
+      "source_formula_id": "standard_normalization_rules",
+      "target_formula_id": "evidence_graph_quality"
+    },
+    {
+      "dependency_kind": "shared_helper",
+      "rationale": "clamp100, round_score, and safe_unit normalize trust synthesis.",
+      "source_formula_id": "standard_normalization_rules",
+      "target_formula_id": "trust_scoring_bands_and_readiness"
+    },
+    {
+      "dependency_kind": "shared_helper",
+      "rationale": "half_life_score, sigmoid, and min_non_null are reused by work routing.",
+      "source_formula_id": "standard_normalization_rules",
+      "target_formula_id": "collaboration_orchestration_queue_routing"
+    },
+    {
+      "dependency_kind": "shared_helper",
+      "rationale": "Client-flow reliability reuses shared helpers plus additional UX-specific helpers.",
+      "source_formula_id": "standard_normalization_rules",
+      "target_formula_id": "client_flow_reliability_and_completion"
+    },
+    {
+      "dependency_kind": "artifact_feed",
+      "rationale": "Forecast consumes compute baseline totals and run-rate context.",
+      "source_formula_id": "record_and_adjustment_compute",
+      "target_formula_id": "forecast"
+    },
+    {
+      "dependency_kind": "artifact_feed",
+      "rationale": "Parity comparison basis starts from frozen compute outputs.",
+      "source_formula_id": "record_and_adjustment_compute",
+      "target_formula_id": "parity_comparison_set_construction"
+    },
+    {
+      "dependency_kind": "artifact_feed",
+      "rationale": "ComputeResult is a required TrustSummary input artifact.",
+      "source_formula_id": "record_and_adjustment_compute",
+      "target_formula_id": "trustsummary_artifact_binding"
+    },
+    {
+      "dependency_kind": "score_feed",
+      "rationale": "Trust uses risk_score and unresolved risk flags.",
+      "source_formula_id": "risk_scoring",
+      "target_formula_id": "trust_scoring_bands_and_readiness"
+    },
+    {
+      "dependency_kind": "score_feed",
+      "rationale": "Trust uses parity_score and comparison requirement posture.",
+      "source_formula_id": "aggregate_parity",
+      "target_formula_id": "trust_scoring_bands_and_readiness"
+    },
+    {
+      "dependency_kind": "score_feed",
+      "rationale": "Trust uses graph_quality_score and retention penalty posture.",
+      "source_formula_id": "evidence_graph_quality",
+      "target_formula_id": "trust_scoring_bands_and_readiness"
+    },
+    {
+      "dependency_kind": "score_feed",
+      "rationale": "Trust uses data_quality_score and completeness_score.",
+      "source_formula_id": "data_quality_and_completeness",
+      "target_formula_id": "trust_scoring_bands_and_readiness"
+    },
+    {
+      "dependency_kind": "state_feed",
+      "rationale": "Authority uncertainty contributes to basis ceilings.",
+      "source_formula_id": "trust_authority_uncertainty",
+      "target_formula_id": "trust_input_admissibility_and_basis"
+    },
+    {
+      "dependency_kind": "hard_ceiling",
+      "rationale": "Basis ceilings cap automation and filing readiness before score math.",
+      "source_formula_id": "trust_input_admissibility_and_basis",
+      "target_formula_id": "trust_scoring_bands_and_readiness"
+    },
+    {
+      "dependency_kind": "hard_ceiling",
+      "rationale": "Upstream gates cap legal progression even when the numeric score is green.",
+      "source_formula_id": "trust_upstream_gate_cap",
+      "target_formula_id": "trust_scoring_bands_and_readiness"
+    },
+    {
+      "dependency_kind": "reason_contract",
+      "rationale": "Trust posture generates dominant and constrained reason-code packets.",
+      "source_formula_id": "trust_scoring_bands_and_readiness",
+      "target_formula_id": "formula_reason_code_emission"
+    },
+    {
+      "dependency_kind": "artifact_feed",
+      "rationale": "Reason codes and explainability are persisted on TrustSummary.",
+      "source_formula_id": "formula_reason_code_emission",
+      "target_formula_id": "trustsummary_artifact_binding"
+    },
+    {
+      "dependency_kind": "currency_guard",
+      "rationale": "Trust reuse depends on the persisted trust basis and score/cap posture remaining current.",
+      "source_formula_id": "trust_scoring_bands_and_readiness",
+      "target_formula_id": "trust_currency_and_recalculation"
+    },
+    {
+      "dependency_kind": "lifecycle_feed",
+      "rationale": "Supersession and append-only lineage update the TrustSummary lifecycle boundary.",
+      "source_formula_id": "trust_currency_and_recalculation",
+      "target_formula_id": "trustsummary_artifact_binding"
+    },
+    {
+      "dependency_kind": "gate_intersection",
+      "rationale": "Parity gate posture contributes to the frozen upstream cap before trust gating.",
+      "source_formula_id": "aggregate_parity",
+      "target_formula_id": "trust_upstream_gate_cap"
+    },
+    {
+      "dependency_kind": "gate_intersection",
+      "rationale": "Data-quality gate posture can force review or block before trust.",
+      "source_formula_id": "data_quality_and_completeness",
+      "target_formula_id": "trust_upstream_gate_cap"
+    },
+    {
+      "dependency_kind": "gate_intersection",
+      "rationale": "Retention evidence gate posture contributes to upstream legal ceilings.",
+      "source_formula_id": "evidence_graph_quality",
+      "target_formula_id": "trust_upstream_gate_cap"
+    },
+    {
+      "dependency_kind": "summary",
+      "rationale": "The summary section compresses the full trust package into one scope statement.",
+      "source_formula_id": "trust_scoring_bands_and_readiness",
+      "target_formula_id": "formula_layer_summary"
+    }
+  ],
+  "formula_records": [
+    {
+      "canonical_section": "8.1",
+      "determinism_rules": [
+        "Formula execution must emit schema-valid TrustSummary, ComputeResult, ForecastSet, RiskReport, and ParityResult artifacts.",
+        "Artifact binding is normative current behavior, not a deferred pack repair."
+      ],
+      "downstream_gate_consumers": [
+        "TRUST_GATE",
+        "FILING_GATE",
+        "SUBMISSION_GATE",
+        "AMENDMENT_GATE"
+      ],
+      "formula_family": "binding_contract",
+      "formula_id": "trustsummary_artifact_binding",
+      "formula_symbols": [
+        "TrustSummary",
+        "artifact_type",
+        "execution_mode",
+        "analysis_only",
+        "non_compliance_config_refs",
+        "counterfactual_basis",
+        "lifecycle_state",
+        "compute_result_ref",
+        "parity_result_ref",
+        "risk_report_ref",
+        "evidence_graph_ref",
+        "gate_decision_refs",
+        "comparison_requirement",
+        "parity_classification",
+        "baseline_submission_state",
+        "live_authority_progression_requested",
+        "trust_input_state",
+        "trust_input_basis_contract{contract_version, basis_contract_hash, input_presence_state, manifest_binding_state, lifecycle_binding_state, consistency_state, limitation_semantics_state, freshness_state, freshness_dependency_classes[], authority_progression_state, baseline_progression_state, baseline_selection_contract_hash_or_null, baseline_automation_ceiling, baseline_limitation_reason_codes[], late_data_invalidation_state, override_dependency_state, human_step_state, trust_input_state, automation_ceiling, filing_readiness_ceiling, input_reason_codes[], blocking_dependency_refs[], trust_fresh_until}",
+        "trust_sensitivity_analysis_contract{contract_version, sensitivity_contract_hash, trust_input_basis_contract_hash, execution_mode_boundary_hash, score_cap_alignment_state, cap_driver_reason_codes[], edge_trigger_codes[], trust_green_margin, trust_amber_margin, risk_automation_margin, completeness_margin, graph_filing_margin_or_null, authority_review_margin_or_null, authority_block_margin_or_null, projected_case_results[]}",
+        "threshold_stability_state",
+        "completeness_score",
+        "data_quality_score",
+        "parity_score",
+        "graph_quality_score",
+        "risk_score",
+        "trust_core_score",
+        "score_band",
+        "cap_band",
+        "trust_band",
+        "trust_score",
+        "trust_green_margin",
+        "trust_amber_margin",
+        "risk_automation_margin",
+        "upstream_gate_cap",
+        "trust_fresh_until",
+        "active_filing_critical_override_count",
+        "critical_retention_limited_count",
+        "override_penalty",
+        "retention_penalty",
+        "authority_uncertainty_score",
+        "authority_penalty",
+        "trust_level",
+        "automation_level",
+        "filing_readiness",
+        "dominant_reason_code",
+        "plain_summary",
+        "decision_constraint_codes",
+        "blocking_dependency_refs",
+        "support_refs",
+        "required_human_steps",
+        "superseded_at",
+        "superseded_by_trust_id",
+        "ComputeResult",
+        "ForecastSet",
+        "RiskReport",
+        "ParityResult"
+      ],
+      "gate_bindings": [
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "AMENDMENT_GATE",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "TRUST_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "TRUST_GREEN",
+            "TRUST_AMBER",
+            "TRUST_RED",
+            "TRUST_INSUFFICIENT_DATA",
+            "TRUST_INPUT_INCOMPLETE",
+            "TRUST_INPUT_STALE",
+            "TRUST_INPUT_CONTRADICTION",
+            "TRUST_AUTHORITY_STATE_UNRESOLVED",
+            "TRUST_THRESHOLD_EDGE_REVIEW",
+            "TRUST_AUTOMATION_LIMITED",
+            "TRUST_REQUIRED_HUMAN_STEPS",
+            "TRUST_OVERRIDE_DEPENDENT_PROGRESS",
+            "TRUST_OVERRIDE_ACTIVE_NOTICE",
+            "TRUST_UPSTREAM_GATE_BLOCK",
+            "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+            "TRUST_ARTIFACT_INCONSISTENT"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L787[TRUST_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L789[TRUST_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L809[TRUST_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L858[TRUST_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "SUBMISSION_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "FILING_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "FILING_PACKET_UNAVAILABLE",
+            "FILING_MANIFEST_MODE_ANALYSIS",
+            "FILING_TRUST_MISSING",
+            "FILING_TRUST_SUPERSEDED",
+            "FILING_TRUST_RECALCULATION_REQUIRED",
+            "FILING_AUTHORITY_LINK_INACTIVE",
+            "FILING_OBLIGATION_NOT_OPEN",
+            "FILING_FINAL_DECLARATION_PRECONDITION_MISSING",
+            "FILING_AMENDMENT_BASELINE_MISSING",
+            "FILING_APPROVAL_REQUIRED",
+            "FILING_APPROVAL_UNSATISFIABLE",
+            "FILING_OVERRIDE_REQUIRED",
+            "FILING_OVERRIDE_ACTIVE_NOTICE",
+            "FILING_OVERRIDE_AUDIT_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_UNSATISFIABLE",
+            "FILING_NOTICE_REQUIRED",
+            "FILING_LATE_DATA_CHILD_MANIFEST_REQUIRED",
+            "FILING_LATE_DATA_REVIEW_REQUIRED",
+            "FILING_LATE_DATA_NONCRITICAL_EXCLUDED",
+            "FILING_PROOF_BUNDLE_MISSING",
+            "FILING_TARGET_UNSUPPORTED",
+            "FILING_TARGET_CONTRADICTED",
+            "FILING_PROOF_CLOSURE_OPEN",
+            "FILING_GRAPH_REBUILD_REQUIRED",
+            "FILING_EXPLANATION_FAILURE",
+            "FILING_PREPARATION_HARD_BLOCK",
+            "FILING_PREPARATION_OVERRIDE_REQUIRED",
+            "FILING_PREPARATION_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_BLOCK",
+            "FILING_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_NOTICE_ACTIVE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L880[FILING_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L899[FILING_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L948[FILING_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1023[FILING_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "SUBMISSION_GATE",
+          "overrideability": "NON_OVERRIDEABLE",
+          "reason_codes": [
+            "SUBMISSION_REAUTHORIZATION_FAILED",
+            "SUBMISSION_MANIFEST_NOT_READY",
+            "SUBMISSION_APPROVAL_INVALID",
+            "SUBMISSION_DECLARED_BASIS_ACK_INVALID",
+            "SUBMISSION_PACKET_MANIFEST_BINDING_MISMATCH",
+            "SUBMISSION_PACKET_NOT_APPROVED",
+            "SUBMISSION_IDEMPOTENCY_BODY_COLLISION",
+            "SUBMISSION_PRIOR_CONFIRMED_EXISTS",
+            "SUBMISSION_AMENDMENT_NOT_READY",
+            "SUBMISSION_AUTHORITY_TOKEN_INVALID",
+            "SUBMISSION_PENDING_ALREADY_EXISTS",
+            "SUBMISSION_SAFE_IDEMPOTENT_RECOVERY"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1060[SUBMISSION_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1062[SUBMISSION_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1080[SUBMISSION_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1108[SUBMISSION_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "AMENDMENT_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "AMENDMENT_MANIFEST_MODE_ANALYSIS",
+            "AMENDMENT_NO_CONFIRMED_FINAL_DECLARATION",
+            "AMENDMENT_BASELINE_UNPROVEN",
+            "AMENDMENT_WINDOW_CLOSED",
+            "AMENDMENT_DRIFT_NOT_MATERIAL",
+            "AMENDMENT_INTENT_TO_AMEND_REQUIRED",
+            "AMENDMENT_INTENT_TO_AMEND_VALIDATION_FAILED",
+            "AMENDMENT_INTENT_TO_AMEND_OVERRIDE_REQUIRED",
+            "AMENDMENT_INTENT_TO_AMEND_REVIEW_REQUIRED",
+            "AMENDMENT_OUT_OF_BAND_BASELINE_UNRESOLVED",
+            "AMENDMENT_RETROACTIVE_REPLAY_REQUIRED",
+            "AMENDMENT_READINESS_STALE",
+            "AMENDMENT_CONTRADICTORY_DRIFT_SOURCES",
+            "AMENDMENT_SUPERSEDES_PRIOR_ACTIVE_CHAIN",
+            "AMENDMENT_ELIGIBLE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1125[AMENDMENT_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1141[AMENDMENT_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1167[AMENDMENT_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1239[AMENDMENT_GATE.reason_codes]"
+          ]
+        }
+      ],
+      "inputs": [
+        "compute_result_ref",
+        "parity_result_ref",
+        "risk_report_ref",
+        "evidence_graph_ref",
+        "gate_decision_refs",
+        "baseline_submission_state",
+        "live_authority_progression_requested"
+      ],
+      "intermediate_terms": [
+        "trust_input_basis_contract",
+        "trust_sensitivity_analysis_contract",
+        "threshold_stability_state"
+      ],
+      "label": "TrustSummary Artifact Binding",
+      "mode_applicability": "Both COMPLIANCE and ANALYSIS; artifact flags must remain internally consistent.",
+      "module_bindings": [
+        {
+          "artifact_targets": [
+            "ComputeResult"
+          ],
+          "module_name": "COMPUTE_OUTCOME",
+          "phase_ids": [],
+          "schema_touchpoints": [
+            "Algorithm/schemas/compute_result.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#compute-outcome-forecast"
+          ],
+          "step_ids": []
+        },
+        {
+          "artifact_targets": [
+            "ComputeResult",
+            "ForecastSet"
+          ],
+          "module_name": "FORECAST",
+          "phase_ids": [],
+          "schema_touchpoints": [
+            "Algorithm/schemas/compute_result.schema.json",
+            "Algorithm/schemas/forecast_set.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#compute-outcome-forecast",
+            "Algorithm/modules.md#forecast"
+          ],
+          "step_ids": []
+        },
+        {
+          "artifact_targets": [
+            "RiskReport"
+          ],
+          "module_name": "SCORE_RISK",
+          "phase_ids": [],
+          "schema_touchpoints": [
+            "Algorithm/schemas/risk_report.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#score-risk"
+          ],
+          "step_ids": []
+        },
+        {
+          "artifact_targets": [
+            "ParityResult"
+          ],
+          "module_name": "EVALUATE_PARITY",
+          "phase_ids": [
+            "P09"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/parity_result.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#evaluate-parity"
+          ],
+          "step_ids": [
+            "P09-S068"
+          ]
+        },
+        {
+          "artifact_targets": [
+            "TrustSummary"
+          ],
+          "module_name": "SYNTHESIZE_TRUST",
+          "phase_ids": [
+            "P11"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/trust_summary.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#synthesize-trust"
+          ],
+          "step_ids": [
+            "P11-S006"
+          ]
+        }
+      ],
+      "money_profile_requirements": [
+        "TrustSummary must carry dereferenceable compute/parity artifacts whose money-bearing fields preserve the frozen money profile."
+      ],
+      "notes": [
+        "This record is a contract surface, not an arithmetic equation family.",
+        "It freezes the schema-backed output boundary for all later formula families."
+      ],
+      "output_artifacts": [
+        "TrustSummary",
+        "ComputeResult",
+        "ForecastSet",
+        "RiskReport",
+        "ParityResult"
+      ],
+      "output_fields": [
+        "execution_mode",
+        "analysis_only",
+        "compute_result_ref",
+        "parity_result_ref",
+        "risk_report_ref",
+        "evidence_graph_ref",
+        "gate_decision_refs",
+        "trust_input_state",
+        "trust_input_basis_contract",
+        "trust_sensitivity_analysis_contract",
+        "score_band",
+        "cap_band",
+        "trust_band",
+        "trust_score",
+        "automation_level",
+        "filing_readiness",
+        "dominant_reason_code",
+        "decision_constraint_codes",
+        "blocking_dependency_refs"
+      ],
+      "reason_code_emissions": [],
+      "schema_touchpoints": [
+        "Algorithm/schemas/trust_summary.schema.json",
+        "Algorithm/schemas/compute_result.schema.json",
+        "Algorithm/schemas/forecast_set.schema.json",
+        "Algorithm/schemas/risk_report.schema.json",
+        "Algorithm/schemas/parity_result.schema.json",
+        "Algorithm/schemas/trust_input_basis_contract.schema.json",
+        "Algorithm/schemas/trust_sensitivity_contract.schema.json"
+      ],
+      "section_title": "TrustSummary artifact binding",
+      "sensitivity_hooks": [
+        "trust_input_basis_contract",
+        "trust_sensitivity_analysis_contract"
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L9[8.1_TrustSummary_artifact_binding]"
+      ],
+      "source_span": {
+        "section_end_line": 72,
+        "section_start_line": 9,
+        "subsection_start_lines": {}
+      },
+      "subsection_titles": [],
+      "threshold_dependencies": [
+        "trust_input_state_enum",
+        "score_band_enum",
+        "cap_band_enum",
+        "trust_band_enum",
+        "automation_level_enum",
+        "filing_readiness_enum"
+      ]
+    },
+    {
+      "canonical_section": "8.2",
+      "determinism_rules": [
+        "Weighted averages normalize only by positive active-weight sums.",
+        "Non-monetary multi-term reductions use deterministic canonical ordering plus pairwise or compensated summation.",
+        "All deterministic branches must be byte-stable under the same manifest."
+      ],
+      "downstream_gate_consumers": [
+        "DATA_QUALITY_GATE",
+        "PARITY_GATE",
+        "TRUST_GATE",
+        "FILING_GATE"
+      ],
+      "formula_family": "shared_runtime_helpers",
+      "formula_id": "standard_normalization_rules",
+      "formula_symbols": [
+        "clamp01(x)",
+        "clamp100(x)",
+        "round_score(x)",
+        "round_penalty30(x)",
+        "round_money(x)",
+        "safe_unit(x)",
+        "\u03a3w",
+        "min_non_null(x_1..x_n)",
+        "null",
+        "money_profile{ currency_code, scale, rounding_mode, aggregation_boundary, serialization_profile }",
+        "m",
+        "money_profile.scale",
+        "serialization_profile",
+        "aggregation_boundary"
+      ],
+      "gate_bindings": [
+        {
+          "downstream_consumers": [
+            "EMIT_ORDERED_GATES",
+            "BUILD_PRESEAL_GATE_EVALUATION",
+            "SEAL_MANIFEST",
+            "TRUST_GATE",
+            "FILING_GATE"
+          ],
+          "gate_code": "DATA_QUALITY_GATE",
+          "overrideability": "SCOPED_OVERRIDE_ALLOWED",
+          "reason_codes": [
+            "DQ_CRITICAL_DOMAIN_MISSING",
+            "DQ_BLOCKING_CONFLICT",
+            "DQ_COMPLETENESS_BELOW_MINIMUM",
+            "DQ_DATA_QUALITY_BELOW_MINIMUM",
+            "DQ_STALE_CRITICAL_DOMAIN",
+            "DQ_PROVISIONAL_CRITICAL_FACT",
+            "DQ_NONCRITICAL_WARNING_PRESENT"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L540[DATA_QUALITY_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L546[DATA_QUALITY_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L571[DATA_QUALITY_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L608[DATA_QUALITY_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "TRUST_GATE",
+            "FILING_GATE",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "PARITY_GATE",
+          "overrideability": "SCOPED_OVERRIDE_ALLOWED",
+          "reason_codes": [
+            "PARITY_MATCH",
+            "PARITY_MINOR_DIFFERENCE",
+            "PARITY_MATERIAL_DIFFERENCE",
+            "PARITY_BLOCKING_DIFFERENCE",
+            "PARITY_NOT_COMPARABLE",
+            "PARITY_OVERRIDE_REQUIRED",
+            "PARITY_OVERRIDE_ACTIVE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L719[PARITY_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L726[PARITY_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L737[PARITY_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L767[PARITY_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "AMENDMENT_GATE",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "TRUST_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "TRUST_GREEN",
+            "TRUST_AMBER",
+            "TRUST_RED",
+            "TRUST_INSUFFICIENT_DATA",
+            "TRUST_INPUT_INCOMPLETE",
+            "TRUST_INPUT_STALE",
+            "TRUST_INPUT_CONTRADICTION",
+            "TRUST_AUTHORITY_STATE_UNRESOLVED",
+            "TRUST_THRESHOLD_EDGE_REVIEW",
+            "TRUST_AUTOMATION_LIMITED",
+            "TRUST_REQUIRED_HUMAN_STEPS",
+            "TRUST_OVERRIDE_DEPENDENT_PROGRESS",
+            "TRUST_OVERRIDE_ACTIVE_NOTICE",
+            "TRUST_UPSTREAM_GATE_BLOCK",
+            "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+            "TRUST_ARTIFACT_INCONSISTENT"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L787[TRUST_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L789[TRUST_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L809[TRUST_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L858[TRUST_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "SUBMISSION_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "FILING_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "FILING_PACKET_UNAVAILABLE",
+            "FILING_MANIFEST_MODE_ANALYSIS",
+            "FILING_TRUST_MISSING",
+            "FILING_TRUST_SUPERSEDED",
+            "FILING_TRUST_RECALCULATION_REQUIRED",
+            "FILING_AUTHORITY_LINK_INACTIVE",
+            "FILING_OBLIGATION_NOT_OPEN",
+            "FILING_FINAL_DECLARATION_PRECONDITION_MISSING",
+            "FILING_AMENDMENT_BASELINE_MISSING",
+            "FILING_APPROVAL_REQUIRED",
+            "FILING_APPROVAL_UNSATISFIABLE",
+            "FILING_OVERRIDE_REQUIRED",
+            "FILING_OVERRIDE_ACTIVE_NOTICE",
+            "FILING_OVERRIDE_AUDIT_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_UNSATISFIABLE",
+            "FILING_NOTICE_REQUIRED",
+            "FILING_LATE_DATA_CHILD_MANIFEST_REQUIRED",
+            "FILING_LATE_DATA_REVIEW_REQUIRED",
+            "FILING_LATE_DATA_NONCRITICAL_EXCLUDED",
+            "FILING_PROOF_BUNDLE_MISSING",
+            "FILING_TARGET_UNSUPPORTED",
+            "FILING_TARGET_CONTRADICTED",
+            "FILING_PROOF_CLOSURE_OPEN",
+            "FILING_GRAPH_REBUILD_REQUIRED",
+            "FILING_EXPLANATION_FAILURE",
+            "FILING_PREPARATION_HARD_BLOCK",
+            "FILING_PREPARATION_OVERRIDE_REQUIRED",
+            "FILING_PREPARATION_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_BLOCK",
+            "FILING_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_NOTICE_ACTIVE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L880[FILING_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L899[FILING_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L948[FILING_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1023[FILING_GATE.reason_codes]"
+          ]
+        }
+      ],
+      "inputs": [
+        "money_profile",
+        "active_weights",
+        "timestamps",
+        "runtime_scope"
+      ],
+      "intermediate_terms": [
+        "clamp01",
+        "clamp100",
+        "round_score",
+        "round_penalty30",
+        "round_money",
+        "safe_unit",
+        "weighted_mean",
+        "min_non_null",
+        "hours_between",
+        "half_life_score",
+        "sigmoid",
+        "\u03a3w"
+      ],
+      "label": "Standard Normalization Rules",
+      "mode_applicability": "Shared across all formula families; applies identically under compliance, analysis, workflow, and client-flow evaluation.",
+      "module_bindings": [
+        {
+          "artifact_targets": [
+            "ComputeResult"
+          ],
+          "module_name": "COMPUTE_OUTCOME",
+          "phase_ids": [],
+          "schema_touchpoints": [
+            "Algorithm/schemas/compute_result.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#compute-outcome-forecast"
+          ],
+          "step_ids": []
+        },
+        {
+          "artifact_targets": [
+            "ComputeResult",
+            "ForecastSet"
+          ],
+          "module_name": "FORECAST",
+          "phase_ids": [],
+          "schema_touchpoints": [
+            "Algorithm/schemas/compute_result.schema.json",
+            "Algorithm/schemas/forecast_set.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#compute-outcome-forecast",
+            "Algorithm/modules.md#forecast"
+          ],
+          "step_ids": []
+        },
+        {
+          "artifact_targets": [
+            "RiskReport"
+          ],
+          "module_name": "SCORE_RISK",
+          "phase_ids": [],
+          "schema_touchpoints": [
+            "Algorithm/schemas/risk_report.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#score-risk"
+          ],
+          "step_ids": []
+        },
+        {
+          "artifact_targets": [
+            "ParityResult"
+          ],
+          "module_name": "EVALUATE_PARITY",
+          "phase_ids": [
+            "P09"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/parity_result.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#evaluate-parity"
+          ],
+          "step_ids": [
+            "P09-S068"
+          ]
+        },
+        {
+          "artifact_targets": [
+            "TrustSummary"
+          ],
+          "module_name": "ASSESS_TRUST_INPUT_STATE",
+          "phase_ids": [
+            "P11"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/trust_summary.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#assess-trust-input-state"
+          ],
+          "step_ids": [
+            "P11-S005"
+          ]
+        },
+        {
+          "artifact_targets": [
+            "TrustSummary"
+          ],
+          "module_name": "SYNTHESIZE_TRUST",
+          "phase_ids": [
+            "P11"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/trust_summary.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#synthesize-trust"
+          ],
+          "step_ids": [
+            "P11-S006"
+          ]
+        }
+      ],
+      "money_profile_requirements": [
+        "Use exact fixed-scale decimal arithmetic in the smallest legal currency unit.",
+        "Round only at declared aggregation boundaries.",
+        "Serialize money as canonical decimal strings with frozen scale and trailing zeros.",
+        "Reject binary floating point, exponent notation, locale separators, NaN, infinity, and trimmed scale."
+      ],
+      "notes": [
+        "Shared helper layer for all downstream formula records."
+      ],
+      "output_artifacts": [
+        "ComputeResult",
+        "ForecastSet",
+        "ParityResult",
+        "TrustSummary"
+      ],
+      "output_fields": [
+        "money_profile",
+        "serialization_profile",
+        "aggregation_boundary"
+      ],
+      "reason_code_emissions": [],
+      "schema_touchpoints": [
+        "Algorithm/schemas/compute_result.schema.json",
+        "Algorithm/schemas/forecast_set.schema.json",
+        "Algorithm/schemas/parity_result.schema.json",
+        "Algorithm/schemas/trust_summary.schema.json"
+      ],
+      "section_title": "Standard normalization rules",
+      "sensitivity_hooks": [
+        "money_profile"
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L73[8.2_Standard_normalization_rules]"
+      ],
+      "source_span": {
+        "section_end_line": 113,
+        "section_start_line": 73,
+        "subsection_start_lines": {}
+      },
+      "subsection_titles": [],
+      "threshold_dependencies": [
+        "money_profile_contract",
+        "canonical_decimal_serialization_v1"
+      ]
+    },
+    {
+      "canonical_section": "8.3",
+      "determinism_rules": [
+        "NOT_REQUESTED and NOT_APPLICABLE facts stay out of the denominator; LIMITED and NOT_YET_MATERIALIZED facts remain in scope and degrade the score.",
+        "Zero-sum domain weights, invalid error budgets, and filing-critical silent limitation ambiguity are structural failures, not soft warnings."
+      ],
+      "downstream_gate_consumers": [
+        "DATA_QUALITY_GATE",
+        "TRUST_GATE",
+        "FILING_GATE"
+      ],
+      "formula_family": "core_formula_family",
+      "formula_id": "data_quality_and_completeness",
+      "formula_symbols": [
+        "NOT_REQUESTED",
+        "NOT_APPLICABLE",
+        "NOT_YET_MATERIALIZED",
+        "d",
+        "C_d",
+        "presence_d",
+        "freshness_d",
+        "confidence_d",
+        "survivability_d",
+        "limitation_clarity_d",
+        "privacy_projection_quality_d",
+        "f",
+        "fact_confidence_f",
+        "fact_weight_f",
+        "DQ_CONFIDENCE_WEIGHT_INVALID",
+        "decision_information_ratio_f",
+        "projection_information_ratio_f",
+        "PRIVACY_PROJECTION_RATIO_INVALID",
+        "limitation_explicitness_f",
+        "LIMITATION_SILENT_AMBIGUITY",
+        "decision_survivability_f",
+        "decision_confidence_f",
+        "projected_confidence_f",
+        "confidence_weight_sum_d",
+        "|C_d|",
+        "validation_d",
+        "error_budget_valid_d",
+        "error_budget_d",
+        "DQ_INVALID_ERROR_BUDGET",
+        "validated_error_budget_d",
+        "partition_integrity_d",
+        "effective_presence_d",
+        "domain_quality_d",
+        "\u03a3w_domain",
+        "weight_d",
+        "DQ_WEIGHT_PROFILE_INVALID",
+        "completeness_score",
+        "data_quality_score",
+        "DATA_QUALITY_GATE"
+      ],
+      "gate_bindings": [
+        {
+          "downstream_consumers": [
+            "EMIT_ORDERED_GATES",
+            "BUILD_PRESEAL_GATE_EVALUATION",
+            "SEAL_MANIFEST",
+            "TRUST_GATE",
+            "FILING_GATE"
+          ],
+          "gate_code": "DATA_QUALITY_GATE",
+          "overrideability": "SCOPED_OVERRIDE_ALLOWED",
+          "reason_codes": [
+            "DQ_CRITICAL_DOMAIN_MISSING",
+            "DQ_BLOCKING_CONFLICT",
+            "DQ_COMPLETENESS_BELOW_MINIMUM",
+            "DQ_DATA_QUALITY_BELOW_MINIMUM",
+            "DQ_STALE_CRITICAL_DOMAIN",
+            "DQ_PROVISIONAL_CRITICAL_FACT",
+            "DQ_NONCRITICAL_WARNING_PRESENT"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L540[DATA_QUALITY_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L546[DATA_QUALITY_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L571[DATA_QUALITY_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L608[DATA_QUALITY_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "AMENDMENT_GATE",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "TRUST_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "TRUST_GREEN",
+            "TRUST_AMBER",
+            "TRUST_RED",
+            "TRUST_INSUFFICIENT_DATA",
+            "TRUST_INPUT_INCOMPLETE",
+            "TRUST_INPUT_STALE",
+            "TRUST_INPUT_CONTRADICTION",
+            "TRUST_AUTHORITY_STATE_UNRESOLVED",
+            "TRUST_THRESHOLD_EDGE_REVIEW",
+            "TRUST_AUTOMATION_LIMITED",
+            "TRUST_REQUIRED_HUMAN_STEPS",
+            "TRUST_OVERRIDE_DEPENDENT_PROGRESS",
+            "TRUST_OVERRIDE_ACTIVE_NOTICE",
+            "TRUST_UPSTREAM_GATE_BLOCK",
+            "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+            "TRUST_ARTIFACT_INCONSISTENT"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L787[TRUST_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L789[TRUST_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L809[TRUST_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L858[TRUST_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "SUBMISSION_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "FILING_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "FILING_PACKET_UNAVAILABLE",
+            "FILING_MANIFEST_MODE_ANALYSIS",
+            "FILING_TRUST_MISSING",
+            "FILING_TRUST_SUPERSEDED",
+            "FILING_TRUST_RECALCULATION_REQUIRED",
+            "FILING_AUTHORITY_LINK_INACTIVE",
+            "FILING_OBLIGATION_NOT_OPEN",
+            "FILING_FINAL_DECLARATION_PRECONDITION_MISSING",
+            "FILING_AMENDMENT_BASELINE_MISSING",
+            "FILING_APPROVAL_REQUIRED",
+            "FILING_APPROVAL_UNSATISFIABLE",
+            "FILING_OVERRIDE_REQUIRED",
+            "FILING_OVERRIDE_ACTIVE_NOTICE",
+            "FILING_OVERRIDE_AUDIT_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_UNSATISFIABLE",
+            "FILING_NOTICE_REQUIRED",
+            "FILING_LATE_DATA_CHILD_MANIFEST_REQUIRED",
+            "FILING_LATE_DATA_REVIEW_REQUIRED",
+            "FILING_LATE_DATA_NONCRITICAL_EXCLUDED",
+            "FILING_PROOF_BUNDLE_MISSING",
+            "FILING_TARGET_UNSUPPORTED",
+            "FILING_TARGET_CONTRADICTED",
+            "FILING_PROOF_CLOSURE_OPEN",
+            "FILING_GRAPH_REBUILD_REQUIRED",
+            "FILING_EXPLANATION_FAILURE",
+            "FILING_PREPARATION_HARD_BLOCK",
+            "FILING_PREPARATION_OVERRIDE_REQUIRED",
+            "FILING_PREPARATION_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_BLOCK",
+            "FILING_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_NOTICE_ACTIVE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L880[FILING_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L899[FILING_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L948[FILING_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1023[FILING_GATE.reason_codes]"
+          ]
+        }
+      ],
+      "inputs": [
+        "C_d",
+        "fact_confidence_f",
+        "fact_weight_f",
+        "decision_information_ratio_f",
+        "projection_information_ratio_f",
+        "limitation_explicitness_f",
+        "error_budget_d",
+        "critical_errors_d",
+        "major_errors_d",
+        "minor_errors_d",
+        "partition_integrity_d",
+        "weight_d"
+      ],
+      "intermediate_terms": [
+        "decision_survivability_f",
+        "decision_confidence_f",
+        "projection_fidelity_f",
+        "projected_confidence_f",
+        "presence_d",
+        "survivability_d",
+        "limitation_clarity_d",
+        "privacy_projection_quality_d",
+        "confidence_d",
+        "validation_d",
+        "effective_presence_d",
+        "domain_quality_d"
+      ],
+      "label": "Data-Quality and Completeness",
+      "mode_applicability": "Feeds trust in both modes; projection-side confidence remains read-side only and must never re-enter compute, parity, trust, or filing readiness.",
+      "module_bindings": [
+        {
+          "artifact_targets": [
+            "TrustSummary"
+          ],
+          "module_name": "ASSESS_TRUST_INPUT_STATE",
+          "phase_ids": [
+            "P11"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/trust_summary.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#assess-trust-input-state"
+          ],
+          "step_ids": [
+            "P11-S005"
+          ]
+        },
+        {
+          "artifact_targets": [
+            "TrustSummary"
+          ],
+          "module_name": "SYNTHESIZE_TRUST",
+          "phase_ids": [
+            "P11"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/trust_summary.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#synthesize-trust"
+          ],
+          "step_ids": [
+            "P11-S006"
+          ]
+        }
+      ],
+      "money_profile_requirements": [],
+      "notes": [
+        "Decision confidence and projection confidence are deliberately separated to preserve legal decisioning boundaries."
+      ],
+      "output_artifacts": [
+        "TrustSummary",
+        "GateDecisionRecord"
+      ],
+      "output_fields": [
+        "completeness_score",
+        "data_quality_score"
+      ],
+      "reason_code_emissions": [
+        "DQ_CONFIDENCE_WEIGHT_INVALID",
+        "PRIVACY_PROJECTION_RATIO_INVALID",
+        "LIMITATION_SILENT_AMBIGUITY",
+        "DQ_INVALID_ERROR_BUDGET",
+        "DQ_WEIGHT_PROFILE_INVALID",
+        "DQ_LOW_COMPLETENESS",
+        "DQ_LOW_QUALITY"
+      ],
+      "schema_touchpoints": [
+        "Algorithm/schemas/trust_summary.schema.json"
+      ],
+      "section_title": "Data-quality and completeness formulas",
+      "sensitivity_hooks": [
+        "decision_information_ratio_f",
+        "projection_fidelity_f",
+        "limitation_explicitness_f"
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L114[8.3_Data-quality_and_completeness_formulas]"
+      ],
+      "source_span": {
+        "section_end_line": 211,
+        "section_start_line": 114,
+        "subsection_start_lines": {}
+      },
+      "subsection_titles": [],
+      "threshold_dependencies": [
+        "data_quality_freshness_scale",
+        "dq_structural_fail_closed_conditions",
+        "completeness_minimum_for_trust_caps"
+      ]
+    },
+    {
+      "canonical_section": "8.4",
+      "determinism_rules": [
+        "Quarterly totals remain record-layer only even under cumulative basis.",
+        "Compliance compute must derive adjustment inclusion from executable reporting scope and exact partition scope, never from requested scope or amendment posture.",
+        "RuleEvaluation uses only frozen manifest inputs and executes in deterministic order."
+      ],
+      "downstream_gate_consumers": [
+        "PARITY_GATE",
+        "TRUST_GATE",
+        "FILING_GATE",
+        "AMENDMENT_GATE"
+      ],
+      "formula_family": "core_formula_family",
+      "formula_id": "record_and_adjustment_compute",
+      "formula_symbols": [
+        "quarterly_basis",
+        "quarterly_reportable_total(b,c,q,mode)",
+        "quarterly_reportable_total(...)",
+        "ADJUSTMENT_FACT",
+        "annual_record_total(b,c,mode)",
+        "annual_adjusted_total(b,c,mode)",
+        "(business_partition, category)",
+        "annual_adjusted_totals",
+        "RuleEvaluation(...)",
+        "outcome_vector"
+      ],
+      "gate_bindings": [
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "TRUST_GATE",
+            "FILING_GATE",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "PARITY_GATE",
+          "overrideability": "SCOPED_OVERRIDE_ALLOWED",
+          "reason_codes": [
+            "PARITY_MATCH",
+            "PARITY_MINOR_DIFFERENCE",
+            "PARITY_MATERIAL_DIFFERENCE",
+            "PARITY_BLOCKING_DIFFERENCE",
+            "PARITY_NOT_COMPARABLE",
+            "PARITY_OVERRIDE_REQUIRED",
+            "PARITY_OVERRIDE_ACTIVE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L719[PARITY_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L726[PARITY_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L737[PARITY_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L767[PARITY_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "AMENDMENT_GATE",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "TRUST_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "TRUST_GREEN",
+            "TRUST_AMBER",
+            "TRUST_RED",
+            "TRUST_INSUFFICIENT_DATA",
+            "TRUST_INPUT_INCOMPLETE",
+            "TRUST_INPUT_STALE",
+            "TRUST_INPUT_CONTRADICTION",
+            "TRUST_AUTHORITY_STATE_UNRESOLVED",
+            "TRUST_THRESHOLD_EDGE_REVIEW",
+            "TRUST_AUTOMATION_LIMITED",
+            "TRUST_REQUIRED_HUMAN_STEPS",
+            "TRUST_OVERRIDE_DEPENDENT_PROGRESS",
+            "TRUST_OVERRIDE_ACTIVE_NOTICE",
+            "TRUST_UPSTREAM_GATE_BLOCK",
+            "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+            "TRUST_ARTIFACT_INCONSISTENT"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L787[TRUST_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L789[TRUST_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L809[TRUST_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L858[TRUST_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "SUBMISSION_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "FILING_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "FILING_PACKET_UNAVAILABLE",
+            "FILING_MANIFEST_MODE_ANALYSIS",
+            "FILING_TRUST_MISSING",
+            "FILING_TRUST_SUPERSEDED",
+            "FILING_TRUST_RECALCULATION_REQUIRED",
+            "FILING_AUTHORITY_LINK_INACTIVE",
+            "FILING_OBLIGATION_NOT_OPEN",
+            "FILING_FINAL_DECLARATION_PRECONDITION_MISSING",
+            "FILING_AMENDMENT_BASELINE_MISSING",
+            "FILING_APPROVAL_REQUIRED",
+            "FILING_APPROVAL_UNSATISFIABLE",
+            "FILING_OVERRIDE_REQUIRED",
+            "FILING_OVERRIDE_ACTIVE_NOTICE",
+            "FILING_OVERRIDE_AUDIT_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_UNSATISFIABLE",
+            "FILING_NOTICE_REQUIRED",
+            "FILING_LATE_DATA_CHILD_MANIFEST_REQUIRED",
+            "FILING_LATE_DATA_REVIEW_REQUIRED",
+            "FILING_LATE_DATA_NONCRITICAL_EXCLUDED",
+            "FILING_PROOF_BUNDLE_MISSING",
+            "FILING_TARGET_UNSUPPORTED",
+            "FILING_TARGET_CONTRADICTED",
+            "FILING_PROOF_CLOSURE_OPEN",
+            "FILING_GRAPH_REBUILD_REQUIRED",
+            "FILING_EXPLANATION_FAILURE",
+            "FILING_PREPARATION_HARD_BLOCK",
+            "FILING_PREPARATION_OVERRIDE_REQUIRED",
+            "FILING_PREPARATION_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_BLOCK",
+            "FILING_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_NOTICE_ACTIVE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L880[FILING_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L899[FILING_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L948[FILING_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1023[FILING_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "AMENDMENT_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "AMENDMENT_MANIFEST_MODE_ANALYSIS",
+            "AMENDMENT_NO_CONFIRMED_FINAL_DECLARATION",
+            "AMENDMENT_BASELINE_UNPROVEN",
+            "AMENDMENT_WINDOW_CLOSED",
+            "AMENDMENT_DRIFT_NOT_MATERIAL",
+            "AMENDMENT_INTENT_TO_AMEND_REQUIRED",
+            "AMENDMENT_INTENT_TO_AMEND_VALIDATION_FAILED",
+            "AMENDMENT_INTENT_TO_AMEND_OVERRIDE_REQUIRED",
+            "AMENDMENT_INTENT_TO_AMEND_REVIEW_REQUIRED",
+            "AMENDMENT_OUT_OF_BAND_BASELINE_UNRESOLVED",
+            "AMENDMENT_RETROACTIVE_REPLAY_REQUIRED",
+            "AMENDMENT_READINESS_STALE",
+            "AMENDMENT_CONTRADICTORY_DRIFT_SOURCES",
+            "AMENDMENT_SUPERSEDES_PRIOR_ACTIVE_CHAIN",
+            "AMENDMENT_ELIGIBLE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1125[AMENDMENT_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1141[AMENDMENT_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1167[AMENDMENT_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1239[AMENDMENT_GATE.reason_codes]"
+          ]
+        }
+      ],
+      "inputs": [
+        "F_record",
+        "F_adjust",
+        "runtime_scope",
+        "adjustment_binding(a)",
+        "eligible_compute_facts(mode)",
+        "rule_version",
+        "profile_facts",
+        "declaration_facts",
+        "authority_reference_facts"
+      ],
+      "intermediate_terms": [
+        "reporting_scope(runtime_scope[])",
+        "selected_reporting_scope(runtime_scope[])",
+        "record_total",
+        "adjustment_total",
+        "quarterly_reportable_total",
+        "annual_record_total",
+        "annual_adjusted_total",
+        "annual_adjusted_totals",
+        "outcome_vector"
+      ],
+      "label": "Record-Layer and Adjustment-Layer Compute",
+      "mode_applicability": "Compliance compute requires CANONICAL facts and executable reporting scope; analysis mode may include PROVISIONAL facts only under explicit frozen analysis policy and must remain analysis_only.",
+      "module_bindings": [
+        {
+          "artifact_targets": [
+            "ComputeResult"
+          ],
+          "module_name": "COMPUTE_OUTCOME",
+          "phase_ids": [],
+          "schema_touchpoints": [
+            "Algorithm/schemas/compute_result.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#compute-outcome-forecast"
+          ],
+          "step_ids": []
+        }
+      ],
+      "money_profile_requirements": [
+        "Contribution order within each slice is lexicographic by effective_date and canonical_fact_id.",
+        "Exact-decimal intermediate precision is preserved until the declared aggregation boundary, then round_money applies once."
+      ],
+      "notes": [
+        "Amendment intent and amendment submit remain year-end reporting basis rather than a new reporting-scope token."
+      ],
+      "output_artifacts": [
+        "ComputeResult"
+      ],
+      "output_fields": [
+        "reporting_scope",
+        "adjustment_scope_source",
+        "quarterly_basis_profile_or_null",
+        "totals",
+        "assumptions",
+        "diagnostic_reason_codes"
+      ],
+      "reason_code_emissions": [],
+      "schema_touchpoints": [
+        "Algorithm/schemas/compute_result.schema.json"
+      ],
+      "section_title": "Record-layer and adjustment-layer compute formulas",
+      "sensitivity_hooks": [
+        "adjustment_scope_source",
+        "quarterly_basis",
+        "analysis_mode_treatment"
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L212[8.4_Record-layer_and_adjustment-layer_compute_formulas]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L250[Quarterly_basis_profile]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L274[Year-end_reportable_totals]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L286[Rule-evaluated_outcome]"
+      ],
+      "source_span": {
+        "section_end_line": 306,
+        "section_start_line": 212,
+        "subsection_start_lines": {
+          "Quarterly basis profile": 250,
+          "Rule-evaluated outcome": 286,
+          "Year-end reportable totals": 274
+        }
+      },
+      "subsection_titles": [
+        "Quarterly basis profile",
+        "Year-end reportable totals",
+        "Rule-evaluated outcome"
+      ],
+      "threshold_dependencies": [
+        "quarterly_basis_enum",
+        "analysis_only_mode_boundary"
+      ]
+    },
+    {
+      "canonical_section": "8.5",
+      "determinism_rules": [
+        "The point forecast uses mass-preserving seasonality and horizon-scaled trend.",
+        "Monte Carlo residuals must be deterministically seeded from frozen controls; manifest_id alone must not perturb the seed."
+      ],
+      "downstream_gate_consumers": [],
+      "formula_family": "core_formula_family",
+      "formula_id": "forecast",
+      "formula_symbols": [
+        "h",
+        "c",
+        "baseline_steps(c)",
+        "seasonality_index(h,c)",
+        "annualized_growth_rate(c)",
+        "horizon_years(h)",
+        "point_forecast(h,c)",
+        "canonical_forecast_profile =",
+        "cfg.forecast_options",
+        "forecast_seed",
+        "epsilon_(h,c,s)",
+        "simulated_forecast(h,c,s)",
+        "forecast_floor(c)",
+        "forecast_cap(c)",
+        "residual_scale(c)"
+      ],
+      "gate_bindings": [],
+      "inputs": [
+        "baseline_total(c)",
+        "baseline_steps(c)",
+        "seasonality_index(h,c)",
+        "annualized_growth_rate(c)",
+        "horizon_years(h)",
+        "forecast_profile",
+        "deterministic_seed"
+      ],
+      "intermediate_terms": [
+        "baseline_run_rate(c)",
+        "normalized_seasonality(h,c)",
+        "forecast_seed",
+        "epsilon_(h,c,s)",
+        "point_forecast(h,c)",
+        "simulated_forecast(h,c,s)"
+      ],
+      "label": "Forecast",
+      "mode_applicability": "Analysis-only; forecast artifacts must never mutate the compliance compute result in place.",
+      "module_bindings": [
+        {
+          "artifact_targets": [
+            "ComputeResult",
+            "ForecastSet"
+          ],
+          "module_name": "FORECAST",
+          "phase_ids": [],
+          "schema_touchpoints": [
+            "Algorithm/schemas/compute_result.schema.json",
+            "Algorithm/schemas/forecast_set.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#compute-outcome-forecast",
+            "Algorithm/modules.md#forecast"
+          ],
+          "step_ids": []
+        }
+      ],
+      "money_profile_requirements": [
+        "Forecast outputs round via round_money under the frozen forecast money profile."
+      ],
+      "notes": [
+        "No forecast should be emitted for categories with zero baseline steps."
+      ],
+      "output_artifacts": [
+        "ForecastSet"
+      ],
+      "output_fields": [
+        "point_forecasts",
+        "scenarios",
+        "seeds"
+      ],
+      "reason_code_emissions": [],
+      "schema_touchpoints": [
+        "Algorithm/schemas/forecast_set.schema.json"
+      ],
+      "section_title": "Forecast formula",
+      "sensitivity_hooks": [
+        "forecast_seed",
+        "scenario_id",
+        "canonical_forecast_profile"
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L307[8.5_Forecast_formula]"
+      ],
+      "source_span": {
+        "section_end_line": 338,
+        "section_start_line": 307,
+        "subsection_start_lines": {}
+      },
+      "subsection_titles": [],
+      "threshold_dependencies": [
+        "forecast_floor_cap_profile"
+      ]
+    },
+    {
+      "canonical_section": "8.5A",
+      "determinism_rules": [
+        "The model is feature-calibrated and profile-driven rather than heuristic.",
+        "Zero-sum risk profiles fail closed with maximal risk and a blocking flag."
+      ],
+      "downstream_gate_consumers": [
+        "TRUST_GATE",
+        "FILING_GATE"
+      ],
+      "formula_family": "core_formula_family",
+      "formula_id": "risk_scoring",
+      "formula_symbols": [
+        "SCORE_RISK(...)",
+        "m",
+        "risk_threshold_profile_ref",
+        "feature_value_m",
+        "feature_weight_m",
+        "material_threshold_m",
+        "blocking_threshold_m",
+        "feature_resolved_m",
+        "\u03a3w_risk",
+        "RISK_WEIGHT_PROFILE_INVALID",
+        "risk_score",
+        "unresolved_material_blocking_risk_flag",
+        "material_risk_flag_count",
+        "blocking_risk_flag_count",
+        "unresolved_blocking_risk_flag",
+        "O(M)"
+      ],
+      "gate_bindings": [
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "AMENDMENT_GATE",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "TRUST_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "TRUST_GREEN",
+            "TRUST_AMBER",
+            "TRUST_RED",
+            "TRUST_INSUFFICIENT_DATA",
+            "TRUST_INPUT_INCOMPLETE",
+            "TRUST_INPUT_STALE",
+            "TRUST_INPUT_CONTRADICTION",
+            "TRUST_AUTHORITY_STATE_UNRESOLVED",
+            "TRUST_THRESHOLD_EDGE_REVIEW",
+            "TRUST_AUTOMATION_LIMITED",
+            "TRUST_REQUIRED_HUMAN_STEPS",
+            "TRUST_OVERRIDE_DEPENDENT_PROGRESS",
+            "TRUST_OVERRIDE_ACTIVE_NOTICE",
+            "TRUST_UPSTREAM_GATE_BLOCK",
+            "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+            "TRUST_ARTIFACT_INCONSISTENT"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L787[TRUST_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L789[TRUST_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L809[TRUST_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L858[TRUST_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "SUBMISSION_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "FILING_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "FILING_PACKET_UNAVAILABLE",
+            "FILING_MANIFEST_MODE_ANALYSIS",
+            "FILING_TRUST_MISSING",
+            "FILING_TRUST_SUPERSEDED",
+            "FILING_TRUST_RECALCULATION_REQUIRED",
+            "FILING_AUTHORITY_LINK_INACTIVE",
+            "FILING_OBLIGATION_NOT_OPEN",
+            "FILING_FINAL_DECLARATION_PRECONDITION_MISSING",
+            "FILING_AMENDMENT_BASELINE_MISSING",
+            "FILING_APPROVAL_REQUIRED",
+            "FILING_APPROVAL_UNSATISFIABLE",
+            "FILING_OVERRIDE_REQUIRED",
+            "FILING_OVERRIDE_ACTIVE_NOTICE",
+            "FILING_OVERRIDE_AUDIT_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_UNSATISFIABLE",
+            "FILING_NOTICE_REQUIRED",
+            "FILING_LATE_DATA_CHILD_MANIFEST_REQUIRED",
+            "FILING_LATE_DATA_REVIEW_REQUIRED",
+            "FILING_LATE_DATA_NONCRITICAL_EXCLUDED",
+            "FILING_PROOF_BUNDLE_MISSING",
+            "FILING_TARGET_UNSUPPORTED",
+            "FILING_TARGET_CONTRADICTED",
+            "FILING_PROOF_CLOSURE_OPEN",
+            "FILING_GRAPH_REBUILD_REQUIRED",
+            "FILING_EXPLANATION_FAILURE",
+            "FILING_PREPARATION_HARD_BLOCK",
+            "FILING_PREPARATION_OVERRIDE_REQUIRED",
+            "FILING_PREPARATION_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_BLOCK",
+            "FILING_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_NOTICE_ACTIVE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L880[FILING_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L899[FILING_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L948[FILING_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1023[FILING_GATE.reason_codes]"
+          ]
+        }
+      ],
+      "inputs": [
+        "feature_value_m",
+        "feature_weight_m",
+        "material_threshold_m",
+        "blocking_threshold_m",
+        "feature_resolved_m"
+      ],
+      "intermediate_terms": [
+        "\u03a3w_risk",
+        "risk_score_raw",
+        "material_risk_flag_count",
+        "blocking_risk_flag_count"
+      ],
+      "label": "Risk Scoring",
+      "mode_applicability": "Used in both modes from frozen pre-parity artifacts.",
+      "module_bindings": [
+        {
+          "artifact_targets": [
+            "RiskReport"
+          ],
+          "module_name": "SCORE_RISK",
+          "phase_ids": [],
+          "schema_touchpoints": [
+            "Algorithm/schemas/risk_report.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#score-risk"
+          ],
+          "step_ids": []
+        },
+        {
+          "artifact_targets": [
+            "TrustSummary"
+          ],
+          "module_name": "SYNTHESIZE_TRUST",
+          "phase_ids": [
+            "P11"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/trust_summary.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#synthesize-trust"
+          ],
+          "step_ids": [
+            "P11-S006"
+          ]
+        }
+      ],
+      "money_profile_requirements": [],
+      "notes": [
+        "Trust consumes both risk_score and the unresolved blocking flags rather than score alone."
+      ],
+      "output_artifacts": [
+        "RiskReport",
+        "TrustSummary"
+      ],
+      "output_fields": [
+        "risk_score",
+        "feature_scores",
+        "flags",
+        "unresolved_material_blocking_risk_flag",
+        "unresolved_blocking_risk_flag"
+      ],
+      "reason_code_emissions": [
+        "RISK_WEIGHT_PROFILE_INVALID",
+        "RISK_MATERIAL_FLAG",
+        "RISK_BLOCKING_FLAG",
+        "TRUST_BLOCKING_RISK"
+      ],
+      "schema_touchpoints": [
+        "Algorithm/schemas/risk_report.schema.json",
+        "Algorithm/schemas/trust_summary.schema.json"
+      ],
+      "section_title": "Risk scoring formula",
+      "sensitivity_hooks": [
+        "risk_threshold_profile_ref",
+        "feature_weight_m",
+        "material_threshold_m",
+        "blocking_threshold_m"
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L339[8.5A_Risk_scoring_formula]"
+      ],
+      "source_span": {
+        "section_end_line": 375,
+        "section_start_line": 339,
+        "subsection_start_lines": {}
+      },
+      "subsection_titles": [],
+      "threshold_dependencies": [
+        "risk_blocking_thresholds",
+        "risk_automation_guard_threshold"
+      ]
+    },
+    {
+      "canonical_section": "8.6",
+      "determinism_rules": [
+        "K is deduplicated by field_code and ordered by criticality rank then field_code.",
+        "Invalid comparison-set construction must persist a fail-closed ParityResult rather than guessing through partial materialization."
+      ],
+      "downstream_gate_consumers": [
+        "PARITY_GATE",
+        "TRUST_GATE",
+        "AMENDMENT_GATE"
+      ],
+      "formula_family": "core_formula_family",
+      "formula_id": "parity_comparison_set_construction",
+      "formula_symbols": [
+        "in-year",
+        "intent-to-finalise",
+        "intent-to-amend",
+        "final-declaration",
+        "EVALUATE_PARITY(...)",
+        "comparison_basis_ref",
+        "CalculationBasis",
+        "comparison_requirement",
+        "NOT_REQUIRED",
+        "validation_outcome",
+        "AmendmentCase",
+        "AMENDMENT_GATE(...)",
+        "FILING_GATE(...)"
+      ],
+      "gate_bindings": [
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "TRUST_GATE",
+            "FILING_GATE",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "PARITY_GATE",
+          "overrideability": "SCOPED_OVERRIDE_ALLOWED",
+          "reason_codes": [
+            "PARITY_MATCH",
+            "PARITY_MINOR_DIFFERENCE",
+            "PARITY_MATERIAL_DIFFERENCE",
+            "PARITY_BLOCKING_DIFFERENCE",
+            "PARITY_NOT_COMPARABLE",
+            "PARITY_OVERRIDE_REQUIRED",
+            "PARITY_OVERRIDE_ACTIVE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L719[PARITY_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L726[PARITY_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L737[PARITY_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L767[PARITY_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "AMENDMENT_GATE",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "TRUST_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "TRUST_GREEN",
+            "TRUST_AMBER",
+            "TRUST_RED",
+            "TRUST_INSUFFICIENT_DATA",
+            "TRUST_INPUT_INCOMPLETE",
+            "TRUST_INPUT_STALE",
+            "TRUST_INPUT_CONTRADICTION",
+            "TRUST_AUTHORITY_STATE_UNRESOLVED",
+            "TRUST_THRESHOLD_EDGE_REVIEW",
+            "TRUST_AUTOMATION_LIMITED",
+            "TRUST_REQUIRED_HUMAN_STEPS",
+            "TRUST_OVERRIDE_DEPENDENT_PROGRESS",
+            "TRUST_OVERRIDE_ACTIVE_NOTICE",
+            "TRUST_UPSTREAM_GATE_BLOCK",
+            "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+            "TRUST_ARTIFACT_INCONSISTENT"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L787[TRUST_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L789[TRUST_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L809[TRUST_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L858[TRUST_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "AMENDMENT_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "AMENDMENT_MANIFEST_MODE_ANALYSIS",
+            "AMENDMENT_NO_CONFIRMED_FINAL_DECLARATION",
+            "AMENDMENT_BASELINE_UNPROVEN",
+            "AMENDMENT_WINDOW_CLOSED",
+            "AMENDMENT_DRIFT_NOT_MATERIAL",
+            "AMENDMENT_INTENT_TO_AMEND_REQUIRED",
+            "AMENDMENT_INTENT_TO_AMEND_VALIDATION_FAILED",
+            "AMENDMENT_INTENT_TO_AMEND_OVERRIDE_REQUIRED",
+            "AMENDMENT_INTENT_TO_AMEND_REVIEW_REQUIRED",
+            "AMENDMENT_OUT_OF_BAND_BASELINE_UNRESOLVED",
+            "AMENDMENT_RETROACTIVE_REPLAY_REQUIRED",
+            "AMENDMENT_READINESS_STALE",
+            "AMENDMENT_CONTRADICTORY_DRIFT_SOURCES",
+            "AMENDMENT_SUPERSEDES_PRIOR_ACTIVE_CHAIN",
+            "AMENDMENT_ELIGIBLE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1125[AMENDMENT_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1141[AMENDMENT_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1167[AMENDMENT_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1239[AMENDMENT_GATE.reason_codes]"
+          ]
+        }
+      ],
+      "inputs": [
+        "internal_value_k",
+        "authority_value_k",
+        "criticality_weight_k",
+        "abs_threshold_k",
+        "rel_threshold_k",
+        "abs_floor_k",
+        "criticality_class",
+        "comparison_basis_ref",
+        "comparison_requirement"
+      ],
+      "intermediate_terms": [
+        "K",
+        "criticality_rank",
+        "comparison_set_state"
+      ],
+      "label": "Parity Comparison-Set Construction",
+      "mode_applicability": "Compliance parity requires canonical authority-comparable facts; analysis parity may include provisional facts only under explicit frozen analysis policy and must remain analysis_only.",
+      "module_bindings": [
+        {
+          "artifact_targets": [
+            "ParityResult"
+          ],
+          "module_name": "EVALUATE_PARITY",
+          "phase_ids": [
+            "P09"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/parity_result.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#evaluate-parity"
+          ],
+          "step_ids": [
+            "P09-S068"
+          ]
+        }
+      ],
+      "money_profile_requirements": [
+        "Comparison items preserve exact-decimal internal and authority values under the frozen money profile."
+      ],
+      "notes": [
+        "Authority calculation path must be frozen before parity evaluation and reused by later filing or amendment stages."
+      ],
+      "output_artifacts": [
+        "ParityResult"
+      ],
+      "output_fields": [
+        "comparison_basis_ref",
+        "comparison_requirement",
+        "comparison_set_state",
+        "ordered_field_codes",
+        "dominant_reason_code",
+        "reason_codes"
+      ],
+      "reason_code_emissions": [
+        "PARITY_COMPARISON_SET_INVALID",
+        "PARITY_NOT_COMPARABLE",
+        "PARITY_PARTIAL_COVERAGE"
+      ],
+      "schema_touchpoints": [
+        "Algorithm/schemas/parity_result.schema.json"
+      ],
+      "section_title": "Parity comparison-set construction",
+      "sensitivity_hooks": [
+        "comparison_requirement",
+        "comparison_basis_ref",
+        "parity_threshold_profile_ref"
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L376[8.6_Parity_comparison-set_construction]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L415[Scope_rules]"
+      ],
+      "source_span": {
+        "section_end_line": 456,
+        "section_start_line": 376,
+        "subsection_start_lines": {
+          "Scope rules": 415
+        }
+      },
+      "subsection_titles": [
+        "Scope rules"
+      ],
+      "threshold_dependencies": [
+        "comparison_requirement_enum",
+        "parity_threshold_profile"
+      ]
+    },
+    {
+      "canonical_section": "8.7",
+      "determinism_rules": [
+        "Each fieldDelta persists threshold and floor inputs needed for exact replay.",
+        "Zero-threshold breaches use the profile-defined blocking_ratio_cap rather than implicit infinity semantics."
+      ],
+      "downstream_gate_consumers": [
+        "PARITY_GATE",
+        "TRUST_GATE"
+      ],
+      "formula_family": "core_formula_family",
+      "formula_id": "per_field_parity",
+      "formula_symbols": [
+        "comparison_requirement",
+        "field_class_k",
+        "breach_ratio_k"
+      ],
+      "gate_bindings": [
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "TRUST_GATE",
+            "FILING_GATE",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "PARITY_GATE",
+          "overrideability": "SCOPED_OVERRIDE_ALLOWED",
+          "reason_codes": [
+            "PARITY_MATCH",
+            "PARITY_MINOR_DIFFERENCE",
+            "PARITY_MATERIAL_DIFFERENCE",
+            "PARITY_BLOCKING_DIFFERENCE",
+            "PARITY_NOT_COMPARABLE",
+            "PARITY_OVERRIDE_REQUIRED",
+            "PARITY_OVERRIDE_ACTIVE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L719[PARITY_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L726[PARITY_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L737[PARITY_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L767[PARITY_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "AMENDMENT_GATE",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "TRUST_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "TRUST_GREEN",
+            "TRUST_AMBER",
+            "TRUST_RED",
+            "TRUST_INSUFFICIENT_DATA",
+            "TRUST_INPUT_INCOMPLETE",
+            "TRUST_INPUT_STALE",
+            "TRUST_INPUT_CONTRADICTION",
+            "TRUST_AUTHORITY_STATE_UNRESOLVED",
+            "TRUST_THRESHOLD_EDGE_REVIEW",
+            "TRUST_AUTOMATION_LIMITED",
+            "TRUST_REQUIRED_HUMAN_STEPS",
+            "TRUST_OVERRIDE_DEPENDENT_PROGRESS",
+            "TRUST_OVERRIDE_ACTIVE_NOTICE",
+            "TRUST_UPSTREAM_GATE_BLOCK",
+            "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+            "TRUST_ARTIFACT_INCONSISTENT"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L787[TRUST_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L789[TRUST_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L809[TRUST_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L858[TRUST_GATE.reason_codes]"
+          ]
+        }
+      ],
+      "inputs": [
+        "internal_value_k",
+        "authority_value_k",
+        "abs_threshold_k",
+        "rel_threshold_k",
+        "abs_floor_k",
+        "minimum_rel_floor"
+      ],
+      "intermediate_terms": [
+        "delta_signed_k",
+        "delta_abs_k",
+        "effective_abs_floor_k",
+        "delta_rel_k",
+        "breach_abs_k",
+        "breach_rel_k",
+        "breach_ratio_k",
+        "field_class_k"
+      ],
+      "label": "Per-Field Parity",
+      "mode_applicability": "Applies to every frozen comparison item; numeric invalidity must stop at the per-field layer and never leak as renderer-local coercion.",
+      "module_bindings": [
+        {
+          "artifact_targets": [
+            "ParityResult"
+          ],
+          "module_name": "EVALUATE_PARITY",
+          "phase_ids": [
+            "P09"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/parity_result.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#evaluate-parity"
+          ],
+          "step_ids": [
+            "P09-S068"
+          ]
+        }
+      ],
+      "money_profile_requirements": [
+        "Money-bearing deltas are exact-decimal values computed from unrounded intermediates.",
+        "Threshold and floor checks use exact intermediates rather than previously rounded display totals."
+      ],
+      "notes": [
+        "Per-field classification is a deterministic threshold surface, not a UI-only explanation layer."
+      ],
+      "output_artifacts": [
+        "ParityResult"
+      ],
+      "output_fields": [
+        "deltas"
+      ],
+      "reason_code_emissions": [],
+      "schema_touchpoints": [
+        "Algorithm/schemas/parity_result.schema.json"
+      ],
+      "section_title": "Per-field parity formulas",
+      "sensitivity_hooks": [
+        "abs_threshold_k",
+        "rel_threshold_k",
+        "abs_floor_k",
+        "minimum_rel_floor",
+        "blocking_ratio_cap"
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L457[8.7_Per-field_parity_formulas]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L492[Per-field_classification]"
+      ],
+      "source_span": {
+        "section_end_line": 516,
+        "section_start_line": 457,
+        "subsection_start_lines": {
+          "Per-field classification": 492
+        }
+      },
+      "subsection_titles": [
+        "Per-field classification"
+      ],
+      "threshold_dependencies": [
+        "minimum_rel_floor",
+        "blocking_ratio_cap",
+        "parity_field_class_thresholds"
+      ]
+    },
+    {
+      "canonical_section": "8.8",
+      "determinism_rules": [
+        "The aggregate classification uses a strict precedence ladder; later score branches cannot override a prior match.",
+        "Top-level explanation codes are persisted in deterministic priority order."
+      ],
+      "downstream_gate_consumers": [
+        "PARITY_GATE",
+        "TRUST_GATE",
+        "AMENDMENT_GATE",
+        "FILING_GATE"
+      ],
+      "formula_family": "core_formula_family",
+      "formula_id": "aggregate_parity",
+      "formula_symbols": [
+        "parity_classification",
+        "NOT_COMPARABLE",
+        "comparison_set_state",
+        "comparison_requirement",
+        "comparison_coverage",
+        "BLOCKING_DIFFERENCE",
+        "field_class_k",
+        "MATERIAL_DIFFERENCE",
+        "weighted_parity_pressure",
+        "MINOR_DIFFERENCE",
+        "PARITY_PARTIAL_COVERAGE",
+        "PARITY_COMPARISON_SET_INVALID",
+        "PARITY_NOT_COMPARABLE",
+        "PARITY_BLOCKING_DIFFERENCE",
+        "PARITY_MATERIAL_DIFFERENCE",
+        "PARITY_MINOR_DIFFERENCE",
+        "PARITY_MATCH",
+        "dominant_reason_code"
+      ],
+      "gate_bindings": [
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "TRUST_GATE",
+            "FILING_GATE",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "PARITY_GATE",
+          "overrideability": "SCOPED_OVERRIDE_ALLOWED",
+          "reason_codes": [
+            "PARITY_MATCH",
+            "PARITY_MINOR_DIFFERENCE",
+            "PARITY_MATERIAL_DIFFERENCE",
+            "PARITY_BLOCKING_DIFFERENCE",
+            "PARITY_NOT_COMPARABLE",
+            "PARITY_OVERRIDE_REQUIRED",
+            "PARITY_OVERRIDE_ACTIVE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L719[PARITY_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L726[PARITY_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L737[PARITY_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L767[PARITY_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "AMENDMENT_GATE",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "TRUST_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "TRUST_GREEN",
+            "TRUST_AMBER",
+            "TRUST_RED",
+            "TRUST_INSUFFICIENT_DATA",
+            "TRUST_INPUT_INCOMPLETE",
+            "TRUST_INPUT_STALE",
+            "TRUST_INPUT_CONTRADICTION",
+            "TRUST_AUTHORITY_STATE_UNRESOLVED",
+            "TRUST_THRESHOLD_EDGE_REVIEW",
+            "TRUST_AUTOMATION_LIMITED",
+            "TRUST_REQUIRED_HUMAN_STEPS",
+            "TRUST_OVERRIDE_DEPENDENT_PROGRESS",
+            "TRUST_OVERRIDE_ACTIVE_NOTICE",
+            "TRUST_UPSTREAM_GATE_BLOCK",
+            "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+            "TRUST_ARTIFACT_INCONSISTENT"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L787[TRUST_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L789[TRUST_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L809[TRUST_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L858[TRUST_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "AMENDMENT_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "AMENDMENT_MANIFEST_MODE_ANALYSIS",
+            "AMENDMENT_NO_CONFIRMED_FINAL_DECLARATION",
+            "AMENDMENT_BASELINE_UNPROVEN",
+            "AMENDMENT_WINDOW_CLOSED",
+            "AMENDMENT_DRIFT_NOT_MATERIAL",
+            "AMENDMENT_INTENT_TO_AMEND_REQUIRED",
+            "AMENDMENT_INTENT_TO_AMEND_VALIDATION_FAILED",
+            "AMENDMENT_INTENT_TO_AMEND_OVERRIDE_REQUIRED",
+            "AMENDMENT_INTENT_TO_AMEND_REVIEW_REQUIRED",
+            "AMENDMENT_OUT_OF_BAND_BASELINE_UNRESOLVED",
+            "AMENDMENT_RETROACTIVE_REPLAY_REQUIRED",
+            "AMENDMENT_READINESS_STALE",
+            "AMENDMENT_CONTRADICTORY_DRIFT_SOURCES",
+            "AMENDMENT_SUPERSEDES_PRIOR_ACTIVE_CHAIN",
+            "AMENDMENT_ELIGIBLE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1125[AMENDMENT_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1141[AMENDMENT_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1167[AMENDMENT_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1239[AMENDMENT_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "SUBMISSION_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "FILING_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "FILING_PACKET_UNAVAILABLE",
+            "FILING_MANIFEST_MODE_ANALYSIS",
+            "FILING_TRUST_MISSING",
+            "FILING_TRUST_SUPERSEDED",
+            "FILING_TRUST_RECALCULATION_REQUIRED",
+            "FILING_AUTHORITY_LINK_INACTIVE",
+            "FILING_OBLIGATION_NOT_OPEN",
+            "FILING_FINAL_DECLARATION_PRECONDITION_MISSING",
+            "FILING_AMENDMENT_BASELINE_MISSING",
+            "FILING_APPROVAL_REQUIRED",
+            "FILING_APPROVAL_UNSATISFIABLE",
+            "FILING_OVERRIDE_REQUIRED",
+            "FILING_OVERRIDE_ACTIVE_NOTICE",
+            "FILING_OVERRIDE_AUDIT_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_UNSATISFIABLE",
+            "FILING_NOTICE_REQUIRED",
+            "FILING_LATE_DATA_CHILD_MANIFEST_REQUIRED",
+            "FILING_LATE_DATA_REVIEW_REQUIRED",
+            "FILING_LATE_DATA_NONCRITICAL_EXCLUDED",
+            "FILING_PROOF_BUNDLE_MISSING",
+            "FILING_TARGET_UNSUPPORTED",
+            "FILING_TARGET_CONTRADICTED",
+            "FILING_PROOF_CLOSURE_OPEN",
+            "FILING_GRAPH_REBUILD_REQUIRED",
+            "FILING_EXPLANATION_FAILURE",
+            "FILING_PREPARATION_HARD_BLOCK",
+            "FILING_PREPARATION_OVERRIDE_REQUIRED",
+            "FILING_PREPARATION_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_BLOCK",
+            "FILING_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_NOTICE_ACTIVE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L880[FILING_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L899[FILING_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L948[FILING_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1023[FILING_GATE.reason_codes]"
+          ]
+        }
+      ],
+      "inputs": [
+        "K",
+        "field_class_k",
+        "criticality_weight_k",
+        "comparison_requirement",
+        "comparison_set_state"
+      ],
+      "intermediate_terms": [
+        "\u03a3w_required",
+        "\u03a3w_comparable",
+        "comparison_coverage",
+        "weighted_parity_pressure",
+        "parity_score_raw",
+        "parity_score"
+      ],
+      "label": "Aggregate Parity",
+      "mode_applicability": "Feeds parity gating and trust synthesis in both modes.",
+      "module_bindings": [
+        {
+          "artifact_targets": [
+            "ParityResult"
+          ],
+          "module_name": "EVALUATE_PARITY",
+          "phase_ids": [
+            "P09"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/parity_result.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#evaluate-parity"
+          ],
+          "step_ids": [
+            "P09-S068"
+          ]
+        },
+        {
+          "artifact_targets": [
+            "TrustSummary"
+          ],
+          "module_name": "SYNTHESIZE_TRUST",
+          "phase_ids": [
+            "P11"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/trust_summary.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#synthesize-trust"
+          ],
+          "step_ids": [
+            "P11-S006"
+          ]
+        }
+      ],
+      "money_profile_requirements": [],
+      "notes": [
+        "The NOT_REQUIRED fallback applies only when the policy explicitly marks the scope as not requiring authority comparison."
+      ],
+      "output_artifacts": [
+        "ParityResult",
+        "TrustSummary"
+      ],
+      "output_fields": [
+        "comparison_coverage",
+        "weighted_parity_pressure",
+        "parity_score",
+        "parity_classification",
+        "dominant_reason_code",
+        "reason_codes"
+      ],
+      "reason_code_emissions": [
+        "PARITY_COMPARISON_SET_INVALID",
+        "PARITY_NOT_COMPARABLE",
+        "PARITY_PARTIAL_COVERAGE",
+        "PARITY_BLOCKING_DIFFERENCE",
+        "PARITY_MATERIAL_DIFFERENCE",
+        "PARITY_MINOR_DIFFERENCE",
+        "PARITY_MATCH",
+        "PARITY_NOT_REQUIRED_NO_AUTHORITY_BASIS"
+      ],
+      "schema_touchpoints": [
+        "Algorithm/schemas/parity_result.schema.json",
+        "Algorithm/schemas/trust_summary.schema.json"
+      ],
+      "section_title": "Aggregate parity formulas",
+      "sensitivity_hooks": [
+        "comparison_requirement",
+        "comparison_coverage",
+        "weighted_parity_pressure"
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L517[8.8_Aggregate_parity_formulas]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L546[Aggregate_parity_classification]"
+      ],
+      "source_span": {
+        "section_end_line": 588,
+        "section_start_line": 517,
+        "subsection_start_lines": {
+          "Aggregate parity classification": 546
+        }
+      },
+      "subsection_titles": [
+        "Aggregate parity classification"
+      ],
+      "threshold_dependencies": [
+        "parity_aggregate_thresholds",
+        "comparison_requirement_enum"
+      ]
+    },
+    {
+      "canonical_section": "8.9",
+      "determinism_rules": [
+        "Best admissible path selection is deterministic through path_tuple ordering.",
+        "Fail-closed caps are explicit and severity-ordered; silent ambiguity blocks filing-capable trust regardless of rendered narrative quality."
+      ],
+      "downstream_gate_consumers": [
+        "RETENTION_EVIDENCE_GATE",
+        "TRUST_GATE",
+        "FILING_GATE"
+      ],
+      "formula_family": "core_formula_family",
+      "formula_id": "evidence_graph_quality",
+      "formula_symbols": [
+        "F_return",
+        "F_critical",
+        "f",
+        "G_f",
+        "support_confidence_e",
+        "decision_information_ratio_e",
+        "limitation_explicitness_e",
+        "review_projection_ratio_e",
+        "p",
+        "path_tuple(p)",
+        "best_admissible_path(f)",
+        "best_path_confidence(f)",
+        "path_survivability(f)",
+        "path_clarity(f)",
+        "review_projection_fidelity(f)",
+        "explanation_quality(f)",
+        "silent_ambiguity_indicator(f)",
+        "figure_weight_f",
+        "GRAPH_WEIGHT_PROFILE_INVALID",
+        "\u03a3w_graph",
+        "graph_quality_raw",
+        "submit_survivability_min",
+        "review_survivability_min",
+        "audit_survivability_min",
+        "silent_ambiguity_ratio",
+        "closure_state",
+        "explanation_status",
+        "weighted_path_survivability",
+        "graph_quality_score",
+        "target_assessments",
+        "critical_paths_ref",
+        "limitation_notes",
+        "weighted_explanation_quality",
+        "limitation_clarity_ratio",
+        "proof_bundle_coverage",
+        "unsupported_critical_target_count",
+        "contradicted_critical_target_count",
+        "stale_critical_target_count",
+        "replay_failure_target_count"
+      ],
+      "gate_bindings": [
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "TRUST_GATE",
+            "FILING_GATE",
+            "DecisionBundle"
+          ],
+          "gate_code": "RETENTION_EVIDENCE_GATE",
+          "overrideability": "SCOPED_OVERRIDE_ALLOWED",
+          "reason_codes": [
+            "RETENTION_CRITICAL_EVIDENCE_ERASED",
+            "RETENTION_CRITICAL_PATH_MISSING",
+            "RETENTION_GRAPH_QUALITY_BELOW_MINIMUM",
+            "RETENTION_CRITICAL_LIMITATION",
+            "RETENTION_SILENT_LIMITATION_AMBIGUITY",
+            "RETENTION_SURVIVABILITY_BELOW_AUDIT_MINIMUM",
+            "RETENTION_SURVIVABILITY_BELOW_SUBMIT_MINIMUM",
+            "RETENTION_INFERRED_PATH_RATIO_HIGH",
+            "RETENTION_PROOF_BUNDLE_MISSING",
+            "RETENTION_TARGET_UNSUPPORTED",
+            "RETENTION_TARGET_CONTRADICTED",
+            "RETENTION_PROOF_CLOSURE_OPEN",
+            "RETENTION_REPLAY_FAILURE",
+            "RETENTION_EXPLANATION_FAILURE",
+            "RETENTION_NONCRITICAL_LIMITATION"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L620[RETENTION_EVIDENCE_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L626[RETENTION_EVIDENCE_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L658[RETENTION_EVIDENCE_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L699[RETENTION_EVIDENCE_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "AMENDMENT_GATE",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "TRUST_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "TRUST_GREEN",
+            "TRUST_AMBER",
+            "TRUST_RED",
+            "TRUST_INSUFFICIENT_DATA",
+            "TRUST_INPUT_INCOMPLETE",
+            "TRUST_INPUT_STALE",
+            "TRUST_INPUT_CONTRADICTION",
+            "TRUST_AUTHORITY_STATE_UNRESOLVED",
+            "TRUST_THRESHOLD_EDGE_REVIEW",
+            "TRUST_AUTOMATION_LIMITED",
+            "TRUST_REQUIRED_HUMAN_STEPS",
+            "TRUST_OVERRIDE_DEPENDENT_PROGRESS",
+            "TRUST_OVERRIDE_ACTIVE_NOTICE",
+            "TRUST_UPSTREAM_GATE_BLOCK",
+            "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+            "TRUST_ARTIFACT_INCONSISTENT"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L787[TRUST_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L789[TRUST_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L809[TRUST_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L858[TRUST_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "SUBMISSION_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "FILING_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "FILING_PACKET_UNAVAILABLE",
+            "FILING_MANIFEST_MODE_ANALYSIS",
+            "FILING_TRUST_MISSING",
+            "FILING_TRUST_SUPERSEDED",
+            "FILING_TRUST_RECALCULATION_REQUIRED",
+            "FILING_AUTHORITY_LINK_INACTIVE",
+            "FILING_OBLIGATION_NOT_OPEN",
+            "FILING_FINAL_DECLARATION_PRECONDITION_MISSING",
+            "FILING_AMENDMENT_BASELINE_MISSING",
+            "FILING_APPROVAL_REQUIRED",
+            "FILING_APPROVAL_UNSATISFIABLE",
+            "FILING_OVERRIDE_REQUIRED",
+            "FILING_OVERRIDE_ACTIVE_NOTICE",
+            "FILING_OVERRIDE_AUDIT_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_UNSATISFIABLE",
+            "FILING_NOTICE_REQUIRED",
+            "FILING_LATE_DATA_CHILD_MANIFEST_REQUIRED",
+            "FILING_LATE_DATA_REVIEW_REQUIRED",
+            "FILING_LATE_DATA_NONCRITICAL_EXCLUDED",
+            "FILING_PROOF_BUNDLE_MISSING",
+            "FILING_TARGET_UNSUPPORTED",
+            "FILING_TARGET_CONTRADICTED",
+            "FILING_PROOF_CLOSURE_OPEN",
+            "FILING_GRAPH_REBUILD_REQUIRED",
+            "FILING_EXPLANATION_FAILURE",
+            "FILING_PREPARATION_HARD_BLOCK",
+            "FILING_PREPARATION_OVERRIDE_REQUIRED",
+            "FILING_PREPARATION_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_BLOCK",
+            "FILING_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_NOTICE_ACTIVE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L880[FILING_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L899[FILING_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L948[FILING_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1023[FILING_GATE.reason_codes]"
+          ]
+        }
+      ],
+      "inputs": [
+        "F_return",
+        "F_critical",
+        "support_state(f)",
+        "closure_state(f)",
+        "proof_bundle_ref(f)",
+        "support_confidence_e",
+        "decision_information_ratio_e",
+        "limitation_explicitness_e",
+        "review_projection_ratio_e",
+        "figure_weight_f"
+      ],
+      "intermediate_terms": [
+        "coverage_return",
+        "coverage_critical",
+        "closed_critical_ratio",
+        "proof_bundle_coverage",
+        "unsupported_ratio",
+        "contradicted_ratio",
+        "stale_ratio",
+        "replay_failure_ratio",
+        "open_closure_ratio",
+        "explanation_failure_ratio",
+        "path_survivability",
+        "path_clarity",
+        "path_review_projection_fidelity",
+        "best_admissible_path",
+        "best_path_confidence",
+        "explanation_quality",
+        "weighted_explanation_quality",
+        "weighted_path_survivability",
+        "limitation_clarity_ratio",
+        "silent_ambiguity_ratio",
+        "inferred_path_ratio",
+        "graph_quality_raw",
+        "graph_quality_score"
+      ],
+      "label": "Evidence-Graph Quality",
+      "mode_applicability": "Feeds retention evidence gating and trust in filing-capable and review-capable runs.",
+      "module_bindings": [
+        {
+          "artifact_targets": [
+            "TrustSummary"
+          ],
+          "module_name": "SYNTHESIZE_TRUST",
+          "phase_ids": [
+            "P11"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/trust_summary.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#synthesize-trust"
+          ],
+          "step_ids": [
+            "P11-S006"
+          ]
+        }
+      ],
+      "money_profile_requirements": [],
+      "notes": [
+        "Projection-side reviewer fidelity is scored explicitly without mutating canonical support semantics."
+      ],
+      "output_artifacts": [
+        "TrustSummary",
+        "GateDecisionRecord"
+      ],
+      "output_fields": [
+        "graph_quality_score"
+      ],
+      "reason_code_emissions": [
+        "GRAPH_LOW_COVERAGE",
+        "GRAPH_HIGH_INFERENCE",
+        "GRAPH_WEIGHT_PROFILE_INVALID",
+        "TRUST_RETENTION_PENALTY"
+      ],
+      "schema_touchpoints": [
+        "Algorithm/schemas/trust_summary.schema.json"
+      ],
+      "section_title": "Evidence-graph quality formula",
+      "sensitivity_hooks": [
+        "review_projection_ratio_e",
+        "figure_weight_f",
+        "submit_survivability_min",
+        "review_survivability_min",
+        "audit_survivability_min"
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L589[8.9_Evidence-graph_quality_formula]"
+      ],
+      "source_span": {
+        "section_end_line": 673,
+        "section_start_line": 589,
+        "subsection_start_lines": {}
+      },
+      "subsection_titles": [],
+      "threshold_dependencies": [
+        "graph_quality_fail_closed_caps",
+        "graph_survivability_minima"
+      ]
+    },
+    {
+      "canonical_section": "8.10",
+      "determinism_rules": [
+        "Authority uncertainty is quantitative and source-weighted; it may not be replaced by a prose-only heuristic.",
+        "The same frozen observation set must reproduce the same uncertainty score and emitted reasons."
+      ],
+      "downstream_gate_consumers": [
+        "TRUST_GATE",
+        "FILING_GATE",
+        "AMENDMENT_GATE"
+      ],
+      "formula_family": "core_formula_family",
+      "formula_id": "trust_authority_uncertainty",
+      "formula_symbols": [
+        "o",
+        "src_rel_o",
+        "corr_o",
+        "correlation_status",
+        "BOUND_WITH_AUTHORITY_REFERENCE_ONLY",
+        "clarity_o",
+        "w_o",
+        "p_x",
+        "x",
+        "reconciliation_confidence",
+        "external_truth_ambiguity",
+        "authority_state_staleness_score",
+        "authority_uncertainty_raw",
+        "authority_uncertainty_score",
+        "TRUST_AUTHORITY_CONFIDENCE_LOW",
+        "TRUST_AUTHORITY_AMBIGUITY_HIGH",
+        "TRUST_AUTHORITY_STATE_STALE",
+        "TRUST_AUTHORITY_STATE_UNRESOLVED",
+        "live_authority_progression_requested"
+      ],
+      "gate_bindings": [
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "AMENDMENT_GATE",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "TRUST_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "TRUST_GREEN",
+            "TRUST_AMBER",
+            "TRUST_RED",
+            "TRUST_INSUFFICIENT_DATA",
+            "TRUST_INPUT_INCOMPLETE",
+            "TRUST_INPUT_STALE",
+            "TRUST_INPUT_CONTRADICTION",
+            "TRUST_AUTHORITY_STATE_UNRESOLVED",
+            "TRUST_THRESHOLD_EDGE_REVIEW",
+            "TRUST_AUTOMATION_LIMITED",
+            "TRUST_REQUIRED_HUMAN_STEPS",
+            "TRUST_OVERRIDE_DEPENDENT_PROGRESS",
+            "TRUST_OVERRIDE_ACTIVE_NOTICE",
+            "TRUST_UPSTREAM_GATE_BLOCK",
+            "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+            "TRUST_ARTIFACT_INCONSISTENT"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L787[TRUST_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L789[TRUST_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L809[TRUST_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L858[TRUST_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "SUBMISSION_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "FILING_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "FILING_PACKET_UNAVAILABLE",
+            "FILING_MANIFEST_MODE_ANALYSIS",
+            "FILING_TRUST_MISSING",
+            "FILING_TRUST_SUPERSEDED",
+            "FILING_TRUST_RECALCULATION_REQUIRED",
+            "FILING_AUTHORITY_LINK_INACTIVE",
+            "FILING_OBLIGATION_NOT_OPEN",
+            "FILING_FINAL_DECLARATION_PRECONDITION_MISSING",
+            "FILING_AMENDMENT_BASELINE_MISSING",
+            "FILING_APPROVAL_REQUIRED",
+            "FILING_APPROVAL_UNSATISFIABLE",
+            "FILING_OVERRIDE_REQUIRED",
+            "FILING_OVERRIDE_ACTIVE_NOTICE",
+            "FILING_OVERRIDE_AUDIT_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_UNSATISFIABLE",
+            "FILING_NOTICE_REQUIRED",
+            "FILING_LATE_DATA_CHILD_MANIFEST_REQUIRED",
+            "FILING_LATE_DATA_REVIEW_REQUIRED",
+            "FILING_LATE_DATA_NONCRITICAL_EXCLUDED",
+            "FILING_PROOF_BUNDLE_MISSING",
+            "FILING_TARGET_UNSUPPORTED",
+            "FILING_TARGET_CONTRADICTED",
+            "FILING_PROOF_CLOSURE_OPEN",
+            "FILING_GRAPH_REBUILD_REQUIRED",
+            "FILING_EXPLANATION_FAILURE",
+            "FILING_PREPARATION_HARD_BLOCK",
+            "FILING_PREPARATION_OVERRIDE_REQUIRED",
+            "FILING_PREPARATION_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_BLOCK",
+            "FILING_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_NOTICE_ACTIVE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L880[FILING_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L899[FILING_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L948[FILING_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1023[FILING_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "AMENDMENT_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "AMENDMENT_MANIFEST_MODE_ANALYSIS",
+            "AMENDMENT_NO_CONFIRMED_FINAL_DECLARATION",
+            "AMENDMENT_BASELINE_UNPROVEN",
+            "AMENDMENT_WINDOW_CLOSED",
+            "AMENDMENT_DRIFT_NOT_MATERIAL",
+            "AMENDMENT_INTENT_TO_AMEND_REQUIRED",
+            "AMENDMENT_INTENT_TO_AMEND_VALIDATION_FAILED",
+            "AMENDMENT_INTENT_TO_AMEND_OVERRIDE_REQUIRED",
+            "AMENDMENT_INTENT_TO_AMEND_REVIEW_REQUIRED",
+            "AMENDMENT_OUT_OF_BAND_BASELINE_UNRESOLVED",
+            "AMENDMENT_RETROACTIVE_REPLAY_REQUIRED",
+            "AMENDMENT_READINESS_STALE",
+            "AMENDMENT_CONTRADICTORY_DRIFT_SOURCES",
+            "AMENDMENT_SUPERSEDES_PRIOR_ACTIVE_CHAIN",
+            "AMENDMENT_ELIGIBLE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1125[AMENDMENT_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1141[AMENDMENT_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1167[AMENDMENT_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1239[AMENDMENT_GATE.reason_codes]"
+          ]
+        }
+      ],
+      "inputs": [
+        "O",
+        "src_rel_o",
+        "corr_o",
+        "fresh_o",
+        "clarity_o"
+      ],
+      "intermediate_terms": [
+        "w_o",
+        "W",
+        "p_x",
+        "reconciliation_confidence",
+        "external_truth_ambiguity",
+        "authority_state_staleness_score",
+        "authority_uncertainty_raw",
+        "authority_uncertainty_score"
+      ],
+      "label": "Trust Authority Uncertainty",
+      "mode_applicability": "Always required when trust synthesis evaluates live authority progression or baseline submission posture.",
+      "module_bindings": [
+        {
+          "artifact_targets": [
+            "TrustSummary"
+          ],
+          "module_name": "ASSESS_TRUST_INPUT_STATE",
+          "phase_ids": [
+            "P11"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/trust_summary.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#assess-trust-input-state"
+          ],
+          "step_ids": [
+            "P11-S005"
+          ]
+        },
+        {
+          "artifact_targets": [
+            "TrustSummary"
+          ],
+          "module_name": "SYNTHESIZE_TRUST",
+          "phase_ids": [
+            "P11"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/trust_summary.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#synthesize-trust"
+          ],
+          "step_ids": [
+            "P11-S006"
+          ]
+        }
+      ],
+      "money_profile_requirements": [],
+      "notes": [
+        "Authority-defined legal truth outranks UI-defined confidence."
+      ],
+      "output_artifacts": [
+        "TrustSummary",
+        "TrustInputBasisContract"
+      ],
+      "output_fields": [
+        "authority_uncertainty_score"
+      ],
+      "reason_code_emissions": [
+        "TRUST_AUTHORITY_CONFIDENCE_LOW",
+        "TRUST_AUTHORITY_AMBIGUITY_HIGH",
+        "TRUST_AUTHORITY_STATE_STALE",
+        "TRUST_AUTHORITY_STATE_UNRESOLVED"
+      ],
+      "schema_touchpoints": [
+        "Algorithm/schemas/trust_summary.schema.json",
+        "Algorithm/schemas/trust_input_basis_contract.schema.json"
+      ],
+      "section_title": "Trust synthesis formula",
+      "sensitivity_hooks": [
+        "half_life_seconds(source_class(o))",
+        "src_rel_o",
+        "corr_o",
+        "clarity_o"
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L674[8.10_Trust_synthesis_formula]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L734[Authority-grounded_uncertainty_score]"
+      ],
+      "source_span": {
+        "section_end_line": 1154,
+        "section_start_line": 674,
+        "subsection_start_lines": {
+          "Authority-grounded uncertainty score": 734
+        }
+      },
+      "subsection_titles": [
+        "Authority-grounded uncertainty score"
+      ],
+      "threshold_dependencies": [
+        "authority_review_threshold",
+        "authority_block_threshold",
+        "authority_penalty_curve"
+      ]
+    },
+    {
+      "canonical_section": "8.10",
+      "determinism_rules": [
+        "Missing, superseded, manifest-mismatched, inconsistent, or silently limited inputs fail closed with explicit reason codes.",
+        "The trust_input_basis_contract freezes typed basis states and ceilings so downstream consumers cannot flatten them into a generic score."
+      ],
+      "downstream_gate_consumers": [
+        "TRUST_GATE",
+        "FILING_GATE",
+        "SUBMISSION_GATE"
+      ],
+      "formula_family": "core_formula_family",
+      "formula_id": "trust_input_admissibility_and_basis",
+      "formula_symbols": [
+        "baseline_submission_state",
+        "authority_uncertainty_score",
+        "live_authority_progression_requested",
+        "true",
+        "runtime_scope",
+        "prepare_submission",
+        "submit",
+        "amendment_submit",
+        "execution_mode",
+        "analysis_only",
+        "TrustSummary",
+        "score_band",
+        "cap_band",
+        "upstream_gate_cap",
+        "trust_input_basis_contract{...}",
+        "blocking_dependency_refs",
+        "required_trust_artifacts",
+        "required_context_inputs",
+        "input_presence_ok",
+        "input_manifest_ok",
+        "input_lifecycle_ok",
+        "input_consistency_ok",
+        "parity.comparison_requirement",
+        "parity.parity_classification",
+        "risk.unresolved_blocking_risk_flag",
+        "risk.unresolved_material_blocking_risk_flag",
+        "input_limitation_ok",
+        "external_freshness_deadlines[] =",
+        "authority_state.observed_at + authority_state_max_age",
+        "late_data_monitor.persisted_at + late_data_monitor_max_age",
+        "override.expires_at",
+        "authority_calculation_or_external_baseline.observed_at + external_basis_max_age",
+        "trust_fresh_until",
+        "external_freshness_deadlines",
+        "min(external_freshness_deadlines[])",
+        "input_freshness_ok",
+        "trust_input_state",
+        "trust_input_state != ADMISSIBLE_CURRENT",
+        "TrustSummary.blocking_dependency_refs",
+        "active_filing_critical_override_count",
+        "TRUST_OVERRIDE_INVALID",
+        "trust_input_basis_contract",
+        "input_presence_state",
+        "manifest_binding_state",
+        "MANIFEST_MISMATCH",
+        "lifecycle_binding_state",
+        "SUPERSEDED_OR_REPLACED",
+        "consistency_state",
+        "limitation_semantics_state",
+        "SILENT_LIMITATION_AMBIGUITY",
+        "freshness_state",
+        "external_freshness_deadlines[] !=",
+        "freshness_dependency_classes",
+        "{AUTHORITY_STATE, LATE_DATA_MONITOR, OVERRIDE_LIFECYCLE, EXTERNAL_BASELINE}",
+        "baseline_progression_state",
+        "baseline_selection_contract_hash_or_null",
+        "baseline_automation_ceiling",
+        "baseline_anchor_weight",
+        "baseline_limitation_reason_codes",
+        "authority_progression_state",
+        "late_data_invalidation_state",
+        "override_dependency_state",
+        "NO_ACTIVE_OR_VALID_OVERRIDES",
+        "human_step_state",
+        "required_human_steps",
+        "automation_ceiling",
+        "filing_readiness_ceiling",
+        "trust_input_basis_contract.input_reason_codes",
+        "TrustSummary.decision_constraint_codes",
+        "TrustSummary.automation_level",
+        "TrustSummary.filing_readiness"
+      ],
+      "gate_bindings": [
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "AMENDMENT_GATE",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "TRUST_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "TRUST_GREEN",
+            "TRUST_AMBER",
+            "TRUST_RED",
+            "TRUST_INSUFFICIENT_DATA",
+            "TRUST_INPUT_INCOMPLETE",
+            "TRUST_INPUT_STALE",
+            "TRUST_INPUT_CONTRADICTION",
+            "TRUST_AUTHORITY_STATE_UNRESOLVED",
+            "TRUST_THRESHOLD_EDGE_REVIEW",
+            "TRUST_AUTOMATION_LIMITED",
+            "TRUST_REQUIRED_HUMAN_STEPS",
+            "TRUST_OVERRIDE_DEPENDENT_PROGRESS",
+            "TRUST_OVERRIDE_ACTIVE_NOTICE",
+            "TRUST_UPSTREAM_GATE_BLOCK",
+            "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+            "TRUST_ARTIFACT_INCONSISTENT"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L787[TRUST_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L789[TRUST_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L809[TRUST_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L858[TRUST_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "SUBMISSION_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "FILING_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "FILING_PACKET_UNAVAILABLE",
+            "FILING_MANIFEST_MODE_ANALYSIS",
+            "FILING_TRUST_MISSING",
+            "FILING_TRUST_SUPERSEDED",
+            "FILING_TRUST_RECALCULATION_REQUIRED",
+            "FILING_AUTHORITY_LINK_INACTIVE",
+            "FILING_OBLIGATION_NOT_OPEN",
+            "FILING_FINAL_DECLARATION_PRECONDITION_MISSING",
+            "FILING_AMENDMENT_BASELINE_MISSING",
+            "FILING_APPROVAL_REQUIRED",
+            "FILING_APPROVAL_UNSATISFIABLE",
+            "FILING_OVERRIDE_REQUIRED",
+            "FILING_OVERRIDE_ACTIVE_NOTICE",
+            "FILING_OVERRIDE_AUDIT_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_UNSATISFIABLE",
+            "FILING_NOTICE_REQUIRED",
+            "FILING_LATE_DATA_CHILD_MANIFEST_REQUIRED",
+            "FILING_LATE_DATA_REVIEW_REQUIRED",
+            "FILING_LATE_DATA_NONCRITICAL_EXCLUDED",
+            "FILING_PROOF_BUNDLE_MISSING",
+            "FILING_TARGET_UNSUPPORTED",
+            "FILING_TARGET_CONTRADICTED",
+            "FILING_PROOF_CLOSURE_OPEN",
+            "FILING_GRAPH_REBUILD_REQUIRED",
+            "FILING_EXPLANATION_FAILURE",
+            "FILING_PREPARATION_HARD_BLOCK",
+            "FILING_PREPARATION_OVERRIDE_REQUIRED",
+            "FILING_PREPARATION_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_BLOCK",
+            "FILING_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_NOTICE_ACTIVE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L880[FILING_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L899[FILING_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L948[FILING_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1023[FILING_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "SUBMISSION_GATE",
+          "overrideability": "NON_OVERRIDEABLE",
+          "reason_codes": [
+            "SUBMISSION_REAUTHORIZATION_FAILED",
+            "SUBMISSION_MANIFEST_NOT_READY",
+            "SUBMISSION_APPROVAL_INVALID",
+            "SUBMISSION_DECLARED_BASIS_ACK_INVALID",
+            "SUBMISSION_PACKET_MANIFEST_BINDING_MISMATCH",
+            "SUBMISSION_PACKET_NOT_APPROVED",
+            "SUBMISSION_IDEMPOTENCY_BODY_COLLISION",
+            "SUBMISSION_PRIOR_CONFIRMED_EXISTS",
+            "SUBMISSION_AMENDMENT_NOT_READY",
+            "SUBMISSION_AUTHORITY_TOKEN_INVALID",
+            "SUBMISSION_PENDING_ALREADY_EXISTS",
+            "SUBMISSION_SAFE_IDEMPOTENT_RECOVERY"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1060[SUBMISSION_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1062[SUBMISSION_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1080[SUBMISSION_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1108[SUBMISSION_GATE.reason_codes]"
+          ]
+        }
+      ],
+      "inputs": [
+        "required_trust_artifacts[]",
+        "required_context_inputs[]",
+        "baseline_submission_state",
+        "authority_uncertainty_score",
+        "live_authority_progression_requested",
+        "execution_mode",
+        "analysis_only",
+        "required_human_steps[]",
+        "late_data_monitor",
+        "overrides"
+      ],
+      "intermediate_terms": [
+        "input_presence_ok",
+        "input_manifest_ok",
+        "input_lifecycle_ok",
+        "input_consistency_ok",
+        "input_limitation_ok",
+        "external_freshness_deadlines[]",
+        "trust_fresh_until",
+        "input_freshness_ok",
+        "input_presence_state",
+        "manifest_binding_state",
+        "lifecycle_binding_state",
+        "consistency_state",
+        "limitation_semantics_state",
+        "freshness_state",
+        "freshness_dependency_classes[]",
+        "baseline_progression_state",
+        "baseline_selection_contract_hash_or_null",
+        "baseline_automation_ceiling",
+        "baseline_limitation_reason_codes[]",
+        "authority_progression_state",
+        "late_data_invalidation_state",
+        "override_dependency_state",
+        "human_step_state",
+        "automation_ceiling",
+        "filing_readiness_ceiling"
+      ],
+      "label": "Trust Input Admissibility and Basis",
+      "mode_applicability": "Required before any trust score or band math; applies in both modes and across continuation/replay lineage admitted by policy.",
+      "module_bindings": [
+        {
+          "artifact_targets": [
+            "AcceptedRiskApproval"
+          ],
+          "module_name": "VALIDATE_OVERRIDE_DEPENDENCIES",
+          "phase_ids": [],
+          "schema_touchpoints": [
+            "Algorithm/schemas/accepted_risk_approval.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#validate-override-dependencies"
+          ],
+          "step_ids": []
+        },
+        {
+          "artifact_targets": [
+            "TrustSummary"
+          ],
+          "module_name": "ASSESS_TRUST_INPUT_STATE",
+          "phase_ids": [
+            "P11"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/trust_summary.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#assess-trust-input-state"
+          ],
+          "step_ids": [
+            "P11-S005"
+          ]
+        },
+        {
+          "artifact_targets": [
+            "LateDataMonitorResult"
+          ],
+          "module_name": "CHECK_TRUST_CURRENCY",
+          "phase_ids": [
+            "P15"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/late_data_monitor_result.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#check-trust-currency"
+          ],
+          "step_ids": [
+            "P15-S004"
+          ]
+        },
+        {
+          "artifact_targets": [
+            "TrustSummary"
+          ],
+          "module_name": "SYNTHESIZE_TRUST",
+          "phase_ids": [
+            "P11"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/trust_summary.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#synthesize-trust"
+          ],
+          "step_ids": [
+            "P11-S006"
+          ]
+        }
+      ],
+      "money_profile_requirements": [],
+      "notes": [
+        "Every non-dominant basis reason must survive into decision_constraint_codes so later surfaces do not lose the ceiling rationale."
+      ],
+      "output_artifacts": [
+        "TrustSummary",
+        "TrustInputBasisContract"
+      ],
+      "output_fields": [
+        "trust_input_state",
+        "trust_input_basis_contract",
+        "trust_fresh_until",
+        "blocking_dependency_refs"
+      ],
+      "reason_code_emissions": [
+        "TRUST_INPUT_INCOMPLETE",
+        "TRUST_INPUT_STALE",
+        "TRUST_INPUT_CONTRADICTION",
+        "TRUST_OVERRIDE_INVALID",
+        "TRUST_REQUIRED_HUMAN_STEPS"
+      ],
+      "schema_touchpoints": [
+        "Algorithm/schemas/trust_summary.schema.json",
+        "Algorithm/schemas/trust_input_basis_contract.schema.json"
+      ],
+      "section_title": "Trust synthesis formula",
+      "sensitivity_hooks": [
+        "external_freshness_deadlines[]",
+        "baseline_automation_ceiling",
+        "authority_progression_state",
+        "human_step_state"
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L674[8.10_Trust_synthesis_formula]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L707[Required_trust_input]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L763[Trust-input_admissibility_state]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L808[TrustInputBasisContract]"
+      ],
+      "source_span": {
+        "section_end_line": 1154,
+        "section_start_line": 674,
+        "subsection_start_lines": {
+          "Required trust input": 707,
+          "Trust-input admissibility state": 763,
+          "TrustInputBasisContract": 808
+        }
+      },
+      "subsection_titles": [
+        "Required trust input",
+        "Trust-input admissibility state",
+        "TrustInputBasisContract"
+      ],
+      "threshold_dependencies": [
+        "trust_input_state_enum",
+        "automation_ceiling_enum",
+        "filing_readiness_ceiling_enum",
+        "baseline_progression_state_enum",
+        "authority_progression_state_enum"
+      ]
+    },
+    {
+      "canonical_section": "8.10",
+      "determinism_rules": [
+        "Trust cannot outrank earlier non-access gates.",
+        "The progression order AUTO_ELIGIBLE > NOTICE_ONLY > REVIEW_ONLY > BLOCKED is frozen and persisted."
+      ],
+      "downstream_gate_consumers": [
+        "TRUST_GATE",
+        "FILING_GATE"
+      ],
+      "formula_family": "core_formula_family",
+      "formula_id": "trust_upstream_gate_cap",
+      "formula_symbols": [
+        "TRUST_GATE",
+        "u_block",
+        "g",
+        "decision",
+        "u_review",
+        "u_notice",
+        "upstream_gate_cap",
+        "REVIEW_ONLY",
+        "NOTICE_ONLY",
+        "AUTO_ELIGIBLE",
+        "TRUST_UPSTREAM_GATE_BLOCK",
+        "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+        "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+        "TrustSummary"
+      ],
+      "gate_bindings": [
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "AMENDMENT_GATE",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "TRUST_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "TRUST_GREEN",
+            "TRUST_AMBER",
+            "TRUST_RED",
+            "TRUST_INSUFFICIENT_DATA",
+            "TRUST_INPUT_INCOMPLETE",
+            "TRUST_INPUT_STALE",
+            "TRUST_INPUT_CONTRADICTION",
+            "TRUST_AUTHORITY_STATE_UNRESOLVED",
+            "TRUST_THRESHOLD_EDGE_REVIEW",
+            "TRUST_AUTOMATION_LIMITED",
+            "TRUST_REQUIRED_HUMAN_STEPS",
+            "TRUST_OVERRIDE_DEPENDENT_PROGRESS",
+            "TRUST_OVERRIDE_ACTIVE_NOTICE",
+            "TRUST_UPSTREAM_GATE_BLOCK",
+            "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+            "TRUST_ARTIFACT_INCONSISTENT"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L787[TRUST_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L789[TRUST_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L809[TRUST_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L858[TRUST_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "SUBMISSION_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "FILING_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "FILING_PACKET_UNAVAILABLE",
+            "FILING_MANIFEST_MODE_ANALYSIS",
+            "FILING_TRUST_MISSING",
+            "FILING_TRUST_SUPERSEDED",
+            "FILING_TRUST_RECALCULATION_REQUIRED",
+            "FILING_AUTHORITY_LINK_INACTIVE",
+            "FILING_OBLIGATION_NOT_OPEN",
+            "FILING_FINAL_DECLARATION_PRECONDITION_MISSING",
+            "FILING_AMENDMENT_BASELINE_MISSING",
+            "FILING_APPROVAL_REQUIRED",
+            "FILING_APPROVAL_UNSATISFIABLE",
+            "FILING_OVERRIDE_REQUIRED",
+            "FILING_OVERRIDE_ACTIVE_NOTICE",
+            "FILING_OVERRIDE_AUDIT_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_UNSATISFIABLE",
+            "FILING_NOTICE_REQUIRED",
+            "FILING_LATE_DATA_CHILD_MANIFEST_REQUIRED",
+            "FILING_LATE_DATA_REVIEW_REQUIRED",
+            "FILING_LATE_DATA_NONCRITICAL_EXCLUDED",
+            "FILING_PROOF_BUNDLE_MISSING",
+            "FILING_TARGET_UNSUPPORTED",
+            "FILING_TARGET_CONTRADICTED",
+            "FILING_PROOF_CLOSURE_OPEN",
+            "FILING_GRAPH_REBUILD_REQUIRED",
+            "FILING_EXPLANATION_FAILURE",
+            "FILING_PREPARATION_HARD_BLOCK",
+            "FILING_PREPARATION_OVERRIDE_REQUIRED",
+            "FILING_PREPARATION_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_BLOCK",
+            "FILING_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_NOTICE_ACTIVE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L880[FILING_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L899[FILING_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L948[FILING_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1023[FILING_GATE.reason_codes]"
+          ]
+        }
+      ],
+      "inputs": [
+        "upstream_gate_records[]"
+      ],
+      "intermediate_terms": [
+        "u_block",
+        "u_review",
+        "u_notice",
+        "upstream_gate_cap"
+      ],
+      "label": "Trust Upstream Gate Cap",
+      "mode_applicability": "Applies whenever trust reads prior non-access gate posture.",
+      "module_bindings": [
+        {
+          "artifact_targets": [
+            "TrustSummary"
+          ],
+          "module_name": "SYNTHESIZE_TRUST",
+          "phase_ids": [
+            "P11"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/trust_summary.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#synthesize-trust"
+          ],
+          "step_ids": [
+            "P11-S006"
+          ]
+        },
+        {
+          "artifact_targets": [
+            "GateDecisionRecord",
+            "TrustSummary"
+          ],
+          "module_name": "TRUST_GATE",
+          "phase_ids": [
+            "P11"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/gate_decision_record.schema.json",
+            "Algorithm/schemas/trust_summary.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#trust-gate"
+          ],
+          "step_ids": [
+            "P11-S009"
+          ]
+        }
+      ],
+      "money_profile_requirements": [],
+      "notes": [
+        "Upstream gate posture is a stage-local legal ceiling, not a UI convenience."
+      ],
+      "output_artifacts": [
+        "TrustSummary"
+      ],
+      "output_fields": [
+        "upstream_gate_cap"
+      ],
+      "reason_code_emissions": [
+        "TRUST_UPSTREAM_GATE_BLOCK",
+        "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+        "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+        "TRUST_GATE"
+      ],
+      "schema_touchpoints": [
+        "Algorithm/schemas/trust_summary.schema.json"
+      ],
+      "section_title": "Trust synthesis formula",
+      "sensitivity_hooks": [
+        "upstream_gate_cap"
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L674[8.10_Trust_synthesis_formula]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L861[Upstream_gate_progression_cap]"
+      ],
+      "source_span": {
+        "section_end_line": 1154,
+        "section_start_line": 674,
+        "subsection_start_lines": {
+          "Upstream gate progression cap": 861
+        }
+      },
+      "subsection_titles": [
+        "Upstream gate progression cap"
+      ],
+      "threshold_dependencies": [
+        "upstream_gate_cap_enum"
+      ]
+    },
+    {
+      "canonical_section": "8.10",
+      "determinism_rules": [
+        "Trust is conjunctive and uses a weighted geometric mean over normalized axes.",
+        "score_band, cap_band, and trust_band are distinct persisted fields; cap-band restrictions may be stricter than the numeric score.",
+        "The trust sensitivity contract freezes the score-vs-cap relation, edge triggers, margins, and exactly six perturbation probes.",
+        "The bridge ALLOWED <-> READY_TO_SUBMIT, LIMITED <-> READY_REVIEW, BLOCKED <-> NOT_READY is exact and stage-monotone."
+      ],
+      "downstream_gate_consumers": [
+        "TRUST_GATE",
+        "FILING_GATE",
+        "AMENDMENT_GATE",
+        "SUBMISSION_GATE"
+      ],
+      "formula_family": "core_formula_family",
+      "formula_id": "trust_scoring_bands_and_readiness",
+      "formula_symbols": [
+        "q",
+        "p",
+        "g",
+        "r",
+        "trust_core_score",
+        "safe_unit(...)",
+        "override_penalty",
+        "retention_penalty",
+        "authority_penalty",
+        "TRUST_AUTHORITY_PENALTY",
+        "trust_score",
+        "confidence_d",
+        "completeness_score",
+        "graph_quality_score",
+        "score_band",
+        "green_guard_band",
+        "amber_guard_band",
+        "risk_guard_band",
+        "completeness_guard_band",
+        "graph_guard_band",
+        "authority_allow_guard_band",
+        "authority_review_guard_band",
+        "authority_block_guard_band",
+        "trust_green_margin",
+        "trust_amber_margin",
+        "risk_automation_margin",
+        "completeness_margin",
+        "graph_filing_margin",
+        "authority_review_margin",
+        "authority_block_margin",
+        "threshold_stability_state",
+        "abs(trust_green_margin)",
+        "abs(trust_amber_margin)",
+        "TRUST_THRESHOLD_EDGE_REVIEW",
+        "TrustSummary",
+        "trust_sensitivity_analysis_contract.edge_trigger_codes",
+        "TRUST_GREEN_GUARD_BAND",
+        "TRUST_AMBER_GUARD_BAND",
+        "RISK_AUTOMATION_GUARD_BAND",
+        "COMPLETENESS_GUARD_BAND",
+        "GRAPH_FILING_GUARD_BAND",
+        "AUTHORITY_REVIEW_GUARD_BAND",
+        "AUTHORITY_BLOCK_GUARD_BAND",
+        "cap_band",
+        "trust_input_state",
+        "HARD_BLOCK",
+        "INSUFFICIENT_DATA",
+        "unresolved_blocking_risk_flag",
+        "upstream_gate_cap",
+        "live_authority_progression_requested",
+        "authority_uncertainty_score",
+        "execution_mode",
+        "required_human_steps_count",
+        "active_filing_critical_override_count",
+        "critical_retention_limited_count",
+        "unresolved_material_blocking_risk_flag",
+        "baseline_submission_state",
+        "trust_band",
+        "most_restrictive(...)",
+        "trust_level",
+        "{RED, INSUFFICIENT_DATA}",
+        "automation_level",
+        "TRUST_AUTOMATION_LIMITED",
+        "trust_input_basis_contract.automation_ceiling",
+        "trust_sensitivity_analysis_contract",
+        "score_cap_alignment_state",
+        "cap_driver_reason_codes",
+        "edge_trigger_codes",
+        "TRUST_SCORE_MINUS_ONE",
+        "TRUST_SCORE_PLUS_ONE",
+        "RISK_SCORE_PLUS_ONE",
+        "AUTHORITY_UNCERTAINTY_PLUS_ONE",
+        "FRESHNESS_INVALIDATED",
+        "INVALID_OVERRIDE_RELIED_UPON",
+        "NON_DEGRADING",
+        "NON_IMPROVING",
+        "automation_rank(ALLOWED)",
+        "automation_rank(LIMITED)",
+        "automation_rank(BLOCKED)",
+        "readiness_rank(READY_TO_SUBMIT)",
+        "readiness_rank(READY_REVIEW)",
+        "readiness_rank(NOT_READY)",
+        "readiness_rank(filing_readiness)",
+        "filing_readiness",
+        "trust_input_basis_contract.filing_readiness_ceiling",
+        "legal_progression_rank",
+        "{PASS, PASS_WITH_NOTICE}",
+        "MANUAL_REVIEW",
+        "{OVERRIDABLE_BLOCK, HARD_BLOCK}",
+        "trust_band SHALL NOT exceed AMBER",
+        "automation_level SHALL NOT exceed LIMITED",
+        "filing_readiness SHALL NOT exceed READY_REVIEW",
+        "TRUST_ANALYSIS_MODE_CAP",
+        "DriftBaselineEnvelope.frozen_hash",
+        "difference_classes",
+        "RetroactiveImpactAnalysis",
+        "amendment_freshness_penalty",
+        "TRUST_AMENDMENT_FRESHNESS_STALE",
+        "retroactive_penalty",
+        "TRUST_RETROACTIVE_IMPACT_UNRESOLVED"
+      ],
+      "gate_bindings": [
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "AMENDMENT_GATE",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "TRUST_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "TRUST_GREEN",
+            "TRUST_AMBER",
+            "TRUST_RED",
+            "TRUST_INSUFFICIENT_DATA",
+            "TRUST_INPUT_INCOMPLETE",
+            "TRUST_INPUT_STALE",
+            "TRUST_INPUT_CONTRADICTION",
+            "TRUST_AUTHORITY_STATE_UNRESOLVED",
+            "TRUST_THRESHOLD_EDGE_REVIEW",
+            "TRUST_AUTOMATION_LIMITED",
+            "TRUST_REQUIRED_HUMAN_STEPS",
+            "TRUST_OVERRIDE_DEPENDENT_PROGRESS",
+            "TRUST_OVERRIDE_ACTIVE_NOTICE",
+            "TRUST_UPSTREAM_GATE_BLOCK",
+            "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+            "TRUST_ARTIFACT_INCONSISTENT"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L787[TRUST_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L789[TRUST_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L809[TRUST_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L858[TRUST_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "SUBMISSION_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "FILING_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "FILING_PACKET_UNAVAILABLE",
+            "FILING_MANIFEST_MODE_ANALYSIS",
+            "FILING_TRUST_MISSING",
+            "FILING_TRUST_SUPERSEDED",
+            "FILING_TRUST_RECALCULATION_REQUIRED",
+            "FILING_AUTHORITY_LINK_INACTIVE",
+            "FILING_OBLIGATION_NOT_OPEN",
+            "FILING_FINAL_DECLARATION_PRECONDITION_MISSING",
+            "FILING_AMENDMENT_BASELINE_MISSING",
+            "FILING_APPROVAL_REQUIRED",
+            "FILING_APPROVAL_UNSATISFIABLE",
+            "FILING_OVERRIDE_REQUIRED",
+            "FILING_OVERRIDE_ACTIVE_NOTICE",
+            "FILING_OVERRIDE_AUDIT_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_UNSATISFIABLE",
+            "FILING_NOTICE_REQUIRED",
+            "FILING_LATE_DATA_CHILD_MANIFEST_REQUIRED",
+            "FILING_LATE_DATA_REVIEW_REQUIRED",
+            "FILING_LATE_DATA_NONCRITICAL_EXCLUDED",
+            "FILING_PROOF_BUNDLE_MISSING",
+            "FILING_TARGET_UNSUPPORTED",
+            "FILING_TARGET_CONTRADICTED",
+            "FILING_PROOF_CLOSURE_OPEN",
+            "FILING_GRAPH_REBUILD_REQUIRED",
+            "FILING_EXPLANATION_FAILURE",
+            "FILING_PREPARATION_HARD_BLOCK",
+            "FILING_PREPARATION_OVERRIDE_REQUIRED",
+            "FILING_PREPARATION_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_BLOCK",
+            "FILING_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_NOTICE_ACTIVE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L880[FILING_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L899[FILING_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L948[FILING_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1023[FILING_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "AMENDMENT_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "AMENDMENT_MANIFEST_MODE_ANALYSIS",
+            "AMENDMENT_NO_CONFIRMED_FINAL_DECLARATION",
+            "AMENDMENT_BASELINE_UNPROVEN",
+            "AMENDMENT_WINDOW_CLOSED",
+            "AMENDMENT_DRIFT_NOT_MATERIAL",
+            "AMENDMENT_INTENT_TO_AMEND_REQUIRED",
+            "AMENDMENT_INTENT_TO_AMEND_VALIDATION_FAILED",
+            "AMENDMENT_INTENT_TO_AMEND_OVERRIDE_REQUIRED",
+            "AMENDMENT_INTENT_TO_AMEND_REVIEW_REQUIRED",
+            "AMENDMENT_OUT_OF_BAND_BASELINE_UNRESOLVED",
+            "AMENDMENT_RETROACTIVE_REPLAY_REQUIRED",
+            "AMENDMENT_READINESS_STALE",
+            "AMENDMENT_CONTRADICTORY_DRIFT_SOURCES",
+            "AMENDMENT_SUPERSEDES_PRIOR_ACTIVE_CHAIN",
+            "AMENDMENT_ELIGIBLE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1125[AMENDMENT_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1141[AMENDMENT_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1167[AMENDMENT_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1239[AMENDMENT_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "SUBMISSION_GATE",
+          "overrideability": "NON_OVERRIDEABLE",
+          "reason_codes": [
+            "SUBMISSION_REAUTHORIZATION_FAILED",
+            "SUBMISSION_MANIFEST_NOT_READY",
+            "SUBMISSION_APPROVAL_INVALID",
+            "SUBMISSION_DECLARED_BASIS_ACK_INVALID",
+            "SUBMISSION_PACKET_MANIFEST_BINDING_MISMATCH",
+            "SUBMISSION_PACKET_NOT_APPROVED",
+            "SUBMISSION_IDEMPOTENCY_BODY_COLLISION",
+            "SUBMISSION_PRIOR_CONFIRMED_EXISTS",
+            "SUBMISSION_AMENDMENT_NOT_READY",
+            "SUBMISSION_AUTHORITY_TOKEN_INVALID",
+            "SUBMISSION_PENDING_ALREADY_EXISTS",
+            "SUBMISSION_SAFE_IDEMPOTENT_RECOVERY"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1060[SUBMISSION_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1062[SUBMISSION_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1080[SUBMISSION_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1108[SUBMISSION_GATE.reason_codes]"
+          ]
+        }
+      ],
+      "inputs": [
+        "Q",
+        "P",
+        "G",
+        "R",
+        "risk_score",
+        "completeness_score",
+        "graph_quality_score",
+        "authority_uncertainty_score",
+        "comparison_requirement",
+        "baseline_submission_state",
+        "execution_mode",
+        "analysis_only",
+        "required_human_steps_count",
+        "active_filing_critical_override_count",
+        "critical_retention_limited_count",
+        "trust_input_state",
+        "upstream_gate_cap"
+      ],
+      "intermediate_terms": [
+        "q_raw",
+        "p_raw",
+        "g_raw",
+        "r_raw",
+        "trust_core_score",
+        "override_penalty",
+        "retention_penalty",
+        "authority_penalty",
+        "trust_score",
+        "score_band",
+        "trust_green_margin",
+        "trust_amber_margin",
+        "risk_automation_margin",
+        "completeness_margin",
+        "graph_filing_margin",
+        "authority_review_margin",
+        "authority_block_margin",
+        "threshold_stability_state",
+        "cap_band",
+        "trust_band",
+        "trust_level",
+        "automation_level",
+        "score_cap_alignment_state",
+        "cap_driver_reason_codes[]",
+        "edge_trigger_codes[]",
+        "projected_case_results[]",
+        "readiness_rank",
+        "automation_rank",
+        "legal_progression_rank",
+        "retroactive_penalty",
+        "amendment_freshness_penalty"
+      ],
+      "label": "Trust Scoring, Bands, and Readiness",
+      "mode_applicability": "Core trust family for both modes; ANALYSIS mode is explicitly capped and must never publish greener machine progression than READY_REVIEW/LIMITED.",
+      "module_bindings": [
+        {
+          "artifact_targets": [
+            "TrustSummary"
+          ],
+          "module_name": "SYNTHESIZE_TRUST",
+          "phase_ids": [
+            "P11"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/trust_summary.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#synthesize-trust"
+          ],
+          "step_ids": [
+            "P11-S006"
+          ]
+        },
+        {
+          "artifact_targets": [
+            "GateDecisionRecord"
+          ],
+          "module_name": "BUILD_GATE_EXPLANATION",
+          "phase_ids": [],
+          "schema_touchpoints": [
+            "Algorithm/schemas/gate_decision_record.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#build-gate-explanation"
+          ],
+          "step_ids": []
+        },
+        {
+          "artifact_targets": [
+            "GateDecisionRecord",
+            "TrustSummary"
+          ],
+          "module_name": "TRUST_GATE",
+          "phase_ids": [
+            "P11"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/gate_decision_record.schema.json",
+            "Algorithm/schemas/trust_summary.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#trust-gate"
+          ],
+          "step_ids": [
+            "P11-S009"
+          ]
+        }
+      ],
+      "money_profile_requirements": [],
+      "notes": [
+        "Sensitivity analysis is a first-class persisted contract rather than debug-only output."
+      ],
+      "output_artifacts": [
+        "TrustSummary",
+        "TrustSensitivityAnalysisContract"
+      ],
+      "output_fields": [
+        "trust_core_score",
+        "trust_score",
+        "score_band",
+        "cap_band",
+        "trust_band",
+        "threshold_stability_state",
+        "trust_level",
+        "automation_level",
+        "filing_readiness",
+        "legal_progression_rank",
+        "trust_sensitivity_analysis_contract"
+      ],
+      "reason_code_emissions": [
+        "PARITY_NOT_REQUIRED_NO_AUTHORITY_BASIS",
+        "TRUST_AUTHORITY_PENALTY",
+        "TRUST_THRESHOLD_EDGE_REVIEW",
+        "TRUST_AUTOMATION_LIMITED",
+        "TRUST_ANALYSIS_MODE_CAP",
+        "TRUST_AMENDMENT_FRESHNESS_STALE",
+        "TRUST_RETROACTIVE_IMPACT_UNRESOLVED",
+        "TRUST_GREEN",
+        "TRUST_AMBER",
+        "TRUST_RED",
+        "TRUST_INSUFFICIENT_DATA",
+        "TRUST_GREEN_GUARD_BAND",
+        "TRUST_AMBER_GUARD_BAND",
+        "RISK_AUTOMATION_GUARD_BAND",
+        "GRAPH_FILING_GUARD_BAND",
+        "TRUST_SCORE_MINUS_ONE",
+        "TRUST_SCORE_PLUS_ONE",
+        "RISK_SCORE_PLUS_ONE"
+      ],
+      "schema_touchpoints": [
+        "Algorithm/schemas/trust_summary.schema.json",
+        "Algorithm/schemas/trust_sensitivity_contract.schema.json",
+        "Algorithm/schemas/trust_sensitivity_analysis_contract.schema.json"
+      ],
+      "section_title": "Trust synthesis formula",
+      "sensitivity_hooks": [
+        "trust_green_margin",
+        "trust_amber_margin",
+        "risk_automation_margin",
+        "completeness_margin",
+        "graph_filing_margin_or_null",
+        "authority_review_margin_or_null",
+        "authority_block_margin_or_null",
+        "edge_trigger_codes[]",
+        "projected_case_results[]"
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L674[8.10_Trust_synthesis_formula]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L897[Base_trust_score]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L922[Penalties]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L939[Score_bands_threshold_guard_bands_and_band_caps]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L1038[Projected_human-facing_level]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L1044[Automation_level]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L1069[Trust_sensitivity_analyzer]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L1090[Filing_readiness]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L1129[Amendment_freshness_and_retroactive_caps]"
+      ],
+      "source_span": {
+        "section_end_line": 1154,
+        "section_start_line": 674,
+        "subsection_start_lines": {
+          "Amendment freshness and retroactive caps": 1129,
+          "Automation level": 1044,
+          "Base trust score": 897,
+          "Filing readiness": 1090,
+          "Penalties": 922,
+          "Projected human-facing level": 1038,
+          "Score bands, threshold guard bands, and band caps": 939,
+          "Trust sensitivity analyzer": 1069
+        }
+      },
+      "subsection_titles": [
+        "Base trust score",
+        "Penalties",
+        "Score bands, threshold guard bands, and band caps",
+        "Projected human-facing level",
+        "Automation level",
+        "Trust sensitivity analyzer",
+        "Filing readiness",
+        "Amendment freshness and retroactive caps"
+      ],
+      "threshold_dependencies": [
+        "trust_score_bands",
+        "trust_guard_bands",
+        "trust_cap_band_rules",
+        "automation_level_enum",
+        "filing_readiness_enum",
+        "threshold_stability_enum",
+        "trust_edge_trigger_enum",
+        "analysis_mode_cap",
+        "amendment_freshness_caps"
+      ]
+    },
+    {
+      "canonical_section": "8.10A",
+      "determinism_rules": [
+        "Ordering is frozen per snapshot and must not vary with websocket arrival order or local sort heuristics.",
+        "Assignment and queue health reuse the same deterministic helper surface as core formulas without feeding filing trust."
+      ],
+      "downstream_gate_consumers": [],
+      "formula_family": "secondary_formula_family",
+      "formula_id": "collaboration_orchestration_queue_routing",
+      "formula_symbols": [
+        "A_i",
+        "i",
+        "a",
+        "skill_fit_(i,a)",
+        "type_i",
+        "queue_affinity_(i,a)",
+        "routing_queue_ref_i",
+        "context_reuse_(i,a)",
+        "availability_fit_(i,a)",
+        "capacity_fit_a",
+        "assignment_efficiency_(i,a)",
+        "best_assign_score_i",
+        "|A_i|",
+        "max_a assignment_efficiency_(i,a)",
+        "second_best_assign_score_i",
+        "assignment_margin_i",
+        "current_assign_score_i",
+        "current_assignee_ref_i",
+        "assignment_efficiency_(i,current_assignee_ref_i)",
+        "assignment_efficiency_score_i",
+        "ownership_confidence_raw_i",
+        "ownership_confidence_score_i",
+        "WORK_OWNERSHIP_AMBIGUOUS",
+        "current_assignee_ref_i != null",
+        "best_assign_score_i - current_assign_score_i",
+        "WORK_ASSIGNMENT_LOW_EFFICIENCY",
+        "evidence_readiness_i",
+        "next_action_clarity_i",
+        "response_integrity_i",
+        "RequestInfoRecord",
+        "request_info_ref",
+        "REQUEST_INFO_RESPONSE",
+        "causal_parent_entry_ref",
+        "lane_integrity_i",
+        "freshness_integrity_i",
+        "{CURRENT, CATCHING_UP, STALE_OR_DEGRADED}",
+        "resolution_confidence_raw_i",
+        "WORK_RESPONSE_GUARD_STALE",
+        "resolution_confidence_score_i",
+        "WORK_RESOLUTION_CONFIDENCE_LOW",
+        "escalation_pressure_raw_i",
+        "escalation_pressure_score_i",
+        "escalation_rank_i",
+        "WORK_ESCALATION_PRESSURE_HIGH",
+        "q",
+        "arrival_rate_q",
+        "service_rate_q",
+        "staffed_parallelism_q",
+        "resolution_target_hours_q",
+        "backlog_age_p90_hours_q",
+        "\u03c1_q",
+        "P_wait_q",
+        "expected_wait_hours_q",
+        "queue_health_score_q",
+        "WORK_QUEUE_HEALTH_DEGRADED",
+        "q(i)",
+        "collaboration_priority_signal_i",
+        "collaboration_priority_score_i",
+        "priority_tuple_i"
+      ],
+      "gate_bindings": [],
+      "inputs": [
+        "effective_due_at_i",
+        "queue_entered_at_i",
+        "waiting_since_at_i",
+        "routing_policy",
+        "eligible_assignee_set",
+        "arrival_rate_q",
+        "service_rate_q",
+        "staffed_parallelism_q"
+      ],
+      "intermediate_terms": [
+        "remaining_hours_i",
+        "item_age_hours_i",
+        "waiting_age_hours_i",
+        "priority_base_i",
+        "age_pressure_i",
+        "customer_wait_pressure_i",
+        "staff_wait_pressure_i",
+        "authority_wait_pressure_i",
+        "due_soon_signal_i",
+        "breach_signal_i",
+        "sla_pressure_raw_i",
+        "sla_pressure_score_i",
+        "assignment_efficiency_(i,a)",
+        "best_assign_score_i",
+        "assignment_margin_i",
+        "ownership_confidence_raw_i",
+        "ownership_confidence_score_i",
+        "resolution_confidence_raw_i",
+        "resolution_confidence_score_i",
+        "resolution_uncertainty_i",
+        "escalation_pressure_raw_i",
+        "escalation_pressure_score_i",
+        "escalation_rank_i",
+        "P_wait_q",
+        "expected_wait_hours_q",
+        "queue_health_signal_q",
+        "queue_health_score_q",
+        "queue_pressure_i",
+        "collaboration_priority_signal_i",
+        "collaboration_priority_score_i",
+        "priority_tuple_i"
+      ],
+      "label": "Collaboration Orchestration, Queue, and Routing",
+      "mode_applicability": "Operational secondary family; must remain separate from core filing trust even though it reuses shared helpers.",
+      "module_bindings": [],
+      "money_profile_requirements": [],
+      "notes": [
+        "Secondary operational formula family; do not fold into TrustSummary trust_score semantics."
+      ],
+      "output_artifacts": [
+        "WorkRoutingContract",
+        "WorkQueueHealthContract"
+      ],
+      "output_fields": [
+        "assignment_efficiency_score",
+        "ownership_confidence_score",
+        "resolution_confidence_score",
+        "escalation_rank",
+        "queue_health_score",
+        "collaboration_priority_score"
+      ],
+      "reason_code_emissions": [
+        "WORK_SLA_UNBOUND",
+        "WORK_OWNERSHIP_AMBIGUOUS",
+        "WORK_ASSIGNMENT_LOW_EFFICIENCY",
+        "WORK_RESPONSE_GUARD_STALE",
+        "WORK_RESOLUTION_CONFIDENCE_LOW",
+        "WORK_ESCALATION_PRESSURE_HIGH",
+        "WORK_QUEUE_HEALTH_DEGRADED"
+      ],
+      "schema_touchpoints": [],
+      "section_title": "Collaboration orchestration, queue, and routing formulas",
+      "sensitivity_hooks": [
+        "item_age_half_life_hours(type_i)",
+        "queue_health_floor",
+        "reassignment_gain_threshold",
+        "resolution_confidence_floor"
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L1155[8.10A_Collaboration_orchestration_queue_and_routing_formulas]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L1184[Assignment_efficiency_and_ownership_confidence]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L1217[Resolution_confidence]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L1246[Escalation_pressure_and_escalation_rank]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L1262[Queue_health]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L1303[Collaboration_priority_and_stable_order]"
+      ],
+      "source_span": {
+        "section_end_line": 1336,
+        "section_start_line": 1155,
+        "subsection_start_lines": {
+          "Assignment efficiency and ownership confidence": 1184,
+          "Collaboration priority and stable order": 1303,
+          "Escalation pressure and escalation rank": 1246,
+          "Queue health": 1262,
+          "Resolution confidence": 1217
+        }
+      },
+      "subsection_titles": [
+        "Assignment efficiency and ownership confidence",
+        "Resolution confidence",
+        "Escalation pressure and escalation rank",
+        "Queue health",
+        "Collaboration priority and stable order"
+      ],
+      "threshold_dependencies": [
+        "work_priority_base_map",
+        "work_resolution_caps",
+        "queue_health_floor",
+        "escalation_pressure_threshold"
+      ]
+    },
+    {
+      "canonical_section": "8.11",
+      "determinism_rules": [
+        "A trust artifact becomes non-current whenever any listed dependency changes after synthesized_at.",
+        "Continuation, rerun, amendment, and replay create new trust artifacts; trust history is append-only lineage."
+      ],
+      "downstream_gate_consumers": [
+        "TRUST_GATE",
+        "FILING_GATE",
+        "SUBMISSION_GATE"
+      ],
+      "formula_family": "core_formula_family",
+      "formula_id": "trust_currency_and_recalculation",
+      "formula_symbols": [
+        "baseline_submission_state",
+        "OUT_OF_BAND_UNRECONCILED",
+        "authority_uncertainty_score",
+        "authority_penalty",
+        "automation_level",
+        "filing_readiness",
+        "TRUST_AUTHORITY_STATE_UNRESOLVED",
+        "TrustSummary",
+        "synthesized_at",
+        "ComputeResult",
+        "ParityResult",
+        "RiskReport",
+        "LateDataMonitorResult",
+        "runtime_scope",
+        "trust_input_state",
+        "ADMISSIBLE_STALE",
+        "TRUST_RECALCULATION_REQUIRED"
+      ],
+      "gate_bindings": [
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "AMENDMENT_GATE",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "TRUST_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "TRUST_GREEN",
+            "TRUST_AMBER",
+            "TRUST_RED",
+            "TRUST_INSUFFICIENT_DATA",
+            "TRUST_INPUT_INCOMPLETE",
+            "TRUST_INPUT_STALE",
+            "TRUST_INPUT_CONTRADICTION",
+            "TRUST_AUTHORITY_STATE_UNRESOLVED",
+            "TRUST_THRESHOLD_EDGE_REVIEW",
+            "TRUST_AUTOMATION_LIMITED",
+            "TRUST_REQUIRED_HUMAN_STEPS",
+            "TRUST_OVERRIDE_DEPENDENT_PROGRESS",
+            "TRUST_OVERRIDE_ACTIVE_NOTICE",
+            "TRUST_UPSTREAM_GATE_BLOCK",
+            "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+            "TRUST_ARTIFACT_INCONSISTENT"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L787[TRUST_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L789[TRUST_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L809[TRUST_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L858[TRUST_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "SUBMISSION_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "FILING_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "FILING_PACKET_UNAVAILABLE",
+            "FILING_MANIFEST_MODE_ANALYSIS",
+            "FILING_TRUST_MISSING",
+            "FILING_TRUST_SUPERSEDED",
+            "FILING_TRUST_RECALCULATION_REQUIRED",
+            "FILING_AUTHORITY_LINK_INACTIVE",
+            "FILING_OBLIGATION_NOT_OPEN",
+            "FILING_FINAL_DECLARATION_PRECONDITION_MISSING",
+            "FILING_AMENDMENT_BASELINE_MISSING",
+            "FILING_APPROVAL_REQUIRED",
+            "FILING_APPROVAL_UNSATISFIABLE",
+            "FILING_OVERRIDE_REQUIRED",
+            "FILING_OVERRIDE_ACTIVE_NOTICE",
+            "FILING_OVERRIDE_AUDIT_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_UNSATISFIABLE",
+            "FILING_NOTICE_REQUIRED",
+            "FILING_LATE_DATA_CHILD_MANIFEST_REQUIRED",
+            "FILING_LATE_DATA_REVIEW_REQUIRED",
+            "FILING_LATE_DATA_NONCRITICAL_EXCLUDED",
+            "FILING_PROOF_BUNDLE_MISSING",
+            "FILING_TARGET_UNSUPPORTED",
+            "FILING_TARGET_CONTRADICTED",
+            "FILING_PROOF_CLOSURE_OPEN",
+            "FILING_GRAPH_REBUILD_REQUIRED",
+            "FILING_EXPLANATION_FAILURE",
+            "FILING_PREPARATION_HARD_BLOCK",
+            "FILING_PREPARATION_OVERRIDE_REQUIRED",
+            "FILING_PREPARATION_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_BLOCK",
+            "FILING_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_NOTICE_ACTIVE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L880[FILING_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L899[FILING_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L948[FILING_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1023[FILING_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "SUBMISSION_GATE",
+          "overrideability": "NON_OVERRIDEABLE",
+          "reason_codes": [
+            "SUBMISSION_REAUTHORIZATION_FAILED",
+            "SUBMISSION_MANIFEST_NOT_READY",
+            "SUBMISSION_APPROVAL_INVALID",
+            "SUBMISSION_DECLARED_BASIS_ACK_INVALID",
+            "SUBMISSION_PACKET_MANIFEST_BINDING_MISMATCH",
+            "SUBMISSION_PACKET_NOT_APPROVED",
+            "SUBMISSION_IDEMPOTENCY_BODY_COLLISION",
+            "SUBMISSION_PRIOR_CONFIRMED_EXISTS",
+            "SUBMISSION_AMENDMENT_NOT_READY",
+            "SUBMISSION_AUTHORITY_TOKEN_INVALID",
+            "SUBMISSION_PENDING_ALREADY_EXISTS",
+            "SUBMISSION_SAFE_IDEMPOTENT_RECOVERY"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1060[SUBMISSION_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1062[SUBMISSION_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1080[SUBMISSION_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1108[SUBMISSION_GATE.reason_codes]"
+          ]
+        }
+      ],
+      "inputs": [
+        "baseline_submission_state",
+        "authority_uncertainty_score",
+        "ComputeResult",
+        "ParityResult",
+        "RiskReport",
+        "graph_quality basis",
+        "upstream gates",
+        "overrides",
+        "LateDataMonitorResult",
+        "authority-state observation",
+        "runtime_scope[]"
+      ],
+      "intermediate_terms": [
+        "trust_currency_state",
+        "TRUST_RECALCULATION_REQUIRED"
+      ],
+      "label": "Trust Currency and Recalculation",
+      "mode_applicability": "Applies after synthesis on any filing-capable reuse path, rerun, continuation, replay, or amendment lineage.",
+      "module_bindings": [
+        {
+          "artifact_targets": [
+            "LateDataMonitorResult"
+          ],
+          "module_name": "CHECK_TRUST_CURRENCY",
+          "phase_ids": [
+            "P15"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/late_data_monitor_result.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#check-trust-currency"
+          ],
+          "step_ids": [
+            "P15-S004"
+          ]
+        }
+      ],
+      "money_profile_requirements": [],
+      "notes": [
+        "Currency evaluation is fail-closed and lineage-sensitive rather than timestamp-only freshness checking."
+      ],
+      "output_artifacts": [
+        "TrustSummary"
+      ],
+      "output_fields": [
+        "lifecycle_state",
+        "superseded_at",
+        "superseded_by_trust_id"
+      ],
+      "reason_code_emissions": [
+        "TRUST_AUTHORITY_STATE_UNRESOLVED",
+        "TRUST_RECALCULATION_REQUIRED"
+      ],
+      "schema_touchpoints": [
+        "Algorithm/schemas/trust_summary.schema.json",
+        "Algorithm/schemas/trust_input_basis_contract.schema.json"
+      ],
+      "section_title": "Out-of-band, stale-input, and recalculation handling",
+      "sensitivity_hooks": [
+        "authority_uncertainty_score",
+        "late_data monitor changes",
+        "override lifecycle changes"
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L1337[8.11_Out-of-band_stale-input_and_recalculation_handling]"
+      ],
+      "source_span": {
+        "section_end_line": 1368,
+        "section_start_line": 1337,
+        "subsection_start_lines": {}
+      },
+      "subsection_titles": [],
+      "threshold_dependencies": [
+        "authority_review_threshold",
+        "authority_block_threshold"
+      ]
+    },
+    {
+      "canonical_section": "8.11A",
+      "determinism_rules": [
+        "These metrics are materialized onto governed client artifacts rather than recomputed ad hoc in renderers.",
+        "Successful client continuity actions must not decrease flow_stability_score absent exogenous state changes."
+      ],
+      "downstream_gate_consumers": [],
+      "formula_family": "secondary_formula_family",
+      "formula_id": "client_flow_reliability_and_completion",
+      "formula_symbols": [
+        "connection_continuity",
+        "freshness_continuity",
+        "interaction_continuity",
+        "resume_continuity",
+        "focus_continuity",
+        "focus_anchor_ref",
+        "flow_stability_raw",
+        "flow_stability_score",
+        "SHALL NOT decrease",
+        "ClientUploadSession",
+        "progress_ratio",
+        "observed_throughput_bps",
+        "eta_seconds",
+        "expiry_buffer",
+        "resumability_state",
+        "transfer_state",
+        "clamp01(safe_div(max(0, remaining_seconds(expires_at) - eta_seconds), max(60, remaining_seconds(expires_at))))",
+        "binding_factor",
+        "resume_success_ratio",
+        "integrity_factor",
+        "scan_factor",
+        "validation_factor",
+        "retry_decay",
+        "upload_confidence_raw",
+        "upload_confidence_score",
+        "integrity_state",
+        "malware_scan_state",
+        "request_binding_state",
+        "attachment_state",
+        "Submit",
+        "Attach",
+        "recovery_posture",
+        "recovery_mode_class",
+        "next_action_code",
+        "INLINE_RESUME",
+        "RECONFIRM_INLINE",
+        "STALE_REVIEW_REQUIRED",
+        "HARD_RESET_REQUIRED",
+        "SUPPORT_REQUIRED",
+        "stale_protection_state",
+        "STEP_UP_RETRY",
+        "resume_viability",
+        "artifact_currency",
+        "min(freshness_continuity, enum_factor(stale_protection_state, {CURRENT: 1.00, REBASE_REQUIRED: 0.35, SUPERSEDED: 0.00, EXPIRED: 0.00}, 0.00))",
+        "preservation_factor",
+        "recovery_posture_score",
+        "ClientApprovalPack",
+        "stale_factor",
+        "view_factor",
+        "digest_factor",
+        "declaration_factor",
+        "ack_factor",
+        "step_up_factor",
+        "requires_step_up",
+        "clamp01(I(step_up_verified_at is not null) * I(step_up_expires_at is not null) * I(remaining_seconds(step_up_expires_at)",
+        "approval_readiness_raw",
+        "approval_readiness_score",
+        "remaining_seconds(step_up_expires_at)",
+        "Sign now",
+        "viewport_burden",
+        "risk_justification",
+        "raw_friction",
+        "friction_allowance",
+        "avoidable_friction",
+        "risk_weighted_friction_score",
+        "j",
+        "upload_component_j",
+        "approval_component_j",
+        "recovery_penalty_j",
+        "mobile_complexity",
+        "hazard_j",
+        "completion_probability",
+        "exp(\u03a3 log(max(1e-6, 1 - hazard_j)))",
+        "Save and return later",
+        "Resume"
+      ],
+      "gate_bindings": [],
+      "inputs": [
+        "surface_class",
+        "network_posture",
+        "freshness_state",
+        "interaction_posture",
+        "draft_state",
+        "focus_anchor_ref",
+        "bytes_transferred",
+        "byte_count",
+        "request_binding_state",
+        "integrity_state",
+        "malware_scan_state",
+        "validation_state",
+        "step_up_expires_at",
+        "remaining_required_step_count",
+        "required_input_count",
+        "blocking_wait_seconds",
+        "retry_count",
+        "external_handoff_count"
+      ],
+      "intermediate_terms": [
+        "surface_penalty",
+        "network_instability",
+        "flow_stability_raw",
+        "flow_stability_score",
+        "progress_ratio",
+        "observed_throughput_bps",
+        "eta_seconds",
+        "expiry_buffer",
+        "binding_factor",
+        "resume_success_ratio",
+        "integrity_factor",
+        "scan_factor",
+        "validation_factor",
+        "upload_confidence_raw",
+        "upload_confidence_score",
+        "recovery_mode_class",
+        "resume_viability",
+        "artifact_currency",
+        "locality_factor",
+        "preservation_factor",
+        "recovery_posture_score",
+        "approval_readiness_raw",
+        "approval_readiness_score",
+        "step_burden",
+        "input_burden",
+        "wait_burden",
+        "retry_burden",
+        "handoff_burden",
+        "risk_justification",
+        "raw_friction",
+        "friction_allowance",
+        "avoidable_friction",
+        "risk_weighted_friction_score",
+        "hazard_j",
+        "completion_probability"
+      ],
+      "label": "Client-Flow Reliability and Completion",
+      "mode_applicability": "Secondary client and portal reliability family; normative for governed UX artifacts but must remain distinct from filing trust.",
+      "module_bindings": [],
+      "money_profile_requirements": [],
+      "notes": [
+        "Secondary governed-client formula family; its outputs should not be mistaken for filing trust or gate semantics."
+      ],
+      "output_artifacts": [
+        "ClientUploadSession",
+        "ClientApprovalPack",
+        "ClientPortalWorkspace"
+      ],
+      "output_fields": [
+        "flow_stability_score",
+        "upload_confidence_score",
+        "recovery_posture_score",
+        "approval_readiness_score",
+        "risk_weighted_friction_score",
+        "completion_probability"
+      ],
+      "reason_code_emissions": [
+        "FLOW_STABILITY_LOW",
+        "UPLOAD_CONFIDENCE_LOW",
+        "UPLOAD_RESUME_EXPIRING",
+        "UPLOAD_BINDING_STALE",
+        "UPLOAD_INTEGRITY_FAILED",
+        "APPROVAL_READINESS_LOW",
+        "APPROVAL_VIEW_STALE",
+        "APPROVAL_STEP_UP_EXPIRED",
+        "FRICTION_EXCESSIVE",
+        "COMPLETION_RISK_HIGH",
+        "UPLOAD_REPLACEMENT"
+      ],
+      "schema_touchpoints": [],
+      "section_title": "Client-flow stability, upload-confidence, recovery, approval-readiness, and completion formulas",
+      "sensitivity_hooks": [
+        "portal_reliability_profile_ref",
+        "surface_class",
+        "network_posture",
+        "risk_justification"
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L1369[8.11A_Client-flow_stability_upload-confidence_recovery_approval-readiness_and_completion_formulas]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L1414[Flow-stability_score]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L1439[Upload-confidence_score]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L1470[Recovery_posture_and_viability]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L1523[Approval-readiness_score]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L1548[Risk-weighted_friction_score]",
+        "Algorithm/compute_parity_and_trust_formulas.md::L1574[Completion_probability]"
+      ],
+      "source_span": {
+        "section_end_line": 1603,
+        "section_start_line": 1369,
+        "subsection_start_lines": {
+          "Approval-readiness score": 1523,
+          "Completion probability": 1574,
+          "Flow-stability score": 1414,
+          "Recovery posture and viability": 1470,
+          "Risk-weighted friction score": 1548,
+          "Upload-confidence score": 1439
+        }
+      },
+      "subsection_titles": [
+        "Flow-stability score",
+        "Upload-confidence score",
+        "Recovery posture and viability",
+        "Approval-readiness score",
+        "Risk-weighted friction score",
+        "Completion probability"
+      ],
+      "threshold_dependencies": [
+        "client_flow_thresholds",
+        "upload_confidence_thresholds",
+        "recovery_posture_mapping",
+        "approval_readiness_thresholds",
+        "completion_probability_thresholds"
+      ]
+    },
+    {
+      "canonical_section": "8.12",
+      "determinism_rules": [
+        "TrustSummary.reason_codes preserves the terminal band code together with every applicable penalty or cap code.",
+        "dominant_reason_code is the first reason in the frozen trust priority order corresponding to the decisive cap or blocker.",
+        "decision_explainability_contract reuses the same ordered reason basis without local recomputation."
+      ],
+      "downstream_gate_consumers": [
+        "TRUST_GATE",
+        "FILING_GATE"
+      ],
+      "formula_family": "reason_code_contract",
+      "formula_id": "formula_reason_code_emission",
+      "formula_symbols": [
+        "TrustSummary.reason_codes",
+        "TRUST_GREEN",
+        "TRUST_AMBER",
+        "TRUST_RED",
+        "TRUST_INSUFFICIENT_DATA",
+        "dominant_reason_code",
+        "plain_summary",
+        "decision_constraint_codes",
+        "decision_explainability_contract{...}",
+        "compressed_reason_codes",
+        "suppressed_reason_count",
+        "AUTHORITY_STATE",
+        "LIMITATION_STATE",
+        "OVERRIDE_STATE",
+        "DQ_LOW_COMPLETENESS",
+        "DQ_LOW_QUALITY",
+        "DQ_INVALID_ERROR_BUDGET",
+        "DQ_CONFIDENCE_WEIGHT_INVALID",
+        "DQ_WEIGHT_PROFILE_INVALID",
+        "PARITY_NOT_REQUIRED_NO_AUTHORITY_BASIS",
+        "PARITY_MINOR_DIFFERENCE",
+        "PARITY_MATERIAL_DIFFERENCE",
+        "PARITY_BLOCKING_DIFFERENCE",
+        "PARITY_NOT_COMPARABLE",
+        "PARITY_PARTIAL_COVERAGE",
+        "PARITY_COMPARISON_SET_INVALID",
+        "RISK_WEIGHT_PROFILE_INVALID",
+        "RISK_MATERIAL_FLAG",
+        "RISK_BLOCKING_FLAG",
+        "GRAPH_LOW_COVERAGE",
+        "GRAPH_HIGH_INFERENCE",
+        "GRAPH_WEIGHT_PROFILE_INVALID",
+        "TRUST_INPUT_INCOMPLETE",
+        "TRUST_INPUT_STALE",
+        "TRUST_INPUT_CONTRADICTION",
+        "TRUST_OVERRIDE_INVALID",
+        "TRUST_THRESHOLD_EDGE_REVIEW",
+        "TRUST_RECALCULATION_REQUIRED",
+        "TRUST_OVERRIDE_PENALTY",
+        "TRUST_RETENTION_PENALTY",
+        "TRUST_AUTHORITY_PENALTY",
+        "TRUST_AUTHORITY_CONFIDENCE_LOW",
+        "TRUST_AUTHORITY_AMBIGUITY_HIGH",
+        "TRUST_AUTHORITY_STATE_STALE",
+        "TRUST_AUTHORITY_STATE_UNRESOLVED",
+        "TRUST_AMENDMENT_FRESHNESS_STALE",
+        "WORK_SLA_UNBOUND",
+        "WORK_OWNERSHIP_AMBIGUOUS",
+        "WORK_ASSIGNMENT_LOW_EFFICIENCY",
+        "WORK_ESCALATION_PRESSURE_HIGH",
+        "WORK_QUEUE_HEALTH_DEGRADED",
+        "WORK_RESPONSE_GUARD_STALE",
+        "WORK_RESOLUTION_CONFIDENCE_LOW",
+        "TRUST_RETROACTIVE_IMPACT_UNRESOLVED",
+        "TRUST_ANALYSIS_MODE_CAP",
+        "TRUST_BLOCKING_RISK",
+        "TRUST_REQUIRED_HUMAN_STEPS",
+        "FLOW_STABILITY_LOW",
+        "UPLOAD_CONFIDENCE_LOW",
+        "UPLOAD_RESUME_EXPIRING",
+        "UPLOAD_BINDING_STALE",
+        "UPLOAD_INTEGRITY_FAILED",
+        "APPROVAL_READINESS_LOW",
+        "APPROVAL_VIEW_STALE",
+        "APPROVAL_STEP_UP_EXPIRED",
+        "FRICTION_EXCESSIVE",
+        "COMPLETION_RISK_HIGH",
+        "TRUST_AUTOMATION_LIMITED",
+        "TRUST_UPSTREAM_GATE_BLOCK",
+        "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+        "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE"
+      ],
+      "gate_bindings": [
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "AMENDMENT_GATE",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "TRUST_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "TRUST_GREEN",
+            "TRUST_AMBER",
+            "TRUST_RED",
+            "TRUST_INSUFFICIENT_DATA",
+            "TRUST_INPUT_INCOMPLETE",
+            "TRUST_INPUT_STALE",
+            "TRUST_INPUT_CONTRADICTION",
+            "TRUST_AUTHORITY_STATE_UNRESOLVED",
+            "TRUST_THRESHOLD_EDGE_REVIEW",
+            "TRUST_AUTOMATION_LIMITED",
+            "TRUST_REQUIRED_HUMAN_STEPS",
+            "TRUST_OVERRIDE_DEPENDENT_PROGRESS",
+            "TRUST_OVERRIDE_ACTIVE_NOTICE",
+            "TRUST_UPSTREAM_GATE_BLOCK",
+            "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+            "TRUST_ARTIFACT_INCONSISTENT"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L787[TRUST_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L789[TRUST_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L809[TRUST_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L858[TRUST_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "SUBMISSION_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "FILING_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "FILING_PACKET_UNAVAILABLE",
+            "FILING_MANIFEST_MODE_ANALYSIS",
+            "FILING_TRUST_MISSING",
+            "FILING_TRUST_SUPERSEDED",
+            "FILING_TRUST_RECALCULATION_REQUIRED",
+            "FILING_AUTHORITY_LINK_INACTIVE",
+            "FILING_OBLIGATION_NOT_OPEN",
+            "FILING_FINAL_DECLARATION_PRECONDITION_MISSING",
+            "FILING_AMENDMENT_BASELINE_MISSING",
+            "FILING_APPROVAL_REQUIRED",
+            "FILING_APPROVAL_UNSATISFIABLE",
+            "FILING_OVERRIDE_REQUIRED",
+            "FILING_OVERRIDE_ACTIVE_NOTICE",
+            "FILING_OVERRIDE_AUDIT_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_UNSATISFIABLE",
+            "FILING_NOTICE_REQUIRED",
+            "FILING_LATE_DATA_CHILD_MANIFEST_REQUIRED",
+            "FILING_LATE_DATA_REVIEW_REQUIRED",
+            "FILING_LATE_DATA_NONCRITICAL_EXCLUDED",
+            "FILING_PROOF_BUNDLE_MISSING",
+            "FILING_TARGET_UNSUPPORTED",
+            "FILING_TARGET_CONTRADICTED",
+            "FILING_PROOF_CLOSURE_OPEN",
+            "FILING_GRAPH_REBUILD_REQUIRED",
+            "FILING_EXPLANATION_FAILURE",
+            "FILING_PREPARATION_HARD_BLOCK",
+            "FILING_PREPARATION_OVERRIDE_REQUIRED",
+            "FILING_PREPARATION_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_BLOCK",
+            "FILING_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_NOTICE_ACTIVE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L880[FILING_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L899[FILING_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L948[FILING_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1023[FILING_GATE.reason_codes]"
+          ]
+        }
+      ],
+      "inputs": [
+        "matched thresholds",
+        "matched caps",
+        "freshness state",
+        "admissibility state",
+        "trust posture"
+      ],
+      "intermediate_terms": [
+        "compressed_reason_codes",
+        "suppressed_reason_count",
+        "semantic_qualifiers"
+      ],
+      "label": "Formula Reason-Code Emission",
+      "mode_applicability": "Applies whenever formula outcomes materially affect trust posture, automation, or filing readiness.",
+      "module_bindings": [
+        {
+          "artifact_targets": [
+            "GateDecisionRecord"
+          ],
+          "module_name": "BUILD_GATE_EXPLANATION",
+          "phase_ids": [],
+          "schema_touchpoints": [
+            "Algorithm/schemas/gate_decision_record.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#build-gate-explanation"
+          ],
+          "step_ids": []
+        },
+        {
+          "artifact_targets": [
+            "TrustSummary"
+          ],
+          "module_name": "SYNTHESIZE_TRUST",
+          "phase_ids": [
+            "P11"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/trust_summary.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#synthesize-trust"
+          ],
+          "step_ids": [
+            "P11-S006"
+          ]
+        },
+        {
+          "artifact_targets": [
+            "GateDecisionRecord",
+            "TrustSummary"
+          ],
+          "module_name": "TRUST_GATE",
+          "phase_ids": [
+            "P11"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/gate_decision_record.schema.json",
+            "Algorithm/schemas/trust_summary.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#trust-gate"
+          ],
+          "step_ids": [
+            "P11-S009"
+          ]
+        }
+      ],
+      "money_profile_requirements": [],
+      "notes": [
+        "Reason-code emission is normative semantics, not a renderer-local narration layer."
+      ],
+      "output_artifacts": [
+        "TrustSummary",
+        "DecisionExplainabilityContract"
+      ],
+      "output_fields": [
+        "reason_codes",
+        "dominant_reason_code",
+        "plain_summary",
+        "decision_constraint_codes",
+        "decision_explainability_contract"
+      ],
+      "reason_code_emissions": [
+        "DQ_LOW_COMPLETENESS",
+        "DQ_LOW_QUALITY",
+        "DQ_INVALID_ERROR_BUDGET",
+        "DQ_CONFIDENCE_WEIGHT_INVALID",
+        "DQ_WEIGHT_PROFILE_INVALID",
+        "PARITY_NOT_REQUIRED_NO_AUTHORITY_BASIS",
+        "PARITY_MINOR_DIFFERENCE",
+        "PARITY_MATERIAL_DIFFERENCE",
+        "PARITY_BLOCKING_DIFFERENCE",
+        "PARITY_NOT_COMPARABLE",
+        "PARITY_PARTIAL_COVERAGE",
+        "PARITY_COMPARISON_SET_INVALID",
+        "RISK_WEIGHT_PROFILE_INVALID",
+        "RISK_MATERIAL_FLAG",
+        "RISK_BLOCKING_FLAG",
+        "GRAPH_LOW_COVERAGE",
+        "GRAPH_HIGH_INFERENCE",
+        "GRAPH_WEIGHT_PROFILE_INVALID",
+        "TRUST_INPUT_INCOMPLETE",
+        "TRUST_INPUT_STALE",
+        "TRUST_INPUT_CONTRADICTION",
+        "TRUST_OVERRIDE_INVALID",
+        "TRUST_THRESHOLD_EDGE_REVIEW",
+        "TRUST_RECALCULATION_REQUIRED",
+        "TRUST_OVERRIDE_PENALTY",
+        "TRUST_RETENTION_PENALTY",
+        "TRUST_AUTHORITY_PENALTY",
+        "TRUST_AUTHORITY_CONFIDENCE_LOW",
+        "TRUST_AUTHORITY_AMBIGUITY_HIGH",
+        "TRUST_AUTHORITY_STATE_STALE",
+        "TRUST_AUTHORITY_STATE_UNRESOLVED",
+        "TRUST_AMENDMENT_FRESHNESS_STALE",
+        "WORK_SLA_UNBOUND",
+        "WORK_OWNERSHIP_AMBIGUOUS",
+        "WORK_ASSIGNMENT_LOW_EFFICIENCY",
+        "WORK_ESCALATION_PRESSURE_HIGH",
+        "WORK_QUEUE_HEALTH_DEGRADED",
+        "WORK_RESPONSE_GUARD_STALE",
+        "WORK_RESOLUTION_CONFIDENCE_LOW",
+        "TRUST_RETROACTIVE_IMPACT_UNRESOLVED",
+        "TRUST_ANALYSIS_MODE_CAP",
+        "TRUST_BLOCKING_RISK",
+        "TRUST_REQUIRED_HUMAN_STEPS",
+        "FLOW_STABILITY_LOW",
+        "UPLOAD_CONFIDENCE_LOW",
+        "UPLOAD_RESUME_EXPIRING",
+        "UPLOAD_BINDING_STALE",
+        "UPLOAD_INTEGRITY_FAILED",
+        "APPROVAL_READINESS_LOW",
+        "APPROVAL_VIEW_STALE",
+        "APPROVAL_STEP_UP_EXPIRED",
+        "FRICTION_EXCESSIVE",
+        "COMPLETION_RISK_HIGH",
+        "TRUST_AUTOMATION_LIMITED",
+        "TRUST_UPSTREAM_GATE_BLOCK",
+        "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+        "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+        "TRUST_GREEN",
+        "TRUST_AMBER",
+        "TRUST_RED",
+        "TRUST_INSUFFICIENT_DATA"
+      ],
+      "schema_touchpoints": [
+        "Algorithm/schemas/trust_summary.schema.json"
+      ],
+      "section_title": "Reason-code emission rules for formulas",
+      "sensitivity_hooks": [
+        "cap_driver_reason_codes[]",
+        "edge_trigger_codes[]",
+        "decision_constraint_codes[]"
+      ],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L1604[8.12_Reason-code_emission_rules_for_formulas]"
+      ],
+      "source_span": {
+        "section_end_line": 1689,
+        "section_start_line": 1604,
+        "subsection_start_lines": {}
+      },
+      "subsection_titles": [],
+      "threshold_dependencies": [
+        "trust_band_reason_codes",
+        "decision_explainability_contract"
+      ]
+    },
+    {
+      "canonical_section": "8.13",
+      "determinism_rules": [
+        "This section is a prose summary anchor for the full formula layer and keeps the implementation package tied to the source\u2019s one-sentence scope claim."
+      ],
+      "downstream_gate_consumers": [
+        "TRUST_GATE",
+        "FILING_GATE",
+        "AMENDMENT_GATE"
+      ],
+      "formula_family": "summary_anchor",
+      "formula_id": "formula_layer_summary",
+      "formula_symbols": [],
+      "gate_bindings": [
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "AMENDMENT_GATE",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "TRUST_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "TRUST_GREEN",
+            "TRUST_AMBER",
+            "TRUST_RED",
+            "TRUST_INSUFFICIENT_DATA",
+            "TRUST_INPUT_INCOMPLETE",
+            "TRUST_INPUT_STALE",
+            "TRUST_INPUT_CONTRADICTION",
+            "TRUST_AUTHORITY_STATE_UNRESOLVED",
+            "TRUST_THRESHOLD_EDGE_REVIEW",
+            "TRUST_AUTOMATION_LIMITED",
+            "TRUST_REQUIRED_HUMAN_STEPS",
+            "TRUST_OVERRIDE_DEPENDENT_PROGRESS",
+            "TRUST_OVERRIDE_ACTIVE_NOTICE",
+            "TRUST_UPSTREAM_GATE_BLOCK",
+            "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+            "TRUST_ARTIFACT_INCONSISTENT"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L787[TRUST_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L789[TRUST_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L809[TRUST_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L858[TRUST_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "SUBMISSION_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "FILING_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "FILING_PACKET_UNAVAILABLE",
+            "FILING_MANIFEST_MODE_ANALYSIS",
+            "FILING_TRUST_MISSING",
+            "FILING_TRUST_SUPERSEDED",
+            "FILING_TRUST_RECALCULATION_REQUIRED",
+            "FILING_AUTHORITY_LINK_INACTIVE",
+            "FILING_OBLIGATION_NOT_OPEN",
+            "FILING_FINAL_DECLARATION_PRECONDITION_MISSING",
+            "FILING_AMENDMENT_BASELINE_MISSING",
+            "FILING_APPROVAL_REQUIRED",
+            "FILING_APPROVAL_UNSATISFIABLE",
+            "FILING_OVERRIDE_REQUIRED",
+            "FILING_OVERRIDE_ACTIVE_NOTICE",
+            "FILING_OVERRIDE_AUDIT_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_REQUIRED",
+            "FILING_DECLARED_BASIS_ACK_UNSATISFIABLE",
+            "FILING_NOTICE_REQUIRED",
+            "FILING_LATE_DATA_CHILD_MANIFEST_REQUIRED",
+            "FILING_LATE_DATA_REVIEW_REQUIRED",
+            "FILING_LATE_DATA_NONCRITICAL_EXCLUDED",
+            "FILING_PROOF_BUNDLE_MISSING",
+            "FILING_TARGET_UNSUPPORTED",
+            "FILING_TARGET_CONTRADICTED",
+            "FILING_PROOF_CLOSURE_OPEN",
+            "FILING_GRAPH_REBUILD_REQUIRED",
+            "FILING_EXPLANATION_FAILURE",
+            "FILING_PREPARATION_HARD_BLOCK",
+            "FILING_PREPARATION_OVERRIDE_REQUIRED",
+            "FILING_PREPARATION_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_BLOCK",
+            "FILING_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "FILING_UPSTREAM_GATE_NOTICE_ACTIVE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L880[FILING_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L899[FILING_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L948[FILING_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1023[FILING_GATE.reason_codes]"
+          ]
+        },
+        {
+          "downstream_consumers": [
+            "APPEND_MANIFEST_GATES",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+          ],
+          "gate_code": "AMENDMENT_GATE",
+          "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+          "reason_codes": [
+            "AMENDMENT_MANIFEST_MODE_ANALYSIS",
+            "AMENDMENT_NO_CONFIRMED_FINAL_DECLARATION",
+            "AMENDMENT_BASELINE_UNPROVEN",
+            "AMENDMENT_WINDOW_CLOSED",
+            "AMENDMENT_DRIFT_NOT_MATERIAL",
+            "AMENDMENT_INTENT_TO_AMEND_REQUIRED",
+            "AMENDMENT_INTENT_TO_AMEND_VALIDATION_FAILED",
+            "AMENDMENT_INTENT_TO_AMEND_OVERRIDE_REQUIRED",
+            "AMENDMENT_INTENT_TO_AMEND_REVIEW_REQUIRED",
+            "AMENDMENT_OUT_OF_BAND_BASELINE_UNRESOLVED",
+            "AMENDMENT_RETROACTIVE_REPLAY_REQUIRED",
+            "AMENDMENT_READINESS_STALE",
+            "AMENDMENT_CONTRADICTORY_DRIFT_SOURCES",
+            "AMENDMENT_SUPERSEDES_PRIOR_ACTIVE_CHAIN",
+            "AMENDMENT_ELIGIBLE"
+          ],
+          "source_refs": [
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1125[AMENDMENT_GATE]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1141[AMENDMENT_GATE.inputs]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1167[AMENDMENT_GATE.decision_table]",
+            "Algorithm/exact_gate_logic_and_decision_tables.md::L1239[AMENDMENT_GATE.reason_codes]"
+          ]
+        }
+      ],
+      "inputs": [
+        "evidence quality",
+        "compute outputs",
+        "authority comparison",
+        "graph defensibility",
+        "override reliance"
+      ],
+      "intermediate_terms": [],
+      "label": "Formula Layer Summary",
+      "mode_applicability": "Summary anchor spanning both modes.",
+      "module_bindings": [
+        {
+          "artifact_targets": [
+            "TrustSummary"
+          ],
+          "module_name": "SYNTHESIZE_TRUST",
+          "phase_ids": [
+            "P11"
+          ],
+          "schema_touchpoints": [
+            "Algorithm/schemas/trust_summary.schema.json"
+          ],
+          "source_refs": [
+            "Algorithm/modules.md#synthesize-trust"
+          ],
+          "step_ids": [
+            "P11-S006"
+          ]
+        }
+      ],
+      "money_profile_requirements": [],
+      "notes": [
+        "Summary-only numbered section included to keep numbered-section coverage exact."
+      ],
+      "output_artifacts": [
+        "TrustSummary"
+      ],
+      "output_fields": [
+        "trust posture"
+      ],
+      "reason_code_emissions": [],
+      "schema_touchpoints": [
+        "Algorithm/schemas/trust_summary.schema.json"
+      ],
+      "section_title": "One-sentence summary",
+      "sensitivity_hooks": [],
+      "source_refs": [
+        "Algorithm/compute_parity_and_trust_formulas.md::L1690[8.13_One-sentence_summary]"
+      ],
+      "source_span": {
+        "section_end_line": 1700,
+        "section_start_line": 1690,
+        "subsection_start_lines": {}
+      },
+      "subsection_titles": [],
+      "threshold_dependencies": []
+    }
+  ],
+  "numbered_sections_required": [
+    "8.1",
+    "8.2",
+    "8.3",
+    "8.4",
+    "8.5",
+    "8.5A",
+    "8.6",
+    "8.7",
+    "8.8",
+    "8.9",
+    "8.10",
+    "8.10A",
+    "8.11",
+    "8.11A",
+    "8.12",
+    "8.13"
+  ],
+  "required_schema_artifacts": {
+    "ComputeResult": "Algorithm/schemas/compute_result.schema.json",
+    "ForecastSet": "Algorithm/schemas/forecast_set.schema.json",
+    "ParityResult": "Algorithm/schemas/parity_result.schema.json",
+    "RiskReport": "Algorithm/schemas/risk_report.schema.json",
+    "TrustInputBasisContract": "Algorithm/schemas/trust_input_basis_contract.schema.json",
+    "TrustSensitivityAnalysisContract": "Algorithm/schemas/trust_sensitivity_contract.schema.json",
+    "TrustSummary": "Algorithm/schemas/trust_summary.schema.json"
+  },
+  "summary": {
+    "core_formula_family_count": 13,
+    "formula_record_count": 19,
+    "formula_symbol_count": 649,
+    "numbered_sections_covered": [
+      "8.1",
+      "8.2",
+      "8.3",
+      "8.4",
+      "8.5",
+      "8.5A",
+      "8.6",
+      "8.7",
+      "8.8",
+      "8.9",
+      "8.10",
+      "8.10A",
+      "8.11",
+      "8.11A",
+      "8.12",
+      "8.13"
+    ],
+    "reason_code_count": 73,
+    "schema_backed_artifacts_covered": [
+      "TrustSummary",
+      "ComputeResult",
+      "ForecastSet",
+      "RiskReport",
+      "ParityResult",
+      "GateDecisionRecord",
+      "TrustInputBasisContract",
+      "TrustSensitivityAnalysisContract",
+      "WorkRoutingContract",
+      "WorkQueueHealthContract",
+      "ClientUploadSession",
+      "ClientApprovalPack",
+      "ClientPortalWorkspace",
+      "DecisionExplainabilityContract"
+    ],
+    "schema_touchpoint_count": 8,
+    "secondary_formula_family_count": 2
+  }
+}

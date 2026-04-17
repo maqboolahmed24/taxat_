@@ -1,0 +1,4390 @@
+{
+  "helper_call_catalog": [
+    "CANONICALIZE_REQUESTED_SCOPE",
+    "ERROR",
+    "ACCESS_BINDING_HASH",
+    "RUN_ENGINE",
+    "ASSERT",
+    "INIT_EXPERIENCE_STREAM",
+    "HASH",
+    "SYNC_LIVE_EXPERIENCE",
+    "MODULE_UPDATE",
+    "BUILD_PULSE_SPINE_STATE",
+    "BUILD_MANIFEST_RIBBON_STATE",
+    "BUILD_HANDOFF_BATON_STATE",
+    "BUILD_DECISION_STAGE_STATE",
+    "BUILD_CONSEQUENCE_RAIL_STATE",
+    "BUILD_EVIDENCE_TIDE_STATE",
+    "BUILD_STAGE_TASK",
+    "PERSIST_STAGE_WORKSET_AND_OUTBOX",
+    "AWAIT_STAGE_WORKSET",
+    "EXECUTION_SLO",
+    "MERGE_FETCH_RESULTS",
+    "CLASSIFY_LATE_DATA",
+    "SPAWN_CHILD_MANIFEST_FOR_LATE_DATA",
+    "NOOP",
+    "BUILD_CONSEQUENCE_RAIL_STATE_FROM_LATE_DATA",
+    "MERGE_STAGE_OUTPUTS",
+    "BUILD_CANONICALIZATION_TASKS",
+    "DETECT_CROSS_PARTITION_CONFLICTS",
+    "MERGE_CONFLICTS",
+    "NO_CROSS_PARTITION_PROMOTION",
+    "BUILD_FOCUS_LENS_STATE",
+    "VALIDATE_ARTIFACT_CONTRACTS_FOR_PRESEAL_SET",
+    "RECORD_PRESEAL_ARTIFACT_CONTRACT_REFS",
+    "PROVIDER_ENVIRONMENT_REFS",
+    "EMIT_ORDERED_GATES",
+    "GATE_BLOCKS_PROGRESS",
+    "SYNC_LIVE_EXPERIENCE_FROM_GATES",
+    "BUILD_CONSEQUENCE_RAIL_STATE_FROM_GATES",
+    "BEGIN_ATOMIC_TRANSACTION",
+    "COMMIT_ATOMIC_TRANSACTION",
+    "BUILD_STAGE_DAG",
+    "STAGE_TASK",
+    "OPTIONAL_STAGE_TASK",
+    "SERVICE_INSTANCE_ID",
+    "EXECUTION_LEASE_TTL",
+    "ROLLBACK_ATOMIC_TRANSACTION",
+    "PERSIST_STAGE_DAG_AND_OUTBOX",
+    "RELOAD_PERSISTED_STAGE_DAG_AND_OUTBOX",
+    "AWAIT_STAGE_DAG",
+    "ADOPT_PERSISTED_STAGE_ARTIFACT",
+    "HAS_STAGE_ARTIFACT",
+    "LOAD_STAGE_RESULT",
+    "DERIVE_WEIGHTED_PATH_SURVIVABILITY",
+    "DERIVE_LIMITATION_CLARITY_RATIO",
+    "DERIVE_CRITICAL_SILENT_LIMITATION_COUNT",
+    "DERIVE_NONCRITICAL_SILENT_LIMITATION_COUNT",
+    "DERIVE_CRITICAL_EXPLANATION_FAILURE_COUNT",
+    "DERIVE_NONCRITICAL_EXPLANATION_FAILURE_COUNT",
+    "RESOLVE_AUTHORITY_COMPARISON_BASIS",
+    "BUILD_DRIFT_FIELD_STATE",
+    "BUILD_CONSEQUENCE_RAIL_STATE_FROM_AMENDMENT",
+    "MERGE_COMPARISON_BASIS",
+    "BASELINE_SUBMISSION_STATE",
+    "BUILD_PACKET_FORGE_STATE",
+    "GATE_REQUIRES_REVIEW",
+    "ORDERED_SET_DIFF",
+    "EXTRACT_GATE_IDS",
+    "PROJECTION_INLINE_BUDGET",
+    "HAS_STAGE_RESULT",
+    "LOAD_READINESS_CONTEXT",
+    "BUILD_AUTHORITY_TUNNEL_STATE",
+    "PERSIST_OUTBOX_MESSAGE",
+    "BUILD_TRANSMIT_COMMAND",
+    "AUTHORITY_NEXT_CHECKPOINT_AT",
+    "WAIT_FOR_TRANSMIT_OR_RECONCILIATION",
+    "NORMALIZE_TERMINAL_WORKFLOW_REFS"
+  ],
+  "lane_taxonomy": [
+    "CALLER_AND_SCOPE",
+    "AUTHORIZATION",
+    "MANIFEST_AND_LINEAGE",
+    "CONFIG_AND_FREEZE",
+    "SOURCE_COLLECTION_AND_CANONICALIZATION",
+    "PRESEAL_GATES",
+    "POSTSEAL_DAG",
+    "AUTHORITY_CONTEXT",
+    "DRIFT_AND_AMENDMENT",
+    "TRUST_AND_WORKFLOW",
+    "FILING_AND_SUBMISSION",
+    "LIVE_EXPERIENCE",
+    "RETENTION_AND_TERMINALIZATION"
+  ],
+  "mandatory_edge_cases": [
+    "`raw_requested_scope[]` is preserved for audit while `runtime_scope[]` drives downstream semantics.",
+    "`masking_context` remains read-side only and must not affect compute, filing, or transport.",
+    "Same-manifest retry against a terminal manifest returns the existing `DecisionBundle`.",
+    "A pre-start system fault after `SEALED` but before `RunStarted` still finalizes `BLOCKED`.",
+    "Replay may reuse frozen post-seal basis instead of inventing a fresh authority read.",
+    "`AMENDMENT_GATE` is forbidden during drift preparation and occurs later in the run.",
+    "Authority-owned truth and out-of-band corrections stay distinct from internal progression state."
+  ],
+  "module_catalog_size": 209,
+  "phase_count": 18,
+  "phases": [
+    {
+      "artifact_writes": [],
+      "audit_events": [],
+      "branch_predicates": [
+        "Access denied, step-up required, or authority-binding mismatch returns before manifest work begins.",
+        "`raw_requested_scope[]` is preserved for later audit only; `runtime_scope[]` drives gates and legal progression.",
+        "`masking_context` remains read-side only and must not leak into compute, filing, or transport behavior."
+      ],
+      "branch_tags": [
+        "access early return",
+        "runtime scope bind"
+      ],
+      "called_helpers": [
+        {
+          "call_name": "CANONICALIZE_REQUESTED_SCOPE",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "ERROR",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "ACCESS_BINDING_HASH",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "RUN_ENGINE",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        }
+      ],
+      "called_modules": [
+        "AUTHORIZE",
+        "ACCESS_BLOCKED_RESPONSE",
+        "ENFORCE_ACCESS_SCOPE_AND_MASKING",
+        "VALIDATE_EFFECTIVE_SCOPE_BINDING"
+      ],
+      "entry_conditions": [
+        "RUN_ENGINE receives `raw_requested_scope[]`, principal context, and any authority-binding context.",
+        "`masking_context` may be present for read-side rendering, but execution semantics remain unmasked."
+      ],
+      "exit_conditions": [
+        "`runtime_scope[]` is bound from authorization and becomes the only downstream scope vocabulary.",
+        "Access-blocked requests may return a low-noise access response before any manifest allocation."
+      ],
+      "failure_exit_paths": [
+        "`ACCESS_BLOCKED_RESPONSE(...)` returns a bounded low-noise posture envelope without allocating a manifest."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "CALLER_AND_SCOPE",
+        "AUTHORIZATION"
+      ],
+      "lane_highlights": {
+        "AUTHORIZATION": [
+          {
+            "kind": "branch",
+            "label": "runtime scope bind"
+          },
+          {
+            "kind": "terminal",
+            "label": "ERROR"
+          },
+          {
+            "kind": "module",
+            "label": "AUTHORIZE"
+          },
+          {
+            "kind": "module",
+            "label": "ACCESS_BLOCKED_RESPONSE"
+          }
+        ],
+        "CALLER_AND_SCOPE": [
+          {
+            "kind": "branch",
+            "label": "access early return"
+          },
+          {
+            "kind": "module",
+            "label": "VALIDATE_EFFECTIVE_SCOPE_BINDING"
+          }
+        ]
+      },
+      "live_experience_updates": [],
+      "manifest_mutations": [],
+      "notes": [
+        "The shell defaults to `LOW_NOISE` and keeps the access result separate from later manifest lifecycle state."
+      ],
+      "ordered_index": 1,
+      "phase_id": "P01",
+      "phase_name": "Authorize and bind execution scope",
+      "return_paths": [
+        "ERROR"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L145[Authorize_and_bind_execution_scope]",
+      "source_line_end": 184,
+      "source_line_start": 145,
+      "state_transitions": [
+        "No durable domain object changes state before access posture is resolved."
+      ],
+      "step_count": 34,
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/exact_gate_logic_and_decision_tables.md",
+        "Algorithm/observability_and_audit_contract.md",
+        "Algorithm/low_noise_experience_contract.md"
+      ],
+      "transaction_boundary": "No atomic transaction. This phase is a caller-to-authorization boundary before manifest lineage exists.",
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [],
+      "audit_events": [
+        "ExistingDecisionBundleReturned"
+      ],
+      "branch_predicates": [
+        "Invalid scope grammar or invalid prior-manifest context stops progression before allocation.",
+        "The reuse decision differentiates fresh manifest allocation, same-manifest reuse, continuation child, and replay child.",
+        "Replay remains lineage-governed reuse of frozen basis rather than a fresh authority read."
+      ],
+      "branch_tags": [
+        "reuse decision",
+        "bundle return"
+      ],
+      "called_helpers": [
+        {
+          "call_name": "ERROR",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        }
+      ],
+      "called_modules": [
+        "COMPUTE_SCOPE_FLAGS",
+        "VALIDATE_SCOPE_GRAMMAR",
+        "LOAD_AND_VALIDATE_PRIOR_MANIFEST_CONTEXT",
+        "DECIDE_MANIFEST_REUSE_STRATEGY",
+        "RECORD_EVENT",
+        "LOAD_EXISTING_DECISION_BUNDLE",
+        "RESOLVE_CONFIG_FOR_REQUEST",
+        "CONTINUATION_REUSES_FROZEN_INPUT"
+      ],
+      "entry_conditions": [
+        "Authorization resolved a usable `runtime_scope[]` and access binding.",
+        "Any prior manifest lineage must be loaded before config inheritance or reuse decisions are chosen."
+      ],
+      "exit_conditions": [
+        "Scope grammar, reporting intent, prior-manifest context, and config inheritance mode are resolved.",
+        "A same-manifest terminal retry may short-circuit to an existing `DecisionBundle`."
+      ],
+      "failure_exit_paths": [
+        "`ERROR(...)` exits on invalid scope grammar or irrecoverable prior-manifest context.",
+        "`ExistingDecisionBundleReturned` may short-circuit same-manifest retries against terminal lineage."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "CALLER_AND_SCOPE",
+        "MANIFEST_AND_LINEAGE",
+        "CONFIG_AND_FREEZE"
+      ],
+      "lane_highlights": {
+        "CALLER_AND_SCOPE": [
+          {
+            "kind": "branch",
+            "label": "reuse decision"
+          },
+          {
+            "kind": "module",
+            "label": "COMPUTE_SCOPE_FLAGS"
+          },
+          {
+            "kind": "module",
+            "label": "VALIDATE_SCOPE_GRAMMAR"
+          }
+        ],
+        "CONFIG_AND_FREEZE": [
+          {
+            "kind": "module",
+            "label": "RESOLVE_CONFIG_FOR_REQUEST"
+          },
+          {
+            "kind": "module",
+            "label": "CONTINUATION_REUSES_FROZEN_INPUT"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "branch",
+            "label": "bundle return"
+          },
+          {
+            "kind": "terminal",
+            "label": "ERROR"
+          },
+          {
+            "kind": "terminal",
+            "label": "LOAD_EXISTING_DECISION_BUNDLE"
+          },
+          {
+            "kind": "module",
+            "label": "LOAD_AND_VALIDATE_PRIOR_MANIFEST_CONTEXT"
+          }
+        ]
+      },
+      "live_experience_updates": [],
+      "manifest_mutations": [],
+      "notes": [
+        "Config inheritance is frozen as a manifest-strategy choice, not a renderer-side preference."
+      ],
+      "ordered_index": 2,
+      "phase_id": "P02",
+      "phase_name": "Resolve scope intent, validate runtime grammar, load any prior manifest, and choose config inheritance",
+      "return_paths": [
+        "ERROR",
+        "LOAD_EXISTING_DECISION_BUNDLE"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L185[Resolve_scope_intent_validate_runtime_grammar_load_any_prior_manifest_and_choose_config_inheritance]",
+      "source_line_end": 258,
+      "source_line_start": 185,
+      "state_transitions": [
+        "No manifest lifecycle transition occurs until the branch strategy is selected."
+      ],
+      "step_count": 33,
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/replay_and_reproducibility_contract.md",
+        "Algorithm/manifest_and_config_freeze_contract.md",
+        "Algorithm/observability_and_audit_contract.md"
+      ],
+      "transaction_boundary": "No atomic transaction. This phase determines lineage and frozen-config posture before any manifest write occurs.",
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [],
+      "audit_events": [
+        "ManifestAllocated",
+        "ManifestContextReused",
+        "ContinuationChildAllocated",
+        "ConfigInheritanceResolved",
+        "InputInheritanceResolved",
+        "AccessScopeBound"
+      ],
+      "branch_predicates": [
+        "Fresh manifest vs reused sealed manifest vs continuation child vs replay child remains explicitly indexed in lineage.",
+        "Config and input inheritance may come from a frozen prior manifest or from fresh request-time resolution."
+      ],
+      "branch_tags": [
+        "manifest allocated",
+        "child lineage"
+      ],
+      "called_helpers": [
+        {
+          "call_name": "ERROR",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "ASSERT",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "INIT_EXPERIENCE_STREAM",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "HASH",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "MODULE_UPDATE",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_PULSE_SPINE_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_MANIFEST_RIBBON_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_HANDOFF_BATON_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_DECISION_STAGE_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_CONSEQUENCE_RAIL_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        }
+      ],
+      "called_modules": [
+        "BEGIN_MANIFEST",
+        "RECORD_EVENT",
+        "VALIDATE_REUSE_SEALED_CONTEXT",
+        "BEGIN_CHILD_MANIFEST",
+        "FREEZE_CONFIG",
+        "UPDATE_MANIFEST_PRESEAL_CONTEXT",
+        "VALIDATE_MANIFEST_LINEAGE_PROJECTION"
+      ],
+      "entry_conditions": [
+        "The run knows whether it is a fresh manifest, same-manifest reuse, continuation child, or replay child.",
+        "Config inheritance and input inheritance choices are available."
+      ],
+      "exit_conditions": [
+        "A manifest context is allocated, reused, or continued with durable lineage refs.",
+        "The live-experience stream is initialized with `shell_route_key = manifest_id` and monotonic sequencing."
+      ],
+      "failure_exit_paths": [
+        "Lineage validation failures stop the run before pre-seal source work starts."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "MANIFEST_AND_LINEAGE",
+        "CONFIG_AND_FREEZE",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "CONFIG_AND_FREEZE": [
+          {
+            "kind": "branch",
+            "label": "child lineage"
+          },
+          {
+            "kind": "module",
+            "label": "FREEZE_CONFIG"
+          },
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_PRESEAL_CONTEXT"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "branch",
+            "label": "manifest allocated"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "event",
+            "label": "ManifestAllocated"
+          },
+          {
+            "kind": "terminal",
+            "label": "ERROR"
+          }
+        ]
+      },
+      "live_experience_updates": [
+        {
+          "cause_ref": null,
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": null,
+          "semantic_motion": null,
+          "source_line_end": 382,
+          "source_line_start": 382,
+          "step_id": "P03-S047",
+          "surface_modules": []
+        },
+        {
+          "cause_ref": "ManifestAllocated",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "ALLOCATED",
+          "posture_state": "STREAMING",
+          "semantic_motion": "ORBIT",
+          "source_line_end": 415,
+          "source_line_start": 386,
+          "step_id": "P03-S050",
+          "surface_modules": [
+            "PULSE_SPINE",
+            "MANIFEST_RIBBON",
+            "HANDOFF_BATON",
+            "DECISION_STAGE",
+            "CONSEQUENCE_RAIL"
+          ]
+        }
+      ],
+      "manifest_mutations": [
+        "BEGIN_MANIFEST",
+        "BEGIN_CHILD_MANIFEST",
+        "UPDATE_MANIFEST_PRESEAL_CONTEXT"
+      ],
+      "notes": [
+        "This is the phase that binds raw request lineage to the stable manifest route and shell continuity contract."
+      ],
+      "ordered_index": 3,
+      "phase_id": "P03",
+      "phase_name": "Allocate, continue, or reuse manifest context and initialize the live experience stream",
+      "return_paths": [
+        "ERROR"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L259[Allocate_continue_or_reuse_manifest_context_and_initialize_the_live_experience_stream]",
+      "source_line_end": 416,
+      "source_line_start": 259,
+      "state_transitions": [
+        "`RunManifest.lifecycle_state` enters `ALLOCATED` for fresh or child allocations.",
+        "Config freeze and input freeze bindings become part of the immutable execution envelope."
+      ],
+      "step_count": 50,
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/manifest_and_config_freeze_contract.md",
+        "Algorithm/state_machines.md",
+        "Algorithm/low_noise_experience_contract.md"
+      ],
+      "transaction_boundary": "No global transaction; allocation and stream initialization must still preserve manifest lineage integrity and reconnect-safe shell identity.",
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [],
+      "audit_events": [
+        "ReplayPreflightValidated",
+        "SourceCollectionStarted",
+        "SourceCollectionCompleted",
+        "LateDataDetected",
+        "SnapshotBuilt",
+        "SnapshotValidated"
+      ],
+      "branch_predicates": [
+        "A sealed pre-start context may be reused when lineage and freeze rules allow it.",
+        "Late data may force spawn-child, review-if-late, or exclude-late posture before seal.",
+        "Replay may reuse a frozen post-seal basis instead of re-reading authority truth."
+      ],
+      "branch_tags": [
+        "sealed reuse",
+        "late-data fork"
+      ],
+      "called_helpers": [
+        {
+          "call_name": "RUN_ENGINE",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "HASH",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "ERROR",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "MODULE_UPDATE",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_DECISION_STAGE_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_EVIDENCE_TIDE_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_STAGE_TASK",
+          "classification": "helper",
+          "reason": "Derived orchestration helper that is constrained by the surrounding core-engine contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "PERSIST_STAGE_WORKSET_AND_OUTBOX",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "AWAIT_STAGE_WORKSET",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "EXECUTION_SLO",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "MERGE_FETCH_RESULTS",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "CLASSIFY_LATE_DATA",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SPAWN_CHILD_MANIFEST_FOR_LATE_DATA",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "NOOP",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_CONSEQUENCE_RAIL_STATE_FROM_LATE_DATA",
+          "classification": "helper",
+          "reason": "Derived orchestration helper that is constrained by the surrounding core-engine contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "MERGE_STAGE_OUTPUTS",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_CANONICALIZATION_TASKS",
+          "classification": "helper",
+          "reason": "Derived orchestration helper that is constrained by the surrounding core-engine contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "DETECT_CROSS_PARTITION_CONFLICTS",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "MERGE_CONFLICTS",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "NO_CROSS_PARTITION_PROMOTION",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_FOCUS_LENS_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "VALIDATE_ARTIFACT_CONTRACTS_FOR_PRESEAL_SET",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "RECORD_PRESEAL_ARTIFACT_CONTRACT_REFS",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        }
+      ],
+      "called_modules": [
+        "VALIDATE_REPLAY_PRECONDITIONS",
+        "RECORD_EVENT",
+        "LOAD_SEALED_RUN_CONTEXT",
+        "PLAN_SOURCE_COLLECTION",
+        "FREEZE_COLLECTION_BOUNDARY",
+        "MATERIALIZE_SOURCE_WINDOW",
+        "PROMOTE_CANONICAL_FACTS",
+        "BUILD_ARTIFACT_SET",
+        "FREEZE_NORMALIZATION_CONTEXT",
+        "BUILD_SNAPSHOT",
+        "VALIDATE",
+        "MEASURE_COMPLETENESS",
+        "LOAD_SCHEMA_BUNDLE",
+        "ARTIFACT_CONTENT_HASH",
+        "FREEZE_INPUT_SET",
+        "DECLARED_EXCLUSIONS",
+        "DECLARE_MISSING_SOURCES",
+        "DECLARE_STALE_SOURCES",
+        "VALIDATE_ARTIFACT",
+        "COMPUTE_EXECUTION_BASIS_HASH",
+        "UPDATE_MANIFEST_PRESEAL_CONTEXT"
+      ],
+      "entry_conditions": [
+        "A manifest exists but has not yet sealed a pre-start execution context.",
+        "The run knows whether it may reuse a sealed pre-start context or must rebuild one from source collection."
+      ],
+      "exit_conditions": [
+        "Either a reusable sealed pre-start basis is loaded, or a fresh source/canonicalization pipeline has built the frozen input set.",
+        "Late-data posture, collection boundary, artifact set, and execution basis hash inputs are known."
+      ],
+      "failure_exit_paths": [
+        "Irrecoverable source-collection or replay-precondition failures stop before manifest sealing."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "SOURCE_COLLECTION_AND_CANONICALIZATION",
+        "CONFIG_AND_FREEZE",
+        "MANIFEST_AND_LINEAGE"
+      ],
+      "lane_highlights": {
+        "CONFIG_AND_FREEZE": [
+          {
+            "kind": "branch",
+            "label": "late-data fork"
+          },
+          {
+            "kind": "module",
+            "label": "FREEZE_COLLECTION_BOUNDARY"
+          },
+          {
+            "kind": "module",
+            "label": "FREEZE_NORMALIZATION_CONTEXT"
+          },
+          {
+            "kind": "module",
+            "label": "LOAD_SCHEMA_BUNDLE"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "module",
+            "label": "VALIDATE_REPLAY_PRECONDITIONS"
+          },
+          {
+            "kind": "module",
+            "label": "LOAD_SEALED_RUN_CONTEXT"
+          }
+        ],
+        "PRESEAL_GATES": [
+          {
+            "kind": "module",
+            "label": "VALIDATE_ARTIFACT"
+          }
+        ],
+        "SOURCE_COLLECTION_AND_CANONICALIZATION": [
+          {
+            "kind": "branch",
+            "label": "sealed reuse"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "module",
+            "label": "BUILD_ARTIFACT_SET"
+          },
+          {
+            "kind": "terminal",
+            "label": "ERROR"
+          }
+        ]
+      },
+      "live_experience_updates": [
+        {
+          "cause_ref": "PrestartContextReused",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "PRESEAL_REUSED",
+          "posture_state": "FROZEN",
+          "semantic_motion": "ECHO",
+          "source_line_end": 486,
+          "source_line_start": 477,
+          "step_id": "P04-S033",
+          "surface_modules": [
+            "DECISION_STAGE",
+            "EVIDENCE_TIDE"
+          ]
+        },
+        {
+          "cause_ref": "SourceCollectionStarted",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "SOURCE_COLLECTION",
+          "posture_state": "STREAMING",
+          "semantic_motion": "TRACE",
+          "source_line_end": 500,
+          "source_line_start": 491,
+          "step_id": "P04-S036",
+          "surface_modules": [
+            "DECISION_STAGE",
+            "EVIDENCE_TIDE"
+          ]
+        },
+        {
+          "cause_ref": "SourceCollectionCompleted",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "SOURCE_COLLECTION_COMPLETED",
+          "posture_state": "STREAMING",
+          "semantic_motion": "TRACE",
+          "source_line_end": 577,
+          "source_line_start": 568,
+          "step_id": "P04-S055",
+          "surface_modules": [
+            "EVIDENCE_TIDE",
+            "DECISION_STAGE"
+          ]
+        },
+        {
+          "cause_ref": "LateDataClassified",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "CONTAINED",
+          "semantic_motion": "RIPPLE",
+          "source_line_end": 602,
+          "source_line_start": 593,
+          "step_id": "P04-S067",
+          "surface_modules": [
+            "CONSEQUENCE_RAIL",
+            "EVIDENCE_TIDE"
+          ]
+        },
+        {
+          "cause_ref": "SnapshotValidated",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "SNAPSHOT_VALIDATED",
+          "posture_state": "STREAMING",
+          "semantic_motion": "TRACE",
+          "source_line_end": 748,
+          "source_line_start": 738,
+          "step_id": "P04-S097",
+          "surface_modules": [
+            "DECISION_STAGE",
+            "EVIDENCE_TIDE",
+            "FOCUS_LENS"
+          ]
+        }
+      ],
+      "manifest_mutations": [
+        "UPDATE_MANIFEST_PRESEAL_CONTEXT"
+      ],
+      "notes": [
+        "`masking_context` is expressly barred from source planning, canonicalization, filing, and transport semantics."
+      ],
+      "ordered_index": 4,
+      "phase_id": "P04",
+      "phase_name": "Load or build the sealed pre-start context using a barriered, partition-aware execution plan",
+      "return_paths": [
+        "ERROR"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L417[Load_or_build_the_sealed_pre-start_context_using_a_barriered_partition-aware_execution_plan]",
+      "source_line_end": 835,
+      "source_line_start": 417,
+      "state_transitions": [
+        "`SourceCollectionRun.lifecycle_state` advances through source-collection states for fresh pre-seal work.",
+        "`Snapshot.lifecycle_state` becomes buildable only from canonicalized, contract-valid inputs."
+      ],
+      "step_count": 115,
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/manifest_and_config_freeze_contract.md",
+        "Algorithm/late_data_authority_correction_and_replay_propagation_contract.md",
+        "Algorithm/state_machines.md"
+      ],
+      "transaction_boundary": "No atomic transaction. This phase is about building or recovering the immutable pre-seal input basis.",
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [
+        "ConfigFreeze",
+        "InputFreeze",
+        "SourcePlan",
+        "SourceWindow",
+        "CollectionBoundary",
+        "NormalizationContext",
+        "SourceRecordSet",
+        "EvidenceItemSet",
+        "CandidateFactSet",
+        "ConflictSet",
+        "CanonicalFactSet",
+        "Snapshot"
+      ],
+      "audit_events": [
+        "ManifestFrozen",
+        "ManifestSealed"
+      ],
+      "branch_predicates": [
+        "Pre-seal evaluation may stop as blocked, review-required, or sealable success.",
+        "A pre-start system fault after seal but before `RunStarted` still finalizes as `BLOCKED`, not `FAILED`.",
+        "Pre-seal outcomes in `{PASS_WITH_NOTICE, MANUAL_REVIEW}` remain binding after seal."
+      ],
+      "branch_tags": [
+        "pre-seal block",
+        "sealed success"
+      ],
+      "called_helpers": [
+        {
+          "call_name": "PROVIDER_ENVIRONMENT_REFS",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "EMIT_ORDERED_GATES",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "GATE_BLOCKS_PROGRESS",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE_FROM_GATES",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "MODULE_UPDATE",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_MANIFEST_RIBBON_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_DECISION_STAGE_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_CONSEQUENCE_RAIL_STATE_FROM_GATES",
+          "classification": "helper",
+          "reason": "Derived orchestration helper that is constrained by the surrounding core-engine contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BEGIN_ATOMIC_TRANSACTION",
+          "classification": "helper",
+          "reason": "Atomic transaction primitive defined directly in the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "COMMIT_ATOMIC_TRANSACTION",
+          "classification": "helper",
+          "reason": "Atomic transaction primitive defined directly in the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        }
+      ],
+      "called_modules": [
+        "FINALIZE_RUN_FAILURE",
+        "TRANSITION_MANIFEST",
+        "RECORD_EVENT",
+        "MANIFEST_GATE",
+        "ARTIFACT_CONTRACT_GATE",
+        "INPUT_BOUNDARY_GATE",
+        "DECLARED_EXCLUSIONS",
+        "DATA_QUALITY_GATE",
+        "BUILD_PRESEAL_GATE_EVALUATION",
+        "PERSIST_PRESTART_TERMINAL_CONTEXT",
+        "FINALIZE_TERMINAL_OUTCOME",
+        "WRITE_ARTIFACT",
+        "RETENTION_TAG",
+        "PERSIST_GATE_BATCH",
+        "UPDATE_MANIFEST_PRESEAL_CONTEXT",
+        "SEAL_MANIFEST"
+      ],
+      "entry_conditions": [
+        "Pre-seal artifacts, input freeze, and schema bundle are available or explicitly reused.",
+        "The manifest is not yet started, so failures remain pre-start outcomes."
+      ],
+      "exit_conditions": [
+        "Ordered pre-seal gates are persisted and either bind a blocked/review posture or allow sealing.",
+        "When a new pre-start context was built, the manifest is sealed exactly once."
+      ],
+      "failure_exit_paths": [
+        "`FINALIZE_TERMINAL_OUTCOME(...)` persists blocked or review-required pre-start outcomes.",
+        "`FINALIZE_RUN_FAILURE(...)` captures irrecoverable pre-start failure without starting the run."
+      ],
+      "gate_evaluations": [
+        "MANIFEST_GATE",
+        "ARTIFACT_CONTRACT_GATE",
+        "INPUT_BOUNDARY_GATE",
+        "DATA_QUALITY_GATE"
+      ],
+      "lane_focus": [
+        "PRESEAL_GATES",
+        "MANIFEST_AND_LINEAGE",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "CONFIG_AND_FREEZE": [
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_PRESEAL_CONTEXT"
+          },
+          {
+            "kind": "module",
+            "label": "SEAL_MANIFEST"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "branch",
+            "label": "sealed success"
+          },
+          {
+            "kind": "module",
+            "label": "FINALIZE_RUN_FAILURE"
+          },
+          {
+            "kind": "module",
+            "label": "TRANSITION_MANIFEST"
+          },
+          {
+            "kind": "terminal",
+            "label": "FINALIZE_TERMINAL_OUTCOME"
+          }
+        ],
+        "PRESEAL_GATES": [
+          {
+            "kind": "branch",
+            "label": "pre-seal block"
+          },
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "gate",
+            "label": "MANIFEST_GATE"
+          }
+        ],
+        "RETENTION_AND_TERMINALIZATION": [
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          },
+          {
+            "kind": "module",
+            "label": "RETENTION_TAG"
+          },
+          {
+            "kind": "artifact",
+            "label": "Snapshot"
+          }
+        ]
+      },
+      "live_experience_updates": [
+        {
+          "cause_ref": null,
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "PRESEAL_GATES",
+          "posture_state": null,
+          "semantic_motion": null,
+          "source_line_end": 917,
+          "source_line_start": 913,
+          "step_id": "P05-S022",
+          "surface_modules": []
+        },
+        {
+          "cause_ref": "PresealBlocked",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "PRESEAL_BLOCKED",
+          "posture_state": "FRACTURED",
+          "semantic_motion": "FRACTURE",
+          "source_line_end": 955,
+          "source_line_start": 939,
+          "step_id": "P05-S025",
+          "surface_modules": [
+            "MANIFEST_RIBBON",
+            "DECISION_STAGE",
+            "CONSEQUENCE_RAIL"
+          ]
+        },
+        {
+          "cause_ref": "ManifestSealed",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "SEALED",
+          "posture_state": "FROZEN",
+          "semantic_motion": "SEAL",
+          "source_line_end": 1012,
+          "source_line_start": 1003,
+          "step_id": "P05-S050",
+          "surface_modules": [
+            "MANIFEST_RIBBON",
+            "DECISION_STAGE"
+          ]
+        }
+      ],
+      "manifest_mutations": [
+        "TRANSITION_MANIFEST",
+        "PERSIST_PRESTART_TERMINAL_CONTEXT",
+        "PERSIST_GATE_BATCH",
+        "UPDATE_MANIFEST_PRESEAL_CONTEXT",
+        "SEAL_MANIFEST"
+      ],
+      "notes": [
+        "The seal step is atomic with the pre-start persistence boundary, which makes later replay and reuse defensible."
+      ],
+      "ordered_index": 5,
+      "phase_id": "P05",
+      "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+      "return_paths": [
+        "FINALIZE_RUN_FAILURE",
+        "FINALIZE_TERMINAL_OUTCOME"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L836[Evaluate_the_ordered_pre-seal_gate_chain_persist_pre-start_blocked_context_if_needed_and_seal_only_when_a_new_pre-start_context_was_built]",
+      "source_line_end": 1013,
+      "source_line_start": 836,
+      "state_transitions": [
+        "`RunManifest.lifecycle_state` moves from `ALLOCATED`/`FROZEN` to `SEALED` when the new pre-start context is accepted.",
+        "Pre-start gate failure finalizes the manifest as `BLOCKED` before command-side start."
+      ],
+      "step_count": 50,
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/invariants_and_gates.md",
+        "Algorithm/exact_gate_logic_and_decision_tables.md",
+        "Algorithm/manifest_and_config_freeze_contract.md"
+      ],
+      "transaction_boundary": "One atomic pre-start persistence boundary records gate outputs, terminal pre-start context when needed, and the seal mutation when the manifest is newly built.",
+      "transaction_spans": [
+        {
+          "label": "Persist pre-start context and seal when eligible",
+          "lane_end": "PRESEAL_GATES",
+          "lane_start": "MANIFEST_AND_LINEAGE"
+        }
+      ]
+    },
+    {
+      "artifact_writes": [],
+      "audit_events": [
+        "FrozenPostSealBasisLoaded",
+        "RunStartClaimRejected",
+        "RunStarted"
+      ],
+      "branch_predicates": [
+        "Claim rejection may surface active run, stale reclaim requirements, or already-terminal bundle reuse.",
+        "The run may still return an existing terminal bundle instead of starting a second writer."
+      ],
+      "branch_tags": [
+        "start claim",
+        "single writer"
+      ],
+      "called_helpers": [
+        {
+          "call_name": "ERROR",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_STAGE_DAG",
+          "classification": "helper",
+          "reason": "Derived orchestration helper that is constrained by the surrounding core-engine contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "STAGE_TASK",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "HASH",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "OPTIONAL_STAGE_TASK",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BEGIN_ATOMIC_TRANSACTION",
+          "classification": "helper",
+          "reason": "Atomic transaction primitive defined directly in the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SERVICE_INSTANCE_ID",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "EXECUTION_LEASE_TTL",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "ROLLBACK_ATOMIC_TRANSACTION",
+          "classification": "helper",
+          "reason": "Atomic transaction primitive defined directly in the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "PERSIST_STAGE_DAG_AND_OUTBOX",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "RELOAD_PERSISTED_STAGE_DAG_AND_OUTBOX",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "COMMIT_ATOMIC_TRANSACTION",
+          "classification": "helper",
+          "reason": "Atomic transaction primitive defined directly in the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "MODULE_UPDATE",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_DECISION_STAGE_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_EVIDENCE_TIDE_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        }
+      ],
+      "called_modules": [
+        "LOAD_FROZEN_POST_SEAL_BASIS",
+        "RECORD_EVENT",
+        "SEED",
+        "CLAIM_MANIFEST_START",
+        "LOAD_EXISTING_DECISION_BUNDLE"
+      ],
+      "entry_conditions": [
+        "A sealed manifest exists and has not yet been legally started by another writer.",
+        "The post-seal execution plan can be published only if a manifest-start claim succeeds."
+      ],
+      "exit_conditions": [
+        "A compare-and-swap manifest-start lease is claimed and the first post-seal DAG is atomically published.",
+        "`RunStarted` occurs only after a sealed manifest exists."
+      ],
+      "failure_exit_paths": [
+        "Start-claim rejection or invalid manifest posture stops progression before worker execution begins."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "MANIFEST_AND_LINEAGE",
+        "POSTSEAL_DAG"
+      ],
+      "lane_highlights": {
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "branch",
+            "label": "start claim"
+          },
+          {
+            "kind": "terminal",
+            "label": "LOAD_EXISTING_DECISION_BUNDLE"
+          },
+          {
+            "kind": "module",
+            "label": "LOAD_FROZEN_POST_SEAL_BASIS"
+          },
+          {
+            "kind": "module",
+            "label": "CLAIM_MANIFEST_START"
+          }
+        ],
+        "POSTSEAL_DAG": [
+          {
+            "kind": "branch",
+            "label": "single writer"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "terminal",
+            "label": "ERROR"
+          },
+          {
+            "kind": "event",
+            "label": "RunStartClaimRejected"
+          }
+        ]
+      },
+      "live_experience_updates": [
+        {
+          "cause_ref": "RunStarted",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "POST_SEAL_COMMANDS",
+          "posture_state": "STREAMING",
+          "semantic_motion": "TRACE",
+          "source_line_end": 1142,
+          "source_line_start": 1133,
+          "step_id": "P06-S047",
+          "surface_modules": [
+            "DECISION_STAGE",
+            "EVIDENCE_TIDE"
+          ]
+        }
+      ],
+      "manifest_mutations": [
+        "CLAIM_MANIFEST_START"
+      ],
+      "notes": [
+        "This is the strongest visible proof that the sealed manifest precedes `RunStarted` and worker fan-out."
+      ],
+      "ordered_index": 6,
+      "phase_id": "P06",
+      "phase_name": "Claim the sealed manifest and publish the post-seal command DAG atomically",
+      "return_paths": [
+        "ERROR",
+        "LOAD_EXISTING_DECISION_BUNDLE"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L1014[Claim_the_sealed_manifest_and_publish_the_post-seal_command_DAG_atomically]",
+      "source_line_end": 1143,
+      "source_line_start": 1014,
+      "state_transitions": [
+        "`RunManifest.lifecycle_state` moves from `SEALED` to `IN_PROGRESS` only after claim + DAG publish succeeds."
+      ],
+      "step_count": 47,
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/state_machines.md",
+        "Algorithm/observability_and_audit_contract.md"
+      ],
+      "transaction_boundary": "A single atomic transaction claims manifest start and publishes the first post-seal DAG or workset.",
+      "transaction_spans": [
+        {
+          "label": "Claim manifest start and publish DAG",
+          "lane_end": "POSTSEAL_DAG",
+          "lane_start": "MANIFEST_AND_LINEAGE"
+        }
+      ]
+    },
+    {
+      "artifact_writes": [],
+      "audit_events": [
+        "HistoricalAuthorityBasisReused",
+        "HistoricalLateDataBasisReused",
+        "ComputeCompleted",
+        "ForecastCompleted",
+        "RiskScored",
+        "GraphBuilt"
+      ],
+      "branch_predicates": [
+        "Previously completed lineage-compatible tasks may be reused rather than recomputed.",
+        "Projection stages may time out as `CONTINUE_WITHOUT_PROJECTION` without failing command-side truth."
+      ],
+      "branch_tags": [
+        "stage reuse",
+        "projection lag"
+      ],
+      "called_helpers": [
+        {
+          "call_name": "AWAIT_STAGE_DAG",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "EXECUTION_SLO",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "ADOPT_PERSISTED_STAGE_ARTIFACT",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "HAS_STAGE_ARTIFACT",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "LOAD_STAGE_RESULT",
+          "classification": "helper",
+          "reason": "Derived orchestration helper that is constrained by the surrounding core-engine contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "MODULE_UPDATE",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_DECISION_STAGE_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_EVIDENCE_TIDE_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_FOCUS_LENS_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        }
+      ],
+      "called_modules": [
+        "FINALIZE_RUN_FAILURE",
+        "RECORD_EVENT",
+        "COLLECTION_LATE_DATA_BINDINGS",
+        "UPDATE_MANIFEST_OUTPUTS",
+        "SELECT_PRIMARY_PROOF_BUNDLE_REF"
+      ],
+      "entry_conditions": [
+        "The post-seal DAG is durable and a single writer owns the manifest-start lease.",
+        "Workers must persist first-class artifacts before any completion signal becomes visible."
+      ],
+      "exit_conditions": [
+        "Mandatory post-seal artifacts are adopted into manifest outputs.",
+        "Projection lag may continue, but command-side truth has the required compute, risk, graph, and related outputs."
+      ],
+      "failure_exit_paths": [
+        "Missing mandatory stage artifacts or invalid adopted outputs escalate as run failure after start."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "POSTSEAL_DAG",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "LIVE_EXPERIENCE": [
+          {
+            "kind": "branch",
+            "label": "projection lag"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "terminal",
+            "label": "FINALIZE_RUN_FAILURE"
+          },
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_OUTPUTS"
+          },
+          {
+            "kind": "module",
+            "label": "SELECT_PRIMARY_PROOF_BUNDLE_REF"
+          }
+        ],
+        "POSTSEAL_DAG": [
+          {
+            "kind": "branch",
+            "label": "stage reuse"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "event",
+            "label": "HistoricalAuthorityBasisReused"
+          },
+          {
+            "kind": "event",
+            "label": "HistoricalLateDataBasisReused"
+          }
+        ],
+        "SOURCE_COLLECTION_AND_CANONICALIZATION": [
+          {
+            "kind": "module",
+            "label": "COLLECTION_LATE_DATA_BINDINGS"
+          }
+        ]
+      },
+      "live_experience_updates": [
+        {
+          "cause_ref": "PostSealCommandsCompleted",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "ANALYTICS_READY",
+          "posture_state": "STREAMING",
+          "semantic_motion": "TRACE",
+          "source_line_end": 1254,
+          "source_line_start": 1244,
+          "step_id": "P07-S041",
+          "surface_modules": [
+            "DECISION_STAGE",
+            "EVIDENCE_TIDE",
+            "FOCUS_LENS"
+          ]
+        }
+      ],
+      "manifest_mutations": [
+        "UPDATE_MANIFEST_OUTPUTS"
+      ],
+      "notes": [
+        "The DAG boundary separates command truth from slower read-model materialization without losing lineage determinism."
+      ],
+      "ordered_index": 7,
+      "phase_id": "P07",
+      "phase_name": "Await post-seal command DAG completion and adopt mandatory outputs",
+      "return_paths": [
+        "FINALIZE_RUN_FAILURE"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L1144[Await_post-seal_command_DAG_completion_and_adopt_mandatory_outputs]",
+      "source_line_end": 1255,
+      "source_line_start": 1144,
+      "state_transitions": [
+        "No manifest terminalization occurs here; the run remains `IN_PROGRESS` with adopted post-seal artifacts."
+      ],
+      "step_count": 41,
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/observability_and_audit_contract.md",
+        "Algorithm/low_noise_experience_contract.md"
+      ],
+      "transaction_boundary": "No overarching transaction. Worker-local durability must precede task completion, and the orchestrator adopts persisted outputs deterministically.",
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [
+        "GateDecisionRecord"
+      ],
+      "audit_events": [
+        "GateEvaluated"
+      ],
+      "branch_predicates": [
+        "Retention posture may pass, pass-with-notice, require review, or block downstream progression."
+      ],
+      "branch_tags": [
+        "retention gate"
+      ],
+      "called_helpers": [
+        {
+          "call_name": "DERIVE_WEIGHTED_PATH_SURVIVABILITY",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "DERIVE_LIMITATION_CLARITY_RATIO",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "DERIVE_CRITICAL_SILENT_LIMITATION_COUNT",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "DERIVE_NONCRITICAL_SILENT_LIMITATION_COUNT",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "DERIVE_CRITICAL_EXPLANATION_FAILURE_COUNT",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "DERIVE_NONCRITICAL_EXPLANATION_FAILURE_COUNT",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE_FROM_GATES",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        }
+      ],
+      "called_modules": [
+        "RETENTION_EVIDENCE_GATE",
+        "WRITE_ARTIFACT",
+        "RECORD_EVENT",
+        "APPEND_MANIFEST_GATES"
+      ],
+      "entry_conditions": [
+        "Core compute, risk, graph, and retained evidence posture are available after post-seal adoption."
+      ],
+      "exit_conditions": [
+        "The retention evidence gate is recorded and becomes part of the ordered non-access gate chain."
+      ],
+      "failure_exit_paths": [
+        "This phase records binding posture but does not itself finalize the run; terminalization happens in later decisive branches."
+      ],
+      "gate_evaluations": [
+        "RETENTION_EVIDENCE_GATE"
+      ],
+      "lane_focus": [
+        "RETENTION_AND_TERMINALIZATION",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "AUTHORITY_CONTEXT": [
+          {
+            "kind": "gate",
+            "label": "RETENTION_EVIDENCE_GATE"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "module",
+            "label": "APPEND_MANIFEST_GATES"
+          }
+        ],
+        "RETENTION_AND_TERMINALIZATION": [
+          {
+            "kind": "branch",
+            "label": "retention gate"
+          },
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          },
+          {
+            "kind": "artifact",
+            "label": "GateDecisionRecord"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          }
+        ]
+      },
+      "live_experience_updates": [
+        {
+          "cause_ref": null,
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "RETENTION_GATE",
+          "posture_state": null,
+          "semantic_motion": null,
+          "source_line_end": 1291,
+          "source_line_start": 1287,
+          "step_id": "P08-S006",
+          "surface_modules": []
+        }
+      ],
+      "manifest_mutations": [
+        "APPEND_MANIFEST_GATES"
+      ],
+      "notes": [
+        "Retention limitations are legal constraints on what can be shown or relied upon, not client-side decoration."
+      ],
+      "ordered_index": 8,
+      "phase_id": "P08",
+      "phase_name": "Retention evidence gate",
+      "return_paths": [],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L1256[Retention_evidence_gate]",
+      "source_line_end": 1292,
+      "source_line_start": 1256,
+      "state_transitions": [
+        "Retention-limited posture can narrow later read-side visibility without mutating command truth."
+      ],
+      "step_count": 6,
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/invariants_and_gates.md",
+        "Algorithm/low_noise_experience_contract.md"
+      ],
+      "transaction_boundary": "No atomic transaction. The retention gate becomes durable input to later trust, filing, and shell-posture decisions.",
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [
+        "DriftBaselineEnvelope",
+        "RetroactiveImpactAnalysis",
+        "DriftRecord",
+        "AmendmentWindowContext",
+        "GateDecisionRecord",
+        "ParityResult"
+      ],
+      "audit_events": [
+        "BaselineSelected",
+        "DriftRetroactiveImpactAnalyzed",
+        "DriftSuperseded",
+        "DriftDetected",
+        "DriftClassified",
+        "AmendmentWindowEvaluated",
+        "IntentToAmendTriggered",
+        "GateEvaluated",
+        "WorkflowOpened",
+        "ParityEvaluated"
+      ],
+      "branch_predicates": [
+        "Provider-required amendment-intent calculation may emit a decisive early amendment gate before the ordinary filing path.",
+        "Parity or filing-readiness validation may stop the run early with blocked or review posture.",
+        "Out-of-band authority truth remains distinct from internal command-side progression."
+      ],
+      "branch_tags": [
+        "parity gate",
+        "early filing terminal"
+      ],
+      "called_helpers": [
+        {
+          "call_name": "RESOLVE_AUTHORITY_COMPARISON_BASIS",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "HASH",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "EXECUTION_SLO",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "MODULE_UPDATE",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_DRIFT_FIELD_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_CONSEQUENCE_RAIL_STATE_FROM_AMENDMENT",
+          "classification": "helper",
+          "reason": "Derived orchestration helper that is constrained by the surrounding core-engine contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE_FROM_GATES",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_CONSEQUENCE_RAIL_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "GATE_BLOCKS_PROGRESS",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "MERGE_COMPARISON_BASIS",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        }
+      ],
+      "called_modules": [
+        "EXECUTE_AUTHORITY_CALCULATION_FLOW",
+        "SELECT_DRIFT_BASELINE",
+        "WRITE_ARTIFACT",
+        "RECORD_EVENT",
+        "BUILD_DRIFT_DELTA_VECTOR",
+        "CLASSIFY_TEMPORAL_POSITION",
+        "ANALYZE_RETROACTIVE_IMPACT",
+        "DETECT_DRIFT",
+        "MATERIALIZE_AMENDMENT_WINDOW_CONTEXT",
+        "EVALUATE_AMENDMENT_ELIGIBILITY",
+        "UPSERT_AMENDMENT_CASE",
+        "UPDATE_MANIFEST_OUTPUTS",
+        "AMENDMENT_GATE",
+        "APPEND_MANIFEST_GATES",
+        "PLAN_WORKFLOW",
+        "UPSERT_WORKFLOW_ITEMS",
+        "SELECT_PRIMARY_PROOF_BUNDLE_REF",
+        "FINALIZE_TERMINAL_OUTCOME",
+        "FILING_GATE",
+        "OBLIGATION_STATUS",
+        "LOAD_OVERRIDES",
+        "EVALUATE_PARITY",
+        "PARITY_GATE"
+      ],
+      "entry_conditions": [
+        "Non-access pre-trust gate context is available and the run can consult authority-facing comparison basis.",
+        "Authority state must remain distinct from internal progression state and packet intent."
+      ],
+      "exit_conditions": [
+        "Authority comparison basis, parity result, and parity gate posture are persisted.",
+        "Early filing-readiness or amendment-intent terminalization may already have returned."
+      ],
+      "failure_exit_paths": [
+        "`FINALIZE_TERMINAL_OUTCOME(...)` may return early for filing-readiness or amendment-intent validation failure."
+      ],
+      "gate_evaluations": [
+        "AMENDMENT_GATE",
+        "FILING_GATE",
+        "PARITY_GATE"
+      ],
+      "lane_focus": [
+        "AUTHORITY_CONTEXT",
+        "FILING_AND_SUBMISSION",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "AUTHORITY_CONTEXT": [
+          {
+            "kind": "branch",
+            "label": "parity gate"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          },
+          {
+            "kind": "artifact",
+            "label": "GateDecisionRecord"
+          }
+        ],
+        "DRIFT_AND_AMENDMENT": [
+          {
+            "kind": "gate",
+            "label": "AMENDMENT_GATE"
+          },
+          {
+            "kind": "module",
+            "label": "SELECT_DRIFT_BASELINE"
+          },
+          {
+            "kind": "module",
+            "label": "BUILD_DRIFT_DELTA_VECTOR"
+          }
+        ],
+        "FILING_AND_SUBMISSION": [
+          {
+            "kind": "branch",
+            "label": "early filing terminal"
+          },
+          {
+            "kind": "gate",
+            "label": "FILING_GATE"
+          },
+          {
+            "kind": "module",
+            "label": "OBLIGATION_STATUS"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "terminal",
+            "label": "FINALIZE_TERMINAL_OUTCOME"
+          },
+          {
+            "kind": "module",
+            "label": "APPEND_MANIFEST_GATES"
+          },
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_OUTPUTS"
+          }
+        ],
+        "POSTSEAL_DAG": [
+          {
+            "kind": "module",
+            "label": "SELECT_PRIMARY_PROOF_BUNDLE_REF"
+          }
+        ],
+        "TRUST_AND_WORKFLOW": [
+          {
+            "kind": "module",
+            "label": "PLAN_WORKFLOW"
+          },
+          {
+            "kind": "module",
+            "label": "UPSERT_WORKFLOW_ITEMS"
+          }
+        ]
+      },
+      "live_experience_updates": [
+        {
+          "cause_ref": "IntentToAmendTriggered",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "CONTAINED",
+          "semantic_motion": "RIPPLE",
+          "source_line_end": 1420,
+          "source_line_start": 1411,
+          "step_id": "P09-S038",
+          "surface_modules": [
+            "DRIFT_FIELD",
+            "CONSEQUENCE_RAIL"
+          ]
+        },
+        {
+          "cause_ref": null,
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "AMENDMENT_READINESS_EARLY",
+          "posture_state": null,
+          "semantic_motion": null,
+          "source_line_end": 1444,
+          "source_line_start": 1440,
+          "step_id": "P09-S044",
+          "surface_modules": []
+        },
+        {
+          "cause_ref": "WorkflowOpened",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "CONTAINED",
+          "semantic_motion": "ECHO",
+          "source_line_end": 1466,
+          "source_line_start": 1458,
+          "step_id": "P09-S049",
+          "surface_modules": [
+            "CONSEQUENCE_RAIL"
+          ]
+        },
+        {
+          "cause_ref": null,
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "EARLY_FILING_READINESS",
+          "posture_state": null,
+          "semantic_motion": null,
+          "source_line_end": 1535,
+          "source_line_start": 1531,
+          "step_id": "P09-S062",
+          "surface_modules": []
+        },
+        {
+          "cause_ref": null,
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "PARITY_GATE",
+          "posture_state": null,
+          "semantic_motion": null,
+          "source_line_end": 1619,
+          "source_line_start": 1615,
+          "step_id": "P09-S076",
+          "surface_modules": []
+        }
+      ],
+      "manifest_mutations": [
+        "UPDATE_MANIFEST_OUTPUTS",
+        "APPEND_MANIFEST_GATES"
+      ],
+      "notes": [
+        "Authority calculations use controlled outbox + inbox recovery, so inline waits never invent unnormalized external truth."
+      ],
+      "ordered_index": 9,
+      "phase_id": "P09",
+      "phase_name": "Authority context, comparison basis, parity, and parity gate",
+      "return_paths": [
+        "FINALIZE_TERMINAL_OUTCOME"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L1293[Authority_context_comparison_basis_parity_and_parity_gate]",
+      "source_line_end": 1620,
+      "source_line_start": 1293,
+      "state_transitions": [
+        "Authority comparison basis and parity artifacts become durable references for later trust and filing."
+      ],
+      "step_count": 76,
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/exact_gate_logic_and_decision_tables.md",
+        "Algorithm/observability_and_audit_contract.md",
+        "Algorithm/late_data_authority_correction_and_replay_propagation_contract.md"
+      ],
+      "transaction_boundary": "No single transaction. Authority comparison and parity remain durable command-side artifacts that can drive early terminalization.",
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [
+        "DriftBaselineEnvelope",
+        "RetroactiveImpactAnalysis",
+        "DriftRecord",
+        "AmendmentWindowContext"
+      ],
+      "audit_events": [
+        "BaselineSelected",
+        "DriftRetroactiveImpactAnalyzed",
+        "DriftSuperseded",
+        "DriftDetected",
+        "DriftClassified",
+        "AmendmentWindowEvaluated",
+        "AmendmentEligibilityEvaluated"
+      ],
+      "branch_predicates": [
+        "Baseline selection may prefer authority-corrected, amended, filed, out-of-band, or working states depending lineage.",
+        "Drift may imply replay requirement, review escalation, or amendment eligibility.",
+        "`AMENDMENT_GATE` is explicitly forbidden during drift preparation and must happen later in the run."
+      ],
+      "branch_tags": [
+        "drift baseline",
+        "no amendment gate"
+      ],
+      "called_helpers": [
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "MODULE_UPDATE",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_DRIFT_FIELD_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_CONSEQUENCE_RAIL_STATE_FROM_AMENDMENT",
+          "classification": "helper",
+          "reason": "Derived orchestration helper that is constrained by the surrounding core-engine contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        }
+      ],
+      "called_modules": [
+        "SELECT_DRIFT_BASELINE",
+        "WRITE_ARTIFACT",
+        "RECORD_EVENT",
+        "BUILD_DRIFT_DELTA_VECTOR",
+        "CLASSIFY_TEMPORAL_POSITION",
+        "ANALYZE_RETROACTIVE_IMPACT",
+        "DETECT_DRIFT",
+        "MATERIALIZE_AMENDMENT_WINDOW_CONTEXT",
+        "EVALUATE_AMENDMENT_ELIGIBILITY",
+        "UPSERT_AMENDMENT_CASE",
+        "UPDATE_MANIFEST_OUTPUTS",
+        "LOAD_AMENDMENT_CASE",
+        "FINALIZE_RUN_FAILURE"
+      ],
+      "entry_conditions": [
+        "Authority comparison and parity posture are known.",
+        "The run can select the lawful drift baseline and evaluate retroactive impact."
+      ],
+      "exit_conditions": [
+        "Drift, amendment-window context, retroactive impact, and amendment case posture are prepared for later gates."
+      ],
+      "failure_exit_paths": [
+        "No direct terminalization occurs here; this phase prepares downstream drift/amendment consequences only."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "DRIFT_AND_AMENDMENT"
+      ],
+      "lane_highlights": {
+        "DRIFT_AND_AMENDMENT": [
+          {
+            "kind": "branch",
+            "label": "drift baseline"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          },
+          {
+            "kind": "module",
+            "label": "SELECT_DRIFT_BASELINE"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_OUTPUTS"
+          },
+          {
+            "kind": "module",
+            "label": "LOAD_AMENDMENT_CASE"
+          },
+          {
+            "kind": "module",
+            "label": "FINALIZE_RUN_FAILURE"
+          }
+        ]
+      },
+      "live_experience_updates": [
+        {
+          "cause_ref": "DriftDetected",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "CONTAINED",
+          "semantic_motion": "RIPPLE",
+          "source_line_end": 1738,
+          "source_line_start": 1729,
+          "step_id": "P10-S025",
+          "surface_modules": [
+            "DRIFT_FIELD",
+            "CONSEQUENCE_RAIL"
+          ]
+        }
+      ],
+      "manifest_mutations": [
+        "UPDATE_MANIFEST_OUTPUTS"
+      ],
+      "notes": [
+        "This phase protects the semantic distinction between drift diagnosis and amendment permissioning."
+      ],
+      "ordered_index": 10,
+      "phase_id": "P10",
+      "phase_name": "Drift posture and amendment posture preparation",
+      "return_paths": [],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L1621[Drift_posture_and_amendment_posture_preparation]",
+      "source_line_end": 1746,
+      "source_line_start": 1621,
+      "state_transitions": [
+        "`AmendmentCase.lifecycle_state` is prepared in pre-gate posture such as `NOT_ELIGIBLE`, `ELIGIBLE`, or `INTENT_REQUIRED`."
+      ],
+      "step_count": 30,
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/late_data_authority_correction_and_replay_propagation_contract.md",
+        "Algorithm/state_machines.md"
+      ],
+      "transaction_boundary": "No atomic transaction. Drift and amendment-prep artifacts are persisted as analysis inputs to later gates.",
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [
+        "TrustSummary",
+        "GateDecisionRecord"
+      ],
+      "audit_events": [
+        "TrustSynthesized",
+        "GateEvaluated"
+      ],
+      "branch_predicates": [
+        "Trust currency, override dependencies, and gate explanation can still produce blocked or review posture.",
+        "The trust posture may later terminalize the run even if filing scope was requested."
+      ],
+      "branch_tags": [
+        "trust gate"
+      ],
+      "called_helpers": [
+        {
+          "call_name": "BASELINE_SUBMISSION_STATE",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE_FROM_GATES",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "MODULE_UPDATE",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_DECISION_STAGE_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_PACKET_FORGE_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "GATE_REQUIRES_REVIEW",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "GATE_BLOCKS_PROGRESS",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        }
+      ],
+      "called_modules": [
+        "DERIVE_REQUIRED_HUMAN_STEPS",
+        "ASSESS_TRUST_INPUT_STATE",
+        "LOAD_OVERRIDES",
+        "SYNTHESIZE_TRUST",
+        "WRITE_ARTIFACT",
+        "RECORD_EVENT",
+        "TRUST_GATE",
+        "APPEND_MANIFEST_GATES",
+        "UPSERT_FILING_CASE",
+        "UPDATE_MANIFEST_OUTPUTS"
+      ],
+      "entry_conditions": [
+        "Parity, retention, drift, and override context are available."
+      ],
+      "exit_conditions": [
+        "Trust summary, trust gate, and command-side filing case posture are persisted."
+      ],
+      "failure_exit_paths": [
+        "This phase does not directly return, but its gate posture may trigger trust-based terminalization in the next read-model phase."
+      ],
+      "gate_evaluations": [
+        "TRUST_GATE"
+      ],
+      "lane_focus": [
+        "TRUST_AND_WORKFLOW"
+      ],
+      "lane_highlights": {
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_OUTPUTS"
+          },
+          {
+            "kind": "module",
+            "label": "APPEND_MANIFEST_GATES"
+          }
+        ],
+        "TRUST_AND_WORKFLOW": [
+          {
+            "kind": "branch",
+            "label": "trust gate"
+          },
+          {
+            "kind": "module",
+            "label": "LOAD_OVERRIDES"
+          },
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          }
+        ]
+      },
+      "live_experience_updates": [
+        {
+          "cause_ref": null,
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "TRUST_GATE",
+          "posture_state": null,
+          "semantic_motion": null,
+          "source_line_end": 1842,
+          "source_line_start": 1838,
+          "step_id": "P11-S018",
+          "surface_modules": []
+        },
+        {
+          "cause_ref": "TrustSynthesized",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "TRUST_READY",
+          "posture_state": "CONTAINED",
+          "semantic_motion": "TRACE",
+          "source_line_end": 1853,
+          "source_line_start": 1844,
+          "step_id": "P11-S019",
+          "surface_modules": [
+            "DECISION_STAGE",
+            "PACKET_FORGE"
+          ]
+        }
+      ],
+      "manifest_mutations": [
+        "APPEND_MANIFEST_GATES",
+        "UPDATE_MANIFEST_OUTPUTS"
+      ],
+      "notes": [
+        "Trust is the command-side synthesis of parity, risk, retention, authority context, and override legality."
+      ],
+      "ordered_index": 11,
+      "phase_id": "P11",
+      "phase_name": "Trust synthesis and command-side case state",
+      "return_paths": [],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L1747[Trust_synthesis_and_command-side_case_state]",
+      "source_line_end": 1858,
+      "source_line_start": 1747,
+      "state_transitions": [
+        "Trust and filing-case state become command-side truth that later phases can project or terminalize from."
+      ],
+      "step_count": 21,
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/invariants_and_gates.md",
+        "Algorithm/exact_gate_logic_and_decision_tables.md"
+      ],
+      "transaction_boundary": "No atomic transaction. Trust posture is durable input to workflow refresh and possible early terminalization.",
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [],
+      "audit_events": [
+        "WorkflowOpened",
+        "WorkflowResolved"
+      ],
+      "branch_predicates": [
+        "Workflow planning may open new operator work or produce no-op refresh if no action is required."
+      ],
+      "branch_tags": [
+        "workflow refresh"
+      ],
+      "called_helpers": [
+        {
+          "call_name": "ORDERED_SET_DIFF",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "MODULE_UPDATE",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_CONSEQUENCE_RAIL_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        }
+      ],
+      "called_modules": [
+        "PLAN_WORKFLOW",
+        "UPSERT_WORKFLOW_ITEMS",
+        "RECORD_EVENT"
+      ],
+      "entry_conditions": [
+        "Trust posture and the ordered gate chain are stable enough to emit operator workflow consequences."
+      ],
+      "exit_conditions": [
+        "Workflow items and immediate-consequence posture are refreshed for the current manifest."
+      ],
+      "failure_exit_paths": [
+        "No direct terminal return occurs here."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "TRUST_AND_WORKFLOW",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "TRUST_AND_WORKFLOW": [
+          {
+            "kind": "branch",
+            "label": "workflow refresh"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "module",
+            "label": "PLAN_WORKFLOW"
+          },
+          {
+            "kind": "module",
+            "label": "UPSERT_WORKFLOW_ITEMS"
+          }
+        ]
+      },
+      "live_experience_updates": [
+        {
+          "cause_ref": null,
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": null,
+          "semantic_motion": "ECHO",
+          "source_line_end": 1910,
+          "source_line_start": 1896,
+          "step_id": "P12-S014",
+          "surface_modules": [
+            "CONSEQUENCE_RAIL"
+          ]
+        }
+      ],
+      "manifest_mutations": [],
+      "notes": [
+        "Workflow remains downstream of gate posture; it does not replace or reinterpret decisive legal state."
+      ],
+      "ordered_index": 12,
+      "phase_id": "P12",
+      "phase_name": "Workflow planning and immediate consequence refresh",
+      "return_paths": [],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L1859[Workflow_planning_and_immediate_consequence_refresh]",
+      "source_line_end": 1911,
+      "source_line_start": 1859,
+      "state_transitions": [
+        "Workflow items transition into durable open state when consequence planning demands human follow-up."
+      ],
+      "step_count": 14,
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/low_noise_experience_contract.md",
+        "Algorithm/observability_and_audit_contract.md"
+      ],
+      "transaction_boundary": "No atomic transaction. Workflow is refreshed as durable consequence planning derived from prior command truth.",
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [],
+      "audit_events": [
+        "TwinBuilt"
+      ],
+      "branch_predicates": [
+        "Trust posture may terminalize here when no amendment or filing path still needs evaluation.",
+        "Projection completion may lag behind command truth without blanking the shell or forcing route changes."
+      ],
+      "branch_tags": [
+        "trust terminal",
+        "projection refresh"
+      ],
+      "called_helpers": [
+        {
+          "call_name": "EXTRACT_GATE_IDS",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "HASH",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_STAGE_DAG",
+          "classification": "helper",
+          "reason": "Derived orchestration helper that is constrained by the surrounding core-engine contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "OPTIONAL_STAGE_TASK",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "PERSIST_STAGE_DAG_AND_OUTBOX",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "AWAIT_STAGE_DAG",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "PROJECTION_INLINE_BUDGET",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "HAS_STAGE_ARTIFACT",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "ADOPT_PERSISTED_STAGE_ARTIFACT",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "HAS_STAGE_RESULT",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "LOAD_STAGE_RESULT",
+          "classification": "helper",
+          "reason": "Derived orchestration helper that is constrained by the surrounding core-engine contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        }
+      ],
+      "called_modules": [
+        "RECORD_EVENT",
+        "UPDATE_MANIFEST_OUTPUTS",
+        "BUILD_LIVE_EXPERIENCE_FRAME",
+        "SELECT_PRIMARY_PROOF_BUNDLE_REF",
+        "FINALIZE_TERMINAL_OUTCOME"
+      ],
+      "entry_conditions": [
+        "The run has stable trust posture and can publish live read-model projections for the shell.",
+        "Projection workers must remain read-side only and may finish after `DecisionBundle` persistence."
+      ],
+      "exit_conditions": [
+        "Composite low-noise shell surfaces are refreshed and the run either proceeds onward or terminalizes on trust posture."
+      ],
+      "failure_exit_paths": [
+        "`FINALIZE_TERMINAL_OUTCOME(...)` may return on decisive trust posture before amendment or filing stages."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "LIVE_EXPERIENCE",
+        "TRUST_AND_WORKFLOW",
+        "RETENTION_AND_TERMINALIZATION"
+      ],
+      "lane_highlights": {
+        "LIVE_EXPERIENCE": [
+          {
+            "kind": "branch",
+            "label": "trust terminal"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "event",
+            "label": "TwinBuilt"
+          },
+          {
+            "kind": "module",
+            "label": "BUILD_LIVE_EXPERIENCE_FRAME"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "terminal",
+            "label": "FINALIZE_TERMINAL_OUTCOME"
+          },
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_OUTPUTS"
+          }
+        ],
+        "POSTSEAL_DAG": [
+          {
+            "kind": "module",
+            "label": "SELECT_PRIMARY_PROOF_BUNDLE_REF"
+          }
+        ],
+        "TRUST_AND_WORKFLOW": [
+          {
+            "kind": "branch",
+            "label": "projection refresh"
+          }
+        ]
+      },
+      "live_experience_updates": [
+        {
+          "cause_ref": "ExperienceFrameRefreshed",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": null,
+          "semantic_motion": null,
+          "source_line_end": 2073,
+          "source_line_start": 2049,
+          "step_id": "P13-S020",
+          "surface_modules": []
+        },
+        {
+          "cause_ref": "ProjectionSidecarsMaterialized",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": null,
+          "semantic_motion": "ECHO",
+          "source_line_end": 2104,
+          "source_line_start": 2080,
+          "step_id": "P13-S025",
+          "surface_modules": []
+        }
+      ],
+      "manifest_mutations": [
+        "UPDATE_MANIFEST_OUTPUTS"
+      ],
+      "notes": [
+        "This phase is the clearest command-truth versus read-side boundary: `ExperienceDelta` is operational, not the legal record."
+      ],
+      "ordered_index": 13,
+      "phase_id": "P13",
+      "phase_name": "Publish live read-model projections and conditionally terminalize on trust posture",
+      "return_paths": [
+        "FINALIZE_TERMINAL_OUTCOME"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L1912[Publish_live_read-model_projections_and_conditionally_terminalize_on_trust_posture]",
+      "source_line_end": 2158,
+      "source_line_start": 1912,
+      "state_transitions": [
+        "`LowNoiseExperienceFrame` advances through read-side presentation and attention states without mutating legal truth."
+      ],
+      "step_count": 34,
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/low_noise_experience_contract.md",
+        "Algorithm/observability_and_audit_contract.md"
+      ],
+      "transaction_boundary": "No global transaction. Read-side projection publication must preserve shell continuity even while command truth can already terminalize.",
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [
+        "GateDecisionRecord"
+      ],
+      "audit_events": [
+        "AmendmentFreshnessInvalidated",
+        "GateEvaluated",
+        "WorkflowOpened",
+        "DriftReviewEscalated",
+        "IntentToAmendTriggered",
+        "IntentToAmendValidated"
+      ],
+      "branch_predicates": [
+        "Amendment intent and amendment submit remain distinct branches.",
+        "No amendment request bypasses this gate entirely, leaving filing progression to later phases.",
+        "Blocked or review-required amendment posture terminalizes immediately."
+      ],
+      "branch_tags": [
+        "amendment gate",
+        "intent vs submit"
+      ],
+      "called_helpers": [
+        {
+          "call_name": "LOAD_READINESS_CONTEXT",
+          "classification": "helper",
+          "reason": "Derived orchestration helper that is constrained by the surrounding core-engine contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE_FROM_GATES",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "MODULE_UPDATE",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_CONSEQUENCE_RAIL_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "GATE_BLOCKS_PROGRESS",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "GATE_REQUIRES_REVIEW",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "HASH",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "EXECUTION_SLO",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_DRIFT_FIELD_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_CONSEQUENCE_RAIL_STATE_FROM_AMENDMENT",
+          "classification": "helper",
+          "reason": "Derived orchestration helper that is constrained by the surrounding core-engine contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        }
+      ],
+      "called_modules": [
+        "VALIDATE_AMENDMENT_READINESS_FRESHNESS",
+        "RECORD_EVENT",
+        "AMENDMENT_GATE",
+        "WRITE_ARTIFACT",
+        "APPEND_MANIFEST_GATES",
+        "PLAN_WORKFLOW",
+        "UPSERT_WORKFLOW_ITEMS",
+        "SELECT_PRIMARY_PROOF_BUNDLE_REF",
+        "FINALIZE_TERMINAL_OUTCOME",
+        "EXECUTE_AUTHORITY_CALCULATION_FLOW",
+        "UPSERT_AMENDMENT_CASE",
+        "UPDATE_MANIFEST_OUTPUTS"
+      ],
+      "entry_conditions": [
+        "Amendment-related scope was requested or amendment posture otherwise needs decisive evaluation.",
+        "Drift and amendment-preparation artifacts are already persisted from phase 10."
+      ],
+      "exit_conditions": [
+        "`AMENDMENT_GATE` and any intent-to-amend readiness posture are persisted.",
+        "The run either continues with a ready amendment path or terminalizes with blocked/review posture."
+      ],
+      "failure_exit_paths": [
+        "`FINALIZE_TERMINAL_OUTCOME(...)` returns when amendment gate posture is blocking or review-required."
+      ],
+      "gate_evaluations": [
+        "AMENDMENT_GATE"
+      ],
+      "lane_focus": [
+        "DRIFT_AND_AMENDMENT",
+        "FILING_AND_SUBMISSION",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "AUTHORITY_CONTEXT": [
+          {
+            "kind": "module",
+            "label": "EXECUTE_AUTHORITY_CALCULATION_FLOW"
+          }
+        ],
+        "DRIFT_AND_AMENDMENT": [
+          {
+            "kind": "branch",
+            "label": "amendment gate"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "gate",
+            "label": "AMENDMENT_GATE"
+          },
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          }
+        ],
+        "FILING_AND_SUBMISSION": [
+          {
+            "kind": "branch",
+            "label": "intent vs submit"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "terminal",
+            "label": "FINALIZE_TERMINAL_OUTCOME"
+          },
+          {
+            "kind": "module",
+            "label": "APPEND_MANIFEST_GATES"
+          },
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_OUTPUTS"
+          }
+        ],
+        "POSTSEAL_DAG": [
+          {
+            "kind": "module",
+            "label": "SELECT_PRIMARY_PROOF_BUNDLE_REF"
+          }
+        ],
+        "TRUST_AND_WORKFLOW": [
+          {
+            "kind": "module",
+            "label": "PLAN_WORKFLOW"
+          },
+          {
+            "kind": "module",
+            "label": "UPSERT_WORKFLOW_ITEMS"
+          }
+        ]
+      },
+      "live_experience_updates": [
+        {
+          "cause_ref": null,
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "AMENDMENT_GATE",
+          "posture_state": null,
+          "semantic_motion": null,
+          "source_line_end": 2197,
+          "source_line_start": 2193,
+          "step_id": "P14-S010",
+          "surface_modules": []
+        },
+        {
+          "cause_ref": "WorkflowOpened",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "CONTAINED",
+          "semantic_motion": "ECHO",
+          "source_line_end": 2219,
+          "source_line_start": 2211,
+          "step_id": "P14-S015",
+          "surface_modules": [
+            "CONSEQUENCE_RAIL"
+          ]
+        },
+        {
+          "cause_ref": "IntentToAmendTriggered",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "CONTAINED",
+          "semantic_motion": "RIPPLE",
+          "source_line_end": 2365,
+          "source_line_start": 2356,
+          "step_id": "P14-S043",
+          "surface_modules": [
+            "DRIFT_FIELD",
+            "CONSEQUENCE_RAIL"
+          ]
+        },
+        {
+          "cause_ref": null,
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "AMENDMENT_GATE_POST_INTENT",
+          "posture_state": null,
+          "semantic_motion": null,
+          "source_line_end": 2389,
+          "source_line_start": 2385,
+          "step_id": "P14-S049",
+          "surface_modules": []
+        },
+        {
+          "cause_ref": "IntentToAmendValidated",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "BRIDGED",
+          "semantic_motion": "BRIDGE",
+          "source_line_end": 2412,
+          "source_line_start": 2404,
+          "step_id": "P14-S055",
+          "surface_modules": [
+            "DRIFT_FIELD"
+          ]
+        }
+      ],
+      "manifest_mutations": [
+        "APPEND_MANIFEST_GATES",
+        "UPDATE_MANIFEST_OUTPUTS"
+      ],
+      "notes": [
+        "This is the first lawful place the engine may evaluate `AMENDMENT_GATE`; drift preparation alone is not enough."
+      ],
+      "ordered_index": 14,
+      "phase_id": "P14",
+      "phase_name": "Amendment gate and intent-to-amend progression",
+      "return_paths": [
+        "FINALIZE_TERMINAL_OUTCOME"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L2159[Amendment_gate_and_intent-to-amend_progression]",
+      "source_line_end": 2453,
+      "source_line_start": 2159,
+      "state_transitions": [
+        "`AmendmentCase.lifecycle_state` may move into `INTENT_SUBMITTED`, `READY_TO_AMEND`, or terminal review/block posture."
+      ],
+      "step_count": 62,
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/exact_gate_logic_and_decision_tables.md",
+        "Algorithm/state_machines.md"
+      ],
+      "transaction_boundary": "No single transaction. Amendment readiness and gate posture become durable filing-side inputs or a terminal outcome.",
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [
+        "GateDecisionRecord",
+        "FilingPacket"
+      ],
+      "audit_events": [
+        "GateEvaluated",
+        "WorkflowOpened",
+        "FilingPacketPrepared"
+      ],
+      "branch_predicates": [
+        "Mode block, prepacket terminalization, and year-end calculation failure can stop filing before packet hardening.",
+        "Amendment submit requires `READY_TO_AMEND`; it must not silently reuse an unready amendment case.",
+        "Filing gate may block, require review, pass-with-notice, or pass to packet approval and later submission."
+      ],
+      "branch_tags": [
+        "filing gate",
+        "packet harden"
+      ],
+      "called_helpers": [
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE_FROM_GATES",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "MODULE_UPDATE",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_CONSEQUENCE_RAIL_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "GATE_BLOCKS_PROGRESS",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "GATE_REQUIRES_REVIEW",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "HASH",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "EXECUTION_SLO",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "ERROR",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_PACKET_FORGE_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        }
+      ],
+      "called_modules": [
+        "CHECK_TRUST_CURRENCY",
+        "LOAD_OVERRIDES",
+        "FILING_GATE",
+        "OBLIGATION_STATUS",
+        "WRITE_ARTIFACT",
+        "RECORD_EVENT",
+        "APPEND_MANIFEST_GATES",
+        "PLAN_WORKFLOW",
+        "UPSERT_WORKFLOW_ITEMS",
+        "SELECT_PRIMARY_PROOF_BUNDLE_REF",
+        "FINALIZE_TERMINAL_OUTCOME",
+        "EXECUTE_AUTHORITY_CALCULATION_FLOW",
+        "UPSERT_FILING_CASE",
+        "UPDATE_MANIFEST_OUTPUTS",
+        "BUILD_FILING_PACKET",
+        "FINALIZE_RUN_FAILURE",
+        "APPROVAL_STATE",
+        "DECLARED_BASIS_ACK_STATE",
+        "DERIVE_PACKET_NOTICE_STEPS",
+        "RESOLVE_FILING_NOTICES",
+        "APPROVE_FILING_PACKET"
+      ],
+      "entry_conditions": [
+        "Filing-related scope is requested or amendment submit requires packet preparation.",
+        "Trust, parity, authority context, and amendment posture are available."
+      ],
+      "exit_conditions": [
+        "Filing-readiness context and `FILING_GATE` posture are persisted.",
+        "A filing packet may be prepared and hardened to `APPROVED_TO_SUBMIT` when lawful."
+      ],
+      "failure_exit_paths": [
+        "`FINALIZE_TERMINAL_OUTCOME(...)` returns for blocked or review-required filing posture.",
+        "`FINALIZE_RUN_FAILURE(...)` guards packet-manifest binding mismatch.",
+        "`ERROR(AMENDMENT_CASE_NOT_READY_TO_SUBMIT)` prevents invalid amendment submission."
+      ],
+      "gate_evaluations": [
+        "FILING_GATE"
+      ],
+      "lane_focus": [
+        "AUTHORITY_CONTEXT",
+        "FILING_AND_SUBMISSION",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "AUTHORITY_CONTEXT": [
+          {
+            "kind": "branch",
+            "label": "filing gate"
+          },
+          {
+            "kind": "module",
+            "label": "CHECK_TRUST_CURRENCY"
+          },
+          {
+            "kind": "module",
+            "label": "LOAD_OVERRIDES"
+          },
+          {
+            "kind": "module",
+            "label": "EXECUTE_AUTHORITY_CALCULATION_FLOW"
+          }
+        ],
+        "FILING_AND_SUBMISSION": [
+          {
+            "kind": "branch",
+            "label": "packet harden"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "gate",
+            "label": "FILING_GATE"
+          },
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "terminal",
+            "label": "FINALIZE_TERMINAL_OUTCOME"
+          },
+          {
+            "kind": "module",
+            "label": "APPEND_MANIFEST_GATES"
+          },
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_OUTPUTS"
+          }
+        ],
+        "POSTSEAL_DAG": [
+          {
+            "kind": "module",
+            "label": "SELECT_PRIMARY_PROOF_BUNDLE_REF"
+          }
+        ],
+        "TRUST_AND_WORKFLOW": [
+          {
+            "kind": "module",
+            "label": "PLAN_WORKFLOW"
+          },
+          {
+            "kind": "module",
+            "label": "UPSERT_WORKFLOW_ITEMS"
+          },
+          {
+            "kind": "module",
+            "label": "APPROVAL_STATE"
+          }
+        ]
+      },
+      "live_experience_updates": [
+        {
+          "cause_ref": null,
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "FILING_GATE_MODE_BLOCK",
+          "posture_state": null,
+          "semantic_motion": null,
+          "source_line_end": 2509,
+          "source_line_start": 2505,
+          "step_id": "P15-S011",
+          "surface_modules": []
+        },
+        {
+          "cause_ref": "WorkflowOpened",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "CONTAINED",
+          "semantic_motion": "ECHO",
+          "source_line_end": 2523,
+          "source_line_start": 2515,
+          "step_id": "P15-S016",
+          "surface_modules": [
+            "CONSEQUENCE_RAIL"
+          ]
+        },
+        {
+          "cause_ref": null,
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "FILING_GATE_PREPACKET",
+          "posture_state": null,
+          "semantic_motion": null,
+          "source_line_end": 2587,
+          "source_line_start": 2583,
+          "step_id": "P15-S026",
+          "surface_modules": []
+        },
+        {
+          "cause_ref": "WorkflowOpened",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "CONTAINED",
+          "semantic_motion": "ECHO",
+          "source_line_end": 2601,
+          "source_line_start": 2593,
+          "step_id": "P15-S031",
+          "surface_modules": [
+            "CONSEQUENCE_RAIL"
+          ]
+        },
+        {
+          "cause_ref": null,
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "FILING_GATE_YEAR_END_CALC",
+          "posture_state": null,
+          "semantic_motion": null,
+          "source_line_end": 2686,
+          "source_line_start": 2682,
+          "step_id": "P15-S044",
+          "surface_modules": []
+        },
+        {
+          "cause_ref": "WorkflowOpened",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "CONTAINED",
+          "semantic_motion": "ECHO",
+          "source_line_end": 2700,
+          "source_line_start": 2692,
+          "step_id": "P15-S049",
+          "surface_modules": [
+            "CONSEQUENCE_RAIL"
+          ]
+        },
+        {
+          "cause_ref": "FilingPacketPrepared",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "FROZEN",
+          "semantic_motion": "SEAL",
+          "source_line_end": 2794,
+          "source_line_start": 2786,
+          "step_id": "P15-S069",
+          "surface_modules": [
+            "PACKET_FORGE"
+          ]
+        },
+        {
+          "cause_ref": null,
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "FILING_GATE",
+          "posture_state": null,
+          "semantic_motion": null,
+          "source_line_end": 2850,
+          "source_line_start": 2846,
+          "step_id": "P15-S079",
+          "surface_modules": []
+        },
+        {
+          "cause_ref": "WorkflowOpened",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "CONTAINED",
+          "semantic_motion": "ECHO",
+          "source_line_end": 2864,
+          "source_line_start": 2856,
+          "step_id": "P15-S084",
+          "surface_modules": [
+            "CONSEQUENCE_RAIL"
+          ]
+        },
+        {
+          "cause_ref": "FilingPacketApproved",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "FROZEN",
+          "semantic_motion": "SEAL",
+          "source_line_end": 2963,
+          "source_line_start": 2955,
+          "step_id": "P15-S105",
+          "surface_modules": [
+            "PACKET_FORGE"
+          ]
+        }
+      ],
+      "manifest_mutations": [
+        "APPEND_MANIFEST_GATES",
+        "UPDATE_MANIFEST_OUTPUTS"
+      ],
+      "notes": [
+        "Internal filing intent and packet hardening remain distinct from authority-owned acceptance or confirmation."
+      ],
+      "ordered_index": 15,
+      "phase_id": "P15",
+      "phase_name": "Authority calculation, filing readiness, packet preparation, and filing gate",
+      "return_paths": [
+        "FINALIZE_TERMINAL_OUTCOME"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L2454[Authority_calculation_filing_readiness_packet_preparation_and_filing_gate]",
+      "source_line_end": 2964,
+      "source_line_start": 2454,
+      "state_transitions": [
+        "`FilingPacket.lifecycle_state` advances from `DRAFT` to `PREPARED` and possibly `APPROVED_TO_SUBMIT`.",
+        "Filing case posture is refreshed with packet and readiness references."
+      ],
+      "step_count": 105,
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/exact_gate_logic_and_decision_tables.md",
+        "Algorithm/state_machines.md",
+        "Algorithm/low_noise_experience_contract.md"
+      ],
+      "transaction_boundary": "No global transaction. Packet preparation and gate persistence must still preserve immutable manifest-binding and approval posture.",
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [
+        "AmendmentBundle",
+        "AuthorityOperation",
+        "AuthorityBinding",
+        "AuthorityRequestEnvelope",
+        "GateDecisionRecord",
+        "SubmissionRecord",
+        "FilingPacket",
+        "AuthorityInteractionRecord"
+      ],
+      "audit_events": [
+        "AmendmentBundlePrepared",
+        "AuthorityOperationPlanned",
+        "AuthorityRequestBuilt",
+        "GateEvaluated",
+        "WorkflowOpened",
+        "AmendmentSubmitted",
+        "SubmissionAttempted",
+        "AuthorityReconciliationResolved",
+        "SubmissionConfirmed",
+        "SubmissionRejected",
+        "OutOfBandStateObserved",
+        "SubmissionUnknown",
+        "SubmissionReconciled",
+        "AmendmentConfirmed"
+      ],
+      "branch_predicates": [
+        "Submission gate may block or require review before any authority bytes leave the process.",
+        "Recovery may resolve via reconciliation, transmitted-awaiting-ack, or transmit-pending-unverified posture.",
+        "Amendment submit updates amendment case state separately from packet or submission state."
+      ],
+      "branch_tags": [
+        "submission gate",
+        "ack vs recovery"
+      ],
+      "called_helpers": [
+        {
+          "call_name": "ERROR",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "MODULE_UPDATE",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_AUTHORITY_TUNNEL_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "HASH",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE_FROM_GATES",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_CONSEQUENCE_RAIL_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "GATE_BLOCKS_PROGRESS",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "GATE_REQUIRES_REVIEW",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BEGIN_ATOMIC_TRANSACTION",
+          "classification": "helper",
+          "reason": "Atomic transaction primitive defined directly in the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "PERSIST_OUTBOX_MESSAGE",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_TRANSMIT_COMMAND",
+          "classification": "helper",
+          "reason": "Derived orchestration helper that is constrained by the surrounding core-engine contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "COMMIT_ATOMIC_TRANSACTION",
+          "classification": "helper",
+          "reason": "Atomic transaction primitive defined directly in the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_PULSE_SPINE_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "AUTHORITY_NEXT_CHECKPOINT_AT",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_PACKET_FORGE_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "WAIT_FOR_TRANSMIT_OR_RECONCILIATION",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "EXECUTION_SLO",
+          "classification": "helper",
+          "reason": "Inline orchestration helper outside the formal `modules.md` module catalog.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        }
+      ],
+      "called_modules": [
+        "CONSTRUCT_AMENDMENT_BUNDLE",
+        "WRITE_ARTIFACT",
+        "UPDATE_MANIFEST_OUTPUTS",
+        "RECORD_EVENT",
+        "RESOLVE_AUTHORITY_OPERATION",
+        "RESOLVE_AUTHORITY_BINDING",
+        "CANONICALIZE_AUTHORITY_REQUEST",
+        "DERIVE_AUTHORITY_REQUEST_HASHES",
+        "BUILD_AUTHORITY_REQUEST_ENVELOPE",
+        "SUBMISSION_GATE",
+        "EXISTING_SUBMISSIONS",
+        "APPEND_MANIFEST_GATES",
+        "PLAN_WORKFLOW",
+        "UPSERT_WORKFLOW_ITEMS",
+        "SELECT_PRIMARY_PROOF_BUNDLE_REF",
+        "FINALIZE_TERMINAL_OUTCOME",
+        "UPSERT_AMENDMENT_CASE",
+        "BEGIN_SUBMISSION_RECORD",
+        "TRANSITION_SUBMISSION_RECORD",
+        "TRANSITION_FILING_PACKET",
+        "UPSERT_FILING_CASE",
+        "RECONCILE_AUTHORITY_STATE",
+        "EMIT_WORKFLOW_ITEM",
+        "UPSERT_OBLIGATION_MIRROR"
+      ],
+      "entry_conditions": [
+        "A filing packet is approved for submit and runtime scope actually requests submission.",
+        "Submission must still pass send-time dedupe, binding, and gate checks."
+      ],
+      "exit_conditions": [
+        "Submission gate posture, submission record state, authority request lineage, and any reconciliation outputs are persisted.",
+        "The live shell now distinguishes transmit-pending, pending-ack, confirmed, rejected, unknown, and out-of-band authority posture."
+      ],
+      "failure_exit_paths": [
+        "`FINALIZE_TERMINAL_OUTCOME(...)` returns when `SUBMISSION_GATE` blocks or requires review before transmit."
+      ],
+      "gate_evaluations": [
+        "SUBMISSION_GATE"
+      ],
+      "lane_focus": [
+        "FILING_AND_SUBMISSION",
+        "AUTHORITY_CONTEXT",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "AUTHORITY_CONTEXT": [
+          {
+            "kind": "branch",
+            "label": "ack vs recovery"
+          },
+          {
+            "kind": "module",
+            "label": "RESOLVE_AUTHORITY_OPERATION"
+          },
+          {
+            "kind": "module",
+            "label": "RESOLVE_AUTHORITY_BINDING"
+          },
+          {
+            "kind": "module",
+            "label": "CANONICALIZE_AUTHORITY_REQUEST"
+          }
+        ],
+        "DRIFT_AND_AMENDMENT": [
+          {
+            "kind": "module",
+            "label": "UPSERT_AMENDMENT_CASE"
+          },
+          {
+            "kind": "module",
+            "label": "CONSTRUCT_AMENDMENT_BUNDLE"
+          }
+        ],
+        "FILING_AND_SUBMISSION": [
+          {
+            "kind": "branch",
+            "label": "submission gate"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          },
+          {
+            "kind": "event",
+            "label": "WorkflowOpened"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_OUTPUTS"
+          },
+          {
+            "kind": "terminal",
+            "label": "FINALIZE_TERMINAL_OUTCOME"
+          },
+          {
+            "kind": "module",
+            "label": "APPEND_MANIFEST_GATES"
+          }
+        ],
+        "POSTSEAL_DAG": [
+          {
+            "kind": "module",
+            "label": "SELECT_PRIMARY_PROOF_BUNDLE_REF"
+          }
+        ],
+        "TRUST_AND_WORKFLOW": [
+          {
+            "kind": "module",
+            "label": "EMIT_WORKFLOW_ITEM"
+          },
+          {
+            "kind": "module",
+            "label": "PLAN_WORKFLOW"
+          },
+          {
+            "kind": "module",
+            "label": "UPSERT_WORKFLOW_ITEMS"
+          }
+        ]
+      },
+      "live_experience_updates": [
+        {
+          "cause_ref": "AuthorityRequestBuilt",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "STREAMING",
+          "semantic_motion": "TRACE",
+          "source_line_end": 3056,
+          "source_line_start": 3048,
+          "step_id": "P16-S025",
+          "surface_modules": [
+            "AUTHORITY_TUNNEL"
+          ]
+        },
+        {
+          "cause_ref": null,
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "SUBMISSION_GATE",
+          "posture_state": null,
+          "semantic_motion": null,
+          "source_line_end": 3082,
+          "source_line_start": 3078,
+          "step_id": "P16-S032",
+          "surface_modules": []
+        },
+        {
+          "cause_ref": "WorkflowOpened",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "CONTAINED",
+          "semantic_motion": "ECHO",
+          "source_line_end": 3096,
+          "source_line_start": 3088,
+          "step_id": "P16-S037",
+          "surface_modules": [
+            "CONSEQUENCE_RAIL"
+          ]
+        },
+        {
+          "cause_ref": "SubmissionAttempted",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "STREAMING",
+          "semantic_motion": "TRACE",
+          "source_line_end": 3240,
+          "source_line_start": 3209,
+          "step_id": "P16-S062",
+          "surface_modules": [
+            "PULSE_SPINE",
+            "AUTHORITY_TUNNEL",
+            "PACKET_FORGE"
+          ]
+        },
+        {
+          "cause_ref": "SubmissionAwaitingAuthorityConfirmation",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "CONTAINED",
+          "semantic_motion": "ECHO",
+          "source_line_end": 3314,
+          "source_line_start": 3282,
+          "step_id": "P16-S082",
+          "surface_modules": [
+            "PULSE_SPINE",
+            "AUTHORITY_TUNNEL",
+            "PACKET_FORGE",
+            "CONSEQUENCE_RAIL"
+          ]
+        },
+        {
+          "cause_ref": "SubmissionTransmitStillPending",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "CONTAINED",
+          "semantic_motion": "ECHO",
+          "source_line_end": 3355,
+          "source_line_start": 3324,
+          "step_id": "P16-S087",
+          "surface_modules": [
+            "PULSE_SPINE",
+            "AUTHORITY_TUNNEL",
+            "CONSEQUENCE_RAIL"
+          ]
+        },
+        {
+          "cause_ref": "SubmissionReconciled",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": null,
+          "semantic_motion": null,
+          "source_line_end": 3445,
+          "source_line_start": 3408,
+          "step_id": "P16-S112",
+          "surface_modules": [
+            "PULSE_SPINE",
+            "AUTHORITY_TUNNEL",
+            "PACKET_FORGE"
+          ]
+        }
+      ],
+      "manifest_mutations": [
+        "UPDATE_MANIFEST_OUTPUTS",
+        "APPEND_MANIFEST_GATES"
+      ],
+      "notes": [
+        "Authority-owned truth and out-of-band corrections remain separate from the engine's internal packet and submission intent states."
+      ],
+      "ordered_index": 16,
+      "phase_id": "P16",
+      "phase_name": "Submission enqueue, governed transmit, inbox-normalized recovery, and bounded reconciliation",
+      "return_paths": [
+        "FINALIZE_TERMINAL_OUTCOME"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L2965[Submission_enqueue_governed_transmit_inbox-normalized_recovery_and_bounded_reconciliation]",
+      "source_line_end": 3464,
+      "source_line_start": 2965,
+      "state_transitions": [
+        "`SubmissionRecord.lifecycle_state` moves through `INTENT_RECORDED`, `TRANSMIT_PENDING`, `PENDING_ACK`, and authority-resolved terminal states.",
+        "`FilingPacket.lifecycle_state` transitions into submission-in-progress posture.",
+        "`AmendmentCase.lifecycle_state` may become `AMEND_SUBMITTED`, `AMEND_CONFIRMED`, `AMEND_REJECTED`, or `AMEND_PENDING`."
+      ],
+      "step_count": 122,
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/observability_and_audit_contract.md",
+        "Algorithm/state_machines.md",
+        "Algorithm/low_noise_experience_contract.md"
+      ],
+      "transaction_boundary": "A dedicated atomic transaction creates the submission record, queues authority transmit intent, advances the filing packet, and refreshes filing-case linkage as one durable handoff.",
+      "transaction_spans": [
+        {
+          "label": "Queue transmit intent and advance packet/submission state",
+          "lane_end": "AUTHORITY_CONTEXT",
+          "lane_start": "FILING_AND_SUBMISSION"
+        }
+      ]
+    },
+    {
+      "artifact_writes": [
+        "DriftBaselineEnvelope",
+        "RetroactiveImpactAnalysis",
+        "DriftRecord",
+        "AmendmentWindowContext"
+      ],
+      "audit_events": [
+        "BaselineSelected",
+        "DriftRetroactiveImpactAnalyzed",
+        "DriftSuperseded",
+        "DriftDetected",
+        "DriftClassified",
+        "AmendmentWindowEvaluated",
+        "AuthorityAcceptedStateInternallySuperseded",
+        "AmendmentEligibilityEvaluated",
+        "WorkflowOpened",
+        "DriftReviewEscalated"
+      ],
+      "branch_predicates": [
+        "Authority-confirmed state may still be internally superseded by later drift or contradiction.",
+        "Replay requirement, contradiction, or material drift opens review workflow instead of silently mutating history."
+      ],
+      "branch_tags": [
+        "post-authority drift"
+      ],
+      "called_helpers": [
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "MODULE_UPDATE",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_DRIFT_FIELD_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_CONSEQUENCE_RAIL_STATE_FROM_AMENDMENT",
+          "classification": "helper",
+          "reason": "Derived orchestration helper that is constrained by the surrounding core-engine contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_CONSEQUENCE_RAIL_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        }
+      ],
+      "called_modules": [
+        "SELECT_DRIFT_BASELINE",
+        "WRITE_ARTIFACT",
+        "RECORD_EVENT",
+        "BUILD_DRIFT_DELTA_VECTOR",
+        "CLASSIFY_TEMPORAL_POSITION",
+        "ANALYZE_RETROACTIVE_IMPACT",
+        "DETECT_DRIFT",
+        "MATERIALIZE_AMENDMENT_WINDOW_CONTEXT",
+        "EVALUATE_AMENDMENT_ELIGIBILITY",
+        "UPSERT_AMENDMENT_CASE",
+        "UPDATE_MANIFEST_OUTPUTS",
+        "EMIT_WORKFLOW_ITEM"
+      ],
+      "entry_conditions": [
+        "A submission exists and reconciliation has produced some authority-side truth or ambiguity."
+      ],
+      "exit_conditions": [
+        "Post-authority drift, retroactive impact, amendment window, and amendment case refresh are persisted.",
+        "Workflow escalation opens when authority-confirmed state is internally superseded or further drift action is needed."
+      ],
+      "failure_exit_paths": [
+        "No direct return occurs here; this phase prepares any post-authority follow-up that survives terminalization."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "DRIFT_AND_AMENDMENT",
+        "LIVE_EXPERIENCE"
+      ],
+      "lane_highlights": {
+        "DRIFT_AND_AMENDMENT": [
+          {
+            "kind": "branch",
+            "label": "post-authority drift"
+          },
+          {
+            "kind": "module",
+            "label": "RECORD_EVENT"
+          },
+          {
+            "kind": "module",
+            "label": "WRITE_ARTIFACT"
+          },
+          {
+            "kind": "module",
+            "label": "SELECT_DRIFT_BASELINE"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "module",
+            "label": "UPDATE_MANIFEST_OUTPUTS"
+          }
+        ],
+        "TRUST_AND_WORKFLOW": [
+          {
+            "kind": "module",
+            "label": "EMIT_WORKFLOW_ITEM"
+          }
+        ]
+      },
+      "live_experience_updates": [
+        {
+          "cause_ref": "PostAuthorityDriftEvaluated",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "CONTAINED",
+          "semantic_motion": "RIPPLE",
+          "source_line_end": 3553,
+          "source_line_start": 3544,
+          "step_id": "P17-S025",
+          "surface_modules": [
+            "DRIFT_FIELD",
+            "CONSEQUENCE_RAIL"
+          ]
+        },
+        {
+          "cause_ref": "WorkflowOpened",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": null,
+          "posture_state": "CONTAINED",
+          "semantic_motion": "ECHO",
+          "source_line_end": 3569,
+          "source_line_start": 3561,
+          "step_id": "P17-S032",
+          "surface_modules": [
+            "CONSEQUENCE_RAIL"
+          ]
+        }
+      ],
+      "manifest_mutations": [
+        "UPDATE_MANIFEST_OUTPUTS"
+      ],
+      "notes": [
+        "This phase preserves the difference between accepted authority truth and the engine's later observation of new contradictions or amendment need."
+      ],
+      "ordered_index": 17,
+      "phase_id": "P17",
+      "phase_name": "Post-authority drift monitoring",
+      "return_paths": [],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L3465[Post-authority_drift_monitoring]",
+      "source_line_end": 3570,
+      "source_line_start": 3465,
+      "state_transitions": [
+        "`AmendmentCase.lifecycle_state` may move toward superseded, review, or amendment-required post-authority posture."
+      ],
+      "step_count": 32,
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/late_data_authority_correction_and_replay_propagation_contract.md",
+        "Algorithm/low_noise_experience_contract.md"
+      ],
+      "transaction_boundary": "No atomic transaction. Post-authority drift is persisted as follow-up truth and workflow, not a rewrite of prior filing history.",
+      "transaction_spans": []
+    },
+    {
+      "artifact_writes": [],
+      "audit_events": [],
+      "branch_predicates": [
+        "No reconciliation yields `REVIEW_REQUIRED` with pending external confirmation.",
+        "Reconciliation may land as `COMPLETED`, `BLOCKED`, or `REVIEW_REQUIRED` depending on confirmed, rejected, unknown, or out-of-band outcome.",
+        "`terminal_checkpoint_state` normalizes transport detail so replay and shell restore do not leak noncanonical transport-only values."
+      ],
+      "branch_tags": [
+        "terminal bundle",
+        "checkpoint normalize"
+      ],
+      "called_helpers": [
+        {
+          "call_name": "NORMALIZE_TERMINAL_WORKFLOW_REFS",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "SYNC_LIVE_EXPERIENCE",
+          "classification": "helper",
+          "reason": "Command-to-read-side helper constrained by the low-noise experience contract.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "MODULE_UPDATE",
+          "classification": "helper",
+          "reason": "Primitive orchestration helper used inline by the core pseudocode.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_PULSE_SPINE_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_MANIFEST_RIBBON_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_DECISION_STAGE_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_CONSEQUENCE_RAIL_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        },
+        {
+          "call_name": "BUILD_AUTHORITY_TUNNEL_STATE",
+          "classification": "helper",
+          "reason": "Read-side projection builder used by live experience composition.",
+          "source_ref": "Algorithm/core_engine.md#execution-helper-constraints-used-above"
+        }
+      ],
+      "called_modules": [
+        "SELECT_PRIMARY_PROOF_BUNDLE_REF",
+        "FINALIZE_TERMINAL_OUTCOME"
+      ],
+      "entry_conditions": [
+        "Command-side work is done, or the run is waiting on bounded external confirmation.",
+        "The engine must normalize terminal workflow refs and shell checkpoint vocabulary before returning."
+      ],
+      "exit_conditions": [
+        "A terminal `DecisionBundle` is persisted with final reasons, retained refs, and normalized workflow posture.",
+        "The live shell is refreshed into terminal posture without losing authority-pending or out-of-band distinctions."
+      ],
+      "failure_exit_paths": [
+        "The phase itself is the final terminalization and return path for successful, blocked, or externally pending outcomes."
+      ],
+      "gate_evaluations": [],
+      "lane_focus": [
+        "RETENTION_AND_TERMINALIZATION",
+        "LIVE_EXPERIENCE",
+        "MANIFEST_AND_LINEAGE"
+      ],
+      "lane_highlights": {
+        "LIVE_EXPERIENCE": [
+          {
+            "kind": "branch",
+            "label": "checkpoint normalize"
+          }
+        ],
+        "MANIFEST_AND_LINEAGE": [
+          {
+            "kind": "terminal",
+            "label": "FINALIZE_TERMINAL_OUTCOME"
+          }
+        ],
+        "POSTSEAL_DAG": [
+          {
+            "kind": "module",
+            "label": "SELECT_PRIMARY_PROOF_BUNDLE_REF"
+          }
+        ],
+        "RETENTION_AND_TERMINALIZATION": [
+          {
+            "kind": "branch",
+            "label": "terminal bundle"
+          }
+        ]
+      },
+      "live_experience_updates": [
+        {
+          "cause_ref": "TerminalFinalization",
+          "command_vs_read_side_boundary": "Operational read-side delta only; command truth must already be persisted elsewhere.",
+          "composite_shell_surfaces": [
+            "CONTEXT_BAR",
+            "DECISION_SUMMARY",
+            "ACTION_STRIP",
+            "DETAIL_DRAWER"
+          ],
+          "phase_code": "TERMINAL",
+          "posture_state": null,
+          "semantic_motion": null,
+          "source_line_end": 3685,
+          "source_line_start": 3647,
+          "step_id": "P18-S031",
+          "surface_modules": [
+            "PULSE_SPINE",
+            "MANIFEST_RIBBON",
+            "DECISION_STAGE",
+            "CONSEQUENCE_RAIL",
+            "AUTHORITY_TUNNEL"
+          ]
+        }
+      ],
+      "manifest_mutations": [],
+      "notes": [
+        "The terminal live-experience frame is operational read-side state only; it is not the legal record of what happened."
+      ],
+      "ordered_index": 18,
+      "phase_id": "P18",
+      "phase_name": "Terminal finalization and return",
+      "return_paths": [
+        "FINALIZE_TERMINAL_OUTCOME"
+      ],
+      "source_heading_or_logical_block": "Algorithm/core_engine.md::L3571[Terminal_finalization_and_return]",
+      "source_line_end": 3718,
+      "source_line_start": 3571,
+      "state_transitions": [
+        "`RunManifest.lifecycle_state` terminalizes as `COMPLETED` or `BLOCKED` while review-required bundle posture remains backwards compatible."
+      ],
+      "step_count": 33,
+      "supporting_source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/observability_and_audit_contract.md",
+        "Algorithm/state_machines.md",
+        "Algorithm/low_noise_experience_contract.md"
+      ],
+      "transaction_boundary": "Terminal finalization persists one authoritative bundle, normalized workflow refs, and final shell posture after all decisive branch logic has converged.",
+      "transaction_spans": []
+    }
+  ],
+  "summary": {
+    "artifact_write_count": 50,
+    "event_count": 98,
+    "gate_count": 16,
+    "live_experience_update_count": 49,
+    "return_path_count": 38,
+    "step_count": 905,
+    "transaction_primitive_count": 12
+  }
+}

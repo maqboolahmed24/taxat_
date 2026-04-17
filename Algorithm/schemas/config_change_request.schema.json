@@ -1,0 +1,282 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/config_change_request.schema.json",
+  "title": "ConfigChangeRequest",
+  "description": "Governed configuration change-request contract. This schema freezes CCR lifecycle, named transition lineage, risk input, approval evidence, and implementation or rollback release linkage so config delivery cannot advance via ad hoc status strings.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "ccr_id",
+    "tenant_id",
+    "lifecycle_state",
+    "state_transition_contract",
+    "diff_ref",
+    "risk_assessment_ref",
+    "approvals",
+    "rejected_reason_code_or_null",
+    "implemented_release_ref_or_null",
+    "rolled_back_release_ref_or_null",
+    "state_changed_at",
+    "created_at",
+    "audit_refs",
+    "provenance_refs"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "ConfigChangeRequest"
+    },
+    "ccr_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "UNDER_REVIEW",
+        "TESTING",
+        "APPROVED",
+        "REJECTED",
+        "IMPLEMENTED",
+        "ROLLED_BACK"
+      ]
+    },
+    "state_transition_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/state_transition_contract.schema.json"
+        },
+        {
+          "properties": {
+            "object_family": {
+              "const": "CONFIG_CHANGE_REQUEST"
+            },
+            "machine_code": {
+              "const": "CONFIG_CHANGE_REQUEST_LIFECYCLE_V1"
+            },
+            "state_field_name": {
+              "const": "lifecycle_state"
+            }
+          }
+        }
+      ]
+    },
+    "diff_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "risk_assessment_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "rejected_reason_code_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "implemented_release_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "rolled_back_release_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "state_changed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "audit_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "provenance_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "OPEN",
+              "UNDER_REVIEW",
+              "TESTING"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "approvals": {
+            "maxItems": 0
+          },
+          "rejected_reason_code_or_null": {
+            "type": "null"
+          },
+          "implemented_release_ref_or_null": {
+            "type": "null"
+          },
+          "rolled_back_release_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "APPROVED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "approvals": {
+            "minItems": 1
+          },
+          "rejected_reason_code_or_null": {
+            "type": "null"
+          },
+          "implemented_release_ref_or_null": {
+            "type": "null"
+          },
+          "rolled_back_release_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "REJECTED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "rejected_reason_code_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "implemented_release_ref_or_null": {
+            "type": "null"
+          },
+          "rolled_back_release_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "IMPLEMENTED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "approvals": {
+            "minItems": 1
+          },
+          "rejected_reason_code_or_null": {
+            "type": "null"
+          },
+          "implemented_release_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "rolled_back_release_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "ROLLED_BACK"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "approvals": {
+            "minItems": 1
+          },
+          "rejected_reason_code_or_null": {
+            "type": "null"
+          },
+          "implemented_release_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "rolled_back_release_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

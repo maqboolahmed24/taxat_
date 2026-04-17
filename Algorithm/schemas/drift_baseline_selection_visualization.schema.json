@@ -1,0 +1,882 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/drift_baseline_selection_visualization.schema.json",
+  "title": "DriftBaselineSelectionVisualization",
+  "description": "Persisted explanation surface for SELECT_DRIFT_BASELINE(...). This artifact freezes the candidate universe, lexicographic dominance evidence, loss reasons, and same-scope envelope supersession lineage so operators and replay workflows can inspect why the winning drift baseline outranked every lawful alternative.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifact_type",
+    "visualization_id",
+    "execution_mode_boundary_contract",
+    "basis_contract",
+    "visualization_outcome",
+    "selected_candidate_ref",
+    "selected_selection_contract",
+    "selected_selection_reason_codes",
+    "selected_baseline_envelope_ref",
+    "selected_baseline_frozen_hash",
+    "candidate_results",
+    "candidate_count",
+    "exact_scope_candidate_count",
+    "compatible_candidate_count",
+    "rejected_candidate_count",
+    "same_scope_envelope_lineage",
+    "superseded_lineage_count",
+    "visualized_by_principal_ref",
+    "visualized_at",
+    "visualization_hash"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "DriftBaselineSelectionVisualization"
+    },
+    "visualization_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_mode_boundary_contract": {
+      "$ref": "https://taxat.dev/schemas/execution_mode_boundary_contract.schema.json"
+    },
+    "basis_contract": {
+      "$ref": "https://taxat.dev/schemas/drift_baseline_selection_visualization_basis_contract.schema.json"
+    },
+    "visualization_outcome": {
+      "type": "string",
+      "enum": [
+        "PERSIST_ENVELOPE",
+        "REUSE_ENVELOPE",
+        "SUPERSEDE_ENVELOPE"
+      ]
+    },
+    "selected_candidate_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selected_selection_contract": {
+      "$ref": "https://taxat.dev/schemas/baseline_selection_contract.schema.json"
+    },
+    "selected_selection_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "selected_baseline_envelope_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selected_baseline_frozen_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/candidateResult"
+      }
+    },
+    "candidate_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "exact_scope_candidate_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "compatible_candidate_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "rejected_candidate_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "same_scope_envelope_lineage": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/lineageEntry"
+      }
+    },
+    "superseded_lineage_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "visualized_by_principal_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "visualized_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "visualization_hash": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "baselineType": {
+      "type": "string",
+      "enum": [
+        "WORKING",
+        "FILED",
+        "AMENDED",
+        "AUTHORITY_CORRECTED",
+        "OUT_OF_BAND"
+      ]
+    },
+    "baselineSubmissionState": {
+      "type": "string",
+      "enum": [
+        "WORKING",
+        "FILED_CONFIRMED",
+        "AMEND_CONFIRMED",
+        "AUTHORITY_CORRECTED",
+        "UNKNOWN",
+        "OUT_OF_BAND_UNRECONCILED"
+      ]
+    },
+    "scopeCompatibilityState": {
+      "type": "string",
+      "enum": [
+        "EXACT_SCOPE_COMPATIBLE",
+        "SUBSET_SCOPE_COMPATIBLE",
+        "BROADER_SCOPE_COMPATIBLE",
+        "INCOMPATIBLE_SCOPE"
+      ]
+    },
+    "scopeMatchClass": {
+      "type": "string",
+      "enum": [
+        "EXACT_SCOPE_MATCH",
+        "SCOPE_SLICED_SUBSET_MATCH",
+        "BROADER_CLIENT_PERIOD_MATCH"
+      ]
+    },
+    "sameScopeTruthResolutionState": {
+      "type": "string",
+      "enum": [
+        "NO_STRONGER_EXTERNAL_TRUTH_PRESENT",
+        "AUTHORITY_CORRECTED_TRUTH_SELECTED",
+        "OUT_OF_BAND_EXTERNAL_TRUTH_BLOCKS_INTERNAL_LINEAGE"
+      ]
+    },
+    "authorityResolutionClass": {
+      "type": "string",
+      "enum": [
+        "EXACT_AUTHORITY_CONFIRMED",
+        "AUTHORITY_OBSERVED_EXTERNAL",
+        "ENGINE_CHAIN_UNREFRESHED",
+        "WORKING_ONLY"
+      ]
+    },
+    "continuityClass": {
+      "type": "string",
+      "enum": [
+        "INTERNAL_CHAIN_CONTINUITY",
+        "AUTHORITY_CORRECTED_EXTERNAL_CONTINUITY",
+        "OUT_OF_BAND_EXTERNAL_CONTINUITY",
+        "WORKING_LOCAL_ONLY"
+      ]
+    },
+    "automationCeiling": {
+      "type": "string",
+      "enum": [
+        "ALLOWED",
+        "LIMITED",
+        "BLOCKED"
+      ]
+    },
+    "reviewRecommendationFloor": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "REVIEW_REQUIRED",
+        "RECONCILIATION_REQUIRED"
+      ]
+    },
+    "amendmentProgressionCeiling": {
+      "type": "string",
+      "enum": [
+        "ELIGIBLE_NOW_ALLOWED",
+        "REVIEW_ONLY",
+        "RECONCILE_FIRST"
+      ]
+    },
+    "benignDriftEligibilityState": {
+      "type": "string",
+      "enum": [
+        "ALLOWED",
+        "FORBIDDEN"
+      ]
+    },
+    "selectionOutcome": {
+      "type": "string",
+      "enum": [
+        "SELECTED",
+        "REJECTED"
+      ]
+    },
+    "candidateSupersessionState": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "ACTIVE",
+        "SUPERSEDED",
+        "REUSED_HISTORICAL_MATCH"
+      ]
+    },
+    "lineageDisposition": {
+      "type": "string",
+      "enum": [
+        "SELECTED_ACTIVE",
+        "REUSED_ACTIVE",
+        "SUPERSEDED_PREDECESSOR"
+      ]
+    },
+    "dominanceKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope_rank",
+        "precedence_rank",
+        "authority_resolution_rank",
+        "chain_continuity_rank",
+        "effective_time_rank_or_null",
+        "manifest_generation_rank_or_null",
+        "stable_id_rank"
+      ],
+      "properties": {
+        "scope_rank": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "precedence_rank": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "authority_resolution_rank": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "chain_continuity_rank": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "effective_time_rank_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "manifest_generation_rank_or_null": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "stable_id_rank": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "candidateResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "display_rank",
+        "candidate_ref",
+        "candidate_baseline_type",
+        "candidate_submission_state",
+        "candidate_manifest_id_or_null",
+        "candidate_scope_refs",
+        "candidate_authority_basis_refs",
+        "candidate_effective_at_or_null",
+        "candidate_manifest_generation_or_null",
+        "candidate_scope_compatibility_state",
+        "candidate_scope_match_class_or_null",
+        "same_scope_truth_resolution_state_or_null",
+        "authority_resolution_class_or_null",
+        "continuity_class_or_null",
+        "candidate_dominance_key_or_null",
+        "candidate_anchor_weight_or_null",
+        "candidate_uncertainty_reason_codes",
+        "candidate_automation_ceiling_or_null",
+        "candidate_review_recommendation_floor_or_null",
+        "candidate_amendment_progression_ceiling_or_null",
+        "candidate_benign_drift_eligibility_state_or_null",
+        "internal_chain_continuity_asserted_or_null",
+        "selection_outcome",
+        "loss_reason_codes",
+        "selection_reason_codes_if_selected",
+        "candidate_frozen_hash_or_null",
+        "candidate_supersedes_frozen_hash_or_null",
+        "candidate_superseded_by_frozen_hash_or_null",
+        "candidate_supersession_state"
+      ],
+      "properties": {
+        "display_rank": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "candidate_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidate_baseline_type": {
+          "$ref": "#/$defs/baselineType"
+        },
+        "candidate_submission_state": {
+          "$ref": "#/$defs/baselineSubmissionState"
+        },
+        "candidate_manifest_id_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "candidate_scope_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "candidate_authority_basis_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "candidate_effective_at_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "candidate_manifest_generation_or_null": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "candidate_scope_compatibility_state": {
+          "$ref": "#/$defs/scopeCompatibilityState"
+        },
+        "candidate_scope_match_class_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "EXACT_SCOPE_MATCH",
+            "SCOPE_SLICED_SUBSET_MATCH",
+            "BROADER_CLIENT_PERIOD_MATCH",
+            null
+          ]
+        },
+        "same_scope_truth_resolution_state_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "NO_STRONGER_EXTERNAL_TRUTH_PRESENT",
+            "AUTHORITY_CORRECTED_TRUTH_SELECTED",
+            "OUT_OF_BAND_EXTERNAL_TRUTH_BLOCKS_INTERNAL_LINEAGE",
+            null
+          ]
+        },
+        "authority_resolution_class_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "EXACT_AUTHORITY_CONFIRMED",
+            "AUTHORITY_OBSERVED_EXTERNAL",
+            "ENGINE_CHAIN_UNREFRESHED",
+            "WORKING_ONLY",
+            null
+          ]
+        },
+        "continuity_class_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "INTERNAL_CHAIN_CONTINUITY",
+            "AUTHORITY_CORRECTED_EXTERNAL_CONTINUITY",
+            "OUT_OF_BAND_EXTERNAL_CONTINUITY",
+            "WORKING_LOCAL_ONLY",
+            null
+          ]
+        },
+        "candidate_dominance_key_or_null": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "allOf": [
+            {
+              "if": {
+                "type": "object"
+              },
+              "then": {
+                "$ref": "#/$defs/dominanceKey"
+              }
+            }
+          ]
+        },
+        "candidate_anchor_weight_or_null": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "candidate_uncertainty_reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "candidate_automation_ceiling_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "ALLOWED",
+            "LIMITED",
+            "BLOCKED",
+            null
+          ]
+        },
+        "candidate_review_recommendation_floor_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "NONE",
+            "REVIEW_REQUIRED",
+            "RECONCILIATION_REQUIRED",
+            null
+          ]
+        },
+        "candidate_amendment_progression_ceiling_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "ELIGIBLE_NOW_ALLOWED",
+            "REVIEW_ONLY",
+            "RECONCILE_FIRST",
+            null
+          ]
+        },
+        "candidate_benign_drift_eligibility_state_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "ALLOWED",
+            "FORBIDDEN",
+            null
+          ]
+        },
+        "internal_chain_continuity_asserted_or_null": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "selection_outcome": {
+          "$ref": "#/$defs/selectionOutcome"
+        },
+        "loss_reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "selection_reason_codes_if_selected": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "candidate_frozen_hash_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "candidate_supersedes_frozen_hash_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "candidate_superseded_by_frozen_hash_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "candidate_supersession_state": {
+          "$ref": "#/$defs/candidateSupersessionState"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "candidate_scope_compatibility_state": {
+                "const": "INCOMPATIBLE_SCOPE"
+              }
+            },
+            "required": [
+              "candidate_scope_compatibility_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "candidate_scope_match_class_or_null": {
+                "type": "null"
+              },
+              "same_scope_truth_resolution_state_or_null": {
+                "type": "null"
+              },
+              "authority_resolution_class_or_null": {
+                "type": "null"
+              },
+              "continuity_class_or_null": {
+                "type": "null"
+              },
+              "candidate_dominance_key_or_null": {
+                "type": "null"
+              },
+              "candidate_anchor_weight_or_null": {
+                "type": "null"
+              },
+              "candidate_automation_ceiling_or_null": {
+                "type": "null"
+              },
+              "candidate_review_recommendation_floor_or_null": {
+                "type": "null"
+              },
+              "candidate_amendment_progression_ceiling_or_null": {
+                "type": "null"
+              },
+              "candidate_benign_drift_eligibility_state_or_null": {
+                "type": "null"
+              },
+              "internal_chain_continuity_asserted_or_null": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selection_outcome": {
+                "const": "SELECTED"
+              }
+            },
+            "required": [
+              "selection_outcome"
+            ]
+          },
+          "then": {
+            "properties": {
+              "selection_reason_codes_if_selected": {
+                "minItems": 1
+              },
+              "loss_reason_codes": {
+                "maxItems": 0
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "selection_reason_codes_if_selected": {
+                "maxItems": 0
+              },
+              "loss_reason_codes": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "candidate_baseline_type": {
+                "const": "WORKING"
+              }
+            },
+            "required": [
+              "candidate_baseline_type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "candidate_submission_state": {
+                "const": "WORKING"
+              },
+              "candidate_manifest_id_or_null": {
+                "type": "null"
+              },
+              "candidate_authority_basis_refs": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "candidate_baseline_type": {
+                "const": "FILED"
+              }
+            },
+            "required": [
+              "candidate_baseline_type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "candidate_submission_state": {
+                "const": "FILED_CONFIRMED"
+              },
+              "candidate_manifest_id_or_null": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "candidate_baseline_type": {
+                "const": "AMENDED"
+              }
+            },
+            "required": [
+              "candidate_baseline_type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "candidate_submission_state": {
+                "const": "AMEND_CONFIRMED"
+              },
+              "candidate_manifest_id_or_null": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "candidate_baseline_type": {
+                "const": "AUTHORITY_CORRECTED"
+              }
+            },
+            "required": [
+              "candidate_baseline_type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "candidate_submission_state": {
+                "const": "AUTHORITY_CORRECTED"
+              },
+              "candidate_authority_basis_refs": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "candidate_baseline_type": {
+                "const": "OUT_OF_BAND"
+              }
+            },
+            "required": [
+              "candidate_baseline_type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "candidate_submission_state": {
+                "const": "OUT_OF_BAND_UNRECONCILED"
+              },
+              "candidate_manifest_id_or_null": {
+                "type": "null"
+              },
+              "candidate_authority_basis_refs": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "lineageEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lineage_rank",
+        "baseline_envelope_ref",
+        "baseline_frozen_hash",
+        "baseline_ref",
+        "baseline_type",
+        "baseline_submission_state",
+        "selected_scope_refs",
+        "selection_contract_hash",
+        "supersedes_baseline_frozen_hash_or_null",
+        "superseded_at_or_null",
+        "lineage_disposition"
+      ],
+      "properties": {
+        "lineage_rank": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "baseline_envelope_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "baseline_frozen_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "baseline_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "baseline_type": {
+          "$ref": "#/$defs/baselineType"
+        },
+        "baseline_submission_state": {
+          "$ref": "#/$defs/baselineSubmissionState"
+        },
+        "selected_scope_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "selection_contract_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "supersedes_baseline_frozen_hash_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "superseded_at_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "lineage_disposition": {
+          "$ref": "#/$defs/lineageDisposition"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "properties": {
+        "candidate_results": {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "selection_outcome": {
+                "const": "SELECTED"
+              }
+            },
+            "required": [
+              "selection_outcome"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      }
+    },
+    {
+      "properties": {
+        "same_scope_envelope_lineage": {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "lineage_disposition": {
+                "enum": [
+                  "SELECTED_ACTIVE",
+                  "REUSED_ACTIVE"
+                ]
+              }
+            },
+            "required": [
+              "lineage_disposition"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      }
+    }
+  ]
+}

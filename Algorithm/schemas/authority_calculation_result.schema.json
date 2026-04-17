@@ -1,0 +1,282 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/authority_calculation_result.schema.json",
+  "title": "AuthorityCalculationResult",
+  "description": "Authority-calculation result contract. This schema freezes retrieved or modeled calculation output, validation outcome, calculation hash, and result-state lineage for one calculation handshake.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "calculation_id",
+    "calculation_request_ref",
+    "manifest_id",
+    "calculation_type",
+    "result_state",
+    "validation_outcome",
+    "reason_codes",
+    "live_authority_call_executed",
+    "calculation_hash",
+    "retrieved_payload_ref",
+    "authority_response_ref",
+    "retrieved_at",
+    "superseded_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "AuthorityCalculationResult"
+    },
+    "calculation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "calculation_request_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "calculation_type": {
+      "type": "string",
+      "enum": [
+        "in-year",
+        "intent-to-finalise",
+        "intent-to-amend",
+        "final-declaration"
+      ]
+    },
+    "result_state": {
+      "type": "string",
+      "enum": [
+        "MODELED",
+        "RETRIEVED",
+        "SUPERSEDED"
+      ]
+    },
+    "validation_outcome": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "PASS_WITH_NOTICE",
+        "MANUAL_REVIEW",
+        "OVERRIDABLE_BLOCK",
+        "HARD_BLOCK"
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "live_authority_call_executed": {
+      "type": "boolean"
+    },
+    "calculation_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "retrieved_payload_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "authority_response_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "retrieved_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "superseded_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "result_state": {
+            "const": "MODELED"
+          }
+        },
+        "required": [
+          "result_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "live_authority_call_executed": {
+            "const": false
+          },
+          "validation_outcome": {
+            "not": {
+              "const": "PASS"
+            }
+          },
+          "calculation_hash": {
+            "type": "null"
+          },
+          "retrieved_payload_ref": {
+            "type": "null"
+          },
+          "authority_response_ref": {
+            "type": "null"
+          },
+          "retrieved_at": {
+            "type": "null"
+          },
+          "superseded_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_state": {
+            "const": "RETRIEVED"
+          }
+        },
+        "required": [
+          "result_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "live_authority_call_executed": {
+            "const": true
+          },
+          "calculation_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "retrieved_payload_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "authority_response_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "retrieved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "superseded_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_state": {
+            "const": "SUPERSEDED"
+          }
+        },
+        "required": [
+          "result_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "live_authority_call_executed": {
+            "const": true
+          },
+          "calculation_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "retrieved_payload_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "authority_response_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "retrieved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "superseded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "validation_outcome": {
+            "const": "PASS"
+          }
+        },
+        "required": [
+          "validation_outcome"
+        ]
+      },
+      "then": {
+        "properties": {
+          "result_state": {
+            "enum": [
+              "RETRIEVED",
+              "SUPERSEDED"
+            ]
+          },
+          "reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "validation_outcome": {
+            "enum": [
+              "PASS_WITH_NOTICE",
+              "MANUAL_REVIEW",
+              "OVERRIDABLE_BLOCK",
+              "HARD_BLOCK"
+            ]
+          }
+        },
+        "required": [
+          "validation_outcome"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

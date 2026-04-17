@@ -1,0 +1,79 @@
+{
+  "artifact_bindings": [
+    {
+      "artifact": "ComputeResult",
+      "requirements": [
+        "persist money_profile",
+        "apply round_money only at declared aggregate totals",
+        "preserve executable reporting-scope basis"
+      ]
+    },
+    {
+      "artifact": "ForecastSet",
+      "requirements": [
+        "persist money_profile",
+        "round point and simulated forecasts through round_money"
+      ]
+    },
+    {
+      "artifact": "ParityResult",
+      "requirements": [
+        "persist money_profile",
+        "compute exact-decimal internal_value, authority_value, delta_signed, and delta_abs",
+        "use exact intermediates for threshold and floor checks"
+      ]
+    },
+    {
+      "artifact": "TrustSummary",
+      "requirements": [
+        "consume money-bearing upstream artifacts without re-rounding them for trust decisions"
+      ]
+    }
+  ],
+  "contract_version": "FORMULA_MONEY_AND_ROUNDING_V1",
+  "deterministic_aggregation_rules": [
+    "contribution order is deterministic and canonical before summation",
+    "compute slice order is lexicographic by effective_date and canonical_fact_id",
+    "exact-decimal intermediate precision is preserved until the aggregation boundary is reached",
+    "round_money applies once at persisted output boundaries"
+  ],
+  "hard_rules": [
+    "money is accumulated in exact fixed-scale decimal arithmetic in the smallest legal currency unit",
+    "binary floating-point is forbidden for money-bearing sums, deltas, threshold checks, and parity breach checks",
+    "rounding occurs only at declared aggregation boundaries",
+    "all persisted money values serialize as canonical decimal strings with exact frozen scale",
+    "serialization_profile = CANONICAL_DECIMAL_STRING_V1",
+    "aggregation_boundary = DECLARED_AGGREGATION_BOUNDARY_ONLY"
+  ],
+  "money_profile_fields": [
+    "currency_code",
+    "scale",
+    "rounding_mode",
+    "aggregation_boundary",
+    "serialization_profile"
+  ],
+  "notes": [
+    "Projection-side confidence and read-side summaries must not mutate the canonical money boundary.",
+    "This contract closes the exact-decimal implementation gap across compute, forecast, parity, and trust replay."
+  ],
+  "primary_section": "8.2",
+  "serialization_contract": {
+    "exact_fractional_digits": "money_profile.scale",
+    "rejects": [
+      "exponent_notation",
+      "locale_separators",
+      "NaN",
+      "infinity",
+      "trimmed_scale"
+    ],
+    "representation": "canonical decimal string",
+    "required_trailing_zeros": true
+  },
+  "source_refs": [
+    "Algorithm/compute_parity_and_trust_formulas.md::L77[money_rules]",
+    "Algorithm/compute_parity_and_trust_formulas.md::L99[money_profile_binding]",
+    "Algorithm/compute_parity_and_trust_formulas.md::L104[money_serialization]",
+    "Algorithm/compute_parity_and_trust_formulas.md::L230[compute_ordering]",
+    "Algorithm/compute_parity_and_trust_formulas.md::L463[parity_exact_decimal]"
+  ]
+}

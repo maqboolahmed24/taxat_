@@ -1,0 +1,454 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/replay_basis_integrity_contract.schema.json",
+  "title": "ReplayBasisIntegrityContract",
+  "description": "Replay-owned basis-integrity contract. This schema freezes whether replay comparison reused the retained historical config, input, pre-seal tape, and post-seal basis; whether any live connector, authority, or late-data collection executed; which substitutions were declared or undeclared; and whether deterministic outcome hashing stayed limited to persisted or transactionally staged material.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "integrity_profile_code",
+    "replay_class",
+    "historical_basis_policy",
+    "config_basis_source_class",
+    "input_basis_source_class",
+    "preseal_gate_source_class",
+    "authority_basis_source_class",
+    "baseline_basis_source_class",
+    "late_data_basis_source_class",
+    "temporal_propagation_event_source_class",
+    "live_connector_read_class",
+    "live_authority_read_class",
+    "late_data_rescan_class",
+    "missing_basis_dimensions",
+    "corrupt_basis_dimensions",
+    "substituted_basis_dimensions",
+    "declared_counterfactual_dimensions",
+    "undeclared_basis_drift_dimensions",
+    "deterministic_outcome_source_policy",
+    "non_persisted_outcome_component_classes",
+    "publication_gate"
+  ],
+  "properties": {
+    "integrity_profile_code": {
+      "const": "REPLAY_BASIS_INTEGRITY_V1"
+    },
+    "replay_class": {
+      "type": "string",
+      "enum": [
+        "STANDARD_REPLAY",
+        "AUDIT_REPLAY",
+        "COUNTERFACTUAL_ANALYSIS"
+      ]
+    },
+    "historical_basis_policy": {
+      "const": "NO_SILENT_HISTORICAL_SUBSTITUTION"
+    },
+    "config_basis_source_class": {
+      "type": "string",
+      "enum": [
+        "HISTORICAL_FROZEN_REUSED",
+        "DECLARED_COUNTERFACTUAL_SUBSTITUTION",
+        "MISSING_HISTORICAL_FREEZE",
+        "CORRUPT_HISTORICAL_FREEZE"
+      ]
+    },
+    "input_basis_source_class": {
+      "type": "string",
+      "enum": [
+        "HISTORICAL_FROZEN_REUSED",
+        "DECLARED_COUNTERFACTUAL_SUBSTITUTION",
+        "MISSING_HISTORICAL_FREEZE",
+        "CORRUPT_HISTORICAL_FREEZE"
+      ]
+    },
+    "preseal_gate_source_class": {
+      "type": "string",
+      "enum": [
+        "HISTORICAL_PRESEAL_TAPE_REUSED",
+        "MISSING_PRESEAL_TAPE",
+        "CORRUPT_PRESEAL_TAPE"
+      ]
+    },
+    "authority_basis_source_class": {
+      "type": "string",
+      "enum": [
+        "HISTORICAL_POST_SEAL_REUSED",
+        "DECLARED_COUNTERFACTUAL_SUBSTITUTION",
+        "NOT_MATERIAL",
+        "MISSING_HISTORICAL_BASIS",
+        "CORRUPT_HISTORICAL_BASIS"
+      ]
+    },
+    "baseline_basis_source_class": {
+      "type": "string",
+      "enum": [
+        "HISTORICAL_POST_SEAL_REUSED",
+        "DECLARED_COUNTERFACTUAL_SUBSTITUTION",
+        "NOT_MATERIAL",
+        "MISSING_HISTORICAL_BASIS",
+        "CORRUPT_HISTORICAL_BASIS"
+      ]
+    },
+    "late_data_basis_source_class": {
+      "type": "string",
+      "enum": [
+        "HISTORICAL_POST_SEAL_REUSED",
+        "DECLARED_COUNTERFACTUAL_SUBSTITUTION",
+        "NOT_MATERIAL",
+        "MISSING_HISTORICAL_BASIS",
+        "CORRUPT_HISTORICAL_BASIS"
+      ]
+    },
+    "temporal_propagation_event_source_class": {
+      "type": "string",
+      "enum": [
+        "HISTORICAL_POST_SEAL_REUSED",
+        "DECLARED_COUNTERFACTUAL_SUBSTITUTION",
+        "NOT_MATERIAL",
+        "MISSING_HISTORICAL_BASIS",
+        "CORRUPT_HISTORICAL_BASIS"
+      ]
+    },
+    "live_connector_read_class": {
+      "type": "string",
+      "enum": [
+        "NOT_PERFORMED",
+        "DECLARED_COUNTERFACTUAL_EXECUTED",
+        "UNDECLARED_EXECUTED"
+      ]
+    },
+    "live_authority_read_class": {
+      "type": "string",
+      "enum": [
+        "NOT_PERFORMED",
+        "DECLARED_COUNTERFACTUAL_EXECUTED",
+        "UNDECLARED_EXECUTED"
+      ]
+    },
+    "late_data_rescan_class": {
+      "type": "string",
+      "enum": [
+        "NOT_PERFORMED",
+        "DECLARED_COUNTERFACTUAL_EXECUTED",
+        "UNDECLARED_EXECUTED"
+      ]
+    },
+    "missing_basis_dimensions": {
+      "$ref": "#/$defs/sourceDimensionArray"
+    },
+    "corrupt_basis_dimensions": {
+      "$ref": "#/$defs/sourceDimensionArray"
+    },
+    "substituted_basis_dimensions": {
+      "$ref": "#/$defs/sourceDimensionArray"
+    },
+    "declared_counterfactual_dimensions": {
+      "$ref": "#/$defs/counterfactualDimensionArray"
+    },
+    "undeclared_basis_drift_dimensions": {
+      "$ref": "#/$defs/counterfactualDimensionArray"
+    },
+    "deterministic_outcome_source_policy": {
+      "const": "PERSISTED_OR_TRANSACTIONALLY_STAGED_ONLY"
+    },
+    "non_persisted_outcome_component_classes": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "DECISION_BUNDLE",
+          "GATE_SEQUENCE",
+          "SNAPSHOT",
+          "COMPUTE_RESULT",
+          "FORECAST_SET",
+          "RISK_REPORT",
+          "PARITY_RESULT",
+          "TRUST_SUMMARY",
+          "EVIDENCE_GRAPH",
+          "TWIN_VIEW",
+          "FILING_PACKET",
+          "AUTHORITY_RESULT",
+          "LATE_DATA_BASIS",
+          "DRIFT_RECORD"
+        ]
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "publication_gate": {
+      "const": "ATTESTATION_REQUIRED_BEFORE_REPLAY_CLAIM"
+    }
+  },
+  "$defs": {
+    "sourceDimensionArray": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "CONFIG",
+          "INPUT",
+          "PRESEAL_GATE_TAPE",
+          "AUTHORITY_POST_SEAL",
+          "BASELINE_POST_SEAL",
+          "LATE_DATA_POST_SEAL",
+          "TEMPORAL_PROPAGATION_POST_SEAL"
+        ]
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "counterfactualDimensionArray": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "IDENTITY_AUTHORITY",
+          "EXECUTABLE",
+          "CONFIG",
+          "INPUT",
+          "POST_SEAL",
+          "DETERMINISM",
+          "AUTHORITY_POST_SEAL",
+          "BASELINE_POST_SEAL",
+          "LATE_DATA_POST_SEAL",
+          "TEMPORAL_PROPAGATION_POST_SEAL"
+        ]
+      },
+      "default": [],
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "replay_class": {
+            "const": "COUNTERFACTUAL_ANALYSIS"
+          }
+        },
+        "required": [
+          "replay_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "declared_counterfactual_dimensions": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "replay_class": {
+            "enum": [
+              "STANDARD_REPLAY",
+              "AUDIT_REPLAY"
+            ]
+          }
+        },
+        "required": [
+          "replay_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "config_basis_source_class": {
+            "enum": [
+              "HISTORICAL_FROZEN_REUSED",
+              "MISSING_HISTORICAL_FREEZE",
+              "CORRUPT_HISTORICAL_FREEZE"
+            ]
+          },
+          "input_basis_source_class": {
+            "enum": [
+              "HISTORICAL_FROZEN_REUSED",
+              "MISSING_HISTORICAL_FREEZE",
+              "CORRUPT_HISTORICAL_FREEZE"
+            ]
+          },
+          "authority_basis_source_class": {
+            "enum": [
+              "HISTORICAL_POST_SEAL_REUSED",
+              "NOT_MATERIAL",
+              "MISSING_HISTORICAL_BASIS",
+              "CORRUPT_HISTORICAL_BASIS"
+            ]
+          },
+          "baseline_basis_source_class": {
+            "enum": [
+              "HISTORICAL_POST_SEAL_REUSED",
+              "NOT_MATERIAL",
+              "MISSING_HISTORICAL_BASIS",
+              "CORRUPT_HISTORICAL_BASIS"
+            ]
+          },
+          "late_data_basis_source_class": {
+            "enum": [
+              "HISTORICAL_POST_SEAL_REUSED",
+              "NOT_MATERIAL",
+              "MISSING_HISTORICAL_BASIS",
+              "CORRUPT_HISTORICAL_BASIS"
+            ]
+          },
+          "temporal_propagation_event_source_class": {
+            "enum": [
+              "HISTORICAL_POST_SEAL_REUSED",
+              "NOT_MATERIAL",
+              "MISSING_HISTORICAL_BASIS",
+              "CORRUPT_HISTORICAL_BASIS"
+            ]
+          },
+          "declared_counterfactual_dimensions": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "authority_basis_source_class": {
+            "const": "DECLARED_COUNTERFACTUAL_SUBSTITUTION"
+          }
+        },
+        "required": [
+          "authority_basis_source_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "declared_counterfactual_dimensions": {
+            "contains": {
+              "const": "AUTHORITY_POST_SEAL"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "baseline_basis_source_class": {
+            "const": "DECLARED_COUNTERFACTUAL_SUBSTITUTION"
+          }
+        },
+        "required": [
+          "baseline_basis_source_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "declared_counterfactual_dimensions": {
+            "contains": {
+              "const": "BASELINE_POST_SEAL"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "late_data_basis_source_class": {
+            "const": "DECLARED_COUNTERFACTUAL_SUBSTITUTION"
+          }
+        },
+        "required": [
+          "late_data_basis_source_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "declared_counterfactual_dimensions": {
+            "contains": {
+              "const": "LATE_DATA_POST_SEAL"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "temporal_propagation_event_source_class": {
+            "const": "DECLARED_COUNTERFACTUAL_SUBSTITUTION"
+          }
+        },
+        "required": [
+          "temporal_propagation_event_source_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "declared_counterfactual_dimensions": {
+            "contains": {
+              "const": "TEMPORAL_PROPAGATION_POST_SEAL"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "live_connector_read_class": {
+            "const": "DECLARED_COUNTERFACTUAL_EXECUTED"
+          }
+        },
+        "required": [
+          "live_connector_read_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "declared_counterfactual_dimensions": {
+            "contains": {
+              "const": "INPUT"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "live_authority_read_class": {
+            "const": "DECLARED_COUNTERFACTUAL_EXECUTED"
+          }
+        },
+        "required": [
+          "live_authority_read_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "declared_counterfactual_dimensions": {
+            "contains": {
+              "const": "AUTHORITY_POST_SEAL"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "late_data_rescan_class": {
+            "const": "DECLARED_COUNTERFACTUAL_EXECUTED"
+          }
+        },
+        "required": [
+          "late_data_rescan_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "declared_counterfactual_dimensions": {
+            "contains": {
+              "const": "LATE_DATA_POST_SEAL"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

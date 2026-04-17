@@ -1,0 +1,2976 @@
+{
+  "gates": [
+    {
+      "canonical_inputs": [
+        "`PrincipalContext`",
+        "target resource attributes",
+        "action family",
+        "environment attributes",
+        "client delegation basis",
+        "authority link state",
+        "token/client binding state",
+        "authentication level"
+      ],
+      "conditional_runtime_scope_tokens": [],
+      "decision_enum": [
+        "ALLOW",
+        "ALLOW_MASKED",
+        "REQUIRE_STEP_UP",
+        "REQUIRE_APPROVAL",
+        "DENY"
+      ],
+      "decision_table": {
+        "branches": [
+          {
+            "conditions": [
+              {
+                "line_number": 295,
+                "text": "no authenticated principal context"
+              },
+              {
+                "line_number": 296,
+                "text": "tenant mismatch"
+              },
+              {
+                "line_number": 297,
+                "text": "no allowed client scope"
+              },
+              {
+                "line_number": 298,
+                "text": "action is authority-facing and no valid authority link exists"
+              },
+              {
+                "line_number": 299,
+                "text": "token/client binding is missing or ambiguous"
+              },
+              {
+                "line_number": 300,
+                "text": "action is outside role/policy scope"
+              }
+            ],
+            "decision": "DENY",
+            "header": "Return `DENY` if any of the following is true:",
+            "line_number": 293
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 304,
+                "text": "the principal is otherwise allowed"
+              },
+              {
+                "line_number": 305,
+                "text": "but the action is one of:"
+              },
+              {
+                "line_number": 306,
+                "text": "submit to authority"
+              },
+              {
+                "line_number": 307,
+                "text": "approve filing-blocking override"
+              },
+              {
+                "line_number": 308,
+                "text": "export full evidence pack"
+              },
+              {
+                "line_number": 309,
+                "text": "execute erasure"
+              },
+              {
+                "line_number": 310,
+                "text": "approve compliance config"
+              },
+              {
+                "line_number": 311,
+                "text": "mark out-of-band submission as known truth"
+              }
+            ],
+            "decision": "REQUIRE_STEP_UP",
+            "header": "Return `REQUIRE_STEP_UP` if:",
+            "line_number": 302
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 315,
+                "text": "the actor may prepare but not approve the requested action"
+              },
+              {
+                "line_number": 316,
+                "text": "or a second-person approval policy applies"
+              }
+            ],
+            "decision": "REQUIRE_APPROVAL",
+            "header": "Return `REQUIRE_APPROVAL` if:",
+            "line_number": 313
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 320,
+                "text": "access is permitted only to a redacted projection"
+              }
+            ],
+            "decision": "ALLOW_MASKED",
+            "header": "Return `ALLOW_MASKED` if:",
+            "line_number": 318
+          },
+          {
+            "conditions": [],
+            "decision": "ALLOW",
+            "header": "Return `ALLOW` otherwise.",
+            "line_number": 322
+          }
+        ],
+        "notes": [],
+        "prelude": []
+      },
+      "downstream_consumers": [
+        "AUTHORIZE",
+        "ACCESS_BLOCKED_RESPONSE",
+        "ENFORCE_ACCESS_SCOPE_AND_MASKING",
+        "MATERIALIZE_SCOPE_EXECUTION_BINDING",
+        "VALIDATE_EFFECTIVE_SCOPE_BINDING",
+        "FILING_GATE",
+        "SUBMISSION_GATE"
+      ],
+      "evaluation_order_index": 1,
+      "evaluation_scope_condition": "Always first, before manifest allocation and before any non-access gate.",
+      "gate_class": "access",
+      "gate_code": "ACCESS_GATE",
+      "gate_family": "access_control",
+      "monotone_progression_rank_behavior": "ACCESS_GATE is outside the non-access monotone progression-rank contract.",
+      "non_access_stage_index_or_null": null,
+      "notes": [
+        "ACCESS_GATE uses the distinct authorization enum rather than GateDecisionRecord.",
+        "Pre-manifest access exits may terminate before RunManifest allocation.",
+        "GAP_ACCESS_REASON_CODES_NOT_ENUMERATED_IN_PRIMARY_GATE_SOURCE"
+      ],
+      "overrideability": "NON_OVERRIDEABLE",
+      "phase_bindings": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "AUTHORIZE",
+          "phase_id": "P01",
+          "phase_name": "Authorize and bind execution scope",
+          "row_id": "P01-S002",
+          "source_ref": "Algorithm/core_engine.md::L148[ACCESS_GATE]",
+          "statement": "access_decision = AUTHORIZE(principal, tenant_id, client_id, period, raw_requested_scope, mode, run_kind)"
+        }
+      ],
+      "purpose_or_intro": "This gate remains special because it uses the actor-and-authority contract.",
+      "rationale": "`ACCESS_GATE` is normalized from the canonical gate tables into one implementation-grade registry row.",
+      "reason_code_families": [],
+      "reason_codes": [],
+      "severity_model": {
+        "decision_to_severity": {},
+        "notes": [
+          "ACCESS_GATE is not serialized as GateDecisionRecord and therefore does not use the non-access severity enum."
+        ],
+        "profile_code": "ACCESS_GATE_SPECIAL_DECISION_ENUM",
+        "severity_enum": []
+      },
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L266[ACCESS_GATE]",
+      "source_refs": [
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L266[ACCESS_GATE]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L270[ACCESS_GATE.inputs]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L291[ACCESS_GATE.decision_table]"
+      ],
+      "terminalization_effects": [
+        "Pre-manifest hard denial; execution stops before any manifest allocation.",
+        "Pre-manifest access exit; runtime cannot allocate a manifest until stronger authentication succeeds.",
+        "Pre-manifest access exit; approval flow must complete before execution can start.",
+        "Continue, but masking binds only downstream projection and export surfaces.",
+        "Proceed into manifest allocation and non-access gate planning."
+      ],
+      "upstream_gate_dependencies": []
+    },
+    {
+      "canonical_inputs": [
+        "`RunManifest`",
+        "`ConfigFreeze`",
+        "`InputFreeze`",
+        "schema bundle hash",
+        "environment/profile refs"
+      ],
+      "conditional_runtime_scope_tokens": [],
+      "decision_enum": [
+        "PASS",
+        "PASS_WITH_NOTICE",
+        "MANUAL_REVIEW",
+        "OVERRIDABLE_BLOCK",
+        "HARD_BLOCK"
+      ],
+      "decision_table": {
+        "branches": [
+          {
+            "conditions": [
+              {
+                "line_number": 365,
+                "text": "`RunManifest.lifecycle_state != FROZEN` when `MANIFEST_GATE` is evaluated in the pre-seal chain"
+              },
+              {
+                "line_number": 366,
+                "text": "`config_freeze_hash` missing"
+              },
+              {
+                "line_number": 367,
+                "text": "`input_set_hash` missing"
+              },
+              {
+                "line_number": 368,
+                "text": "`execution_basis_hash` missing"
+              },
+              {
+                "line_number": 369,
+                "text": "`code_build_id` missing"
+              },
+              {
+                "line_number": 370,
+                "text": "`schema_bundle_hash` missing"
+              },
+              {
+                "line_number": 371,
+                "text": "provider/environment refs required for the runtime scope are missing"
+              },
+              {
+                "line_number": 372,
+                "text": "any required top-level config-freeze completeness ref is missing"
+              },
+              {
+                "line_number": 373,
+                "text": "`required_config_types_present[]` is missing, incomplete, or does not match the mandatory config-type set required for the run"
+              },
+              {
+                "line_number": 375,
+                "text": "`required_config_types_present[]` does not match the de-duplicated config-type set actually present in `ConfigFreeze.entries[]`"
+              },
+              {
+                "line_number": 377,
+                "text": "`config_completeness_state != COMPLETE_REQUIRED_CONFIG_SET`"
+              },
+              {
+                "line_number": 378,
+                "text": "`config_consumption_mode != FROZEN_CONFIG_ONLY`"
+              },
+              {
+                "line_number": 379,
+                "text": "`mode = COMPLIANCE` and `run_kind != REPLAY` and any frozen compliance-critical config is not `APPROVED`"
+              },
+              {
+                "line_number": 380,
+                "text": "`mode = COMPLIANCE` and `run_kind = REPLAY` and any frozen compliance-critical config is outside `{APPROVED, DEPRECATED, REVOKED}`"
+              },
+              {
+                "line_number": 382,
+                "text": "`run_kind = REPLAY` and any non-live frozen compliance config is present while the runtime scope still includes a filing-capable or amendment-capable live action token"
+              },
+              {
+                "line_number": 384,
+                "text": "`run_kind = REPLAY` and `replay_class in {STANDARD_REPLAY, AUDIT_REPLAY}` but `continuation_set.config_inheritance_mode != REPLAY_EXACT`"
+              },
+              {
+                "line_number": 386,
+                "text": "`run_kind = REPLAY` and `replay_class in {STANDARD_REPLAY, AUDIT_REPLAY}` but `ConfigFreeze.config_resolution_basis != REPLAY_EXACT_REUSE`"
+              },
+              {
+                "line_number": 388,
+                "text": "`run_kind = REPLAY` and `replay_class in {STANDARD_REPLAY, AUDIT_REPLAY}` but `continuation_set.input_inheritance_mode != REPLAY_EXACT`"
+              },
+              {
+                "line_number": 390,
+                "text": "`continuation_basis = RECOVERY_CHILD` but either config or input inheritance mode is not the exact recovery mode required for same-attempt replayable recovery"
+              },
+              {
+                "line_number": 392,
+                "text": "`continuation_basis = RECOVERY_CHILD` but `ConfigFreeze.config_resolution_basis != RECOVERY_EXACT_REUSE`"
+              },
+              {
+                "line_number": 393,
+                "text": "`continuation_set.config_inheritance_mode = FRESH_CHILD_RESOLUTION` but `ConfigFreeze.config_resolution_basis` is not `DIRECT_REQUEST_RESOLUTION`"
+              },
+              {
+                "line_number": 394,
+                "text": "`continuation_set.config_inheritance_mode = HISTORICAL_EXPLICIT` but `ConfigFreeze.config_resolution_basis != HISTORICAL_EXPLICIT_REUSE`"
+              }
+            ],
+            "decision": "HARD_BLOCK",
+            "header": "Return `HARD_BLOCK` if:",
+            "line_number": 363
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 398,
+                "text": "a required approval reference is missing for the requested run kind and frozen policy permits an override path"
+              }
+            ],
+            "decision": "OVERRIDABLE_BLOCK",
+            "header": "Return `OVERRIDABLE_BLOCK` if:",
+            "line_number": 396
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 403,
+                "text": "`run_kind = REPLAY` and one or more frozen compliance-critical config entries are `{DEPRECATED, REVOKED}` but the replay carve-out is valid and no live filing-capable progression is requested"
+              }
+            ],
+            "decision": "PASS_WITH_NOTICE",
+            "header": "Return `PASS_WITH_NOTICE` if:",
+            "line_number": 401
+          },
+          {
+            "conditions": [],
+            "decision": "PASS",
+            "header": "Return `PASS` otherwise.",
+            "line_number": 407
+          }
+        ],
+        "notes": [],
+        "prelude": []
+      },
+      "downstream_consumers": [
+        "EMIT_ORDERED_GATES",
+        "BUILD_PRESEAL_GATE_EVALUATION",
+        "SEAL_MANIFEST",
+        "TRUST_GATE",
+        "FILING_GATE"
+      ],
+      "evaluation_order_index": 2,
+      "evaluation_scope_condition": "Ordered pre-seal gate; runs on the frozen manifest before seal.",
+      "gate_class": "non_access",
+      "gate_code": "MANIFEST_GATE",
+      "gate_family": "preseal_manifest_integrity",
+      "monotone_progression_rank_behavior": "Inherited non-access monotone-min contract from section 7.1; later gates may narrow but never raise legal progression.",
+      "non_access_stage_index_or_null": 1,
+      "notes": [
+        "Same-manifest retry reuses persisted pre-seal gate records after seal.",
+        "Pre-seal PASS_WITH_NOTICE posture remains binding after seal."
+      ],
+      "overrideability": "SCOPED_OVERRIDE_ALLOWED",
+      "phase_bindings": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "MANIFEST_GATE",
+          "phase_id": "P05",
+          "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+          "row_id": "P05-S016",
+          "source_ref": "Algorithm/core_engine.md::L858[MANIFEST_GATE]",
+          "statement": "gate_manifest = MANIFEST_GATE( manifest, cfg_freeze, input_freeze, manifest.schema_bundle_hash, PROVIDER_ENVIRONMENT_REFS(collection_boundary) )"
+        }
+      ],
+      "purpose_or_intro": "Ensure the manifest envelope is fully frozen, internally complete, and valid for seal.",
+      "rationale": "`MANIFEST_GATE` is normalized from the canonical gate tables into one implementation-grade registry row.",
+      "reason_code_families": [
+        "MANIFEST_*"
+      ],
+      "reason_codes": [
+        "MANIFEST_NOT_FROZEN_FOR_PRESEAL",
+        "MANIFEST_CONFIG_FREEZE_MISSING",
+        "MANIFEST_CONFIG_FREEZE_INCOMPLETE",
+        "MANIFEST_INPUT_FREEZE_MISSING",
+        "MANIFEST_EXECUTION_BASIS_HASH_MISSING",
+        "MANIFEST_BUILD_CONTEXT_INCOMPLETE",
+        "MANIFEST_REQUIRED_CONFIG_TYPES_MISSING",
+        "MANIFEST_NON_COMPLIANCE_CONFIG",
+        "MANIFEST_REPLAY_SCOPE_NONLIVE_CONFIG_CONFLICT",
+        "MANIFEST_REPLAY_CONFIG_BASIS_INVALID",
+        "MANIFEST_REPLAY_INPUT_BASIS_INVALID",
+        "MANIFEST_RECOVERY_BASIS_INVALID",
+        "MANIFEST_REPLAY_NONLIVE_CONFIG_NOTICE",
+        "MANIFEST_REQUIRED_APPROVAL_MISSING"
+      ],
+      "severity_model": {
+        "decision_rank": {
+          "HARD_BLOCK": 4,
+          "MANUAL_REVIEW": 2,
+          "OVERRIDABLE_BLOCK": 3,
+          "PASS": 0,
+          "PASS_WITH_NOTICE": 1
+        },
+        "decision_to_severity": {
+          "HARD_BLOCK": "CRITICAL",
+          "MANUAL_REVIEW": "WARNING",
+          "OVERRIDABLE_BLOCK": "ERROR",
+          "PASS": "INFO",
+          "PASS_WITH_NOTICE": "NOTICE"
+        },
+        "profile_code": "NON_ACCESS_GATE_SEVERITY_V1",
+        "progression_rank": {
+          "HARD_BLOCK": 0,
+          "MANUAL_REVIEW": 1,
+          "OVERRIDABLE_BLOCK": 0,
+          "PASS": 2,
+          "PASS_WITH_NOTICE": 2
+        },
+        "severity_enum": [
+          "INFO",
+          "NOTICE",
+          "WARNING",
+          "ERROR",
+          "CRITICAL"
+        ]
+      },
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L332[MANIFEST_GATE]",
+      "source_refs": [
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L332[MANIFEST_GATE]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L345[MANIFEST_GATE.inputs]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L361[MANIFEST_GATE.decision_table]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L409[MANIFEST_GATE.reason_codes]"
+      ],
+      "terminalization_effects": [
+        "Blocks seal and terminalizes the pre-start path; legal continuation requires remediation or a child/replay lineage.",
+        "Blocks seal until a valid in-scope override is active for this gate.",
+        "Allows seal while preserving auditable notice posture for later TRUST_GATE and FILING_GATE consumption.",
+        "Allows the pre-seal chain to continue toward a complete ready-to-seal tape."
+      ],
+      "upstream_gate_dependencies": []
+    },
+    {
+      "canonical_inputs": [
+        "`schema_bundle`",
+        "`source_plan`",
+        "`source_window`",
+        "`collection_boundary`",
+        "`normalization_context`",
+        "`source_record_set`",
+        "`evidence_item_set`",
+        "`candidate_fact_set`",
+        "`conflict_set`",
+        "`canonical_fact_set`",
+        "`snapshot`",
+        "`input_freeze`"
+      ],
+      "conditional_runtime_scope_tokens": [],
+      "decision_enum": [
+        "PASS",
+        "PASS_WITH_NOTICE",
+        "MANUAL_REVIEW",
+        "OVERRIDABLE_BLOCK",
+        "HARD_BLOCK"
+      ],
+      "decision_table": {
+        "branches": [
+          {
+            "conditions": [
+              {
+                "line_number": 454,
+                "text": "required authoritative schema is missing from the frozen bundle"
+              },
+              {
+                "line_number": 455,
+                "text": "`SourcePlan`, `SourceWindow`, `CollectionBoundary`, or `NormalizationContext` fails validation against its declared schema"
+              },
+              {
+                "line_number": 456,
+                "text": "an authoritative artifact references a schema outside the frozen bundle"
+              },
+              {
+                "line_number": 457,
+                "text": "required field missing, unknown enum value, or undeclared field exists after schema closure"
+              },
+              {
+                "line_number": 458,
+                "text": "incompatible artifact-version mix violates bundle compatibility rules"
+              },
+              {
+                "line_number": 459,
+                "text": "artifact envelope lacks required contract identity (`schema_id`, `semantic_version`, `dialect_ref`, `schema_bundle_hash`, `artifact_content_hash`, `writer_build_id`)"
+              },
+              {
+                "line_number": 460,
+                "text": "`input_freeze.artifact_contract_refs[]` does not include the frozen `SourcePlan`, `SourceWindow`, `CollectionBoundary`, and `NormalizationContext` contract refs"
+              },
+              {
+                "line_number": 461,
+                "text": "`input_freeze.artifact_contract_hash` missing for a compliance-capable run"
+              },
+              {
+                "line_number": 462,
+                "text": "`input_freeze.artifact_contract_hash` does not match recomputed contract hash across intake-boundary and intake-data artifacts"
+              }
+            ],
+            "decision": "HARD_BLOCK",
+            "header": "Return `HARD_BLOCK` if any is true:",
+            "line_number": 452
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 466,
+                "text": "an authoritative artifact uses a deprecated but still allowed schema version inside an explicit compatibility window"
+              },
+              {
+                "line_number": 467,
+                "text": "a backward-compatible minor-version skew exists across independent artifact families and is permitted by frozen policy"
+              }
+            ],
+            "decision": "PASS_WITH_NOTICE",
+            "header": "Return `PASS_WITH_NOTICE` if:",
+            "line_number": 464
+          },
+          {
+            "conditions": [],
+            "decision": "PASS",
+            "header": "Return `PASS` otherwise.",
+            "line_number": 469
+          }
+        ],
+        "notes": [],
+        "prelude": []
+      },
+      "downstream_consumers": [
+        "EMIT_ORDERED_GATES",
+        "BUILD_PRESEAL_GATE_EVALUATION",
+        "SEAL_MANIFEST",
+        "TRUST_GATE",
+        "FILING_GATE"
+      ],
+      "evaluation_order_index": 3,
+      "evaluation_scope_condition": "Ordered pre-seal gate; runs after MANIFEST_GATE and before seal.",
+      "gate_class": "non_access",
+      "gate_code": "ARTIFACT_CONTRACT_GATE",
+      "gate_family": "artifact_contract_safety",
+      "monotone_progression_rank_behavior": "Inherited non-access monotone-min contract from section 7.1; later gates may narrow but never raise legal progression.",
+      "non_access_stage_index_or_null": 2,
+      "notes": [
+        "Pre-seal PASS_WITH_NOTICE posture remains binding after seal."
+      ],
+      "overrideability": "NON_OVERRIDEABLE",
+      "phase_bindings": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "ARTIFACT_CONTRACT_GATE",
+          "phase_id": "P05",
+          "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+          "row_id": "P05-S017",
+          "source_ref": "Algorithm/core_engine.md::L866[ARTIFACT_CONTRACT_GATE]",
+          "statement": "gate_contracts = ARTIFACT_CONTRACT_GATE( schema_bundle, source_plan, source_window, collection_boundary, normalization_context, source_record_set, evidence_item_set, candidate_fact_set, conflict_set, canonical_fact_set, snapshot, input_freeze )"
+        }
+      ],
+      "purpose_or_intro": "Ensure both intake-boundary artifacts and intake-data artifacts conform to the frozen versioned schema bundle before they become authoritative for compute, parity, trust, filing, or graphing.",
+      "rationale": "`ARTIFACT_CONTRACT_GATE` is normalized from the canonical gate tables into one implementation-grade registry row.",
+      "reason_code_families": [
+        "ARTIFACT_*"
+      ],
+      "reason_codes": [
+        "ARTIFACT_SCHEMA_MISSING",
+        "ARTIFACT_SCHEMA_NOT_IN_BUNDLE",
+        "ARTIFACT_SCHEMA_VALIDATION_FAILED",
+        "ARTIFACT_VERSION_INCOMPATIBLE",
+        "ARTIFACT_ENVELOPE_INCOMPLETE",
+        "ARTIFACT_CONTRACT_REF_MISSING",
+        "ARTIFACT_CONTRACT_HASH_MISMATCH",
+        "ARTIFACT_SCHEMA_DEPRECATED_ALLOWED"
+      ],
+      "severity_model": {
+        "decision_rank": {
+          "HARD_BLOCK": 4,
+          "MANUAL_REVIEW": 2,
+          "OVERRIDABLE_BLOCK": 3,
+          "PASS": 0,
+          "PASS_WITH_NOTICE": 1
+        },
+        "decision_to_severity": {
+          "HARD_BLOCK": "CRITICAL",
+          "MANUAL_REVIEW": "WARNING",
+          "OVERRIDABLE_BLOCK": "ERROR",
+          "PASS": "INFO",
+          "PASS_WITH_NOTICE": "NOTICE"
+        },
+        "profile_code": "NON_ACCESS_GATE_SEVERITY_V1",
+        "progression_rank": {
+          "HARD_BLOCK": 0,
+          "MANUAL_REVIEW": 1,
+          "OVERRIDABLE_BLOCK": 0,
+          "PASS": 2,
+          "PASS_WITH_NOTICE": 2
+        },
+        "severity_enum": [
+          "INFO",
+          "NOTICE",
+          "WARNING",
+          "ERROR",
+          "CRITICAL"
+        ]
+      },
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L428[ARTIFACT_CONTRACT_GATE]",
+      "source_refs": [
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L428[ARTIFACT_CONTRACT_GATE]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L435[ARTIFACT_CONTRACT_GATE.inputs]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L450[ARTIFACT_CONTRACT_GATE.decision_table]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L471[ARTIFACT_CONTRACT_GATE.reason_codes]"
+      ],
+      "terminalization_effects": [
+        "Blocks seal and terminalizes the pre-start path; legal continuation requires remediation or a child/replay lineage.",
+        "Allows seal while preserving auditable notice posture for later TRUST_GATE and FILING_GATE consumption.",
+        "Allows the pre-seal chain to continue toward a complete ready-to-seal tape."
+      ],
+      "upstream_gate_dependencies": [
+        "MANIFEST_GATE"
+      ]
+    },
+    {
+      "canonical_inputs": [
+        "`InputFreeze`",
+        "`CollectionBoundary`",
+        "`source_domain_postures[]`",
+        "explicit exclusion / confirmed-no-data / missing / stale declarations"
+      ],
+      "conditional_runtime_scope_tokens": [],
+      "decision_enum": [
+        "PASS",
+        "PASS_WITH_NOTICE",
+        "MANUAL_REVIEW",
+        "OVERRIDABLE_BLOCK",
+        "HARD_BLOCK"
+      ],
+      "decision_table": {
+        "branches": [
+          {
+            "conditions": [
+              {
+                "line_number": 502,
+                "text": "required source classes for the requested scope were never evaluated"
+              },
+              {
+                "line_number": 503,
+                "text": "input boundary is missing for a compliance run"
+              },
+              {
+                "line_number": 504,
+                "text": "source set was mutated after `FREEZE_COLLECTION_BOUNDARY`"
+              },
+              {
+                "line_number": 505,
+                "text": "any required domain lacks one explicit frozen posture in `source_domain_postures[]`"
+              },
+              {
+                "line_number": 506,
+                "text": "gate evaluation consults raw connector deltas or a fresher boundary snapshot instead of `InputFreeze`"
+              }
+            ],
+            "decision": "HARD_BLOCK",
+            "header": "Return `HARD_BLOCK` if:",
+            "line_number": 500
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 511,
+                "text": "frozen scope includes explicit exclusions affecting a filing-critical domain"
+              },
+              {
+                "line_number": 512,
+                "text": "a filing-critical domain is frozen `STALE_AT_CUTOFF`"
+              }
+            ],
+            "decision": "MANUAL_REVIEW",
+            "header": "Return `MANUAL_REVIEW` if:",
+            "line_number": 509
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 516,
+                "text": "non-filing-critical exclusions exist inside the frozen boundary"
+              },
+              {
+                "line_number": 517,
+                "text": "non-filing-critical domains are explicitly `NO_DATA_CONFIRMED_AT_CUTOFF`"
+              },
+              {
+                "line_number": 518,
+                "text": "stale but non-critical sources are declared inside the frozen boundary"
+              }
+            ],
+            "decision": "PASS_WITH_NOTICE",
+            "header": "Return `PASS_WITH_NOTICE` if:",
+            "line_number": 514
+          },
+          {
+            "conditions": [],
+            "decision": "PASS",
+            "header": "Return `PASS` otherwise.",
+            "line_number": 520
+          }
+        ],
+        "notes": [],
+        "prelude": [
+          {
+            "line_number": 522,
+            "text": "Post-seal late-data discovery SHALL NOT be judged here; it SHALL instead be passed into"
+          },
+          {
+            "line_number": 523,
+            "text": "`FILING_GATE` as `late_data_status` together with the applicable ordered"
+          },
+          {
+            "line_number": 524,
+            "text": "`late_data_policy_bindings[]` for the affected frozen source bindings."
+          },
+          {
+            "line_number": 525,
+            "text": "That handoff SHALL come from a persisted `LateDataMonitorResult`, not a fresh ad hoc scan of raw"
+          },
+          {
+            "line_number": 526,
+            "text": "connector state at gate time."
+          }
+        ]
+      },
+      "downstream_consumers": [
+        "EMIT_ORDERED_GATES",
+        "BUILD_PRESEAL_GATE_EVALUATION",
+        "SEAL_MANIFEST",
+        "TRUST_GATE",
+        "FILING_GATE"
+      ],
+      "evaluation_order_index": 4,
+      "evaluation_scope_condition": "Ordered pre-seal gate; runs after artifact-contract validation and before seal.",
+      "gate_class": "non_access",
+      "gate_code": "INPUT_BOUNDARY_GATE",
+      "gate_family": "input_boundary",
+      "monotone_progression_rank_behavior": "Inherited non-access monotone-min contract from section 7.1; later gates may narrow but never raise legal progression.",
+      "non_access_stage_index_or_null": 3,
+      "notes": [
+        "Post-seal late data is judged by FILING_GATE via LateDataMonitorResult, not re-evaluated here.",
+        "Pre-seal MANUAL_REVIEW or PASS_WITH_NOTICE posture remains binding after seal."
+      ],
+      "overrideability": "NON_OVERRIDEABLE",
+      "phase_bindings": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "INPUT_BOUNDARY_GATE",
+          "phase_id": "P05",
+          "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+          "row_id": "P05-S018",
+          "source_ref": "Algorithm/core_engine.md::L881[INPUT_BOUNDARY_GATE]",
+          "statement": "gate_boundary = INPUT_BOUNDARY_GATE( input_freeze, collection_boundary, DECLARED_EXCLUSIONS(input_freeze) )"
+        }
+      ],
+      "purpose_or_intro": "Ensure the data population in scope is frozen, explicitly classified per source domain, and not drifting during the run.",
+      "rationale": "`INPUT_BOUNDARY_GATE` is normalized from the canonical gate tables into one implementation-grade registry row.",
+      "reason_code_families": [
+        "INPUT_*"
+      ],
+      "reason_codes": [
+        "INPUT_BOUNDARY_UNFROZEN",
+        "INPUT_POST_BOUNDARY_SOURCE_MUTATION",
+        "INPUT_CRITICAL_SOURCE_EXCLUDED",
+        "INPUT_CRITICAL_SOURCE_STALE",
+        "INPUT_NONCRITICAL_SOURCE_EXCLUDED",
+        "INPUT_NONCRITICAL_SOURCE_CONFIRMED_EMPTY",
+        "INPUT_NONCRITICAL_SOURCE_STALE"
+      ],
+      "severity_model": {
+        "decision_rank": {
+          "HARD_BLOCK": 4,
+          "MANUAL_REVIEW": 2,
+          "OVERRIDABLE_BLOCK": 3,
+          "PASS": 0,
+          "PASS_WITH_NOTICE": 1
+        },
+        "decision_to_severity": {
+          "HARD_BLOCK": "CRITICAL",
+          "MANUAL_REVIEW": "WARNING",
+          "OVERRIDABLE_BLOCK": "ERROR",
+          "PASS": "INFO",
+          "PASS_WITH_NOTICE": "NOTICE"
+        },
+        "profile_code": "NON_ACCESS_GATE_SEVERITY_V1",
+        "progression_rank": {
+          "HARD_BLOCK": 0,
+          "MANUAL_REVIEW": 1,
+          "OVERRIDABLE_BLOCK": 0,
+          "PASS": 2,
+          "PASS_WITH_NOTICE": 2
+        },
+        "severity_enum": [
+          "INFO",
+          "NOTICE",
+          "WARNING",
+          "ERROR",
+          "CRITICAL"
+        ]
+      },
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L484[INPUT_BOUNDARY_GATE]",
+      "source_refs": [
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L484[INPUT_BOUNDARY_GATE]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L491[INPUT_BOUNDARY_GATE.inputs]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L498[INPUT_BOUNDARY_GATE.decision_table]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L528[INPUT_BOUNDARY_GATE.reason_codes]"
+      ],
+      "terminalization_effects": [
+        "Blocks seal and terminalizes the pre-start path; legal continuation requires remediation or a child/replay lineage.",
+        "Allows seal, but the unresolved review posture remains binding after seal and caps later automation.",
+        "Allows seal while preserving auditable notice posture for later TRUST_GATE and FILING_GATE consumption.",
+        "Allows the pre-seal chain to continue toward a complete ready-to-seal tape."
+      ],
+      "upstream_gate_dependencies": [
+        "MANIFEST_GATE",
+        "ARTIFACT_CONTRACT_GATE"
+      ]
+    },
+    {
+      "canonical_inputs": [
+        "`completeness_score`",
+        "`data_quality_score`",
+        "`critical_domain_missing_count`",
+        "`open_conflict_count`",
+        "`blocking_conflict_count`",
+        "`conflict_resolution_frontier`",
+        "`stale_critical_domain_count`",
+        "`validation_error_budget_exceeded`",
+        "scope-specific required-domain profile"
+      ],
+      "conditional_runtime_scope_tokens": [],
+      "decision_enum": [
+        "PASS",
+        "PASS_WITH_NOTICE",
+        "MANUAL_REVIEW",
+        "OVERRIDABLE_BLOCK",
+        "HARD_BLOCK"
+      ],
+      "decision_table": {
+        "branches": [
+          {
+            "conditions": [
+              {
+                "line_number": 575,
+                "text": "`blocking_conflict_count > 0`"
+              },
+              {
+                "line_number": 576,
+                "text": "`conflict_resolution_frontier = BLOCKING_PRESENT`"
+              },
+              {
+                "line_number": 577,
+                "text": "`critical_domain_missing_count > 0`"
+              },
+              {
+                "line_number": 578,
+                "text": "`completeness_score < 60`"
+              },
+              {
+                "line_number": 579,
+                "text": "`data_quality_score < 55`"
+              },
+              {
+                "line_number": 580,
+                "text": "validation has a filing-critical structural error"
+              }
+            ],
+            "decision": "HARD_BLOCK",
+            "header": "Return `HARD_BLOCK` if any is true:",
+            "line_number": 573
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 584,
+                "text": "`60 <= completeness_score < 75`"
+              },
+              {
+                "line_number": 585,
+                "text": "or `55 <= data_quality_score < 70`"
+              },
+              {
+                "line_number": 586,
+                "text": "or `stale_critical_domain_count > 0`"
+              },
+              {
+                "line_number": 587,
+                "text": "or required critical domain exists only as provisional facts"
+              }
+            ],
+            "decision": "OVERRIDABLE_BLOCK",
+            "header": "Return `OVERRIDABLE_BLOCK` if:",
+            "line_number": 582
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 591,
+                "text": "`75 <= completeness_score < 85`"
+              },
+              {
+                "line_number": 592,
+                "text": "or `70 <= data_quality_score < 80`"
+              },
+              {
+                "line_number": 593,
+                "text": "or only non-blocking critical warnings exist"
+              }
+            ],
+            "decision": "MANUAL_REVIEW",
+            "header": "Return `MANUAL_REVIEW` if:",
+            "line_number": 589
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 597,
+                "text": "`completeness_score >= 85`"
+              },
+              {
+                "line_number": 598,
+                "text": "`data_quality_score >= 80`"
+              },
+              {
+                "line_number": 599,
+                "text": "and either `conflict_resolution_frontier = MONITORING_ONLY` or non-critical warnings or partial domains remain"
+              }
+            ],
+            "decision": "PASS_WITH_NOTICE",
+            "header": "Return `PASS_WITH_NOTICE` if:",
+            "line_number": 595
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 603,
+                "text": "`completeness_score >= 85`"
+              },
+              {
+                "line_number": 604,
+                "text": "`data_quality_score >= 80`"
+              },
+              {
+                "line_number": 605,
+                "text": "`open_conflict_count = 0`"
+              },
+              {
+                "line_number": 606,
+                "text": "no critical warnings remain"
+              }
+            ],
+            "decision": "PASS",
+            "header": "Return `PASS` if:",
+            "line_number": 601
+          }
+        ],
+        "notes": [],
+        "prelude": []
+      },
+      "downstream_consumers": [
+        "EMIT_ORDERED_GATES",
+        "BUILD_PRESEAL_GATE_EVALUATION",
+        "SEAL_MANIFEST",
+        "TRUST_GATE",
+        "FILING_GATE"
+      ],
+      "evaluation_order_index": 5,
+      "evaluation_scope_condition": "Ordered pre-seal gate; runs last in the canonical pre-seal tape before seal.",
+      "gate_class": "non_access",
+      "gate_code": "DATA_QUALITY_GATE",
+      "gate_family": "data_quality",
+      "monotone_progression_rank_behavior": "Inherited non-access monotone-min contract from section 7.1; later gates may narrow but never raise legal progression.",
+      "non_access_stage_index_or_null": 4,
+      "notes": [
+        "Pre-seal MANUAL_REVIEW or PASS_WITH_NOTICE posture remains binding after seal.",
+        "OVERRIDABLE_BLOCK is explicitly available for bounded low-quality or stale-critical posture."
+      ],
+      "overrideability": "SCOPED_OVERRIDE_ALLOWED",
+      "phase_bindings": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "DATA_QUALITY_GATE",
+          "phase_id": "P05",
+          "phase_name": "Evaluate the ordered pre-seal gate chain, persist pre-start blocked context if needed, and seal only when a new pre-start context was built",
+          "row_id": "P05-S019",
+          "source_ref": "Algorithm/core_engine.md::L887[DATA_QUALITY_GATE]",
+          "statement": "gate_quality = DATA_QUALITY_GATE(snapshot, cfg)"
+        }
+      ],
+      "purpose_or_intro": "Convert completeness, validation, freshness, and conflict metrics into an execution decision.",
+      "rationale": "`DATA_QUALITY_GATE` is normalized from the canonical gate tables into one implementation-grade registry row.",
+      "reason_code_families": [
+        "DQ_*"
+      ],
+      "reason_codes": [
+        "DQ_CRITICAL_DOMAIN_MISSING",
+        "DQ_BLOCKING_CONFLICT",
+        "DQ_COMPLETENESS_BELOW_MINIMUM",
+        "DQ_DATA_QUALITY_BELOW_MINIMUM",
+        "DQ_STALE_CRITICAL_DOMAIN",
+        "DQ_PROVISIONAL_CRITICAL_FACT",
+        "DQ_NONCRITICAL_WARNING_PRESENT"
+      ],
+      "severity_model": {
+        "decision_rank": {
+          "HARD_BLOCK": 4,
+          "MANUAL_REVIEW": 2,
+          "OVERRIDABLE_BLOCK": 3,
+          "PASS": 0,
+          "PASS_WITH_NOTICE": 1
+        },
+        "decision_to_severity": {
+          "HARD_BLOCK": "CRITICAL",
+          "MANUAL_REVIEW": "WARNING",
+          "OVERRIDABLE_BLOCK": "ERROR",
+          "PASS": "INFO",
+          "PASS_WITH_NOTICE": "NOTICE"
+        },
+        "profile_code": "NON_ACCESS_GATE_SEVERITY_V1",
+        "progression_rank": {
+          "HARD_BLOCK": 0,
+          "MANUAL_REVIEW": 1,
+          "OVERRIDABLE_BLOCK": 0,
+          "PASS": 2,
+          "PASS_WITH_NOTICE": 2
+        },
+        "severity_enum": [
+          "INFO",
+          "NOTICE",
+          "WARNING",
+          "ERROR",
+          "CRITICAL"
+        ]
+      },
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L540[DATA_QUALITY_GATE]",
+      "source_refs": [
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L540[DATA_QUALITY_GATE]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L546[DATA_QUALITY_GATE.inputs]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L571[DATA_QUALITY_GATE.decision_table]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L608[DATA_QUALITY_GATE.reason_codes]"
+      ],
+      "terminalization_effects": [
+        "Blocks seal and terminalizes the pre-start path; legal continuation requires remediation or a child/replay lineage.",
+        "Blocks seal until a valid in-scope override is active for this gate.",
+        "Allows seal, but the unresolved review posture remains binding after seal and caps later automation.",
+        "Allows seal while preserving auditable notice posture for later TRUST_GATE and FILING_GATE consumption.",
+        "Allows the pre-seal chain to continue toward a complete ready-to-seal tape."
+      ],
+      "upstream_gate_dependencies": [
+        "MANIFEST_GATE",
+        "ARTIFACT_CONTRACT_GATE",
+        "INPUT_BOUNDARY_GATE"
+      ]
+    },
+    {
+      "canonical_inputs": [
+        "`graph_quality_score`",
+        "`critical_path_coverage`",
+        "`critical_retention_limited_count`",
+        "`critical_evidence_erased_count`",
+        "`weighted_path_survivability`",
+        "`limitation_clarity_ratio`",
+        "`critical_silent_limitation_count`",
+        "`noncritical_silent_limitation_count`",
+        "`inferred_critical_path_ratio`",
+        "`proof_bundle_coverage`",
+        "`unsupported_critical_target_count`",
+        "`contradicted_critical_target_count`",
+        "`stale_critical_target_count`",
+        "`replay_failure_target_count`",
+        "`open_critical_target_count`",
+        "`missing_proof_bundle_target_count`",
+        "`critical_explanation_failure_count`",
+        "`noncritical_explanation_failure_count`"
+      ],
+      "conditional_runtime_scope_tokens": [],
+      "decision_enum": [
+        "PASS",
+        "PASS_WITH_NOTICE",
+        "MANUAL_REVIEW",
+        "OVERRIDABLE_BLOCK",
+        "HARD_BLOCK"
+      ],
+      "decision_table": {
+        "branches": [
+          {
+            "conditions": [
+              {
+                "line_number": 662,
+                "text": "any filing-critical evidence path is erased"
+              },
+              {
+                "line_number": 663,
+                "text": "`critical_path_coverage < 0.75`"
+              },
+              {
+                "line_number": 664,
+                "text": "`critical_silent_limitation_count > 0`"
+              },
+              {
+                "line_number": 665,
+                "text": "`unsupported_critical_target_count > 0`"
+              },
+              {
+                "line_number": 666,
+                "text": "`contradicted_critical_target_count > 0`"
+              },
+              {
+                "line_number": 667,
+                "text": "`open_critical_target_count > 0`"
+              },
+              {
+                "line_number": 668,
+                "text": "`missing_proof_bundle_target_count > 0`"
+              },
+              {
+                "line_number": 669,
+                "text": "`replay_failure_target_count > 0`"
+              },
+              {
+                "line_number": 670,
+                "text": "`critical_explanation_failure_count > 0`"
+              },
+              {
+                "line_number": 671,
+                "text": "any filing-critical path survivability falls below `path_survivability_min_audit`"
+              },
+              {
+                "line_number": 672,
+                "text": "required evidence is retention-limited in a way that prevents lawful or defensible submission"
+              }
+            ],
+            "decision": "HARD_BLOCK",
+            "header": "Return `HARD_BLOCK` if:",
+            "line_number": 660
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 676,
+                "text": "`0.75 <= critical_path_coverage < 0.90`"
+              },
+              {
+                "line_number": 677,
+                "text": "or `65 <= graph_quality_score < 80`"
+              },
+              {
+                "line_number": 678,
+                "text": "or `path_survivability_min_review <= weighted_path_survivability < path_survivability_min_submit`"
+              },
+              {
+                "line_number": 679,
+                "text": "or `limitation_clarity_ratio < limitation_clarity_min_submit` with explicit limitation notes but no silent ambiguity"
+              },
+              {
+                "line_number": 680,
+                "text": "or critical paths exist but rely heavily on inferred links"
+              },
+              {
+                "line_number": 681,
+                "text": "or stale decisive targets exist but policy allows scoped human waiver before rebuild"
+              },
+              {
+                "line_number": 682,
+                "text": "or a critical path is limited but still explainable with explicit limitation notes"
+              }
+            ],
+            "decision": "OVERRIDABLE_BLOCK",
+            "header": "Return `OVERRIDABLE_BLOCK` if:",
+            "line_number": 674
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 686,
+                "text": "evidence paths exist for all critical figures"
+              },
+              {
+                "line_number": 687,
+                "text": "but non-critical limitations materially affect reviewer confidence"
+              },
+              {
+                "line_number": 688,
+                "text": "or `noncritical_silent_limitation_count > 0`"
+              },
+              {
+                "line_number": 689,
+                "text": "or `noncritical_explanation_failure_count > 0`"
+              }
+            ],
+            "decision": "MANUAL_REVIEW",
+            "header": "Return `MANUAL_REVIEW` if:",
+            "line_number": 684
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 693,
+                "text": "only non-critical evidence limitations exist"
+              },
+              {
+                "line_number": 694,
+                "text": "or only non-critical stale or limited proof posture exists with explicit limitation notes"
+              },
+              {
+                "line_number": 695,
+                "text": "or `weighted_path_survivability >= path_survivability_min_submit` and `limitation_clarity_ratio = 1` but non-critical limitations still remain visible"
+              }
+            ],
+            "decision": "PASS_WITH_NOTICE",
+            "header": "Return `PASS_WITH_NOTICE` if:",
+            "line_number": 691
+          },
+          {
+            "conditions": [],
+            "decision": "PASS",
+            "header": "Return `PASS` otherwise.",
+            "line_number": 697
+          }
+        ],
+        "notes": [],
+        "prelude": []
+      },
+      "downstream_consumers": [
+        "APPEND_MANIFEST_GATES",
+        "TRUST_GATE",
+        "FILING_GATE",
+        "DecisionBundle"
+      ],
+      "evaluation_order_index": 6,
+      "evaluation_scope_condition": "Runs once proof and graph evidence exist; appends post-seal without rewriting the frozen pre-seal tape.",
+      "gate_class": "non_access",
+      "gate_code": "RETENTION_EVIDENCE_GATE",
+      "gate_family": "retention_evidence",
+      "monotone_progression_rank_behavior": "Inherited non-access monotone-min contract from section 7.1; later gates may narrow but never raise legal progression.",
+      "non_access_stage_index_or_null": 5,
+      "notes": [
+        "Retention limitations remain explicit reason-coded posture rather than hidden score discounting."
+      ],
+      "overrideability": "SCOPED_OVERRIDE_ALLOWED",
+      "phase_bindings": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "RETENTION_EVIDENCE_GATE",
+          "phase_id": "P08",
+          "phase_name": "Retention evidence gate",
+          "row_id": "P08-S001",
+          "source_ref": "Algorithm/core_engine.md::L1258[RETENTION_EVIDENCE_GATE]",
+          "statement": "gate_retention = RETENTION_EVIDENCE_GATE( graph.quality.graph_quality_score, graph.quality.critical_path_coverage, graph.quality.critical_retention_limited_count, graph.quality.critical_evidence_erased_count, DERIVE_WEIGHTED_PATH_SURVIVABILITY(graph), DERIVE_LIMITATION_CLARITY_RATIO(graph), DERIVE_CRITICAL_SILENT_LIMITATION_COUNT(graph), DERIVE_NONCRITICAL_SILENT_LIMITATION_COUNT(graph), graph.quality.inferred_critical_path_ratio, graph.quality.proof_bundle_coverage, graph.quality.unsupported_critical_target_count, graph.quality.contradicted_critical_target_count, graph.quality.stale_critical_target_count, graph.quality.replay_failure_target_count, graph.integrity_summary.open_critical_target_count, graph.integrity_summary.missing_proof_bundle_target_count, DERIVE_CRITICAL_EXPLANATION_FAILURE_COUNT(graph), DERIVE_NONCRITICAL_EXPLANATION_FAILURE_COUNT(graph) )"
+        }
+      ],
+      "purpose_or_intro": "Ensure required evidence is still available and sufficiently direct for the requested action.",
+      "rationale": "`RETENTION_EVIDENCE_GATE` is normalized from the canonical gate tables into one implementation-grade registry row.",
+      "reason_code_families": [
+        "RETENTION_*"
+      ],
+      "reason_codes": [
+        "RETENTION_CRITICAL_EVIDENCE_ERASED",
+        "RETENTION_CRITICAL_PATH_MISSING",
+        "RETENTION_GRAPH_QUALITY_BELOW_MINIMUM",
+        "RETENTION_CRITICAL_LIMITATION",
+        "RETENTION_SILENT_LIMITATION_AMBIGUITY",
+        "RETENTION_SURVIVABILITY_BELOW_AUDIT_MINIMUM",
+        "RETENTION_SURVIVABILITY_BELOW_SUBMIT_MINIMUM",
+        "RETENTION_INFERRED_PATH_RATIO_HIGH",
+        "RETENTION_PROOF_BUNDLE_MISSING",
+        "RETENTION_TARGET_UNSUPPORTED",
+        "RETENTION_TARGET_CONTRADICTED",
+        "RETENTION_PROOF_CLOSURE_OPEN",
+        "RETENTION_REPLAY_FAILURE",
+        "RETENTION_EXPLANATION_FAILURE",
+        "RETENTION_NONCRITICAL_LIMITATION"
+      ],
+      "severity_model": {
+        "decision_rank": {
+          "HARD_BLOCK": 4,
+          "MANUAL_REVIEW": 2,
+          "OVERRIDABLE_BLOCK": 3,
+          "PASS": 0,
+          "PASS_WITH_NOTICE": 1
+        },
+        "decision_to_severity": {
+          "HARD_BLOCK": "CRITICAL",
+          "MANUAL_REVIEW": "WARNING",
+          "OVERRIDABLE_BLOCK": "ERROR",
+          "PASS": "INFO",
+          "PASS_WITH_NOTICE": "NOTICE"
+        },
+        "profile_code": "NON_ACCESS_GATE_SEVERITY_V1",
+        "progression_rank": {
+          "HARD_BLOCK": 0,
+          "MANUAL_REVIEW": 1,
+          "OVERRIDABLE_BLOCK": 0,
+          "PASS": 2,
+          "PASS_WITH_NOTICE": 2
+        },
+        "severity_enum": [
+          "INFO",
+          "NOTICE",
+          "WARNING",
+          "ERROR",
+          "CRITICAL"
+        ]
+      },
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L620[RETENTION_EVIDENCE_GATE]",
+      "source_refs": [
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L620[RETENTION_EVIDENCE_GATE]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L626[RETENTION_EVIDENCE_GATE.inputs]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L658[RETENTION_EVIDENCE_GATE.decision_table]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L699[RETENTION_EVIDENCE_GATE.reason_codes]"
+      ],
+      "terminalization_effects": [
+        "Terminalizes the current progression path; legal continuation requires remediation or a new child lineage.",
+        "Blocks progression until a valid in-scope override is active for the unresolved prerequisite.",
+        "Routes into reviewer-facing progression without allowing straight-through automation.",
+        "Allows progress, but notice posture remains explicit and auditable downstream.",
+        "Allows the next ordered gate or live authority progression to continue automatically."
+      ],
+      "upstream_gate_dependencies": [
+        "DATA_QUALITY_GATE"
+      ]
+    },
+    {
+      "canonical_inputs": [
+        "`comparison_set_state`",
+        "`parity_classification`",
+        "`parity_score`",
+        "`critical_blocking_field_count`",
+        "`critical_material_field_count`",
+        "`comparison_required`",
+        "`override_state`",
+        "`dominant_reason_code`"
+      ],
+      "conditional_runtime_scope_tokens": [],
+      "decision_enum": [
+        "PASS",
+        "PASS_WITH_NOTICE",
+        "MANUAL_REVIEW",
+        "OVERRIDABLE_BLOCK",
+        "HARD_BLOCK"
+      ],
+      "decision_table": {
+        "branches": [
+          {
+            "conditions": [
+              {
+                "line_number": 741,
+                "text": "(`parity_classification = BLOCKING_DIFFERENCE` and no valid approved parity override exists)"
+              },
+              {
+                "line_number": 742,
+                "text": "or (`parity_classification = NOT_COMPARABLE` and comparison is mandatory for the requested scope)"
+              }
+            ],
+            "decision": "HARD_BLOCK",
+            "header": "Return `HARD_BLOCK` if:",
+            "line_number": 739
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 746,
+                "text": "(`parity_classification = MATERIAL_DIFFERENCE` and at least one critical field is affected)"
+              },
+              {
+                "line_number": 747,
+                "text": "or (`parity_classification = BLOCKING_DIFFERENCE` and policy allows scoped parity override and no approved override is yet active)"
+              }
+            ],
+            "decision": "OVERRIDABLE_BLOCK",
+            "header": "Return `OVERRIDABLE_BLOCK` if:",
+            "line_number": 744
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 751,
+                "text": "(`parity_classification = MATERIAL_DIFFERENCE` and only non-critical comparison fields are affected)"
+              },
+              {
+                "line_number": 752,
+                "text": "or (`parity_classification = NOT_COMPARABLE` and comparison is desirable but not mandatory)"
+              }
+            ],
+            "decision": "MANUAL_REVIEW",
+            "header": "Return `MANUAL_REVIEW` if:",
+            "line_number": 749
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 756,
+                "text": "`parity_classification = MINOR_DIFFERENCE`"
+              }
+            ],
+            "decision": "PASS_WITH_NOTICE",
+            "header": "Return `PASS_WITH_NOTICE` if:",
+            "line_number": 754
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 760,
+                "text": "`parity_classification = MATCH` `comparison_set_state = INVALID` SHALL already be serialized by `ParityResult` as `parity_classification = NOT_COMPARABLE`, `parity_score = 0`, and `dominant_reason_code = PARITY_COMPARISON_SET_INVALID`; `PARITY_GATE` SHALL preserve that fail-closed posture instead of softening it into a local-match heuristic."
+              }
+            ],
+            "decision": "PASS",
+            "header": "Return `PASS` if:",
+            "line_number": 758
+          }
+        ],
+        "notes": [],
+        "prelude": []
+      },
+      "downstream_consumers": [
+        "APPEND_MANIFEST_GATES",
+        "TRUST_GATE",
+        "FILING_GATE",
+        "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+      ],
+      "evaluation_order_index": 7,
+      "evaluation_scope_condition": "Runs after retention evidence once comparison artifacts exist.",
+      "gate_class": "non_access",
+      "gate_code": "PARITY_GATE",
+      "gate_family": "authority_parity",
+      "monotone_progression_rank_behavior": "Inherited non-access monotone-min contract from section 7.1; later gates may narrow but never raise legal progression.",
+      "non_access_stage_index_or_null": 6,
+      "notes": [
+        "Comparison-set invalidity must remain fail-closed as NOT_COMPARABLE."
+      ],
+      "overrideability": "SCOPED_OVERRIDE_ALLOWED",
+      "phase_bindings": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "PARITY_GATE",
+          "phase_id": "P09",
+          "phase_name": "Authority context, comparison basis, parity, and parity gate",
+          "row_id": "P09-S071",
+          "source_ref": "Algorithm/core_engine.md::L1601[PARITY_GATE]",
+          "statement": "gate_parity = PARITY_GATE( parity, cfg.parity_rules, overrides=LOAD_OVERRIDES(active_override_refs) )"
+        }
+      ],
+      "purpose_or_intro": "Decide whether the internal result can be used as-is, must be reviewed, needs override, or is blocked when compared against authority or filing-baseline values.",
+      "rationale": "`PARITY_GATE` is normalized from the canonical gate tables into one implementation-grade registry row.",
+      "reason_code_families": [
+        "PARITY_*"
+      ],
+      "reason_codes": [
+        "PARITY_MATCH",
+        "PARITY_MINOR_DIFFERENCE",
+        "PARITY_MATERIAL_DIFFERENCE",
+        "PARITY_BLOCKING_DIFFERENCE",
+        "PARITY_NOT_COMPARABLE",
+        "PARITY_OVERRIDE_REQUIRED",
+        "PARITY_OVERRIDE_ACTIVE"
+      ],
+      "severity_model": {
+        "decision_rank": {
+          "HARD_BLOCK": 4,
+          "MANUAL_REVIEW": 2,
+          "OVERRIDABLE_BLOCK": 3,
+          "PASS": 0,
+          "PASS_WITH_NOTICE": 1
+        },
+        "decision_to_severity": {
+          "HARD_BLOCK": "CRITICAL",
+          "MANUAL_REVIEW": "WARNING",
+          "OVERRIDABLE_BLOCK": "ERROR",
+          "PASS": "INFO",
+          "PASS_WITH_NOTICE": "NOTICE"
+        },
+        "profile_code": "NON_ACCESS_GATE_SEVERITY_V1",
+        "progression_rank": {
+          "HARD_BLOCK": 0,
+          "MANUAL_REVIEW": 1,
+          "OVERRIDABLE_BLOCK": 0,
+          "PASS": 2,
+          "PASS_WITH_NOTICE": 2
+        },
+        "severity_enum": [
+          "INFO",
+          "NOTICE",
+          "WARNING",
+          "ERROR",
+          "CRITICAL"
+        ]
+      },
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L719[PARITY_GATE]",
+      "source_refs": [
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L719[PARITY_GATE]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L726[PARITY_GATE.inputs]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L737[PARITY_GATE.decision_table]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L767[PARITY_GATE.reason_codes]"
+      ],
+      "terminalization_effects": [
+        "Terminalizes the current progression path; legal continuation requires remediation or a new child lineage.",
+        "Blocks progression until a valid in-scope override is active for the unresolved prerequisite.",
+        "Routes into reviewer-facing progression without allowing straight-through automation.",
+        "Allows progress, but notice posture remains explicit and auditable downstream.",
+        "Allows the next ordered gate or live authority progression to continue automatically."
+      ],
+      "upstream_gate_dependencies": [
+        "RETENTION_EVIDENCE_GATE"
+      ]
+    },
+    {
+      "canonical_inputs": [
+        "upstream gate outcomes",
+        "synthesized `TrustSummary`",
+        "`TrustSummary.trust_input_basis_contract`",
+        "`TrustSummary.trust_sensitivity_analysis_contract`",
+        "current upstream gate progression cap derived from the upstream non-access gate decisions",
+        "`trust_input_state`",
+        "`score_band`",
+        "`cap_band`",
+        "`threshold_stability_state`",
+        "`upstream_gate_cap`",
+        "`trust_band`",
+        "`trust_score`",
+        "`automation_level`",
+        "`filing_readiness`",
+        "`blocking_dependency_refs[]`",
+        "active override usage",
+        "unresolved pre-trust human steps only"
+      ],
+      "conditional_runtime_scope_tokens": [],
+      "decision_enum": [
+        "PASS",
+        "PASS_WITH_NOTICE",
+        "MANUAL_REVIEW",
+        "OVERRIDABLE_BLOCK",
+        "HARD_BLOCK"
+      ],
+      "decision_table": {
+        "branches": [
+          {
+            "conditions": [
+              {
+                "line_number": 817,
+                "text": "any upstream gate returned `HARD_BLOCK`"
+              },
+              {
+                "line_number": 818,
+                "text": "synthesized trust artifact is missing, superseded, or not bound to the current manifest scope"
+              },
+              {
+                "line_number": 819,
+                "text": "synthesized trust artifact is internally inconsistent under the frozen trust formulas or claims automation/readiness above the current upstream gate progression cap"
+              },
+              {
+                "line_number": 820,
+                "text": "synthesized trust artifact omits the persisted `score_band`, `cap_band`, `upstream_gate_cap`, or `trust_input_basis_contract{...}`, `trust_sensitivity_analysis_contract{...}`, or decisive `blocking_dependency_refs[]` required to explain a stale, reviewed, or blocked posture"
+              },
+              {
+                "line_number": 823,
+                "text": "`trust_input_state in {INCOMPLETE, CONTRADICTED}`"
+              },
+              {
+                "line_number": 824,
+                "text": "`automation_level` or `filing_readiness` exceeds the persisted `trust_input_basis_contract` ceiling"
+              },
+              {
+                "line_number": 826,
+                "text": "`trust_band in {RED, INSUFFICIENT_DATA}`"
+              },
+              {
+                "line_number": 827,
+                "text": "`filing_readiness = NOT_READY`"
+              }
+            ],
+            "decision": "HARD_BLOCK",
+            "header": "Return `HARD_BLOCK` if any of the following is true:",
+            "line_number": 815
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 831,
+                "text": "any upstream gate returned `OVERRIDABLE_BLOCK` and no valid approved override is active"
+              }
+            ],
+            "decision": "OVERRIDABLE_BLOCK",
+            "header": "Return `OVERRIDABLE_BLOCK` if:",
+            "line_number": 829
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 835,
+                "text": "any upstream gate returned `MANUAL_REVIEW`"
+              },
+              {
+                "line_number": 836,
+                "text": "`trust_input_state = ADMISSIBLE_STALE`"
+              },
+              {
+                "line_number": 837,
+                "text": "`threshold_stability_state = EDGE_REVIEW`"
+              },
+              {
+                "line_number": 838,
+                "text": "`trust_band = AMBER`"
+              },
+              {
+                "line_number": 839,
+                "text": "`filing_readiness = READY_REVIEW`"
+              },
+              {
+                "line_number": 840,
+                "text": "one or more unresolved pre-trust human steps remain"
+              }
+            ],
+            "decision": "MANUAL_REVIEW",
+            "header": "Return `MANUAL_REVIEW` if no higher-severity condition matched and any of the following is true:",
+            "line_number": 833
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 844,
+                "text": "any upstream gate returned `PASS_WITH_NOTICE`"
+              },
+              {
+                "line_number": 845,
+                "text": "a valid approved override is active but no unresolved review/block condition remains"
+              },
+              {
+                "line_number": 846,
+                "text": "trust output carries non-blocking notice-only reason codes"
+              }
+            ],
+            "decision": "PASS_WITH_NOTICE",
+            "header": "Return `PASS_WITH_NOTICE` if no higher-severity condition matched and any of the following is true:",
+            "line_number": 842
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 850,
+                "text": "`trust_input_state = ADMISSIBLE_CURRENT`"
+              },
+              {
+                "line_number": 851,
+                "text": "`threshold_stability_state = STABLE`"
+              },
+              {
+                "line_number": 852,
+                "text": "`trust_band = GREEN`"
+              },
+              {
+                "line_number": 853,
+                "text": "`automation_level = ALLOWED`"
+              },
+              {
+                "line_number": 854,
+                "text": "`filing_readiness = READY_TO_SUBMIT`"
+              },
+              {
+                "line_number": 855,
+                "text": "no unresolved pre-trust human steps remain"
+              },
+              {
+                "line_number": 856,
+                "text": "no valid approved override is active"
+              }
+            ],
+            "decision": "PASS",
+            "header": "Return `PASS` if and only if all of the following are true:",
+            "line_number": 848
+          }
+        ],
+        "notes": [],
+        "prelude": [
+          {
+            "line_number": 811,
+            "text": "`TRUST_GATE` SHALL NOT invent a new override family. It may surface `OVERRIDABLE_BLOCK` only when an already-documented upstream gate has an unresolved scoped-override requirement. Trust-derived red or insufficient-data posture is not itself a new discretionary override path."
+          }
+        ]
+      },
+      "downstream_consumers": [
+        "APPEND_MANIFEST_GATES",
+        "AMENDMENT_GATE",
+        "FILING_GATE",
+        "DecisionBundle",
+        "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+      ],
+      "evaluation_order_index": 8,
+      "evaluation_scope_condition": "Runs after parity and upstream non-access gate posture are available.",
+      "gate_class": "non_access",
+      "gate_code": "TRUST_GATE",
+      "gate_family": "trust_synthesis",
+      "monotone_progression_rank_behavior": "TRUST_GATE freezes the current upstream gate cap and may not exceed that persisted progression ceiling.",
+      "non_access_stage_index_or_null": 7,
+      "notes": [
+        "TRUST_GATE may surface override-missing posture only when an already-documented upstream gate remains unresolved.",
+        "Trust-derived red posture is not a new discretionary override family.",
+        "TRUST_GATE may only mirror unresolved upstream override posture, never invent a synthetic trust override family."
+      ],
+      "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+      "phase_bindings": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "TRUST_GATE",
+          "phase_id": "P11",
+          "phase_name": "Trust synthesis and command-side case state",
+          "row_id": "P11-S009",
+          "source_ref": "Algorithm/core_engine.md::L1800[TRUST_GATE]",
+          "statement": "gate_trust = TRUST_GATE( non_access_gate_records, trust, required_human_steps=pre_trust_human_steps )"
+        }
+      ],
+      "purpose_or_intro": "",
+      "rationale": "`TRUST_GATE` is normalized from the canonical gate tables into one implementation-grade registry row.",
+      "reason_code_families": [
+        "TRUST_*"
+      ],
+      "reason_codes": [
+        "TRUST_GREEN",
+        "TRUST_AMBER",
+        "TRUST_RED",
+        "TRUST_INSUFFICIENT_DATA",
+        "TRUST_INPUT_INCOMPLETE",
+        "TRUST_INPUT_STALE",
+        "TRUST_INPUT_CONTRADICTION",
+        "TRUST_AUTHORITY_STATE_UNRESOLVED",
+        "TRUST_THRESHOLD_EDGE_REVIEW",
+        "TRUST_AUTOMATION_LIMITED",
+        "TRUST_REQUIRED_HUMAN_STEPS",
+        "TRUST_OVERRIDE_DEPENDENT_PROGRESS",
+        "TRUST_OVERRIDE_ACTIVE_NOTICE",
+        "TRUST_UPSTREAM_GATE_BLOCK",
+        "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+        "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+        "TRUST_ARTIFACT_INCONSISTENT"
+      ],
+      "severity_model": {
+        "decision_rank": {
+          "HARD_BLOCK": 4,
+          "MANUAL_REVIEW": 2,
+          "OVERRIDABLE_BLOCK": 3,
+          "PASS": 0,
+          "PASS_WITH_NOTICE": 1
+        },
+        "decision_to_severity": {
+          "HARD_BLOCK": "CRITICAL",
+          "MANUAL_REVIEW": "WARNING",
+          "OVERRIDABLE_BLOCK": "ERROR",
+          "PASS": "INFO",
+          "PASS_WITH_NOTICE": "NOTICE"
+        },
+        "profile_code": "NON_ACCESS_GATE_SEVERITY_V1",
+        "progression_rank": {
+          "HARD_BLOCK": 0,
+          "MANUAL_REVIEW": 1,
+          "OVERRIDABLE_BLOCK": 0,
+          "PASS": 2,
+          "PASS_WITH_NOTICE": 2
+        },
+        "severity_enum": [
+          "INFO",
+          "NOTICE",
+          "WARNING",
+          "ERROR",
+          "CRITICAL"
+        ]
+      },
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L787[TRUST_GATE]",
+      "source_refs": [
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L787[TRUST_GATE]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L789[TRUST_GATE.inputs]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L809[TRUST_GATE.decision_table]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L858[TRUST_GATE.reason_codes]"
+      ],
+      "terminalization_effects": [
+        "Terminalizes the current progression path; legal continuation requires remediation or a new child lineage.",
+        "Blocks progression until a valid in-scope override is active for the unresolved prerequisite.",
+        "Routes into reviewer-facing progression without allowing straight-through automation.",
+        "Allows progress, but notice posture remains explicit and auditable downstream.",
+        "Allows the next ordered gate or live authority progression to continue automatically."
+      ],
+      "upstream_gate_dependencies": [
+        "PARITY_GATE",
+        "RETENTION_EVIDENCE_GATE",
+        "DATA_QUALITY_GATE",
+        "INPUT_BOUNDARY_GATE",
+        "ARTIFACT_CONTRACT_GATE",
+        "MANIFEST_GATE"
+      ]
+    },
+    {
+      "canonical_inputs": [
+        "manifest mode",
+        "persisted `DriftBaselineEnvelope`",
+        "filing baseline status",
+        "persisted `AmendmentWindowContext`",
+        "drift classification",
+        "`difference_classes[]`",
+        "`RetroactiveImpactAnalysis`",
+        "intent-to-amend status",
+        "amendment-readiness freshness state",
+        "authority context",
+        "authorized amendment action token from `runtime_scope[]`",
+        "optional `amendment_readiness_context`, including:",
+        "`validation_outcome`",
+        "`reason_codes[]`",
+        "`calculation_request_ref`",
+        "`calculation_id`",
+        "`calculation_type`",
+        "`calculation_basis_ref`",
+        "`user_confirmation_ref`",
+        "`live_authority_call_executed`"
+      ],
+      "conditional_runtime_scope_tokens": [
+        "amendment_intent",
+        "amendment_submit"
+      ],
+      "decision_enum": [
+        "PASS",
+        "PASS_WITH_NOTICE",
+        "MANUAL_REVIEW",
+        "OVERRIDABLE_BLOCK",
+        "HARD_BLOCK"
+      ],
+      "decision_table": {
+        "branches": [
+          {
+            "conditions": [
+              {
+                "line_number": 1196,
+                "text": "`(manifest mode is not COMPLIANCE)`"
+              },
+              {
+                "line_number": 1197,
+                "text": "`(not confirmed_final_baseline)`"
+              },
+              {
+                "line_number": 1198,
+                "text": "`(not exact_scope_baseline)`"
+              },
+              {
+                "line_number": 1199,
+                "text": "`(not window_open)`"
+              },
+              {
+                "line_number": 1200,
+                "text": "`(out_of_band_baseline_unresolved)`"
+              },
+              {
+                "line_number": 1201,
+                "text": "`(baseline_reconcile_first_cap)`"
+              },
+              {
+                "line_number": 1202,
+                "text": "`(not authority_prerequisites_ready)`"
+              },
+              {
+                "line_number": 1203,
+                "text": "`(freshness_stale_for_submit)`"
+              },
+              {
+                "line_number": 1204,
+                "text": "`(amendment_readiness_context.validation_outcome = HARD_BLOCK)`"
+              }
+            ],
+            "decision": "HARD_BLOCK",
+            "header": "Return `HARD_BLOCK` if:",
+            "line_number": 1194
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 1208,
+                "text": "`(amendment_readiness_context.validation_outcome = OVERRIDABLE_BLOCK)`"
+              }
+            ],
+            "decision": "OVERRIDABLE_BLOCK",
+            "header": "Return `OVERRIDABLE_BLOCK` if:",
+            "line_number": 1206
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 1212,
+                "text": "`(confirmed_final_baseline and exact_scope_baseline and window_open and not material_amendment_basis)`"
+              },
+              {
+                "line_number": 1213,
+                "text": "`(baseline_review_only_cap)`"
+              },
+              {
+                "line_number": 1214,
+                "text": "`(intent_required_but_incomplete)`"
+              },
+              {
+                "line_number": 1215,
+                "text": "`(retroactive_prework_required)`"
+              },
+              {
+                "line_number": 1216,
+                "text": "`(unresolved_source_contradiction)`"
+              },
+              {
+                "line_number": 1217,
+                "text": "`(additional_validation_review)`"
+              },
+              {
+                "line_number": 1218,
+                "text": "`(amendment_readiness_context.validation_outcome = MANUAL_REVIEW)`"
+              }
+            ],
+            "decision": "MANUAL_REVIEW",
+            "header": "Return `MANUAL_REVIEW` if any of the following is true:",
+            "line_number": 1210
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 1222,
+                "text": "`(partial_scope_only)`"
+              },
+              {
+                "line_number": 1223,
+                "text": "`(intent_flow_may_begin)`"
+              },
+              {
+                "line_number": 1224,
+                "text": "`(supersedes_prior_chain)`"
+              },
+              {
+                "line_number": 1225,
+                "text": "`(amendment_readiness_context.validation_outcome = PASS_WITH_NOTICE)`"
+              }
+            ],
+            "decision": "PASS_WITH_NOTICE",
+            "header": "Return `PASS_WITH_NOTICE` if any of the following is true:",
+            "line_number": 1220
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 1229,
+                "text": "`(manifest mode is COMPLIANCE)`"
+              },
+              {
+                "line_number": 1230,
+                "text": "`(confirmed_final_baseline)`"
+              },
+              {
+                "line_number": 1231,
+                "text": "`(exact_scope_baseline)`"
+              },
+              {
+                "line_number": 1232,
+                "text": "`(window_open)`"
+              },
+              {
+                "line_number": 1233,
+                "text": "`(material_amendment_basis)`"
+              },
+              {
+                "line_number": 1234,
+                "text": "`(RetroactiveImpactAnalysis is NONE or fully bounded and already incorporated into the current continuation path)`"
+              },
+              {
+                "line_number": 1235,
+                "text": "`((not submit_scope) or (not intent_required_but_incomplete))`"
+              },
+              {
+                "line_number": 1236,
+                "text": "`(no authority validation errors remain)`"
+              },
+              {
+                "line_number": 1237,
+                "text": "`(not freshness_stale_for_submit)`"
+              }
+            ],
+            "decision": "PASS",
+            "header": "Return `PASS` if:",
+            "line_number": 1227
+          }
+        ],
+        "notes": [],
+        "prelude": [
+          {
+            "line_number": 1169,
+            "text": "Evaluate conditions strictly in descending severity order: `HARD_BLOCK` > `OVERRIDABLE_BLOCK` > `MANUAL_REVIEW` > `PASS_WITH_NOTICE` > `PASS`. Each bullet below is parenthesized as a complete condition against the authorized amendment runtime scope. Define these boolean shorthands before evaluating the table:"
+          },
+          {
+            "line_number": 1175,
+            "text": "`submit_scope = (authorized amendment token = amendment_submit)`"
+          },
+          {
+            "line_number": 1176,
+            "text": "`intent_scope = (authorized amendment token = amendment_intent)`"
+          },
+          {
+            "line_number": 1177,
+            "text": "`confirmed_final_baseline = persisted confirmed final-declaration baseline exists`"
+          },
+          {
+            "line_number": 1178,
+            "text": "`exact_scope_baseline = persisted exact-scope DriftBaselineEnvelope exists`"
+          },
+          {
+            "line_number": 1179,
+            "text": "`window_open = amendment window is open`"
+          },
+          {
+            "line_number": 1180,
+            "text": "`out_of_band_baseline_unresolved = amendment targets unresolved out-of-band baseline truth`"
+          },
+          {
+            "line_number": 1181,
+            "text": "`baseline_review_only_cap = amendment_eligibility_contract.baseline_progression_ceiling_or_null = REVIEW_ONLY`"
+          },
+          {
+            "line_number": 1182,
+            "text": "`baseline_reconcile_first_cap = amendment_eligibility_contract.baseline_progression_ceiling_or_null = RECONCILE_FIRST`"
+          },
+          {
+            "line_number": 1183,
+            "text": "`authority_prerequisites_ready = all required authority preconditions are present`"
+          },
+          {
+            "line_number": 1184,
+            "text": "`freshness_stale_for_submit = submit_scope and amendment-readiness freshness state = STALE`"
+          },
+          {
+            "line_number": 1185,
+            "text": "`material_amendment_basis = drift materiality classification not in {NO_CHANGE, BENIGN_DRIFT} or explicit authority-state divergence exists`"
+          },
+          {
+            "line_number": 1186,
+            "text": "`intent_required_but_incomplete = submit_scope and intent-to-amend is required but not yet completed in current or prior manifest lineage`"
+          },
+          {
+            "line_number": 1187,
+            "text": "`retroactive_prework_required = RetroactiveImpactAnalysis requires replay, prior-position restatement, or authority reconciliation`"
+          },
+          {
+            "line_number": 1188,
+            "text": "`unresolved_source_contradiction = contradictory drift or authority sources remain unresolved`"
+          },
+          {
+            "line_number": 1189,
+            "text": "`additional_validation_review = additional validation errors remain unresolved`"
+          },
+          {
+            "line_number": 1190,
+            "text": "`intent_flow_may_begin = intent_scope and no amendment_readiness_context is yet present`"
+          },
+          {
+            "line_number": 1191,
+            "text": "`partial_scope_only = amendment is eligible but only a subset of authorized runtime scope is amendable`"
+          },
+          {
+            "line_number": 1192,
+            "text": "`supersedes_prior_chain = a same-scope prior amendment chain or bundle will be superseded if this path continues`"
+          }
+        ]
+      },
+      "downstream_consumers": [
+        "APPEND_MANIFEST_GATES",
+        "FILING_GATE",
+        "DecisionBundle",
+        "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+      ],
+      "evaluation_order_index": 9,
+      "evaluation_scope_condition": "Runs only when runtime_scope[] includes amendment_intent or amendment_submit; a narrow early-failure amendment-basis branch may emit before parity/trust.",
+      "gate_class": "non_access",
+      "gate_code": "AMENDMENT_GATE",
+      "gate_family": "amendment_progression",
+      "monotone_progression_rank_behavior": "Inherited non-access monotone-min contract from section 7.1; later gates may narrow but never raise legal progression.",
+      "non_access_stage_index_or_null": 8,
+      "notes": [
+        "AMENDMENT_GATE is deliberately not evaluated during drift preparation.",
+        "The gate is the only family allowed to speak for intent-to-amend readiness failure.",
+        "A narrow early-failure amendment-basis exception may emit AMENDMENT_GATE before the ordinary parity/trust sequence."
+      ],
+      "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+      "phase_bindings": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "AMENDMENT_GATE",
+          "phase_id": "P09",
+          "phase_name": "Authority context, comparison basis, parity, and parity gate",
+          "row_id": "P09-S039",
+          "source_ref": "Algorithm/core_engine.md::L1422[AMENDMENT_GATE]",
+          "statement": "amendment_gate = AMENDMENT_GATE( baseline, amendment_window.window_state, drift.materiality_class, drift.difference_classes, retroactive_impact, amendment_case.freshness_state, amendment.intent_status if exists(amendment.intent_status) else amendment_case.lifecycle_state, authority_state, runtime_scope, amendment_readiness_context=amendment_calc )"
+        },
+        {
+          "binding_class": "evaluation",
+          "module_name": "AMENDMENT_GATE",
+          "phase_id": "P14",
+          "phase_name": "Amendment gate and intent-to-amend progression",
+          "row_id": "P14-S005",
+          "source_ref": "Algorithm/core_engine.md::L2175[AMENDMENT_GATE]",
+          "statement": "amendment_gate = AMENDMENT_GATE( baseline, amendment_window.window_state, drift.materiality_class, drift.difference_classes, retroactive_impact, amendment_case.freshness_state, amendment.intent_status if exists(amendment.intent_status) else amendment_case.lifecycle_state, authority_state, runtime_scope, amendment_readiness_context=LOAD_READINESS_CONTEXT(amendment_case) if exists(amendment_case.readiness_context_ref) else None )"
+        },
+        {
+          "binding_class": "evaluation",
+          "module_name": "AMENDMENT_GATE",
+          "phase_id": "P14",
+          "phase_name": "Amendment gate and intent-to-amend progression",
+          "row_id": "P14-S044",
+          "source_ref": "Algorithm/core_engine.md::L2367[AMENDMENT_GATE]",
+          "statement": "decisive_amendment_gate = AMENDMENT_GATE( baseline, amendment_window.window_state, drift.materiality_class, drift.difference_classes, retroactive_impact, amendment_case.freshness_state, amendment_case.lifecycle_state, authority_state, runtime_scope, amendment_readiness_context=amendment_calc )"
+        }
+      ],
+      "purpose_or_intro": "Determine whether an amendment journey may begin or progress.",
+      "rationale": "`AMENDMENT_GATE` is normalized from the canonical gate tables into one implementation-grade registry row.",
+      "reason_code_families": [
+        "AMENDMENT_*"
+      ],
+      "reason_codes": [
+        "AMENDMENT_MANIFEST_MODE_ANALYSIS",
+        "AMENDMENT_NO_CONFIRMED_FINAL_DECLARATION",
+        "AMENDMENT_BASELINE_UNPROVEN",
+        "AMENDMENT_WINDOW_CLOSED",
+        "AMENDMENT_DRIFT_NOT_MATERIAL",
+        "AMENDMENT_INTENT_TO_AMEND_REQUIRED",
+        "AMENDMENT_INTENT_TO_AMEND_VALIDATION_FAILED",
+        "AMENDMENT_INTENT_TO_AMEND_OVERRIDE_REQUIRED",
+        "AMENDMENT_INTENT_TO_AMEND_REVIEW_REQUIRED",
+        "AMENDMENT_OUT_OF_BAND_BASELINE_UNRESOLVED",
+        "AMENDMENT_RETROACTIVE_REPLAY_REQUIRED",
+        "AMENDMENT_READINESS_STALE",
+        "AMENDMENT_CONTRADICTORY_DRIFT_SOURCES",
+        "AMENDMENT_SUPERSEDES_PRIOR_ACTIVE_CHAIN",
+        "AMENDMENT_ELIGIBLE"
+      ],
+      "severity_model": {
+        "decision_rank": {
+          "HARD_BLOCK": 4,
+          "MANUAL_REVIEW": 2,
+          "OVERRIDABLE_BLOCK": 3,
+          "PASS": 0,
+          "PASS_WITH_NOTICE": 1
+        },
+        "decision_to_severity": {
+          "HARD_BLOCK": "CRITICAL",
+          "MANUAL_REVIEW": "WARNING",
+          "OVERRIDABLE_BLOCK": "ERROR",
+          "PASS": "INFO",
+          "PASS_WITH_NOTICE": "NOTICE"
+        },
+        "profile_code": "NON_ACCESS_GATE_SEVERITY_V1",
+        "progression_rank": {
+          "HARD_BLOCK": 0,
+          "MANUAL_REVIEW": 1,
+          "OVERRIDABLE_BLOCK": 0,
+          "PASS": 2,
+          "PASS_WITH_NOTICE": 2
+        },
+        "severity_enum": [
+          "INFO",
+          "NOTICE",
+          "WARNING",
+          "ERROR",
+          "CRITICAL"
+        ]
+      },
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L1125[AMENDMENT_GATE]",
+      "source_refs": [
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L1125[AMENDMENT_GATE]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L1141[AMENDMENT_GATE.inputs]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L1167[AMENDMENT_GATE.decision_table]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L1239[AMENDMENT_GATE.reason_codes]"
+      ],
+      "terminalization_effects": [
+        "Terminalizes the current progression path; legal continuation requires remediation or a new child lineage.",
+        "Blocks progression until a valid in-scope override is active for the unresolved prerequisite.",
+        "Routes into reviewer-facing progression without allowing straight-through automation.",
+        "Allows progress, but notice posture remains explicit and auditable downstream.",
+        "Allows the next ordered gate or live authority progression to continue automatically."
+      ],
+      "upstream_gate_dependencies": [
+        "TRUST_GATE"
+      ]
+    },
+    {
+      "canonical_inputs": [
+        "access result",
+        "manifest state",
+        "manifest mode",
+        "trust output when available",
+        "parity result when available",
+        "`trust_currency_state in {CURRENT, RECALC_REQUIRED, NOT_APPLICABLE_PRETRUST}`",
+        "`trust_currency_reason_codes[]`",
+        "`upstream_gate_records[]`",
+        "obligation status",
+        "filing packet state, if a packet has been prepared",
+        "authority link state",
+        "approval state",
+        "declaration-basis acknowledgement state, which may be `NOT_APPLICABLE` on a legitimate pre-packet path",
+        "authorized `runtime_scope[]` tokens",
+        "amendment posture when applicable",
+        "override state / active overrides",
+        "`filing_notice_steps[]`",
+        "late-data status since seal",
+        "`late_data_policy_bindings[]` for the affected frozen source bindings",
+        "`graph.target_assessments[]`",
+        "`graph.integrity_summary`",
+        "controlling `proof_bundle_ref`, when one exists",
+        "optional `filing_readiness_context` from pre-packet filing preparation, including:",
+        "`validation_outcome`",
+        "readiness reason codes",
+        "calculation refs / basis refs when applicable"
+      ],
+      "conditional_runtime_scope_tokens": [
+        "prepare_submission",
+        "submit",
+        "amendment_submit"
+      ],
+      "decision_enum": [
+        "PASS",
+        "PASS_WITH_NOTICE",
+        "MANUAL_REVIEW",
+        "OVERRIDABLE_BLOCK",
+        "HARD_BLOCK"
+      ],
+      "decision_table": {
+        "branches": [
+          {
+            "conditions": [
+              {
+                "line_number": 952,
+                "text": "any upstream gate returned `HARD_BLOCK`"
+              },
+              {
+                "line_number": 953,
+                "text": "access gate decision is not `ALLOW` or `ALLOW_MASKED` as appropriate"
+              },
+              {
+                "line_number": 954,
+                "text": "manifest mode is not `COMPLIANCE`"
+              },
+              {
+                "line_number": 955,
+                "text": "`filing_readiness_context.validation_outcome = HARD_BLOCK`"
+              },
+              {
+                "line_number": 956,
+                "text": "filing packet state is `VOID` or `SUPERSEDED`"
+              },
+              {
+                "line_number": 957,
+                "text": "filing packet is missing and there is no active pre-packet readiness context and no unresolved upstream gate posture that legitimately explains the pre-packet branch"
+              },
+              {
+                "line_number": 959,
+                "text": "a prepared filing packet is present but omits packet-local readiness lineage required for the selected filing path, or an approved packet path depends on notice settlement that has not been sealed into a packet-bound `FilingNoticeResolution`"
+              },
+              {
+                "line_number": 962,
+                "text": "trust is absent and `trust_currency_state != NOT_APPLICABLE_PRETRUST`"
+              },
+              {
+                "line_number": 963,
+                "text": "trust exists but is superseded, not bound to the current manifest scope, or `trust_currency_state = RECALC_REQUIRED`"
+              },
+              {
+                "line_number": 964,
+                "text": "authority link not active"
+              },
+              {
+                "line_number": 965,
+                "text": "obligation or tax-year context does not support the requested submission"
+              },
+              {
+                "line_number": 966,
+                "text": "required end-of-year preconditions are incomplete"
+              },
+              {
+                "line_number": 967,
+                "text": "amendment requested without an eligible baseline"
+              },
+              {
+                "line_number": 968,
+                "text": "`approval_state` is in `{UNSATISFIABLE, DENIED}`"
+              },
+              {
+                "line_number": 969,
+                "text": "`declared_basis_ack_state = UNSATISFIABLE`"
+              },
+              {
+                "line_number": 970,
+                "text": "any filing-critical late-data event after seal maps to a frozen source binding whose `late_data_policy_ref = SPAWN_CHILD_MANIFEST`"
+              },
+              {
+                "line_number": 972,
+                "text": "any filing-critical target is `UNSUPPORTED` or `CONTRADICTED`"
+              },
+              {
+                "line_number": 973,
+                "text": "controlling proof bundle is missing where filing posture exists"
+              },
+              {
+                "line_number": 974,
+                "text": "any filing-critical target has `closure_state = OPEN`"
+              },
+              {
+                "line_number": 975,
+                "text": "graph integrity summary indicates `rebuild_required = true`"
+              }
+            ],
+            "decision": "HARD_BLOCK",
+            "header": "Return `HARD_BLOCK` if any of the following is true:",
+            "line_number": 950
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 979,
+                "text": "any upstream gate returned `OVERRIDABLE_BLOCK` and no valid approved override is active"
+              },
+              {
+                "line_number": 980,
+                "text": "`filing_readiness_context.validation_outcome = OVERRIDABLE_BLOCK`"
+              },
+              {
+                "line_number": 981,
+                "text": "filing depends on a scoped approved override not yet granted"
+              }
+            ],
+            "decision": "OVERRIDABLE_BLOCK",
+            "header": "Return `OVERRIDABLE_BLOCK` if no higher-severity condition matched and any of the following is true:",
+            "line_number": 977
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 985,
+                "text": "any upstream gate returned `MANUAL_REVIEW`"
+              },
+              {
+                "line_number": 986,
+                "text": "`filing_readiness_context.validation_outcome = MANUAL_REVIEW`"
+              },
+              {
+                "line_number": 987,
+                "text": "trust output requires review"
+              },
+              {
+                "line_number": 988,
+                "text": "parity output requires review"
+              },
+              {
+                "line_number": 989,
+                "text": "any filing-critical late-data event after seal maps to a frozen source binding whose `late_data_policy_ref = REVIEW_IF_LATE`"
+              },
+              {
+                "line_number": 991,
+                "text": "one or more filing-critical targets is `STALE` but not policy-routed to mandatory rebuild"
+              },
+              {
+                "line_number": 992,
+                "text": "explanation rendering failed for the controlling filing proof"
+              }
+            ],
+            "decision": "MANUAL_REVIEW",
+            "header": "Return `MANUAL_REVIEW` if no higher-severity condition matched and any of the following is true:",
+            "line_number": 983
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 996,
+                "text": "any upstream gate returned `PASS_WITH_NOTICE`"
+              },
+              {
+                "line_number": 997,
+                "text": "`filing_readiness_context.validation_outcome = PASS_WITH_NOTICE` and no filing packet has yet been prepared"
+              },
+              {
+                "line_number": 998,
+                "text": "`approval_state = REQUIRED_PENDING`"
+              },
+              {
+                "line_number": 999,
+                "text": "`declared_basis_ack_state = REQUIRED_PENDING`"
+              },
+              {
+                "line_number": 1000,
+                "text": "`filing_notice_steps[]` is non-empty and every unresolved step is packet-local"
+              },
+              {
+                "line_number": 1001,
+                "text": "trust or parity emitted non-blocking notices"
+              },
+              {
+                "line_number": 1002,
+                "text": "a valid approved override is active and contributed to filing-capable progression"
+              },
+              {
+                "line_number": 1003,
+                "text": "only non-critical late-data exists and every affected source binding has `late_data_policy_ref = EXCLUDE_LATE`"
+              }
+            ],
+            "decision": "PASS_WITH_NOTICE",
+            "header": "Return `PASS_WITH_NOTICE` if no higher-severity condition matched and any of the following is true:",
+            "line_number": 994
+          },
+          {
+            "conditions": [],
+            "decision": "PASS",
+            "header": "Return `PASS` otherwise.",
+            "line_number": 1006
+          }
+        ],
+        "notes": [
+          {
+            "line_number": 1009,
+            "text": "`declared_basis_ack_state = NOT_APPLICABLE` on a legitimate pre-packet branch SHALL not by itself create block or review"
+          },
+          {
+            "line_number": 1011,
+            "text": "a missing filing packet is legal only on an explicit pre-packet readiness branch"
+          },
+          {
+            "line_number": 1012,
+            "text": "when a filing packet exists, the packet contract is the source of truth for packet-local legality; operator or client UI state SHALL remain explanatory only"
+          },
+          {
+            "line_number": 1014,
+            "text": "a stale or invalidated trust artifact SHALL hard-block at `FILING_GATE`; filing-capable paths must resynthesize trust before they may proceed"
+          },
+          {
+            "line_number": 1016,
+            "text": "a valid approved override may unblock a scoped prerequisite, but it SHALL NOT upgrade the current filing decision above `PASS_WITH_NOTICE`; the gate SHALL emit explicit override-dependent notice reason codes and audit follow-up actions When multiple frozen source bindings are affected by late data, the gate SHALL evaluate each binding independently and return the highest-severity aggregate decision."
+          }
+        ],
+        "prelude": []
+      },
+      "downstream_consumers": [
+        "APPEND_MANIFEST_GATES",
+        "SUBMISSION_GATE",
+        "DecisionBundle",
+        "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+      ],
+      "evaluation_order_index": 10,
+      "evaluation_scope_condition": "Runs when runtime_scope[] includes prepare_submission, submit, or amendment_submit; early pre-trust or pre-packet branches still require an explicit filing gate record.",
+      "gate_class": "non_access",
+      "gate_code": "FILING_GATE",
+      "gate_family": "filing_progression",
+      "monotone_progression_rank_behavior": "FILING_GATE is an explicit monotone narrowing stage that may reduce inherited progression rank but may not upgrade it.",
+      "non_access_stage_index_or_null": 9,
+      "notes": [
+        "FILING_GATE is monotone narrowing and SHALL NOT upgrade inherited legal progression.",
+        "A valid approved override may unblock a scoped prerequisite but SHALL NOT upgrade the filing decision above PASS_WITH_NOTICE.",
+        "FILING_GATE may appear on early filing-readiness failure branches before full trust synthesis completes."
+      ],
+      "overrideability": "SCOPED_OVERRIDE_REQUIRED",
+      "phase_bindings": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "FILING_GATE",
+          "phase_id": "P09",
+          "phase_name": "Authority context, comparison basis, parity, and parity gate",
+          "row_id": "P09-S057",
+          "source_ref": "Algorithm/core_engine.md::L1503[FILING_GATE]",
+          "statement": "early_filing_gate = FILING_GATE( access_decision, manifest.lifecycle_state, mode, None, None, upstream_gate_records=non_access_gate_records, obligation_status=OBLIGATION_STATUS(authority_state), filing_packet_state=None, authority_link_state=authority_link_state, approval_state=pretrust_approval_state, declared_basis_ack_state=NOT_APPLICABLE, runtime_scope=runtime_scope, amendment_posture=None, overrides=LOAD_OVERRIDES(active_override_refs), filing_notice_steps=[], late_data_status=late_data_status, late_data_policy_bindings=late_data_policy_bindings, filing_readiness_context=filing_calculation, trust_currency_state=NOT_APPLICABLE_PRETRUST, trust_currency_reason_codes=[] )"
+        },
+        {
+          "binding_class": "evaluation",
+          "module_name": "FILING_GATE",
+          "phase_id": "P15",
+          "phase_name": "Authority calculation, filing readiness, packet preparation, and filing gate",
+          "row_id": "P15-S006",
+          "source_ref": "Algorithm/core_engine.md::L2477[FILING_GATE]",
+          "statement": "filing_gate = FILING_GATE( access_decision, manifest.lifecycle_state, mode, trust, parity, upstream_gate_records=non_access_gate_records, obligation_status=OBLIGATION_STATUS(authority_state), filing_packet_state=None, authority_link_state=authority_link_state, approval_state=pretrust_approval_state, declared_basis_ack_state=NOT_APPLICABLE, runtime_scope=runtime_scope, amendment_posture=amendment_case if exists(amendment_case) else amendment, overrides=LOAD_OVERRIDES(active_override_refs), filing_notice_steps=[], late_data_status=late_data_status, late_data_policy_bindings=late_data_policy_bindings, filing_readiness_context=None, trust_currency_state=trust_currency.state, trust_currency_reason_codes=trust_currency.reason_codes )"
+        },
+        {
+          "binding_class": "evaluation",
+          "module_name": "FILING_GATE",
+          "phase_id": "P15",
+          "phase_name": "Authority calculation, filing readiness, packet preparation, and filing gate",
+          "row_id": "P15-S021",
+          "source_ref": "Algorithm/core_engine.md::L2555[FILING_GATE]",
+          "statement": "filing_gate = FILING_GATE( access_decision, manifest.lifecycle_state, mode, trust, parity, upstream_gate_records=non_access_gate_records, obligation_status=OBLIGATION_STATUS(authority_state), filing_packet_state=None, authority_link_state=authority_link_state, approval_state=pretrust_approval_state, declared_basis_ack_state=NOT_APPLICABLE, runtime_scope=runtime_scope, amendment_posture=amendment_case if exists(amendment_case) else amendment, overrides=LOAD_OVERRIDES(active_override_refs), filing_notice_steps=[], late_data_status=late_data_status, late_data_policy_bindings=late_data_policy_bindings, filing_readiness_context=None, trust_currency_state=trust_currency.state, trust_currency_reason_codes=trust_currency.reason_codes )"
+        },
+        {
+          "binding_class": "evaluation",
+          "module_name": "FILING_GATE",
+          "phase_id": "P15",
+          "phase_name": "Authority calculation, filing readiness, packet preparation, and filing gate",
+          "row_id": "P15-S039",
+          "source_ref": "Algorithm/core_engine.md::L2655[FILING_GATE]",
+          "statement": "filing_gate = FILING_GATE( access_decision, manifest.lifecycle_state, mode, trust, parity, upstream_gate_records=non_access_gate_records, obligation_status=OBLIGATION_STATUS(authority_state), filing_packet_state=None, authority_link_state=authority_link_state, approval_state=pretrust_approval_state, declared_basis_ack_state=NOT_APPLICABLE, runtime_scope=runtime_scope, amendment_posture=amendment_case if exists(amendment_case) else amendment, overrides=LOAD_OVERRIDES(active_override_refs), filing_notice_steps=[], late_data_status=late_data_status, late_data_policy_bindings=late_data_policy_bindings, filing_readiness_context=filing_calculation, trust_currency_state=trust_currency.state, trust_currency_reason_codes=trust_currency.reason_codes )"
+        },
+        {
+          "binding_class": "evaluation",
+          "module_name": "FILING_GATE",
+          "phase_id": "P15",
+          "phase_name": "Authority calculation, filing readiness, packet preparation, and filing gate",
+          "row_id": "P15-S072",
+          "source_ref": "Algorithm/core_engine.md::L2816[FILING_GATE]",
+          "statement": "filing_gate = FILING_GATE( access_decision, manifest.lifecycle_state, mode, trust, parity, upstream_gate_records=non_access_gate_records, obligation_status=OBLIGATION_STATUS(authority_state), filing_packet_state=packet.lifecycle_state, authority_link_state=authority_link_state, approval_state=approval_state, declared_basis_ack_state=declared_basis_ack_state, runtime_scope=runtime_scope, amendment_posture=amendment_case if exists(amendment_case) else amendment, overrides=LOAD_OVERRIDES(active_override_refs), filing_notice_steps=filing_notice_steps, late_data_status=late_data_status, late_data_policy_bindings=late_data_policy_bindings, filing_readiness_context=filing_calculation if exists(filing_calculation) else None, trust_currency_state=trust_currency.state, trust_currency_reason_codes=trust_currency.reason_codes )"
+        }
+      ],
+      "purpose_or_intro": "Govern filing-capable progression.",
+      "rationale": "`FILING_GATE` is normalized from the canonical gate tables into one implementation-grade registry row.",
+      "reason_code_families": [
+        "FILING_*"
+      ],
+      "reason_codes": [
+        "FILING_PACKET_UNAVAILABLE",
+        "FILING_MANIFEST_MODE_ANALYSIS",
+        "FILING_TRUST_MISSING",
+        "FILING_TRUST_SUPERSEDED",
+        "FILING_TRUST_RECALCULATION_REQUIRED",
+        "FILING_AUTHORITY_LINK_INACTIVE",
+        "FILING_OBLIGATION_NOT_OPEN",
+        "FILING_FINAL_DECLARATION_PRECONDITION_MISSING",
+        "FILING_AMENDMENT_BASELINE_MISSING",
+        "FILING_APPROVAL_REQUIRED",
+        "FILING_APPROVAL_UNSATISFIABLE",
+        "FILING_OVERRIDE_REQUIRED",
+        "FILING_OVERRIDE_ACTIVE_NOTICE",
+        "FILING_OVERRIDE_AUDIT_REQUIRED",
+        "FILING_DECLARED_BASIS_ACK_REQUIRED",
+        "FILING_DECLARED_BASIS_ACK_UNSATISFIABLE",
+        "FILING_NOTICE_REQUIRED",
+        "FILING_LATE_DATA_CHILD_MANIFEST_REQUIRED",
+        "FILING_LATE_DATA_REVIEW_REQUIRED",
+        "FILING_LATE_DATA_NONCRITICAL_EXCLUDED",
+        "FILING_PROOF_BUNDLE_MISSING",
+        "FILING_TARGET_UNSUPPORTED",
+        "FILING_TARGET_CONTRADICTED",
+        "FILING_PROOF_CLOSURE_OPEN",
+        "FILING_GRAPH_REBUILD_REQUIRED",
+        "FILING_EXPLANATION_FAILURE",
+        "FILING_PREPARATION_HARD_BLOCK",
+        "FILING_PREPARATION_OVERRIDE_REQUIRED",
+        "FILING_PREPARATION_REVIEW_REQUIRED",
+        "FILING_UPSTREAM_GATE_BLOCK",
+        "FILING_UPSTREAM_GATE_REVIEW_REQUIRED",
+        "FILING_UPSTREAM_GATE_NOTICE_ACTIVE"
+      ],
+      "severity_model": {
+        "decision_rank": {
+          "HARD_BLOCK": 4,
+          "MANUAL_REVIEW": 2,
+          "OVERRIDABLE_BLOCK": 3,
+          "PASS": 0,
+          "PASS_WITH_NOTICE": 1
+        },
+        "decision_to_severity": {
+          "HARD_BLOCK": "CRITICAL",
+          "MANUAL_REVIEW": "WARNING",
+          "OVERRIDABLE_BLOCK": "ERROR",
+          "PASS": "INFO",
+          "PASS_WITH_NOTICE": "NOTICE"
+        },
+        "profile_code": "NON_ACCESS_GATE_SEVERITY_V1",
+        "progression_rank": {
+          "HARD_BLOCK": 0,
+          "MANUAL_REVIEW": 1,
+          "OVERRIDABLE_BLOCK": 0,
+          "PASS": 2,
+          "PASS_WITH_NOTICE": 2
+        },
+        "severity_enum": [
+          "INFO",
+          "NOTICE",
+          "WARNING",
+          "ERROR",
+          "CRITICAL"
+        ]
+      },
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L880[FILING_GATE]",
+      "source_refs": [
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L880[FILING_GATE]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L899[FILING_GATE.inputs]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L948[FILING_GATE.decision_table]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L1023[FILING_GATE.reason_codes]"
+      ],
+      "terminalization_effects": [
+        "Terminalizes the current progression path; legal continuation requires remediation or a new child lineage.",
+        "Blocks progression until a valid in-scope override is active for the unresolved prerequisite.",
+        "Routes into reviewer-facing progression without allowing straight-through automation.",
+        "Allows progress, but notice posture remains explicit and auditable downstream.",
+        "Allows the next ordered gate or live authority progression to continue automatically."
+      ],
+      "upstream_gate_dependencies": [
+        "TRUST_GATE",
+        "PARITY_GATE",
+        "AMENDMENT_GATE"
+      ]
+    },
+    {
+      "canonical_inputs": [
+        "authority preflight reauthorization decision",
+        "authority preflight manifest-state check result",
+        "authority preflight token/client binding check result",
+        "authority preflight approval-validity check result",
+        "authority preflight declared-basis-ack validity check result",
+        "filing packet payload hash",
+        "filing packet manifest-binding hash",
+        "expected manifest-binding hash",
+        "authority idempotency key",
+        "existing submissions for the same authority meaning",
+        "authority binding",
+        "canonical request-body hash",
+        "filing packet lifecycle state",
+        "authorized `runtime_scope[]`",
+        "amendment posture when applicable"
+      ],
+      "conditional_runtime_scope_tokens": [
+        "submit",
+        "amendment_submit"
+      ],
+      "decision_enum": [
+        "PASS",
+        "PASS_WITH_NOTICE",
+        "MANUAL_REVIEW",
+        "OVERRIDABLE_BLOCK",
+        "HARD_BLOCK"
+      ],
+      "decision_table": {
+        "branches": [
+          {
+            "conditions": [
+              {
+                "line_number": 1084,
+                "text": "authority preflight reauthorization decision is not in `{ALLOW, ALLOW_MASKED}`"
+              },
+              {
+                "line_number": 1085,
+                "text": "authority preflight manifest-state check failed"
+              },
+              {
+                "line_number": 1086,
+                "text": "authority preflight token/client binding check failed"
+              },
+              {
+                "line_number": 1087,
+                "text": "authority preflight approval-validity check failed"
+              },
+              {
+                "line_number": 1088,
+                "text": "authority preflight declared-basis-ack validity check failed"
+              },
+              {
+                "line_number": 1089,
+                "text": "filing packet manifest-binding hash does not equal the expected manifest-binding hash"
+              },
+              {
+                "line_number": 1090,
+                "text": "idempotency key collides with a different packet body"
+              },
+              {
+                "line_number": 1091,
+                "text": "a confirmed submission already exists for the same obligation and the current transmit is not an eligible amendment progression"
+              },
+              {
+                "line_number": 1093,
+                "text": "runtime scope includes `amendment_submit` but amendment posture is absent or not in `READY_TO_AMEND`"
+              },
+              {
+                "line_number": 1094,
+                "text": "authority link/token is invalid"
+              },
+              {
+                "line_number": 1095,
+                "text": "filing packet is not `APPROVED_TO_SUBMIT`"
+              }
+            ],
+            "decision": "HARD_BLOCK",
+            "header": "Return `HARD_BLOCK` if:",
+            "line_number": 1082
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 1099,
+                "text": "submission recovery or reconciliation is required before transmit"
+              }
+            ],
+            "decision": "MANUAL_REVIEW",
+            "header": "Return `MANUAL_REVIEW` if:",
+            "line_number": 1097
+          },
+          {
+            "conditions": [
+              {
+                "line_number": 1103,
+                "text": "the exact same packet and idempotency key already exist in a safe retriable state and the engine will perform idempotent recovery rather than a blind resend"
+              }
+            ],
+            "decision": "PASS_WITH_NOTICE",
+            "header": "Return `PASS_WITH_NOTICE` if:",
+            "line_number": 1101
+          },
+          {
+            "conditions": [],
+            "decision": "PASS",
+            "header": "Return `PASS` otherwise.",
+            "line_number": 1106
+          }
+        ],
+        "notes": [],
+        "prelude": []
+      },
+      "downstream_consumers": [
+        "APPEND_MANIFEST_GATES",
+        "DecisionBundle",
+        "SYNC_LIVE_EXPERIENCE_FROM_GATES"
+      ],
+      "evaluation_order_index": 11,
+      "evaluation_scope_condition": "Runs immediately before transmit when live submission is actually attempted.",
+      "gate_class": "non_access",
+      "gate_code": "SUBMISSION_GATE",
+      "gate_family": "submission_preflight",
+      "monotone_progression_rank_behavior": "Inherited non-access monotone-min contract from section 7.1; later gates may narrow but never raise legal progression.",
+      "non_access_stage_index_or_null": 10,
+      "notes": [
+        "Submission preflight re-runs authorization and authority-binding validity immediately before transmit."
+      ],
+      "overrideability": "NON_OVERRIDEABLE",
+      "phase_bindings": [
+        {
+          "binding_class": "evaluation",
+          "module_name": "SUBMISSION_GATE",
+          "phase_id": "P16",
+          "phase_name": "Submission enqueue, governed transmit, inbox-normalized recovery, and bounded reconciliation",
+          "row_id": "P16-S027",
+          "source_ref": "Algorithm/core_engine.md::L3060[SUBMISSION_GATE]",
+          "statement": "submission_gate = SUBMISSION_GATE( packet.payload_hash, packet.manifest_binding_hash, expected_packet_manifest_binding_hash, request.idempotency_key, EXISTING_SUBMISSIONS(client_id, operation), binding, request.request_body_hash, packet.lifecycle_state, runtime_scope, amendment_case if exists(amendment_case) else amendment )"
+        }
+      ],
+      "purpose_or_intro": "",
+      "rationale": "`SUBMISSION_GATE` is normalized from the canonical gate tables into one implementation-grade registry row.",
+      "reason_code_families": [
+        "SUBMISSION_*"
+      ],
+      "reason_codes": [
+        "SUBMISSION_REAUTHORIZATION_FAILED",
+        "SUBMISSION_MANIFEST_NOT_READY",
+        "SUBMISSION_APPROVAL_INVALID",
+        "SUBMISSION_DECLARED_BASIS_ACK_INVALID",
+        "SUBMISSION_PACKET_MANIFEST_BINDING_MISMATCH",
+        "SUBMISSION_PACKET_NOT_APPROVED",
+        "SUBMISSION_IDEMPOTENCY_BODY_COLLISION",
+        "SUBMISSION_PRIOR_CONFIRMED_EXISTS",
+        "SUBMISSION_AMENDMENT_NOT_READY",
+        "SUBMISSION_AUTHORITY_TOKEN_INVALID",
+        "SUBMISSION_PENDING_ALREADY_EXISTS",
+        "SUBMISSION_SAFE_IDEMPOTENT_RECOVERY"
+      ],
+      "severity_model": {
+        "decision_rank": {
+          "HARD_BLOCK": 4,
+          "MANUAL_REVIEW": 2,
+          "OVERRIDABLE_BLOCK": 3,
+          "PASS": 0,
+          "PASS_WITH_NOTICE": 1
+        },
+        "decision_to_severity": {
+          "HARD_BLOCK": "CRITICAL",
+          "MANUAL_REVIEW": "WARNING",
+          "OVERRIDABLE_BLOCK": "ERROR",
+          "PASS": "INFO",
+          "PASS_WITH_NOTICE": "NOTICE"
+        },
+        "profile_code": "NON_ACCESS_GATE_SEVERITY_V1",
+        "progression_rank": {
+          "HARD_BLOCK": 0,
+          "MANUAL_REVIEW": 1,
+          "OVERRIDABLE_BLOCK": 0,
+          "PASS": 2,
+          "PASS_WITH_NOTICE": 2
+        },
+        "severity_enum": [
+          "INFO",
+          "NOTICE",
+          "WARNING",
+          "ERROR",
+          "CRITICAL"
+        ]
+      },
+      "source_file": "Algorithm/exact_gate_logic_and_decision_tables.md",
+      "source_heading_or_logical_block": "Algorithm/exact_gate_logic_and_decision_tables.md::L1060[SUBMISSION_GATE]",
+      "source_refs": [
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L1060[SUBMISSION_GATE]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L1062[SUBMISSION_GATE.inputs]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L1080[SUBMISSION_GATE.decision_table]",
+        "Algorithm/exact_gate_logic_and_decision_tables.md::L1108[SUBMISSION_GATE.reason_codes]"
+      ],
+      "terminalization_effects": [
+        "Terminalizes the current progression path; legal continuation requires remediation or a new child lineage.",
+        "Routes into reviewer-facing progression without allowing straight-through automation.",
+        "Allows progress, but notice posture remains explicit and auditable downstream.",
+        "Allows the next ordered gate or live authority progression to continue automatically."
+      ],
+      "upstream_gate_dependencies": [
+        "FILING_GATE"
+      ]
+    }
+  ],
+  "reason_code_family_declarations": [
+    "ACCESS_*",
+    "MANIFEST_*",
+    "ARTIFACT_*",
+    "INPUT_*",
+    "DQ_*",
+    "RETENTION_*",
+    "PARITY_*",
+    "TRUST_*",
+    "FILING_*",
+    "SUBMISSION_*",
+    "AMENDMENT_*"
+  ],
+  "shared_contract": {
+    "decision_rank_mapping": {
+      "HARD_BLOCK": 4,
+      "MANUAL_REVIEW": 2,
+      "OVERRIDABLE_BLOCK": 3,
+      "PASS": 0,
+      "PASS_WITH_NOTICE": 1
+    },
+    "explainability_contract": {
+      "compression_summary": "`compression_reason_cap = 3`",
+      "reason_order_policy_summary": "`reason_order_policy = DOMINANT_REASON_FIRST_CANONICAL_PRIORITY`",
+      "semantic_qualifier_order": [
+        "AUTHORITY_STATE",
+        "LIMITATION_STATE",
+        "OVERRIDE_STATE",
+        "ACTIONABILITY_STATE"
+      ]
+    },
+    "gate_decision_record_required_fields": [
+      "artifact_type",
+      "gate_decision_id",
+      "gate_code",
+      "gate_stage_index",
+      "manifest_id",
+      "decision",
+      "severity",
+      "gate_semantics_contract",
+      "reason_codes[]",
+      "dominant_reason_code",
+      "plain_explanation",
+      "decision_explainability_contract",
+      "metrics{}",
+      "decision_basis_ref",
+      "input_artifact_refs[]",
+      "prerequisite_gate_refs[]",
+      "blocking_dependency_refs[]",
+      "effective_scope[]",
+      "overrideability",
+      "override_resolution_state",
+      "active_override_refs[]",
+      "required_override_scope",
+      "next_action_codes[]",
+      "policy_version_ref",
+      "decided_at"
+    ],
+    "gate_record_invariants": [
+      "`artifact_type = GateDecisionRecord`",
+      "`gate_stage_index` SHALL persist the fixed stage order rather than requiring replay consumers to infer order from `gate_code` after post-seal appends",
+      "`effective_scope[]` SHALL be the canonical authorized runtime scope snapshot used by the gate, frozen as an ordered scope-token array with the reporting-scope token first",
+      "`input_artifact_refs[]` and `decision_basis_ref` SHALL preserve the frozen inputs and derived basis actually evaluated by the gate; a gate record SHALL NOT rely on an ad hoc metrics map alone",
+      "`prerequisite_gate_refs[]` SHALL be empty only for `MANIFEST_GATE`; every later gate SHALL cite at least one earlier gate record that formed part of its prerequisite posture",
+      "`override_resolution_state` plus `active_override_refs[]` SHALL distinguish override-independent progress from pass / notice / review outcomes that only became legal because a valid override was active",
+      "`gate_semantics_contract{ contract_version, evaluation_order_profile_code, reason_order_profile_code, severity_profile_code, decision_rank, progression_rank, blocking_class, progression_semantics, override_dependency_state }` SHALL freeze the deterministic severity/rank mapping and whether progression was override-independent, valid-override-governed, still override-missing, or override-forbidden",
+      "`dominant_reason_code` SHALL be one of the emitted `reason_codes[]` and SHALL identify the highest-priority reason from the most severe matched decision family",
+      "`plain_explanation` SHALL explain the decision in bounded operator language without requiring the reviewer to reconstruct threshold or dependency state from raw metrics alone",
+      "`decision_explainability_contract{ contract_version, grammar_profile_code, reason_order_policy, dominant_reason_selection_policy, summary_source_policy, compression_policy, ordered_reason_codes[], dominant_reason_code, compressed_reason_codes[], suppressed_reason_count, semantic_qualifiers[], action_projection_state, plain_text_field_name, plain_text_character_limit }` SHALL freeze the backend-authored explanation boundary used by gate records, trust summaries, and terminal bundles",
+      "`blocking_dependency_refs[]` SHALL cite the missing, stale, superseded, or otherwise decisive dependencies whenever the gate outcome depends on specific upstream artifacts or approvals"
+    ],
+    "monotone_progression_formula": "`final_legal_progression_rank = min(readiness_rank(TrustSummary.filing_readiness), AMENDMENT_GATE.gate_semantics_contract.progression_rank, FILING_GATE.gate_semantics_contract.progression_rank, SUBMISSION_GATE.gate_semantics_contract.progression_rank)`",
+    "non_access_decision_enum": [
+      "PASS",
+      "PASS_WITH_NOTICE",
+      "MANUAL_REVIEW",
+      "OVERRIDABLE_BLOCK",
+      "HARD_BLOCK"
+    ],
+    "override_resolution_rule": [
+      {
+        "line_number": 119,
+        "text": "`VALID_OVERRIDE_ACTIVE(...)` SHALL be evaluated only for a gate whose own `decision = OVERRIDABLE_BLOCK`."
+      },
+      {
+        "line_number": 121,
+        "text": "A gate whose own `decision = HARD_BLOCK` SHALL NOT consult override state and SHALL remain blocking."
+      },
+      {
+        "line_number": 123,
+        "text": "Any implementation path that progresses the current manifest after a `HARD_BLOCK` SHALL be treated as a fatal conformance error."
+      }
+    ],
+    "overrideability_enum": [
+      "NONE",
+      "SCOPED_OVERRIDE_ALLOWED",
+      "SCOPED_OVERRIDE_REQUIRED",
+      "NON_OVERRIDEABLE"
+    ],
+    "progression_rank_mapping": {
+      "HARD_BLOCK": 0,
+      "MANUAL_REVIEW": 1,
+      "OVERRIDABLE_BLOCK": 0,
+      "PASS": 2,
+      "PASS_WITH_NOTICE": 2
+    },
+    "readiness_rank_mapping": {
+      "NOT_READY": 0,
+      "READY_REVIEW": 1,
+      "READY_TO_SUBMIT": 2
+    },
+    "schema_contract_refs": {
+      "gate_decision_record_schema": "Algorithm/schemas/gate_decision_record.schema.json",
+      "gate_semantics_contract_schema": "Algorithm/schemas/gate_semantics_contract.schema.json",
+      "preseal_gate_evaluation_schema": "Algorithm/schemas/preseal_gate_evaluation_contract.schema.json"
+    },
+    "schema_gate_code_enum": [
+      "MANIFEST_GATE",
+      "ARTIFACT_CONTRACT_GATE",
+      "INPUT_BOUNDARY_GATE",
+      "DATA_QUALITY_GATE",
+      "RETENTION_EVIDENCE_GATE",
+      "PARITY_GATE",
+      "TRUST_GATE",
+      "AMENDMENT_GATE",
+      "FILING_GATE",
+      "SUBMISSION_GATE"
+    ],
+    "severity_enum": [
+      "INFO",
+      "NOTICE",
+      "WARNING",
+      "ERROR",
+      "CRITICAL"
+    ],
+    "severity_mapping": {
+      "HARD_BLOCK": "CRITICAL",
+      "MANUAL_REVIEW": "WARNING",
+      "OVERRIDABLE_BLOCK": "ERROR",
+      "PASS": "INFO",
+      "PASS_WITH_NOTICE": "NOTICE"
+    }
+  },
+  "summary": {
+    "access_gate_count": 1,
+    "declared_reason_code_family_count": 11,
+    "gate_count": 11,
+    "gate_family_counts": {
+      "access_control": 1,
+      "amendment_progression": 1,
+      "artifact_contract_safety": 1,
+      "authority_parity": 1,
+      "data_quality": 1,
+      "filing_progression": 1,
+      "input_boundary": 1,
+      "preseal_manifest_integrity": 1,
+      "retention_evidence": 1,
+      "submission_preflight": 1,
+      "trust_synthesis": 1
+    },
+    "instantiated_reason_code_family_count": 10,
+    "missing_reason_code_families": [
+      "ACCESS_*"
+    ],
+    "non_access_gate_count": 10,
+    "reason_code_count": 134
+  }
+}

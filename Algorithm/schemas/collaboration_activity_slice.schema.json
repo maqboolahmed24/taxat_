@@ -1,0 +1,400 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/collaboration_activity_slice.schema.json",
+  "title": "CollaborationActivitySlice",
+  "description": "Visibility-scoped paginated collaboration activity read contract. This schema freezes the route-visible workspace guard spine, thread filter echo, paging posture, and latest snapshot anchor so inline activity refresh does not leak internal lanes or reconstruct paging state locally.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "item_id",
+    "workspace_route_key",
+    "viewer_scope",
+    "thread_visibility_class",
+    "workspace_version",
+    "shell_stability_token",
+    "visibility_partition",
+    "access_binding_hash",
+    "masking_posture_fingerprint",
+    "customer_safe_projection",
+    "active_filters",
+    "head_sequence",
+    "newest_returned_sequence_or_null",
+    "oldest_returned_sequence_or_null",
+    "next_before_sequence_or_null",
+    "has_more_before",
+    "focus_anchor_ref_or_null",
+    "entry_refs",
+    "latest_workspace_snapshot_ref",
+    "returned_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "CollaborationActivitySlice"
+    },
+    "item_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workspace_route_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "viewer_scope": {
+      "type": "string",
+      "enum": [
+        "STAFF_FULL",
+        "CUSTOMER_VISIBLE"
+      ]
+    },
+    "thread_visibility_class": {
+      "type": "string",
+      "enum": [
+        "CUSTOMER_VISIBLE",
+        "INTERNAL_ONLY"
+      ]
+    },
+    "workspace_version": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "shell_stability_token": {
+      "type": "string",
+      "minLength": 1
+    },
+    "visibility_partition": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/visibility_partition_contract.schema.json"
+        },
+        {
+          "properties": {
+            "partition_scope": {
+              "const": "COLLABORATION_ACTIVITY_SLICE"
+            }
+          }
+        }
+      ]
+    },
+    "access_binding_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "masking_posture_fingerprint": {
+      "type": "string",
+      "minLength": 1
+    },
+    "customer_safe_projection": {
+      "anyOf": [
+        {
+          "allOf": [
+            {
+              "$ref": "https://taxat.dev/schemas/customer_safe_projection_contract.schema.json"
+            },
+            {
+              "properties": {
+                "boundary_scope": {
+                  "const": "COLLABORATION_ACTIVITY_SLICE"
+                },
+                "projection_audience": {
+                  "const": "CUSTOMER_COLLABORATION"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "active_filters": {
+      "$ref": "#/$defs/activeFilters"
+    },
+    "head_sequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "newest_returned_sequence_or_null": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "oldest_returned_sequence_or_null": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "next_before_sequence_or_null": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "has_more_before": {
+      "type": "boolean"
+    },
+    "focus_anchor_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "entry_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "latest_workspace_snapshot_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "returned_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "activeFilters": {
+      "type": "object",
+      "required": [
+        "thread_visibility_class",
+        "request_info_ref_or_null",
+        "include_system_entries",
+        "before_sequence_or_null"
+      ],
+      "properties": {
+        "thread_visibility_class": {
+          "type": "string",
+          "enum": [
+            "CUSTOMER_VISIBLE",
+            "INTERNAL_ONLY"
+          ]
+        },
+        "request_info_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "include_system_entries": {
+          "type": "boolean"
+        },
+        "before_sequence_or_null": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "viewer_scope": {
+            "const": "CUSTOMER_VISIBLE"
+          }
+        },
+        "required": [
+          "viewer_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "thread_visibility_class": {
+            "const": "CUSTOMER_VISIBLE"
+          },
+          "customer_safe_projection": {
+            "type": "object"
+          },
+          "active_filters": {
+            "properties": {
+              "thread_visibility_class": {
+                "const": "CUSTOMER_VISIBLE"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "thread_visibility_class": {
+            "const": "INTERNAL_ONLY"
+          }
+        },
+        "required": [
+          "thread_visibility_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "viewer_scope": {
+            "const": "STAFF_FULL"
+          },
+          "customer_safe_projection": {
+            "type": "null"
+          },
+          "active_filters": {
+            "properties": {
+              "thread_visibility_class": {
+                "const": "INTERNAL_ONLY"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "thread_visibility_class": {
+            "const": "CUSTOMER_VISIBLE"
+          }
+        },
+        "required": [
+          "thread_visibility_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "active_filters": {
+            "properties": {
+              "thread_visibility_class": {
+                "const": "CUSTOMER_VISIBLE"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "head_sequence": {
+            "const": 0
+          }
+        },
+        "required": [
+          "head_sequence"
+        ]
+      },
+      "then": {
+        "properties": {
+          "entry_refs": {
+            "maxItems": 0
+          },
+          "newest_returned_sequence_or_null": {
+            "type": "null"
+          },
+          "oldest_returned_sequence_or_null": {
+            "type": "null"
+          },
+          "next_before_sequence_or_null": {
+            "type": "null"
+          },
+          "has_more_before": {
+            "const": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "has_more_before": {
+            "const": false
+          }
+        },
+        "required": [
+          "has_more_before"
+        ]
+      },
+      "then": {
+        "properties": {
+          "next_before_sequence_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "has_more_before": {
+            "const": true
+          }
+        },
+        "required": [
+          "has_more_before"
+        ]
+      },
+      "then": {
+        "properties": {
+          "next_before_sequence_or_null": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "newest_returned_sequence_or_null": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "newest_returned_sequence_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "oldest_returned_sequence_or_null": {
+            "type": "null"
+          },
+          "entry_refs": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "newest_returned_sequence_or_null": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "newest_returned_sequence_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "oldest_returned_sequence_or_null": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    }
+  ]
+}

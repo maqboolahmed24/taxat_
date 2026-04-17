@@ -1,0 +1,507 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/request_info_record.schema.json",
+  "title": "RequestInfoRecord",
+  "description": "Immutable request-for-info artifact. This schema freezes request identity, numbering, response-state versioning, prompt lineage, response lineage, and closure basis so customer replies and notifications bind to one exact request rather than to a floating open-request concept.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "request_info_id",
+    "item_id",
+    "visibility_class",
+    "request_info_ordinal",
+    "lifecycle_state",
+    "request_state_version",
+    "prompt_entry_ref",
+    "prompt_body_ref",
+    "requested_by_ref",
+    "customer_due_at",
+    "opened_notification_refs",
+    "opened_at",
+    "response_entry_ref",
+    "response_body_ref",
+    "responded_by_ref",
+    "responded_at",
+    "closure_entry_ref",
+    "closed_by_ref",
+    "closure_reason_code",
+    "closed_at",
+    "audit_event_refs"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "RequestInfoRecord"
+    },
+    "request_info_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "item_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "visibility_class": {
+      "const": "CUSTOMER_VISIBLE"
+    },
+    "request_info_ordinal": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "RESPONDED",
+        "CLOSED"
+      ]
+    },
+    "request_state_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "prompt_entry_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "prompt_body_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requested_by_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "customer_due_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "opened_notification_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "opened_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "response_entry_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "response_body_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "responded_by_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "responded_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "closure_entry_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "closed_by_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "closure_reason_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "CUSTOMER_REPLY_ACCEPTED",
+        "CANCELLED",
+        "SUPERSEDED",
+        null
+      ]
+    },
+    "closed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "audit_event_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "OPEN"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "request_state_version": {
+            "const": 1
+          },
+          "response_entry_ref": {
+            "type": "null"
+          },
+          "response_body_ref": {
+            "type": "null"
+          },
+          "responded_by_ref": {
+            "type": "null"
+          },
+          "responded_at": {
+            "type": "null"
+          },
+          "closure_entry_ref": {
+            "type": "null"
+          },
+          "closed_by_ref": {
+            "type": "null"
+          },
+          "closure_reason_code": {
+            "type": "null"
+          },
+          "closed_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "RESPONDED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "request_state_version": {
+            "const": 2
+          },
+          "response_entry_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "response_body_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "responded_by_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "responded_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closure_entry_ref": {
+            "type": "null"
+          },
+          "closed_by_ref": {
+            "type": "null"
+          },
+          "closure_reason_code": {
+            "type": "null"
+          },
+          "closed_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "CLOSED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "closure_entry_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "closed_by_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "closure_reason_code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "closed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "closure_reason_code": {
+            "const": "CUSTOMER_REPLY_ACCEPTED"
+          }
+        },
+        "required": [
+          "closure_reason_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "request_state_version": {
+            "const": 3
+          },
+          "response_entry_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "response_body_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "responded_by_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "responded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "closure_reason_code": {
+            "enum": [
+              "CANCELLED",
+              "SUPERSEDED"
+            ]
+          }
+        },
+        "required": [
+          "closure_reason_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "request_state_version": {
+            "const": 2
+          },
+          "response_entry_ref": {
+            "type": "null"
+          },
+          "response_body_ref": {
+            "type": "null"
+          },
+          "responded_by_ref": {
+            "type": "null"
+          },
+          "responded_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "response_entry_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "response_entry_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_body_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "responded_by_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "responded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "response_body_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "response_body_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_entry_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "responded_by_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "responded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "responded_by_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "responded_by_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_entry_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "response_body_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "responded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "responded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "responded_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_entry_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "response_body_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "responded_by_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "closure_reason_code": {
+            "const": "CUSTOMER_REPLY_ACCEPTED"
+          }
+        },
+        "required": [
+          "closure_reason_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_entry_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "response_body_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "responded_by_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "responded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

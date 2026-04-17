@@ -1,0 +1,197 @@
+{
+  "mandatory_branch_ids": [
+    "BR_ACCESS_BLOCKED_EARLY_RETURN",
+    "BR_AMENDMENT_INTENT_VS_AMENDMENT_SUBMIT",
+    "BR_EARLY_FILING_READINESS_TERMINALIZATION",
+    "BR_EXISTING_DECISION_BUNDLE_RETURN",
+    "BR_INVALID_SCOPE_OR_PRIOR_CONTEXT",
+    "BR_LATE_DATA_SPAWN_REVIEW_EXCLUDE",
+    "BR_MANIFEST_REUSE_VS_CONTINUATION_VS_REPLAY",
+    "BR_PRESEAL_BLOCKED_VS_SEALED",
+    "BR_PRESTART_VS_POSTSTART_SYSTEM_FAULT",
+    "BR_REPLAY_REUSES_FROZEN_POSTSEAL_BASIS",
+    "BR_SUBMIT_VS_NON_SUBMIT",
+    "BR_TRUST_POSTURE_TERMINALIZATION"
+  ],
+  "row_count": 12,
+  "rows": [
+    {
+      "branch_family": "access_blocked_early_return",
+      "branch_id": "BR_ACCESS_BLOCKED_EARLY_RETURN",
+      "false_path": "Continue into runtime-scope resolution and manifest-strategy selection.",
+      "phase_id": "P01",
+      "phase_name": "access early return",
+      "source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/exact_gate_logic_and_decision_tables.md",
+        "Algorithm/low_noise_experience_contract.md"
+      ],
+      "terminal_outcome": "Terminal before manifest allocation.",
+      "trigger_condition": "Authorization or access-scope binding fails before any manifest allocation.",
+      "true_path": "Return `ACCESS_BLOCKED_RESPONSE(...)` with low-noise posture envelope."
+    },
+    {
+      "branch_family": "invalid_scope_or_prior_context",
+      "branch_id": "BR_INVALID_SCOPE_OR_PRIOR_CONTEXT",
+      "false_path": "Proceed to manifest reuse / continuation / replay selection.",
+      "phase_id": "P02",
+      "phase_name": "scope and prior-context validation",
+      "source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/replay_and_reproducibility_contract.md"
+      ],
+      "terminal_outcome": "Hard stop before manifest allocation.",
+      "trigger_condition": "Runtime scope grammar or prior-manifest context fails validation.",
+      "true_path": "Return `ERROR(...)` before manifest allocation or reuse."
+    },
+    {
+      "branch_family": "existing_decision_bundle_return",
+      "branch_id": "BR_EXISTING_DECISION_BUNDLE_RETURN",
+      "false_path": "Continue into fresh, continuation, or replay manifest work.",
+      "phase_id": "P02",
+      "phase_name": "same-manifest retry bundle return",
+      "source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/state_machines.md",
+        "Algorithm/observability_and_audit_contract.md"
+      ],
+      "terminal_outcome": "Terminal via idempotent bundle reuse.",
+      "trigger_condition": "The run matches a terminal manifest lineage whose `DecisionBundle` may be safely reused.",
+      "true_path": "Return the existing `DecisionBundle` instead of allocating a continuation child."
+    },
+    {
+      "branch_family": "manifest_branch_selection",
+      "branch_id": "BR_MANIFEST_REUSE_VS_CONTINUATION_VS_REPLAY",
+      "false_path": "n/a",
+      "phase_id": "P03",
+      "phase_name": "manifest strategy selection",
+      "source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/manifest_and_config_freeze_contract.md",
+        "Algorithm/replay_and_reproducibility_contract.md",
+        "Algorithm/observability_and_audit_contract.md"
+      ],
+      "terminal_outcome": "Nonterminal lineage fork that governs the rest of the run.",
+      "trigger_condition": "Reuse strategy chooses fresh manifest, same-manifest reuse, continuation child, or replay child.",
+      "true_path": "Lineage refs, inheritance modes, and branch-decision audit context are frozen into manifest context."
+    },
+    {
+      "branch_family": "late_data_policy",
+      "branch_id": "BR_LATE_DATA_SPAWN_REVIEW_EXCLUDE",
+      "false_path": "Continue with the sealed pre-start basis.",
+      "phase_id": "P04",
+      "phase_name": "late-data classification",
+      "source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/late_data_authority_correction_and_replay_propagation_contract.md",
+        "Algorithm/manifest_and_config_freeze_contract.md"
+      ],
+      "terminal_outcome": "Usually nonterminal, but may force review or child lineage before seal.",
+      "trigger_condition": "Late data appears while building or reusing the pre-seal context.",
+      "true_path": "Spawn child, surface review posture, or exclude late data according to policy bindings."
+    },
+    {
+      "branch_family": "preseal_gate_outcome",
+      "branch_id": "BR_PRESEAL_BLOCKED_VS_SEALED",
+      "false_path": "Seal the manifest and permit later `RunStarted` claim.",
+      "phase_id": "P05",
+      "phase_name": "ordered pre-seal gate chain",
+      "source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/invariants_and_gates.md",
+        "Algorithm/exact_gate_logic_and_decision_tables.md"
+      ],
+      "terminal_outcome": "Blocked or review-required pre-start outcome vs nonterminal sealed success.",
+      "trigger_condition": "The ordered pre-seal gates resolve as block/review or allow seal.",
+      "true_path": "Persist pre-start terminal context or review-required posture and stop before `RunStarted`."
+    },
+    {
+      "branch_family": "fault_boundary",
+      "branch_id": "BR_PRESTART_VS_POSTSTART_SYSTEM_FAULT",
+      "false_path": "Post-start faults use started-run failure handling and may enter `FAILED` semantics.",
+      "phase_id": "P05",
+      "phase_name": "system fault boundary",
+      "source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/state_machines.md"
+      ],
+      "terminal_outcome": "Boundary between blocked pre-start and failed post-start posture.",
+      "trigger_condition": "A system fault happens before `RunStarted` or after command-side start.",
+      "true_path": "Pre-start faults finalize `BLOCKED` even if the manifest already sealed."
+    },
+    {
+      "branch_family": "replay_basis_reuse",
+      "branch_id": "BR_REPLAY_REUSES_FROZEN_POSTSEAL_BASIS",
+      "false_path": "Build or recover a fresh pre-seal basis under ordinary collection rules.",
+      "phase_id": "P04",
+      "phase_name": "replay basis selection",
+      "source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/replay_and_reproducibility_contract.md",
+        "Algorithm/manifest_and_config_freeze_contract.md"
+      ],
+      "terminal_outcome": "Nonterminal lineage reuse that constrains later compute and audit expectations.",
+      "trigger_condition": "The request is a replay-capable lineage path with frozen post-seal basis available.",
+      "true_path": "Reuse the frozen post-seal basis and replay from deterministic lineage-bound artifacts."
+    },
+    {
+      "branch_family": "early_filing_readiness_terminalization",
+      "branch_id": "BR_EARLY_FILING_READINESS_TERMINALIZATION",
+      "false_path": "Proceed into drift, trust, amendment, and filing packet work.",
+      "phase_id": "P09",
+      "phase_name": "authority and filing-readiness short-circuit",
+      "source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/exact_gate_logic_and_decision_tables.md",
+        "Algorithm/observability_and_audit_contract.md"
+      ],
+      "terminal_outcome": "Early blocked or review-required terminalization.",
+      "trigger_condition": "Authority or filing-readiness validation yields non-pass posture before packet preparation.",
+      "true_path": "Emit filing or amendment gate posture and finalize blocked/review-required outcome early."
+    },
+    {
+      "branch_family": "trust_posture_terminalization",
+      "branch_id": "BR_TRUST_POSTURE_TERMINALIZATION",
+      "false_path": "Continue into amendment and filing stages.",
+      "phase_id": "P13",
+      "phase_name": "trust-posture terminalization",
+      "source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/low_noise_experience_contract.md"
+      ],
+      "terminal_outcome": "Completed, blocked, or review-required terminalization before filing logic.",
+      "trigger_condition": "Trust posture is already decisive and no later amendment or filing stage remains required.",
+      "true_path": "Publish live projections and return a terminal bundle from trust posture."
+    },
+    {
+      "branch_family": "amendment_progression_split",
+      "branch_id": "BR_AMENDMENT_INTENT_VS_AMENDMENT_SUBMIT",
+      "false_path": "No amendment progression occurs and filing logic remains ordinary.",
+      "phase_id": "P14",
+      "phase_name": "amendment intent vs amendment submit",
+      "source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/state_machines.md",
+        "Algorithm/exact_gate_logic_and_decision_tables.md"
+      ],
+      "terminal_outcome": "May terminalize blocked/review-required on amendment gate or continue to filing.",
+      "trigger_condition": "Runtime scope requests amendment intent, amendment submit, or neither.",
+      "true_path": "Intent-to-amend readiness and later submit readiness remain distinct state-machine progressions."
+    },
+    {
+      "branch_family": "submit_vs_non_submit",
+      "branch_id": "BR_SUBMIT_VS_NON_SUBMIT",
+      "false_path": "End without transmit while retaining packet or trust posture as the latest truth.",
+      "phase_id": "P16",
+      "phase_name": "submission execution split",
+      "source_refs": [
+        "Algorithm/core_engine.md",
+        "Algorithm/state_machines.md",
+        "Algorithm/observability_and_audit_contract.md"
+      ],
+      "terminal_outcome": "May remain pending external confirmation, complete, or block/review depending on authority outcome.",
+      "trigger_condition": "Runtime scope requests actual submission and the packet is approved to submit.",
+      "true_path": "Execute governed transmit, bounded recovery, and authority reconciliation."
+    }
+  ]
+}

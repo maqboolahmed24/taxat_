@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/nightly_batch_identity_contract.schema.json",
+  "title": "NightlyBatchIdentityContract",
+  "description": "Structured nightly batch identity contract. This schema freezes the scheduler dedupe tuple, batch_identity_hash semantics, same-window duplicate-suppression posture, selection_window_start semantics for the nightly window, cross-window continuity boundary, and recovery-lineage policy for one NightlyBatchRun so batch identity is not reconstructed from an opaque key alone.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "identity_contract_hash",
+    "tenant_id",
+    "nightly_window_key",
+    "trigger_class",
+    "release_verification_manifest_ref",
+    "policy_snapshot_hash",
+    "autopilot_policy_hash",
+    "scheduler_dedupe_key",
+    "schema_bundle_hash",
+    "code_build_id",
+    "environment_ref",
+    "selection_universe_hash",
+    "selection_universe_count",
+    "reclaimed_predecessor_batch_run_ref_or_null",
+    "recovery_resume_state",
+    "identity_binding_policy",
+    "same_window_duplicate_policy",
+    "candidate_universe_policy",
+    "terminal_result_reuse_policy",
+    "active_attempt_isolation_policy",
+    "shard_failure_isolation_policy",
+    "cross_window_continuity_policy",
+    "recovery_lineage_policy"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "NIGHTLY_BATCH_IDENTITY_V1"
+    },
+    "identity_contract_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nightly_window_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trigger_class": {
+      "type": "string",
+      "enum": [
+        "SCHEDULED_WINDOW",
+        "MANUAL_RETRY_WINDOW",
+        "RECOVERY_RECLAIM_WINDOW"
+      ]
+    },
+    "release_verification_manifest_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_snapshot_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "autopilot_policy_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scheduler_dedupe_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema_bundle_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "code_build_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment_ref": {
+      "type": "string",
+      "enum": [
+        "DEV",
+        "TEST",
+        "UAT",
+        "SANDBOX",
+        "PRODUCTION"
+      ]
+    },
+    "selection_universe_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selection_universe_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reclaimed_predecessor_batch_run_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "recovery_resume_state": {
+      "type": "string",
+      "enum": [
+        "NOT_APPLICABLE",
+        "PREDECESSOR_SELECTION_AND_SHARDS_RESUMED",
+        "PREDECESSOR_SELECTION_REUSED_RESHARDED"
+      ]
+    },
+    "identity_binding_policy": {
+      "const": "TENANT_WINDOW_TRIGGER_RELEASE_POLICY_AUTOPILOT_SCHEMA_BUILD_UNIVERSE_HASH"
+    },
+    "same_window_duplicate_policy": {
+      "const": "REUSE_BATCH_AND_PERSIST_EXPLICIT_CLIENT_DISPOSITIONS"
+    },
+    "candidate_universe_policy": {
+      "const": "EVERY_CANDIDATE_REQUIRES_PERSISTED_SELECTION_DISPOSITION"
+    },
+    "terminal_result_reuse_policy": {
+      "const": "REUSE_TERMINAL_RESULT_BEFORE_NEW_MANIFEST_ALLOCATION"
+    },
+    "active_attempt_isolation_policy": {
+      "const": "SAME_WINDOW_ACTIVE_ATTEMPT_REQUIRES_DEFER_OR_STALE_RECLAIM"
+    },
+    "shard_failure_isolation_policy": {
+      "const": "UNRELATED_CLIENTS_RETAIN_EXPLICIT_OUTCOME_DESPITE_SHARD_FAILURE"
+    },
+    "cross_window_continuity_policy": {
+      "const": "WINDOW_KEY_PART_OF_MANIFEST_AND_BATCH_IDENTITY"
+    },
+    "recovery_lineage_policy": {
+      "const": "SUCCESSOR_MUST_LINK_AND_RESUME_PREDECESSOR"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "trigger_class": {
+            "const": "RECOVERY_RECLAIM_WINDOW"
+          }
+        },
+        "required": [
+          "trigger_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reclaimed_predecessor_batch_run_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "recovery_resume_state": {
+            "enum": [
+              "PREDECESSOR_SELECTION_AND_SHARDS_RESUMED",
+              "PREDECESSOR_SELECTION_REUSED_RESHARDED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "trigger_class": {
+            "enum": [
+              "SCHEDULED_WINDOW",
+              "MANUAL_RETRY_WINDOW"
+            ]
+          }
+        },
+        "required": [
+          "trigger_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reclaimed_predecessor_batch_run_ref_or_null": {
+            "type": "null"
+          },
+          "recovery_resume_state": {
+            "const": "NOT_APPLICABLE"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}
