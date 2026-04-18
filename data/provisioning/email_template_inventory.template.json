@@ -1,0 +1,379 @@
+{
+  "schema_version": "1.0",
+  "inventory_id": "email_template_inventory",
+  "provider_id": "transactional-email-delivery-control-plane",
+  "provider_display_name": "Transactional Email Delivery Control Plane",
+  "run_id": "template-email-notifications-2026-04-18",
+  "flow_id": "email-templates-and-webhooks-configuration",
+  "operator_identity_alias": "ops.email.template",
+  "provider_selection": {
+    "provider_selection_status": "PROVIDER_DEFAULT_APPLIED",
+    "provider_family": "TRANSACTIONAL_EMAIL_DELIVERY",
+    "provider_vendor_adapter": "POSTMARK_COMPATIBLE_CONTROL_PLANE",
+    "provider_vendor_label": "Postmark-compatible transactional email provider",
+    "docs_urls": [
+      "https://postmarkapp.com/developer/api/overview",
+      "https://postmarkapp.com/developer/api/templates-api",
+      "https://postmarkapp.com/developer/user-guide/content/templates",
+      "https://postmarkapp.com/developer/user-guide/content/templates/mustachio-syntax",
+      "https://postmarkapp.com/developer/webhooks/webhooks-overview",
+      "https://postmarkapp.com/developer/webhooks/delivery-webhook",
+      "https://postmarkapp.com/developer/webhooks/bounce-webhook",
+      "https://postmarkapp.com/developer/webhooks/spam-complaint-webhook",
+      "https://postmarkapp.com/developer/webhooks/subscription-change-webhook",
+      "https://postmarkapp.com/developer/webhooks/open-webhook",
+      "https://postmarkapp.com/developer/webhooks/click-webhook",
+      "https://postmarkapp.com/developer/user-guide/tracking-opens/tracking-opens-per-email"
+    ],
+    "source_refs": [
+      {
+        "source_ref": "Algorithm/collaboration_workspace_contract.md::L1838[Customer_notifications]",
+        "rationale": "Only explicit customer-visible collaboration events may fan out into optional customer email."
+      },
+      {
+        "source_ref": "Algorithm/data_model.md::L195[WorkItemNotification]",
+        "rationale": "Notification routing, continuity, and customer-safe projection must remain explicit and typed."
+      },
+      {
+        "source_ref": "Algorithm/data_model.md::L2240[PortalHelpRequest]",
+        "rationale": "Contextual help acknowledgements must preserve route and case context instead of becoming free-form tickets."
+      },
+      {
+        "source_ref": "https://postmarkapp.com/developer/api/templates-api",
+        "rationale": "Current provider documentation exposes API-managed template aliases and server-scoped template records."
+      },
+      {
+        "source_ref": "https://postmarkapp.com/developer/webhooks/webhooks-overview",
+        "rationale": "Current provider webhook posture is configured per server and authenticated with HTTPS, Basic Auth, and custom headers."
+      }
+    ]
+  },
+  "template_records": [
+    {
+      "template_ref": "email_template_request_info_created",
+      "provider_template_alias": "customer-request-info-created-v1",
+      "provider_subject_template": "Action needed for {{ item_title }}",
+      "provider_html_template": "<!doctype html><html lang=\"en-GB\"><body><span style=\"display:none;\">A new request for information is ready in your Taxat portal.</span><h1>We need a little more information</h1><p>We've added a request for information to your case for {{ item_title }}.</p><p>Please review {{ request_info_summary }} and reply in the portal by {{ request_info_due_date_label }}.</p><p><a href=\"{{ detail_route_ref }}\">Open request</a></p><p>Need support? Use Help in the portal and we'll keep the same case context.</p></body></html>",
+      "provider_text_template": "We need a little more information\n\nWe've added a request for information to your case for {{ item_title }}.\nPlease review {{ request_info_summary }} and reply in the portal by {{ request_info_due_date_label }}.\n\nOpen request: {{ detail_route_ref }}\n\nNeed support? Use Help in the portal and we'll keep the same case context.",
+      "deployment_bindings": [
+        {
+          "environment_ref": "env_shared_sandbox_integration",
+          "workspace_ref": "email_ws_sandbox",
+          "sender_domain_ref": "email_domain_notify_sandbox",
+          "message_stream_ref": "email_stream_sandbox_customer_transactional",
+          "provider_template_alias": "sandbox.customer-request-info-created-v1",
+          "from_address": "noreply@notify.sandbox.taxat.example",
+          "reply_to_address": "help@notify.sandbox.taxat.example",
+          "callback_ref": "email_webhook_customer_transactional_sandbox",
+          "deployment_state": "READY_FOR_RENDER_REHEARSAL"
+        },
+        {
+          "environment_ref": "env_preproduction_verification",
+          "workspace_ref": "email_ws_preprod",
+          "sender_domain_ref": "email_domain_notify_preprod",
+          "message_stream_ref": "email_stream_preproduction_customer_transactional",
+          "provider_template_alias": "preprod.customer-request-info-created-v1",
+          "from_address": "noreply@notify.preprod.taxat.example",
+          "reply_to_address": "help@notify.preprod.taxat.example",
+          "callback_ref": "email_webhook_customer_transactional_preprod",
+          "deployment_state": "READY_FOR_PROMOTION_VERIFICATION"
+        },
+        {
+          "environment_ref": "env_production",
+          "workspace_ref": "email_ws_production",
+          "sender_domain_ref": "email_domain_notify_production",
+          "message_stream_ref": "email_stream_production_customer_transactional",
+          "provider_template_alias": "production.customer-request-info-created-v1",
+          "from_address": "noreply@notify.production.taxat.example",
+          "reply_to_address": "help@notify.production.taxat.example",
+          "callback_ref": "email_webhook_customer_transactional_production",
+          "deployment_state": "READY_FOR_CONTROLLED_ROLLOUT"
+        }
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/collaboration_workspace_contract.md::L1846[new_request-for-info]",
+          "rationale": "New request-for-info is a notifyable customer event family."
+        }
+      ],
+      "notes": [
+        "Customer-safe projection fields only; no internal actor or gate context.",
+        "Deployment bindings stay environment-scoped and callback-scoped."
+      ]
+    },
+    {
+      "template_ref": "email_template_staff_customer_comment_created",
+      "provider_template_alias": "staff-customer-comment-created-v1",
+      "provider_subject_template": "New update on {{ item_title }}",
+      "provider_html_template": "<!doctype html><html lang=\"en-GB\"><body><span style=\"display:none;\">A Taxat reviewer shared a customer-visible update in the portal.</span><h1>There is a new update on your case</h1><p>A Taxat reviewer has shared a customer-visible comment on {{ item_title }}.</p><p>Latest update: {{ staff_comment_preview }}</p><p><a href=\"{{ detail_route_ref }}\">View update</a></p><p>Use Help in the portal if you need support. We'll keep the same case context.</p></body></html>",
+      "provider_text_template": "There is a new update on your case\n\nA Taxat reviewer has shared a customer-visible comment on {{ item_title }}.\nLatest update: {{ staff_comment_preview }}\n\nView update: {{ detail_route_ref }}\n\nUse Help in the portal if you need support. We'll keep the same case context.",
+      "deployment_bindings": [
+        {
+          "environment_ref": "env_shared_sandbox_integration",
+          "workspace_ref": "email_ws_sandbox",
+          "sender_domain_ref": "email_domain_notify_sandbox",
+          "message_stream_ref": "email_stream_sandbox_customer_transactional",
+          "provider_template_alias": "sandbox.staff-customer-comment-created-v1",
+          "from_address": "noreply@notify.sandbox.taxat.example",
+          "reply_to_address": "help@notify.sandbox.taxat.example",
+          "callback_ref": "email_webhook_customer_transactional_sandbox",
+          "deployment_state": "READY_FOR_RENDER_REHEARSAL"
+        },
+        {
+          "environment_ref": "env_preproduction_verification",
+          "workspace_ref": "email_ws_preprod",
+          "sender_domain_ref": "email_domain_notify_preprod",
+          "message_stream_ref": "email_stream_preproduction_customer_transactional",
+          "provider_template_alias": "preprod.staff-customer-comment-created-v1",
+          "from_address": "noreply@notify.preprod.taxat.example",
+          "reply_to_address": "help@notify.preprod.taxat.example",
+          "callback_ref": "email_webhook_customer_transactional_preprod",
+          "deployment_state": "READY_FOR_PROMOTION_VERIFICATION"
+        },
+        {
+          "environment_ref": "env_production",
+          "workspace_ref": "email_ws_production",
+          "sender_domain_ref": "email_domain_notify_production",
+          "message_stream_ref": "email_stream_production_customer_transactional",
+          "provider_template_alias": "production.staff-customer-comment-created-v1",
+          "from_address": "noreply@notify.production.taxat.example",
+          "reply_to_address": "help@notify.production.taxat.example",
+          "callback_ref": "email_webhook_customer_transactional_production",
+          "deployment_state": "READY_FOR_CONTROLLED_ROLLOUT"
+        }
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/collaboration_workspace_contract.md::L1847[new_staff_customer-visible_comment]",
+          "rationale": "Shared staff comments are explicitly notifyable to customers."
+        }
+      ],
+      "notes": [
+        "Do not include individual staff identity when tenant policy masks it.",
+        "Deployment bindings stay environment-scoped and callback-scoped."
+      ]
+    },
+    {
+      "template_ref": "email_template_customer_due_date_changed",
+      "provider_template_alias": "customer-due-date-changed-v1",
+      "provider_subject_template": "Due date updated for {{ item_title }}",
+      "provider_html_template": "<!doctype html><html lang=\"en-GB\"><body><span style=\"display:none;\">The next due date in your Taxat portal has been created or updated.</span><h1>A due date has changed</h1><p>The next due date for {{ item_title }} has been set or updated in the portal.</p><p>Current due date: {{ customer_due_date_label }}</p><p><a href=\"{{ detail_route_ref }}\">Review due date</a></p><p>If you need help with this request, use Help in the portal so the same case context stays attached.</p></body></html>",
+      "provider_text_template": "A due date has changed\n\nThe next due date for {{ item_title }} has been set or updated in the portal.\nCurrent due date: {{ customer_due_date_label }}\n\nReview due date: {{ detail_route_ref }}\n\nIf you need help with this request, use Help in the portal so the same case context stays attached.",
+      "deployment_bindings": [
+        {
+          "environment_ref": "env_shared_sandbox_integration",
+          "workspace_ref": "email_ws_sandbox",
+          "sender_domain_ref": "email_domain_notify_sandbox",
+          "message_stream_ref": "email_stream_sandbox_customer_transactional",
+          "provider_template_alias": "sandbox.customer-due-date-changed-v1",
+          "from_address": "noreply@notify.sandbox.taxat.example",
+          "reply_to_address": "help@notify.sandbox.taxat.example",
+          "callback_ref": "email_webhook_customer_transactional_sandbox",
+          "deployment_state": "READY_FOR_RENDER_REHEARSAL"
+        },
+        {
+          "environment_ref": "env_preproduction_verification",
+          "workspace_ref": "email_ws_preprod",
+          "sender_domain_ref": "email_domain_notify_preprod",
+          "message_stream_ref": "email_stream_preproduction_customer_transactional",
+          "provider_template_alias": "preprod.customer-due-date-changed-v1",
+          "from_address": "noreply@notify.preprod.taxat.example",
+          "reply_to_address": "help@notify.preprod.taxat.example",
+          "callback_ref": "email_webhook_customer_transactional_preprod",
+          "deployment_state": "READY_FOR_PROMOTION_VERIFICATION"
+        },
+        {
+          "environment_ref": "env_production",
+          "workspace_ref": "email_ws_production",
+          "sender_domain_ref": "email_domain_notify_production",
+          "message_stream_ref": "email_stream_production_customer_transactional",
+          "provider_template_alias": "production.customer-due-date-changed-v1",
+          "from_address": "noreply@notify.production.taxat.example",
+          "reply_to_address": "help@notify.production.taxat.example",
+          "callback_ref": "email_webhook_customer_transactional_production",
+          "deployment_state": "READY_FOR_CONTROLLED_ROLLOUT"
+        }
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/collaboration_workspace_contract.md::L1848[customer_due_date_creation_or_change]",
+          "rationale": "Customer due date creation or change is a notifyable family when the source contract allows it."
+        }
+      ],
+      "notes": [
+        "Do not turn overdue or escalation-only state into outbound copy.",
+        "Deployment bindings stay environment-scoped and callback-scoped."
+      ]
+    },
+    {
+      "template_ref": "email_template_item_resolved_or_closed",
+      "provider_template_alias": "item-resolved-or-closed-v1",
+      "provider_subject_template": "{{ item_title }} is complete",
+      "provider_html_template": "<!doctype html><html lang=\"en-GB\"><body><span style=\"display:none;\">A request in your Taxat portal is resolved or closed.</span><h1>This item is now complete</h1><p>We've marked {{ item_title }} as resolved or closed in the portal.</p><p>Summary: {{ resolution_summary }}</p><p><a href=\"{{ detail_route_ref }}\">Review completion</a></p><p>You can still open the portal to review the completed item and its final summary.</p></body></html>",
+      "provider_text_template": "This item is now complete\n\nWe've marked {{ item_title }} as resolved or closed in the portal.\nSummary: {{ resolution_summary }}\n\nReview completion: {{ detail_route_ref }}\n\nYou can still open the portal to review the completed item and its final summary.",
+      "deployment_bindings": [
+        {
+          "environment_ref": "env_shared_sandbox_integration",
+          "workspace_ref": "email_ws_sandbox",
+          "sender_domain_ref": "email_domain_notify_sandbox",
+          "message_stream_ref": "email_stream_sandbox_customer_transactional",
+          "provider_template_alias": "sandbox.item-resolved-or-closed-v1",
+          "from_address": "noreply@notify.sandbox.taxat.example",
+          "reply_to_address": "help@notify.sandbox.taxat.example",
+          "callback_ref": "email_webhook_customer_transactional_sandbox",
+          "deployment_state": "READY_FOR_RENDER_REHEARSAL"
+        },
+        {
+          "environment_ref": "env_preproduction_verification",
+          "workspace_ref": "email_ws_preprod",
+          "sender_domain_ref": "email_domain_notify_preprod",
+          "message_stream_ref": "email_stream_preproduction_customer_transactional",
+          "provider_template_alias": "preprod.item-resolved-or-closed-v1",
+          "from_address": "noreply@notify.preprod.taxat.example",
+          "reply_to_address": "help@notify.preprod.taxat.example",
+          "callback_ref": "email_webhook_customer_transactional_preprod",
+          "deployment_state": "READY_FOR_PROMOTION_VERIFICATION"
+        },
+        {
+          "environment_ref": "env_production",
+          "workspace_ref": "email_ws_production",
+          "sender_domain_ref": "email_domain_notify_production",
+          "message_stream_ref": "email_stream_production_customer_transactional",
+          "provider_template_alias": "production.item-resolved-or-closed-v1",
+          "from_address": "noreply@notify.production.taxat.example",
+          "reply_to_address": "help@notify.production.taxat.example",
+          "callback_ref": "email_webhook_customer_transactional_production",
+          "deployment_state": "READY_FOR_CONTROLLED_ROLLOUT"
+        }
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/collaboration_workspace_contract.md::L1849[item_resolved_or_closed]",
+          "rationale": "Item resolved or closed is a notifyable customer event family."
+        }
+      ],
+      "notes": [
+        "Completion copy must stay literal and avoid implying authority-of-record settlement.",
+        "Deployment bindings stay environment-scoped and callback-scoped."
+      ]
+    },
+    {
+      "template_ref": "email_template_portal_help_acknowledged",
+      "provider_template_alias": "portal-help-acknowledged-v1",
+      "provider_subject_template": "We received your help request about {{ item_title }}",
+      "provider_html_template": "<!doctype html><html lang=\"en-GB\"><body><span style=\"display:none;\">Your help request was saved with the same case context in the Taxat portal.</span><h1>Support context is saved</h1><p>We received your help request and kept the same case context for {{ item_title }}.</p><p>Reason: {{ help_reason_label }}</p><p><a href=\"{{ detail_route_ref }}\">View help request</a></p><p>You don't need to restate the case. We'll continue from the same request context.</p></body></html>",
+      "provider_text_template": "Support context is saved\n\nWe received your help request and kept the same case context for {{ item_title }}.\nReason: {{ help_reason_label }}\n\nView help request: {{ detail_route_ref }}\n\nYou don't need to restate the case. We'll continue from the same request context.",
+      "deployment_bindings": [
+        {
+          "environment_ref": "env_shared_sandbox_integration",
+          "workspace_ref": "email_ws_sandbox",
+          "sender_domain_ref": "email_domain_notify_sandbox",
+          "message_stream_ref": "email_stream_sandbox_customer_transactional",
+          "provider_template_alias": "sandbox.portal-help-acknowledged-v1",
+          "from_address": "help@notify.sandbox.taxat.example",
+          "reply_to_address": "support@notify.sandbox.taxat.example",
+          "callback_ref": "email_webhook_customer_transactional_sandbox",
+          "deployment_state": "READY_FOR_RENDER_REHEARSAL"
+        },
+        {
+          "environment_ref": "env_preproduction_verification",
+          "workspace_ref": "email_ws_preprod",
+          "sender_domain_ref": "email_domain_notify_preprod",
+          "message_stream_ref": "email_stream_preproduction_customer_transactional",
+          "provider_template_alias": "preprod.portal-help-acknowledged-v1",
+          "from_address": "help@notify.preprod.taxat.example",
+          "reply_to_address": "support@notify.preprod.taxat.example",
+          "callback_ref": "email_webhook_customer_transactional_preprod",
+          "deployment_state": "READY_FOR_PROMOTION_VERIFICATION"
+        },
+        {
+          "environment_ref": "env_production",
+          "workspace_ref": "email_ws_production",
+          "sender_domain_ref": "email_domain_notify_production",
+          "message_stream_ref": "email_stream_production_customer_transactional",
+          "provider_template_alias": "production.portal-help-acknowledged-v1",
+          "from_address": "help@notify.production.taxat.example",
+          "reply_to_address": "support@notify.production.taxat.example",
+          "callback_ref": "email_webhook_customer_transactional_production",
+          "deployment_state": "READY_FOR_CONTROLLED_ROLLOUT"
+        }
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L431[CLIENT_PORTAL_REQUEST_HELP]",
+          "rationale": "Portal help allocation is a durable contextual-support event."
+        },
+        {
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L666[context-preserving_help_submissions]",
+          "rationale": "Help acknowledgements must preserve route and case context rather than forcing blank restatement."
+        }
+      ],
+      "notes": [
+        "This is product-owned acknowledgement mail, not generic provider support mail.",
+        "Deployment bindings stay environment-scoped and callback-scoped."
+      ]
+    },
+    {
+      "template_ref": "email_template_support_contact_acknowledged",
+      "provider_template_alias": "support-contact-acknowledged-v1",
+      "provider_subject_template": "Support message received for {{ item_title }}",
+      "provider_html_template": "<!doctype html><html lang=\"en-GB\"><body><span style=\"display:none;\">Your support contact was recorded with the same case context in Taxat.</span><h1>Your support message was received</h1><p>We logged your support request through the {{ support_channel_label }} channel for {{ item_title }}.</p><p>Case context: {{ case_context_summary }}</p><p><a href=\"{{ detail_route_ref }}\">Open support message</a></p><p>We kept the same route and focus context so you do not need to restate the case.</p></body></html>",
+      "provider_text_template": "Your support message was received\n\nWe logged your support request through the {{ support_channel_label }} channel for {{ item_title }}.\nCase context: {{ case_context_summary }}\n\nOpen support message: {{ detail_route_ref }}\n\nWe kept the same route and focus context so you do not need to restate the case.",
+      "deployment_bindings": [
+        {
+          "environment_ref": "env_shared_sandbox_integration",
+          "workspace_ref": "email_ws_sandbox",
+          "sender_domain_ref": "email_domain_notify_sandbox",
+          "message_stream_ref": "email_stream_sandbox_customer_transactional",
+          "provider_template_alias": "sandbox.support-contact-acknowledged-v1",
+          "from_address": "help@notify.sandbox.taxat.example",
+          "reply_to_address": "support@notify.sandbox.taxat.example",
+          "callback_ref": "email_webhook_customer_transactional_sandbox",
+          "deployment_state": "READY_FOR_RENDER_REHEARSAL"
+        },
+        {
+          "environment_ref": "env_preproduction_verification",
+          "workspace_ref": "email_ws_preprod",
+          "sender_domain_ref": "email_domain_notify_preprod",
+          "message_stream_ref": "email_stream_preproduction_customer_transactional",
+          "provider_template_alias": "preprod.support-contact-acknowledged-v1",
+          "from_address": "help@notify.preprod.taxat.example",
+          "reply_to_address": "support@notify.preprod.taxat.example",
+          "callback_ref": "email_webhook_customer_transactional_preprod",
+          "deployment_state": "READY_FOR_PROMOTION_VERIFICATION"
+        },
+        {
+          "environment_ref": "env_production",
+          "workspace_ref": "email_ws_production",
+          "sender_domain_ref": "email_domain_notify_production",
+          "message_stream_ref": "email_stream_production_customer_transactional",
+          "provider_template_alias": "production.support-contact-acknowledged-v1",
+          "from_address": "help@notify.production.taxat.example",
+          "reply_to_address": "support@notify.production.taxat.example",
+          "callback_ref": "email_webhook_customer_transactional_production",
+          "deployment_state": "READY_FOR_CONTROLLED_ROLLOUT"
+        }
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L666[context-preserving_help_submissions]",
+          "rationale": "Support-contact acknowledgements must preserve contextual case routing."
+        }
+      ],
+      "notes": [
+        "This acknowledgement is customer-safe and channel-bounded.",
+        "Deployment bindings stay environment-scoped and callback-scoped."
+      ]
+    }
+  ],
+  "webhook_contract_ref": "config/notifications/email_webhook_endpoint_contract.json",
+  "delivery_event_mapping_ref": "config/notifications/email_delivery_event_mapping.json",
+  "typed_gaps": [
+    "shared_operating_contract_0038_to_0045.md was absent at execution time, so this inventory grounded itself directly in the named contracts and current provider documentation."
+  ],
+  "notes": [
+    "Provider templates are server-scoped aliases derived from one authoritative product-owned catalog.",
+    "Sandbox and preproduction bindings are safe for render rehearsal and promotion verification without sending to uncontrolled live recipients."
+  ],
+  "last_verified_at": "2026-04-18"
+}

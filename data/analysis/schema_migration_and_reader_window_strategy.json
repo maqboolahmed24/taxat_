@@ -1,0 +1,186 @@
+{
+  "chronology_steps": [
+    {
+      "goal": "Introduce new writer and reader shape without breaking the prior reader window.",
+      "phase_id": "EXPAND",
+      "reader_window_expectation": "reader window remains open to the prior protected bundle set",
+      "required_artifacts": [
+        "SchemaMigrationLedger",
+        "schema_reader_window_contract",
+        "schema_bundle_compatibility_gate_contract"
+      ],
+      "rollback_posture": "ROLLBACK_ALLOWED while the prior reader window still validates",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L72[3._Schema_and_datastore_migration_rules]",
+        "Algorithm/replay_and_reproducibility_contract.md::L668[Schema-reader_incompatibility]"
+      ],
+      "writer_posture": "new writers may emit the expanded shape while older readers remain supported"
+    },
+    {
+      "goal": "Backfill or transform durable truth idempotently while preserving frozen historical references.",
+      "phase_id": "MIGRATE_BACKFILL",
+      "reader_window_expectation": "in-flight and sealed manifests continue on their frozen basis",
+      "required_artifacts": [
+        "SchemaMigrationLedger.backfill_execution_contract",
+        "ReleaseVerificationManifest",
+        "RecoveryCheckpoint"
+      ],
+      "rollback_posture": "ROLLBACK_ALLOWED only if backfill remains reversible or compatibility-preserving",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L72[3._Schema_and_datastore_migration_rules]",
+        "Algorithm/manifest_and_config_freeze_contract.md::L440[5.5_Freeze_timing_rules]",
+        "Algorithm/manifest_and_config_freeze_contract.md::L505[5.7_Parent_child_manifest_semantics]"
+      ],
+      "writer_posture": "both expanded and legacy-readable state may coexist"
+    },
+    {
+      "goal": "Prove reader-window, replay, restore, migration, and client-window safety under the shared compatibility gate.",
+      "phase_id": "VERIFY",
+      "reader_window_expectation": "historical-manifest and replay or restore readability remain explicitly green",
+      "required_artifacts": [
+        "VerificationSuiteResult",
+        "GateAdmissibilityRecord",
+        "ClientCompatibilityMatrix",
+        "RestoreDrillResult"
+      ],
+      "rollback_posture": "ROLLBACK_ALLOWED only if the compatibility gate says the rollback window is still open",
+      "source_refs": [
+        "Algorithm/verification_and_release_gates.md::L108[2._Release_gate]",
+        "Algorithm/verification_and_release_gates.md::L160[Gate_admissibility_rules]",
+        "Algorithm/replay_and_reproducibility_contract.md::L227[Exact_replay_preconditions]"
+      ],
+      "writer_posture": "candidate build and schema bundle are judged together"
+    },
+    {
+      "goal": "Remove legacy shape only after no protected in-flight, replay, restore, or client window depends on it.",
+      "phase_id": "CONTRACT",
+      "reader_window_expectation": "compatibility window closes only after protected historical and operational readers are safe",
+      "required_artifacts": [
+        "SchemaMigrationLedger",
+        "schema_reader_window_contract",
+        "DeploymentRelease"
+      ],
+      "rollback_posture": "FAIL_FORWARD_ONLY once the compatibility window closes or destructive change begins",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L72[3._Schema_and_datastore_migration_rules]",
+        "Algorithm/deployment_and_resilience_contract.md::L177[6._Rollout_rollback_and_fail-forward_posture]",
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L127[Rollback_and_fail-forward_law]"
+      ],
+      "writer_posture": "old readers and fields are removed in a controlled contract phase"
+    },
+    {
+      "goal": "If rollback safety ended, prove the compensating release plan and preserve prior truth instead of rewriting history.",
+      "phase_id": "FAIL_FORWARD_OR_SETTLE",
+      "reader_window_expectation": "closed windows stay closed; historical reads rely on preserved frozen basis",
+      "required_artifacts": [
+        "DeploymentRelease.rollback_boundary_state",
+        "DeploymentRelease.compensating_release_id_or_null",
+        "DeploymentRelease.fail_forward_owner_ref_or_null"
+      ],
+      "rollback_posture": "FAILED_FORWARD or FAIL_FORWARD_ONLY with explicit owner and runbook lineage",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L177[6._Rollout_rollback_and_fail-forward_posture]",
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L127[Rollback_and_fail-forward_law]"
+      ],
+      "writer_posture": "forward fix or compensating release owns correction"
+    }
+  ],
+  "continuation_and_reclaim_rules": [
+    {
+      "rule": "Nightly duplicate suppression and batch allocation operate on a frozen envelope so migration or client-window drift does not silently reuse stale attempt identity.",
+      "rule_id": "nightly_duplicate_suppression_respects_frozen_envelope",
+      "source_refs": [
+        "Algorithm/nightly_autopilot_contract.md::L48[2._Trigger_contract_and_frozen_operating_window]",
+        "Algorithm/nightly_autopilot_contract.md::L147[4._Portfolio_selection_and_eligibility_contract]"
+      ]
+    },
+    {
+      "rule": "Crash recovery and reclaim may transfer ownership but may not collapse recovery into a fresh run with different basis, schema, or client-window assumptions.",
+      "rule_id": "reclaim_never_collapses_recovery_into_fresh_execution",
+      "source_refs": [
+        "Algorithm/nightly_autopilot_contract.md::L602[10._Crash_recovery_and_stale-checkpoint_resolution]",
+        "Algorithm/nightly_selection_disposition_and_batch_isolation_contract.md::L69[Recovery-reclaim_law]"
+      ]
+    },
+    {
+      "rule": "Branch selection and manifest claim identity keep request lineage, nightly window keys, and inheritance basis frozen across continuation or replay.",
+      "rule_id": "manifest_branch_identity_freezes_request_lineage",
+      "source_refs": [
+        "Algorithm/nightly_selection_disposition_and_batch_isolation_contract.md::L17[Identity_law]",
+        "Algorithm/nightly_selection_disposition_and_batch_isolation_contract.md::L35[Selection_law]"
+      ]
+    },
+    {
+      "rule": "Nightly global stop conditions may halt batch progression before new control-plane work begins when release admissibility or authority safety is compromised.",
+      "rule_id": "batch_global_stop_conditions_prevent_invalid_promotion_inputs",
+      "source_refs": [
+        "Algorithm/nightly_autopilot_contract.md::L682[11._Global_stop_conditions_and_partial-failure_handling]",
+        "Algorithm/nightly_autopilot_contract.md::L394[6._Per-client_and_per-stage_unattended_policy_matrix]"
+      ]
+    }
+  ],
+  "contract_version": "2026-04-18",
+  "historical_manifest_guards": [
+    {
+      "rule": "Sealed or in-progress manifests continue under their frozen schema bundle and config refs even when the default live bundle advances.",
+      "rule_id": "sealed_and_inflight_manifests_keep_frozen_schema_and_config",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L72[3._Schema_and_datastore_migration_rules]",
+        "Algorithm/manifest_and_config_freeze_contract.md::L78[5.3_RunManifest_required_field_groups]"
+      ]
+    },
+    {
+      "rule": "Historical replay uses preserved post-seal basis artifacts rather than recollecting live state.",
+      "rule_id": "historical_post_seal_basis_remains_explicit",
+      "source_refs": [
+        "Algorithm/replay_and_reproducibility_contract.md::L329[Historical_post-seal_basis]",
+        "Algorithm/replay_and_reproducibility_contract.md::L738[Implementation_shape]"
+      ]
+    },
+    {
+      "rule": "Unreadable historical basis or schema-reader incompatibility fails closed instead of silently substituting a different reader.",
+      "rule_id": "schema_reader_incompatibility_fails_closed",
+      "source_refs": [
+        "Algorithm/replay_and_reproducibility_contract.md::L656[Corruption_and_incomplete_basis_handling]",
+        "Algorithm/verification_and_release_gates.md::L108[2._Release_gate]"
+      ]
+    },
+    {
+      "rule": "Dropped columns, destructive rewrites, or meaning changes cannot begin while manifests that rely on the old shape may still replay or reconcile.",
+      "rule_id": "destructive_change_waits_for_historical_safety",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L72[3._Schema_and_datastore_migration_rules]",
+        "Algorithm/replay_and_reproducibility_contract.md::L797[Non-negotiable_prohibitions]"
+      ]
+    },
+    {
+      "rule": "Release evidence carries the full reader-window and compatibility posture, not just the static writer bundle hash.",
+      "rule_id": "release_evidence_carries_reader_window_not_just_writer_hash",
+      "source_refs": [
+        "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]",
+        "Algorithm/verification_and_release_gates.md::L108[2._Release_gate]"
+      ]
+    },
+    {
+      "rule": "Restore and reopen safety are judged against the same protected reader-window and limitation posture as forward release promotion.",
+      "rule_id": "restore_reads_same_protected_bundle_posture",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L133[5._Backup_restore_and_DR_rules]",
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[Restore_privacy_reconciliation_law]"
+      ]
+    }
+  ],
+  "selected_strategy_id": "manifest_centered_candidate_bound_release_doctrine",
+  "summary": {
+    "chronology_step_count": 5,
+    "continuation_rule_count": 4,
+    "historical_guard_count": 6
+  },
+  "typed_gaps_or_deferred_decisions": [
+    {
+      "id": "migration_executor_product_deferred",
+      "summary": "ADR-009 fixes migration chronology and evidence boundaries, but not the final migration-runner product or orchestration engine.",
+      "type": "DEFERRED_DECISION"
+    }
+  ]
+}

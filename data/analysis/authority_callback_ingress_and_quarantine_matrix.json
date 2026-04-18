@@ -1,0 +1,98 @@
+{
+  "case_count": 7,
+  "cases": [
+    {
+      "canonical_receipt_rule": "Creates first canonical ingress receipt for this delivery.",
+      "case_id": "STRONGLY_BOUND_FIRST_SEEN",
+      "correlation_posture": "BOUND",
+      "gateway_action": "Authenticate, dedupe, checkpoint, and pass to normalization.",
+      "mutation_permission": "Allowed only after normalization and control-plane merge.",
+      "quarantine_owner": null,
+      "receipt_state": "NORMALIZED",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L792[9.9A_Inbound_authority_ingress_protocol]",
+        "Algorithm/modules.md::L1939[CHECKPOINT_AUTHORITY_INGRESS_...]"
+      ]
+    },
+    {
+      "canonical_receipt_rule": "Must point at the existing canonical ingress receipt.",
+      "case_id": "DUPLICATE_DELIVERY_SUPPRESSED",
+      "correlation_posture": "BOUND",
+      "gateway_action": "Persist duplicate receipt with canonical_ingress_receipt_ref and skip second normalization.",
+      "mutation_permission": "None.",
+      "quarantine_owner": null,
+      "receipt_state": "DUPLICATE_SUPPRESSED",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L792[9.9A_Inbound_authority_ingress_protocol]",
+        "Algorithm/authority_interaction_protocol.md::L952[9.12_Duplicate_and_pending-state_rules]"
+      ]
+    },
+    {
+      "canonical_receipt_rule": "May create a receipt, but cannot create a normalized response.",
+      "case_id": "BOUND_WITH_AUTHORITY_REFERENCE_ONLY",
+      "correlation_posture": "BOUND_WITH_AUTHORITY_REFERENCE_ONLY",
+      "gateway_action": "Persist proof and quarantine for investigation; do not normalize to legal mutation.",
+      "mutation_permission": "None until stronger lineage proof exists.",
+      "quarantine_owner": "RECONCILIATION_OWNER_REQUIRED",
+      "receipt_state": "QUARANTINED",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L792[9.9A_Inbound_authority_ingress_protocol]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L99[5._Service-to-service_and_network_hardening]"
+      ]
+    },
+    {
+      "canonical_receipt_rule": "No canonical settlement mutation until ambiguity is resolved.",
+      "case_id": "AMBIGUOUS_CORRELATION",
+      "correlation_posture": "AMBIGUOUS",
+      "gateway_action": "Checkpoint the payload and block mutation pending operator or reconciliation investigation.",
+      "mutation_permission": "None.",
+      "quarantine_owner": "RECONCILIATION_OWNER_REQUIRED",
+      "receipt_state": "QUARANTINED",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L792[9.9A_Inbound_authority_ingress_protocol]",
+        "Algorithm/authority_interaction_protocol.md::L998[9.13_Reconciliation_protocol]"
+      ]
+    },
+    {
+      "canonical_receipt_rule": "Cannot become a settlement witness without later strong binding evidence.",
+      "case_id": "UNBOUND_DELIVERY",
+      "correlation_posture": "UNBOUND",
+      "gateway_action": "Persist authenticated ingress evidence and route to quarantine.",
+      "mutation_permission": "None.",
+      "quarantine_owner": "RECONCILIATION_OWNER_REQUIRED",
+      "receipt_state": "QUARANTINED",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L792[9.9A_Inbound_authority_ingress_protocol]",
+        "Algorithm/authority_truth_and_internal_projection_separation_contract.md::L55[Required_Outcomes]"
+      ]
+    },
+    {
+      "canonical_receipt_rule": "No canonical receipt for settlement purposes.",
+      "case_id": "PROVIDER_AUTHENTICATION_FAILURE",
+      "correlation_posture": "CHANNEL_UNTRUSTED",
+      "gateway_action": "Reject mutation, emit high-severity audit evidence, and preserve transport investigation details.",
+      "mutation_permission": "None.",
+      "quarantine_owner": "SECURITY_AND_RECONCILIATION_OWNERS",
+      "receipt_state": "QUARANTINED",
+      "source_refs": [
+        "Algorithm/security_and_runtime_hardening_contract.md::L99[5._Service-to-service_and_network_hardening]",
+        "Algorithm/authority_interaction_protocol.md::L1175[9.15_Audit_invariants]"
+      ]
+    },
+    {
+      "canonical_receipt_rule": "Each delivery gets its own receipt; active_response_id changes only through merge control.",
+      "case_id": "REORDERED_OR_SUPERSEDING_PENDING_OBSERVATION",
+      "correlation_posture": "BOUND_BUT_SUPERSEDING",
+      "gateway_action": "Checkpoint and normalize, then route to merge or reconciliation rather than direct overwrite.",
+      "mutation_permission": "Only through reconciliation or admissible merge rules.",
+      "quarantine_owner": "RECONCILIATION_CONTROL",
+      "receipt_state": "NORMALIZED_RECONCILIATION_REQUIRED",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L756[9.9B_Multi-source_response_merge_protocol]",
+        "Algorithm/authority_interaction_protocol.md::L998[9.13_Reconciliation_protocol]",
+        "Algorithm/modules.md::L2004[MERGE_AUTHORITY_RESPONSE_OBSERVATION_...]"
+      ]
+    }
+  ],
+  "generated_at": "2026-04-17"
+}

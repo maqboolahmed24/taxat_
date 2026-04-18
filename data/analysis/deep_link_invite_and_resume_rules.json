@@ -1,0 +1,123 @@
+{
+  "decision_id": "ADR-003",
+  "rules": [
+    {
+      "applicable_channels": [
+        "BROWSER_LIMITED_ENTRY"
+      ],
+      "fallback_or_recovery": "Keep the same object context reserved locally, then resume to the same route after upgrade or external auth handoff.",
+      "label": "Invite entry upgrades before sensitive mutation",
+      "requirement": "Invite-link or emailed deep-link entry into the client portal upgrades into a normal authenticated session before upload, acknowledgement, or sign-off actions are accepted.",
+      "rule_id": "invite_upgrade_before_sensitive_mutation",
+      "source_refs": [
+        "Algorithm/customer_client_portal_experience_contract.md::L370[Onboarding_flow]",
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]"
+      ]
+    },
+    {
+      "applicable_channels": [
+        "BROWSER",
+        "NATIVE_MACOS"
+      ],
+      "fallback_or_recovery": "If the requested target exceeds current scope, route to the closest surviving lawful target with a typed explanation.",
+      "label": "Deep-link scope narrows and never widens",
+      "requirement": "Every authenticated session resolves one principal class, client scope, delegation basis, and masking posture before route composition, and deep links narrow into that bound scope rather than widening it.",
+      "rule_id": "deep_link_scope_narrows_never_widens",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+        "Algorithm/customer_client_portal_experience_contract.md::L479[Read-model_and_API_translation_requirements]"
+      ]
+    },
+    {
+      "applicable_channels": [
+        "BROWSER"
+      ],
+      "fallback_or_recovery": "Use the explicit fallback target and reason when the original focus no longer survives.",
+      "label": "Route context preserves focus and return path",
+      "requirement": "Contextual deep-link focus, focused artifact bucket or subject, restoration disposition, return focus anchor, and fallback target are serialized in `route_context` rather than inferred locally.",
+      "rule_id": "route_context_preserves_focus_and_return_path",
+      "source_refs": [
+        "Algorithm/customer_client_portal_experience_contract.md::L595[route_context_deep_link_focus_and_return_path]",
+        "Algorithm/customer_client_portal_experience_contract.md::L701[Playwright_validation_minimum]"
+      ]
+    },
+    {
+      "applicable_channels": [
+        "BROWSER",
+        "NATIVE_MACOS"
+      ],
+      "fallback_or_recovery": "Return posture stays pending until a governed read model confirms settlement.",
+      "label": "External identity or authority handoff returns to the same object",
+      "requirement": "Identity- or authority-owned checkpoints may hand off to the system browser or auth session, but the product preserves the same request, approval, or work-item context locally and restores the user to the same focused item afterward.",
+      "rule_id": "external_handoff_returns_to_same_object",
+      "source_refs": [
+        "Algorithm/customer_client_portal_experience_contract.md::L399[Artifact_print_and_browser-handoff_rules]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L372[7._Authentication_and_session_strategy]"
+      ]
+    },
+    {
+      "applicable_channels": [
+        "BROWSER",
+        "NATIVE_MACOS"
+      ],
+      "fallback_or_recovery": "Surface explicit pending or recovery posture instead of optimistic completion.",
+      "label": "Return from external handoff does not imply completion",
+      "requirement": "Completion language and final receipt posture stay blocked until `ClientPortalWorkspace`, `ClientApprovalPack`, or the governing parent read model confirms settlement.",
+      "rule_id": "return_does_not_imply_completion",
+      "source_refs": [
+        "Algorithm/customer_client_portal_experience_contract.md::L399[Artifact_print_and_browser-handoff_rules]",
+        "Algorithm/customer_client_portal_experience_contract.md::L340[Approval_and_sign-off_flow]"
+      ]
+    },
+    {
+      "applicable_channels": [
+        "BROWSER",
+        "NATIVE_MACOS"
+      ],
+      "fallback_or_recovery": "Return typed `REBASE_REQUIRED`, `REVOKED`, or other invalidation posture with replacement refs where applicable.",
+      "label": "Resume tokens bind to session, tenant, principal class, and access binding",
+      "requirement": "Manifest and workspace resume tokens bind to route lineage, session or access-binding context, and fail closed on wrong session, tenant, or principal class.",
+      "rule_id": "resume_tokens_bind_to_session_tenant_and_access",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L646[7._Stream_and_reconnect_rules]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L390[8._Persistence_model]"
+      ]
+    },
+    {
+      "applicable_channels": [
+        "BROWSER",
+        "BROWSER_OR_MOBILE_TRANSFER"
+      ],
+      "fallback_or_recovery": "Request rebases preserve the same upload lineage but may require explicit reconfirmation or rebind-required posture.",
+      "label": "Upload-session binding is frozen and explicit",
+      "requirement": "Upload-session allocation freezes tenant, client, request, and request-version identity so resumed or cross-device transfer cannot silently drift into the wrong request lane.",
+      "rule_id": "upload_session_binding_is_frozen_and_explicit",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L184[2.2_Customer_Client_portal_and_upload-session_surfaces]",
+        "Algorithm/customer_client_portal_experience_contract.md::L293[Secure_document-upload_flow]"
+      ]
+    },
+    {
+      "applicable_channels": [
+        "NATIVE_MACOS"
+      ],
+      "fallback_or_recovery": "Force re-authentication and explicit focus restoration or invalidation posture when tenant switch, privilege drift, masking drift, or schema incompatibility broke continuity.",
+      "label": "Native restore requires valid local and server session state",
+      "requirement": "Native scene restoration only proceeds when local cache, resume metadata, and the server session remain valid together.",
+      "rule_id": "native_restore_requires_valid_server_session",
+      "source_refs": [
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L372[7._Authentication_and_session_strategy]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L473[11._Security_and_runtime_posture_for_the_desktop_client]"
+      ]
+    }
+  ],
+  "summary": {
+    "deep_link_restore_focus_order": [
+      "Remap to the closest surviving focus anchor within the same governed object.",
+      "Fall back to the owning object summary on the same governed object.",
+      "Use the serialized parent return target if the original focus anchor no longer exists.",
+      "Use the narrowest surviving list or queue target with an explicit recovery explanation."
+    ],
+    "rule_count": 8
+  }
+}

@@ -1,0 +1,313 @@
+{
+  "contract_version": "2026-04-18",
+  "rows": [
+    {
+      "artifact_id": "BuildArtifact",
+      "blocking_gates": [
+        "ARTIFACT_INTEGRITY_AND_NOTARIZATION",
+        "SECURITY"
+      ],
+      "candidate_binding": [
+        "build_artifact_ref",
+        "artifact_digest",
+        "candidate_identity_hash"
+      ],
+      "compatibility_binding": [],
+      "mixed_evidence_failure_mode": "A build digest or notarization result from another candidate is inadmissible.",
+      "produced_from": "build, signing, provenance, and desktop notarization pipeline",
+      "promotion_required": true,
+      "promotion_stage": "BUILD_AND_ATTEST",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L44[2._Promotion_pipeline]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L161[8._Operational_security_release_gates]"
+      ]
+    },
+    {
+      "artifact_id": "SchemaBundleCompatibilityGateContract",
+      "blocking_gates": [
+        "SCHEMA_COMPATIBILITY",
+        "MIGRATION_VERIFICATION",
+        "OPERATOR_CLIENT"
+      ],
+      "candidate_binding": [
+        "candidate_identity_hash",
+        "schema_bundle_hash",
+        "migration_plan_ref_or_null",
+        "supported_client_window_ref_or_null"
+      ],
+      "compatibility_binding": [
+        "compatibility_gate_hash"
+      ],
+      "mixed_evidence_failure_mode": "A changed client window, historical-manifest guard, or rollback posture requires a new compatibility gate hash.",
+      "produced_from": "reader-window and migration compatibility evaluation",
+      "promotion_required": true,
+      "promotion_stage": "SCHEMA_COMPATIBILITY",
+      "source_refs": [
+        "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]",
+        "Algorithm/deployment_and_resilience_contract.md::L72[3._Schema_and_datastore_migration_rules]",
+        "Algorithm/verification_and_release_gates.md::L108[2._Release_gate]"
+      ]
+    },
+    {
+      "artifact_id": "SchemaMigrationLedger",
+      "blocking_gates": [
+        "MIGRATION_VERIFICATION"
+      ],
+      "candidate_binding": [
+        "schema_bundle_hash",
+        "migration_plan_ref_or_null",
+        "candidate_identity_hash"
+      ],
+      "compatibility_binding": [
+        "compatibility_gate_hash"
+      ],
+      "mixed_evidence_failure_mode": "Backfill or contract results from a different chronology cannot be reused under the same candidate hash.",
+      "produced_from": "expand, backfill, verify, and contract migration execution",
+      "promotion_required": true,
+      "promotion_stage": "MIGRATION_VERIFICATION",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L72[3._Schema_and_datastore_migration_rules]",
+        "Algorithm/verification_and_release_gates.md::L271[4._Evidence_required_for_promotion]"
+      ]
+    },
+    {
+      "artifact_id": "VerificationSuiteResult",
+      "blocking_gates": [
+        "SCHEMA_COMPATIBILITY",
+        "DETERMINISTIC_AND_STATE_MACHINE",
+        "NORTHBOUND_API",
+        "AUTHORITY_SANDBOX",
+        "OPERATOR_CLIENT",
+        "SECURITY",
+        "PERFORMANCE_CANARY",
+        "RESTORE_DRILL",
+        "MIGRATION_VERIFICATION"
+      ],
+      "candidate_binding": [
+        "candidate_identity_hash",
+        "build_artifact_ref",
+        "schema_bundle_hash"
+      ],
+      "compatibility_binding": [
+        "compatibility_gate_hash_or_null"
+      ],
+      "mixed_evidence_failure_mode": "Mixed builds, mixed schema bundles, or mixed client windows fail admissibility.",
+      "produced_from": "blocking verification suites",
+      "promotion_required": true,
+      "promotion_stage": "BLOCKING_SUITE_EXECUTION",
+      "source_refs": [
+        "Algorithm/verification_and_release_gates.md::L160[Gate_admissibility_rules]",
+        "Algorithm/verification_and_release_gates.md::L271[4._Evidence_required_for_promotion]"
+      ]
+    },
+    {
+      "artifact_id": "GateAdmissibilityRecord",
+      "blocking_gates": [
+        "SUITE_ADMISSIBILITY"
+      ],
+      "candidate_binding": [
+        "candidate_identity_hash",
+        "build_artifact_ref",
+        "supported_client_window_ref_or_null"
+      ],
+      "compatibility_binding": [
+        "compatibility_gate_hash_or_null"
+      ],
+      "mixed_evidence_failure_mode": "A green suite result without same-scope admissibility cannot satisfy a blocking gate.",
+      "produced_from": "post-suite admissibility evaluation",
+      "promotion_required": true,
+      "promotion_stage": "SUITE_ADMISSIBILITY",
+      "source_refs": [
+        "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L78[3._Admissibility_boundary]",
+        "Algorithm/verification_and_release_gates.md::L160[Gate_admissibility_rules]"
+      ]
+    },
+    {
+      "artifact_id": "DeterministicGoldenPack",
+      "blocking_gates": [
+        "DETERMINISTIC_AND_STATE_MACHINE"
+      ],
+      "candidate_binding": [
+        "candidate_identity_hash",
+        "artifact_digest"
+      ],
+      "compatibility_binding": [],
+      "mixed_evidence_failure_mode": "Deterministic green posture cannot be assembled without the exact frozen golden-pack ref.",
+      "produced_from": "deterministic and state-machine review pack",
+      "promotion_required": true,
+      "promotion_stage": "DETERMINISTIC_AND_STATE_MACHINE",
+      "source_refs": [
+        "Algorithm/verification_and_release_gates.md::L108[2._Release_gate]",
+        "Algorithm/verification_and_release_gates.md::L317[4A._Replayability_verification_additions]"
+      ]
+    },
+    {
+      "artifact_id": "AuthoritySandboxCoverageContract",
+      "blocking_gates": [
+        "AUTHORITY_SANDBOX"
+      ],
+      "candidate_binding": [
+        "candidate_identity_hash",
+        "enabled_provider_profile_refs[]"
+      ],
+      "compatibility_binding": [],
+      "mixed_evidence_failure_mode": "Coverage from another provider-profile set cannot satisfy the active candidate.",
+      "produced_from": "authority sandbox and controlled-edge breadth evaluation",
+      "promotion_required": true,
+      "promotion_stage": "AUTHORITY_SANDBOX",
+      "source_refs": [
+        "Algorithm/verification_and_release_gates.md::L160[Gate_admissibility_rules]",
+        "Algorithm/verification_and_release_gates.md::L271[4._Evidence_required_for_promotion]"
+      ]
+    },
+    {
+      "artifact_id": "ClientCompatibilityMatrix",
+      "blocking_gates": [
+        "OPERATOR_CLIENT"
+      ],
+      "candidate_binding": [
+        "candidate_identity_hash",
+        "supported_client_window_ref_or_null",
+        "build_artifact_ref"
+      ],
+      "compatibility_binding": [
+        "compatibility_gate_hash"
+      ],
+      "mixed_evidence_failure_mode": "Green client compatibility evidence cannot outlive a blocked native client window or bind a different window.",
+      "produced_from": "browser and native client window compatibility evaluation",
+      "promotion_required": true,
+      "promotion_stage": "OPERATOR_CLIENT",
+      "source_refs": [
+        "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]",
+        "Algorithm/verification_and_release_gates.md::L271[4._Evidence_required_for_promotion]",
+        "Algorithm/deployment_and_resilience_contract.md::L72[3._Schema_and_datastore_migration_rules]"
+      ]
+    },
+    {
+      "artifact_id": "CanaryHealthSummary",
+      "blocking_gates": [
+        "PERFORMANCE_CANARY"
+      ],
+      "candidate_binding": [
+        "candidate_identity_hash",
+        "artifact_digest"
+      ],
+      "compatibility_binding": [
+        "compatibility_gate_hash_or_null"
+      ],
+      "mixed_evidence_failure_mode": "Canary evidence from another candidate or another compatibility window cannot be stitched into the judged release.",
+      "produced_from": "bounded pre-production or canary slice evaluation",
+      "promotion_required": true,
+      "promotion_stage": "CANARY",
+      "source_refs": [
+        "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]",
+        "Algorithm/deployment_and_resilience_contract.md::L44[2._Promotion_pipeline]"
+      ]
+    },
+    {
+      "artifact_id": "RecoveryCheckpoint",
+      "blocking_gates": [
+        "RESTORE_DRILL"
+      ],
+      "candidate_binding": [
+        "candidate_identity_hash",
+        "supported_client_window_ref_or_null"
+      ],
+      "compatibility_binding": [
+        "compatibility_gate_hash"
+      ],
+      "mixed_evidence_failure_mode": "A restore checkpoint with unresolved reopen blockers cannot be promoted as successful restore evidence.",
+      "produced_from": "checkpoint validation against recovery governance",
+      "promotion_required": true,
+      "promotion_stage": "RESTORE_DRILL",
+      "source_refs": [
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L44[Recovery_checkpoint_law]",
+        "Algorithm/verification_and_release_gates.md::L160[Gate_admissibility_rules]"
+      ]
+    },
+    {
+      "artifact_id": "RestoreDrillResult",
+      "blocking_gates": [
+        "RESTORE_DRILL"
+      ],
+      "candidate_binding": [
+        "candidate_identity_hash",
+        "restore_drill_ref",
+        "restore_checkpoint_ref"
+      ],
+      "compatibility_binding": [
+        "compatibility_gate_hash"
+      ],
+      "mixed_evidence_failure_mode": "Restore evidence cannot swap in another drill or checkpoint lineage during admissibility evaluation.",
+      "produced_from": "candidate-bound restore rehearsal",
+      "promotion_required": true,
+      "promotion_stage": "RESTORE_DRILL",
+      "source_refs": [
+        "Algorithm/verification_and_release_gates.md::L160[Gate_admissibility_rules]",
+        "Algorithm/deployment_and_resilience_contract.md::L133[5._Backup_restore_and_DR_rules]",
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[Restore_privacy_reconciliation_law]"
+      ]
+    },
+    {
+      "artifact_id": "ReleaseVerificationManifest",
+      "blocking_gates": [
+        "ALL_BLOCKING_GATES"
+      ],
+      "candidate_binding": [
+        "candidate_identity_hash",
+        "schema_bundle_hash",
+        "config_bundle_hash",
+        "supported_client_window_ref_or_null"
+      ],
+      "compatibility_binding": [
+        "compatibility_gate_hash"
+      ],
+      "mixed_evidence_failure_mode": "Release truth cannot be inferred from CI or deploy logs once the manifest assembly contract exists.",
+      "produced_from": "deterministic manifest assembly contract over blocking gates",
+      "promotion_required": true,
+      "promotion_stage": "MANIFEST_ASSEMBLY",
+      "source_refs": [
+        "Algorithm/verification_and_release_gates.md::L108[2._Release_gate]",
+        "Algorithm/verification_and_release_gates.md::L271[4._Evidence_required_for_promotion]",
+        "Algorithm/deployment_and_resilience_contract.md::L44[2._Promotion_pipeline]"
+      ]
+    },
+    {
+      "artifact_id": "DeploymentRelease",
+      "blocking_gates": [
+        "DEPLOYMENT_RELEASE_DECISION"
+      ],
+      "candidate_binding": [
+        "candidate_identity_hash",
+        "build_artifact_ref",
+        "supported_client_window_ref_or_null"
+      ],
+      "compatibility_binding": [
+        "compatibility_gate_hash"
+      ],
+      "mixed_evidence_failure_mode": "Deployment records must retain the same candidate and compatibility boundary as the release manifest they promote.",
+      "produced_from": "promotion, rollback, and fail-forward governance",
+      "promotion_required": true,
+      "promotion_stage": "DEPLOY_AND_GOVERN",
+      "source_refs": [
+        "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]",
+        "Algorithm/deployment_and_resilience_contract.md::L177[6._Rollout_rollback_and_fail-forward_posture]",
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L127[Rollback_and_fail-forward_law]"
+      ]
+    }
+  ],
+  "selected_strategy_id": "manifest_centered_candidate_bound_release_doctrine",
+  "summary": {
+    "artifact_count": 13,
+    "compatibility_bound_artifact_count": 10,
+    "promotion_required_artifact_count": 13,
+    "restore_or_recovery_artifact_count": 3
+  },
+  "typed_gaps_or_deferred_decisions": [
+    {
+      "id": "deployment_vendor_and_rollout_percentage_deferred",
+      "summary": "ADR-009 fixes required evidence and decision posture, but not the final deployment vendor or rollout percentage policy.",
+      "type": "DEFERRED_DECISION"
+    }
+  ]
+}

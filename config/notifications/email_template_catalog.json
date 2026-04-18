@@ -1,0 +1,768 @@
+{
+  "schema_version": "1.0",
+  "catalog_id": "email_template_catalog",
+  "provider_selection": {
+    "provider_selection_status": "PROVIDER_DEFAULT_APPLIED",
+    "provider_family": "TRANSACTIONAL_EMAIL_DELIVERY",
+    "provider_vendor_adapter": "POSTMARK_COMPATIBLE_CONTROL_PLANE",
+    "provider_vendor_label": "Postmark-compatible transactional email provider",
+    "docs_urls": [
+      "https://postmarkapp.com/developer/api/overview",
+      "https://postmarkapp.com/developer/api/templates-api",
+      "https://postmarkapp.com/developer/user-guide/content/templates",
+      "https://postmarkapp.com/developer/user-guide/content/templates/mustachio-syntax",
+      "https://postmarkapp.com/developer/webhooks/webhooks-overview",
+      "https://postmarkapp.com/developer/webhooks/delivery-webhook",
+      "https://postmarkapp.com/developer/webhooks/bounce-webhook",
+      "https://postmarkapp.com/developer/webhooks/spam-complaint-webhook",
+      "https://postmarkapp.com/developer/webhooks/subscription-change-webhook",
+      "https://postmarkapp.com/developer/webhooks/open-webhook",
+      "https://postmarkapp.com/developer/webhooks/click-webhook",
+      "https://postmarkapp.com/developer/user-guide/tracking-opens/tracking-opens-per-email"
+    ],
+    "source_refs": [
+      {
+        "source_ref": "Algorithm/collaboration_workspace_contract.md::L1838[Customer_notifications]",
+        "rationale": "Only explicit customer-visible collaboration events may fan out into optional customer email."
+      },
+      {
+        "source_ref": "Algorithm/data_model.md::L195[WorkItemNotification]",
+        "rationale": "Notification routing, continuity, and customer-safe projection must remain explicit and typed."
+      },
+      {
+        "source_ref": "Algorithm/data_model.md::L2240[PortalHelpRequest]",
+        "rationale": "Contextual help acknowledgements must preserve route and case context instead of becoming free-form tickets."
+      },
+      {
+        "source_ref": "https://postmarkapp.com/developer/api/templates-api",
+        "rationale": "Current provider documentation exposes API-managed template aliases and server-scoped template records."
+      },
+      {
+        "source_ref": "https://postmarkapp.com/developer/webhooks/webhooks-overview",
+        "rationale": "Current provider webhook posture is configured per server and authenticated with HTTPS, Basic Auth, and custom headers."
+      }
+    ]
+  },
+  "policy_version": "1.0",
+  "generated_on": "2026-04-18",
+  "truth_boundary_statement": "External email delivery events remain transport or observability projections only. They may append internal notification evidence, suppression posture, retry posture, and counters, but they never mutate work-item truth, approval truth, portal-help lifecycle truth, or authority truth directly.",
+  "safe_merge_variable_definitions": [
+    {
+      "variable_ref": "notification_id",
+      "label": "Notification ID",
+      "privacy_class": "DELIVERY_CORRELATION",
+      "description": "Stable correlation key for internal delivery evidence and dedupe.",
+      "source_contract_ref": "Algorithm/data_model.md::L195[WorkItemNotification]"
+    },
+    {
+      "variable_ref": "item_id",
+      "label": "Item ID",
+      "privacy_class": "DELIVERY_CORRELATION",
+      "description": "Opaque object correlation ID; never rendered alone to the customer.",
+      "source_contract_ref": "Algorithm/data_model.md::L195[WorkItemNotification]"
+    },
+    {
+      "variable_ref": "item_title",
+      "label": "Item title",
+      "privacy_class": "CUSTOMER_SAFE_TEXT",
+      "description": "Customer-safe title from the aligned projection.",
+      "source_contract_ref": "Algorithm/customer_client_portal_experience_contract.md::L520[customer_safe_projection]"
+    },
+    {
+      "variable_ref": "item_period_label",
+      "label": "Period label",
+      "privacy_class": "CUSTOMER_SAFE_TEXT",
+      "description": "Customer-safe period or filing range label.",
+      "source_contract_ref": "Algorithm/customer_client_portal_experience_contract.md::L520[customer_safe_projection]"
+    },
+    {
+      "variable_ref": "item_reference_label",
+      "label": "Reference label",
+      "privacy_class": "CUSTOMER_SAFE_TEXT",
+      "description": "Plain-language case or request reference suitable for the portal.",
+      "source_contract_ref": "Algorithm/frontend_shell_and_interaction_law.md::L640[Emails_notifications_invite_links]"
+    },
+    {
+      "variable_ref": "customer_status_label",
+      "label": "Customer status",
+      "privacy_class": "CUSTOMER_SAFE_TEXT",
+      "description": "Literal customer-safe state label; no internal gate or escalation terms.",
+      "source_contract_ref": "Algorithm/collaboration_workspace_contract.md::L341[customer-visible_status_language]"
+    },
+    {
+      "variable_ref": "request_info_ref",
+      "label": "Request info ref",
+      "privacy_class": "DELIVERY_CORRELATION",
+      "description": "Opaque request-for-info reference used for focus routing and dedupe.",
+      "source_contract_ref": "Algorithm/data_model.md::L195[WorkItemNotification]"
+    },
+    {
+      "variable_ref": "request_info_summary",
+      "label": "Request info summary",
+      "privacy_class": "CUSTOMER_SAFE_TEXT",
+      "description": "Customer-safe summary of what is needed next.",
+      "source_contract_ref": "Algorithm/collaboration_workspace_contract.md::L1831[customer-visible_due_date_change]"
+    },
+    {
+      "variable_ref": "request_info_due_date_label",
+      "label": "Request info due date",
+      "privacy_class": "CUSTOMER_SAFE_TEXT",
+      "description": "Plain-language due date label when policy allows it to be shown.",
+      "source_contract_ref": "Algorithm/frontend_shell_and_interaction_law.md::L640[Emails_notifications_invite_links]"
+    },
+    {
+      "variable_ref": "staff_comment_preview",
+      "label": "Staff comment preview",
+      "privacy_class": "CUSTOMER_SAFE_TEXT",
+      "description": "Short customer-visible preview of the latest shared comment.",
+      "source_contract_ref": "Algorithm/collaboration_workspace_contract.md::L1847[new_staff_customer-visible_comment]"
+    },
+    {
+      "variable_ref": "customer_due_date_label",
+      "label": "Customer due date",
+      "privacy_class": "CUSTOMER_SAFE_TEXT",
+      "description": "Customer-safe due date string used when due date changes are notifyable.",
+      "source_contract_ref": "Algorithm/collaboration_workspace_contract.md::L1848[customer_due_date_creation_or_change]"
+    },
+    {
+      "variable_ref": "resolution_summary",
+      "label": "Resolution summary",
+      "privacy_class": "CUSTOMER_SAFE_TEXT",
+      "description": "Plain-language completion summary with no internal cause coding.",
+      "source_contract_ref": "Algorithm/collaboration_workspace_contract.md::L1849[item_resolved_or_closed]"
+    },
+    {
+      "variable_ref": "help_request_id",
+      "label": "Help request ID",
+      "privacy_class": "DELIVERY_CORRELATION",
+      "description": "Opaque contextual-help artifact reference.",
+      "source_contract_ref": "Algorithm/data_model.md::L2240[PortalHelpRequest]"
+    },
+    {
+      "variable_ref": "help_reason_label",
+      "label": "Help reason",
+      "privacy_class": "CUSTOMER_SAFE_TEXT",
+      "description": "Literal help-reason label carried from the request context.",
+      "source_contract_ref": "Algorithm/data_model.md::L2240[PortalHelpRequest]"
+    },
+    {
+      "variable_ref": "support_channel_label",
+      "label": "Support channel",
+      "privacy_class": "CUSTOMER_SAFE_TEXT",
+      "description": "Bounded support channel label for acknowledgement copy.",
+      "source_contract_ref": "Algorithm/customer_client_portal_experience_contract.md::L666[PortalHelpRequest]"
+    },
+    {
+      "variable_ref": "case_context_summary",
+      "label": "Case context summary",
+      "privacy_class": "CUSTOMER_SAFE_TEXT",
+      "description": "Short context-preserving summary so the customer need not restate the case.",
+      "source_contract_ref": "Algorithm/collaboration_workspace_contract.md::L359[help_handoff_case_context]"
+    },
+    {
+      "variable_ref": "detail_route_ref",
+      "label": "Detail route",
+      "privacy_class": "ROUTE_REF",
+      "description": "Exact lawful in-app destination route for follow-through.",
+      "source_contract_ref": "Algorithm/data_model.md::L195[WorkItemNotification]"
+    },
+    {
+      "variable_ref": "focus_anchor_ref",
+      "label": "Focus anchor",
+      "privacy_class": "FOCUS_ANCHOR_REF",
+      "description": "Exact customer-safe focus anchor for continuity.",
+      "source_contract_ref": "Algorithm/data_model.md::L195[WorkItemNotification]"
+    },
+    {
+      "variable_ref": "return_route_ref",
+      "label": "Return route",
+      "privacy_class": "ROUTE_REF",
+      "description": "Lawful parent return route when the notification is opened.",
+      "source_contract_ref": "Algorithm/data_model.md::L195[WorkItemNotification]"
+    },
+    {
+      "variable_ref": "return_focus_anchor_ref",
+      "label": "Return focus anchor",
+      "privacy_class": "FOCUS_ANCHOR_REF",
+      "description": "Parent return focus anchor carried by continuity contracts.",
+      "source_contract_ref": "Algorithm/data_model.md::L195[WorkItemNotification]"
+    },
+    {
+      "variable_ref": "fallback_route_ref",
+      "label": "Fallback route",
+      "privacy_class": "ROUTE_REF",
+      "description": "Safe browser fallback route when the original detail route cannot reopen.",
+      "source_contract_ref": "Algorithm/data_model.md::L195[WorkItemNotification]"
+    },
+    {
+      "variable_ref": "fallback_focus_anchor_ref",
+      "label": "Fallback focus anchor",
+      "privacy_class": "FOCUS_ANCHOR_REF",
+      "description": "Focus target paired with the safe fallback route.",
+      "source_contract_ref": "Algorithm/data_model.md::L195[WorkItemNotification]"
+    }
+  ],
+  "template_records": [
+    {
+      "template_ref": "email_template_request_info_created",
+      "template_alias": "customer-request-info-created-v1",
+      "label": "New request for information",
+      "notification_family": "REQUEST_INFO_CREATED",
+      "allowed_trigger_events": [
+        "CustomerInfoRequested"
+      ],
+      "visibility_class": "CUSTOMER_VISIBLE",
+      "customer_safe_projection_required": true,
+      "localization_posture": "EN_GB_ONLY",
+      "sender_stream_ref": "email_stream_customer_transactional",
+      "sender_identity_profile_ref": "customer_transactional_noreply",
+      "subject_template": "Action needed for {{ item_title }}",
+      "preheader_template": "A new request for information is ready in your Taxat portal.",
+      "headline_template": "We need a little more information",
+      "body_template_paragraphs": [
+        "We've added a request for information to your case for {{ item_title }}.",
+        "Please review {{ request_info_summary }} and reply in the portal by {{ request_info_due_date_label }}."
+      ],
+      "cta_label_template": "Open request",
+      "cta_route_template": "{{ detail_route_ref }}",
+      "footer_template_paragraphs": [
+        "Need support? Use Help in the portal and we'll keep the same case context."
+      ],
+      "allowed_merge_variables": [
+        "notification_id",
+        "item_id",
+        "item_title",
+        "request_info_ref",
+        "request_info_summary",
+        "request_info_due_date_label",
+        "detail_route_ref",
+        "focus_anchor_ref",
+        "return_route_ref",
+        "return_focus_anchor_ref",
+        "fallback_route_ref",
+        "fallback_focus_anchor_ref"
+      ],
+      "required_merge_variables": [
+        "notification_id",
+        "item_id",
+        "item_title",
+        "request_info_ref",
+        "request_info_summary",
+        "request_info_due_date_label",
+        "detail_route_ref"
+      ],
+      "fallback_rules": [
+        "If any required merge variable is missing, fail configuration and do not queue send.",
+        "Do not substitute internal notes, gate language, or assignment labels when request-for-info summary is missing."
+      ],
+      "continuity": {
+        "shell_family": "CLIENT_PORTAL_SHELL",
+        "object_anchor_ref_template": "work-item/{{ item_id }}",
+        "target_route_ref_template": "{{ detail_route_ref }}",
+        "focus_anchor_ref_template": "{{ focus_anchor_ref }}",
+        "return_route_ref_template": "{{ return_route_ref }}",
+        "return_focus_anchor_ref_template": "{{ return_focus_anchor_ref }}",
+        "fallback_route_ref_template": "{{ fallback_route_ref }}",
+        "fallback_focus_anchor_ref_template": "{{ fallback_focus_anchor_ref }}"
+      },
+      "provider_tracking_defaults": {
+        "track_opens": false,
+        "track_links": "None"
+      },
+      "sample_render_model": {
+        "notification_id": "notif_ri_001",
+        "item_id": "wi_2025_26_001",
+        "item_title": "2025-26 Self Assessment filing",
+        "item_period_label": "2025 to 2026",
+        "item_reference_label": "Request SA-001",
+        "customer_status_label": "Action required",
+        "request_info_ref": "rfi_2025_26_001",
+        "request_info_summary": "Please confirm your freelance income and upload the missing invoice.",
+        "request_info_due_date_label": "24 Apr 2026",
+        "detail_route_ref": "/portal/requests/wi_2025_26_001",
+        "focus_anchor_ref": "request-info-rfi_2025_26_001",
+        "return_route_ref": "/portal",
+        "return_focus_anchor_ref": "home-primary-task",
+        "fallback_route_ref": "/portal",
+        "fallback_focus_anchor_ref": "home-primary-task"
+      },
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/collaboration_workspace_contract.md::L1846[new_request-for-info]",
+          "rationale": "New request-for-info is a notifyable customer event family."
+        }
+      ],
+      "notes": [
+        "Customer-safe projection fields only; no internal actor or gate context."
+      ]
+    },
+    {
+      "template_ref": "email_template_staff_customer_comment_created",
+      "template_alias": "staff-customer-comment-created-v1",
+      "label": "New staff comment shared with customer",
+      "notification_family": "STAFF_CUSTOMER_COMMENT_CREATED",
+      "allowed_trigger_events": [
+        "CustomerCommentAdded"
+      ],
+      "visibility_class": "CUSTOMER_VISIBLE",
+      "customer_safe_projection_required": true,
+      "localization_posture": "EN_GB_ONLY",
+      "sender_stream_ref": "email_stream_customer_transactional",
+      "sender_identity_profile_ref": "customer_transactional_noreply",
+      "subject_template": "New update on {{ item_title }}",
+      "preheader_template": "A Taxat reviewer shared a customer-visible update in the portal.",
+      "headline_template": "There is a new update on your case",
+      "body_template_paragraphs": [
+        "A Taxat reviewer has shared a customer-visible comment on {{ item_title }}.",
+        "Latest update: {{ staff_comment_preview }}"
+      ],
+      "cta_label_template": "View update",
+      "cta_route_template": "{{ detail_route_ref }}",
+      "footer_template_paragraphs": [
+        "Use Help in the portal if you need support. We'll keep the same case context."
+      ],
+      "allowed_merge_variables": [
+        "notification_id",
+        "item_id",
+        "item_title",
+        "staff_comment_preview",
+        "detail_route_ref",
+        "focus_anchor_ref",
+        "return_route_ref",
+        "return_focus_anchor_ref",
+        "fallback_route_ref",
+        "fallback_focus_anchor_ref"
+      ],
+      "required_merge_variables": [
+        "notification_id",
+        "item_id",
+        "item_title",
+        "staff_comment_preview",
+        "detail_route_ref"
+      ],
+      "fallback_rules": [
+        "If the comment preview is missing, fail configuration rather than falling back to internal thread content."
+      ],
+      "continuity": {
+        "shell_family": "CLIENT_PORTAL_SHELL",
+        "object_anchor_ref_template": "work-item/{{ item_id }}",
+        "target_route_ref_template": "{{ detail_route_ref }}",
+        "focus_anchor_ref_template": "{{ focus_anchor_ref }}",
+        "return_route_ref_template": "{{ return_route_ref }}",
+        "return_focus_anchor_ref_template": "{{ return_focus_anchor_ref }}",
+        "fallback_route_ref_template": "{{ fallback_route_ref }}",
+        "fallback_focus_anchor_ref_template": "{{ fallback_focus_anchor_ref }}"
+      },
+      "provider_tracking_defaults": {
+        "track_opens": false,
+        "track_links": "None"
+      },
+      "sample_render_model": {
+        "notification_id": "notif_comment_001",
+        "item_id": "wi_2025_26_001",
+        "item_title": "2025-26 Self Assessment filing",
+        "item_period_label": "2025 to 2026",
+        "item_reference_label": "Request SA-001",
+        "customer_status_label": "In review",
+        "staff_comment_preview": "We've checked the first upload and left one follow-up note in the portal.",
+        "detail_route_ref": "/portal/requests/wi_2025_26_001",
+        "focus_anchor_ref": "customer-comment-thread",
+        "return_route_ref": "/portal/requests/wi_2025_26_001",
+        "return_focus_anchor_ref": "request-card-wi_2025_26_001",
+        "fallback_route_ref": "/portal",
+        "fallback_focus_anchor_ref": "home-primary-task"
+      },
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/collaboration_workspace_contract.md::L1847[new_staff_customer-visible_comment]",
+          "rationale": "Shared staff comments are explicitly notifyable to customers."
+        }
+      ],
+      "notes": [
+        "Do not include individual staff identity when tenant policy masks it."
+      ]
+    },
+    {
+      "template_ref": "email_template_customer_due_date_changed",
+      "template_alias": "customer-due-date-changed-v1",
+      "label": "Customer due date changed",
+      "notification_family": "CUSTOMER_DUE_DATE_CHANGED",
+      "allowed_trigger_events": [
+        "WorkItemDueDatesChanged"
+      ],
+      "visibility_class": "CUSTOMER_VISIBLE",
+      "customer_safe_projection_required": true,
+      "localization_posture": "EN_GB_ONLY",
+      "sender_stream_ref": "email_stream_customer_transactional",
+      "sender_identity_profile_ref": "customer_transactional_noreply",
+      "subject_template": "Due date updated for {{ item_title }}",
+      "preheader_template": "The next due date in your Taxat portal has been created or updated.",
+      "headline_template": "A due date has changed",
+      "body_template_paragraphs": [
+        "The next due date for {{ item_title }} has been set or updated in the portal.",
+        "Current due date: {{ customer_due_date_label }}"
+      ],
+      "cta_label_template": "Review due date",
+      "cta_route_template": "{{ detail_route_ref }}",
+      "footer_template_paragraphs": [
+        "If you need help with this request, use Help in the portal so the same case context stays attached."
+      ],
+      "allowed_merge_variables": [
+        "notification_id",
+        "item_id",
+        "item_title",
+        "customer_due_date_label",
+        "detail_route_ref",
+        "focus_anchor_ref",
+        "return_route_ref",
+        "return_focus_anchor_ref",
+        "fallback_route_ref",
+        "fallback_focus_anchor_ref"
+      ],
+      "required_merge_variables": [
+        "notification_id",
+        "item_id",
+        "item_title",
+        "customer_due_date_label",
+        "detail_route_ref"
+      ],
+      "fallback_rules": [
+        "If no customer-safe due date label is available, block the template instead of inferring one from internal SLA or escalation state."
+      ],
+      "continuity": {
+        "shell_family": "CLIENT_PORTAL_SHELL",
+        "object_anchor_ref_template": "work-item/{{ item_id }}",
+        "target_route_ref_template": "{{ detail_route_ref }}",
+        "focus_anchor_ref_template": "{{ focus_anchor_ref }}",
+        "return_route_ref_template": "{{ return_route_ref }}",
+        "return_focus_anchor_ref_template": "{{ return_focus_anchor_ref }}",
+        "fallback_route_ref_template": "{{ fallback_route_ref }}",
+        "fallback_focus_anchor_ref_template": "{{ fallback_focus_anchor_ref }}"
+      },
+      "provider_tracking_defaults": {
+        "track_opens": false,
+        "track_links": "None"
+      },
+      "sample_render_model": {
+        "notification_id": "notif_due_001",
+        "item_id": "wi_2025_26_001",
+        "item_title": "2025-26 Self Assessment filing",
+        "item_period_label": "2025 to 2026",
+        "item_reference_label": "Request SA-001",
+        "customer_status_label": "Action required",
+        "customer_due_date_label": "28 Apr 2026",
+        "detail_route_ref": "/portal/requests/wi_2025_26_001",
+        "focus_anchor_ref": "due-date-summary",
+        "return_route_ref": "/portal/requests/wi_2025_26_001",
+        "return_focus_anchor_ref": "request-card-wi_2025_26_001",
+        "fallback_route_ref": "/portal",
+        "fallback_focus_anchor_ref": "home-primary-task"
+      },
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/collaboration_workspace_contract.md::L1848[customer_due_date_creation_or_change]",
+          "rationale": "Customer due date creation or change is a notifyable family when the source contract allows it."
+        }
+      ],
+      "notes": [
+        "Do not turn overdue or escalation-only state into outbound copy."
+      ]
+    },
+    {
+      "template_ref": "email_template_item_resolved_or_closed",
+      "template_alias": "item-resolved-or-closed-v1",
+      "label": "Item resolved or closed",
+      "notification_family": "ITEM_RESOLVED_OR_CLOSED",
+      "allowed_trigger_events": [
+        "WorkItemStatusChanged"
+      ],
+      "visibility_class": "CUSTOMER_VISIBLE",
+      "customer_safe_projection_required": true,
+      "localization_posture": "EN_GB_ONLY",
+      "sender_stream_ref": "email_stream_customer_transactional",
+      "sender_identity_profile_ref": "customer_transactional_noreply",
+      "subject_template": "{{ item_title }} is complete",
+      "preheader_template": "A request in your Taxat portal is resolved or closed.",
+      "headline_template": "This item is now complete",
+      "body_template_paragraphs": [
+        "We've marked {{ item_title }} as resolved or closed in the portal.",
+        "Summary: {{ resolution_summary }}"
+      ],
+      "cta_label_template": "Review completion",
+      "cta_route_template": "{{ detail_route_ref }}",
+      "footer_template_paragraphs": [
+        "You can still open the portal to review the completed item and its final summary."
+      ],
+      "allowed_merge_variables": [
+        "notification_id",
+        "item_id",
+        "item_title",
+        "resolution_summary",
+        "detail_route_ref",
+        "focus_anchor_ref",
+        "return_route_ref",
+        "return_focus_anchor_ref",
+        "fallback_route_ref",
+        "fallback_focus_anchor_ref"
+      ],
+      "required_merge_variables": [
+        "notification_id",
+        "item_id",
+        "item_title",
+        "resolution_summary",
+        "detail_route_ref"
+      ],
+      "fallback_rules": [
+        "If no customer-safe resolution summary exists, block the email instead of translating internal state transitions into generic reassurance."
+      ],
+      "continuity": {
+        "shell_family": "CLIENT_PORTAL_SHELL",
+        "object_anchor_ref_template": "work-item/{{ item_id }}",
+        "target_route_ref_template": "{{ detail_route_ref }}",
+        "focus_anchor_ref_template": "{{ focus_anchor_ref }}",
+        "return_route_ref_template": "{{ return_route_ref }}",
+        "return_focus_anchor_ref_template": "{{ return_focus_anchor_ref }}",
+        "fallback_route_ref_template": "{{ fallback_route_ref }}",
+        "fallback_focus_anchor_ref_template": "{{ fallback_focus_anchor_ref }}"
+      },
+      "provider_tracking_defaults": {
+        "track_opens": false,
+        "track_links": "None"
+      },
+      "sample_render_model": {
+        "notification_id": "notif_resolved_001",
+        "item_id": "wi_2025_26_001",
+        "item_title": "2025-26 Self Assessment filing",
+        "item_period_label": "2025 to 2026",
+        "item_reference_label": "Request SA-001",
+        "customer_status_label": "Completed",
+        "resolution_summary": "This request is complete and no further action is needed right now.",
+        "detail_route_ref": "/portal/requests/wi_2025_26_001",
+        "focus_anchor_ref": "status-hero",
+        "return_route_ref": "/portal",
+        "return_focus_anchor_ref": "home-primary-task",
+        "fallback_route_ref": "/portal",
+        "fallback_focus_anchor_ref": "completed-items"
+      },
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/collaboration_workspace_contract.md::L1849[item_resolved_or_closed]",
+          "rationale": "Item resolved or closed is a notifyable customer event family."
+        }
+      ],
+      "notes": [
+        "Completion copy must stay literal and avoid implying authority-of-record settlement."
+      ]
+    },
+    {
+      "template_ref": "email_template_portal_help_acknowledged",
+      "template_alias": "portal-help-acknowledged-v1",
+      "label": "Portal help acknowledged",
+      "notification_family": "PORTAL_HELP_ACKNOWLEDGED",
+      "allowed_trigger_events": [
+        "CLIENT_PORTAL_REQUEST_HELP",
+        "PortalHelpRequestAllocated"
+      ],
+      "visibility_class": "CUSTOMER_VISIBLE",
+      "customer_safe_projection_required": true,
+      "localization_posture": "EN_GB_ONLY",
+      "sender_stream_ref": "email_stream_customer_transactional",
+      "sender_identity_profile_ref": "support_acknowledgement_help",
+      "subject_template": "We received your help request about {{ item_title }}",
+      "preheader_template": "Your help request was saved with the same case context in the Taxat portal.",
+      "headline_template": "Support context is saved",
+      "body_template_paragraphs": [
+        "We received your help request and kept the same case context for {{ item_title }}.",
+        "Reason: {{ help_reason_label }}"
+      ],
+      "cta_label_template": "View help request",
+      "cta_route_template": "{{ detail_route_ref }}",
+      "footer_template_paragraphs": [
+        "You don't need to restate the case. We'll continue from the same request context."
+      ],
+      "allowed_merge_variables": [
+        "notification_id",
+        "item_id",
+        "item_title",
+        "help_request_id",
+        "help_reason_label",
+        "case_context_summary",
+        "detail_route_ref",
+        "focus_anchor_ref",
+        "return_route_ref",
+        "return_focus_anchor_ref",
+        "fallback_route_ref",
+        "fallback_focus_anchor_ref"
+      ],
+      "required_merge_variables": [
+        "notification_id",
+        "item_id",
+        "item_title",
+        "help_request_id",
+        "help_reason_label",
+        "detail_route_ref"
+      ],
+      "fallback_rules": [
+        "If help-request identity or help reason is missing, block the template and keep the acknowledgement in-app only."
+      ],
+      "continuity": {
+        "shell_family": "CLIENT_PORTAL_SHELL",
+        "object_anchor_ref_template": "portal-help/{{ help_request_id }}",
+        "target_route_ref_template": "{{ detail_route_ref }}",
+        "focus_anchor_ref_template": "{{ focus_anchor_ref }}",
+        "return_route_ref_template": "{{ return_route_ref }}",
+        "return_focus_anchor_ref_template": "{{ return_focus_anchor_ref }}",
+        "fallback_route_ref_template": "{{ fallback_route_ref }}",
+        "fallback_focus_anchor_ref_template": "{{ fallback_focus_anchor_ref }}"
+      },
+      "provider_tracking_defaults": {
+        "track_opens": false,
+        "track_links": "None"
+      },
+      "sample_render_model": {
+        "notification_id": "notif_help_001",
+        "item_id": "wi_2025_26_001",
+        "item_title": "2025-26 Self Assessment filing",
+        "item_period_label": "2025 to 2026",
+        "item_reference_label": "Request SA-001",
+        "help_request_id": "help_001",
+        "help_reason_label": "Question about the upload you requested",
+        "case_context_summary": "Your help request is linked to the same filing request and upload panel.",
+        "detail_route_ref": "/portal/help/help_001",
+        "focus_anchor_ref": "portal-help-request-help_001",
+        "return_route_ref": "/portal/requests/wi_2025_26_001",
+        "return_focus_anchor_ref": "help-entrypoint",
+        "fallback_route_ref": "/portal/help",
+        "fallback_focus_anchor_ref": "help-inbox"
+      },
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L431[CLIENT_PORTAL_REQUEST_HELP]",
+          "rationale": "Portal help allocation is a durable contextual-support event."
+        },
+        {
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L666[context-preserving_help_submissions]",
+          "rationale": "Help acknowledgements must preserve route and case context rather than forcing blank restatement."
+        }
+      ],
+      "notes": [
+        "This is product-owned acknowledgement mail, not generic provider support mail."
+      ]
+    },
+    {
+      "template_ref": "email_template_support_contact_acknowledged",
+      "template_alias": "support-contact-acknowledged-v1",
+      "label": "Support contact acknowledged",
+      "notification_family": "SUPPORT_CONTACT_ACKNOWLEDGED",
+      "allowed_trigger_events": [
+        "CLIENT_PORTAL_REQUEST_HELP",
+        "PortalHelpRequestAllocated"
+      ],
+      "visibility_class": "CUSTOMER_VISIBLE",
+      "customer_safe_projection_required": true,
+      "localization_posture": "EN_GB_ONLY",
+      "sender_stream_ref": "email_stream_customer_transactional",
+      "sender_identity_profile_ref": "support_acknowledgement_help",
+      "subject_template": "Support message received for {{ item_title }}",
+      "preheader_template": "Your support contact was recorded with the same case context in Taxat.",
+      "headline_template": "Your support message was received",
+      "body_template_paragraphs": [
+        "We logged your support request through the {{ support_channel_label }} channel for {{ item_title }}.",
+        "Case context: {{ case_context_summary }}"
+      ],
+      "cta_label_template": "Open support message",
+      "cta_route_template": "{{ detail_route_ref }}",
+      "footer_template_paragraphs": [
+        "We kept the same route and focus context so you do not need to restate the case."
+      ],
+      "allowed_merge_variables": [
+        "notification_id",
+        "item_id",
+        "item_title",
+        "help_request_id",
+        "support_channel_label",
+        "case_context_summary",
+        "detail_route_ref",
+        "focus_anchor_ref",
+        "return_route_ref",
+        "return_focus_anchor_ref",
+        "fallback_route_ref",
+        "fallback_focus_anchor_ref"
+      ],
+      "required_merge_variables": [
+        "notification_id",
+        "item_id",
+        "item_title",
+        "help_request_id",
+        "support_channel_label",
+        "case_context_summary",
+        "detail_route_ref"
+      ],
+      "fallback_rules": [
+        "If the support channel or case-context summary is missing, keep the acknowledgement inside the portal and raise a typed configuration error."
+      ],
+      "continuity": {
+        "shell_family": "CLIENT_PORTAL_SHELL",
+        "object_anchor_ref_template": "portal-help/{{ help_request_id }}",
+        "target_route_ref_template": "{{ detail_route_ref }}",
+        "focus_anchor_ref_template": "{{ focus_anchor_ref }}",
+        "return_route_ref_template": "{{ return_route_ref }}",
+        "return_focus_anchor_ref_template": "{{ return_focus_anchor_ref }}",
+        "fallback_route_ref_template": "{{ fallback_route_ref }}",
+        "fallback_focus_anchor_ref_template": "{{ fallback_focus_anchor_ref }}"
+      },
+      "provider_tracking_defaults": {
+        "track_opens": false,
+        "track_links": "None"
+      },
+      "sample_render_model": {
+        "notification_id": "notif_support_001",
+        "item_id": "wi_2025_26_001",
+        "item_title": "2025-26 Self Assessment filing",
+        "item_period_label": "2025 to 2026",
+        "item_reference_label": "Request SA-001",
+        "help_request_id": "help_002",
+        "support_channel_label": "portal Help route",
+        "case_context_summary": "We kept the same request and focus context with your support message.",
+        "detail_route_ref": "/portal/help/help_002",
+        "focus_anchor_ref": "portal-help-request-help_002",
+        "return_route_ref": "/portal/requests/wi_2025_26_001",
+        "return_focus_anchor_ref": "help-entrypoint",
+        "fallback_route_ref": "/portal/help",
+        "fallback_focus_anchor_ref": "help-inbox"
+      },
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L666[context-preserving_help_submissions]",
+          "rationale": "Support-contact acknowledgements must preserve contextual case routing."
+        }
+      ],
+      "notes": [
+        "This acknowledgement is customer-safe and channel-bounded."
+      ]
+    }
+  ],
+  "blocked_event_families": [
+    "InternalNoteAdded",
+    "WorkItemAssigned",
+    "WorkItemReassigned",
+    "WorkItemEscalated",
+    "WorkItemEscalationCleared",
+    "WorkItemAttachmentPublished:INTERNAL_ONLY",
+    "AuditOnlyEvent"
+  ],
+  "blocked_provider_boundary_mail": [
+    "IDP_VERIFY_EMAIL",
+    "PASSWORD_RESET",
+    "MFA_CHALLENGE",
+    "PROVIDER_SECURITY_ALERT"
+  ],
+  "typed_gaps": [
+    "shared_operating_contract_0038_to_0045.md was absent at execution time, so this pack grounded itself directly in the algorithm corpus, pc_0041, pc_0031, pc_0033, and current provider documentation.",
+    "Open and click tracking remain disabled by default until a later explicit product/privacy decision justifies them."
+  ],
+  "notes": [
+    "Only customer-visible collaboration and contextual-help events are modeled here.",
+    "Provider-owned identity, password-reset, or MFA mail remains outside this catalog and outside product workflow truth."
+  ]
+}

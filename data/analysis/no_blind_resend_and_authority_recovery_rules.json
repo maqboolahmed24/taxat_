@@ -1,0 +1,607 @@
+{
+  "grouped_control_rules": [
+    {
+      "allowed_next_actions": [
+        "resume_follow_up_from_persisted_budget",
+        "reject_recomputation_from_retry_logs"
+      ],
+      "audit_events": [
+        "AuthorityReconciliationEscalated",
+        "SubmissionUnknown"
+      ],
+      "authority_safety_posture": "Budget exhaustion and ambiguity state cannot be reset by worker restarts or new profile defaults.",
+      "canonical_id": "authority_recovery_grouped_control_rule_copy_control_packet_to_submission_and_obligation",
+      "frozen_inputs": [
+        "reconciliation_control_contract",
+        "AuthorityInteractionRecord",
+        "SubmissionRecord",
+        "ObligationMirror"
+      ],
+      "idempotency_or_hash_fields": [
+        "request_hash",
+        "idempotency_key",
+        "control_contract_hash"
+      ],
+      "identity_tuple": [
+        "request_hash",
+        "submission_record_id_or_null",
+        "obligation_mirror_id_or_null"
+      ],
+      "notes": [],
+      "operator_visible_effect": "Operators can inspect one grouped control packet across interaction, submission, and obligation views.",
+      "privacy_reconciliation_required": false,
+      "record_type": "authority_recovery_grouped_control_rule",
+      "recovery_posture": "Replay, restore, and continuation reuse the grouped control packet instead of recomputing attempt budget and resend legality.",
+      "source_file": "Algorithm/authority_interaction_protocol.md",
+      "source_heading_or_logical_block": "9.13A Reconciliation budget and escalation rule",
+      "source_ref": "Algorithm/authority_interaction_protocol.md::L1042[9.13A_Reconciliation_budget_and_escalation_rule]",
+      "state_or_outcome": "The persisted reconciliation control contract must be copied onto AuthorityInteractionRecord, unresolved SubmissionRecord, and unresolved ObligationMirror.",
+      "trigger_or_entry_condition": "An unresolved authority interaction remains pending across restore, replay, or continuation boundaries."
+    },
+    {
+      "allowed_next_actions": [
+        "rebuild_outstanding_authority_work",
+        "reuse_persisted_ingress_proof",
+        "resume_reconciliation_from_control_contract"
+      ],
+      "audit_events": [
+        "RestoreDrillExecuted",
+        "AuthorityReconciliationAttempted",
+        "AuthorityReconciliationResolved"
+      ],
+      "authority_safety_posture": "Canonical ingress receipt lineage prevents duplicate callback or poll deliveries from mutating legal state twice.",
+      "canonical_id": "authority_recovery_grouped_control_rule_restore_rebuilds_from_durable_truth",
+      "frozen_inputs": [
+        "AuthorityIngressReceipt",
+        "AuthorityInteractionRecord",
+        "SubmissionRecord",
+        "canonical_ingress_receipt_ref",
+        "response_history_ids[]",
+        "meaning_resolution_state"
+      ],
+      "idempotency_or_hash_fields": [
+        "request_hash",
+        "idempotency_key",
+        "canonical_ingress_receipt_ref"
+      ],
+      "identity_tuple": [
+        "checkpoint_id",
+        "environment_ref",
+        "authority_recovery_policy"
+      ],
+      "notes": [],
+      "operator_visible_effect": "Recovery tooling can show exactly which persisted authority artifacts justified resumed work.",
+      "privacy_reconciliation_required": true,
+      "record_type": "authority_recovery_grouped_control_rule",
+      "recovery_posture": "Outstanding unresolved authority work resumes from persisted control packets and ingress proofs.",
+      "source_file": "Algorithm/deployment_and_resilience_contract.md",
+      "source_heading_or_logical_block": "5. Backup, restore, and DR rules",
+      "source_ref": "Algorithm/deployment_and_resilience_contract.md::L133[5._Backup_restore_and_DR_rules]",
+      "state_or_outcome": "Authority recovery rebuilds outstanding transmit and reconciliation work from persisted receipts, interaction records, submissions, and inbox truth instead of broker replay.",
+      "trigger_or_entry_condition": "Restore or failover reconstructs outstanding authority-integrated workloads."
+    }
+  ],
+  "precondition_rules": [
+    {
+      "allowed_next_actions": [
+        "continue_if_preconditions_hold",
+        "downgrade_to_follow_up_or_blocked_resend_posture"
+      ],
+      "audit_events": [
+        "AuthorityRequestSent",
+        "AuthorityReconciliationAttempted"
+      ],
+      "authority_safety_posture": "Changed binding lineage or ambiguous evidence blocks automatic resend.",
+      "canonical_id": "authority_recovery_resend_rule_auto_resend_preconditions",
+      "frozen_inputs": [
+        "binding_lineage_ref",
+        "idempotency_scope",
+        "collision_flags",
+        "unresolved_external_ambiguity"
+      ],
+      "idempotency_or_hash_fields": [
+        "request_hash",
+        "duplicate_meaning_key",
+        "idempotency_key",
+        "binding_lineage_ref"
+      ],
+      "identity_tuple": [
+        "request_hash",
+        "idempotency_key",
+        "binding_lineage_ref"
+      ],
+      "notes": [],
+      "operator_visible_effect": "Operators can see whether a resend was truly legal or downgraded to read-only or blocked posture.",
+      "privacy_reconciliation_required": false,
+      "record_type": "authority_recovery_resend_rule",
+      "recovery_posture": "Mutation resend is not the default recovery posture; it must still satisfy exact recovery prerequisites.",
+      "resend_legality_state": "PRECONDITIONED_MUTATION_RESEND",
+      "source_file": "Algorithm/authority_interaction_protocol.md",
+      "source_heading_or_logical_block": "9.13A Reconciliation budget and escalation rule",
+      "source_ref": "Algorithm/authority_interaction_protocol.md::L1042[9.13A_Reconciliation_budget_and_escalation_rule]",
+      "state_or_outcome": "Automatic resend of mutation-capable packets requires unchanged binding lineage, unchanged idempotency scope, zero collision flags, and low unresolved external ambiguity.",
+      "trigger_or_entry_condition": "The engine considers automatic resend of a mutation-capable authority packet."
+    }
+  ],
+  "resend_legality_rules": [
+    {
+      "allowed_next_actions": [
+        "follow_up_read",
+        "exact_idempotent_recovery",
+        "open_or_update_workflow",
+        "preserve_last_defensible_legal_state"
+      ],
+      "audit_events": [
+        "AuthorityReconciliationAttempted",
+        "AuthorityReconciliationResolved",
+        "AuthorityReconciliationEscalated"
+      ],
+      "authority_safety_posture": "No blind resend is lawful after budget exhaustion, contradictory evidence, or escalation posture.",
+      "canonical_id": "authority_recovery_resend_rule_follow_up_read_only",
+      "frozen_inputs": [
+        "reconciliation_budget_state",
+        "next_reconciliation_at",
+        "reconciliation_deadline_at",
+        "resend_control_reason_codes[]",
+        "reconciliation_control_contract"
+      ],
+      "idempotency_or_hash_fields": [
+        "request_hash",
+        "duplicate_meaning_key",
+        "idempotency_key",
+        "binding_lineage_ref"
+      ],
+      "identity_tuple": [
+        "request_hash",
+        "idempotency_key",
+        "resend_legality_state"
+      ],
+      "notes": [],
+      "operator_visible_effect": "Authority recovery views can show whether follow-up remained read-only, idempotent-only, or blocked pending escalation.",
+      "privacy_reconciliation_required": false,
+      "record_type": "authority_recovery_resend_rule",
+      "recovery_posture": "Restore, replay, or continuation resumes from the persisted reconciliation budget and deadline rather than resetting the clock.",
+      "resend_legality_state": "FOLLOW_UP_READ_ONLY",
+      "source_file": "Algorithm/authority_interaction_protocol.md",
+      "source_heading_or_logical_block": "9.13A Reconciliation budget and escalation rule",
+      "source_ref": "Algorithm/authority_interaction_protocol.md::L1042[9.13A_Reconciliation_budget_and_escalation_rule]",
+      "state_or_outcome": "Budget remains active; bounded read-after-write or read-after-timeout checks are still lawful without a duplicate mutation send.",
+      "trigger_or_entry_condition": "The reconciliation control contract evaluates resend legality after a response, timeout, restore, or reclaim boundary."
+    },
+    {
+      "allowed_next_actions": [
+        "follow_up_read",
+        "exact_idempotent_recovery",
+        "open_or_update_workflow",
+        "preserve_last_defensible_legal_state"
+      ],
+      "audit_events": [
+        "AuthorityReconciliationAttempted",
+        "AuthorityReconciliationResolved",
+        "AuthorityReconciliationEscalated"
+      ],
+      "authority_safety_posture": "No blind resend is lawful after budget exhaustion, contradictory evidence, or escalation posture.",
+      "canonical_id": "authority_recovery_resend_rule_idempotent_recovery_only",
+      "frozen_inputs": [
+        "reconciliation_budget_state",
+        "next_reconciliation_at",
+        "reconciliation_deadline_at",
+        "resend_control_reason_codes[]",
+        "reconciliation_control_contract"
+      ],
+      "idempotency_or_hash_fields": [
+        "request_hash",
+        "duplicate_meaning_key",
+        "idempotency_key",
+        "binding_lineage_ref"
+      ],
+      "identity_tuple": [
+        "request_hash",
+        "idempotency_key",
+        "resend_legality_state"
+      ],
+      "notes": [],
+      "operator_visible_effect": "Authority recovery views can show whether follow-up remained read-only, idempotent-only, or blocked pending escalation.",
+      "privacy_reconciliation_required": false,
+      "record_type": "authority_recovery_resend_rule",
+      "recovery_posture": "Restore, replay, or continuation resumes from the persisted reconciliation budget and deadline rather than resetting the clock.",
+      "resend_legality_state": "IDEMPOTENT_RECOVERY_ONLY",
+      "source_file": "Algorithm/authority_interaction_protocol.md",
+      "source_heading_or_logical_block": "9.13A Reconciliation budget and escalation rule",
+      "source_ref": "Algorithm/authority_interaction_protocol.md::L1042[9.13A_Reconciliation_budget_and_escalation_rule]",
+      "state_or_outcome": "Bytes already left the process but no provider response is durable; exact request-lineage recovery may continue without a fresh mutation packet.",
+      "trigger_or_entry_condition": "The reconciliation control contract evaluates resend legality after a response, timeout, restore, or reclaim boundary."
+    },
+    {
+      "allowed_next_actions": [
+        "follow_up_read",
+        "exact_idempotent_recovery",
+        "open_or_update_workflow",
+        "preserve_last_defensible_legal_state"
+      ],
+      "audit_events": [
+        "AuthorityReconciliationAttempted",
+        "AuthorityReconciliationResolved",
+        "AuthorityReconciliationEscalated"
+      ],
+      "authority_safety_posture": "No blind resend is lawful after budget exhaustion, contradictory evidence, or escalation posture.",
+      "canonical_id": "authority_recovery_resend_rule_blocked_by_reconciliation",
+      "frozen_inputs": [
+        "reconciliation_budget_state",
+        "next_reconciliation_at",
+        "reconciliation_deadline_at",
+        "resend_control_reason_codes[]",
+        "reconciliation_control_contract"
+      ],
+      "idempotency_or_hash_fields": [
+        "request_hash",
+        "duplicate_meaning_key",
+        "idempotency_key",
+        "binding_lineage_ref"
+      ],
+      "identity_tuple": [
+        "request_hash",
+        "idempotency_key",
+        "resend_legality_state"
+      ],
+      "notes": [],
+      "operator_visible_effect": "Authority recovery views can show whether follow-up remained read-only, idempotent-only, or blocked pending escalation.",
+      "privacy_reconciliation_required": false,
+      "record_type": "authority_recovery_resend_rule",
+      "recovery_posture": "Restore, replay, or continuation resumes from the persisted reconciliation budget and deadline rather than resetting the clock.",
+      "resend_legality_state": "BLOCKED_BY_RECONCILIATION",
+      "source_file": "Algorithm/authority_interaction_protocol.md",
+      "source_heading_or_logical_block": "9.13A Reconciliation budget and escalation rule",
+      "source_ref": "Algorithm/authority_interaction_protocol.md::L1042[9.13A_Reconciliation_budget_and_escalation_rule]",
+      "state_or_outcome": "Automatic resend is blocked after budget exhaustion or unresolved contradictory evidence.",
+      "trigger_or_entry_condition": "The reconciliation control contract evaluates resend legality after a response, timeout, restore, or reclaim boundary."
+    },
+    {
+      "allowed_next_actions": [
+        "follow_up_read",
+        "exact_idempotent_recovery",
+        "open_or_update_workflow",
+        "preserve_last_defensible_legal_state"
+      ],
+      "audit_events": [
+        "AuthorityReconciliationAttempted",
+        "AuthorityReconciliationResolved",
+        "AuthorityReconciliationEscalated"
+      ],
+      "authority_safety_posture": "No blind resend is lawful after budget exhaustion, contradictory evidence, or escalation posture.",
+      "canonical_id": "authority_recovery_resend_rule_blocked_by_escalation",
+      "frozen_inputs": [
+        "reconciliation_budget_state",
+        "next_reconciliation_at",
+        "reconciliation_deadline_at",
+        "resend_control_reason_codes[]",
+        "reconciliation_control_contract"
+      ],
+      "idempotency_or_hash_fields": [
+        "request_hash",
+        "duplicate_meaning_key",
+        "idempotency_key",
+        "binding_lineage_ref"
+      ],
+      "identity_tuple": [
+        "request_hash",
+        "idempotency_key",
+        "resend_legality_state"
+      ],
+      "notes": [],
+      "operator_visible_effect": "Authority recovery views can show whether follow-up remained read-only, idempotent-only, or blocked pending escalation.",
+      "privacy_reconciliation_required": false,
+      "record_type": "authority_recovery_resend_rule",
+      "recovery_posture": "Restore, replay, or continuation resumes from the persisted reconciliation budget and deadline rather than resetting the clock.",
+      "resend_legality_state": "BLOCKED_BY_ESCALATION",
+      "source_file": "Algorithm/authority_interaction_protocol.md",
+      "source_heading_or_logical_block": "9.13A Reconciliation budget and escalation rule",
+      "source_ref": "Algorithm/authority_interaction_protocol.md::L1042[9.13A_Reconciliation_budget_and_escalation_rule]",
+      "state_or_outcome": "Automatic resend is blocked because escalation ownership and workflow have taken over the unresolved case.",
+      "trigger_or_entry_condition": "The reconciliation control contract evaluates resend legality after a response, timeout, restore, or reclaim boundary."
+    }
+  ],
+  "rows": [
+    {
+      "allowed_next_actions": [
+        "continue_if_preconditions_hold",
+        "downgrade_to_follow_up_or_blocked_resend_posture"
+      ],
+      "audit_events": [
+        "AuthorityRequestSent",
+        "AuthorityReconciliationAttempted"
+      ],
+      "authority_safety_posture": "Changed binding lineage or ambiguous evidence blocks automatic resend.",
+      "canonical_id": "authority_recovery_resend_rule_auto_resend_preconditions",
+      "frozen_inputs": [
+        "binding_lineage_ref",
+        "idempotency_scope",
+        "collision_flags",
+        "unresolved_external_ambiguity"
+      ],
+      "idempotency_or_hash_fields": [
+        "request_hash",
+        "duplicate_meaning_key",
+        "idempotency_key",
+        "binding_lineage_ref"
+      ],
+      "identity_tuple": [
+        "request_hash",
+        "idempotency_key",
+        "binding_lineage_ref"
+      ],
+      "notes": [],
+      "operator_visible_effect": "Operators can see whether a resend was truly legal or downgraded to read-only or blocked posture.",
+      "privacy_reconciliation_required": false,
+      "record_type": "authority_recovery_resend_rule",
+      "recovery_posture": "Mutation resend is not the default recovery posture; it must still satisfy exact recovery prerequisites.",
+      "resend_legality_state": "PRECONDITIONED_MUTATION_RESEND",
+      "source_file": "Algorithm/authority_interaction_protocol.md",
+      "source_heading_or_logical_block": "9.13A Reconciliation budget and escalation rule",
+      "source_ref": "Algorithm/authority_interaction_protocol.md::L1042[9.13A_Reconciliation_budget_and_escalation_rule]",
+      "state_or_outcome": "Automatic resend of mutation-capable packets requires unchanged binding lineage, unchanged idempotency scope, zero collision flags, and low unresolved external ambiguity.",
+      "trigger_or_entry_condition": "The engine considers automatic resend of a mutation-capable authority packet."
+    },
+    {
+      "allowed_next_actions": [
+        "follow_up_read",
+        "exact_idempotent_recovery",
+        "open_or_update_workflow",
+        "preserve_last_defensible_legal_state"
+      ],
+      "audit_events": [
+        "AuthorityReconciliationAttempted",
+        "AuthorityReconciliationResolved",
+        "AuthorityReconciliationEscalated"
+      ],
+      "authority_safety_posture": "No blind resend is lawful after budget exhaustion, contradictory evidence, or escalation posture.",
+      "canonical_id": "authority_recovery_resend_rule_follow_up_read_only",
+      "frozen_inputs": [
+        "reconciliation_budget_state",
+        "next_reconciliation_at",
+        "reconciliation_deadline_at",
+        "resend_control_reason_codes[]",
+        "reconciliation_control_contract"
+      ],
+      "idempotency_or_hash_fields": [
+        "request_hash",
+        "duplicate_meaning_key",
+        "idempotency_key",
+        "binding_lineage_ref"
+      ],
+      "identity_tuple": [
+        "request_hash",
+        "idempotency_key",
+        "resend_legality_state"
+      ],
+      "notes": [],
+      "operator_visible_effect": "Authority recovery views can show whether follow-up remained read-only, idempotent-only, or blocked pending escalation.",
+      "privacy_reconciliation_required": false,
+      "record_type": "authority_recovery_resend_rule",
+      "recovery_posture": "Restore, replay, or continuation resumes from the persisted reconciliation budget and deadline rather than resetting the clock.",
+      "resend_legality_state": "FOLLOW_UP_READ_ONLY",
+      "source_file": "Algorithm/authority_interaction_protocol.md",
+      "source_heading_or_logical_block": "9.13A Reconciliation budget and escalation rule",
+      "source_ref": "Algorithm/authority_interaction_protocol.md::L1042[9.13A_Reconciliation_budget_and_escalation_rule]",
+      "state_or_outcome": "Budget remains active; bounded read-after-write or read-after-timeout checks are still lawful without a duplicate mutation send.",
+      "trigger_or_entry_condition": "The reconciliation control contract evaluates resend legality after a response, timeout, restore, or reclaim boundary."
+    },
+    {
+      "allowed_next_actions": [
+        "follow_up_read",
+        "exact_idempotent_recovery",
+        "open_or_update_workflow",
+        "preserve_last_defensible_legal_state"
+      ],
+      "audit_events": [
+        "AuthorityReconciliationAttempted",
+        "AuthorityReconciliationResolved",
+        "AuthorityReconciliationEscalated"
+      ],
+      "authority_safety_posture": "No blind resend is lawful after budget exhaustion, contradictory evidence, or escalation posture.",
+      "canonical_id": "authority_recovery_resend_rule_idempotent_recovery_only",
+      "frozen_inputs": [
+        "reconciliation_budget_state",
+        "next_reconciliation_at",
+        "reconciliation_deadline_at",
+        "resend_control_reason_codes[]",
+        "reconciliation_control_contract"
+      ],
+      "idempotency_or_hash_fields": [
+        "request_hash",
+        "duplicate_meaning_key",
+        "idempotency_key",
+        "binding_lineage_ref"
+      ],
+      "identity_tuple": [
+        "request_hash",
+        "idempotency_key",
+        "resend_legality_state"
+      ],
+      "notes": [],
+      "operator_visible_effect": "Authority recovery views can show whether follow-up remained read-only, idempotent-only, or blocked pending escalation.",
+      "privacy_reconciliation_required": false,
+      "record_type": "authority_recovery_resend_rule",
+      "recovery_posture": "Restore, replay, or continuation resumes from the persisted reconciliation budget and deadline rather than resetting the clock.",
+      "resend_legality_state": "IDEMPOTENT_RECOVERY_ONLY",
+      "source_file": "Algorithm/authority_interaction_protocol.md",
+      "source_heading_or_logical_block": "9.13A Reconciliation budget and escalation rule",
+      "source_ref": "Algorithm/authority_interaction_protocol.md::L1042[9.13A_Reconciliation_budget_and_escalation_rule]",
+      "state_or_outcome": "Bytes already left the process but no provider response is durable; exact request-lineage recovery may continue without a fresh mutation packet.",
+      "trigger_or_entry_condition": "The reconciliation control contract evaluates resend legality after a response, timeout, restore, or reclaim boundary."
+    },
+    {
+      "allowed_next_actions": [
+        "follow_up_read",
+        "exact_idempotent_recovery",
+        "open_or_update_workflow",
+        "preserve_last_defensible_legal_state"
+      ],
+      "audit_events": [
+        "AuthorityReconciliationAttempted",
+        "AuthorityReconciliationResolved",
+        "AuthorityReconciliationEscalated"
+      ],
+      "authority_safety_posture": "No blind resend is lawful after budget exhaustion, contradictory evidence, or escalation posture.",
+      "canonical_id": "authority_recovery_resend_rule_blocked_by_reconciliation",
+      "frozen_inputs": [
+        "reconciliation_budget_state",
+        "next_reconciliation_at",
+        "reconciliation_deadline_at",
+        "resend_control_reason_codes[]",
+        "reconciliation_control_contract"
+      ],
+      "idempotency_or_hash_fields": [
+        "request_hash",
+        "duplicate_meaning_key",
+        "idempotency_key",
+        "binding_lineage_ref"
+      ],
+      "identity_tuple": [
+        "request_hash",
+        "idempotency_key",
+        "resend_legality_state"
+      ],
+      "notes": [],
+      "operator_visible_effect": "Authority recovery views can show whether follow-up remained read-only, idempotent-only, or blocked pending escalation.",
+      "privacy_reconciliation_required": false,
+      "record_type": "authority_recovery_resend_rule",
+      "recovery_posture": "Restore, replay, or continuation resumes from the persisted reconciliation budget and deadline rather than resetting the clock.",
+      "resend_legality_state": "BLOCKED_BY_RECONCILIATION",
+      "source_file": "Algorithm/authority_interaction_protocol.md",
+      "source_heading_or_logical_block": "9.13A Reconciliation budget and escalation rule",
+      "source_ref": "Algorithm/authority_interaction_protocol.md::L1042[9.13A_Reconciliation_budget_and_escalation_rule]",
+      "state_or_outcome": "Automatic resend is blocked after budget exhaustion or unresolved contradictory evidence.",
+      "trigger_or_entry_condition": "The reconciliation control contract evaluates resend legality after a response, timeout, restore, or reclaim boundary."
+    },
+    {
+      "allowed_next_actions": [
+        "follow_up_read",
+        "exact_idempotent_recovery",
+        "open_or_update_workflow",
+        "preserve_last_defensible_legal_state"
+      ],
+      "audit_events": [
+        "AuthorityReconciliationAttempted",
+        "AuthorityReconciliationResolved",
+        "AuthorityReconciliationEscalated"
+      ],
+      "authority_safety_posture": "No blind resend is lawful after budget exhaustion, contradictory evidence, or escalation posture.",
+      "canonical_id": "authority_recovery_resend_rule_blocked_by_escalation",
+      "frozen_inputs": [
+        "reconciliation_budget_state",
+        "next_reconciliation_at",
+        "reconciliation_deadline_at",
+        "resend_control_reason_codes[]",
+        "reconciliation_control_contract"
+      ],
+      "idempotency_or_hash_fields": [
+        "request_hash",
+        "duplicate_meaning_key",
+        "idempotency_key",
+        "binding_lineage_ref"
+      ],
+      "identity_tuple": [
+        "request_hash",
+        "idempotency_key",
+        "resend_legality_state"
+      ],
+      "notes": [],
+      "operator_visible_effect": "Authority recovery views can show whether follow-up remained read-only, idempotent-only, or blocked pending escalation.",
+      "privacy_reconciliation_required": false,
+      "record_type": "authority_recovery_resend_rule",
+      "recovery_posture": "Restore, replay, or continuation resumes from the persisted reconciliation budget and deadline rather than resetting the clock.",
+      "resend_legality_state": "BLOCKED_BY_ESCALATION",
+      "source_file": "Algorithm/authority_interaction_protocol.md",
+      "source_heading_or_logical_block": "9.13A Reconciliation budget and escalation rule",
+      "source_ref": "Algorithm/authority_interaction_protocol.md::L1042[9.13A_Reconciliation_budget_and_escalation_rule]",
+      "state_or_outcome": "Automatic resend is blocked because escalation ownership and workflow have taken over the unresolved case.",
+      "trigger_or_entry_condition": "The reconciliation control contract evaluates resend legality after a response, timeout, restore, or reclaim boundary."
+    },
+    {
+      "allowed_next_actions": [
+        "resume_follow_up_from_persisted_budget",
+        "reject_recomputation_from_retry_logs"
+      ],
+      "audit_events": [
+        "AuthorityReconciliationEscalated",
+        "SubmissionUnknown"
+      ],
+      "authority_safety_posture": "Budget exhaustion and ambiguity state cannot be reset by worker restarts or new profile defaults.",
+      "canonical_id": "authority_recovery_grouped_control_rule_copy_control_packet_to_submission_and_obligation",
+      "frozen_inputs": [
+        "reconciliation_control_contract",
+        "AuthorityInteractionRecord",
+        "SubmissionRecord",
+        "ObligationMirror"
+      ],
+      "idempotency_or_hash_fields": [
+        "request_hash",
+        "idempotency_key",
+        "control_contract_hash"
+      ],
+      "identity_tuple": [
+        "request_hash",
+        "submission_record_id_or_null",
+        "obligation_mirror_id_or_null"
+      ],
+      "notes": [],
+      "operator_visible_effect": "Operators can inspect one grouped control packet across interaction, submission, and obligation views.",
+      "privacy_reconciliation_required": false,
+      "record_type": "authority_recovery_grouped_control_rule",
+      "recovery_posture": "Replay, restore, and continuation reuse the grouped control packet instead of recomputing attempt budget and resend legality.",
+      "source_file": "Algorithm/authority_interaction_protocol.md",
+      "source_heading_or_logical_block": "9.13A Reconciliation budget and escalation rule",
+      "source_ref": "Algorithm/authority_interaction_protocol.md::L1042[9.13A_Reconciliation_budget_and_escalation_rule]",
+      "state_or_outcome": "The persisted reconciliation control contract must be copied onto AuthorityInteractionRecord, unresolved SubmissionRecord, and unresolved ObligationMirror.",
+      "trigger_or_entry_condition": "An unresolved authority interaction remains pending across restore, replay, or continuation boundaries."
+    },
+    {
+      "allowed_next_actions": [
+        "rebuild_outstanding_authority_work",
+        "reuse_persisted_ingress_proof",
+        "resume_reconciliation_from_control_contract"
+      ],
+      "audit_events": [
+        "RestoreDrillExecuted",
+        "AuthorityReconciliationAttempted",
+        "AuthorityReconciliationResolved"
+      ],
+      "authority_safety_posture": "Canonical ingress receipt lineage prevents duplicate callback or poll deliveries from mutating legal state twice.",
+      "canonical_id": "authority_recovery_grouped_control_rule_restore_rebuilds_from_durable_truth",
+      "frozen_inputs": [
+        "AuthorityIngressReceipt",
+        "AuthorityInteractionRecord",
+        "SubmissionRecord",
+        "canonical_ingress_receipt_ref",
+        "response_history_ids[]",
+        "meaning_resolution_state"
+      ],
+      "idempotency_or_hash_fields": [
+        "request_hash",
+        "idempotency_key",
+        "canonical_ingress_receipt_ref"
+      ],
+      "identity_tuple": [
+        "checkpoint_id",
+        "environment_ref",
+        "authority_recovery_policy"
+      ],
+      "notes": [],
+      "operator_visible_effect": "Recovery tooling can show exactly which persisted authority artifacts justified resumed work.",
+      "privacy_reconciliation_required": true,
+      "record_type": "authority_recovery_grouped_control_rule",
+      "recovery_posture": "Outstanding unresolved authority work resumes from persisted control packets and ingress proofs.",
+      "source_file": "Algorithm/deployment_and_resilience_contract.md",
+      "source_heading_or_logical_block": "5. Backup, restore, and DR rules",
+      "source_ref": "Algorithm/deployment_and_resilience_contract.md::L133[5._Backup_restore_and_DR_rules]",
+      "state_or_outcome": "Authority recovery rebuilds outstanding transmit and reconciliation work from persisted receipts, interaction records, submissions, and inbox truth instead of broker replay.",
+      "trigger_or_entry_condition": "Restore or failover reconstructs outstanding authority-integrated workloads."
+    }
+  ],
+  "summary": {
+    "grouped_control_rule_count": 2,
+    "resend_legality_state_count": 4,
+    "row_count": 7
+  }
+}

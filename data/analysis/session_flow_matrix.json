@@ -1,0 +1,206 @@
+{
+  "decision_id": "ADR-003",
+  "flows": [
+    {
+      "authority_credential_posture": "No raw authority credentials in the browser; authority calls remain server-mediated from persisted `AuthorityBinding` and vault-held token lineage.",
+      "blocked_or_forbidden": [
+        "No browser-origin write action without authenticated session and anti-CSRF.",
+        "No unsafe reliance on browser-held bearer tokens as the primary browser trust anchor."
+      ],
+      "channel": "BROWSER",
+      "continuity_rules": [
+        "Route and shell continuity stay same-object and same-shell where the broader frontend contract requires it.",
+        "Stale-view rejection returns typed recovery metadata rather than mutating the current route in place."
+      ],
+      "entry_posture": "OIDC/OAuth human sign-in through the chosen IdP, then server-mediated interactive session resolution.",
+      "flow_id": "browser_operator_interactive",
+      "label": "Interactive browser operator session",
+      "local_storage_posture": "Only derivable route/cache state; interactive trust remains server-authoritative.",
+      "principal_classes": [
+        "TENANT_ADMIN",
+        "PREPARER",
+        "REVIEWER",
+        "APPROVER",
+        "AUDITOR",
+        "SUPPORT_OPERATOR"
+      ],
+      "sensitive_mutation_posture": "Governance, authority-link, approval, and submission actions require current actor-session validation and may trigger step-up or approval.",
+      "session_carrier": "Secure `HttpOnly`, same-site cookie or equivalent same-origin protected session plus anti-CSRF binding.",
+      "source_refs": [
+        "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L30[2._Identity_session_and_command_trust]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L78[4._Browser_native-client_API_and_transport_hardening]"
+      ],
+      "step_up_posture": "Contained escalation path tied to the current object; step-up completion rotates effective challenge state before later command acceptance."
+    },
+    {
+      "authority_credential_posture": "No client-held authority credential material; authority-owned checkpoints may hand off externally but must return to the same route and focus target.",
+      "blocked_or_forbidden": [
+        "Invite and deep-link entry may not accept upload, acknowledgement, or sign-off before upgrade.",
+        "A stale or superseded approval pack may not be signed."
+      ],
+      "channel": "BROWSER",
+      "continuity_rules": [
+        "The portal preserves declaration context and approval-pack focus through step-up completion.",
+        "Notification or address-bar deep links reopen the same request or approval object with an explicit return path."
+      ],
+      "entry_posture": "Normal sign-in or post-invite upgrade into a fully authenticated portal session bound to one principal class, client scope, delegation basis, and masking posture.",
+      "flow_id": "browser_portal_user_interactive",
+      "label": "Interactive browser client-portal session",
+      "local_storage_posture": "Client-safe derivable snapshots and resumability only; governed truth stays server-side.",
+      "principal_classes": [
+        "CLIENT_VIEWER",
+        "CLIENT_CONTRIBUTOR",
+        "CLIENT_SIGNATORY"
+      ],
+      "sensitive_mutation_posture": "Document upload, acknowledgement, and sign-off happen only after authenticated upgrade into the normal portal session; `CLIENT_SIGNATORY` sign-off may additionally require `STEP_UP_VERIFIED` assurance.",
+      "session_carrier": "Secure browser session cookie or equivalent same-origin protected session plus anti-CSRF binding.",
+      "source_refs": [
+        "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+        "Algorithm/customer_client_portal_experience_contract.md::L340[Approval_and_sign-off_flow]",
+        "Algorithm/customer_client_portal_experience_contract.md::L399[Artifact_print_and_browser-handoff_rules]"
+      ],
+      "step_up_posture": "The sign-off flow keeps step-up as a contained checkpoint on the same `Approvals` route and same approval-pack context."
+    },
+    {
+      "authority_credential_posture": "Authority-owned or HMRC-only tasks open in the default system browser; no unrestricted in-app web shell for primary sign-in or step-up.",
+      "blocked_or_forbidden": [
+        "No raw authority credentials on device.",
+        "No scene restoration if cache, resume metadata, or server session have become invalid."
+      ],
+      "channel": "NATIVE_MACOS",
+      "continuity_rules": [
+        "Scene restoration is allowed only while local cache, resume metadata, and server session all remain valid.",
+        "Tenant switch, privilege downgrade, masking drift, or schema incompatibility force cache and cursor invalidation."
+      ],
+      "entry_posture": "System-browser or platform auth-session sign-in through `ASWebAuthenticationSession` or equivalent.",
+      "flow_id": "native_macos_operator_interactive",
+      "label": "Native macOS operator session",
+      "local_storage_posture": "Persist only derivable product-session artifacts, receipts, resume metadata, and redaction-safe local state.",
+      "principal_classes": [
+        "TENANT_ADMIN",
+        "PREPARER",
+        "REVIEWER",
+        "APPROVER",
+        "AUDITOR",
+        "SUPPORT_OPERATOR"
+      ],
+      "sensitive_mutation_posture": "Commands use the same server-side actor-session and stale-view validation as browser clients; native-only local state never becomes legal truth.",
+      "session_carrier": "Server-authoritative interactive session plus Keychain-backed product-session artifacts and resume metadata.",
+      "source_refs": [
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L372[7._Authentication_and_session_strategy]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L390[8._Persistence_model]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L473[11._Security_and_runtime_posture_for_the_desktop_client]",
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]"
+      ],
+      "step_up_posture": "Native step-up uses system-browser-managed auth, rotates challenge state on completion, and never stores raw authority credentials on device."
+    },
+    {
+      "authority_credential_posture": "Authority token use still revalidates lineage and binding immediately before send; machine posture never stands in for human signatory or authority-link proof.",
+      "blocked_or_forbidden": [
+        "No masquerading as an interactive browser or native product session.",
+        "No invention of delegation or human approval capabilities."
+      ],
+      "channel": "API_AUTOMATION",
+      "continuity_rules": [
+        "Replay, retry, and delayed send remain bound to durable request identity and binding lineage.",
+        "Short-lived bearer use is allowed only for non-browser automation clients, not as an interactive session substitute."
+      ],
+      "entry_posture": "Short-lived non-browser machine credential with explicit service identity and scoped environment or tenant binding.",
+      "flow_id": "machine_automation_client",
+      "label": "Machine automation client",
+      "local_storage_posture": "No interactive session semantics; any machine-secret material remains in vault or managed runtime secret boundaries.",
+      "principal_classes": [
+        "SCHEDULER_SERVICE",
+        "CONNECTOR_SERVICE",
+        "NORMALIZER_SERVICE",
+        "COMPUTE_SERVICE",
+        "GRAPH_SERVICE",
+        "FILING_SERVICE",
+        "REPLAY_SERVICE",
+        "RETENTION_SERVICE",
+        "NOTIFICATION_SERVICE"
+      ],
+      "sensitive_mutation_posture": "Machine actors may perform only service-allowed actions and must still satisfy server-side authorization and idempotency contracts.",
+      "session_carrier": "Machine credential plus persisted `command_id`, `idempotency_key`, and server-evaluated `PrincipalContext` for each command.",
+      "source_refs": [
+        "Algorithm/actor_and_authority_model.md::L555[3.13_Machine-actor_rules]",
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L50[3._Secret_key_and_token_handling]",
+        "Algorithm/authority_interaction_protocol.md::L540[9.6_Token_and_client_binding_rule]"
+      ],
+      "step_up_posture": "Machine actors never satisfy `REQUIRE_STEP_UP`, `REQUIRE_APPROVAL`, override approval, or exceptional authority on behalf of humans."
+    },
+    {
+      "authority_credential_posture": "External identity or authority checkpoints may hand off to system browser or auth session only; the local route keeps typed pending-return posture rather than inferring completion.",
+      "blocked_or_forbidden": [
+        "No document upload, acknowledgement, or sign-off before authenticated upgrade.",
+        "No widening of client scope or route authority from deep-link context alone."
+      ],
+      "channel": "BROWSER_LIMITED_ENTRY",
+      "continuity_rules": [
+        "The flow preserves contextual focus and return path through `route_context` and typed fallback targets.",
+        "Return from external handoff never implies success until the governed read model confirms settlement."
+      ],
+      "entry_posture": "Notification, emailed deep link, or invite opens contextual route state before a normal authenticated session has been re-established.",
+      "flow_id": "invite_or_deep_link_pre_upgrade",
+      "label": "Invite or deep-link recipient before authenticated upgrade",
+      "local_storage_posture": "May preserve request or approval focus and return path, but no trust-sensitive mutation may depend on pre-upgrade state alone.",
+      "principal_classes": [
+        "CLIENT_VIEWER",
+        "CLIENT_CONTRIBUTOR",
+        "CLIENT_SIGNATORY"
+      ],
+      "sensitive_mutation_posture": "Sensitive actions are blocked until the flow upgrades into a normal authenticated session bound to the correct principal, tenant, and client scope.",
+      "session_carrier": "Contextual entry posture only; not yet a full sensitive-mutation session.",
+      "source_refs": [
+        "Algorithm/customer_client_portal_experience_contract.md::L370[Onboarding_flow]",
+        "Algorithm/customer_client_portal_experience_contract.md::L399[Artifact_print_and_browser-handoff_rules]",
+        "Algorithm/customer_client_portal_experience_contract.md::L595[route_context_deep_link_focus_and_return_path]",
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]"
+      ],
+      "step_up_posture": "If the target action is sign-off or another high-trust step, authenticated upgrade happens first and fresh step-up can still be required after return to the same object."
+    },
+    {
+      "authority_credential_posture": "No independent authority or browser-held credential scope is created by upload resumability.",
+      "blocked_or_forbidden": [
+        "Upload session allocation fails closed on stale, cross-client, or cross-tenant request identity.",
+        "Request rebases may force explicit reconfirmation rather than silently rebinding older bytes."
+      ],
+      "channel": "BROWSER_OR_MOBILE_TRANSFER",
+      "continuity_rules": [
+        "Resumed uploads stay visibly attached to the same request lane instead of appearing as fresh uploads.",
+        "Revocation invalidates outstanding upload-session control operations."
+      ],
+      "entry_posture": "Authenticated portal session allocates a governed `ClientUploadSession` as the binary-transfer exception to the generic command surface.",
+      "flow_id": "governed_upload_session",
+      "label": "Governed upload-session transfer flow",
+      "local_storage_posture": "Resumability metadata is allowed only as derivable transfer state; attachment finalization remains a typed command.",
+      "principal_classes": [
+        "CLIENT_CONTRIBUTOR",
+        "CLIENT_SIGNATORY",
+        "CLIENT_VIEWER"
+      ],
+      "sensitive_mutation_posture": "Byte transfer and status inspection are allowed; request attachment and later submission semantics still require current typed command validation.",
+      "session_carrier": "Normal authenticated session plus upload-session binding contract that freezes tenant, client, request, and request-version identity.",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L184[2.2_Customer_Client_portal_and_upload-session_surfaces]",
+        "Algorithm/customer_client_portal_experience_contract.md::L293[Secure_document-upload_flow]",
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]"
+      ],
+      "step_up_posture": "Upload itself is not a substitute for sign-off or authority-sensitive step-up; any later approval or sign-off still uses the normal authenticated session and policy-driven step-up rules."
+    }
+  ],
+  "summary": {
+    "channels": [
+      "BROWSER",
+      "NATIVE_MACOS",
+      "API_AUTOMATION",
+      "BROWSER_LIMITED_ENTRY",
+      "BROWSER_OR_MOBILE_TRANSFER"
+    ],
+    "flow_count": 6
+  }
+}

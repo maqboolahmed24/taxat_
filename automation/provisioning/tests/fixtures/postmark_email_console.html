@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Transactional Email Control Plane Fixture</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        background: #f5f6f4;
+        color: #111418;
+      }
+
+      header,
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: center;
+        padding: 24px 0 16px;
+      }
+
+      nav {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+
+      nav a {
+        color: #586f58;
+        text-decoration: none;
+      }
+
+      main {
+        display: grid;
+        gap: 1rem;
+        padding-bottom: 32px;
+      }
+
+      section {
+        background: #ffffff;
+        border: 1px solid rgba(17, 20, 24, 0.08);
+        border-radius: 18px;
+        padding: 24px;
+      }
+
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: start;
+        margin-bottom: 18px;
+      }
+
+      .badge,
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 999px;
+        padding: 0.35rem 0.7rem;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .badge {
+        background: rgba(88, 111, 88, 0.12);
+        color: #586f58;
+      }
+
+      .chip {
+        background: rgba(138, 92, 24, 0.12);
+        color: #8a5c18;
+      }
+
+      button {
+        border: 1px solid rgba(17, 20, 24, 0.1);
+        border-radius: 999px;
+        background: #586f58;
+        color: #ffffff;
+        padding: 11px 16px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .grid {
+        display: grid;
+        gap: 14px;
+      }
+
+      .card {
+        border: 1px solid rgba(17, 20, 24, 0.08);
+        border-radius: 14px;
+        padding: 16px;
+        background: #f8faf8;
+      }
+
+      .row-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: start;
+      }
+
+      .meta {
+        color: #65707a;
+        font-size: 14px;
+      }
+
+      strong {
+        display: block;
+        font-size: 13px;
+        color: #65707a;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      code {
+        font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+        font-size: 13px;
+      }
+
+      .row-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+      }
+    </style>
+  </head>
+  <body data-scenario="existing">
+    <header>
+      <div>
+        <p class="meta">Provisioning fixture</p>
+        <h1>Transactional email control plane</h1>
+      </div>
+      <nav aria-label="Provider navigation">
+        <a href="#workspace">Workspace</a>
+        <a href="#domains">Sender domains</a>
+        <a href="#streams">Message streams</a>
+        <a href="#templates">Templates</a>
+        <a href="#webhooks">Webhooks</a>
+        <a href="#event-mapping">Event mapping</a>
+      </nav>
+    </header>
+    <main>
+      <section id="workspace">
+        <div class="section-head">
+          <div>
+            <p class="meta">Provider workspace</p>
+            <h2>Workspace</h2>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <span class="badge">Postmark-compatible</span>
+            <button id="workspace-action" type="button">Create or adopt email workspace</button>
+          </div>
+        </div>
+        <div class="grid" id="workspace-list"></div>
+      </section>
+
+      <section id="domains">
+        <div class="section-head">
+          <div>
+            <p class="meta">Sender identities</p>
+            <h2>Sender domains</h2>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <span class="chip" id="dns-state-chip">Verified</span>
+            <button id="domain-action" type="button">Create or adopt sender domains</button>
+            <button id="dns-action" type="button">Verify DNS readiness</button>
+          </div>
+        </div>
+        <div class="grid" id="domain-list"></div>
+      </section>
+
+      <section id="streams">
+        <div class="section-head">
+          <div>
+            <p class="meta">Delivery partitioning</p>
+            <h2>Message streams</h2>
+          </div>
+          <span class="badge">Transport only</span>
+        </div>
+        <div class="grid" id="stream-list"></div>
+      </section>
+
+      <section id="templates">
+        <div class="section-head">
+          <div>
+            <p class="meta">Customer-safe copy</p>
+            <h2>Templates</h2>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <span class="badge" id="template-state-chip">Adopted</span>
+            <button id="template-action" type="button">Configure or adopt templates</button>
+          </div>
+        </div>
+        <div class="grid" id="template-list"></div>
+      </section>
+
+      <section id="webhooks">
+        <div class="section-head">
+          <div>
+            <p class="meta">Authenticated callbacks</p>
+            <h2>Webhooks</h2>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <span class="chip" id="telemetry-state-chip">Open/click disabled</span>
+            <button id="webhook-action" type="button">Configure webhook endpoints</button>
+          </div>
+        </div>
+        <div class="grid" id="webhook-list"></div>
+      </section>
+
+      <section id="event-mapping">
+        <div class="section-head">
+          <div>
+            <p class="meta">Evidence-only updates</p>
+            <h2>Event mapping</h2>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <span class="badge">No workflow mutation</span>
+            <button id="mapping-action" type="button">Validate delivery event mapping</button>
+          </div>
+        </div>
+        <div class="grid" id="mapping-list"></div>
+      </section>
+    </main>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const scenario = params.get("scenario") || "existing";
+      const templateScenario = params.get("templateScenario") || "existing";
+      const telemetryPolicy = params.get("telemetry") || "off";
+      document.body.dataset.scenario = scenario;
+      document.body.dataset.templateScenario = templateScenario;
+      document.body.dataset.telemetryPolicy = telemetryPolicy;
+
+      const workspaceList = document.getElementById("workspace-list");
+      const domainList = document.getElementById("domain-list");
+      const streamList = document.getElementById("stream-list");
+      const dnsStateChip = document.getElementById("dns-state-chip");
+      const templateList = document.getElementById("template-list");
+      const webhookList = document.getElementById("webhook-list");
+      const mappingList = document.getElementById("mapping-list");
+      const templateStateChip = document.getElementById("template-state-chip");
+      const telemetryStateChip = document.getElementById("telemetry-state-chip");
+
+      const workspaceRows = [
+        {
+          label: "Sandbox server",
+          alias: "taxat-sandbox-transactional",
+          disposition: scenario === "fresh" ? "created" : "adopted",
+        },
+        {
+          label: "Preproduction server",
+          alias: "taxat-preprod-transactional",
+          disposition: scenario === "fresh" ? "created" : "adopted",
+        },
+        {
+          label: "Production server",
+          alias: "taxat-production-transactional",
+          disposition: scenario === "fresh" ? "created" : "adopted",
+        },
+      ];
+
+      const domains = [
+        {
+          ref: "email_domain_notify_sandbox",
+          domain: "notify.sandbox.taxat.example",
+          readiness: "verified",
+        },
+        {
+          ref: "email_domain_notify_preprod",
+          domain: "notify.preprod.taxat.example",
+          readiness: scenario === "dns-pending" ? "pending dns" : "verified",
+        },
+        {
+          ref: "email_domain_notify_production",
+          domain: "notify.production.taxat.example",
+          readiness: "verified",
+        },
+      ];
+
+      const streams = [
+        "taxat-sandbox-customer-transactional",
+        "taxat-sandbox-operator-security",
+        "taxat-sandbox-test-sink",
+        "taxat-preprod-customer-transactional",
+        "taxat-preprod-operator-security",
+        "taxat-preprod-test-sink",
+        "taxat-production-customer-transactional",
+        "taxat-production-operator-security",
+      ];
+
+      dnsStateChip.textContent =
+        scenario === "dns-pending" ? "Manual DNS review" : "Verified";
+      templateStateChip.textContent =
+        templateScenario === "fresh" ? "Created now" : "Adopted";
+      telemetryStateChip.textContent =
+        telemetryPolicy === "drift" ? "Open tracking drift" : "Open/click disabled";
+
+      workspaceRows.forEach((row) => {
+        const card = document.createElement("article");
+        card.className = "card";
+        card.innerHTML = `
+          <div class="row-header">
+            <div>
+              <p class="meta">${row.label}</p>
+              <h3>${row.alias}</h3>
+            </div>
+            <span class="badge">${row.disposition}</span>
+          </div>
+        `;
+        workspaceList.append(card);
+      });
+
+      domains.forEach((row) => {
+        const card = document.createElement("article");
+        card.className = "card";
+        card.setAttribute("data-testid", "sender-domain-row");
+        card.innerHTML = `
+          <div class="row-header">
+            <div>
+              <p class="meta">Sender domain</p>
+              <h3>${row.domain}</h3>
+            </div>
+            <span class="chip">${row.readiness}</span>
+          </div>
+          <div class="row-grid">
+            <div>
+              <strong>Return-Path</strong>
+              <code>pm-bounces.${row.domain}</code>
+            </div>
+            <div>
+              <strong>DMARC</strong>
+              <code>_dmarc.${row.domain}</code>
+            </div>
+          </div>
+        `;
+        domainList.append(card);
+      });
+
+      streams.forEach((stream) => {
+        const card = document.createElement("article");
+        card.className = "card";
+        card.innerHTML = `
+          <p class="meta">Stream</p>
+          <h3>${stream}</h3>
+        `;
+        streamList.append(card);
+      });
+
+      [
+        ["customer-request-info-created-v1", "Request for information"],
+        ["staff-customer-comment-created-v1", "Staff shared comment"],
+        ["customer-due-date-changed-v1", "Due date changed"],
+        ["item-resolved-or-closed-v1", "Item resolved or closed"],
+        ["portal-help-acknowledged-v1", "Help acknowledged"],
+        ["support-contact-acknowledged-v1", "Support contact acknowledged"],
+      ].forEach(([alias, family]) => {
+        const card = document.createElement("article");
+        card.className = "card";
+        card.setAttribute("data-testid", "template-row");
+        card.innerHTML = `
+          <div class="row-header">
+            <div>
+              <p class="meta">${family}</p>
+              <h3>${alias}</h3>
+            </div>
+            <span class="badge">${templateScenario === "fresh" ? "created" : "adopted"}</span>
+          </div>
+          <div class="row-grid">
+            <div>
+              <strong>Stream</strong>
+              <code>customer-transactional</code>
+            </div>
+            <div>
+              <strong>Telemetry</strong>
+              <span>${telemetryPolicy === "drift" ? "open tracking enabled" : "open/click disabled"}</span>
+            </div>
+          </div>
+        `;
+        templateList.append(card);
+      });
+
+      [
+        ["Sandbox callback", "https://notification-ingress.sandbox.taxat.example/webhooks/email/postmark/customer-transactional"],
+        ["Preproduction callback", "https://notification-ingress.preprod.taxat.example/webhooks/email/postmark/customer-transactional"],
+        ["Production callback", "https://notification-ingress.production.taxat.example/webhooks/email/postmark/customer-transactional"],
+      ].forEach(([label, url]) => {
+        const card = document.createElement("article");
+        card.className = "card";
+        card.innerHTML = `
+          <div class="row-header">
+            <div>
+              <p class="meta">${label}</p>
+              <h3>${url}</h3>
+            </div>
+            <span class="chip">Authenticated</span>
+          </div>
+          <div class="row-grid">
+            <div>
+              <strong>Auth</strong>
+              <span>Basic auth + custom header</span>
+            </div>
+            <div>
+              <strong>Replay</strong>
+              <span>Return 200 on duplicate</span>
+            </div>
+          </div>
+        `;
+        webhookList.append(card);
+      });
+
+      [
+        ["Delivery", "Append delivered evidence only"],
+        ["Bounce", "Create suppression candidate and retry block"],
+        ["Spam complaint", "Confirm suppression and operator review"],
+        ["Subscription change", "Record unsubscribe evidence only"],
+      ].forEach(([label, effect]) => {
+        const card = document.createElement("article");
+        card.className = "card";
+        card.innerHTML = `
+          <div class="row-header">
+            <div>
+              <p class="meta">${label}</p>
+              <h3>${effect}</h3>
+            </div>
+            <span class="badge">No workflow mutation</span>
+          </div>
+        `;
+        mappingList.append(card);
+      });
+    </script>
+  </body>
+</html>

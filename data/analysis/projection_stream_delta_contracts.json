@@ -1,0 +1,196 @@
+{
+  "contract_version": "2026-04-18",
+  "selected_strategy": {
+    "doctrine": "Use typed deltas where the corpus already names them; otherwise prefer receipt-driven snapshot refresh over client-composed legal posture.",
+    "strategy_id": "server_authored_per_surface_typed_projections"
+  },
+  "stream_contracts": [
+    {
+      "client_rule": "Clients apply typed deltas and may preserve local focus only; they may not derive fresh legal meaning from the stream alone.",
+      "contract_id": "manifest_experience_stream",
+      "cursor_or_resume_contract": "ExperienceCursor",
+      "customer_safe_boundary": "NOT_APPLICABLE",
+      "delivery_mode": "SNAPSHOT_PLUS_TYPED_DELTA",
+      "delta_or_refresh_companion": "ExperienceDelta",
+      "duplicate_handling": "Duplicate deltas are idempotent by sequence and publication generation.",
+      "event_envelope": "ExperienceStreamEvent",
+      "ordering_scope": "manifest_id",
+      "primary_snapshot": "LowNoiseExperienceFrame",
+      "rebase_triggers": [
+        "frame epoch drift",
+        "shell stability token drift",
+        "route context drift",
+        "stream compaction floor advance"
+      ],
+      "rebuild_source": "DecisionBundle and durable manifest truth.",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L43[2._Required_northbound_surfaces]",
+        "Algorithm/northbound_api_and_session_contract.md::L646[7._Stream_and_reconnect_rules]"
+      ],
+      "surface_family": "MANIFEST"
+    },
+    {
+      "client_rule": "Clients preserve filters and scroll anchors but do not reconstruct queue truth from mounted workspaces.",
+      "contract_id": "work_inbox_stream",
+      "cursor_or_resume_contract": "resume_token",
+      "customer_safe_boundary": "STAFF_QUEUE_WITH_CUSTOMER_VISIBLE_SUMMARY_ONLY",
+      "delivery_mode": "SNAPSHOT_PLUS_TYPED_DELTA",
+      "delta_or_refresh_companion": "WorkInboxDelta",
+      "duplicate_handling": "Duplicate delivery is idempotent by monotonic sequence.",
+      "event_envelope": "notification.badge",
+      "ordering_scope": "(tenant_id, inbox_route_key)",
+      "primary_snapshot": "WorkInboxSnapshot",
+      "rebase_triggers": [
+        "queue filter grammar drift",
+        "access binding drift",
+        "shell stability token drift"
+      ],
+      "rebuild_source": "Workflow truth and append-only notification history.",
+      "source_refs": [
+        "Algorithm/collaboration_workspace_contract.md::L973[WorkInboxSnapshot]",
+        "Algorithm/collaboration_workspace_contract.md::L1098[WorkInboxDelta]",
+        "Algorithm/collaboration_workspace_contract.md::L1778[9._Stream_events_and_notifications]"
+      ],
+      "surface_family": "COLLABORATION"
+    },
+    {
+      "client_rule": "Clients preserve the active module and draft context, but do not synthesize assignment, escalation, or hidden-lane state.",
+      "contract_id": "workspace_stream",
+      "cursor_or_resume_contract": "WorkspaceCursor",
+      "customer_safe_boundary": "CUSTOMER_SAFE_PROJECTION_ON_CUSTOMER_VISIBLE_VARIANTS_ONLY",
+      "delivery_mode": "SNAPSHOT_PLUS_TYPED_DELTA",
+      "delta_or_refresh_companion": "WorkspaceDelta",
+      "duplicate_handling": "Workspace deltas are idempotent by sequence and route guard spine.",
+      "event_envelope": "WorkspaceStreamEvent",
+      "ordering_scope": "item_id",
+      "primary_snapshot": "WorkspaceSnapshot",
+      "rebase_triggers": [
+        "workspace_version drift",
+        "shell_stability_token drift",
+        "access binding drift",
+        "masking posture drift"
+      ],
+      "rebuild_source": "Workflow truth plus append-only collaboration artifacts.",
+      "source_refs": [
+        "Algorithm/collaboration_workspace_contract.md::L1146[WorkspaceSnapshot]",
+        "Algorithm/collaboration_workspace_contract.md::L1488[WorkspaceDelta]",
+        "Algorithm/collaboration_workspace_contract.md::L1778[9._Stream_events_and_notifications]"
+      ],
+      "surface_family": "COLLABORATION"
+    },
+    {
+      "client_rule": "Clients may page older entries and switch lanes only when the server returns the matching visibility-scoped slice.",
+      "contract_id": "activity_and_attachment_support_slices",
+      "cursor_or_resume_contract": "before_sequence / latest_workspace_snapshot_ref",
+      "customer_safe_boundary": "CUSTOMER_SAFE_PROJECTION_REQUIRED_ON_CUSTOMER_VISIBLE_SLICES",
+      "delivery_mode": "PAGED_SLICE_PLUS_WORKSPACE_DELTA",
+      "delta_or_refresh_companion": "WorkspaceDelta",
+      "duplicate_handling": "Paged support slices rebase to the mounted workspace snapshot rather than applying opaque local patch sets.",
+      "event_envelope": "activity.appended",
+      "ordering_scope": "item_id + thread_visibility_class_or_attachment_visibility_class",
+      "primary_snapshot": "CollaborationActivitySlice / CollaborationAttachmentSlice",
+      "rebase_triggers": [
+        "latest_workspace_snapshot_ref drift",
+        "visibility partition drift"
+      ],
+      "rebuild_source": "Append-only collaboration entries and attachments plus mounted workspace truth.",
+      "source_refs": [
+        "Algorithm/collaboration_workspace_contract.md::L1518[CollaborationActivitySlice]",
+        "Algorithm/collaboration_workspace_contract.md::L1569[CollaborationAttachmentSlice]"
+      ],
+      "surface_family": "COLLABORATION"
+    },
+    {
+      "client_rule": "Portal clients never infer stronger certainty or hidden staff posture from refresh timing or badge changes.",
+      "contract_id": "portal_route_refresh",
+      "cursor_or_resume_contract": "cross_device_continuity_contract",
+      "customer_safe_boundary": "MANDATORY",
+      "delivery_mode": "ROLE_FILTERED_REFRESH",
+      "delta_or_refresh_companion": "role-filtered portal refresh",
+      "duplicate_handling": "Portal refresh replaces the mounted route projection only when the view guard and visibility partition still match.",
+      "event_envelope": "customer-safe route refresh",
+      "ordering_scope": "client_id + route + object_anchor_ref",
+      "primary_snapshot": "ClientPortalWorkspace and route-local customer-safe read models",
+      "rebase_triggers": [
+        "workspace_version drift",
+        "customer_safe_projection drift",
+        "access binding drift",
+        "masking posture drift"
+      ],
+      "rebuild_source": "Durable workflow, obligation, authority, and receipt truth through the customer-safe boundary.",
+      "source_refs": [
+        "Algorithm/customer_client_portal_experience_contract.md::L479[Read-model_and_API_translation_requirements]",
+        "Algorithm/northbound_api_and_session_contract.md::L43[2._Required_northbound_surfaces]"
+      ],
+      "surface_family": "PORTAL"
+    },
+    {
+      "client_rule": "Governance clients may preserve local filters and change baskets, but not derive authoritative policy state from mutated local fragments.",
+      "contract_id": "governance_snapshot_refresh",
+      "cursor_or_resume_contract": "policy/dependency/simulation basis hashes",
+      "customer_safe_boundary": "MASKED_GOVERNANCE_ONLY",
+      "delivery_mode": "SNAPSHOT_REFRESH_WITH_RECEIPT_INVALIDATION",
+      "delta_or_refresh_companion": "durable command receipts",
+      "duplicate_handling": "Equivalent basis hashes dedupe refreshes; changed basis hashes force a new snapshot.",
+      "event_envelope": "governance overview refresh",
+      "ordering_scope": "tenant + route + basis_hash",
+      "primary_snapshot": "Governance route snapshots and simulations",
+      "rebase_triggers": [
+        "policy_snapshot_hash drift",
+        "dependency_topology_hash drift",
+        "simulation_basis_hash drift"
+      ],
+      "rebuild_source": "Durable governance truth, audit ledgers, and simulation basis snapshots.",
+      "source_refs": [
+        "Algorithm/admin_governance_console_architecture.md::L661[7._Frontend_systems_architecture]",
+        "Algorithm/admin_governance_console_architecture.md::L724[7.6_Minimum_route_read_models]"
+      ],
+      "surface_family": "GOVERNANCE"
+    },
+    {
+      "client_rule": "Native caches are disposable mirrors only and must purge on revocation, tenant switch, masking drift, or incompatible schema.",
+      "contract_id": "native_scene_hydration",
+      "cursor_or_resume_contract": "ExperienceCursor / WorkspaceCursor / resume_token",
+      "customer_safe_boundary": "NOT_APPLICABLE",
+      "delivery_mode": "SNAPSHOT_HYDRATION_PLUS_TYPED_RESUME",
+      "delta_or_refresh_companion": "ExperienceDelta / WorkspaceDelta",
+      "duplicate_handling": "Native delta application is idempotent; incompatible cache or guard drift triggers full rehydrate.",
+      "event_envelope": "native scene rehydrate",
+      "ordering_scope": "scene_identity + canonical_object_ref",
+      "primary_snapshot": "DecisionBundle / WorkspaceSnapshot",
+      "rebase_triggers": [
+        "scene identity drift",
+        "access binding drift",
+        "masking drift",
+        "schema incompatibility"
+      ],
+      "rebuild_source": "Northbound snapshots and typed deltas sourced from durable truth.",
+      "source_refs": [
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L294[6._Data_flow_and_synchronization_model]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L580[FE-75_Native_Cache_Hydration_Purge_and_Rebase]"
+      ],
+      "surface_family": "NATIVE_OPERATOR"
+    }
+  ],
+  "summary": {
+    "delivery_modes": {
+      "PAGED_SLICE_PLUS_WORKSPACE_DELTA": 1,
+      "ROLE_FILTERED_REFRESH": 1,
+      "SNAPSHOT_HYDRATION_PLUS_TYPED_RESUME": 1,
+      "SNAPSHOT_PLUS_TYPED_DELTA": 3,
+      "SNAPSHOT_REFRESH_WITH_RECEIPT_INVALIDATION": 1
+    },
+    "stream_contract_count": 7
+  },
+  "typed_gaps": [
+    {
+      "gap_key": "MANIFEST_FOCUS_ROUTE_NORMALIZED",
+      "source_refs": [
+        "Algorithm/collaboration_workspace_contract.md::2. Screen map[The explicit focus-jump form is named here.]",
+        "Algorithm/frontend_shell_and_interaction_law.md::2. Route continuity and shell stability[Focus jumps still obey shell stability law.]"
+      ],
+      "status": "open",
+      "summary": "The collaboration contract explicitly names `/manifests/{manifest_id}?focus=workflow:{item_id}`, but other manifest route literals are distributed across the corpus rather than centralized."
+    }
+  ]
+}

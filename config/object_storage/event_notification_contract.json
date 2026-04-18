@@ -1,0 +1,1069 @@
+{
+  "schema_version": "1.0",
+  "contract_id": "object_storage_event_notification_contract",
+  "selection_status": "PROVIDER_SELECTION_REQUIRED",
+  "route_rows": [
+    {
+      "route_ref": "route.upload_staging.object_finalize_to_scan_request",
+      "purpose_ref": "purpose.upload_staging",
+      "label": "Upload finalized -> scan request",
+      "event_types": [
+        "OBJECT_FINALIZE",
+        "BlobCreated",
+        "s3:ObjectCreated:*"
+      ],
+      "destination_channel_ref": "channel.upload.scan.request",
+      "delivery_posture": "AT_LEAST_ONCE",
+      "ordering_posture": "OUT_OF_ORDER_POSSIBLE",
+      "dedupe_fields": [
+        "bucket_name",
+        "object_key",
+        "object_version_ref",
+        "event_type",
+        "event_id_or_sequencer"
+      ],
+      "downstream_precondition": "Only stable object versions with checksum basis may advance to malware scanning and later validation.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L25[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology explicitly requires an immutable object store for uploaded bytes, quarantined binaries, proof bundles, and export bodies."
+        },
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 already fixed the object-store role as immutable-body storage distinct from control truth, broker transport, and disposable projections."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OBJECT_STORAGE_AND_QUARANTINE_BUCKETS dependency row",
+          "source_ref": "data/analysis/dependency_register.json::OBJECT_STORAGE_AND_QUARANTINE_BUCKETS",
+          "rationale": "The dependency register marks the object-store substrate as mandatory while leaving the platform as a procurement or platform choice."
+        },
+        {
+          "source_file": "Algorithm/canonical_source_and_evidence_taxonomy.md",
+          "source_heading_or_logical_block": "EvidenceItem and DOCUMENTARY_EVIDENCE candidate-boundary law",
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::L32[EvidenceItem] / Algorithm/canonical_source_and_evidence_taxonomy.md::L354[DOCUMENTARY_EVIDENCE]",
+          "rationale": "Object storage carries retained evidence bodies but must not turn raw bytes or extracted output into canonical truth by itself."
+        },
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Secure document-upload flow and preview posture",
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L307[upload-session_state] / Algorithm/customer_client_portal_experience_contract.md::L321[same-shell_file_preview]",
+          "rationale": "Transfer, scan, validation, attachment confirmation, preview, and current-vs-history remain separate facts and the storage topology must preserve that separation."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "2.2 Customer/Client portal and upload-session surfaces",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L204[2.2_Customer/Client_portal_and_upload-session_surfaces]",
+          "rationale": "Upload-session allocation freezes tenant, client, request, and request-version identity, which object keys and refs must preserve."
+        },
+        {
+          "source_file": "Algorithm/upload_session_request_binding_and_rebase_contract.md",
+          "source_heading_or_logical_block": "Upload-session identity and stale-rebase law",
+          "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::L4[contract_boundary] / Algorithm/upload_session_request_binding_and_rebase_contract.md::L67[prohibited_inference]",
+          "rationale": "Storage keys and refs must continue to bind immutable upload-session identity through rebase and replacement instead of collapsing onto friendly names."
+        },
+        {
+          "source_file": "Algorithm/upload_session_recovery_harness_contract.md",
+          "source_heading_or_logical_block": "Frozen upload-session continuity and scanner-delay cases",
+          "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::L19[continuity_boundary] / Algorithm/upload_session_recovery_harness_contract.md::L61[scanner_delay_prohibition]",
+          "rationale": "Multipart or resumable transfer success does not imply accepted, previewable, or attachable posture, and storage event routes must preserve that law."
+        },
+        {
+          "source_file": "Algorithm/retention_and_privacy.md",
+          "source_heading_or_logical_block": "Artifact retention contract and limitation behavior",
+          "source_ref": "Algorithm/retention_and_privacy.md::L58[Artifact_retention_contract]",
+          "rationale": "Lifecycle rules must bind storage purposes to retention classes and explicit limitation behavior rather than inventing ad hoc expiry semantics."
+        },
+        {
+          "source_file": "data/analysis/artifact_retention_matrix.json",
+          "source_heading_or_logical_block": "Artifact retention matrix explicit gaps and retention classes",
+          "source_ref": "data/analysis/artifact_retention_matrix.json::retention_class_enum",
+          "rationale": "The corpus publishes retention classes but still lacks one canonical per-artifact duration matrix, so lifecycle rules must encode the gap explicitly."
+        },
+        {
+          "source_file": "config/uploads/malware_scan_outcome_mapping.json",
+          "source_heading_or_logical_block": "Truth boundary statement and quarantine posture",
+          "source_ref": "config/uploads/malware_scan_outcome_mapping.json::truth_boundary_statement",
+          "rationale": "The object-store topology has to preserve the already-fixed quarantine, preview, and extraction boundary from upload intake safety work."
+        },
+        {
+          "source_file": "config/uploads/quarantine_release_policy.json",
+          "source_heading_or_logical_block": "Release rows and history-preserving copy/promote semantics",
+          "source_ref": "config/uploads/quarantine_release_policy.json::release_rows",
+          "rationale": "Quarantine release is evidence-bound and must preserve history rather than mutating a quarantined object into clean state in place."
+        }
+      ],
+      "notes": [
+        "Queue or broker resolution stays logical until pc_0052, but dedupe and replay posture are already fixed here."
+      ]
+    },
+    {
+      "route_ref": "route.upload_staging.metadata_change_to_validation_recheck",
+      "purpose_ref": "purpose.upload_staging",
+      "label": "Upload metadata change -> validation recheck",
+      "event_types": [
+        "OBJECT_METADATA_UPDATE",
+        "BlobPropertiesUpdated",
+        "s3:ObjectTagging:*"
+      ],
+      "destination_channel_ref": "channel.upload.validation.recheck",
+      "delivery_posture": "AT_LEAST_ONCE",
+      "ordering_posture": "OUT_OF_ORDER_POSSIBLE",
+      "dedupe_fields": [
+        "bucket_name",
+        "object_key",
+        "object_version_ref",
+        "event_type",
+        "metageneration_or_etag"
+      ],
+      "downstream_precondition": "Validation refresh stays version-bound and cannot reuse stale scan or request-binding posture silently.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L25[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology explicitly requires an immutable object store for uploaded bytes, quarantined binaries, proof bundles, and export bodies."
+        },
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 already fixed the object-store role as immutable-body storage distinct from control truth, broker transport, and disposable projections."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OBJECT_STORAGE_AND_QUARANTINE_BUCKETS dependency row",
+          "source_ref": "data/analysis/dependency_register.json::OBJECT_STORAGE_AND_QUARANTINE_BUCKETS",
+          "rationale": "The dependency register marks the object-store substrate as mandatory while leaving the platform as a procurement or platform choice."
+        },
+        {
+          "source_file": "Algorithm/canonical_source_and_evidence_taxonomy.md",
+          "source_heading_or_logical_block": "EvidenceItem and DOCUMENTARY_EVIDENCE candidate-boundary law",
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::L32[EvidenceItem] / Algorithm/canonical_source_and_evidence_taxonomy.md::L354[DOCUMENTARY_EVIDENCE]",
+          "rationale": "Object storage carries retained evidence bodies but must not turn raw bytes or extracted output into canonical truth by itself."
+        },
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Secure document-upload flow and preview posture",
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L307[upload-session_state] / Algorithm/customer_client_portal_experience_contract.md::L321[same-shell_file_preview]",
+          "rationale": "Transfer, scan, validation, attachment confirmation, preview, and current-vs-history remain separate facts and the storage topology must preserve that separation."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "2.2 Customer/Client portal and upload-session surfaces",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L204[2.2_Customer/Client_portal_and_upload-session_surfaces]",
+          "rationale": "Upload-session allocation freezes tenant, client, request, and request-version identity, which object keys and refs must preserve."
+        },
+        {
+          "source_file": "Algorithm/upload_session_request_binding_and_rebase_contract.md",
+          "source_heading_or_logical_block": "Upload-session identity and stale-rebase law",
+          "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::L4[contract_boundary] / Algorithm/upload_session_request_binding_and_rebase_contract.md::L67[prohibited_inference]",
+          "rationale": "Storage keys and refs must continue to bind immutable upload-session identity through rebase and replacement instead of collapsing onto friendly names."
+        },
+        {
+          "source_file": "Algorithm/upload_session_recovery_harness_contract.md",
+          "source_heading_or_logical_block": "Frozen upload-session continuity and scanner-delay cases",
+          "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::L19[continuity_boundary] / Algorithm/upload_session_recovery_harness_contract.md::L61[scanner_delay_prohibition]",
+          "rationale": "Multipart or resumable transfer success does not imply accepted, previewable, or attachable posture, and storage event routes must preserve that law."
+        },
+        {
+          "source_file": "Algorithm/retention_and_privacy.md",
+          "source_heading_or_logical_block": "Artifact retention contract and limitation behavior",
+          "source_ref": "Algorithm/retention_and_privacy.md::L58[Artifact_retention_contract]",
+          "rationale": "Lifecycle rules must bind storage purposes to retention classes and explicit limitation behavior rather than inventing ad hoc expiry semantics."
+        },
+        {
+          "source_file": "data/analysis/artifact_retention_matrix.json",
+          "source_heading_or_logical_block": "Artifact retention matrix explicit gaps and retention classes",
+          "source_ref": "data/analysis/artifact_retention_matrix.json::retention_class_enum",
+          "rationale": "The corpus publishes retention classes but still lacks one canonical per-artifact duration matrix, so lifecycle rules must encode the gap explicitly."
+        },
+        {
+          "source_file": "config/uploads/malware_scan_outcome_mapping.json",
+          "source_heading_or_logical_block": "Truth boundary statement and quarantine posture",
+          "source_ref": "config/uploads/malware_scan_outcome_mapping.json::truth_boundary_statement",
+          "rationale": "The object-store topology has to preserve the already-fixed quarantine, preview, and extraction boundary from upload intake safety work."
+        },
+        {
+          "source_file": "config/uploads/quarantine_release_policy.json",
+          "source_heading_or_logical_block": "Release rows and history-preserving copy/promote semantics",
+          "source_ref": "config/uploads/quarantine_release_policy.json::release_rows",
+          "rationale": "Quarantine release is evidence-bound and must preserve history rather than mutating a quarantined object into clean state in place."
+        }
+      ],
+      "notes": [
+        "Metadata changes must not silently widen preview or attachment posture."
+      ]
+    },
+    {
+      "route_ref": "route.retained_evidence.object_finalize_to_manifest_binding",
+      "purpose_ref": "purpose.retained_evidence",
+      "label": "Retained evidence finalized -> manifest binding",
+      "event_types": [
+        "OBJECT_FINALIZE",
+        "BlobCreated",
+        "s3:ObjectCreated:*"
+      ],
+      "destination_channel_ref": "channel.evidence.manifest.binding",
+      "delivery_posture": "AT_LEAST_ONCE",
+      "ordering_posture": "OUT_OF_ORDER_POSSIBLE",
+      "dedupe_fields": [
+        "bucket_name",
+        "object_key",
+        "object_version_ref",
+        "event_type",
+        "event_id_or_sequencer"
+      ],
+      "downstream_precondition": "Metadata binding updates durable control records; bucket listings themselves never become source of truth.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L25[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology explicitly requires an immutable object store for uploaded bytes, quarantined binaries, proof bundles, and export bodies."
+        },
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 already fixed the object-store role as immutable-body storage distinct from control truth, broker transport, and disposable projections."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OBJECT_STORAGE_AND_QUARANTINE_BUCKETS dependency row",
+          "source_ref": "data/analysis/dependency_register.json::OBJECT_STORAGE_AND_QUARANTINE_BUCKETS",
+          "rationale": "The dependency register marks the object-store substrate as mandatory while leaving the platform as a procurement or platform choice."
+        },
+        {
+          "source_file": "Algorithm/canonical_source_and_evidence_taxonomy.md",
+          "source_heading_or_logical_block": "EvidenceItem and DOCUMENTARY_EVIDENCE candidate-boundary law",
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::L32[EvidenceItem] / Algorithm/canonical_source_and_evidence_taxonomy.md::L354[DOCUMENTARY_EVIDENCE]",
+          "rationale": "Object storage carries retained evidence bodies but must not turn raw bytes or extracted output into canonical truth by itself."
+        },
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Secure document-upload flow and preview posture",
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L307[upload-session_state] / Algorithm/customer_client_portal_experience_contract.md::L321[same-shell_file_preview]",
+          "rationale": "Transfer, scan, validation, attachment confirmation, preview, and current-vs-history remain separate facts and the storage topology must preserve that separation."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "2.2 Customer/Client portal and upload-session surfaces",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L204[2.2_Customer/Client_portal_and_upload-session_surfaces]",
+          "rationale": "Upload-session allocation freezes tenant, client, request, and request-version identity, which object keys and refs must preserve."
+        },
+        {
+          "source_file": "Algorithm/upload_session_request_binding_and_rebase_contract.md",
+          "source_heading_or_logical_block": "Upload-session identity and stale-rebase law",
+          "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::L4[contract_boundary] / Algorithm/upload_session_request_binding_and_rebase_contract.md::L67[prohibited_inference]",
+          "rationale": "Storage keys and refs must continue to bind immutable upload-session identity through rebase and replacement instead of collapsing onto friendly names."
+        },
+        {
+          "source_file": "Algorithm/upload_session_recovery_harness_contract.md",
+          "source_heading_or_logical_block": "Frozen upload-session continuity and scanner-delay cases",
+          "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::L19[continuity_boundary] / Algorithm/upload_session_recovery_harness_contract.md::L61[scanner_delay_prohibition]",
+          "rationale": "Multipart or resumable transfer success does not imply accepted, previewable, or attachable posture, and storage event routes must preserve that law."
+        },
+        {
+          "source_file": "Algorithm/retention_and_privacy.md",
+          "source_heading_or_logical_block": "Artifact retention contract and limitation behavior",
+          "source_ref": "Algorithm/retention_and_privacy.md::L58[Artifact_retention_contract]",
+          "rationale": "Lifecycle rules must bind storage purposes to retention classes and explicit limitation behavior rather than inventing ad hoc expiry semantics."
+        },
+        {
+          "source_file": "data/analysis/artifact_retention_matrix.json",
+          "source_heading_or_logical_block": "Artifact retention matrix explicit gaps and retention classes",
+          "source_ref": "data/analysis/artifact_retention_matrix.json::retention_class_enum",
+          "rationale": "The corpus publishes retention classes but still lacks one canonical per-artifact duration matrix, so lifecycle rules must encode the gap explicitly."
+        },
+        {
+          "source_file": "config/uploads/malware_scan_outcome_mapping.json",
+          "source_heading_or_logical_block": "Truth boundary statement and quarantine posture",
+          "source_ref": "config/uploads/malware_scan_outcome_mapping.json::truth_boundary_statement",
+          "rationale": "The object-store topology has to preserve the already-fixed quarantine, preview, and extraction boundary from upload intake safety work."
+        },
+        {
+          "source_file": "config/uploads/quarantine_release_policy.json",
+          "source_heading_or_logical_block": "Release rows and history-preserving copy/promote semantics",
+          "source_ref": "config/uploads/quarantine_release_policy.json::release_rows",
+          "rationale": "Quarantine release is evidence-bound and must preserve history rather than mutating a quarantined object into clean state in place."
+        }
+      ],
+      "notes": [
+        "Evidence bodies become addressable via immutable refs only after durable metadata binding lands."
+      ]
+    },
+    {
+      "route_ref": "route.authority_payload.object_finalize_to_ingress_normalization",
+      "purpose_ref": "purpose.authority_payload_bodies",
+      "label": "Authority payload finalized -> ingress normalization",
+      "event_types": [
+        "OBJECT_FINALIZE",
+        "BlobCreated",
+        "s3:ObjectCreated:*"
+      ],
+      "destination_channel_ref": "channel.authority.payload.normalization",
+      "delivery_posture": "AT_LEAST_ONCE",
+      "ordering_posture": "OUT_OF_ORDER_POSSIBLE",
+      "dedupe_fields": [
+        "bucket_name",
+        "object_key",
+        "object_version_ref",
+        "event_type",
+        "event_id_or_sequencer"
+      ],
+      "downstream_precondition": "Authority payloads must still checkpoint through governed ingress before any legal-state mutation.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L25[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology explicitly requires an immutable object store for uploaded bytes, quarantined binaries, proof bundles, and export bodies."
+        },
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 already fixed the object-store role as immutable-body storage distinct from control truth, broker transport, and disposable projections."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OBJECT_STORAGE_AND_QUARANTINE_BUCKETS dependency row",
+          "source_ref": "data/analysis/dependency_register.json::OBJECT_STORAGE_AND_QUARANTINE_BUCKETS",
+          "rationale": "The dependency register marks the object-store substrate as mandatory while leaving the platform as a procurement or platform choice."
+        },
+        {
+          "source_file": "Algorithm/canonical_source_and_evidence_taxonomy.md",
+          "source_heading_or_logical_block": "EvidenceItem and DOCUMENTARY_EVIDENCE candidate-boundary law",
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::L32[EvidenceItem] / Algorithm/canonical_source_and_evidence_taxonomy.md::L354[DOCUMENTARY_EVIDENCE]",
+          "rationale": "Object storage carries retained evidence bodies but must not turn raw bytes or extracted output into canonical truth by itself."
+        },
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Secure document-upload flow and preview posture",
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L307[upload-session_state] / Algorithm/customer_client_portal_experience_contract.md::L321[same-shell_file_preview]",
+          "rationale": "Transfer, scan, validation, attachment confirmation, preview, and current-vs-history remain separate facts and the storage topology must preserve that separation."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "2.2 Customer/Client portal and upload-session surfaces",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L204[2.2_Customer/Client_portal_and_upload-session_surfaces]",
+          "rationale": "Upload-session allocation freezes tenant, client, request, and request-version identity, which object keys and refs must preserve."
+        },
+        {
+          "source_file": "Algorithm/upload_session_request_binding_and_rebase_contract.md",
+          "source_heading_or_logical_block": "Upload-session identity and stale-rebase law",
+          "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::L4[contract_boundary] / Algorithm/upload_session_request_binding_and_rebase_contract.md::L67[prohibited_inference]",
+          "rationale": "Storage keys and refs must continue to bind immutable upload-session identity through rebase and replacement instead of collapsing onto friendly names."
+        },
+        {
+          "source_file": "Algorithm/upload_session_recovery_harness_contract.md",
+          "source_heading_or_logical_block": "Frozen upload-session continuity and scanner-delay cases",
+          "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::L19[continuity_boundary] / Algorithm/upload_session_recovery_harness_contract.md::L61[scanner_delay_prohibition]",
+          "rationale": "Multipart or resumable transfer success does not imply accepted, previewable, or attachable posture, and storage event routes must preserve that law."
+        },
+        {
+          "source_file": "Algorithm/retention_and_privacy.md",
+          "source_heading_or_logical_block": "Artifact retention contract and limitation behavior",
+          "source_ref": "Algorithm/retention_and_privacy.md::L58[Artifact_retention_contract]",
+          "rationale": "Lifecycle rules must bind storage purposes to retention classes and explicit limitation behavior rather than inventing ad hoc expiry semantics."
+        },
+        {
+          "source_file": "data/analysis/artifact_retention_matrix.json",
+          "source_heading_or_logical_block": "Artifact retention matrix explicit gaps and retention classes",
+          "source_ref": "data/analysis/artifact_retention_matrix.json::retention_class_enum",
+          "rationale": "The corpus publishes retention classes but still lacks one canonical per-artifact duration matrix, so lifecycle rules must encode the gap explicitly."
+        },
+        {
+          "source_file": "config/uploads/malware_scan_outcome_mapping.json",
+          "source_heading_or_logical_block": "Truth boundary statement and quarantine posture",
+          "source_ref": "config/uploads/malware_scan_outcome_mapping.json::truth_boundary_statement",
+          "rationale": "The object-store topology has to preserve the already-fixed quarantine, preview, and extraction boundary from upload intake safety work."
+        },
+        {
+          "source_file": "config/uploads/quarantine_release_policy.json",
+          "source_heading_or_logical_block": "Release rows and history-preserving copy/promote semantics",
+          "source_ref": "config/uploads/quarantine_release_policy.json::release_rows",
+          "rationale": "Quarantine release is evidence-bound and must preserve history rather than mutating a quarantined object into clean state in place."
+        }
+      ],
+      "notes": [
+        "Payload body storage and authority truth remain distinct."
+      ]
+    },
+    {
+      "route_ref": "route.derived_preview.object_finalize_to_preview_registration",
+      "purpose_ref": "purpose.derived_previews",
+      "label": "Derived preview finalized -> preview registration",
+      "event_types": [
+        "OBJECT_FINALIZE",
+        "BlobCreated",
+        "s3:ObjectCreated:*"
+      ],
+      "destination_channel_ref": "channel.preview.registration",
+      "delivery_posture": "AT_LEAST_ONCE",
+      "ordering_posture": "OUT_OF_ORDER_POSSIBLE",
+      "dedupe_fields": [
+        "bucket_name",
+        "object_key",
+        "artifact_version_ref",
+        "event_type",
+        "event_id_or_sequencer"
+      ],
+      "downstream_precondition": "Preview registration must retain current-versus-history and limitation posture from durable truth.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L25[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology explicitly requires an immutable object store for uploaded bytes, quarantined binaries, proof bundles, and export bodies."
+        },
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 already fixed the object-store role as immutable-body storage distinct from control truth, broker transport, and disposable projections."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OBJECT_STORAGE_AND_QUARANTINE_BUCKETS dependency row",
+          "source_ref": "data/analysis/dependency_register.json::OBJECT_STORAGE_AND_QUARANTINE_BUCKETS",
+          "rationale": "The dependency register marks the object-store substrate as mandatory while leaving the platform as a procurement or platform choice."
+        },
+        {
+          "source_file": "Algorithm/canonical_source_and_evidence_taxonomy.md",
+          "source_heading_or_logical_block": "EvidenceItem and DOCUMENTARY_EVIDENCE candidate-boundary law",
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::L32[EvidenceItem] / Algorithm/canonical_source_and_evidence_taxonomy.md::L354[DOCUMENTARY_EVIDENCE]",
+          "rationale": "Object storage carries retained evidence bodies but must not turn raw bytes or extracted output into canonical truth by itself."
+        },
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Secure document-upload flow and preview posture",
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L307[upload-session_state] / Algorithm/customer_client_portal_experience_contract.md::L321[same-shell_file_preview]",
+          "rationale": "Transfer, scan, validation, attachment confirmation, preview, and current-vs-history remain separate facts and the storage topology must preserve that separation."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "2.2 Customer/Client portal and upload-session surfaces",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L204[2.2_Customer/Client_portal_and_upload-session_surfaces]",
+          "rationale": "Upload-session allocation freezes tenant, client, request, and request-version identity, which object keys and refs must preserve."
+        },
+        {
+          "source_file": "Algorithm/upload_session_request_binding_and_rebase_contract.md",
+          "source_heading_or_logical_block": "Upload-session identity and stale-rebase law",
+          "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::L4[contract_boundary] / Algorithm/upload_session_request_binding_and_rebase_contract.md::L67[prohibited_inference]",
+          "rationale": "Storage keys and refs must continue to bind immutable upload-session identity through rebase and replacement instead of collapsing onto friendly names."
+        },
+        {
+          "source_file": "Algorithm/upload_session_recovery_harness_contract.md",
+          "source_heading_or_logical_block": "Frozen upload-session continuity and scanner-delay cases",
+          "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::L19[continuity_boundary] / Algorithm/upload_session_recovery_harness_contract.md::L61[scanner_delay_prohibition]",
+          "rationale": "Multipart or resumable transfer success does not imply accepted, previewable, or attachable posture, and storage event routes must preserve that law."
+        },
+        {
+          "source_file": "Algorithm/retention_and_privacy.md",
+          "source_heading_or_logical_block": "Artifact retention contract and limitation behavior",
+          "source_ref": "Algorithm/retention_and_privacy.md::L58[Artifact_retention_contract]",
+          "rationale": "Lifecycle rules must bind storage purposes to retention classes and explicit limitation behavior rather than inventing ad hoc expiry semantics."
+        },
+        {
+          "source_file": "data/analysis/artifact_retention_matrix.json",
+          "source_heading_or_logical_block": "Artifact retention matrix explicit gaps and retention classes",
+          "source_ref": "data/analysis/artifact_retention_matrix.json::retention_class_enum",
+          "rationale": "The corpus publishes retention classes but still lacks one canonical per-artifact duration matrix, so lifecycle rules must encode the gap explicitly."
+        },
+        {
+          "source_file": "config/uploads/malware_scan_outcome_mapping.json",
+          "source_heading_or_logical_block": "Truth boundary statement and quarantine posture",
+          "source_ref": "config/uploads/malware_scan_outcome_mapping.json::truth_boundary_statement",
+          "rationale": "The object-store topology has to preserve the already-fixed quarantine, preview, and extraction boundary from upload intake safety work."
+        },
+        {
+          "source_file": "config/uploads/quarantine_release_policy.json",
+          "source_heading_or_logical_block": "Release rows and history-preserving copy/promote semantics",
+          "source_ref": "config/uploads/quarantine_release_policy.json::release_rows",
+          "rationale": "Quarantine release is evidence-bound and must preserve history rather than mutating a quarantined object into clean state in place."
+        }
+      ],
+      "notes": [
+        "Preview derivatives are never lawful direct-download targets by themselves."
+      ]
+    },
+    {
+      "route_ref": "route.export_masked.object_finalize_to_delivery_attestation",
+      "purpose_ref": "purpose.export_masked",
+      "label": "Masked export finalized -> delivery attestation",
+      "event_types": [
+        "OBJECT_FINALIZE",
+        "BlobCreated",
+        "s3:ObjectCreated:*"
+      ],
+      "destination_channel_ref": "channel.export.delivery.attestation",
+      "delivery_posture": "AT_LEAST_ONCE",
+      "ordering_posture": "OUT_OF_ORDER_POSSIBLE",
+      "dedupe_fields": [
+        "bucket_name",
+        "object_key",
+        "export_version_ref",
+        "delivery_binding_hash",
+        "event_id_or_sequencer"
+      ],
+      "downstream_precondition": "Delivery records must stay bound to the active masking posture and route-specific externalization contract.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L25[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology explicitly requires an immutable object store for uploaded bytes, quarantined binaries, proof bundles, and export bodies."
+        },
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 already fixed the object-store role as immutable-body storage distinct from control truth, broker transport, and disposable projections."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OBJECT_STORAGE_AND_QUARANTINE_BUCKETS dependency row",
+          "source_ref": "data/analysis/dependency_register.json::OBJECT_STORAGE_AND_QUARANTINE_BUCKETS",
+          "rationale": "The dependency register marks the object-store substrate as mandatory while leaving the platform as a procurement or platform choice."
+        },
+        {
+          "source_file": "Algorithm/canonical_source_and_evidence_taxonomy.md",
+          "source_heading_or_logical_block": "EvidenceItem and DOCUMENTARY_EVIDENCE candidate-boundary law",
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::L32[EvidenceItem] / Algorithm/canonical_source_and_evidence_taxonomy.md::L354[DOCUMENTARY_EVIDENCE]",
+          "rationale": "Object storage carries retained evidence bodies but must not turn raw bytes or extracted output into canonical truth by itself."
+        },
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Secure document-upload flow and preview posture",
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L307[upload-session_state] / Algorithm/customer_client_portal_experience_contract.md::L321[same-shell_file_preview]",
+          "rationale": "Transfer, scan, validation, attachment confirmation, preview, and current-vs-history remain separate facts and the storage topology must preserve that separation."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "2.2 Customer/Client portal and upload-session surfaces",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L204[2.2_Customer/Client_portal_and_upload-session_surfaces]",
+          "rationale": "Upload-session allocation freezes tenant, client, request, and request-version identity, which object keys and refs must preserve."
+        },
+        {
+          "source_file": "Algorithm/upload_session_request_binding_and_rebase_contract.md",
+          "source_heading_or_logical_block": "Upload-session identity and stale-rebase law",
+          "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::L4[contract_boundary] / Algorithm/upload_session_request_binding_and_rebase_contract.md::L67[prohibited_inference]",
+          "rationale": "Storage keys and refs must continue to bind immutable upload-session identity through rebase and replacement instead of collapsing onto friendly names."
+        },
+        {
+          "source_file": "Algorithm/upload_session_recovery_harness_contract.md",
+          "source_heading_or_logical_block": "Frozen upload-session continuity and scanner-delay cases",
+          "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::L19[continuity_boundary] / Algorithm/upload_session_recovery_harness_contract.md::L61[scanner_delay_prohibition]",
+          "rationale": "Multipart or resumable transfer success does not imply accepted, previewable, or attachable posture, and storage event routes must preserve that law."
+        },
+        {
+          "source_file": "Algorithm/retention_and_privacy.md",
+          "source_heading_or_logical_block": "Artifact retention contract and limitation behavior",
+          "source_ref": "Algorithm/retention_and_privacy.md::L58[Artifact_retention_contract]",
+          "rationale": "Lifecycle rules must bind storage purposes to retention classes and explicit limitation behavior rather than inventing ad hoc expiry semantics."
+        },
+        {
+          "source_file": "data/analysis/artifact_retention_matrix.json",
+          "source_heading_or_logical_block": "Artifact retention matrix explicit gaps and retention classes",
+          "source_ref": "data/analysis/artifact_retention_matrix.json::retention_class_enum",
+          "rationale": "The corpus publishes retention classes but still lacks one canonical per-artifact duration matrix, so lifecycle rules must encode the gap explicitly."
+        },
+        {
+          "source_file": "config/uploads/malware_scan_outcome_mapping.json",
+          "source_heading_or_logical_block": "Truth boundary statement and quarantine posture",
+          "source_ref": "config/uploads/malware_scan_outcome_mapping.json::truth_boundary_statement",
+          "rationale": "The object-store topology has to preserve the already-fixed quarantine, preview, and extraction boundary from upload intake safety work."
+        },
+        {
+          "source_file": "config/uploads/quarantine_release_policy.json",
+          "source_heading_or_logical_block": "Release rows and history-preserving copy/promote semantics",
+          "source_ref": "config/uploads/quarantine_release_policy.json::release_rows",
+          "rationale": "Quarantine release is evidence-bound and must preserve history rather than mutating a quarantined object into clean state in place."
+        }
+      ],
+      "notes": [
+        "Masked exports and restricted exports are attested separately."
+      ]
+    },
+    {
+      "route_ref": "route.export_restricted.object_finalize_to_operator_delivery_attestation",
+      "purpose_ref": "purpose.export_restricted",
+      "label": "Restricted export finalized -> operator delivery attestation",
+      "event_types": [
+        "OBJECT_FINALIZE",
+        "BlobCreated",
+        "s3:ObjectCreated:*"
+      ],
+      "destination_channel_ref": "channel.export.delivery.attestation.restricted",
+      "delivery_posture": "AT_LEAST_ONCE",
+      "ordering_posture": "OUT_OF_ORDER_POSSIBLE",
+      "dedupe_fields": [
+        "bucket_name",
+        "object_key",
+        "export_version_ref",
+        "delivery_binding_hash",
+        "event_id_or_sequencer"
+      ],
+      "downstream_precondition": "Restricted export delivery remains operator-step-up-bound and cannot reuse masked-export receipts.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L25[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology explicitly requires an immutable object store for uploaded bytes, quarantined binaries, proof bundles, and export bodies."
+        },
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 already fixed the object-store role as immutable-body storage distinct from control truth, broker transport, and disposable projections."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OBJECT_STORAGE_AND_QUARANTINE_BUCKETS dependency row",
+          "source_ref": "data/analysis/dependency_register.json::OBJECT_STORAGE_AND_QUARANTINE_BUCKETS",
+          "rationale": "The dependency register marks the object-store substrate as mandatory while leaving the platform as a procurement or platform choice."
+        },
+        {
+          "source_file": "Algorithm/canonical_source_and_evidence_taxonomy.md",
+          "source_heading_or_logical_block": "EvidenceItem and DOCUMENTARY_EVIDENCE candidate-boundary law",
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::L32[EvidenceItem] / Algorithm/canonical_source_and_evidence_taxonomy.md::L354[DOCUMENTARY_EVIDENCE]",
+          "rationale": "Object storage carries retained evidence bodies but must not turn raw bytes or extracted output into canonical truth by itself."
+        },
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Secure document-upload flow and preview posture",
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L307[upload-session_state] / Algorithm/customer_client_portal_experience_contract.md::L321[same-shell_file_preview]",
+          "rationale": "Transfer, scan, validation, attachment confirmation, preview, and current-vs-history remain separate facts and the storage topology must preserve that separation."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "2.2 Customer/Client portal and upload-session surfaces",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L204[2.2_Customer/Client_portal_and_upload-session_surfaces]",
+          "rationale": "Upload-session allocation freezes tenant, client, request, and request-version identity, which object keys and refs must preserve."
+        },
+        {
+          "source_file": "Algorithm/upload_session_request_binding_and_rebase_contract.md",
+          "source_heading_or_logical_block": "Upload-session identity and stale-rebase law",
+          "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::L4[contract_boundary] / Algorithm/upload_session_request_binding_and_rebase_contract.md::L67[prohibited_inference]",
+          "rationale": "Storage keys and refs must continue to bind immutable upload-session identity through rebase and replacement instead of collapsing onto friendly names."
+        },
+        {
+          "source_file": "Algorithm/upload_session_recovery_harness_contract.md",
+          "source_heading_or_logical_block": "Frozen upload-session continuity and scanner-delay cases",
+          "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::L19[continuity_boundary] / Algorithm/upload_session_recovery_harness_contract.md::L61[scanner_delay_prohibition]",
+          "rationale": "Multipart or resumable transfer success does not imply accepted, previewable, or attachable posture, and storage event routes must preserve that law."
+        },
+        {
+          "source_file": "Algorithm/retention_and_privacy.md",
+          "source_heading_or_logical_block": "Artifact retention contract and limitation behavior",
+          "source_ref": "Algorithm/retention_and_privacy.md::L58[Artifact_retention_contract]",
+          "rationale": "Lifecycle rules must bind storage purposes to retention classes and explicit limitation behavior rather than inventing ad hoc expiry semantics."
+        },
+        {
+          "source_file": "data/analysis/artifact_retention_matrix.json",
+          "source_heading_or_logical_block": "Artifact retention matrix explicit gaps and retention classes",
+          "source_ref": "data/analysis/artifact_retention_matrix.json::retention_class_enum",
+          "rationale": "The corpus publishes retention classes but still lacks one canonical per-artifact duration matrix, so lifecycle rules must encode the gap explicitly."
+        },
+        {
+          "source_file": "config/uploads/malware_scan_outcome_mapping.json",
+          "source_heading_or_logical_block": "Truth boundary statement and quarantine posture",
+          "source_ref": "config/uploads/malware_scan_outcome_mapping.json::truth_boundary_statement",
+          "rationale": "The object-store topology has to preserve the already-fixed quarantine, preview, and extraction boundary from upload intake safety work."
+        },
+        {
+          "source_file": "config/uploads/quarantine_release_policy.json",
+          "source_heading_or_logical_block": "Release rows and history-preserving copy/promote semantics",
+          "source_ref": "config/uploads/quarantine_release_policy.json::release_rows",
+          "rationale": "Quarantine release is evidence-bound and must preserve history rather than mutating a quarantined object into clean state in place."
+        }
+      ],
+      "notes": [
+        "Restricted export delivery remains distinct from customer-safe externalization."
+      ]
+    },
+    {
+      "route_ref": "route.quarantine.object_finalize_to_quarantine_audit",
+      "purpose_ref": "purpose.quarantine",
+      "label": "Quarantine object finalized -> quarantine audit",
+      "event_types": [
+        "OBJECT_FINALIZE",
+        "BlobCreated",
+        "s3:ObjectCreated:*"
+      ],
+      "destination_channel_ref": "channel.quarantine.audit",
+      "delivery_posture": "AT_LEAST_ONCE",
+      "ordering_posture": "OUT_OF_ORDER_POSSIBLE",
+      "dedupe_fields": [
+        "bucket_name",
+        "object_key",
+        "object_version_ref",
+        "quarantine_event_ref",
+        "event_id_or_sequencer"
+      ],
+      "downstream_precondition": "Quarantine state must remain durable and history-preserving before any release or replacement workflow continues.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L25[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology explicitly requires an immutable object store for uploaded bytes, quarantined binaries, proof bundles, and export bodies."
+        },
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 already fixed the object-store role as immutable-body storage distinct from control truth, broker transport, and disposable projections."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OBJECT_STORAGE_AND_QUARANTINE_BUCKETS dependency row",
+          "source_ref": "data/analysis/dependency_register.json::OBJECT_STORAGE_AND_QUARANTINE_BUCKETS",
+          "rationale": "The dependency register marks the object-store substrate as mandatory while leaving the platform as a procurement or platform choice."
+        },
+        {
+          "source_file": "Algorithm/canonical_source_and_evidence_taxonomy.md",
+          "source_heading_or_logical_block": "EvidenceItem and DOCUMENTARY_EVIDENCE candidate-boundary law",
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::L32[EvidenceItem] / Algorithm/canonical_source_and_evidence_taxonomy.md::L354[DOCUMENTARY_EVIDENCE]",
+          "rationale": "Object storage carries retained evidence bodies but must not turn raw bytes or extracted output into canonical truth by itself."
+        },
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Secure document-upload flow and preview posture",
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L307[upload-session_state] / Algorithm/customer_client_portal_experience_contract.md::L321[same-shell_file_preview]",
+          "rationale": "Transfer, scan, validation, attachment confirmation, preview, and current-vs-history remain separate facts and the storage topology must preserve that separation."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "2.2 Customer/Client portal and upload-session surfaces",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L204[2.2_Customer/Client_portal_and_upload-session_surfaces]",
+          "rationale": "Upload-session allocation freezes tenant, client, request, and request-version identity, which object keys and refs must preserve."
+        },
+        {
+          "source_file": "Algorithm/upload_session_request_binding_and_rebase_contract.md",
+          "source_heading_or_logical_block": "Upload-session identity and stale-rebase law",
+          "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::L4[contract_boundary] / Algorithm/upload_session_request_binding_and_rebase_contract.md::L67[prohibited_inference]",
+          "rationale": "Storage keys and refs must continue to bind immutable upload-session identity through rebase and replacement instead of collapsing onto friendly names."
+        },
+        {
+          "source_file": "Algorithm/upload_session_recovery_harness_contract.md",
+          "source_heading_or_logical_block": "Frozen upload-session continuity and scanner-delay cases",
+          "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::L19[continuity_boundary] / Algorithm/upload_session_recovery_harness_contract.md::L61[scanner_delay_prohibition]",
+          "rationale": "Multipart or resumable transfer success does not imply accepted, previewable, or attachable posture, and storage event routes must preserve that law."
+        },
+        {
+          "source_file": "Algorithm/retention_and_privacy.md",
+          "source_heading_or_logical_block": "Artifact retention contract and limitation behavior",
+          "source_ref": "Algorithm/retention_and_privacy.md::L58[Artifact_retention_contract]",
+          "rationale": "Lifecycle rules must bind storage purposes to retention classes and explicit limitation behavior rather than inventing ad hoc expiry semantics."
+        },
+        {
+          "source_file": "data/analysis/artifact_retention_matrix.json",
+          "source_heading_or_logical_block": "Artifact retention matrix explicit gaps and retention classes",
+          "source_ref": "data/analysis/artifact_retention_matrix.json::retention_class_enum",
+          "rationale": "The corpus publishes retention classes but still lacks one canonical per-artifact duration matrix, so lifecycle rules must encode the gap explicitly."
+        },
+        {
+          "source_file": "config/uploads/malware_scan_outcome_mapping.json",
+          "source_heading_or_logical_block": "Truth boundary statement and quarantine posture",
+          "source_ref": "config/uploads/malware_scan_outcome_mapping.json::truth_boundary_statement",
+          "rationale": "The object-store topology has to preserve the already-fixed quarantine, preview, and extraction boundary from upload intake safety work."
+        },
+        {
+          "source_file": "config/uploads/quarantine_release_policy.json",
+          "source_heading_or_logical_block": "Release rows and history-preserving copy/promote semantics",
+          "source_ref": "config/uploads/quarantine_release_policy.json::release_rows",
+          "rationale": "Quarantine release is evidence-bound and must preserve history rather than mutating a quarantined object into clean state in place."
+        }
+      ],
+      "notes": [
+        "Quarantine copy/promote workflows keep the original quarantined version immutable."
+      ]
+    },
+    {
+      "route_ref": "route.restore_archive.object_finalize_to_restore_index",
+      "purpose_ref": "purpose.restore_archive",
+      "label": "Restore archive finalized -> restore index",
+      "event_types": [
+        "OBJECT_FINALIZE",
+        "BlobCreated",
+        "s3:ObjectCreated:*"
+      ],
+      "destination_channel_ref": "channel.restore.archive.index",
+      "delivery_posture": "AT_LEAST_ONCE",
+      "ordering_posture": "OUT_OF_ORDER_POSSIBLE",
+      "dedupe_fields": [
+        "bucket_name",
+        "object_key",
+        "artifact_version_ref",
+        "checkpoint_ref",
+        "candidate_identity_hash",
+        "event_id_or_sequencer"
+      ],
+      "downstream_precondition": "Restore bundles must bind to restore checkpoints and candidate identity before they count as admissible evidence.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L25[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology explicitly requires an immutable object store for uploaded bytes, quarantined binaries, proof bundles, and export bodies."
+        },
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 already fixed the object-store role as immutable-body storage distinct from control truth, broker transport, and disposable projections."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OBJECT_STORAGE_AND_QUARANTINE_BUCKETS dependency row",
+          "source_ref": "data/analysis/dependency_register.json::OBJECT_STORAGE_AND_QUARANTINE_BUCKETS",
+          "rationale": "The dependency register marks the object-store substrate as mandatory while leaving the platform as a procurement or platform choice."
+        },
+        {
+          "source_file": "Algorithm/canonical_source_and_evidence_taxonomy.md",
+          "source_heading_or_logical_block": "EvidenceItem and DOCUMENTARY_EVIDENCE candidate-boundary law",
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::L32[EvidenceItem] / Algorithm/canonical_source_and_evidence_taxonomy.md::L354[DOCUMENTARY_EVIDENCE]",
+          "rationale": "Object storage carries retained evidence bodies but must not turn raw bytes or extracted output into canonical truth by itself."
+        },
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Secure document-upload flow and preview posture",
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L307[upload-session_state] / Algorithm/customer_client_portal_experience_contract.md::L321[same-shell_file_preview]",
+          "rationale": "Transfer, scan, validation, attachment confirmation, preview, and current-vs-history remain separate facts and the storage topology must preserve that separation."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "2.2 Customer/Client portal and upload-session surfaces",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L204[2.2_Customer/Client_portal_and_upload-session_surfaces]",
+          "rationale": "Upload-session allocation freezes tenant, client, request, and request-version identity, which object keys and refs must preserve."
+        },
+        {
+          "source_file": "Algorithm/upload_session_request_binding_and_rebase_contract.md",
+          "source_heading_or_logical_block": "Upload-session identity and stale-rebase law",
+          "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::L4[contract_boundary] / Algorithm/upload_session_request_binding_and_rebase_contract.md::L67[prohibited_inference]",
+          "rationale": "Storage keys and refs must continue to bind immutable upload-session identity through rebase and replacement instead of collapsing onto friendly names."
+        },
+        {
+          "source_file": "Algorithm/upload_session_recovery_harness_contract.md",
+          "source_heading_or_logical_block": "Frozen upload-session continuity and scanner-delay cases",
+          "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::L19[continuity_boundary] / Algorithm/upload_session_recovery_harness_contract.md::L61[scanner_delay_prohibition]",
+          "rationale": "Multipart or resumable transfer success does not imply accepted, previewable, or attachable posture, and storage event routes must preserve that law."
+        },
+        {
+          "source_file": "Algorithm/retention_and_privacy.md",
+          "source_heading_or_logical_block": "Artifact retention contract and limitation behavior",
+          "source_ref": "Algorithm/retention_and_privacy.md::L58[Artifact_retention_contract]",
+          "rationale": "Lifecycle rules must bind storage purposes to retention classes and explicit limitation behavior rather than inventing ad hoc expiry semantics."
+        },
+        {
+          "source_file": "data/analysis/artifact_retention_matrix.json",
+          "source_heading_or_logical_block": "Artifact retention matrix explicit gaps and retention classes",
+          "source_ref": "data/analysis/artifact_retention_matrix.json::retention_class_enum",
+          "rationale": "The corpus publishes retention classes but still lacks one canonical per-artifact duration matrix, so lifecycle rules must encode the gap explicitly."
+        },
+        {
+          "source_file": "config/uploads/malware_scan_outcome_mapping.json",
+          "source_heading_or_logical_block": "Truth boundary statement and quarantine posture",
+          "source_ref": "config/uploads/malware_scan_outcome_mapping.json::truth_boundary_statement",
+          "rationale": "The object-store topology has to preserve the already-fixed quarantine, preview, and extraction boundary from upload intake safety work."
+        },
+        {
+          "source_file": "config/uploads/quarantine_release_policy.json",
+          "source_heading_or_logical_block": "Release rows and history-preserving copy/promote semantics",
+          "source_ref": "config/uploads/quarantine_release_policy.json::release_rows",
+          "rationale": "Quarantine release is evidence-bound and must preserve history rather than mutating a quarantined object into clean state in place."
+        }
+      ],
+      "notes": [
+        "Restore archive indexing is evidence-supporting and remains non-authoritative for reopen by itself."
+      ]
+    },
+    {
+      "route_ref": "route.all_purposes.lifecycle_or_delete_to_retention_law",
+      "purpose_ref": "purpose.retained_evidence",
+      "label": "Lifecycle or delete -> retention law audit",
+      "event_types": [
+        "OBJECT_DELETE",
+        "OBJECT_ARCHIVE",
+        "BlobDeleted",
+        "s3:LifecycleExpiration:*"
+      ],
+      "destination_channel_ref": "channel.retention.limitation.audit",
+      "delivery_posture": "AT_LEAST_ONCE",
+      "ordering_posture": "OUT_OF_ORDER_POSSIBLE",
+      "dedupe_fields": [
+        "bucket_name",
+        "object_key",
+        "object_version_ref",
+        "event_type",
+        "event_id_or_sequencer"
+      ],
+      "downstream_precondition": "Lifecycle and deletion events must update limitation or omission posture rather than silently making surviving derivatives look authoritative.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L25[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology explicitly requires an immutable object store for uploaded bytes, quarantined binaries, proof bundles, and export bodies."
+        },
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 already fixed the object-store role as immutable-body storage distinct from control truth, broker transport, and disposable projections."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OBJECT_STORAGE_AND_QUARANTINE_BUCKETS dependency row",
+          "source_ref": "data/analysis/dependency_register.json::OBJECT_STORAGE_AND_QUARANTINE_BUCKETS",
+          "rationale": "The dependency register marks the object-store substrate as mandatory while leaving the platform as a procurement or platform choice."
+        },
+        {
+          "source_file": "Algorithm/canonical_source_and_evidence_taxonomy.md",
+          "source_heading_or_logical_block": "EvidenceItem and DOCUMENTARY_EVIDENCE candidate-boundary law",
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::L32[EvidenceItem] / Algorithm/canonical_source_and_evidence_taxonomy.md::L354[DOCUMENTARY_EVIDENCE]",
+          "rationale": "Object storage carries retained evidence bodies but must not turn raw bytes or extracted output into canonical truth by itself."
+        },
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Secure document-upload flow and preview posture",
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L307[upload-session_state] / Algorithm/customer_client_portal_experience_contract.md::L321[same-shell_file_preview]",
+          "rationale": "Transfer, scan, validation, attachment confirmation, preview, and current-vs-history remain separate facts and the storage topology must preserve that separation."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "2.2 Customer/Client portal and upload-session surfaces",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L204[2.2_Customer/Client_portal_and_upload-session_surfaces]",
+          "rationale": "Upload-session allocation freezes tenant, client, request, and request-version identity, which object keys and refs must preserve."
+        },
+        {
+          "source_file": "Algorithm/upload_session_request_binding_and_rebase_contract.md",
+          "source_heading_or_logical_block": "Upload-session identity and stale-rebase law",
+          "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::L4[contract_boundary] / Algorithm/upload_session_request_binding_and_rebase_contract.md::L67[prohibited_inference]",
+          "rationale": "Storage keys and refs must continue to bind immutable upload-session identity through rebase and replacement instead of collapsing onto friendly names."
+        },
+        {
+          "source_file": "Algorithm/upload_session_recovery_harness_contract.md",
+          "source_heading_or_logical_block": "Frozen upload-session continuity and scanner-delay cases",
+          "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::L19[continuity_boundary] / Algorithm/upload_session_recovery_harness_contract.md::L61[scanner_delay_prohibition]",
+          "rationale": "Multipart or resumable transfer success does not imply accepted, previewable, or attachable posture, and storage event routes must preserve that law."
+        },
+        {
+          "source_file": "Algorithm/retention_and_privacy.md",
+          "source_heading_or_logical_block": "Artifact retention contract and limitation behavior",
+          "source_ref": "Algorithm/retention_and_privacy.md::L58[Artifact_retention_contract]",
+          "rationale": "Lifecycle rules must bind storage purposes to retention classes and explicit limitation behavior rather than inventing ad hoc expiry semantics."
+        },
+        {
+          "source_file": "data/analysis/artifact_retention_matrix.json",
+          "source_heading_or_logical_block": "Artifact retention matrix explicit gaps and retention classes",
+          "source_ref": "data/analysis/artifact_retention_matrix.json::retention_class_enum",
+          "rationale": "The corpus publishes retention classes but still lacks one canonical per-artifact duration matrix, so lifecycle rules must encode the gap explicitly."
+        },
+        {
+          "source_file": "config/uploads/malware_scan_outcome_mapping.json",
+          "source_heading_or_logical_block": "Truth boundary statement and quarantine posture",
+          "source_ref": "config/uploads/malware_scan_outcome_mapping.json::truth_boundary_statement",
+          "rationale": "The object-store topology has to preserve the already-fixed quarantine, preview, and extraction boundary from upload intake safety work."
+        },
+        {
+          "source_file": "config/uploads/quarantine_release_policy.json",
+          "source_heading_or_logical_block": "Release rows and history-preserving copy/promote semantics",
+          "source_ref": "config/uploads/quarantine_release_policy.json::release_rows",
+          "rationale": "Quarantine release is evidence-bound and must preserve history rather than mutating a quarantined object into clean state in place."
+        }
+      ],
+      "notes": [
+        "This route is logical and cross-purpose even though it is anchored here for the topology board."
+      ]
+    }
+  ],
+  "source_refs": [
+    {
+      "source_file": "Algorithm/deployment_and_resilience_contract.md",
+      "source_heading_or_logical_block": "1. Reference runtime topology",
+      "source_ref": "Algorithm/deployment_and_resilience_contract.md::L25[1._Reference_runtime_topology]",
+      "rationale": "The runtime topology explicitly requires an immutable object store for uploaded bytes, quarantined binaries, proof bundles, and export bodies."
+    },
+    {
+      "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+      "source_heading_or_logical_block": "Decision",
+      "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+      "rationale": "ADR-002 already fixed the object-store role as immutable-body storage distinct from control truth, broker transport, and disposable projections."
+    },
+    {
+      "source_file": "data/analysis/dependency_register.json",
+      "source_heading_or_logical_block": "OBJECT_STORAGE_AND_QUARANTINE_BUCKETS dependency row",
+      "source_ref": "data/analysis/dependency_register.json::OBJECT_STORAGE_AND_QUARANTINE_BUCKETS",
+      "rationale": "The dependency register marks the object-store substrate as mandatory while leaving the platform as a procurement or platform choice."
+    },
+    {
+      "source_file": "Algorithm/canonical_source_and_evidence_taxonomy.md",
+      "source_heading_or_logical_block": "EvidenceItem and DOCUMENTARY_EVIDENCE candidate-boundary law",
+      "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::L32[EvidenceItem] / Algorithm/canonical_source_and_evidence_taxonomy.md::L354[DOCUMENTARY_EVIDENCE]",
+      "rationale": "Object storage carries retained evidence bodies but must not turn raw bytes or extracted output into canonical truth by itself."
+    },
+    {
+      "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+      "source_heading_or_logical_block": "Secure document-upload flow and preview posture",
+      "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L307[upload-session_state] / Algorithm/customer_client_portal_experience_contract.md::L321[same-shell_file_preview]",
+      "rationale": "Transfer, scan, validation, attachment confirmation, preview, and current-vs-history remain separate facts and the storage topology must preserve that separation."
+    },
+    {
+      "source_file": "Algorithm/northbound_api_and_session_contract.md",
+      "source_heading_or_logical_block": "2.2 Customer/Client portal and upload-session surfaces",
+      "source_ref": "Algorithm/northbound_api_and_session_contract.md::L204[2.2_Customer/Client_portal_and_upload-session_surfaces]",
+      "rationale": "Upload-session allocation freezes tenant, client, request, and request-version identity, which object keys and refs must preserve."
+    },
+    {
+      "source_file": "Algorithm/upload_session_request_binding_and_rebase_contract.md",
+      "source_heading_or_logical_block": "Upload-session identity and stale-rebase law",
+      "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::L4[contract_boundary] / Algorithm/upload_session_request_binding_and_rebase_contract.md::L67[prohibited_inference]",
+      "rationale": "Storage keys and refs must continue to bind immutable upload-session identity through rebase and replacement instead of collapsing onto friendly names."
+    },
+    {
+      "source_file": "Algorithm/upload_session_recovery_harness_contract.md",
+      "source_heading_or_logical_block": "Frozen upload-session continuity and scanner-delay cases",
+      "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::L19[continuity_boundary] / Algorithm/upload_session_recovery_harness_contract.md::L61[scanner_delay_prohibition]",
+      "rationale": "Multipart or resumable transfer success does not imply accepted, previewable, or attachable posture, and storage event routes must preserve that law."
+    },
+    {
+      "source_file": "Algorithm/retention_and_privacy.md",
+      "source_heading_or_logical_block": "Artifact retention contract and limitation behavior",
+      "source_ref": "Algorithm/retention_and_privacy.md::L58[Artifact_retention_contract]",
+      "rationale": "Lifecycle rules must bind storage purposes to retention classes and explicit limitation behavior rather than inventing ad hoc expiry semantics."
+    },
+    {
+      "source_file": "data/analysis/artifact_retention_matrix.json",
+      "source_heading_or_logical_block": "Artifact retention matrix explicit gaps and retention classes",
+      "source_ref": "data/analysis/artifact_retention_matrix.json::retention_class_enum",
+      "rationale": "The corpus publishes retention classes but still lacks one canonical per-artifact duration matrix, so lifecycle rules must encode the gap explicitly."
+    },
+    {
+      "source_file": "config/uploads/malware_scan_outcome_mapping.json",
+      "source_heading_or_logical_block": "Truth boundary statement and quarantine posture",
+      "source_ref": "config/uploads/malware_scan_outcome_mapping.json::truth_boundary_statement",
+      "rationale": "The object-store topology has to preserve the already-fixed quarantine, preview, and extraction boundary from upload intake safety work."
+    },
+    {
+      "source_file": "config/uploads/quarantine_release_policy.json",
+      "source_heading_or_logical_block": "Release rows and history-preserving copy/promote semantics",
+      "source_ref": "config/uploads/quarantine_release_policy.json::release_rows",
+      "rationale": "Quarantine release is evidence-bound and must preserve history rather than mutating a quarantined object into clean state in place."
+    }
+  ],
+  "typed_gaps": [
+    "DESTINATION_CHANNELS_REMAIN_LOGICAL_UNTIL_QUEUE_AND_BROKER_PROVISIONING"
+  ],
+  "notes": [
+    "Event routes assume at-least-once and out-of-order delivery regardless of provider. Downstream workers must dedupe on object identity plus event identity."
+  ]
+}

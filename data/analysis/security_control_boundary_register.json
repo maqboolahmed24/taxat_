@@ -1,0 +1,637 @@
+{
+  "control_id_enum": [
+    "RETENTION_TAG_AND_ARTIFACT_RETENTION",
+    "RETENTION_LIMITED_EXPLAINABILITY",
+    "RETENTION_ERROR_AND_GATE_COUPLING",
+    "SESSION_BOUND_COMMAND_VALIDATION",
+    "ANTI_CSRF_AND_SECURE_COOKIE_POSTURE",
+    "STEP_UP_AND_SESSION_ROTATION",
+    "TOKEN_VAULT_AND_BINDING_LINEAGE_REVALIDATION",
+    "PER_TENANT_ENVELOPE_ENCRYPTION",
+    "AUTHORITY_INGRESS_QUARANTINE_AND_DEDUPE",
+    "CACHE_ISOLATION_CONTRACT_ENFORCEMENT",
+    "NATIVE_CACHE_HYDRATION_PURGE_AND_REBASE",
+    "RESTORE_PRIVACY_RECONCILIATION",
+    "LOG_REDACTION_AND_MASKED_EXPORT_POLICY",
+    "SSRF_ALLOWLIST_AND_LEAST_PRIVILEGE_EGRESS",
+    "SIGNED_BUILD_SBOM_AND_PROVENANCE",
+    "SECRET_VERSION_ROTATION_AND_ATTESTATION",
+    "NATIVE_SIGNATURE_NOTARIZATION_AND_HARDENED_RUNTIME"
+  ],
+  "explicit_gaps": [
+    {
+      "description": "The corpus defines retention classes, expiry basis, and erasure blockers, but does not publish one canonical per-artifact duration matrix.",
+      "gap_id": "artifact_specific_retention_windows_not_canonicalized",
+      "severity": "medium",
+      "source_ref": "Algorithm/retention_and_privacy.md::L3[Retention_and_privacy]"
+    },
+    {
+      "description": "Threat classes are normatively defined in prose in the runtime hardening contract, but no dedicated schema-backed enum exists in the current corpus.",
+      "gap_id": "threat_class_enum_is_prose_only",
+      "severity": "medium",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L13[1._Threat_classes]"
+    },
+    {
+      "description": "The corpus forbids stored authority login credentials by design, so there is no dedicated persisted schema artifact for that credential class.",
+      "gap_id": "authority_login_credentials_have_no_schema_because_persistence_is_forbidden",
+      "severity": "low",
+      "source_ref": "Algorithm/retention_and_privacy.md::L184[authority_login_credentials_forbidden]"
+    },
+    {
+      "description": "Restore privacy reconciliation states are defined, but the corpus does not separately publish a per-surface reopen matrix for each operator and customer route family.",
+      "gap_id": "restore_reopen_surface_specific_matrix_not_expanded_in_source",
+      "severity": "medium",
+      "source_ref": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[Restore_privacy_reconciliation_law]"
+    }
+  ],
+  "rows": [
+    {
+      "artifact_or_control_id": "ANTI_CSRF_AND_SECURE_COOKIE_POSTURE",
+      "cache_scope": [
+        "CLIENT_PORTAL_WORKSPACE",
+        "CUSTOMER_REQUEST_LIST",
+        "LOW_NOISE_FRAME"
+      ],
+      "canonical_store_or_boundary": "browser session boundary",
+      "category": "SECURITY_CONTROL",
+      "contains_personal_or_sensitive_data": false,
+      "control_layer": "browser_security_boundary",
+      "encryption_or_protection_control": "anti-CSRF token, secure cookie flags, CSP, clickjacking defenses",
+      "erasure_behavior": "Not applicable to payload erasure; applies to browser-origin request validity.",
+      "legal_hold_behavior": "Not stateful beyond audit evidence of revocation and challenge changes.",
+      "notes": [
+        "Browser-origin write actions require authenticated session plus anti-CSRF posture."
+      ],
+      "projection_allowed": "RUNTIME_ONLY",
+      "purge_trigger": [
+        "SESSION_REVOKED",
+        "STEP_UP_COMPLETED"
+      ],
+      "release_gate_dependency": [
+        "SESSION_AND_ANTI_CSRF_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": false,
+      "retention_basis": "browser_origin_defense",
+      "retention_tag": "policy_governed_other",
+      "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+      "source_heading_or_logical_block": "4. Browser, native-client, API, and transport hardening",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L39[ANTI_CSRF_AND_SECURE_COOKIE_POSTURE]",
+      "survivability_or_fidelity_formula": "cookie-based browser sessions require anti-CSRF protection and secure cookie flags."
+    },
+    {
+      "artifact_or_control_id": "AUTHORITY_INGRESS_QUARANTINE_AND_DEDUPE",
+      "cache_scope": [
+        "PRINCIPAL_ACCESS_VIEW"
+      ],
+      "canonical_store_or_boundary": "authority inbox and ingress checkpoint",
+      "category": "SECURITY_CONTROL",
+      "contains_personal_or_sensitive_data": false,
+      "control_layer": "authority_edge_boundary",
+      "encryption_or_protection_control": "provider-channel authentication, dedupe key, authority_ingress_proof_contract",
+      "erasure_behavior": "Ingress lineage survives retries and recovery; it is not reconstructed from transport memory.",
+      "legal_hold_behavior": "Quarantine, dedupe, and reconciliation ownership remain explicit under hold.",
+      "notes": [
+        "A lone authority_reference match remains quarantined, not trusted as legal correlation."
+      ],
+      "projection_allowed": "RUNTIME_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "AUTHORITY_REBINDING",
+        "SESSION_REVOKED"
+      ],
+      "release_gate_dependency": [
+        "AUTHORITY_SANDBOX_BINDING_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "authenticated_authority_ingress_checkpoint",
+      "retention_tag": "policy_governed_other",
+      "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+      "source_heading_or_logical_block": "5. Service-to-service and network hardening",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L99[AUTHORITY_INGRESS_QUARANTINE_AND_DEDUPE]",
+      "survivability_or_fidelity_formula": "No authority callback or recovery payload mutates legal state before authenticated ingress, dedupe, and request-lineage correlation complete."
+    },
+    {
+      "artifact_or_control_id": "CACHE_ISOLATION_CONTRACT_ENFORCEMENT",
+      "cache_scope": [
+        "LOW_NOISE_FRAME",
+        "WORKSPACE_SNAPSHOT",
+        "WORK_INBOX_SNAPSHOT",
+        "CLIENT_PORTAL_WORKSPACE",
+        "CUSTOMER_REQUEST_LIST",
+        "TENANT_GOVERNANCE_SNAPSHOT",
+        "GOVERNANCE_POLICY_SNAPSHOT",
+        "PRINCIPAL_ACCESS_VIEW",
+        "ROLE_TEMPLATE_MATRIX",
+        "NATIVE_OPERATOR_WORKSPACE_SCENE",
+        "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE"
+      ],
+      "canonical_store_or_boundary": "shared cache identity contract",
+      "category": "SECURITY_CONTROL",
+      "contains_personal_or_sensitive_data": false,
+      "control_layer": "cache_reuse_boundary",
+      "encryption_or_protection_control": "cache_isolation_contract, delivery binding hash, temp artifact purge policy",
+      "erasure_behavior": "Broader variants purge immediately on access or masking narrowing.",
+      "legal_hold_behavior": "Hold does not permit reuse across tenants, masking posture, or route drift.",
+      "notes": [
+        "Cache identity is a security boundary across browser, portal, governance, and native surfaces."
+      ],
+      "projection_allowed": "RUNTIME_ONLY",
+      "purge_trigger": [
+        "TENANT_SWITCH",
+        "PRINCIPAL_CLASS_CHANGE",
+        "SESSION_BINDING_CHANGE",
+        "ACCESS_BINDING_CHANGE",
+        "MASKING_CHANGE",
+        "ROUTE_OR_OBJECT_DRIFT",
+        "SCHEMA_INCOMPATIBLE"
+      ],
+      "release_gate_dependency": [
+        "CROSS_TENANT_CACHE_ISOLATION_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": false,
+      "retention_basis": "exact_cache_context_matching",
+      "retention_tag": "policy_governed_other",
+      "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+      "source_heading_or_logical_block": "FE-25 Cache Isolation",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L195[CACHE_ISOLATION_CONTRACT_ENFORCEMENT]",
+      "survivability_or_fidelity_formula": "exact security-context match only; purge-or-reject on tenant, principal, session, access, masking, route, projection-version, or preview drift."
+    },
+    {
+      "artifact_or_control_id": "LOG_REDACTION_AND_MASKED_EXPORT_POLICY",
+      "cache_scope": [
+        "CLIENT_PORTAL_WORKSPACE",
+        "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE"
+      ],
+      "canonical_store_or_boundary": "observability and export boundary",
+      "category": "SECURITY_CONTROL",
+      "contains_personal_or_sensitive_data": false,
+      "control_layer": "privacy_and_observability_boundary",
+      "encryption_or_protection_control": "redaction, masked values, summary-first telemetry, export policy inheritance",
+      "erasure_behavior": "Diagnostic tooling may not reintroduce data hidden by privacy or masking policy.",
+      "legal_hold_behavior": "Audit may preserve reason and lineage minimums without exposing unnecessary raw values.",
+      "notes": [
+        "Exports inherit masking/export policy and cannot bypass it through direct object-store URLs."
+      ],
+      "projection_allowed": "RUNTIME_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "MASKING_CHANGE",
+        "ROUTE_OR_OBJECT_DRIFT"
+      ],
+      "release_gate_dependency": [
+        "SESSION_AND_ANTI_CSRF_GATE",
+        "SECRET_ROTATION_ATTESTATION_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": true,
+      "retention_basis": "runtime_leakage_prevention",
+      "retention_tag": "policy_governed_other",
+      "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+      "source_heading_or_logical_block": "6. Data protection, privacy, and cache safety",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L130[LOG_REDACTION_AND_MASKED_EXPORT_POLICY]",
+      "survivability_or_fidelity_formula": "logs redact secrets, raw tokens, government identifiers, and full regulated payload bodies."
+    },
+    {
+      "artifact_or_control_id": "NATIVE_CACHE_HYDRATION_PURGE_AND_REBASE",
+      "cache_scope": [
+        "EXPERIENCE_CURSOR",
+        "WORKSPACE_CURSOR",
+        "NATIVE_PRIMARY_SCENE",
+        "NATIVE_SECONDARY_WINDOW"
+      ],
+      "canonical_store_or_boundary": "native scene and cursor hydration boundary",
+      "category": "SECURITY_CONTROL",
+      "contains_personal_or_sensitive_data": false,
+      "control_layer": "native_restore_boundary",
+      "encryption_or_protection_control": "native_cache_hydration_contract and automation pack coverage",
+      "erasure_behavior": "Purge clears structured cache, resume metadata, scene-restoration payloads, NSUserActivity, preview caches, temp exports, and local search indices.",
+      "legal_hold_behavior": "Hold does not bypass first-paint legality or mutation gate after cache-only restore.",
+      "notes": [
+        "Native speed may reuse compatible state, but may not outrun legality."
+      ],
+      "projection_allowed": "NATIVE_ONLY_AFTER_FULL_MATCH",
+      "purge_trigger": [
+        "TENANT_SWITCH",
+        "PRINCIPAL_CLASS_CHANGE",
+        "PRIVILEGE_DOWNGRADE",
+        "SESSION_REVOKED",
+        "SESSION_BINDING_CHANGE",
+        "ACCESS_BINDING_CHANGE",
+        "MASKING_CHANGE",
+        "SCHEMA_INCOMPATIBLE",
+        "ROUTE_OR_OBJECT_DRIFT"
+      ],
+      "release_gate_dependency": [
+        "NATIVE_DESKTOP_HARDENING_GATE",
+        "CROSS_TENANT_CACHE_ISOLATION_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": false,
+      "retention_basis": "native_speed_must_not_outrun_legality",
+      "retention_tag": "policy_governed_other",
+      "source_file": "Algorithm/native_cache_hydration_purge_and_rebase_contract.md",
+      "source_heading_or_logical_block": "Required rules",
+      "source_ref": "Algorithm/native_cache_hydration_purge_and_rebase_contract.md::L45[NATIVE_CACHE_HYDRATION_PURGE_AND_REBASE]",
+      "survivability_or_fidelity_formula": "VERIFY_COMPATIBILITY_BEFORE_RENDER_OR_RESTORE and NO_MUTATION_OR_FILING_AFTER_CACHE_ONLY_RESTORE_OR_CONTEXT_DRIFT"
+    },
+    {
+      "artifact_or_control_id": "NATIVE_SIGNATURE_NOTARIZATION_AND_HARDENED_RUNTIME",
+      "cache_scope": [
+        "NATIVE_OPERATOR_WORKSPACE_SCENE",
+        "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE"
+      ],
+      "canonical_store_or_boundary": "native release and build boundary",
+      "category": "SECURITY_CONTROL",
+      "contains_personal_or_sensitive_data": false,
+      "control_layer": "native_release_boundary",
+      "encryption_or_protection_control": "signed and notarized macOS build with hardened runtime and least-privilege entitlements",
+      "erasure_behavior": "Desktop-only evidence clears when the desktop target is absent, preventing overclaiming.",
+      "legal_hold_behavior": "Release evidence preserves desktop hardening posture whenever the macOS target ships.",
+      "notes": [
+        "The desktop client is blocked from production without hardening evidence."
+      ],
+      "projection_allowed": "OPERATOR_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "NATIVE_BUILD_SUPERSEDED"
+      ],
+      "release_gate_dependency": [
+        "NATIVE_DESKTOP_HARDENING_GATE",
+        "BUILD_SIGNATURE_AND_PROVENANCE_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": false,
+      "retention_basis": "production_desktop_binary_hardening",
+      "retention_tag": "policy_governed_other",
+      "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+      "source_heading_or_logical_block": "4. Browser, native-client, API, and transport hardening",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L84[NATIVE_SIGNATURE_NOTARIZATION_AND_HARDENED_RUNTIME]",
+      "survivability_or_fidelity_formula": "no production desktop client without signature, notarization, and hardened-runtime policy compliance"
+    },
+    {
+      "artifact_or_control_id": "PER_TENANT_ENVELOPE_ENCRYPTION",
+      "cache_scope": [
+        "CLIENT_PORTAL_WORKSPACE",
+        "WORKSPACE_SNAPSHOT",
+        "NATIVE_OPERATOR_WORKSPACE_SCENE"
+      ],
+      "canonical_store_or_boundary": "object store and regulated payload boundary",
+      "category": "SECURITY_CONTROL",
+      "contains_personal_or_sensitive_data": false,
+      "control_layer": "data_protection_boundary",
+      "encryption_or_protection_control": "envelope encryption rooted in KMS/HSM",
+      "erasure_behavior": "Erased or minimized artifacts may retain lawful encrypted refs or hashes, not raw content.",
+      "legal_hold_behavior": "Hold preserves encrypted artifacts without downgrading the encryption boundary.",
+      "notes": [
+        "Applies to sensitive client and authority data."
+      ],
+      "projection_allowed": "RUNTIME_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "TENANT_SWITCH",
+        "MASKING_CHANGE",
+        "SCHEMA_INCOMPATIBLE"
+      ],
+      "release_gate_dependency": [
+        "SECRET_ROTATION_ATTESTATION_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "per_tenant_or_per_sensitivity_data_encryption",
+      "retention_tag": "policy_governed_other",
+      "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+      "source_heading_or_logical_block": "3. Secret, key, and token handling",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L65[PER_TENANT_ENVELOPE_ENCRYPTION]",
+      "survivability_or_fidelity_formula": "object payload encryption uses per-tenant or per-sensitivity envelope keys rooted in KMS/HSM master keys."
+    },
+    {
+      "artifact_or_control_id": "RESTORE_PRIVACY_RECONCILIATION",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "restore privacy reconciliation boundary",
+      "category": "SECURITY_CONTROL",
+      "contains_personal_or_sensitive_data": false,
+      "control_layer": "restore_boundary",
+      "encryption_or_protection_control": "checkpoint refs, restore drill refs, audit continuity, replay/enquiry limitation safety",
+      "erasure_behavior": "Resurrected data opens compensating re-erasure before normal access reopens.",
+      "legal_hold_behavior": "Blocked legal hold, proof preservation, and authority ambiguity states keep reopened access limited.",
+      "notes": [
+        "Restore reopening is blocked until privacy reconciliation proves lawful access posture."
+      ],
+      "projection_allowed": "RUNTIME_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "restore_reopen_privacy_gate",
+      "retention_tag": "policy_governed_other",
+      "source_file": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md",
+      "source_heading_or_logical_block": "Restore privacy reconciliation law",
+      "source_ref": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[RESTORE_PRIVACY_RECONCILIATION]",
+      "survivability_or_fidelity_formula": "Restore evidence is not lawful production evidence until privacy_reconciliation_state is reconciled."
+    },
+    {
+      "artifact_or_control_id": "RETENTION_ERROR_AND_GATE_COUPLING",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "error, remediation, and gate integration boundary",
+      "category": "SECURITY_CONTROL",
+      "contains_personal_or_sensitive_data": false,
+      "control_layer": "gate_and_failure_control_plane",
+      "encryption_or_protection_control": "typed ErrorRecord / RemediationTask / CompensationRecord linkage",
+      "erasure_behavior": "Any material retention condition produces correlated gate, error, and audit evidence.",
+      "legal_hold_behavior": "Legal hold preventing erasure surfaces as typed blocking effect such as BLOCKS_ERASURE.",
+      "notes": [
+        "Retention posture is a gate input, not a UI warning."
+      ],
+      "projection_allowed": "OPERATOR_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": true,
+      "retention_basis": "retention_state_to_error_and_gate_binding",
+      "retention_tag": "policy_governed_other",
+      "source_file": "Algorithm/retention_error_and_observability_contract.md",
+      "source_heading_or_logical_block": "15.3 Gate and progression coupling",
+      "source_ref": "Algorithm/retention_error_and_observability_contract.md::L122[RETENTION_ERROR_AND_GATE_COUPLING]",
+      "survivability_or_fidelity_formula": "RETENTION_EVIDENCE_GATE consumes evidence availability, limitation, and erased-path posture directly."
+    },
+    {
+      "artifact_or_control_id": "RETENTION_LIMITED_EXPLAINABILITY",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "retention-limited explainability contract boundary",
+      "category": "SECURITY_CONTROL",
+      "contains_personal_or_sensitive_data": false,
+      "control_layer": "explainability_boundary",
+      "encryption_or_protection_control": "typed limitation notes, omission entries, and present-limited truth",
+      "erasure_behavior": "Explanation AVAILABLE posture is forbidden when decisive support no longer fully survives.",
+      "legal_hold_behavior": "Hold does not permit silent absence; limitations remain explicit.",
+      "notes": [
+        "Lawful minimization is not permission for silent ambiguity."
+      ],
+      "projection_allowed": "RUNTIME_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "honest_limited_truth_rendering",
+      "retention_tag": "policy_governed_other",
+      "source_file": "Algorithm/retention_limited_explainability_and_audit_sufficiency_contract.md",
+      "source_heading_or_logical_block": "Required Outcomes",
+      "source_ref": "Algorithm/retention_limited_explainability_and_audit_sufficiency_contract.md::L52[RETENTION_LIMITED_EXPLAINABILITY]",
+      "survivability_or_fidelity_formula": "silent_ambiguity(o) must remain zero for decisive support."
+    },
+    {
+      "artifact_or_control_id": "RETENTION_TAG_AND_ARTIFACT_RETENTION",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "retention control store",
+      "category": "SECURITY_CONTROL",
+      "contains_personal_or_sensitive_data": false,
+      "control_layer": "retention_control_plane",
+      "encryption_or_protection_control": "schema-validated retention tag and artifact lifecycle objects",
+      "erasure_behavior": "Fail closed on unresolved hold, statutory minimum, proof-preservation, or authority ambiguity blockers.",
+      "legal_hold_behavior": "Hold state, refs, and chronology are serialized on canonical retention objects.",
+      "notes": [
+        "Retention state changes remain typed state, not passive prose."
+      ],
+      "projection_allowed": "OPERATOR_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "canonical_retention_and_expiry_control_plane",
+      "retention_tag": "policy_governed_other",
+      "source_file": "Algorithm/retention_and_privacy.md",
+      "source_heading_or_logical_block": "Retention tag contract",
+      "source_ref": "Algorithm/retention_and_privacy.md::L13[RETENTION_TAG_AND_ARTIFACT_RETENTION]",
+      "survivability_or_fidelity_formula": "RetentionTag and ArtifactRetention serialize the lifecycle basis that later gates consume."
+    },
+    {
+      "artifact_or_control_id": "SECRET_VERSION_ROTATION_AND_ATTESTATION",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "secret metadata boundary",
+      "category": "SECURITY_CONTROL",
+      "contains_personal_or_sensitive_data": false,
+      "control_layer": "secret_rotation_boundary",
+      "encryption_or_protection_control": "SecretVersion schema, attestation refs, historical read window, cutover chronology",
+      "erasure_behavior": "No key or secret rotation is legal when attestation or version binding is unknown.",
+      "legal_hold_behavior": "Rotation history remains serialized even after retirement or revocation.",
+      "notes": [
+        "Newly promoted environments require secret-rotation attestation."
+      ],
+      "projection_allowed": "OPERATOR_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "SECRET_ROTATION",
+        "TOKEN_ROTATION"
+      ],
+      "release_gate_dependency": [
+        "SECRET_ROTATION_ATTESTATION_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": true,
+      "retention_basis": "auditable_secret_cutover",
+      "retention_tag": "policy_governed_other",
+      "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+      "source_heading_or_logical_block": "3. Secret, key, and token handling",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L68[SECRET_VERSION_ROTATION_AND_ATTESTATION]",
+      "survivability_or_fidelity_formula": "key and secret rotation shall fail closed if attestation or version binding is unknown."
+    },
+    {
+      "artifact_or_control_id": "SESSION_BOUND_COMMAND_VALIDATION",
+      "cache_scope": [
+        "LOW_NOISE_FRAME",
+        "WORKSPACE_SNAPSHOT"
+      ],
+      "canonical_store_or_boundary": "northbound session and command control plane",
+      "category": "SECURITY_CONTROL",
+      "contains_personal_or_sensitive_data": false,
+      "control_layer": "identity_and_command_trust",
+      "encryption_or_protection_control": "short-lived ActorSession records and server-side validation",
+      "erasure_behavior": "Revocation blocks future command acceptance until re-authentication rather than relying on client-held tokens.",
+      "legal_hold_behavior": "Session audit lineage remains queryable for incident and compliance review.",
+      "notes": [
+        "No write action relies only on a client-held token."
+      ],
+      "projection_allowed": "RUNTIME_ONLY",
+      "purge_trigger": [
+        "SESSION_REVOKED",
+        "STEP_UP_COMPLETED",
+        "PRIVILEGE_DOWNGRADE"
+      ],
+      "release_gate_dependency": [
+        "SESSION_AND_ANTI_CSRF_GATE",
+        "STALE_VIEW_AND_IDEMPOTENCY_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": false,
+      "retention_basis": "current_actor_session_validation",
+      "retention_tag": "policy_governed_other",
+      "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+      "source_heading_or_logical_block": "2. Identity, session, and command trust",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L30[SESSION_BOUND_COMMAND_VALIDATION]",
+      "survivability_or_fidelity_formula": "Every command validates against current actor/session state; stale commands are rejected."
+    },
+    {
+      "artifact_or_control_id": "SIGNED_BUILD_SBOM_AND_PROVENANCE",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "release verification and provenance boundary",
+      "category": "SECURITY_CONTROL",
+      "contains_personal_or_sensitive_data": false,
+      "control_layer": "release_provenance_boundary",
+      "encryption_or_protection_control": "signature, digest, provenance, candidate_identity_hash, compatibility_gate_hash",
+      "erasure_behavior": "Promotion evidence is replayable from durable artifacts, not dashboards or operator memory.",
+      "legal_hold_behavior": "Release evidence remains durable and candidate-bound for later scrutiny.",
+      "notes": [
+        "Promotion evidence cannot be assembled from stale green runs or mixed candidate tuples."
+      ],
+      "projection_allowed": "OPERATOR_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "BUILD_SIGNATURE_AND_PROVENANCE_GATE",
+        "CRITICAL_VULNERABILITY_CLEARANCE_GATE",
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "release_provenance_required_before_promotion",
+      "retention_tag": "policy_governed_other",
+      "source_file": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md",
+      "source_heading_or_logical_block": "2. Contract boundary",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[SIGNED_BUILD_SBOM_AND_PROVENANCE]",
+      "survivability_or_fidelity_formula": "signed BuildArtifact outputs, SBOM, vulnerability scanning, provenance attestation, and candidate-bound release evidence"
+    },
+    {
+      "artifact_or_control_id": "SSRF_ALLOWLIST_AND_LEAST_PRIVILEGE_EGRESS",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "connector, OCR, authority gateway network boundary",
+      "category": "SECURITY_CONTROL",
+      "contains_personal_or_sensitive_data": false,
+      "control_layer": "network_egress_boundary",
+      "encryption_or_protection_control": "least-privilege network egress policy and authenticated service identity",
+      "erasure_behavior": "Not an erasure workflow control; prevents unsafe ingress/egress paths.",
+      "legal_hold_behavior": "Not retention-stateful; applies to transport reachability and external fetch control.",
+      "notes": [
+        "Zero trust applies between service boundaries as well as to external connectors."
+      ],
+      "projection_allowed": "RUNTIME_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "AUTHORITY_SANDBOX_BINDING_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": false,
+      "retention_basis": "connector_and_document_pipeline_egress_restriction",
+      "retention_tag": "policy_governed_other",
+      "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+      "source_heading_or_logical_block": "5. Service-to-service and network hardening",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L105[SSRF_ALLOWLIST_AND_LEAST_PRIVILEGE_EGRESS]",
+      "survivability_or_fidelity_formula": "external fetchers use explicit allowlists and SSRF-resistant URL validation."
+    },
+    {
+      "artifact_or_control_id": "STEP_UP_AND_SESSION_ROTATION",
+      "cache_scope": [
+        "LOW_NOISE_FRAME",
+        "NATIVE_OPERATOR_WORKSPACE_SCENE",
+        "EXPERIENCE_CURSOR",
+        "WORKSPACE_CURSOR"
+      ],
+      "canonical_store_or_boundary": "session challenge state and approval boundary",
+      "category": "SECURITY_CONTROL",
+      "contains_personal_or_sensitive_data": false,
+      "control_layer": "authn_escalation_boundary",
+      "encryption_or_protection_control": "MFA/step-up, session rotation, revocation audit, and bound cursor invalidation",
+      "erasure_behavior": "Pre-step-up commands and cursors cannot replay blindly after step-up completion.",
+      "legal_hold_behavior": "Step-up completion and revocation remain auditable.",
+      "notes": [
+        "Applies to browser, native, and authority-sensitive flows."
+      ],
+      "projection_allowed": "RUNTIME_ONLY",
+      "purge_trigger": [
+        "STEP_UP_COMPLETED",
+        "SESSION_REVOKED",
+        "PRIVILEGE_DOWNGRADE"
+      ],
+      "release_gate_dependency": [
+        "SESSION_AND_ANTI_CSRF_GATE",
+        "STALE_VIEW_AND_IDEMPOTENCY_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": false,
+      "retention_basis": "privileged_action_escalation_control",
+      "retention_tag": "policy_governed_other",
+      "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+      "source_heading_or_logical_block": "7. Authentication and session strategy",
+      "source_ref": "Algorithm/macos_native_operator_workspace_blueprint.md::L384[STEP_UP_AND_SESSION_ROTATION]",
+      "survivability_or_fidelity_formula": "session rotation after privilege elevation or step-up completion"
+    },
+    {
+      "artifact_or_control_id": "TOKEN_VAULT_AND_BINDING_LINEAGE_REVALIDATION",
+      "cache_scope": [
+        "PRINCIPAL_ACCESS_VIEW"
+      ],
+      "canonical_store_or_boundary": "governed token vault or secret store",
+      "category": "SECURITY_CONTROL",
+      "contains_personal_or_sensitive_data": false,
+      "control_layer": "secret_and_token_boundary",
+      "encryption_or_protection_control": "vault isolation, token_binding_ref, binding_lineage_ref, access_binding_hash, policy_snapshot_hash",
+      "erasure_behavior": "Raw tokens never persist in queues, read models, or general logs; only opaque refs survive.",
+      "legal_hold_behavior": "Token lineage and rotation evidence remain auditable; hold does not justify broader token exposure.",
+      "notes": [
+        "No raw authority token exists outside the vault boundary."
+      ],
+      "projection_allowed": "RUNTIME_ONLY",
+      "purge_trigger": [
+        "AUTHORITY_REBINDING",
+        "TOKEN_ROTATION",
+        "SESSION_REVOKED"
+      ],
+      "release_gate_dependency": [
+        "SECRET_ROTATION_ATTESTATION_GATE",
+        "AUTHORITY_SANDBOX_BINDING_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": true,
+      "retention_basis": "vault_only_raw_tokens_and_pre_send_revalidation",
+      "retention_tag": "policy_governed_other",
+      "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+      "source_heading_or_logical_block": "3. Secret, key, and token handling",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L50[TOKEN_VAULT_AND_BINDING_LINEAGE_REVALIDATION]",
+      "survivability_or_fidelity_formula": "queued authority mutation revalidates usable token version against persisted binding_lineage_ref immediately before send."
+    }
+  ],
+  "summary": {
+    "control_count": 17,
+    "row_count": 17
+  }
+}

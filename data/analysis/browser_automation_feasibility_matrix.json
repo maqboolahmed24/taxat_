@@ -1,0 +1,213 @@
+{
+  "dependency_assessments": [
+    {
+      "blocking_classes": [
+        "MFA_OR_CAPTCHA_CHECKPOINT"
+      ],
+      "ci": "LIMITED",
+      "dependency_key": "AUTHORITY_DEVELOPER_HUB_WORKSPACE",
+      "ephemeral-review": "NOT_RECOMMENDED",
+      "local-dev": "SUPPORTED_WITH_MANUAL_CHECKPOINTS",
+      "notes": [
+        "Provider portal sessions often require attended MFA at least once."
+      ],
+      "staging": "SUPPORTED_WITH_MANUAL_CHECKPOINTS"
+    },
+    {
+      "blocking_classes": [
+        "MFA_OR_CAPTCHA_CHECKPOINT"
+      ],
+      "ci": "LIMITED",
+      "dependency_key": "AUTHORITY_SANDBOX_APP_REGISTRATION",
+      "ephemeral-review": "NOT_RECOMMENDED",
+      "local-dev": "SUPPORTED_WITH_MANUAL_CHECKPOINTS",
+      "notes": [
+        "Use staging callback hosts where provider policy refuses loopback or tunnel URLs."
+      ],
+      "staging": "SUPPORTED_WITH_MANUAL_CHECKPOINTS"
+    },
+    {
+      "blocking_classes": [
+        "MFA_OR_CAPTCHA_CHECKPOINT",
+        "STABLE_CALLBACK_HOST_REQUIRED"
+      ],
+      "ci": "NOT_RECOMMENDED",
+      "dependency_key": "AUTHORITY_PRODUCTION_APP_REGISTRATION",
+      "ephemeral-review": "NOT_RECOMMENDED",
+      "local-dev": "NOT_RECOMMENDED",
+      "notes": [
+        "Live provider registration typically requires stable corporate domains and human approval evidence."
+      ],
+      "staging": "SUPPORTED_WITH_MANUAL_CHECKPOINTS"
+    },
+    {
+      "blocking_classes": [
+        "STABLE_CALLBACK_HOST_REQUIRED"
+      ],
+      "ci": "LIMITED",
+      "dependency_key": "AUTHORITY_REDIRECT_URI_CALLBACK_AND_SCOPE_CONFIGURATION",
+      "ephemeral-review": "NOT_RECOMMENDED",
+      "local-dev": "LIMITED",
+      "notes": [
+        "Callback hostnames should be anchored to long-lived staging or production domains."
+      ],
+      "staging": "SUPPORTED"
+    },
+    {
+      "blocking_classes": [
+        "MFA_OR_CAPTCHA_CHECKPOINT"
+      ],
+      "ci": "LIMITED",
+      "dependency_key": "IDP_TENANT_AND_APPLICATION_CLIENTS",
+      "ephemeral-review": "LIMITED",
+      "local-dev": "SUPPORTED_WITH_MANUAL_CHECKPOINTS",
+      "notes": [
+        "Many IdPs allow API-based client management after first-time tenant bootstrap."
+      ],
+      "staging": "SUPPORTED"
+    },
+    {
+      "blocking_classes": [
+        "STABLE_CALLBACK_HOST_REQUIRED"
+      ],
+      "ci": "NOT_RECOMMENDED",
+      "dependency_key": "EMAIL_DELIVERY_PROVIDER_ACCOUNT_AND_SENDER_DOMAIN",
+      "ephemeral-review": "NOT_RECOMMENDED",
+      "local-dev": "LIMITED",
+      "notes": [
+        "Sender-domain proof and DNS ownership make staging the primary automation target."
+      ],
+      "staging": "SUPPORTED_WITH_MANUAL_CHECKPOINTS"
+    },
+    {
+      "blocking_classes": [
+        "STABLE_CALLBACK_HOST_REQUIRED"
+      ],
+      "ci": "LIMITED",
+      "dependency_key": "EMAIL_TEMPLATE_WEBHOOK_AND_CALLBACK_CONFIGURATION",
+      "ephemeral-review": "NOT_RECOMMENDED",
+      "local-dev": "LIMITED",
+      "notes": [
+        "Webhook verification is easiest once staging callback hosts are stable."
+      ],
+      "staging": "SUPPORTED"
+    },
+    {
+      "blocking_classes": [
+        "MFA_OR_CAPTCHA_CHECKPOINT"
+      ],
+      "ci": "NOT_RECOMMENDED",
+      "dependency_key": "PUSH_NOTIFICATION_OR_DEVICE_MESSAGING_PROJECT",
+      "ephemeral-review": "NOT_RECOMMENDED",
+      "local-dev": "LIMITED",
+      "notes": [
+        "Treat push credential setup as embodiment-conditional rather than universally required."
+      ],
+      "staging": "SUPPORTED_WITH_MANUAL_CHECKPOINTS"
+    },
+    {
+      "blocking_classes": [],
+      "ci": "SUPPORTED",
+      "dependency_key": "SUPPLEMENTAL_ERROR_MONITORING_WORKSPACE",
+      "ephemeral-review": "SUPPORTED",
+      "local-dev": "SUPPORTED",
+      "notes": [
+        "This is one of the easiest external provisioning targets to automate end to end."
+      ],
+      "staging": "SUPPORTED"
+    },
+    {
+      "blocking_classes": [
+        "MFA_OR_CAPTCHA_CHECKPOINT"
+      ],
+      "ci": "LIMITED",
+      "dependency_key": "HELPDESK_OR_OPERATOR_ASSIST_INTEGRATION",
+      "ephemeral-review": "NOT_RECOMMENDED",
+      "local-dev": "SUPPORTED_WITH_MANUAL_CHECKPOINTS",
+      "notes": [
+        "Support platforms often require attended setup and data-governance review."
+      ],
+      "staging": "SUPPORTED_WITH_MANUAL_CHECKPOINTS"
+    },
+    {
+      "blocking_classes": [],
+      "ci": "SUPPORTED",
+      "dependency_key": "OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+      "ephemeral-review": "LIMITED",
+      "local-dev": "SUPPORTED",
+      "notes": [
+        "Managed OCR services can be smoke-tested from CI once credentials exist; preview hosts are useful only when the callback or ingress model does not require stable domains."
+      ],
+      "staging": "SUPPORTED"
+    },
+    {
+      "blocking_classes": [],
+      "ci": "SUPPORTED",
+      "dependency_key": "MALWARE_SCANNING_AND_QUARANTINE_CAPABILITY",
+      "ephemeral-review": "LIMITED",
+      "local-dev": "SUPPORTED",
+      "notes": [
+        "Managed or self-hosted scanners are both amenable to CI smoke once object storage hooks are stable."
+      ],
+      "staging": "SUPPORTED"
+    }
+  ],
+  "environment_profiles": [
+    {
+      "environment": "local-dev",
+      "overall_feasibility": "SUPPORTED_WITH_MANUAL_CHECKPOINTS",
+      "recommended_use": [
+        "first-pass sandbox provisioning",
+        "manual checkpoint capture",
+        "callback flow debugging with tunnels or temporary hosts"
+      ],
+      "secret_source": "vault-synced local env or operator-injected short-lived secrets",
+      "tooling": "headed Playwright with operator-attended sessions"
+    },
+    {
+      "environment": "ci",
+      "overall_feasibility": "LIMITED",
+      "recommended_use": [
+        "repeatable smoke checks against already-provisioned sandboxes",
+        "non-interactive provider console drift detection where MFA is bypassed by service account"
+      ],
+      "secret_source": "CI-injected short-lived vault material",
+      "tooling": "headless or virtual-display Playwright runners"
+    },
+    {
+      "environment": "ephemeral-review",
+      "overall_feasibility": "NOT_RECOMMENDED",
+      "recommended_use": [
+        "internal product smoke tests only",
+        "never the canonical target for provider callback registration"
+      ],
+      "secret_source": "review-app secrets with strict scope limits",
+      "tooling": "preview-host browser automation only when third-party host stability is irrelevant"
+    },
+    {
+      "environment": "staging",
+      "overall_feasibility": "SUPPORTED",
+      "recommended_use": [
+        "primary host for stable callback registration",
+        "repeatable full provisioning smoke",
+        "authority and IdP console confirmation after production-like config changes"
+      ],
+      "secret_source": "staging vault scopes and environment-specific service accounts",
+      "tooling": "headed and headless Playwright against stable long-lived domains"
+    }
+  ],
+  "workspace_rules": [
+    {
+      "description": "Authority and IdP callback setup should anchor to long-lived staging or production hostnames rather than ephemeral review URLs.",
+      "rule_code": "STABLE_CALLBACK_HOST_REQUIRED"
+    },
+    {
+      "description": "When third-party portals demand MFA, CAPTCHA, or manual review, automation should capture evidence and stop rather than fake progress.",
+      "rule_code": "MFA_OR_CAPTCHA_CHECKPOINT"
+    },
+    {
+      "description": "Browser automation should consume vault-injected secrets or short-lived session material; it should not persist raw credentials in repo files.",
+      "rule_code": "VAULT_INJECTED_SECRETS_ONLY"
+    }
+  ]
+}

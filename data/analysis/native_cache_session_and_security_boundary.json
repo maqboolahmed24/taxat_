@@ -1,0 +1,181 @@
+{
+  "boundaries": [
+    {
+      "allowed_storage": [
+        "Keychain-backed product-session artifacts",
+        "resume metadata",
+        "redaction-safe local preferences"
+      ],
+      "boundary_id": "native_human_session",
+      "forbidden_storage": [
+        "raw authority credentials on device",
+        "embedded webview-owned primary sign-in state"
+      ],
+      "label": "Interactive native human session boundary",
+      "live_session_requirement": "Mutation-capable actions require a live bound session plus current actor-session validation.",
+      "source_refs": [
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L372[7._Authentication_and_session_strategy]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L473[11._Security_and_runtime_posture_for_the_desktop_client]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L78[4._Browser_native-client_API_and_transport_hardening]"
+      ]
+    },
+    {
+      "allowed_storage": [
+        "DecisionBundle",
+        "ExperienceDelta",
+        "WorkspaceSnapshot",
+        "WorkspaceDelta",
+        "ApiCommandReceipt history",
+        "resume metadata",
+        "pinned evidence",
+        "compare selections",
+        "recent lists"
+      ],
+      "boundary_id": "structured_projection_cache",
+      "forbidden_storage": [
+        "unsent filing legality decisions",
+        "client-generated workflow conclusions",
+        "pre-acceptance mutation state without durable receipt"
+      ],
+      "label": "Structured projection and receipt cache boundary",
+      "live_session_requirement": "Cache-only restoration may render compatible read state, but filing-capable or mutation-capable actions stay blocked until live rebase re-establishes legality.",
+      "source_refs": [
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L390[8._Persistence_model]",
+        "Algorithm/native_cache_hydration_purge_and_rebase_contract.md::L45[Required_rules]"
+      ]
+    },
+    {
+      "allowed_storage": [
+        "scene restoration payloads",
+        "NSUserActivity",
+        "focus restoration outcome",
+        "cross_device_continuity_contract"
+      ],
+      "boundary_id": "scene_restoration_and_resume",
+      "forbidden_storage": [
+        "restoration under invalid tenant, masking, or session lineage",
+        "reopening stale objects after access or compatibility drift"
+      ],
+      "label": "Scene restoration and resume lineage boundary",
+      "live_session_requirement": "Restore proceeds only when local cache, resume metadata, and server session remain valid together.",
+      "source_refs": [
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L473[11._Security_and_runtime_posture_for_the_desktop_client]",
+        "data/analysis/deep_link_invite_and_resume_rules.json::native_restore_requires_valid_server_session[ADR-003 exported native restore rule]"
+      ]
+    },
+    {
+      "allowed_storage": [
+        "preview caches",
+        "temporary exports",
+        "Quick Look staging",
+        "redaction-safe local search indices"
+      ],
+      "boundary_id": "regulated_local_artifacts",
+      "forbidden_storage": [
+        "broader preview reuse across subject drift",
+        "masked or revoked material left in temp storage"
+      ],
+      "label": "Regulated previews, exports, and local index boundary",
+      "live_session_requirement": "Materialization remains bound to current masking, export posture, and selected preview subject.",
+      "source_refs": [
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L449[10._Native_UX_opportunities_that_should_replace_browser_habits]",
+        "Algorithm/cache_isolation_and_secure_reuse_contract.md::L58[FE-75_Native_Hydration_Composition]"
+      ]
+    },
+    {
+      "allowed_storage": [
+        "return target",
+        "focused object anchor",
+        "focus restoration anchor"
+      ],
+      "boundary_id": "browser_handoff_context",
+      "forbidden_storage": [
+        "local completion inference from browser return alone",
+        "scope widening from deep-link or handoff context alone"
+      ],
+      "label": "System-browser handoff return boundary",
+      "live_session_requirement": "The parent scene keeps pending posture until the governing read model refreshes and the target remains lawful.",
+      "source_refs": [
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L372[7._Authentication_and_session_strategy]",
+        "Algorithm/frontend_shell_and_interaction_law.md::L551[7.5_Browser_and_system_handoff]"
+      ]
+    },
+    {
+      "allowed_storage": [
+        "vault-held authority token lineage",
+        "vault-held IdP client secrets or private keys"
+      ],
+      "boundary_id": "authority_secret_boundary",
+      "forbidden_storage": [
+        "raw authority access or refresh tokens in Keychain, cache, queues, or read models",
+        "mixed storage of IdP admin material with general application persistence"
+      ],
+      "label": "Authority token and secret boundary",
+      "live_session_requirement": "Native flows may trigger authority work, but raw token material stays outside device storage boundaries.",
+      "source_refs": [
+        "Algorithm/security_and_runtime_hardening_contract.md::L50[3._Secret_key_and_token_handling]",
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]"
+      ]
+    },
+    {
+      "allowed_storage": [
+        "local drafts",
+        "compare selections",
+        "read-only compatible projections"
+      ],
+      "boundary_id": "disconnected_fail_closed_boundary",
+      "forbidden_storage": [
+        "blind queued filing sends",
+        "blind queued approval or authority mutations"
+      ],
+      "label": "Disconnected and cache-only fail-closed boundary",
+      "live_session_requirement": "Offline or disconnected posture degrades to read-only or local-draft mode for legally material actions.",
+      "source_refs": [
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L294[6._Data_flow_and_synchronization_model]",
+        "Algorithm/native_cache_hydration_purge_and_rebase_contract.md::L76[Failure_modes_closed]"
+      ]
+    }
+  ],
+  "compatibility_dimensions": [
+    "tenant_id",
+    "principal_class",
+    "session_binding_hash",
+    "session_lineage_ref",
+    "access_binding_hash_or_null",
+    "masking_posture_fingerprint",
+    "route_identity",
+    "canonical_object_ref",
+    "shell_family",
+    "projection_version",
+    "projection_guard_or_shell_stability_ref",
+    "supported_contract_window",
+    "preview_subject_ref_or_null_for_secondary_windows",
+    "delivery_binding_hash_for_temp_artifacts"
+  ],
+  "contract_version": "2026-04-18",
+  "native_session_carrier": "ASWebAuthenticationSession or equivalent plus Keychain-backed product-session material.",
+  "purge_triggers": [
+    "tenant switch",
+    "privilege downgrade",
+    "masking drift",
+    "session revocation",
+    "device binding invalidation",
+    "schema incompatibility",
+    "projection guard mismatch",
+    "route identity drift",
+    "preview subject mismatch",
+    "remote kill switch"
+  ],
+  "selected_security_posture": "system_browser_auth_plus_keychain_plus_tenant_bound_disposable_cache",
+  "source_refs": [
+    "Algorithm/security_and_runtime_hardening_contract.md::L30[2._Identity_session_and_command_trust]",
+    "Algorithm/security_and_runtime_hardening_contract.md::L130[6._Data_protection_privacy_and_cache_safety]",
+    "Algorithm/native_cache_hydration_purge_and_rebase_contract.md::L61[Coverage_requirements]",
+    "Algorithm/cache_isolation_and_secure_reuse_contract.md::L31[Reuse_Law]"
+  ],
+  "summary": {
+    "boundary_count": 7,
+    "compatibility_dimension_count": 14,
+    "purge_trigger_count": 10
+  }
+}

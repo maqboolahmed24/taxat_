@@ -1,0 +1,176 @@
+{
+  "compatibility_scenarios": [
+    {
+      "must_bind": [
+        "supported_client_window_ref",
+        "candidate_identity_hash",
+        "compatibility_gate_hash"
+      ],
+      "platform": "BROWSER",
+      "promotion_block_if_red": true,
+      "purpose": "Prove the oldest still-supported browser client remains safe against the promoted server and schema bundle.",
+      "scenario_id": "browser_oldest_supported_against_current_server",
+      "source_refs": [
+        "Algorithm/verification_and_release_gates.md::L10[1._Required_test_families]",
+        "Algorithm/verification_and_release_gates.md::L271[4._Evidence_required_for_promotion]"
+      ]
+    },
+    {
+      "must_bind": [
+        "supported_client_window_ref",
+        "candidate_identity_hash",
+        "compatibility_gate_hash"
+      ],
+      "platform": "BROWSER",
+      "promotion_block_if_red": true,
+      "purpose": "Prove the current browser client can still operate against the rollback-safe server edge when that window is promised.",
+      "scenario_id": "browser_current_against_rollback_safe_server",
+      "source_refs": [
+        "Algorithm/verification_and_release_gates.md::L10[1._Required_test_families]",
+        "Algorithm/deployment_and_resilience_contract.md::L177[6._Rollout_rollback_and_fail-forward_posture]"
+      ]
+    },
+    {
+      "must_bind": [
+        "supported_client_window_ref",
+        "candidate_identity_hash",
+        "compatibility_gate_hash",
+        "desktop_notarization_ref"
+      ],
+      "platform": "MACOS_NATIVE",
+      "promotion_block_if_red": true,
+      "purpose": "Prove the oldest supported native desktop client remains safe against the promoted backend and schema window.",
+      "scenario_id": "macos_oldest_supported_against_current_server",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L44[2._Promotion_pipeline]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L161[8._Operational_security_release_gates]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L516[13._Delivery_sequencing]"
+      ]
+    },
+    {
+      "must_bind": [
+        "supported_client_window_ref",
+        "candidate_identity_hash",
+        "compatibility_gate_hash",
+        "desktop_notarization_ref"
+      ],
+      "platform": "MACOS_NATIVE",
+      "promotion_block_if_red": true,
+      "purpose": "Prove the current shipped native client remains lawful against the rollback-safe server edge while the supported window is open.",
+      "scenario_id": "macos_current_against_rollback_safe_server",
+      "source_refs": [
+        "Algorithm/verification_and_release_gates.md::L10[1._Required_test_families]",
+        "Algorithm/deployment_and_resilience_contract.md::L177[6._Rollout_rollback_and_fail-forward_posture]"
+      ]
+    }
+  ],
+  "contract_version": "2026-04-18",
+  "governing_artifacts": [
+    {
+      "artifact_id": "release_candidate_identity_contract",
+      "role": "declares the supported client window as part of the candidate tuple",
+      "source_refs": [
+        "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L12[1._Governing_candidate_identity_model]"
+      ]
+    },
+    {
+      "artifact_id": "schema_bundle_compatibility_gate_contract",
+      "role": "freezes native client window posture and compatibility-window legality",
+      "source_refs": [
+        "Algorithm/verification_and_release_gates.md::L108[2._Release_gate]"
+      ]
+    },
+    {
+      "artifact_id": "VerificationSuiteResult.suite_family=OPERATOR_CLIENT",
+      "role": "retains the exact supported client window that was judged",
+      "source_refs": [
+        "Algorithm/verification_and_release_gates.md::L160[Gate_admissibility_rules]"
+      ]
+    },
+    {
+      "artifact_id": "GateAdmissibilityRecord.suite_family=OPERATOR_CLIENT",
+      "role": "proves the operator-client result is same-candidate, same-window, and admissible",
+      "source_refs": [
+        "Algorithm/verification_and_release_gates.md::L160[Gate_admissibility_rules]"
+      ]
+    },
+    {
+      "artifact_id": "ClientCompatibilityMatrix",
+      "role": "binds browser/native window coverage to the candidate and shared compatibility boundary",
+      "source_refs": [
+        "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]",
+        "Algorithm/verification_and_release_gates.md::L271[4._Evidence_required_for_promotion]"
+      ]
+    },
+    {
+      "artifact_id": "ReleaseVerificationManifest",
+      "role": "carries supported-client evidence into the promotion decision root",
+      "source_refs": [
+        "Algorithm/verification_and_release_gates.md::L108[2._Release_gate]"
+      ]
+    },
+    {
+      "artifact_id": "DeploymentRelease",
+      "role": "preserves the resulting rollout, rollback boundary, and supported-window promise",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L177[6._Rollout_rollback_and_fail-forward_posture]"
+      ]
+    }
+  ],
+  "promotion_blockers": [
+    {
+      "blocker_id": "missing_supported_client_window_when_promised",
+      "rule": "Any candidate that promises a supported client window must keep a non-null supported-client ref everywhere the operator-client gate or deployment decision binds it.",
+      "source_refs": [
+        "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L12[1._Governing_candidate_identity_model]",
+        "Algorithm/verification_and_release_gates.md::L160[Gate_admissibility_rules]"
+      ]
+    },
+    {
+      "blocker_id": "client_matrix_not_green",
+      "rule": "Promotion blocks when ClientCompatibilityMatrix is not green for the promised browser/native window.",
+      "source_refs": [
+        "Algorithm/verification_and_release_gates.md::L271[4._Evidence_required_for_promotion]",
+        "Algorithm/deployment_and_resilience_contract.md::L44[2._Promotion_pipeline]"
+      ]
+    },
+    {
+      "blocker_id": "native_client_window_blocked",
+      "rule": "Promotion blocks when the shared compatibility gate records native_client_window_state = BLOCKED, even if other evidence looks green.",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L72[3._Schema_and_datastore_migration_rules]",
+        "Algorithm/verification_and_release_gates.md::L108[2._Release_gate]"
+      ]
+    },
+    {
+      "blocker_id": "desktop_notarization_or_hardening_missing",
+      "rule": "A shipped macOS target blocks promotion if signature, notarization, hardened runtime, or entitlement policy evidence is missing or failing.",
+      "source_refs": [
+        "Algorithm/security_and_runtime_hardening_contract.md::L161[8._Operational_security_release_gates]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L473[11._Security_and_runtime_posture_for_the_desktop_client]"
+      ]
+    },
+    {
+      "blocker_id": "no_emergency_disable_or_pin_path",
+      "rule": "Desktop rollout is not lawful without a documented compatibility window and an emergency disable or pin path.",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L228[8._Release_and_resilience_invariants]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L516[13._Delivery_sequencing]"
+      ]
+    }
+  ],
+  "selected_strategy_id": "manifest_centered_candidate_bound_release_doctrine",
+  "summary": {
+    "compatibility_scenario_count": 4,
+    "governing_artifact_count": 7,
+    "platform_count": 2,
+    "promotion_blocker_count": 5
+  },
+  "typed_gaps_or_deferred_decisions": [
+    {
+      "id": "exact_version_floor_policy_deferred",
+      "summary": "ADR-009 fixes the supported-window governance model but not the exact client version floor or release-channel policy used to populate that window.",
+      "type": "DEFERRED_DECISION"
+    }
+  ]
+}

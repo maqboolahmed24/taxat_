@@ -1,0 +1,44 @@
+flowchart LR
+  api["Northbound APIs and command handlers"]
+  control["Primary control store"]
+  audit["Append-only audit store"]
+  object["Immutable object store"]
+  outbox["Durable outbox / inbox ledgers"]
+  broker["Queue / broker"]
+  auth["Authority gateway"]
+  projector["Read-side projector"]
+  projection["Projection store"]
+  cache["Cache / resume store"]
+  live["SSE / notification fanout"]
+  clients["Browser and native clients"]
+  recovery["Replay / restore controller"]
+  api --> control
+  control --> outbox
+  control --> audit
+  control --> object
+  outbox --> broker
+  broker --> auth
+  broker --> projector
+  auth --> audit
+  auth --> control
+  auth --> object
+  projector --> projection
+  projector --> audit
+  projection --> cache
+  projection --> live
+  live --> clients
+  cache --> clients
+  recovery --> control
+  recovery --> audit
+  recovery --> object
+  recovery --> broker
+  recovery --> projection
+  recovery --> cache
+  classDef truth fill:#E6FFFA,stroke:#2C7A7B,color:#234E52;
+  classDef evidence fill:#FFF5F5,stroke:#C53030,color:#742A2A;
+  classDef transport fill:#EBF8FF,stroke:#3182CE,color:#2A4365;
+  classDef client fill:#F7FAFC,stroke:#4A5568,color:#2D3748;
+  class control truth;
+  class audit,object evidence;
+  class outbox,broker,projection,cache,live,auth,projector transport;
+  class api,clients,recovery client;

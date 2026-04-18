@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/manual_portal_checkpoint.schema.json",
+  "title": "ManualPortalCheckpointRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "checkpoint_record_id",
+    "generated_on",
+    "provider_id",
+    "provider_label",
+    "flow_id",
+    "run_id",
+    "product_environment_id",
+    "provider_environment",
+    "environment_label",
+    "checkpoint_reason_code",
+    "checkpoint_reason_family",
+    "checkpoint_severity",
+    "checkpoint_status",
+    "opened_at",
+    "portal_route_ref",
+    "page_identity_ref",
+    "page_title_hash_sha256",
+    "url_hash_sha256",
+    "safe_route_fingerprint",
+    "flow_context",
+    "mapped_core_checkpoint",
+    "reason_code_policy_ref",
+    "resume_policy_ref",
+    "redaction_policy_ref",
+    "evidence_pack_ref",
+    "resume_requirements",
+    "provider_docs_urls",
+    "source_refs",
+    "typed_gaps",
+    "notes"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "checkpoint_record_id": { "const": "manual_portal_checkpoint_record" },
+    "generated_on": { "type": "string" },
+    "provider_id": { "type": "string", "minLength": 1 },
+    "provider_label": { "type": "string", "minLength": 1 },
+    "flow_id": { "type": "string", "minLength": 1 },
+    "run_id": { "type": "string", "minLength": 1 },
+    "product_environment_id": { "type": "string", "minLength": 1 },
+    "provider_environment": {
+      "type": "string",
+      "enum": ["sandbox", "production", "fixture"]
+    },
+    "environment_label": { "type": "string", "minLength": 1 },
+    "checkpoint_reason_code": {
+      "type": "string",
+      "enum": [
+        "CAPTCHA",
+        "MFA_REQUIRED",
+        "STEP_UP_REQUIRED",
+        "EMAIL_VERIFICATION_REQUIRED",
+        "DEVICE_APPROVAL_REQUIRED",
+        "SUSPICIOUS_LOGIN_REVIEW",
+        "HUMAN_CONFIRMATION_REQUIRED",
+        "PORTAL_POLICY_BLOCK",
+        "UNKNOWN_CHALLENGE_REVIEW_REQUIRED"
+      ]
+    },
+    "checkpoint_reason_family": {
+      "type": "string",
+      "enum": [
+        "ANTI_BOT",
+        "IDENTITY_STEP_UP",
+        "VERIFICATION",
+        "HUMAN_APPROVAL",
+        "PORTAL_POLICY",
+        "UNKNOWN_REVIEW"
+      ]
+    },
+    "checkpoint_severity": {
+      "type": "string",
+      "enum": ["REVIEW_REQUIRED", "ACTION_REQUIRED", "BLOCKING"]
+    },
+    "checkpoint_status": { "const": "OPEN" },
+    "opened_at": { "type": "string", "format": "date-time" },
+    "checkpoint_expires_at_or_null": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "portal_route_ref": { "type": "string", "minLength": 1 },
+    "page_identity_ref": { "type": "string", "minLength": 1 },
+    "page_title_hash_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "url_hash_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "safe_route_fingerprint": { "type": "string", "minLength": 1 },
+    "flow_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recipe_ref",
+        "step_id",
+        "step_title",
+        "safe_last_completed_step_id",
+        "selector_manifest_version",
+        "browser_session_posture",
+        "secret_entry_suppression_active"
+      ],
+      "properties": {
+        "recipe_ref": { "type": "string", "minLength": 1 },
+        "step_id": { "type": "string", "minLength": 1 },
+        "step_title": { "type": "string", "minLength": 1 },
+        "safe_last_completed_step_id": { "type": "string", "minLength": 1 },
+        "selector_manifest_version": { "type": "string", "minLength": 1 },
+        "browser_session_posture": { "type": "string", "minLength": 1 },
+        "secret_entry_suppression_active": { "type": "boolean" }
+      }
+    },
+    "mapped_core_checkpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkpoint_id",
+        "core_reason",
+        "reentry_policy",
+        "capture_policy"
+      ],
+      "properties": {
+        "checkpoint_id": { "type": "string", "minLength": 1 },
+        "core_reason": {
+          "type": "string",
+          "enum": [
+            "EMAIL_VERIFICATION",
+            "CAPTCHA",
+            "MFA",
+            "HUMAN_REVIEW",
+            "LEGAL_APPROVAL",
+            "POLICY_CONFIRMATION"
+          ]
+        },
+        "reentry_policy": {
+          "type": "string",
+          "enum": [
+            "VERIFY_CURRENT_STATE_THEN_CONTINUE",
+            "ADOPT_EXISTING_RESOURCE_THEN_CONTINUE",
+            "STOP_AND_ESCALATE"
+          ]
+        },
+        "capture_policy": {
+          "type": "string",
+          "enum": ["REDACT", "SUPPRESS"]
+        }
+      }
+    },
+    "reason_code_policy_ref": {
+      "const": "config/provisioning/manual_checkpoint_reason_codes.json"
+    },
+    "resume_policy_ref": {
+      "const": "config/provisioning/blocked_portal_resume_policy.json"
+    },
+    "redaction_policy_ref": {
+      "const": "config/provisioning/checkpoint_redaction_policy.json"
+    },
+    "evidence_pack_ref": { "type": "string", "minLength": 1 },
+    "resume_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resume_policy_ref",
+        "human_actor_role",
+        "expected_post_checkpoint_route_ref",
+        "session_revalidation_requirement",
+        "selector_drift_check_requirement",
+        "safe_noop_verification_step",
+        "timeout_posture",
+        "forbidden_actions",
+        "resume_snapshot_ref_or_null"
+      ],
+      "properties": {
+        "resume_policy_ref": { "type": "string", "minLength": 1 },
+        "human_actor_role": { "type": "string", "minLength": 1 },
+        "expected_post_checkpoint_route_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "session_revalidation_requirement": {
+          "type": "string",
+          "enum": [
+            "REQUIRED",
+            "REQUIRED_AND_FAIL_CLOSED_IF_SESSION_ROTATED"
+          ]
+        },
+        "selector_drift_check_requirement": {
+          "type": "string",
+          "const": "REQUIRED"
+        },
+        "safe_noop_verification_step": { "type": "string", "minLength": 1 },
+        "timeout_posture": {
+          "type": "string",
+          "enum": [
+            "FAIL_CLOSED_ON_EXPIRY",
+            "FAIL_CLOSED_ON_ROUTE_OR_SESSION_MISMATCH"
+          ]
+        },
+        "forbidden_actions": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "resume_snapshot_ref_or_null": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "provider_docs_urls": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "format": "uri" }
+    },
+    "source_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_ref", "rationale"],
+        "properties": {
+          "source_ref": { "type": "string", "minLength": 1 },
+          "rationale": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "typed_gaps": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "notes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

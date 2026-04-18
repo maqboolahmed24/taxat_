@@ -1,0 +1,615 @@
+{
+  "alternatives": [
+    {
+      "alternative_id": "relational_first_with_audit_object_broker_and_cache",
+      "criterion_breakdown": [
+        {
+          "criterion_id": "durable_truth_and_legal_state_integrity",
+          "label": "Durable truth and legal-state integrity",
+          "note": "Strongest alignment with the explicit control-store and append-only-evidence split in the corpus, while keeping mutable legal truth out of transport and cache layers.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 4.75,
+          "weight": 14,
+          "weighted_score": 13.3
+        },
+        {
+          "criterion_id": "replayability_and_deterministic_reconstruction",
+          "label": "Replayability and deterministic reconstruction",
+          "note": "Supports exact replay and proof reconstruction well because manifests, freezes, hash sets, and evidence refs stay durable and queryable under one transactional spine.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 4.5,
+          "weight": 12,
+          "weighted_score": 10.8
+        },
+        {
+          "criterion_id": "append_only_evidence_and_lineage_integrity",
+          "label": "Append-only evidence and lineage integrity",
+          "note": "Fits append-only audit and provenance semantics naturally without promoting the audit ledger into the only mutable system-of-record plane.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 4.5,
+          "weight": 11,
+          "weighted_score": 9.9
+        },
+        {
+          "criterion_id": "retention_erasure_and_privacy_reconciliation_fit",
+          "label": "Retention, erasure, and privacy reconciliation fit",
+          "note": "Separates mutable retention control from immutable evidence and blob bodies, which makes limitation notes, tombstones, and compensating re-erasure easier to preserve lawfully.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 4.5,
+          "weight": 10,
+          "weighted_score": 9.0
+        },
+        {
+          "criterion_id": "read_model_rebuildability_and_stream_support",
+          "label": "Read-model rebuildability and stream/reconnect support",
+          "note": "Explicitly treats read models, queues, and caches as disposable while still supporting reconnect-safe SSE and route-scoped recovery.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 4.75,
+          "weight": 10,
+          "weighted_score": 9.5
+        },
+        {
+          "criterion_id": "authority_idempotency_and_resend_safety",
+          "label": "Authority idempotency, ingress, and resend safety",
+          "note": "Best fit for durable request envelopes, ingress receipts, interaction control records, and resend legality because those facts live outside the transport layer.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 4.75,
+          "weight": 10,
+          "weighted_score": 9.5
+        },
+        {
+          "criterion_id": "large_artifact_and_quarantine_handling",
+          "label": "Large artifact, quarantine, and export handling",
+          "note": "Object storage for immutable bodies and relational metadata for staging, request binding, and publish-time state cleanly match the upload and proof-bundle contracts.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 4.75,
+          "weight": 8,
+          "weighted_score": 7.6
+        },
+        {
+          "criterion_id": "migration_and_fail_forward_compatibility",
+          "label": "Migration, rollback, and fail-forward compatibility",
+          "note": "The expand-migrate-contract posture maps well onto relational truth plus rebuildable projections and outbox-mediated fanout.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 4.5,
+          "weight": 9,
+          "weighted_score": 8.1
+        },
+        {
+          "criterion_id": "restore_speed_and_operability",
+          "label": "Restore speed, backup posture, and operability",
+          "note": "Tiered backup posture is straightforward: directly back up control, audit, and authoritative blob stores; rebuild queues, projections, and caches from them.",
+          "priority": "STRONG_PREFERENCE",
+          "raw_score": 4.25,
+          "weight": 8,
+          "weighted_score": 6.8
+        },
+        {
+          "criterion_id": "cost_and_operational_simplicity",
+          "label": "Cost and operational simplicity",
+          "note": "Not the cheapest single-service design, but it avoids more dangerous complexity from conflating truth, evidence, and delivery.",
+          "priority": "STRONG_PREFERENCE",
+          "raw_score": 4.0,
+          "weight": 5,
+          "weighted_score": 4.0
+        },
+        {
+          "criterion_id": "scale_and_latency_headroom",
+          "label": "Scale and latency headroom under mixed workloads",
+          "note": "Good fit for the expected mixed workload, with room to scale projection and delivery paths independently without moving truth into the broker.",
+          "priority": "DEFERRED_CONCERN",
+          "raw_score": 4.0,
+          "weight": 3,
+          "weighted_score": 2.4
+        }
+      ],
+      "label": "Relational-first control store with append-only audit ledger, object store, broker, and cache/resume store",
+      "rank": 1,
+      "risks": [
+        "Needs discipline around transactional outbox/inbox, append-only audit boundaries, and projection rebuild tooling.",
+        "Requires the team to operate multiple logical store roles instead of collapsing everything into one database or one stream."
+      ],
+      "strengths": [
+        "Best fit for the corpus distinction between durable legal truth, append-only evidence, disposable projections, and transport-only delivery.",
+        "Supports no-blind-resend authority recovery because request identity, ingress receipts, and interaction control stay durable outside the broker.",
+        "Lets projections, caches, and SSE fanout rebuild from receipts, manifests, audit events, and object refs instead of becoming accidental truth."
+      ],
+      "summary": "Keep mutable legal truth in a transactional relational control store, append-only evidence in a distinct audit ledger, immutable bodies in object storage, transport in a queue/broker, and resumability in disposable cache stores. Use transactional outbox/inbox ledgers so broker loss is recoverable from durable truth.",
+      "weighted_total": 90.9
+    },
+    {
+      "alternative_id": "document_store_centric_with_change_feed_projections",
+      "criterion_breakdown": [
+        {
+          "criterion_id": "durable_truth_and_legal_state_integrity",
+          "label": "Durable truth and legal-state integrity",
+          "note": "Can hold operational truth, but it is a weaker fit for the corpus's structured legal-state, receipt, and migration-control relationships than a transactional relational core.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 3.0,
+          "weight": 14,
+          "weighted_score": 8.4
+        },
+        {
+          "criterion_id": "replayability_and_deterministic_reconstruction",
+          "label": "Replayability and deterministic reconstruction",
+          "note": "Replay is workable, but hash-bound basis and cross-artifact historical readability require more bespoke discipline than the relational-first option.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 3.25,
+          "weight": 12,
+          "weighted_score": 7.8
+        },
+        {
+          "criterion_id": "append_only_evidence_and_lineage_integrity",
+          "label": "Append-only evidence and lineage integrity",
+          "note": "Append-only evidence can be modeled, but keeping immutable audit lineage distinct from mutable document updates is less natural.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 3.75,
+          "weight": 11,
+          "weighted_score": 8.25
+        },
+        {
+          "criterion_id": "retention_erasure_and_privacy_reconciliation_fit",
+          "label": "Retention, erasure, and privacy reconciliation fit",
+          "note": "Blob/body separation still works, but lifecycle and tombstone semantics become more subtle when mutable documents and evidence history coexist in one operational plane.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 3.5,
+          "weight": 10,
+          "weighted_score": 7.0
+        },
+        {
+          "criterion_id": "read_model_rebuildability_and_stream_support",
+          "label": "Read-model rebuildability and stream/reconnect support",
+          "note": "Change feeds help projection fanout, though the system still needs explicit rebuild rules for compacted or superseded history.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 4.0,
+          "weight": 10,
+          "weighted_score": 8.0
+        },
+        {
+          "criterion_id": "authority_idempotency_and_resend_safety",
+          "label": "Authority idempotency, ingress, and resend safety",
+          "note": "Durable request identity and ingress proof can be preserved, but the authority lineage model fits less cleanly than in a relational control store with explicit append-only tables.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 3.25,
+          "weight": 10,
+          "weighted_score": 6.5
+        },
+        {
+          "criterion_id": "large_artifact_and_quarantine_handling",
+          "label": "Large artifact, quarantine, and export handling",
+          "note": "Blob attachments plus document metadata work well for uploads, exports, and proof bodies.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 4.5,
+          "weight": 8,
+          "weighted_score": 7.2
+        },
+        {
+          "criterion_id": "migration_and_fail_forward_compatibility",
+          "label": "Migration, rollback, and fail-forward compatibility",
+          "note": "Schema change is often easier operationally, but the corpus explicitly needs stronger reader-window and historical-bundle guarantees than schemaless drift tolerates comfortably.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 3.5,
+          "weight": 9,
+          "weighted_score": 6.3
+        },
+        {
+          "criterion_id": "restore_speed_and_operability",
+          "label": "Restore speed, backup posture, and operability",
+          "note": "Restore can be decent, but proving audit continuity, replay-safe historical reads, and migration chronology is less direct.",
+          "priority": "STRONG_PREFERENCE",
+          "raw_score": 3.75,
+          "weight": 8,
+          "weighted_score": 6.0
+        },
+        {
+          "criterion_id": "cost_and_operational_simplicity",
+          "label": "Cost and operational simplicity",
+          "note": "Simpler than the event-log-first option, but still not as normatively aligned as the relational-first control plane.",
+          "priority": "STRONG_PREFERENCE",
+          "raw_score": 4.0,
+          "weight": 5,
+          "weighted_score": 4.0
+        },
+        {
+          "criterion_id": "scale_and_latency_headroom",
+          "label": "Scale and latency headroom under mixed workloads",
+          "note": "Good read-side scaling characteristics, especially for denormalized route-facing state.",
+          "priority": "DEFERRED_CONCERN",
+          "raw_score": 4.25,
+          "weight": 3,
+          "weighted_score": 2.55
+        }
+      ],
+      "label": "Document-store-centric operational truth with change-feed projections and blob attachments",
+      "rank": 2,
+      "risks": [
+        "Weaker fit for relational integrity around submission state, idempotency buckets, migration ledgers, and audit-link-heavy truth classes.",
+        "Makes replay, historical reader windows, and append-only evidence boundaries harder to explain cleanly than a relational-first control spine."
+      ],
+      "strengths": [
+        "Keeps the number of durable state systems lower than a full event-log-first design.",
+        "Handles hierarchical read models and blob references comfortably for product-facing surfaces.",
+        "Can scale fanout and change-feed-driven projections reasonably well."
+      ],
+      "summary": "Store most mutable operational state in a document database, keep large bodies in object storage, project read models from change feeds, and use queue/broker infrastructure for asynchronous work and notifications.",
+      "weighted_total": 72.0
+    },
+    {
+      "alternative_id": "event_stream_first_with_materialized_views",
+      "criterion_breakdown": [
+        {
+          "criterion_id": "durable_truth_and_legal_state_integrity",
+          "label": "Durable truth and legal-state integrity",
+          "note": "Conflicts with the explicit rule that broker/log transport must not become legal truth for manifests, workflow state, or authority settlement.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 2.25,
+          "weight": 14,
+          "weighted_score": 6.3
+        },
+        {
+          "criterion_id": "replayability_and_deterministic_reconstruction",
+          "label": "Replayability and deterministic reconstruction",
+          "note": "Event replay is naturally strong, but the corpus needs more than event reprocessing: it needs stable basis hashes, request envelopes, blob refs, and historical reader-window guarantees.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 3.5,
+          "weight": 12,
+          "weighted_score": 8.4
+        },
+        {
+          "criterion_id": "append_only_evidence_and_lineage_integrity",
+          "label": "Append-only evidence and lineage integrity",
+          "note": "Very strong on append-only history, which is the main advantage of this topology.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 4.75,
+          "weight": 11,
+          "weighted_score": 10.45
+        },
+        {
+          "criterion_id": "retention_erasure_and_privacy_reconciliation_fit",
+          "label": "Retention, erasure, and privacy reconciliation fit",
+          "note": "Erasure, tombstones, and proof-preserving limitation posture are possible, but retention-limited lifecycle rules become materially harder once the stream is treated as primary truth.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 3.25,
+          "weight": 10,
+          "weighted_score": 6.5
+        },
+        {
+          "criterion_id": "read_model_rebuildability_and_stream_support",
+          "label": "Read-model rebuildability and stream/reconnect support",
+          "note": "Strongest fanout and projection story on paper, but it solves the easiest part of the problem better than the hardest part.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 4.75,
+          "weight": 10,
+          "weighted_score": 9.5
+        },
+        {
+          "criterion_id": "authority_idempotency_and_resend_safety",
+          "label": "Authority idempotency, ingress, and resend safety",
+          "note": "Authority sends and ingress checkpoints still need durable control records outside the broker, otherwise recovery drifts toward blind replay and ambiguous reconciliation.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 2.25,
+          "weight": 10,
+          "weighted_score": 4.5
+        },
+        {
+          "criterion_id": "large_artifact_and_quarantine_handling",
+          "label": "Large artifact, quarantine, and export handling",
+          "note": "Blob bodies still land in object storage, though their operational metadata tends to collapse back into a non-stream control store anyway.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 4.0,
+          "weight": 8,
+          "weighted_score": 6.4
+        },
+        {
+          "criterion_id": "migration_and_fail_forward_compatibility",
+          "label": "Migration, rollback, and fail-forward compatibility",
+          "note": "Schema evolution on a canonical event log is possible, but the reader-window and restore guarantees become much harder to keep simple and provable.",
+          "priority": "HARD_REQUIREMENT",
+          "raw_score": 2.75,
+          "weight": 9,
+          "weighted_score": 4.95
+        },
+        {
+          "criterion_id": "restore_speed_and_operability",
+          "label": "Restore speed, backup posture, and operability",
+          "note": "Can recover projections quickly, but durable reopen safety still requires reconstructed control truth and explicit privacy plus authority gates.",
+          "priority": "STRONG_PREFERENCE",
+          "raw_score": 3.5,
+          "weight": 8,
+          "weighted_score": 5.6
+        },
+        {
+          "criterion_id": "cost_and_operational_simplicity",
+          "label": "Cost and operational simplicity",
+          "note": "The operational burden is high once event compatibility, log retention, materialized views, blob refs, and legal correction flows all need first-class governance.",
+          "priority": "STRONG_PREFERENCE",
+          "raw_score": 2.75,
+          "weight": 5,
+          "weighted_score": 2.75
+        },
+        {
+          "criterion_id": "scale_and_latency_headroom",
+          "label": "Scale and latency headroom under mixed workloads",
+          "note": "Best theoretical headroom for high-throughput fanout, but that is not the dominant phase-00 constraint.",
+          "priority": "DEFERRED_CONCERN",
+          "raw_score": 4.75,
+          "weight": 3,
+          "weighted_score": 2.85
+        }
+      ],
+      "label": "Event-stream-first log promoted toward primary truth with downstream materialized views",
+      "rank": 3,
+      "risks": [
+        "Directly fights the corpus requirement that the queue/broker not become the system of record for legal truth.",
+        "Harder to satisfy no-blind-resend authority recovery, explicit ingestion checkpoints, and restore reopen gating without introducing a second durable control plane anyway."
+      ],
+      "strengths": [
+        "Excellent append history and fanout characteristics.",
+        "Strong fit for high-volume projection pipelines and reprocessing mechanics when the stream is the central axis.",
+        "Can make derived analytical timelines and materialized views feel very natural."
+      ],
+      "summary": "Promote the event stream or broker log toward primary persistence, model transactional state primarily through immutable events, and derive read models plus legal-state projections downstream from the stream.",
+      "weighted_total": 68.2
+    }
+  ],
+  "criteria": [
+    {
+      "criterion_id": "durable_truth_and_legal_state_integrity",
+      "label": "Durable truth and legal-state integrity",
+      "priority": "HARD_REQUIREMENT",
+      "rationale": "Legal workflow state, submission state, manifests, receipts, and migration control objects need one authoritative durable home instead of being inferred from transport or projections.",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+        "Algorithm/deployment_and_resilience_contract.md::L33[queue_not_system_of_record]",
+        "Algorithm/authority_interaction_protocol.md::L854[9.10_Submission-state_write_rules]",
+        "Algorithm/northbound_api_and_session_contract.md::L751[durable_command_receipt_invariant]"
+      ],
+      "weight": 14
+    },
+    {
+      "criterion_id": "replayability_and_deterministic_reconstruction",
+      "label": "Replayability and deterministic reconstruction",
+      "priority": "HARD_REQUIREMENT",
+      "rationale": "Exact replay, proof reconstruction, and restore verification depend on durable execution basis, graph lineage, and immutable artifact references that can be reloaded without transport guesswork.",
+      "source_refs": [
+        "Algorithm/replay_and_reproducibility_contract.md::L109[Execution-basis_freeze_contract]",
+        "Algorithm/replay_and_reproducibility_contract.md::L227[Exact_replay_preconditions]",
+        "Algorithm/replay_and_reproducibility_contract.md::L738[Implementation_shape]",
+        "Algorithm/provenance_graph_semantics.md::L617[11.14D_Replay-safe_proof_reconstruction]"
+      ],
+      "weight": 12
+    },
+    {
+      "criterion_id": "append_only_evidence_and_lineage_integrity",
+      "label": "Append-only evidence and lineage integrity",
+      "priority": "HARD_REQUIREMENT",
+      "rationale": "Audit evidence, provenance edges, authority envelopes, and replay attestations must remain historically traversable even when read models rebuild or releases roll back.",
+      "source_refs": [
+        "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+        "Algorithm/observability_and_audit_contract.md::L154[14.5_Audit_event_contract]",
+        "Algorithm/deployment_and_resilience_contract.md::L42[audit_append_only_under_rebuild_and_rollback]",
+        "Algorithm/provenance_graph_semantics.md::L253[gate_and_audit_anchoring_rule]"
+      ],
+      "weight": 11
+    },
+    {
+      "criterion_id": "retention_erasure_and_privacy_reconciliation_fit",
+      "label": "Retention, erasure, and privacy reconciliation fit",
+      "priority": "HARD_REQUIREMENT",
+      "rationale": "The topology has to preserve basis hashes, typed limitation posture, erasure proof, and post-restore privacy reconciliation without allowing limited projections to overwrite canonical evidence.",
+      "source_refs": [
+        "Algorithm/retention_and_privacy.md::L58[Artifact_retention_contract]",
+        "Algorithm/retention_and_privacy.md::L218[Proof-bundle_retention_semantics]",
+        "Algorithm/retention_and_privacy.md::L240[Basis-preserving_retention_for_replay]",
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[Restore_privacy_reconciliation_law]"
+      ],
+      "weight": 10
+    },
+    {
+      "criterion_id": "read_model_rebuildability_and_stream_support",
+      "label": "Read-model rebuildability and stream/reconnect support",
+      "priority": "HARD_REQUIREMENT",
+      "rationale": "Portal, collaboration, and governance surfaces need fast live updates and resumability, but those surfaces must be explicitly rebuildable from durable command-side truth.",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L34[read_models_and_caches_disposable]",
+        "Algorithm/deployment_and_resilience_contract.md::L35[projector_derives_disposable_surfaces]",
+        "Algorithm/northbound_api_and_session_contract.md::L646[7._Stream_and_reconnect_rules]",
+        "Algorithm/collaboration_workspace_contract.md::L1778[9._Stream_events_and_notifications]"
+      ],
+      "weight": 10
+    },
+    {
+      "criterion_id": "authority_idempotency_and_resend_safety",
+      "label": "Authority idempotency, ingress, and resend safety",
+      "priority": "HARD_REQUIREMENT",
+      "rationale": "Authority sends, callbacks, reconciliation, and recovery all depend on durable request identity, ingress checkpoints, and no-blind-resend guarantees even after queue loss or restore.",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L621[9.8_Request_hashing_and_idempotency]",
+        "Algorithm/authority_interaction_protocol.md::L792[9.9A_Inbound_authority_ingress_protocol]",
+        "Algorithm/authority_interaction_protocol.md::L952[9.12_Duplicate_and_pending-state_rules]",
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L113[Queue_and_authority_recovery_law]"
+      ],
+      "weight": 10
+    },
+    {
+      "criterion_id": "large_artifact_and_quarantine_handling",
+      "label": "Large artifact, quarantine, and export handling",
+      "priority": "HARD_REQUIREMENT",
+      "rationale": "Uploads, quarantined binaries, generated exports, response bodies, and proof bundles need immutable-body storage and scan-aware lifecycle handling that is distinct from transactional row state.",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L25[object_store_payload_evidence_artifact_bodies]",
+        "Algorithm/customer_client_portal_experience_contract.md::L293[Secure_document-upload_flow]",
+        "Algorithm/collaboration_workspace_contract.md::L1673[8.2_Upload_staging]",
+        "Algorithm/retention_and_privacy.md::L218[Proof-bundle_retention_semantics]"
+      ],
+      "weight": 8
+    },
+    {
+      "criterion_id": "migration_and_fail_forward_compatibility",
+      "label": "Migration, rollback, and fail-forward compatibility",
+      "priority": "HARD_REQUIREMENT",
+      "rationale": "Schema evolution, reader windows, restore drills, and compensating releases all need a topology that supports expand-migrate-contract without corrupting in-flight truth or historical readability.",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L72[3._Schema_and_datastore_migration_rules]",
+        "Algorithm/deployment_and_resilience_contract.md::L177[6._Rollout_rollback_and_fail-forward_posture]",
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L127[Rollback_and_fail-forward_law]"
+      ],
+      "weight": 9
+    },
+    {
+      "criterion_id": "restore_speed_and_operability",
+      "label": "Restore speed, backup posture, and operability",
+      "priority": "STRONG_PREFERENCE",
+      "rationale": "The chosen topology should keep Tier 0 truth restorable within the declared RPO/RTO targets while allowing projections, queues, and caches to recover in more mechanical ways.",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L112[4._Recovery_tiers_and_targets]",
+        "Algorithm/deployment_and_resilience_contract.md::L133[5._Backup_restore_and_DR_rules]",
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L44[Recovery_checkpoint_law]"
+      ],
+      "weight": 8
+    },
+    {
+      "criterion_id": "cost_and_operational_simplicity",
+      "label": "Cost and operational simplicity",
+      "priority": "STRONG_PREFERENCE",
+      "rationale": "The topology should remain comprehensible to the platform team and avoid introducing extra durable truth planes when the corpus only justifies distinct roles, not gratuitous services.",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+        "Algorithm/deployment_and_resilience_contract.md::L211[7._Minimum_operational_runbooks]"
+      ],
+      "weight": 5
+    },
+    {
+      "criterion_id": "scale_and_latency_headroom",
+      "label": "Scale and latency headroom under mixed workloads",
+      "priority": "DEFERRED_CONCERN",
+      "rationale": "The system needs credible fanout, projection, and upload throughput, but phase 00 is still driven more by truth placement and replay safety than by peak scale optimization.",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L646[7._Stream_and_reconnect_rules]",
+        "Algorithm/collaboration_workspace_contract.md::L1778[9._Stream_events_and_notifications]",
+        "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]"
+      ],
+      "weight": 3
+    }
+  ],
+  "decision_date": "2026-04-17",
+  "decision_id": "ADR-002",
+  "decision_title": "Storage and eventing topology",
+  "winner": {
+    "alternative_id": "relational_first_with_audit_object_broker_and_cache",
+    "criterion_breakdown": [
+      {
+        "criterion_id": "durable_truth_and_legal_state_integrity",
+        "label": "Durable truth and legal-state integrity",
+        "note": "Strongest alignment with the explicit control-store and append-only-evidence split in the corpus, while keeping mutable legal truth out of transport and cache layers.",
+        "priority": "HARD_REQUIREMENT",
+        "raw_score": 4.75,
+        "weight": 14,
+        "weighted_score": 13.3
+      },
+      {
+        "criterion_id": "replayability_and_deterministic_reconstruction",
+        "label": "Replayability and deterministic reconstruction",
+        "note": "Supports exact replay and proof reconstruction well because manifests, freezes, hash sets, and evidence refs stay durable and queryable under one transactional spine.",
+        "priority": "HARD_REQUIREMENT",
+        "raw_score": 4.5,
+        "weight": 12,
+        "weighted_score": 10.8
+      },
+      {
+        "criterion_id": "append_only_evidence_and_lineage_integrity",
+        "label": "Append-only evidence and lineage integrity",
+        "note": "Fits append-only audit and provenance semantics naturally without promoting the audit ledger into the only mutable system-of-record plane.",
+        "priority": "HARD_REQUIREMENT",
+        "raw_score": 4.5,
+        "weight": 11,
+        "weighted_score": 9.9
+      },
+      {
+        "criterion_id": "retention_erasure_and_privacy_reconciliation_fit",
+        "label": "Retention, erasure, and privacy reconciliation fit",
+        "note": "Separates mutable retention control from immutable evidence and blob bodies, which makes limitation notes, tombstones, and compensating re-erasure easier to preserve lawfully.",
+        "priority": "HARD_REQUIREMENT",
+        "raw_score": 4.5,
+        "weight": 10,
+        "weighted_score": 9.0
+      },
+      {
+        "criterion_id": "read_model_rebuildability_and_stream_support",
+        "label": "Read-model rebuildability and stream/reconnect support",
+        "note": "Explicitly treats read models, queues, and caches as disposable while still supporting reconnect-safe SSE and route-scoped recovery.",
+        "priority": "HARD_REQUIREMENT",
+        "raw_score": 4.75,
+        "weight": 10,
+        "weighted_score": 9.5
+      },
+      {
+        "criterion_id": "authority_idempotency_and_resend_safety",
+        "label": "Authority idempotency, ingress, and resend safety",
+        "note": "Best fit for durable request envelopes, ingress receipts, interaction control records, and resend legality because those facts live outside the transport layer.",
+        "priority": "HARD_REQUIREMENT",
+        "raw_score": 4.75,
+        "weight": 10,
+        "weighted_score": 9.5
+      },
+      {
+        "criterion_id": "large_artifact_and_quarantine_handling",
+        "label": "Large artifact, quarantine, and export handling",
+        "note": "Object storage for immutable bodies and relational metadata for staging, request binding, and publish-time state cleanly match the upload and proof-bundle contracts.",
+        "priority": "HARD_REQUIREMENT",
+        "raw_score": 4.75,
+        "weight": 8,
+        "weighted_score": 7.6
+      },
+      {
+        "criterion_id": "migration_and_fail_forward_compatibility",
+        "label": "Migration, rollback, and fail-forward compatibility",
+        "note": "The expand-migrate-contract posture maps well onto relational truth plus rebuildable projections and outbox-mediated fanout.",
+        "priority": "HARD_REQUIREMENT",
+        "raw_score": 4.5,
+        "weight": 9,
+        "weighted_score": 8.1
+      },
+      {
+        "criterion_id": "restore_speed_and_operability",
+        "label": "Restore speed, backup posture, and operability",
+        "note": "Tiered backup posture is straightforward: directly back up control, audit, and authoritative blob stores; rebuild queues, projections, and caches from them.",
+        "priority": "STRONG_PREFERENCE",
+        "raw_score": 4.25,
+        "weight": 8,
+        "weighted_score": 6.8
+      },
+      {
+        "criterion_id": "cost_and_operational_simplicity",
+        "label": "Cost and operational simplicity",
+        "note": "Not the cheapest single-service design, but it avoids more dangerous complexity from conflating truth, evidence, and delivery.",
+        "priority": "STRONG_PREFERENCE",
+        "raw_score": 4.0,
+        "weight": 5,
+        "weighted_score": 4.0
+      },
+      {
+        "criterion_id": "scale_and_latency_headroom",
+        "label": "Scale and latency headroom under mixed workloads",
+        "note": "Good fit for the expected mixed workload, with room to scale projection and delivery paths independently without moving truth into the broker.",
+        "priority": "DEFERRED_CONCERN",
+        "raw_score": 4.0,
+        "weight": 3,
+        "weighted_score": 2.4
+      }
+    ],
+    "label": "Relational-first control store with append-only audit ledger, object store, broker, and cache/resume store",
+    "rank": 1,
+    "risks": [
+      "Needs discipline around transactional outbox/inbox, append-only audit boundaries, and projection rebuild tooling.",
+      "Requires the team to operate multiple logical store roles instead of collapsing everything into one database or one stream."
+    ],
+    "strengths": [
+      "Best fit for the corpus distinction between durable legal truth, append-only evidence, disposable projections, and transport-only delivery.",
+      "Supports no-blind-resend authority recovery because request identity, ingress receipts, and interaction control stay durable outside the broker.",
+      "Lets projections, caches, and SSE fanout rebuild from receipts, manifests, audit events, and object refs instead of becoming accidental truth."
+    ],
+    "summary": "Keep mutable legal truth in a transactional relational control store, append-only evidence in a distinct audit ledger, immutable bodies in object storage, transport in a queue/broker, and resumability in disposable cache stores. Use transactional outbox/inbox ledgers so broker loss is recoverable from durable truth.",
+    "weighted_total": 90.9
+  }
+}

@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Support Integration Control Plane Fixture</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        background: #f5f6f4;
+        color: #111418;
+      }
+
+      header,
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: center;
+        padding: 24px 0 16px;
+      }
+
+      nav {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+
+      nav a {
+        color: #4b6379;
+        text-decoration: none;
+      }
+
+      main {
+        display: grid;
+        gap: 1rem;
+        padding-bottom: 32px;
+      }
+
+      section {
+        background: #ffffff;
+        border: 1px solid rgba(17, 20, 24, 0.08);
+        border-radius: 18px;
+        padding: 24px;
+      }
+
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: start;
+        margin-bottom: 18px;
+      }
+
+      .badge,
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 999px;
+        padding: 0.35rem 0.7rem;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .badge {
+        background: rgba(75, 99, 121, 0.12);
+        color: #4b6379;
+      }
+
+      .chip {
+        background: rgba(122, 97, 104, 0.12);
+        color: #7a6168;
+      }
+
+      .chip[data-state="selected-with-gaps"] {
+        background: rgba(138, 92, 24, 0.12);
+        color: #8a5c18;
+      }
+
+      button {
+        border: 1px solid rgba(17, 20, 24, 0.1);
+        border-radius: 999px;
+        background: #4b6379;
+        color: #ffffff;
+        padding: 11px 16px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .grid {
+        display: grid;
+        gap: 14px;
+      }
+
+      .card {
+        border: 1px solid rgba(17, 20, 24, 0.08);
+        border-radius: 14px;
+        padding: 16px;
+        background: #f8faf8;
+      }
+
+      .row-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: start;
+      }
+
+      .meta {
+        color: #65707a;
+        font-size: 14px;
+      }
+
+      strong {
+        display: block;
+        font-size: 13px;
+        color: #65707a;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      code {
+        font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body data-scenario="not-selected">
+    <header>
+      <div>
+        <p class="meta">Provisioning fixture</p>
+        <h1>Support integration decision</h1>
+      </div>
+      <nav aria-label="Provider navigation">
+        <a href="#decision">Decision</a>
+        <a href="#channel-policy">Channel policy</a>
+        <a href="#context-mapping">Context mapping</a>
+        <a href="#mirror-rules">Mirror rules</a>
+      </nav>
+    </header>
+    <main>
+      <section id="decision">
+        <div class="section-head">
+          <div>
+            <p class="meta">Selection posture</p>
+            <p id="decision-summary" class="meta"></p>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <span class="badge">Zendesk-compatible baseline</span>
+            <span class="chip" id="selection-state-chip"></span>
+            <button id="selection-action" type="button">Record support selection</button>
+          </div>
+        </div>
+        <div class="grid" id="decision-list"></div>
+      </section>
+
+      <section id="channel-policy">
+        <div class="section-head">
+          <div>
+            <p class="meta">Scenario split</p>
+            <h2>Support channel policy</h2>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <span class="badge">No-restatement law</span>
+            <button id="channel-policy-action" type="button">Validate support channel policy</button>
+          </div>
+        </div>
+        <div class="grid" id="channel-policy-list"></div>
+      </section>
+
+      <section id="context-mapping">
+        <div class="section-head">
+          <div>
+            <p class="meta">Field boundaries</p>
+            <h2>Context mapping</h2>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <span class="chip">Customer-safe only</span>
+            <button id="context-mapping-action" type="button">Validate contextual help mapping</button>
+          </div>
+        </div>
+        <div class="grid" id="mapping-list"></div>
+      </section>
+
+      <section id="mirror-rules">
+        <div class="section-head">
+          <div>
+            <p class="meta">Mirror and callback bounds</p>
+            <h2>Mirror rules</h2>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <span class="badge">Metadata-only mirror</span>
+            <button id="mirror-rules-action" type="button">Validate mirror rules</button>
+          </div>
+        </div>
+        <div class="grid" id="mirror-list"></div>
+      </section>
+    </main>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const scenario = params.get("scenario") || "not-selected";
+      document.body.dataset.scenario = scenario;
+
+      const selectionStateChip = document.getElementById("selection-state-chip");
+      const decisionSummary = document.getElementById("decision-summary");
+      const decisionList = document.getElementById("decision-list");
+      const channelPolicyList = document.getElementById("channel-policy-list");
+      const mappingList = document.getElementById("mapping-list");
+      const mirrorList = document.getElementById("mirror-list");
+
+      const selectionState =
+        scenario === "selected-with-gaps" ? "Selected with Gaps" : "Not Selected";
+      selectionStateChip.textContent = selectionState;
+      selectionStateChip.dataset.state = scenario;
+      decisionSummary.textContent =
+        scenario === "selected-with-gaps"
+          ? "External workspace concept chosen, but procurement and field binding remain open."
+          : "No external support workspace has been selected; first-party portal help remains canonical.";
+
+      [
+        {
+          label: "Truth boundary",
+          value:
+            "PortalHelpRequest remains canonical. External tickets may mirror customer-safe context only."
+        },
+        {
+          label: "Future adapter",
+          value: "ZENDESK_COMPATIBLE_BASELINE"
+        },
+        {
+          label: "Provider selection",
+          value: scenario === "selected-with-gaps" ? "Selected pending procurement" : "Not selected"
+        }
+      ].forEach((row) => {
+        const article = document.createElement("article");
+        article.className = "card";
+        article.innerHTML = `
+          <div class="row-header">
+            <div>
+              <strong>${row.label}</strong>
+              <p>${row.value}</p>
+            </div>
+          </div>
+        `;
+        decisionList.append(article);
+      });
+
+      [
+        ["Contextual request help", "Route, focus anchor, request-info lineage, and no restatement."],
+        ["General help route", "Bounded help route with safe context summary only."],
+        ["Support acknowledgement", "Product-owned acknowledgement rather than provider-owned truth."]
+      ].forEach(([label, value]) => {
+        const article = document.createElement("article");
+        article.className = "card";
+        article.innerHTML = `
+          <strong>${label}</strong>
+          <p>${value}</p>
+        `;
+        channelPolicyList.append(article);
+      });
+
+      [
+        ["Required fields", "help_request_id, reason_family, source_route, source_focus_anchor_ref, request_info_ref, manifest_id, item_id"],
+        ["Safe summary", "One customer-safe case-context summary may populate ticket subject or public comment."],
+        ["Blocked fields", "body_ref, masked_evidence_refs, internal_note_refs, authority_payload_refs, privileged_audit_refs"]
+      ].forEach(([label, value]) => {
+        const article = document.createElement("article");
+        article.className = "card";
+        article.innerHTML = `
+          <strong>${label}</strong>
+          <p>${value}</p>
+        `;
+        mappingList.append(article);
+      });
+
+      [
+        ["Mirror-back policy", "Reference and status metadata only."],
+        ["Webhook duplicates", "Idempotent on external ticket ID, external event ID, and help_request_id."],
+        ["Truth mutation boundary", "External callbacks must not rewrite source route, focus anchor, reason family, or request-info lineage."]
+      ].forEach(([label, value]) => {
+        const article = document.createElement("article");
+        article.className = "card";
+        article.innerHTML = `
+          <strong>${label}</strong>
+          <p>${value}</p>
+        `;
+        mirrorList.append(article);
+      });
+    </script>
+  </body>
+</html>

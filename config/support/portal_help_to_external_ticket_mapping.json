@@ -1,0 +1,496 @@
+{
+  "schema_version": "1.0",
+  "mapping_id": "portal_help_to_external_ticket_mapping",
+  "selection_status": "NOT_SELECTED",
+  "selected_vendor_adapter_or_null": null,
+  "truth_boundary_statement": "PortalHelpRequest remains the canonical product artifact. External tickets, conversations, or webhooks may mirror customer-safe context only and must never become help truth.",
+  "mapping_rows": [
+    {
+      "scenario_ref": "contextual_request_help",
+      "scenario_label": "Contextual request help",
+      "activation_state": "FROZEN_NOT_ACTIVE",
+      "required_portal_fields": [
+        "help_request_id",
+        "reason_family",
+        "source_route",
+        "source_focus_anchor_ref",
+        "request_info_ref",
+        "manifest_id",
+        "item_id",
+        "case_context_refs"
+      ],
+      "field_rows": [
+        {
+          "source_field": "help_request_id",
+          "external_field_ref_or_null": "ticket.custom.help_request_id",
+          "export_policy": "CUSTOM_FIELD",
+          "privacy_class": "CUSTOMER_SAFE_CONTEXT",
+          "required_when": "ALWAYS",
+          "notes": [
+            "Primary stable mirror key for future vendor binding."
+          ]
+        },
+        {
+          "source_field": "reason_family",
+          "external_field_ref_or_null": "ticket.custom.reason_family",
+          "export_policy": "CUSTOM_FIELD",
+          "privacy_class": "CUSTOMER_SAFE_CONTEXT",
+          "required_when": "ALWAYS",
+          "notes": [
+            "Use the bounded help reason family, never internal-only reason codes."
+          ]
+        },
+        {
+          "source_field": "source_route",
+          "external_field_ref_or_null": "ticket.custom.source_route",
+          "export_policy": "CUSTOM_FIELD",
+          "privacy_class": "CUSTOMER_SAFE_CONTEXT",
+          "required_when": "ALWAYS",
+          "notes": [
+            "Preserve route continuity so later handoff does not lose shell context."
+          ]
+        },
+        {
+          "source_field": "source_focus_anchor_ref",
+          "external_field_ref_or_null": "ticket.custom.source_focus_anchor_ref",
+          "export_policy": "CUSTOM_FIELD",
+          "privacy_class": "CUSTOMER_SAFE_CONTEXT",
+          "required_when": "ALWAYS",
+          "notes": [
+            "Preserve the exact focus anchor for return-to-task continuity."
+          ]
+        },
+        {
+          "source_field": "request_info_ref",
+          "external_field_ref_or_null": "ticket.custom.request_info_ref",
+          "export_policy": "CUSTOM_FIELD",
+          "privacy_class": "CUSTOMER_SAFE_CONTEXT",
+          "required_when": "WHEN_LINKED_REQUEST_PRESENT",
+          "notes": [
+            "Retain the linked request-for-info lineage on contextual help."
+          ]
+        },
+        {
+          "source_field": "manifest_id",
+          "external_field_ref_or_null": "ticket.custom.manifest_id",
+          "export_policy": "CUSTOM_FIELD",
+          "privacy_class": "CUSTOMER_SAFE_CONTEXT",
+          "required_when": "ALWAYS",
+          "notes": [
+            "Keep manifest linkage explicit without exposing internal evidence bundles."
+          ]
+        },
+        {
+          "source_field": "item_id",
+          "external_field_ref_or_null": "ticket.custom.item_id",
+          "export_policy": "CUSTOM_FIELD",
+          "privacy_class": "CUSTOMER_SAFE_CONTEXT",
+          "required_when": "ALWAYS",
+          "notes": [
+            "Preserve work-item continuity for later staff handoff."
+          ]
+        },
+        {
+          "source_field": "case_context_summary",
+          "external_field_ref_or_null": "ticket.comment.body",
+          "export_policy": "PUBLIC_COMMENT_SUMMARY",
+          "privacy_class": "CUSTOMER_SAFE_SUMMARY",
+          "required_when": "ALWAYS",
+          "notes": [
+            "Use one customer-safe summary rather than raw free-form case state."
+          ]
+        },
+        {
+          "source_field": "subject_line",
+          "external_field_ref_or_null": "ticket.subject",
+          "export_policy": "TICKET_SUBJECT",
+          "privacy_class": "CUSTOMER_SAFE_SUMMARY",
+          "required_when": "ALWAYS",
+          "notes": [
+            "Subject stays literal and bounded."
+          ]
+        },
+        {
+          "source_field": "body_ref",
+          "external_field_ref_or_null": null,
+          "export_policy": "INTERNAL_ONLY_FORBIDDEN",
+          "privacy_class": "INTERNAL_ONLY",
+          "required_when": "NEVER",
+          "notes": [
+            "Raw body refs stay first-party only."
+          ]
+        },
+        {
+          "source_field": "masked_evidence_refs",
+          "external_field_ref_or_null": null,
+          "export_policy": "INTERNAL_ONLY_FORBIDDEN",
+          "privacy_class": "INTERNAL_ONLY",
+          "required_when": "NEVER",
+          "notes": [
+            "Masked or limited evidence must not leak into external tickets."
+          ]
+        },
+        {
+          "source_field": "internal_note_refs",
+          "external_field_ref_or_null": null,
+          "export_policy": "INTERNAL_ONLY_FORBIDDEN",
+          "privacy_class": "INTERNAL_ONLY",
+          "required_when": "NEVER",
+          "notes": [
+            "Internal-only notes are prohibited in external ticket mirrors."
+          ]
+        }
+      ],
+      "prohibited_source_fields": [
+        "body_ref",
+        "masked_evidence_refs",
+        "internal_note_refs",
+        "authority_payload_refs",
+        "privileged_audit_refs"
+      ],
+      "mirror_back_policy": "REFERENCE_AND_STATUS_METADATA_ONLY",
+      "source_refs": [
+        {
+          "source_ref": "PROMPT/Checklist.md::L80[pc_0045]",
+          "rationale": "The roadmap marks external support integration as conditional rather than mandatory."
+        },
+        {
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L420[CLIENT_PORTAL_REQUEST_HELP]",
+          "rationale": "Client help remains a first-class portal command family rather than a provider-owned side path."
+        },
+        {
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L431[CLIENT_PORTAL_REQUEST_HELP]",
+          "rationale": "Every contextual help request must allocate a durable PortalHelpRequest and keep linked request lineage when applicable."
+        },
+        {
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L197[Help]",
+          "rationale": "The Help route is bounded, contextual, and explicitly forbids asking the client to restate already-governed case context."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::L1809[Help_route_surface_order]",
+          "rationale": "The Help route preserves one ordered support stack with exact case-context carriage and `restate_required = false`."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::L2240[PortalHelpRequest]",
+          "rationale": "PortalHelpRequest remains the canonical support artifact and must preserve route, focus anchor, request lineage, and response timing."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L50[3._Secret_key_and_token_handling]",
+          "rationale": "External support tokens, webhook secrets, and workspace credentials must remain vault-bound and never enter repo-safe artifacts."
+        }
+      ],
+      "notes": [
+        "The mapping is frozen now so later vendor selection does not need to rediscover portal-help semantics."
+      ]
+    },
+    {
+      "scenario_ref": "general_help_route",
+      "scenario_label": "General help route",
+      "activation_state": "FROZEN_NOT_ACTIVE",
+      "required_portal_fields": [
+        "help_request_id",
+        "reason_family",
+        "source_route",
+        "source_focus_anchor_ref",
+        "manifest_id",
+        "item_id",
+        "case_context_refs"
+      ],
+      "field_rows": [
+        {
+          "source_field": "help_request_id",
+          "external_field_ref_or_null": "ticket.custom.help_request_id",
+          "export_policy": "CUSTOM_FIELD",
+          "privacy_class": "CUSTOMER_SAFE_CONTEXT",
+          "required_when": "ALWAYS",
+          "notes": [
+            "Primary stable mirror key for future vendor binding."
+          ]
+        },
+        {
+          "source_field": "reason_family",
+          "external_field_ref_or_null": "ticket.custom.reason_family",
+          "export_policy": "CUSTOM_FIELD",
+          "privacy_class": "CUSTOMER_SAFE_CONTEXT",
+          "required_when": "ALWAYS",
+          "notes": [
+            "Use the bounded help reason family, never internal-only reason codes."
+          ]
+        },
+        {
+          "source_field": "source_route",
+          "external_field_ref_or_null": "ticket.custom.source_route",
+          "export_policy": "CUSTOM_FIELD",
+          "privacy_class": "CUSTOMER_SAFE_CONTEXT",
+          "required_when": "ALWAYS",
+          "notes": [
+            "Preserve route continuity so later handoff does not lose shell context."
+          ]
+        },
+        {
+          "source_field": "source_focus_anchor_ref",
+          "external_field_ref_or_null": "ticket.custom.source_focus_anchor_ref",
+          "export_policy": "CUSTOM_FIELD",
+          "privacy_class": "CUSTOMER_SAFE_CONTEXT",
+          "required_when": "ALWAYS",
+          "notes": [
+            "Preserve the exact focus anchor for return-to-task continuity."
+          ]
+        },
+        {
+          "source_field": "manifest_id",
+          "external_field_ref_or_null": "ticket.custom.manifest_id",
+          "export_policy": "CUSTOM_FIELD",
+          "privacy_class": "CUSTOMER_SAFE_CONTEXT",
+          "required_when": "ALWAYS",
+          "notes": [
+            "Keep manifest linkage explicit without exposing internal evidence bundles."
+          ]
+        },
+        {
+          "source_field": "item_id",
+          "external_field_ref_or_null": "ticket.custom.item_id",
+          "export_policy": "CUSTOM_FIELD",
+          "privacy_class": "CUSTOMER_SAFE_CONTEXT",
+          "required_when": "ALWAYS",
+          "notes": [
+            "Preserve work-item continuity for later staff handoff."
+          ]
+        },
+        {
+          "source_field": "case_context_summary",
+          "external_field_ref_or_null": "ticket.comment.body",
+          "export_policy": "PUBLIC_COMMENT_SUMMARY",
+          "privacy_class": "CUSTOMER_SAFE_SUMMARY",
+          "required_when": "ALWAYS",
+          "notes": [
+            "Use one customer-safe summary rather than raw free-form case state."
+          ]
+        },
+        {
+          "source_field": "subject_line",
+          "external_field_ref_or_null": "ticket.subject",
+          "export_policy": "TICKET_SUBJECT",
+          "privacy_class": "CUSTOMER_SAFE_SUMMARY",
+          "required_when": "ALWAYS",
+          "notes": [
+            "Subject stays literal and bounded."
+          ]
+        },
+        {
+          "source_field": "body_ref",
+          "external_field_ref_or_null": null,
+          "export_policy": "INTERNAL_ONLY_FORBIDDEN",
+          "privacy_class": "INTERNAL_ONLY",
+          "required_when": "NEVER",
+          "notes": [
+            "Raw body refs stay first-party only."
+          ]
+        },
+        {
+          "source_field": "masked_evidence_refs",
+          "external_field_ref_or_null": null,
+          "export_policy": "INTERNAL_ONLY_FORBIDDEN",
+          "privacy_class": "INTERNAL_ONLY",
+          "required_when": "NEVER",
+          "notes": [
+            "Masked or limited evidence must not leak into external tickets."
+          ]
+        },
+        {
+          "source_field": "internal_note_refs",
+          "external_field_ref_or_null": null,
+          "export_policy": "INTERNAL_ONLY_FORBIDDEN",
+          "privacy_class": "INTERNAL_ONLY",
+          "required_when": "NEVER",
+          "notes": [
+            "Internal-only notes are prohibited in external ticket mirrors."
+          ]
+        },
+        {
+          "source_field": "faq_refs",
+          "external_field_ref_or_null": "ticket.custom.help_topic_refs",
+          "export_policy": "CUSTOM_FIELD",
+          "privacy_class": "CUSTOMER_SAFE_CONTEXT",
+          "required_when": "WHEN_HELP_ROUTE_FAQS_PRESENT",
+          "notes": [
+            "Bounded top-question context may be mirrored as tags or IDs, not full FAQ text."
+          ]
+        }
+      ],
+      "prohibited_source_fields": [
+        "body_ref",
+        "masked_evidence_refs",
+        "internal_note_refs",
+        "authority_payload_refs",
+        "privileged_audit_refs"
+      ],
+      "mirror_back_policy": "REFERENCE_AND_STATUS_METADATA_ONLY",
+      "source_refs": [
+        {
+          "source_ref": "PROMPT/Checklist.md::L80[pc_0045]",
+          "rationale": "The roadmap marks external support integration as conditional rather than mandatory."
+        },
+        {
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L420[CLIENT_PORTAL_REQUEST_HELP]",
+          "rationale": "Client help remains a first-class portal command family rather than a provider-owned side path."
+        },
+        {
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L431[CLIENT_PORTAL_REQUEST_HELP]",
+          "rationale": "Every contextual help request must allocate a durable PortalHelpRequest and keep linked request lineage when applicable."
+        },
+        {
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L197[Help]",
+          "rationale": "The Help route is bounded, contextual, and explicitly forbids asking the client to restate already-governed case context."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::L1809[Help_route_surface_order]",
+          "rationale": "The Help route preserves one ordered support stack with exact case-context carriage and `restate_required = false`."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::L2240[PortalHelpRequest]",
+          "rationale": "PortalHelpRequest remains the canonical support artifact and must preserve route, focus anchor, request lineage, and response timing."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L50[3._Secret_key_and_token_handling]",
+          "rationale": "External support tokens, webhook secrets, and workspace credentials must remain vault-bound and never enter repo-safe artifacts."
+        }
+      ],
+      "notes": [
+        "The mapping is frozen now so later vendor selection does not need to rediscover portal-help semantics."
+      ]
+    },
+    {
+      "scenario_ref": "support_acknowledgement",
+      "scenario_label": "Support acknowledgement",
+      "activation_state": "FROZEN_NOT_ACTIVE",
+      "required_portal_fields": [
+        "help_request_id",
+        "reason_family",
+        "source_route",
+        "source_focus_anchor_ref",
+        "manifest_id",
+        "item_id"
+      ],
+      "field_rows": [
+        {
+          "source_field": "help_request_id",
+          "external_field_ref_or_null": "ticket.custom.help_request_id",
+          "export_policy": "CUSTOM_FIELD",
+          "privacy_class": "CUSTOMER_SAFE_CONTEXT",
+          "required_when": "ALWAYS",
+          "notes": [
+            "Acknowledgement still needs a stable help-request reference."
+          ]
+        },
+        {
+          "source_field": "support_channel",
+          "external_field_ref_or_null": "ticket.custom.support_channel",
+          "export_policy": "CUSTOM_FIELD",
+          "privacy_class": "CUSTOMER_SAFE_CONTEXT",
+          "required_when": "ALWAYS",
+          "notes": [
+            "Bound the support channel label to one safe, customer-facing vocabulary."
+          ]
+        },
+        {
+          "source_field": "acknowledgement_summary",
+          "external_field_ref_or_null": "ticket.comment.body",
+          "export_policy": "PUBLIC_COMMENT_SUMMARY",
+          "privacy_class": "CUSTOMER_SAFE_SUMMARY",
+          "required_when": "ALWAYS",
+          "notes": [
+            "Acknowledgement summaries remain customer-safe and route-aware."
+          ]
+        },
+        {
+          "source_field": "response_ref",
+          "external_field_ref_or_null": null,
+          "export_policy": "INTERNAL_ONLY_FORBIDDEN",
+          "privacy_class": "INTERNAL_ONLY",
+          "required_when": "NEVER",
+          "notes": [
+            "First-party response refs remain the truth source and are not mirrored."
+          ]
+        }
+      ],
+      "prohibited_source_fields": [
+        "body_ref",
+        "masked_evidence_refs",
+        "internal_note_refs",
+        "authority_payload_refs",
+        "privileged_audit_refs"
+      ],
+      "mirror_back_policy": "NO_EXTERNAL_WRITE",
+      "source_refs": [
+        {
+          "source_ref": "PROMPT/Checklist.md::L80[pc_0045]",
+          "rationale": "The roadmap marks external support integration as conditional rather than mandatory."
+        },
+        {
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L420[CLIENT_PORTAL_REQUEST_HELP]",
+          "rationale": "Client help remains a first-class portal command family rather than a provider-owned side path."
+        },
+        {
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L431[CLIENT_PORTAL_REQUEST_HELP]",
+          "rationale": "Every contextual help request must allocate a durable PortalHelpRequest and keep linked request lineage when applicable."
+        },
+        {
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L197[Help]",
+          "rationale": "The Help route is bounded, contextual, and explicitly forbids asking the client to restate already-governed case context."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::L1809[Help_route_surface_order]",
+          "rationale": "The Help route preserves one ordered support stack with exact case-context carriage and `restate_required = false`."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::L2240[PortalHelpRequest]",
+          "rationale": "PortalHelpRequest remains the canonical support artifact and must preserve route, focus anchor, request lineage, and response timing."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L50[3._Secret_key_and_token_handling]",
+          "rationale": "External support tokens, webhook secrets, and workspace credentials must remain vault-bound and never enter repo-safe artifacts."
+        }
+      ],
+      "notes": [
+        "The mapping is frozen now so later vendor selection does not need to rediscover portal-help semantics."
+      ]
+    }
+  ],
+  "source_refs": [
+    {
+      "source_ref": "PROMPT/Checklist.md::L80[pc_0045]",
+      "rationale": "The roadmap marks external support integration as conditional rather than mandatory."
+    },
+    {
+      "source_ref": "Algorithm/northbound_api_and_session_contract.md::L420[CLIENT_PORTAL_REQUEST_HELP]",
+      "rationale": "Client help remains a first-class portal command family rather than a provider-owned side path."
+    },
+    {
+      "source_ref": "Algorithm/northbound_api_and_session_contract.md::L431[CLIENT_PORTAL_REQUEST_HELP]",
+      "rationale": "Every contextual help request must allocate a durable PortalHelpRequest and keep linked request lineage when applicable."
+    },
+    {
+      "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L197[Help]",
+      "rationale": "The Help route is bounded, contextual, and explicitly forbids asking the client to restate already-governed case context."
+    },
+    {
+      "source_ref": "Algorithm/data_model.md::L1809[Help_route_surface_order]",
+      "rationale": "The Help route preserves one ordered support stack with exact case-context carriage and `restate_required = false`."
+    },
+    {
+      "source_ref": "Algorithm/data_model.md::L2240[PortalHelpRequest]",
+      "rationale": "PortalHelpRequest remains the canonical support artifact and must preserve route, focus anchor, request lineage, and response timing."
+    },
+    {
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L50[3._Secret_key_and_token_handling]",
+      "rationale": "External support tokens, webhook secrets, and workspace credentials must remain vault-bound and never enter repo-safe artifacts."
+    }
+  ],
+  "typed_gaps": [
+    "No external helpdesk vendor has been selected yet, so external ticket creation and mirror sync remain disabled by policy."
+  ],
+  "notes": [
+    "Field-level mapping preserves route, focus, and request lineage while explicitly excluding internal-only or masked data classes."
+  ]
+}

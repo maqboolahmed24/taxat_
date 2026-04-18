@@ -1,0 +1,242 @@
+{
+  "chosen_topology_id": "relational_first_with_audit_object_broker_and_cache",
+  "deferred_decisions": [
+    "exact relational engine, audit-ledger physical deployment, and whether control plus audit share one managed platform or separate clusters",
+    "exact projection-store technology for search-heavy or analytics-heavy read models",
+    "exact broker product and partitioning strategy",
+    "object lifecycle tiering and archive-class transitions for very old or large evidence bodies",
+    "whether any hot-path projection indexes need additional search infrastructure beyond the base projection store"
+  ],
+  "no_blind_resend_rules": [
+    {
+      "rule": "Queue or broker loss must be resolved by rebuilding from durable truth, not by replaying transport artifacts as if they were legal truth.",
+      "rule_id": "queue_loss_is_transport_loss_not_truth_loss",
+      "source_ref": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L113[Queue_and_authority_recovery_law]"
+    },
+    {
+      "rule": "Recovered authority work requires request-lineage comparison and binding revalidation before any resend or mutation.",
+      "rule_id": "authority_reopen_requires_lineage_and_binding_revalidation",
+      "source_ref": "Algorithm/deployment_and_resilience_contract.md::L236[no_disaster_recovery_resend_without_lineage_and_binding]"
+    },
+    {
+      "rule": "No async provider payload may mutate legal state before a canonical AuthorityIngressReceipt is durable.",
+      "rule_id": "ingress_checkpoint_before_mutation",
+      "source_ref": "Algorithm/authority_interaction_protocol.md::L792[9.9A_Inbound_authority_ingress_protocol]"
+    },
+    {
+      "rule": "Read-side rebuild and cache repair must replay persisted truth rather than copying projection tables or client caches back into control state.",
+      "rule_id": "projections_and_caches_never_reopen_as_truth",
+      "source_ref": "Algorithm/deployment_and_resilience_contract.md::L156[read_side_rebuild_replays_persisted_truth]"
+    }
+  ],
+  "rebuild_paths": [
+    {
+      "rebuild_from": [
+        "manifest_and_execution_basis",
+        "workflow_filing_and_submission_state",
+        "durable_command_receipts_and_outbox_inbox",
+        "authority_interaction_control",
+        "audit_event_ledger",
+        "provenance_graph_evidence",
+        "immutable_upload_and_quarantine_bodies"
+      ],
+      "rebuild_rule": "Replay persisted control and evidence truth through the projector; never copy state back out of stale projection tables.",
+      "target": "derived_read_models_and_snapshots"
+    },
+    {
+      "rebuild_from": [
+        "derived_read_models_and_snapshots",
+        "durable_command_receipts_and_outbox_inbox",
+        "workflow_filing_and_submission_state"
+      ],
+      "rebuild_rule": "Issue fresh snapshots and resume tokens; route-cursor loss is handled by typed rebase rather than state inference.",
+      "target": "resume_tokens_and_route_cursors"
+    },
+    {
+      "rebuild_from": [
+        "durable_command_receipts_and_outbox_inbox",
+        "authority_interaction_control",
+        "workflow_filing_and_submission_state",
+        "audit_event_ledger"
+      ],
+      "rebuild_rule": "Rehydrate transport backlog from durable outbox, inbox, receipt, interaction, workflow, and audit truth only.",
+      "target": "queue_messages_and_worker_claims"
+    },
+    {
+      "rebuild_from": [
+        "authority_interaction_control",
+        "authority_ingress_receipts",
+        "authority_request_and_response_evidence",
+        "workflow_filing_and_submission_state"
+      ],
+      "rebuild_rule": "Reconstruct unresolved authority work from persisted request lineage, ingress checkpoints, response history, and resend legality state; never from broker retry logs alone.",
+      "target": "authority_recovery_work"
+    },
+    {
+      "rebuild_from": [
+        "provenance_graph_evidence",
+        "audit_event_ledger",
+        "generated_exports_and_proof_bundle_bodies",
+        "immutable_upload_and_quarantine_bodies"
+      ],
+      "rebuild_rule": "Reconstruct proof deterministically from recorded path ordering, decisive edge refs, retained object refs, and typed limitation notes.",
+      "target": "proof_and_enquiry_render_paths"
+    },
+    {
+      "rebuild_from": [
+        "manifest_and_execution_basis",
+        "release_migration_and_recovery_control",
+        "audit_event_ledger",
+        "immutable_upload_and_quarantine_bodies"
+      ],
+      "rebuild_rule": "Exact replay and restore validation load the frozen basis, verify hash stability, check reader-window compatibility, and fail closed on unreadable or replaced artifacts.",
+      "target": "exact_replay_or_restore_validation"
+    }
+  ],
+  "restore_reopen_blocker_source_refs": [
+    "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L44[Recovery_checkpoint_law]",
+    "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[Restore_privacy_reconciliation_law]"
+  ],
+  "restore_reopen_blockers": [
+    "RESTORE_EVIDENCE_BOUND",
+    "PRIVACY_RECONCILIATION_BOUND",
+    "AUDIT_CONTINUITY_VERIFIED",
+    "QUEUE_REBUILD_VERIFIED",
+    "AUTHORITY_REBUILD_VERIFIED",
+    "AUTHORITY_BINDING_REVALIDATED"
+  ],
+  "store_recovery_plan": [
+    {
+      "contains_artifact_families": [
+        "manifest_and_execution_basis",
+        "release_migration_and_recovery_control",
+        "workflow_filing_and_submission_state",
+        "durable_command_receipts_and_outbox_inbox",
+        "authority_interaction_control",
+        "retention_control_objects",
+        "upload_session_metadata"
+      ],
+      "direct_backup_required": true,
+      "notes": [
+        "This is the authoritative mutable control plane.",
+        "Restore success is not lawful unless privacy, audit, queue, and authority gates all pass."
+      ],
+      "rebuildable_without_backup": false,
+      "recovery_tier_class": "TIER_0_CONTROL_PLANE",
+      "store_id": "PRIMARY_CONTROL_STORE"
+    },
+    {
+      "contains_artifact_families": [
+        "authority_request_and_response_evidence",
+        "authority_ingress_receipts",
+        "audit_event_ledger",
+        "provenance_graph_evidence",
+        "replay_attestations_and_erasure_proofs"
+      ],
+      "direct_backup_required": true,
+      "notes": [
+        "Append-only evidence remains queryable across rebuild, rollback, and retention limitation."
+      ],
+      "rebuildable_without_backup": false,
+      "recovery_tier_class": "TIER_0_CONTROL_PLANE",
+      "store_id": "APPEND_ONLY_AUDIT_STORE"
+    },
+    {
+      "contains_artifact_families": [
+        "immutable_upload_and_quarantine_bodies",
+        "generated_exports_and_proof_bundle_bodies"
+      ],
+      "direct_backup_required": true,
+      "notes": [
+        "Generated exports may be regenerable, but authoritative uploads, provider payloads, and filed proof artifacts are not assumed regenerable."
+      ],
+      "rebuildable_without_backup": false,
+      "recovery_tier_class": "TIER_0_CONTROL_PLANE_FOR_AUTHORITATIVE_BLOBS",
+      "store_id": "IMMUTABLE_OBJECT_STORE"
+    },
+    {
+      "contains_artifact_families": [
+        "derived_read_models_and_snapshots"
+      ],
+      "direct_backup_required": false,
+      "notes": [
+        "Projection rebuild must replay persisted manifests, workflow items, gate records, authority interaction records, receipts, and audit evidence."
+      ],
+      "rebuildable_without_backup": true,
+      "recovery_tier_class": "TIER_1_REBUILDABLE",
+      "store_id": "PROJECTION_STORE"
+    },
+    {
+      "contains_artifact_families": [
+        "queue_messages_and_worker_claims",
+        "live_stream_and_notification_fanout"
+      ],
+      "direct_backup_required": false,
+      "notes": [
+        "Broker loss is transport loss, not truth loss.",
+        "No reopen path may blindly replay authority mutations from transport artifacts alone."
+      ],
+      "rebuildable_without_backup": true,
+      "recovery_tier_class": "TRANSPORT_ONLY",
+      "store_id": "QUEUE_BROKER"
+    },
+    {
+      "contains_artifact_families": [
+        "resume_tokens_and_route_cursors",
+        "client_side_disposable_scene_caches"
+      ],
+      "direct_backup_required": false,
+      "notes": [
+        "Loss forces rebase or relaunch hydration, not legal-state reconstruction."
+      ],
+      "rebuildable_without_backup": true,
+      "recovery_tier_class": "TIER_2_DISPOSABLE",
+      "store_id": "CACHE_RESUME_STORE"
+    }
+  ],
+  "store_roles": [
+    {
+      "durability_posture": "Direct backup required; Tier 0 for control-plane legal truth.",
+      "label": "Primary control store",
+      "rebuildability": "Not rebuildable from projections or transport.",
+      "role": "Transactional system of record for mutable legal, workflow, control-plane, and idempotency state.",
+      "store_id": "PRIMARY_CONTROL_STORE"
+    },
+    {
+      "durability_posture": "Direct backup required; Tier 0 for compliance-significant evidence.",
+      "label": "Append-only audit store",
+      "rebuildability": "Not rebuildable from projections; only derivable from preserved evidence itself.",
+      "role": "Immutable or append-only evidence ledger for audit events, provenance, envelopes, ingress checkpoints, replay attestations, and erasure proofs.",
+      "store_id": "APPEND_ONLY_AUDIT_STORE"
+    },
+    {
+      "durability_posture": "Direct backup or inventory-linked replication required for non-regenerable bodies.",
+      "label": "Immutable object store",
+      "rebuildability": "Some generated exports can be regenerated; authoritative uploaded or authority-returned bodies cannot.",
+      "role": "Blob storage for uploaded bytes, quarantined binaries, exports, proof bodies, response bodies, and other large immutable payloads referenced by durable refs.",
+      "store_id": "IMMUTABLE_OBJECT_STORE"
+    },
+    {
+      "durability_posture": "Tier 1 rebuildable; direct backup optional.",
+      "label": "Projection store",
+      "rebuildability": "Rebuild from control truth, append-only evidence, and immutable object refs.",
+      "role": "Disposable read-side materializations for route-facing bundles, snapshots, workspace views, and search/index helpers.",
+      "store_id": "PROJECTION_STORE"
+    },
+    {
+      "durability_posture": "Transport loss tolerated if outbox/inbox truth survives.",
+      "label": "Queue or broker",
+      "rebuildability": "Rebuildable from durable outbox, inbox, receipt, interaction, workflow, and audit truth.",
+      "role": "Transport-only delivery fabric for worker coordination, outbox drain, reconciliation jobs, notifications, and live fanout.",
+      "store_id": "QUEUE_BROKER"
+    },
+    {
+      "durability_posture": "Tier 2 disposable; best-effort backup only.",
+      "label": "Cache and resume store",
+      "rebuildability": "Rehydratable from authoritative snapshots, receipts, and projection state.",
+      "role": "Ephemeral resumability, route cursor, session-adjacent cache, and reconnect helpers.",
+      "store_id": "CACHE_RESUME_STORE"
+    }
+  ],
+  "topology_summary": "Relational-first control truth, append-only evidence, immutable object bodies, transport-only broker, rebuildable projection store, and disposable cache/resume store."
+}

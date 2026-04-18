@@ -1,0 +1,678 @@
+{
+  "schema_version": "1.0",
+  "matrix_id": "idp-step-up-policy-matrix",
+  "provider_id": "oidc-external-idp-control-plane",
+  "provider_display_name": "OIDC External Identity Control Plane",
+  "provider_selection": {
+    "provider_selection_status": "PROVIDER_DEFAULT_APPLIED",
+    "provider_family": "OIDC_EXTERNAL_IDP",
+    "provider_vendor_adapter": "AUTH0_COMPATIBLE_DASHBOARD",
+    "provider_vendor_label": "Auth0-compatible external IdP",
+    "docs_urls": [
+      "https://auth0.com/docs/get-started/auth0-overview/create-tenants/set-up-multiple-environments",
+      "https://auth0.com/docs/manage-users/access-control/rbac",
+      "https://auth0.com/docs/secure/multi-factor-authentication/enable-mfa",
+      "https://auth0.com/docs/secure/multi-factor-authentication/step-up-authentication",
+      "https://auth0.com/docs/manage-users/sessions/configure-session-lifetime-settings",
+      "https://auth0.com/docs/manage-users/sessions/manage-user-sessions-with-auth0-management-api",
+      "https://auth0.com/docs/secure/tokens/refresh-tokens/configure-refresh-token-rotation",
+      "https://auth0.com/docs/get-started/applications/application-settings"
+    ],
+    "source_refs": [
+      {
+        "source_ref": "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
+        "rationale": "Taxat actor classes split client, tenant-human, service, and external boundaries before authorization is evaluated."
+      },
+      {
+        "source_ref": "Algorithm/actor_and_authority_model.md::L326[3.9_Policy_decision_model]",
+        "rationale": "The IdP may bootstrap authentication posture, but the engine still owns the final ALLOW or REQUIRE_STEP_UP or REQUIRE_APPROVAL or DENY decision."
+      },
+      {
+        "source_ref": "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+        "rationale": "Browser, native, machine, and limited-entry session channels must remain distinct and challenge rotation must invalidate stale pre-step-up state."
+      },
+      {
+        "source_ref": "https://auth0.com/docs/manage-users/access-control/rbac",
+        "rationale": "Current Auth0 RBAC guidance allows coarse role and permission assignment while keeping richer authorization in the application."
+      },
+      {
+        "source_ref": "https://auth0.com/docs/secure/multi-factor-authentication/step-up-authentication",
+        "rationale": "Current Auth0 step-up guidance relies on requested scopes and Actions rather than a single tenant-wide MFA toggle."
+      },
+      {
+        "source_ref": "https://auth0.com/docs/manage-users/sessions/configure-session-lifetime-settings",
+        "rationale": "Current Auth0 session guidance supports tenant defaults plus per-login overrides through Actions."
+      }
+    ]
+  },
+  "policy_version": "1.0",
+  "generated_on": "2026-04-18",
+  "summary": {
+    "trigger_count": 10,
+    "step_up_or_approval_required_count": 8,
+    "step_up_required_count": 1,
+    "upgrade_gate_count": 1,
+    "invalidation_event_count": 7
+  },
+  "invalidation_events": [
+    {
+      "event_id": "STEP_UP_COMPLETED",
+      "label": "Step-up completed",
+      "rotation_or_purge": [
+        "Rotate effective session challenge state.",
+        "Require revalidation of any pre-step-up command, cursor, or resumability artifact before reuse."
+      ],
+      "effects_on_command_acceptance": "Pre-step-up commands cannot be replayed blindly after the challenge state rotates.",
+      "effects_on_resume_and_upload": "Resume tokens, cursors, and upload-session control artifacts stay usable only if revalidated against the new challenge lineage.",
+      "continuity_rule": "Continuation returns to the same governed object and shell where the surface contract requires it.",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L30[2._Identity_session_and_command_trust]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L372[7._Authentication_and_session_strategy]"
+      ]
+    },
+    {
+      "event_id": "SESSION_REVOKED",
+      "label": "Session revoked or administrator invalidation",
+      "rotation_or_purge": [
+        "Invalidate outstanding resume tokens.",
+        "Invalidate upload-session control operations.",
+        "Block future command acceptance until re-authentication."
+      ],
+      "effects_on_command_acceptance": "All future commands fail closed until a lawful replacement session exists.",
+      "effects_on_resume_and_upload": "Outstanding resume, scene-restoration, and upload control artifacts become revoked state rather than silently continuing.",
+      "continuity_rule": "Clients surface revoked-session recovery rather than inventing a soft refresh.",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L30[2._Identity_session_and_command_trust]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L473[11._Security_and_runtime_posture_for_the_desktop_client]"
+      ]
+    },
+    {
+      "event_id": "LOGOUT",
+      "label": "Logout",
+      "rotation_or_purge": [
+        "Treat logout as explicit session revocation.",
+        "Audit the revocation and clear interactive session material."
+      ],
+      "effects_on_command_acceptance": "Future interactive writes require a new authenticated session.",
+      "effects_on_resume_and_upload": "Browser or native resumability remains invalid until the next session re-establishes lawful scope.",
+      "continuity_rule": "No cached route context may silently regain live mutation posture after logout.",
+      "source_refs": [
+        "Algorithm/security_and_runtime_hardening_contract.md::L30[2._Identity_session_and_command_trust]",
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]"
+      ]
+    },
+    {
+      "event_id": "TENANT_SWITCH",
+      "label": "Tenant or account switch",
+      "rotation_or_purge": [
+        "Purge incompatible local caches and resume metadata.",
+        "Force re-resolution of principal class, client scope, delegation basis, and masking posture."
+      ],
+      "effects_on_command_acceptance": "Commands must not reuse stale bindings from the prior tenant or account.",
+      "effects_on_resume_and_upload": "Resume tokens, native scenes, and upload sessions from the old tenant become invalid or rebind-required.",
+      "continuity_rule": "Clients reopen only the narrowest still-lawful target after the new tenant context is established.",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L390[8._Persistence_model]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L473[11._Security_and_runtime_posture_for_the_desktop_client]"
+      ]
+    },
+    {
+      "event_id": "AUTHORITY_REBIND_OR_BINDING_DRIFT",
+      "label": "Authority rebinding or binding drift",
+      "rotation_or_purge": [
+        "Require new binding resolution and, where materially different, a new request identity.",
+        "Block delayed or queued send if token/client, subject, authority link, or approval or step-up evidence no longer match."
+      ],
+      "effects_on_command_acceptance": "Authority-integrated commands cannot continue on ambiguous or stale binding lineage.",
+      "effects_on_resume_and_upload": "Authority-adjacent continuations preserve pending-return posture but remain blocked until a fresh binding clears.",
+      "continuity_rule": "Return the user to the same object with explicit rebind or escalation posture instead of silently swapping authority context.",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L147[B._AuthorityBinding]",
+        "Algorithm/authority_interaction_protocol.md::L509[9.5_Preflight_sequence]",
+        "Algorithm/authority_interaction_protocol.md::L540[9.6_Token_and_client_binding_rule]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L50[3._Secret_key_and_token_handling]"
+      ]
+    },
+    {
+      "event_id": "STALE_VIEW_REBASE",
+      "label": "Stale-view rejection or rebase",
+      "rotation_or_purge": [
+        "Reject the command with typed stale-view metadata.",
+        "Preserve review progress only as read-only carry-forward where the surface contract says so."
+      ],
+      "effects_on_command_acceptance": "Sign-off, override, and other exact-basis actions require refresh onto the latest snapshot or pack before resubmission.",
+      "effects_on_resume_and_upload": "Latest resume token, snapshot, or replacement ref may be issued, but the client must not synthesize a merge.",
+      "continuity_rule": "Same route family and same object stay mounted where possible; unsafe mutation demotes into explicit review or recovery posture.",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L621[6._Concurrency_and_stale-view_rules]",
+        "Algorithm/northbound_api_and_session_contract.md::L646[7._Stream_and_reconnect_rules]",
+        "Algorithm/customer_client_portal_experience_contract.md::L340[Approval_and_sign-off_flow]",
+        "Algorithm/customer_client_portal_experience_contract.md::L293[Secure_document-upload_flow]"
+      ]
+    },
+    {
+      "event_id": "DEEP_LINK_OR_INVITE_EXPIRY",
+      "label": "Deep-link, invite, or limited-context entry expiry",
+      "rotation_or_purge": [
+        "Require authenticated upgrade or re-authentication before sensitive mutation resumes.",
+        "Use typed fallback target and return-path metadata instead of guessing the next route."
+      ],
+      "effects_on_command_acceptance": "Upload, acknowledgement, and sign-off remain blocked until a fresh authenticated session and current object context exist.",
+      "effects_on_resume_and_upload": "Expired contextual entry never silently revives a stale upload or approval posture.",
+      "continuity_rule": "The user returns to the closest surviving same-object target or explicit fallback target with a reason code.",
+      "source_refs": [
+        "Algorithm/customer_client_portal_experience_contract.md::L370[Onboarding_flow]",
+        "Algorithm/customer_client_portal_experience_contract.md::L399[Artifact_print_and_browser-handoff_rules]",
+        "Algorithm/customer_client_portal_experience_contract.md::L701[Playwright_validation_minimum]",
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]"
+      ]
+    }
+  ],
+  "trigger_rows": [
+    {
+      "trigger_id": "authority_link_or_relink",
+      "label": "Linking or re-linking software to the authority",
+      "trigger_kind": "STEP_UP_OR_APPROVAL_REQUIRED",
+      "action_family_refs": [
+        "LINK_AUTHORITY_SOFTWARE",
+        "UNLINK_AUTHORITY_SOFTWARE"
+      ],
+      "actor_classes": [
+        "TENANT_ADMIN",
+        "PREPARER",
+        "APPROVER"
+      ],
+      "role_refs": [
+        "role_governance_admin",
+        "role_operator_workspace"
+      ],
+      "scope_refs": [
+        "scope.elevated.authority_link"
+      ],
+      "surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "session_profile_refs": [
+        "session.browser.operator",
+        "session.native.operator"
+      ],
+      "step_up_cell": "REQUIRE_STEP_UP",
+      "approval_cell": "REQUIRE_APPROVAL",
+      "authn_level_on_success": "STEP_UP",
+      "step_up_state_on_entry": "REQUIRED_PENDING",
+      "step_up_state_on_success": "SATISFIED",
+      "assurance_requirement": "Fresh human gate evidence; no machine substitution.",
+      "revalidation_requirements": [
+        "Resolve a fresh AuthorityBinding if subject, client, authority scope, or link lineage changed.",
+        "Do not continue from stale deep-link or ambient route state alone."
+      ],
+      "invalidation_events": [
+        "STEP_UP_COMPLETED",
+        "AUTHORITY_REBIND_OR_BINDING_DRIFT",
+        "SESSION_REVOKED"
+      ],
+      "source_refs": [
+        "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
+        "Algorithm/authority_interaction_protocol.md::L147[B._AuthorityBinding]"
+      ],
+      "notes": []
+    },
+    {
+      "trigger_id": "override_changes_filing_or_parity",
+      "label": "Approve override changing filing readiness or parity outcome",
+      "trigger_kind": "STEP_UP_OR_APPROVAL_REQUIRED",
+      "action_family_refs": [
+        "APPROVE_OVERRIDE"
+      ],
+      "actor_classes": [
+        "APPROVER",
+        "TENANT_ADMIN"
+      ],
+      "role_refs": [
+        "role_governance_admin"
+      ],
+      "scope_refs": [
+        "scope.elevated.override_approval"
+      ],
+      "surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "session_profile_refs": [
+        "session.browser.operator",
+        "session.native.operator"
+      ],
+      "step_up_cell": "REQUIRE_STEP_UP",
+      "approval_cell": "REQUIRE_APPROVAL",
+      "authn_level_on_success": "STEP_UP",
+      "step_up_state_on_entry": "REQUIRED_PENDING",
+      "step_up_state_on_success": "SATISFIED",
+      "assurance_requirement": "Fresh approver identity with current view and policy basis.",
+      "revalidation_requirements": [
+        "Refresh on stale-view rejection before resubmitting.",
+        "Preserve rationale, scope, and expiry on any override approval."
+      ],
+      "invalidation_events": [
+        "STEP_UP_COMPLETED",
+        "STALE_VIEW_REBASE",
+        "SESSION_REVOKED"
+      ],
+      "source_refs": [
+        "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
+        "Algorithm/actor_and_authority_model.md::L579[3.14_Actor_invariants]"
+      ],
+      "notes": []
+    },
+    {
+      "trigger_id": "submit_filing_or_amendment",
+      "label": "Submit filing or amendment",
+      "trigger_kind": "STEP_UP_OR_APPROVAL_REQUIRED",
+      "action_family_refs": [
+        "SUBMIT_TO_AUTHORITY",
+        "SIGN_CLIENT_DECLARATION"
+      ],
+      "actor_classes": [
+        "APPROVER",
+        "CLIENT_SIGNATORY",
+        "TENANT_ADMIN"
+      ],
+      "role_refs": [
+        "role_governance_admin",
+        "role_portal_signatory"
+      ],
+      "scope_refs": [
+        "scope.elevated.submit",
+        "scope.elevated.client_signoff"
+      ],
+      "surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR",
+        "PORTAL_BROWSER"
+      ],
+      "session_profile_refs": [
+        "session.browser.operator",
+        "session.native.operator",
+        "session.browser.portal"
+      ],
+      "step_up_cell": "REQUIRE_STEP_UP",
+      "approval_cell": "REQUIRE_APPROVAL",
+      "authn_level_on_success": "STEP_UP",
+      "step_up_state_on_entry": "REQUIRED_PENDING",
+      "step_up_state_on_success": "SATISFIED",
+      "assurance_requirement": "Fresh step-up or approved equivalent plus current authority-binding safety.",
+      "revalidation_requirements": [
+        "Verify current approval or step-up state before envelope build.",
+        "Re-run send-time authority binding checks if transmit is delayed or retried."
+      ],
+      "invalidation_events": [
+        "STEP_UP_COMPLETED",
+        "AUTHORITY_REBIND_OR_BINDING_DRIFT",
+        "STALE_VIEW_REBASE",
+        "SESSION_REVOKED"
+      ],
+      "source_refs": [
+        "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
+        "Algorithm/authority_interaction_protocol.md::L509[9.5_Preflight_sequence]",
+        "Algorithm/authority_interaction_protocol.md::L540[9.6_Token_and_client_binding_rule]"
+      ],
+      "notes": []
+    },
+    {
+      "trigger_id": "mark_unverified_submission_out_of_band",
+      "label": "Mark externally unverified submission as known out-of-band",
+      "trigger_kind": "STEP_UP_OR_APPROVAL_REQUIRED",
+      "action_family_refs": [
+        "ACKNOWLEDGE_OR_SUPPRESS_FLAG"
+      ],
+      "actor_classes": [
+        "APPROVER",
+        "TENANT_ADMIN",
+        "SUPPORT_OPERATOR"
+      ],
+      "role_refs": [
+        "role_governance_admin",
+        "role_support_operator"
+      ],
+      "scope_refs": [
+        "scope.elevated.out_of_band_annotation"
+      ],
+      "surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "session_profile_refs": [
+        "session.browser.operator",
+        "session.native.operator"
+      ],
+      "step_up_cell": "REQUIRE_STEP_UP",
+      "approval_cell": "REQUIRE_APPROVAL",
+      "authn_level_on_success": "STEP_UP",
+      "step_up_state_on_entry": "REQUIRED_PENDING",
+      "step_up_state_on_success": "SATISFIED",
+      "assurance_requirement": "Fresh human-gated exception posture with bounded rationale.",
+      "revalidation_requirements": [
+        "Keep out-of-band truth distinct from confirmed authority truth.",
+        "Do not convert unknown authority truth into confirmed truth via exception handling."
+      ],
+      "invalidation_events": [
+        "STEP_UP_COMPLETED",
+        "AUTHORITY_REBIND_OR_BINDING_DRIFT",
+        "SESSION_REVOKED"
+      ],
+      "source_refs": [
+        "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
+        "Algorithm/actor_and_authority_model.md::L539[3.12_Authority_precedence_rules]"
+      ],
+      "notes": []
+    },
+    {
+      "trigger_id": "export_full_evidence_or_unmasked_provenance",
+      "label": "Export full evidence packs or unmasked provenance",
+      "trigger_kind": "STEP_UP_OR_APPROVAL_REQUIRED",
+      "action_family_refs": [
+        "EXPORT",
+        "VIEW_FULL"
+      ],
+      "actor_classes": [
+        "AUDITOR",
+        "APPROVER",
+        "TENANT_ADMIN",
+        "SUPPORT_OPERATOR"
+      ],
+      "role_refs": [
+        "role_audit_review",
+        "role_governance_admin",
+        "role_support_operator"
+      ],
+      "scope_refs": [
+        "scope.elevated.unmasked_export"
+      ],
+      "surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "session_profile_refs": [
+        "session.browser.operator",
+        "session.native.operator"
+      ],
+      "step_up_cell": "REQUIRE_STEP_UP",
+      "approval_cell": "REQUIRE_APPROVAL",
+      "authn_level_on_success": "STEP_UP",
+      "step_up_state_on_entry": "REQUIRED_PENDING",
+      "step_up_state_on_success": "SATISFIED",
+      "assurance_requirement": "Fresh human gate and current masking or export posture.",
+      "revalidation_requirements": [
+        "Re-evaluate masking scope and export posture before materializing bytes.",
+        "Do not rely on stale desktop caches or detached browser state for richer export posture."
+      ],
+      "invalidation_events": [
+        "STEP_UP_COMPLETED",
+        "SESSION_REVOKED",
+        "LOGOUT"
+      ],
+      "source_refs": [
+        "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L449[10._Native_UX_opportunities_that_should_replace_browser_habits]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L473[11._Security_and_runtime_posture_for_the_desktop_client]"
+      ],
+      "notes": []
+    },
+    {
+      "trigger_id": "approve_compliance_mode_config_version",
+      "label": "Approve config versions for compliance mode",
+      "trigger_kind": "STEP_UP_OR_APPROVAL_REQUIRED",
+      "action_family_refs": [
+        "APPROVE_CONFIG"
+      ],
+      "actor_classes": [
+        "TENANT_ADMIN",
+        "APPROVER"
+      ],
+      "role_refs": [
+        "role_governance_admin"
+      ],
+      "scope_refs": [
+        "scope.elevated.config_approval"
+      ],
+      "surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "session_profile_refs": [
+        "session.browser.operator",
+        "session.native.operator"
+      ],
+      "step_up_cell": "REQUIRE_STEP_UP",
+      "approval_cell": "REQUIRE_APPROVAL",
+      "authn_level_on_success": "STEP_UP",
+      "step_up_state_on_entry": "REQUIRED_PENDING",
+      "step_up_state_on_success": "SATISFIED",
+      "assurance_requirement": "Current approver identity plus fresh policy and dependency topology basis.",
+      "revalidation_requirements": [
+        "Treat config and compliance-mode mutation as exact-basis governance action.",
+        "Rebase on stale policy or dependency topology drift before resubmission."
+      ],
+      "invalidation_events": [
+        "STEP_UP_COMPLETED",
+        "STALE_VIEW_REBASE",
+        "SESSION_REVOKED"
+      ],
+      "source_refs": [
+        "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
+        "Algorithm/actor_and_authority_model.md::L326[3.9_Policy_decision_model]"
+      ],
+      "notes": []
+    },
+    {
+      "trigger_id": "erasure_legal_hold_release_or_retention_exception",
+      "label": "Execute erasure, legal-hold release, or retention exception",
+      "trigger_kind": "STEP_UP_OR_APPROVAL_REQUIRED",
+      "action_family_refs": [
+        "EXECUTE_ERASURE",
+        "EXECUTE_RETENTION"
+      ],
+      "actor_classes": [
+        "TENANT_ADMIN",
+        "APPROVER"
+      ],
+      "role_refs": [
+        "role_governance_admin"
+      ],
+      "scope_refs": [
+        "scope.elevated.retention_exception"
+      ],
+      "surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "session_profile_refs": [
+        "session.browser.operator",
+        "session.native.operator"
+      ],
+      "step_up_cell": "REQUIRE_STEP_UP",
+      "approval_cell": "REQUIRE_APPROVAL",
+      "authn_level_on_success": "STEP_UP",
+      "step_up_state_on_entry": "REQUIRED_PENDING",
+      "step_up_state_on_success": "SATISFIED",
+      "assurance_requirement": "Fresh human gate and current retention or legal-hold basis.",
+      "revalidation_requirements": [
+        "Do not permit machine actors to satisfy the human gate.",
+        "Invalidate cached export or restoration posture after policy change."
+      ],
+      "invalidation_events": [
+        "STEP_UP_COMPLETED",
+        "SESSION_REVOKED",
+        "LOGOUT"
+      ],
+      "source_refs": [
+        "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L30[2._Identity_session_and_command_trust]"
+      ],
+      "notes": []
+    },
+    {
+      "trigger_id": "client_signatory_signoff_when_pack_demands_step_up",
+      "label": "Client signatory declaration or sign-off when the approval pack demands step-up",
+      "trigger_kind": "STEP_UP_REQUIRED",
+      "action_family_refs": [
+        "ACKNOWLEDGE_CLIENT_DECLARATION",
+        "SIGN_CLIENT_DECLARATION"
+      ],
+      "actor_classes": [
+        "CLIENT_SIGNATORY"
+      ],
+      "role_refs": [
+        "role_portal_signatory"
+      ],
+      "scope_refs": [
+        "scope.elevated.client_signoff"
+      ],
+      "surface_families": [
+        "PORTAL_BROWSER",
+        "BROWSER_LIMITED_ENTRY"
+      ],
+      "session_profile_refs": [
+        "session.browser.portal",
+        "session.browser.invite-pre-upgrade"
+      ],
+      "step_up_cell": "REQUIRE_STEP_UP",
+      "approval_cell": "ALLOW",
+      "authn_level_on_success": "STEP_UP",
+      "step_up_state_on_entry": "REQUIRED_PENDING",
+      "step_up_state_on_success": "SATISFIED",
+      "assurance_requirement": "subject_identity_assurance_level = STEP_UP_VERIFIED whenever the frozen approval pack requires it.",
+      "revalidation_requirements": [
+        "Sign-off commands must carry fresh step-up proof where required.",
+        "Continuation stays on the same Approvals route and same approval-pack context."
+      ],
+      "invalidation_events": [
+        "STEP_UP_COMPLETED",
+        "STALE_VIEW_REBASE",
+        "SESSION_REVOKED",
+        "DEEP_LINK_OR_INVITE_EXPIRY"
+      ],
+      "source_refs": [
+        "Algorithm/actor_and_authority_model.md::L251[client_signatory_step_up_rule]",
+        "Algorithm/customer_client_portal_experience_contract.md::L340[Approval_and_sign-off_flow]",
+        "Algorithm/northbound_api_and_session_contract.md::L429[fresh_step_up_proof_for_signoff]"
+      ],
+      "notes": []
+    },
+    {
+      "trigger_id": "governance_mutation_widening_access_or_relinking_scope",
+      "label": "Governance mutation that widens access, changes step-up posture, alters retention minimums, or relinks authority scope",
+      "trigger_kind": "STEP_UP_OR_APPROVAL_REQUIRED",
+      "action_family_refs": [
+        "ADMIN_UPDATE_TENANT_SETTINGS",
+        "ADMIN_STAGE_POLICY_CHANGE",
+        "ADMIN_ASSIGN_PRINCIPAL_ROLE",
+        "ADMIN_REMOVE_PRINCIPAL_ROLE",
+        "ADMIN_SET_PRINCIPAL_ATTRIBUTES",
+        "ADMIN_LINK_AUTHORITY",
+        "ADMIN_RELINK_AUTHORITY",
+        "ADMIN_APPLY_RETENTION_POLICY"
+      ],
+      "actor_classes": [
+        "TENANT_ADMIN",
+        "APPROVER"
+      ],
+      "role_refs": [
+        "role_governance_admin"
+      ],
+      "scope_refs": [
+        "scope.elevated.governance_mutation"
+      ],
+      "surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "session_profile_refs": [
+        "session.browser.operator",
+        "session.native.operator"
+      ],
+      "step_up_cell": "REQUIRE_STEP_UP",
+      "approval_cell": "REQUIRE_APPROVAL",
+      "authn_level_on_success": "STEP_UP",
+      "step_up_state_on_entry": "REQUIRED_PENDING",
+      "step_up_state_on_success": "SATISFIED",
+      "assurance_requirement": "Current governance authority plus fresh human gate evidence as required by policy.",
+      "revalidation_requirements": [
+        "Commands must not proceed from stale governance views.",
+        "Changed access or step-up posture may invalidate prior resumability and cache assumptions."
+      ],
+      "invalidation_events": [
+        "STEP_UP_COMPLETED",
+        "STALE_VIEW_REBASE",
+        "TENANT_SWITCH",
+        "SESSION_REVOKED"
+      ],
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L405[governance_mutation_step_up_or_approval]",
+        "Algorithm/actor_and_authority_model.md::L326[3.9_Policy_decision_model]"
+      ],
+      "notes": []
+    },
+    {
+      "trigger_id": "invite_or_deep_link_upgrade_gate",
+      "label": "Invite, deep-link, or external handoff entry before authenticated upgrade",
+      "trigger_kind": "AUTHENTICATED_SESSION_UPGRADE_REQUIRED",
+      "action_family_refs": [
+        "UPLOAD_CLIENT_DOCUMENT",
+        "ACKNOWLEDGE_CLIENT_DECLARATION",
+        "SIGN_CLIENT_DECLARATION"
+      ],
+      "actor_classes": [
+        "CLIENT_VIEWER",
+        "CLIENT_CONTRIBUTOR",
+        "CLIENT_SIGNATORY"
+      ],
+      "role_refs": [
+        "role_portal_user",
+        "role_portal_signatory"
+      ],
+      "scope_refs": [
+        "scope.portal.read",
+        "scope.portal.contribute"
+      ],
+      "surface_families": [
+        "BROWSER_LIMITED_ENTRY",
+        "PORTAL_BROWSER"
+      ],
+      "session_profile_refs": [
+        "session.browser.invite-pre-upgrade",
+        "session.browser.portal"
+      ],
+      "step_up_cell": "DENY",
+      "approval_cell": "DENY",
+      "authn_level_on_success": "BASIC",
+      "step_up_state_on_entry": "NOT_REQUIRED",
+      "step_up_state_on_success": "NOT_REQUIRED",
+      "assurance_requirement": "Upgrade to a normal authenticated session before upload, acknowledgement, or sign-off; fresh step-up may still be needed afterward.",
+      "revalidation_requirements": [
+        "Keep route focus and return target through the upgrade and any external auth handoff.",
+        "Do not imply completion until the governed read model settles."
+      ],
+      "invalidation_events": [
+        "DEEP_LINK_OR_INVITE_EXPIRY",
+        "SESSION_REVOKED",
+        "STALE_VIEW_REBASE"
+      ],
+      "source_refs": [
+        "Algorithm/customer_client_portal_experience_contract.md::L370[Onboarding_flow]",
+        "Algorithm/customer_client_portal_experience_contract.md::L399[Artifact_print_and_browser-handoff_rules]",
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]"
+      ],
+      "notes": [
+        "This row is an authenticated upgrade gate, not a substitute for step-up."
+      ]
+    }
+  ],
+  "typed_gaps": [],
+  "notes": [
+    "Step-up triggers come from the Taxat corpus first. Auth0 only enforces the challenge posture that this matrix requests."
+  ]
+}

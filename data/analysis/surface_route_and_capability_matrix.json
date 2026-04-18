@@ -1,0 +1,2874 @@
+{
+  "summary": {
+    "surface_family_count": 4,
+    "route_scene_count": 30,
+    "selector_count": 79,
+    "component_count": 75,
+    "gap_count": 6,
+    "routes_by_family": {
+      "COLLABORATION": 8,
+      "PORTAL": 5,
+      "GOVERNANCE": 10,
+      "NATIVE_OPERATOR": 7
+    }
+  },
+  "routes": [
+    {
+      "surface_family": "COLLABORATION",
+      "shell_family": "CALM_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "DETAIL_DRAWER",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "masking",
+        "route",
+        "work_item_id",
+        "visibility_partition"
+      ],
+      "source_file": "Algorithm/collaboration_workspace_contract.md",
+      "source_heading_or_logical_block": "2. Screen map / 3. Page layouts / 8. Command and read API additions / 11. Accessibility and responsive rules",
+      "route_or_scene_key": "collaboration_staff_inbox",
+      "title": "Staff work inbox",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/work",
+      "actor_profile": "STAFF_OPERATOR",
+      "object_ownership": "WorkInbox / WorkItemQueue",
+      "dominant_question": "Which work item needs action now, and why?",
+      "dominant_action": "Assign, claim, escalate, or enter the workspace without losing queue context.",
+      "read_models": [
+        "WorkInboxSnapshot",
+        "WorkInboxDelta"
+      ],
+      "read_surfaces": [
+        "GET /v1/work-items?assignee=...&lifecycle_state=...&waiting_on=...&due_state=...&customer_projection=...",
+        "GET /v1/work-items/stream?resume_token=..."
+      ],
+      "commands": [
+        "ASSIGN_WORK_ITEM",
+        "REASSIGN_WORK_ITEM",
+        "ESCALATE_WORK_ITEM"
+      ],
+      "command_semantics": "AUTHORITATIVE_ENUM",
+      "stream_sources": [
+        "workspace.delta",
+        "notification.badge",
+        "heartbeat"
+      ],
+      "visibility_lanes": [
+        "CUSTOMER_VISIBLE summary facts",
+        "INTERNAL_ONLY triage metadata"
+      ],
+      "artifact_posture": "Queue rows summarize current state only; attachments stay subordinate until workspace entry.",
+      "step_up_checkpoints": [
+        "Privileged reassignment or escalation may trigger inline step-up under northbound command law."
+      ],
+      "stale_view_posture": "Rows remain mounted while basis drift rebases inline and mutation affordances fail closed.",
+      "recovery_and_resume_rules": [
+        "Refresh and reconnect preserve filters, row order, and the anchored row.",
+        "Notification-open returns to the same queue row when the object remains legal.",
+        "No full-page reset for ordinary row updates."
+      ],
+      "focus_return_rule": "Return to the originating inbox row or the narrowest surviving filter chip.",
+      "selector_profile": "COLLABORATION_STAFF_QUEUE_V1",
+      "responsive_fallback": "Filter rails compact into chips and the detail drawer redocks beneath the primary stack on narrow screens.",
+      "components": [
+        "WorkInboxRow",
+        "StatusPill",
+        "AssigneeChip",
+        "SlaBadge",
+        "EscalationBadge"
+      ],
+      "notes": "The inbox is the staff collaboration queue root and must update in place.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/collaboration_workspace_contract.md",
+          "source_heading_or_logical_block": "2. Screen map / Staff `/work`",
+          "rationale": "The route and queue semantics are explicit."
+        },
+        {
+          "source_file": "Algorithm/collaboration_workspace_contract.md",
+          "source_heading_or_logical_block": "12. Playwright scenarios",
+          "rationale": "Queue updates, escalation posture, and stale protection are explicitly testable."
+        }
+      ]
+    },
+    {
+      "surface_family": "COLLABORATION",
+      "shell_family": "CALM_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "DETAIL_DRAWER",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "masking",
+        "route",
+        "work_item_id",
+        "visibility_partition"
+      ],
+      "source_file": "Algorithm/collaboration_workspace_contract.md",
+      "source_heading_or_logical_block": "2. Screen map / 3. Page layouts / 8. Command and read API additions / 11. Accessibility and responsive rules",
+      "route_or_scene_key": "collaboration_staff_workspace",
+      "title": "Staff work-item workspace",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/work/items/{item_id}",
+      "actor_profile": "STAFF_OPERATOR",
+      "object_ownership": "WorkItemWorkspace",
+      "dominant_question": "What is the safest next decision on this work item?",
+      "dominant_action": "Advance the work item while preserving dominant question, settlement posture, and thread continuity.",
+      "read_models": [
+        "WorkspaceSnapshot",
+        "WorkspaceDelta"
+      ],
+      "read_surfaces": [
+        "GET /v1/work-items/{item_id}/workspace/snapshot",
+        "GET /v1/work-items/{item_id}/workspace/stream?resume_token=..."
+      ],
+      "commands": [
+        "ASSIGN_WORK_ITEM",
+        "CHANGE_WORK_ITEM_STATUS",
+        "SET_WORK_ITEM_DUE_DATES",
+        "REQUEST_CUSTOMER_INFO"
+      ],
+      "command_semantics": "AUTHORITATIVE_ENUM",
+      "stream_sources": [
+        "workspace.snapshot",
+        "workspace.delta",
+        "notification.badge",
+        "heartbeat"
+      ],
+      "visibility_lanes": [
+        "CUSTOMER_VISIBLE activity slice",
+        "INTERNAL_ONLY activity slice",
+        "AUDIT trail"
+      ],
+      "artifact_posture": "Current artifacts, linked context, and history remain visibly distinct inside the same shell.",
+      "step_up_checkpoints": [
+        "Risky status changes and authority-dependent actions stay inline and shell-local."
+      ],
+      "stale_view_posture": "Keep the full calm-shell frame mounted and downgrade unsafe mutations to `NO_SAFE_ACTION` during rebase.",
+      "recovery_and_resume_rules": [
+        "The ordered reading path remains `CONTEXT_BAR -> DECISION_SUMMARY -> ACTION_STRIP -> DETAIL_DRAWER`.",
+        "Rebase preserves the same item shell, draft context, and selected module when still legal.",
+        "Focus returns to the route-local anchor after module, drawer, or composer transitions."
+      ],
+      "focus_return_rule": "Return to the originating module tab, composer trigger, or queue row anchor.",
+      "selector_profile": "COLLABORATION_WORKSPACE_V1",
+      "responsive_fallback": "On narrow screens the drawer collapses below the primary stack without changing module meaning.",
+      "components": [
+        "ContextBar",
+        "DecisionSummary",
+        "ActionStrip",
+        "DetailDrawer",
+        "DominantQuestion",
+        "SettlementPosture",
+        "NoSafeAction"
+      ],
+      "notes": "This is the canonical calm-shell collaboration workspace and owns same-object/same-shell continuity for work items.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/collaboration_workspace_contract.md",
+          "source_heading_or_logical_block": "3. Page layouts / Staff work-item workspace",
+          "rationale": "The four-surface order and module grammar are explicit."
+        },
+        {
+          "source_file": "Algorithm/low_noise_experience_contract.md",
+          "source_heading_or_logical_block": "LowNoiseExperienceFrame",
+          "rationale": "The calm-shell ordered reading path is shared law."
+        }
+      ]
+    },
+    {
+      "surface_family": "COLLABORATION",
+      "shell_family": "CALM_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "DETAIL_DRAWER",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "masking",
+        "route",
+        "work_item_id",
+        "visibility_partition"
+      ],
+      "source_file": "Algorithm/collaboration_workspace_contract.md",
+      "source_heading_or_logical_block": "2. Screen map / 3. Page layouts / 8. Command and read API additions / 11. Accessibility and responsive rules",
+      "route_or_scene_key": "collaboration_staff_customer_activity_module",
+      "title": "Staff customer-visible activity module",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/work/items/{item_id}?module=customer-activity",
+      "actor_profile": "STAFF_OPERATOR",
+      "object_ownership": "CustomerVisibleActivitySlice",
+      "dominant_question": "What has the customer seen, and what reply is safe now?",
+      "dominant_action": "Respond or request more information using customer-visible language only.",
+      "read_models": [
+        "CollaborationActivitySlice",
+        "WorkspaceDelta"
+      ],
+      "read_surfaces": [
+        "GET /v1/work-items/{item_id}/activity?thread=customer&before_sequence=...",
+        "GET /v1/work-items/{item_id}/workspace/stream?resume_token=..."
+      ],
+      "commands": [
+        "ADD_CUSTOMER_COMMENT",
+        "REQUEST_CUSTOMER_INFO"
+      ],
+      "command_semantics": "AUTHORITATIVE_ENUM",
+      "stream_sources": [
+        "activity.appended",
+        "workspace.delta"
+      ],
+      "visibility_lanes": [
+        "CUSTOMER_VISIBLE"
+      ],
+      "artifact_posture": "Only customer-visible activity and customer-safe attachment posture may appear here.",
+      "step_up_checkpoints": [
+        "Sensitive outbound requests stay bound to the work-item stale-view guard."
+      ],
+      "stale_view_posture": "Preserve the thread and composer while invalidating only the unsafe submission path.",
+      "recovery_and_resume_rules": [
+        "Customer-visible concurrency is visibility-scoped.",
+        "Inline refresh preserves scroll position and composer context when legal."
+      ],
+      "focus_return_rule": "Return to the customer-activity tab or the exact composer trigger.",
+      "selector_profile": "COLLABORATION_WORKSPACE_V1",
+      "responsive_fallback": "Customer activity remains in the same reading order; history and composer stack vertically on narrow screens.",
+      "components": [
+        "CustomerActivityThread",
+        "DetailDrawer",
+        "ActionStrip"
+      ],
+      "notes": "Customer-visible activity is a separate stream and cannot be contaminated by internal-only facts.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/collaboration_workspace_contract.md",
+          "source_heading_or_logical_block": "1. Core invariants",
+          "rationale": "Customer-visible activity is separately stored and streamed."
+        },
+        {
+          "source_file": "Algorithm/collaboration_workspace_contract.md",
+          "source_heading_or_logical_block": "8. Command and read API additions",
+          "rationale": "The customer thread read surface and command surface are explicit."
+        }
+      ]
+    },
+    {
+      "surface_family": "COLLABORATION",
+      "shell_family": "CALM_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "DETAIL_DRAWER",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "masking",
+        "route",
+        "work_item_id",
+        "visibility_partition"
+      ],
+      "source_file": "Algorithm/collaboration_workspace_contract.md",
+      "source_heading_or_logical_block": "2. Screen map / 3. Page layouts / 8. Command and read API additions / 11. Accessibility and responsive rules",
+      "route_or_scene_key": "collaboration_staff_internal_activity_module",
+      "title": "Staff internal-only activity module",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/work/items/{item_id}?module=internal-activity",
+      "actor_profile": "STAFF_OPERATOR",
+      "object_ownership": "InternalOnlyActivitySlice",
+      "dominant_question": "What internal context, constraints, or reasoning must stay staff-only?",
+      "dominant_action": "Append internal notes and coordinate without contaminating customer-visible projections.",
+      "read_models": [
+        "CollaborationActivitySlice",
+        "WorkspaceDelta"
+      ],
+      "read_surfaces": [
+        "GET /v1/work-items/{item_id}/activity?thread=internal&before_sequence=...",
+        "GET /v1/work-items/{item_id}/workspace/stream?resume_token=..."
+      ],
+      "commands": [
+        "ADD_INTERNAL_NOTE"
+      ],
+      "command_semantics": "AUTHORITATIVE_ENUM",
+      "stream_sources": [
+        "activity.appended",
+        "workspace.delta"
+      ],
+      "visibility_lanes": [
+        "INTERNAL_ONLY"
+      ],
+      "artifact_posture": "Internal-only notes and attachments never appear in customer-facing routes.",
+      "step_up_checkpoints": [
+        "Higher-privilege note entry stays policy-gated and non-leaky."
+      ],
+      "stale_view_posture": "Thread stays mounted but the note composer fails closed if the workspace basis drifts.",
+      "recovery_and_resume_rules": [
+        "Internal-only activity does not stale or notify customer-visible routes.",
+        "Append-only history remains visible during reconnect and rebase."
+      ],
+      "focus_return_rule": "Return to the internal-activity tab, latest note anchor, or the invoking queue row.",
+      "selector_profile": "COLLABORATION_WORKSPACE_V1",
+      "responsive_fallback": "Thread and note composer stack beneath summary content without changing visibility semantics.",
+      "components": [
+        "InternalActivityThread",
+        "ProblemBanner",
+        "NoSafeAction"
+      ],
+      "notes": "This module is the hard internal/customer boundary inside collaboration.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/collaboration_workspace_contract.md",
+          "source_heading_or_logical_block": "1. Core invariants",
+          "rationale": "Internal-only activity must never appear in customer-visible surfaces."
+        },
+        {
+          "source_file": "Algorithm/collaboration_workspace_contract.md",
+          "source_heading_or_logical_block": "12. Playwright scenarios",
+          "rationale": "The customer-visible omission and stale behavior are explicit regression scenarios."
+        }
+      ]
+    },
+    {
+      "surface_family": "COLLABORATION",
+      "shell_family": "CALM_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "DETAIL_DRAWER",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "masking",
+        "route",
+        "work_item_id",
+        "visibility_partition"
+      ],
+      "source_file": "Algorithm/collaboration_workspace_contract.md",
+      "source_heading_or_logical_block": "2. Screen map / 3. Page layouts / 8. Command and read API additions / 11. Accessibility and responsive rules",
+      "route_or_scene_key": "collaboration_staff_files_module",
+      "title": "Staff files module",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/work/items/{item_id}?module=files",
+      "actor_profile": "STAFF_OPERATOR",
+      "object_ownership": "CollaborationAttachmentSlice",
+      "dominant_question": "Which artifact is current, historical, quarantined, or not safely downloadable?",
+      "dominant_action": "Inspect the current artifact posture before previewing, downloading, or requesting replacement.",
+      "read_models": [
+        "CollaborationAttachmentSlice",
+        "WorkspaceDelta"
+      ],
+      "read_surfaces": [
+        "GET /v1/work-items/{item_id}/attachments?visibility=customer|internal",
+        "GET /v1/work-items/{item_id}/workspace/stream?resume_token=..."
+      ],
+      "commands": [],
+      "command_semantics": "READ_ONLY_ATTACHMENT_POSTURE",
+      "stream_sources": [
+        "workspace.delta"
+      ],
+      "visibility_lanes": [
+        "CUSTOMER_VISIBLE shared artifacts",
+        "INTERNAL_ONLY staff-only or quarantined artifacts"
+      ],
+      "artifact_posture": "Current-vs-history posture is explicit and quarantined files never masquerade as downloadable current artifacts.",
+      "step_up_checkpoints": [
+        "Sensitive download or export posture remains policy-governed and may require step-up."
+      ],
+      "stale_view_posture": "Artifact rows stay visible as stale context but cannot be promoted to current on a drifted view.",
+      "recovery_and_resume_rules": [
+        "Current and historical artifact anchors survive inline refresh.",
+        "Quarantined or replacement-required files remain visible as typed recovery context."
+      ],
+      "focus_return_rule": "Return to the exact artifact row or preview launcher that opened detail.",
+      "selector_profile": "COLLABORATION_WORKSPACE_V1",
+      "responsive_fallback": "Artifact rows stay single-column with current-state chips preserved on mobile widths.",
+      "components": [
+        "FilesModule",
+        "ProblemBanner"
+      ],
+      "notes": "The files module is the collaboration truth surface for current-vs-history artifact posture.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/collaboration_workspace_contract.md",
+          "source_heading_or_logical_block": "4. Key components / Files module",
+          "rationale": "The files module is a first-class workspace component."
+        },
+        {
+          "source_file": "Algorithm/collaboration_workspace_contract.md",
+          "source_heading_or_logical_block": "12. Playwright scenarios",
+          "rationale": "Current-vs-history and quarantined download posture are explicit scenarios."
+        }
+      ]
+    },
+    {
+      "surface_family": "COLLABORATION",
+      "shell_family": "CALM_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "DETAIL_DRAWER",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "masking",
+        "route",
+        "work_item_id",
+        "visibility_partition"
+      ],
+      "source_file": "Algorithm/collaboration_workspace_contract.md",
+      "source_heading_or_logical_block": "2. Screen map / 3. Page layouts / 8. Command and read API additions / 11. Accessibility and responsive rules",
+      "route_or_scene_key": "collaboration_manifest_focus_jump",
+      "title": "Manifest route with workflow focus jump",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/manifests/{manifest_id}?focus=workflow:{item_id}",
+      "actor_profile": "STAFF_OPERATOR",
+      "object_ownership": "ManifestDecisionBundle plus linked work-item context",
+      "dominant_question": "How does this workflow item affect the current manifest decision?",
+      "dominant_action": "Inspect the linked work item as subordinate context without changing the manifest shell identity.",
+      "read_models": [
+        "DecisionBundle",
+        "WorkspaceSnapshot",
+        "WorkspaceDelta"
+      ],
+      "read_surfaces": [
+        "Manifest experience snapshot and stream surfaces from the northbound contract",
+        "GET /v1/work-items/{item_id}/workspace/snapshot"
+      ],
+      "commands": [
+        "MANIFEST_ROUTE_LOCAL_COMMANDS",
+        "REQUEST_CUSTOMER_INFO"
+      ],
+      "command_semantics": "MIXED_MANIFEST_AND_COLLABORATION",
+      "stream_sources": [
+        "manifest experience stream",
+        "workspace.delta"
+      ],
+      "visibility_lanes": [
+        "CALM operator truth",
+        "linked workflow visibility partition"
+      ],
+      "artifact_posture": "Manifest truth remains primary while workflow context opens as linked support detail.",
+      "step_up_checkpoints": [
+        "Manifest-local filing or approval step-up still stays route-local to the manifest shell."
+      ],
+      "stale_view_posture": "The manifest route remains mounted; linked workflow focus rebases inline or drops back to the manifest anchor.",
+      "recovery_and_resume_rules": [
+        "Same object, same shell applies to the manifest route even when workflow focus is active.",
+        "The focus query must restore the linked work-item anchor after refresh if still legal."
+      ],
+      "focus_return_rule": "Return to the manifest-local workflow focus anchor or the parent manifest navigator.",
+      "selector_profile": "COLLABORATION_WORKSPACE_V1",
+      "responsive_fallback": "The linked workflow support view docks below the main manifest stack on narrow screens.",
+      "components": [
+        "LinkedContextPanel",
+        "ContextBar",
+        "DecisionSummary",
+        "DetailDrawer"
+      ],
+      "notes": "This route normalizes the explicit workflow focus deep link into the cross-surface atlas.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/collaboration_workspace_contract.md",
+          "source_heading_or_logical_block": "2. Screen map",
+          "rationale": "The explicit manifest focus pattern is named here."
+        },
+        {
+          "source_file": "Algorithm/frontend_shell_and_interaction_law.md",
+          "source_heading_or_logical_block": "2. Route continuity and shell stability",
+          "rationale": "Focus jumps cannot invent a new shell identity."
+        }
+      ]
+    },
+    {
+      "surface_family": "COLLABORATION",
+      "shell_family": "CLIENT_PORTAL_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "SUPPORT_PANEL",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "client",
+        "session",
+        "customer_safe_projection",
+        "route",
+        "request_id",
+        "visibility_partition"
+      ],
+      "source_file": "Algorithm/collaboration_workspace_contract.md",
+      "source_heading_or_logical_block": "2. Screen map / Customer request routes / 11. Accessibility and responsive rules",
+      "route_or_scene_key": "collaboration_customer_request_list",
+      "title": "Customer request list",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/portal/requests",
+      "actor_profile": "CLIENT_CONTRIBUTOR",
+      "object_ownership": "CustomerRequestListSnapshot",
+      "dominant_question": "Which request needs a reply, upload, approval, or simply waiting?",
+      "dominant_action": "Open the exact request without losing customer-safe context or the return target.",
+      "read_models": [
+        "CustomerRequestListSnapshot"
+      ],
+      "read_surfaces": [
+        "Customer-visible request-list projection under the collaboration contract"
+      ],
+      "commands": [],
+      "command_semantics": "READ_ONLY_ENTRY_SURFACE",
+      "stream_sources": [
+        "notification.badge",
+        "customer-safe list refresh"
+      ],
+      "visibility_lanes": [
+        "CUSTOMER_VISIBLE"
+      ],
+      "artifact_posture": "Only current safe request state and customer-safe history summaries may appear.",
+      "step_up_checkpoints": [],
+      "stale_view_posture": "The list refreshes in place and never shows internal-only fields even during reconnect.",
+      "recovery_and_resume_rules": [
+        "Opening and closing request detail preserves the parent request-row anchor.",
+        "Cross-device continuity restores the same request when still legal."
+      ],
+      "focus_return_rule": "Return to the originating request row or list filter.",
+      "selector_profile": "COLLABORATION_CUSTOMER_V1",
+      "responsive_fallback": "Single-column list with contextual support hidden behind explicit disclosure on narrow screens.",
+      "components": [
+        "StatusHero",
+        "TaskQueue",
+        "RecentActivity"
+      ],
+      "notes": "The customer request list is collaboration truth rendered through portal-safe language and visibility rules.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/collaboration_workspace_contract.md",
+          "source_heading_or_logical_block": "2. Screen map / Customer `/portal/requests`",
+          "rationale": "The route is explicit."
+        },
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Shell continuity, support budget, and constrained layouts",
+          "rationale": "Client-shell continuity and return-target rules apply."
+        }
+      ]
+    },
+    {
+      "surface_family": "COLLABORATION",
+      "shell_family": "CLIENT_PORTAL_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "SUPPORT_PANEL",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "client",
+        "session",
+        "customer_safe_projection",
+        "route",
+        "request_id",
+        "visibility_partition"
+      ],
+      "source_file": "Algorithm/collaboration_workspace_contract.md",
+      "source_heading_or_logical_block": "2. Screen map / Customer request routes / 11. Accessibility and responsive rules",
+      "route_or_scene_key": "collaboration_customer_request_detail",
+      "title": "Customer request workspace",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/portal/requests/{item_id}",
+      "actor_profile": "CLIENT_CONTRIBUTOR",
+      "object_ownership": "Customer-safe request-detail projection",
+      "dominant_question": "What exactly is being asked of the client, and what is the safe next step?",
+      "dominant_action": "Reply, upload, or acknowledge from the same request lane without surfacing staff-only state.",
+      "read_models": [
+        "WorkspaceSnapshot",
+        "CollaborationActivitySlice",
+        "CollaborationAttachmentSlice"
+      ],
+      "read_surfaces": [
+        "Customer-visible request-detail projection",
+        "GET /v1/work-items/{item_id}/activity?thread=customer&before_sequence=..."
+      ],
+      "commands": [
+        "RESPOND_TO_REQUEST_INFO",
+        "ADD_CUSTOMER_COMMENT"
+      ],
+      "command_semantics": "AUTHORITATIVE_ENUM",
+      "stream_sources": [
+        "activity.appended",
+        "customer-safe request refresh"
+      ],
+      "visibility_lanes": [
+        "CUSTOMER_VISIBLE"
+      ],
+      "artifact_posture": "Current artifact, history, and support handoff stay explicit and customer-safe.",
+      "step_up_checkpoints": [
+        "Identity or authority verification stays inside the route rather than redirecting to a new shell."
+      ],
+      "stale_view_posture": "The request card stays mounted with inline recovery and explicit no-safe-action language when needed.",
+      "recovery_and_resume_rules": [
+        "Return from browser or authority handoff never implies completion until the request projection settles.",
+        "Historical artifacts remain visible as context but never become the default current artifact on rebase."
+      ],
+      "focus_return_rule": "Return to the request focus anchor, current artifact row, or the invoking request list row.",
+      "selector_profile": "COLLABORATION_CUSTOMER_V1",
+      "responsive_fallback": "Primary task column fills the viewport; history and help collapse behind explicit disclosure on mobile widths.",
+      "components": [
+        "PortalHeader",
+        "SupportPanel",
+        "DocumentHistory"
+      ],
+      "notes": "This is the customer-safe collaboration detail route that shares portal shell law without inheriting staff-only vocabulary.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/collaboration_workspace_contract.md",
+          "source_heading_or_logical_block": "2. Screen map / Customer `/portal/requests/{item_id}`",
+          "rationale": "The route is explicit."
+        },
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Accessibility and interaction rules",
+          "rationale": "Customer-safe return, handoff, and artifact posture rules are shared."
+        }
+      ]
+    },
+    {
+      "surface_family": "PORTAL",
+      "shell_family": "CLIENT_PORTAL_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "SUPPORT_PANEL",
+      "command_transport": [
+        "POST /v1/commands",
+        "POST /v1/uploads/sessions",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "client",
+        "session",
+        "customer_safe_projection",
+        "route",
+        "artifact_subject"
+      ],
+      "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+      "source_heading_or_logical_block": "Navigation contract / Route architecture / Accessibility and interaction rules / Read-model and API translation requirements",
+      "route_or_scene_key": "portal_home",
+      "title": "Portal home",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/portal",
+      "actor_profile": "CLIENT_VIEWER | CLIENT_CONTRIBUTOR | CLIENT_SIGNATORY",
+      "object_ownership": "ClientPortalWorkspace",
+      "dominant_question": "What changed, what matters now, and what should the client do next?",
+      "dominant_action": "Choose the next routed task from one status hero and one task queue.",
+      "read_models": [
+        "ClientPortalWorkspace",
+        "ClientTimelineEvent"
+      ],
+      "read_surfaces": [
+        "ClientPortalWorkspace route projection (root home slice)"
+      ],
+      "commands": [
+        "PORTAL_OPEN_REQUEST",
+        "PORTAL_OPEN_HELP_CASE"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "role-filtered portal refresh",
+        "cross_device_continuity_contract"
+      ],
+      "visibility_lanes": [
+        "CUSTOMER_SAFE_PROJECTION"
+      ],
+      "artifact_posture": "Home uses summary-first current-state cards; artifacts stay subordinate to task selection.",
+      "step_up_checkpoints": [
+        "Home may route into in-place step-up, but does not force a new top-level destination."
+      ],
+      "stale_view_posture": "The hero and task queue remain visible while stale or reconnect posture is explained inline.",
+      "recovery_and_resume_rules": [
+        "Home must restore the pending task, upload, approval pack, or onboarding draft across devices.",
+        "Contextual routes are not allowed to become a sixth permanent tab."
+      ],
+      "focus_return_rule": "Return to the status hero primary action or the exact task queue row that launched a deeper route.",
+      "selector_profile": "PORTAL_SHELL_V1",
+      "responsive_fallback": "Home stays single-column and mobile-first; support remains subordinate to the task queue.",
+      "components": [
+        "PortalHeader",
+        "StatusHero",
+        "TaskQueue",
+        "RecentActivity"
+      ],
+      "notes": "The atlas binds Home to `/portal` as the canonical root route because the contract names Home but not `/portal/home`.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Navigation contract",
+          "rationale": "Home is one of the five permanent destinations."
+        },
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Route architecture / Home",
+          "rationale": "Home layout modules are explicit."
+        }
+      ]
+    },
+    {
+      "surface_family": "PORTAL",
+      "shell_family": "CLIENT_PORTAL_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "SUPPORT_PANEL",
+      "command_transport": [
+        "POST /v1/commands",
+        "POST /v1/uploads/sessions",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "client",
+        "session",
+        "customer_safe_projection",
+        "route",
+        "artifact_subject"
+      ],
+      "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+      "source_heading_or_logical_block": "Navigation contract / Route architecture / Accessibility and interaction rules / Read-model and API translation requirements",
+      "route_or_scene_key": "portal_documents",
+      "title": "Portal documents",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/portal/documents",
+      "actor_profile": "CLIENT_CONTRIBUTOR",
+      "object_ownership": "ClientDocumentRequest + ClientUploadSession",
+      "dominant_question": "Which document request is active, and what is the exact upload posture?",
+      "dominant_action": "Upload, retry, or replace inside the same request lane with confidence and binding made explicit.",
+      "read_models": [
+        "ClientPortalWorkspace",
+        "ClientDocumentRequest",
+        "ClientUploadSession"
+      ],
+      "read_surfaces": [
+        "ClientPortalWorkspace route projection (documents slice)",
+        "POST /v1/uploads/sessions"
+      ],
+      "commands": [
+        "PORTAL_START_UPLOAD",
+        "PORTAL_RETRY_UPLOAD",
+        "PORTAL_REPLACE_DOCUMENT",
+        "PORTAL_ATTACH_FINALIZED_UPLOAD"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "upload session progress",
+        "role-filtered portal refresh"
+      ],
+      "visibility_lanes": [
+        "CUSTOMER_SAFE_PROJECTION"
+      ],
+      "artifact_posture": "Transfer, scan, validation, accepted, rejected, superseded, and replacement-only states stay visibly distinct.",
+      "step_up_checkpoints": [
+        "Sensitive uploads remain request-bound and may require route-local confirmation before final attachment."
+      ],
+      "stale_view_posture": "The request card stays mounted with request-version posture explicit during rebase or reconnect.",
+      "recovery_and_resume_rules": [
+        "Resumed uploads preserve frozen tenant, client, request, and request-version identity.",
+        "Rejected and superseded uploads remain visible as recovery context but never become default current artifacts."
+      ],
+      "focus_return_rule": "Return to the request card, current upload row, or upload affordance that initiated the transfer.",
+      "selector_profile": "PORTAL_SHELL_V1",
+      "responsive_fallback": "On mobile the active request card owns the full viewport and history/help collapse behind disclosure.",
+      "components": [
+        "DocumentInbox",
+        "UploadPanel",
+        "UploadStatusList",
+        "DocumentHistory"
+      ],
+      "notes": "Upload action families are normalized from prose because the contract names the flow and the byte-session exception, not a complete command enum.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Secure document-upload flow",
+          "rationale": "The upload phases and request-binding rules are explicit."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "Binary transfer exception",
+          "rationale": "Upload session allocation is the sole non-command mutation surface for raw bytes."
+        }
+      ]
+    },
+    {
+      "surface_family": "PORTAL",
+      "shell_family": "CLIENT_PORTAL_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "SUPPORT_PANEL",
+      "command_transport": [
+        "POST /v1/commands",
+        "POST /v1/uploads/sessions",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "client",
+        "session",
+        "customer_safe_projection",
+        "route",
+        "artifact_subject"
+      ],
+      "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+      "source_heading_or_logical_block": "Navigation contract / Route architecture / Accessibility and interaction rules / Read-model and API translation requirements",
+      "route_or_scene_key": "portal_approvals",
+      "title": "Portal approvals",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/portal/approvals",
+      "actor_profile": "CLIENT_SIGNATORY",
+      "object_ownership": "ClientApprovalPack",
+      "dominant_question": "What is being approved, and is sign-off safe right now?",
+      "dominant_action": "Review change digest, declaration, and sign-off inside one contained route.",
+      "read_models": [
+        "ClientPortalWorkspace",
+        "ClientApprovalPack"
+      ],
+      "read_surfaces": [
+        "ClientPortalWorkspace route projection (approvals slice)"
+      ],
+      "commands": [
+        "PORTAL_ACCEPT_APPROVAL",
+        "PORTAL_DECLINE_APPROVAL",
+        "PORTAL_ACKNOWLEDGE_CHANGE_DIGEST"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "approval pack refresh",
+        "cross_device_continuity_contract"
+      ],
+      "visibility_lanes": [
+        "CUSTOMER_SAFE_PROJECTION"
+      ],
+      "artifact_posture": "Current approval pack and signed receipt stay explicit; superseded packs remain historical only.",
+      "step_up_checkpoints": [
+        "Step-up stays contained inside the route and must not route-switch the client into a different shell."
+      ],
+      "stale_view_posture": "The approval pack remains visible while stale-signoff posture blocks unsafe commitment.",
+      "recovery_and_resume_rules": [
+        "Return from external sign-off handoff never implies completion until the governed approval read model settles.",
+        "Historical approval packs remain available but cannot become the current default by drift."
+      ],
+      "focus_return_rule": "Return to the digest anchor, declaration section, or the sign-off trigger.",
+      "selector_profile": "PORTAL_SHELL_V1",
+      "responsive_fallback": "The active approval pack takes full width on mobile and keeps sticky sign-off controls visible without covering governing explanation.",
+      "components": [
+        "ApprovalSummary",
+        "ChangeDigest",
+        "DeclarationPanel",
+        "SignOffPanel"
+      ],
+      "notes": "Approval command names are normalized from route-local action prose rather than a published command enum.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Approval and sign-off flow",
+          "rationale": "Approval posture, step-up, and stale protection are explicit."
+        },
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Playwright validation minimum",
+          "rationale": "Rebased approval and historical pack posture are explicit scenarios."
+        }
+      ]
+    },
+    {
+      "surface_family": "PORTAL",
+      "shell_family": "CLIENT_PORTAL_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "SUPPORT_PANEL",
+      "command_transport": [
+        "POST /v1/commands",
+        "POST /v1/uploads/sessions",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "client",
+        "session",
+        "customer_safe_projection",
+        "route",
+        "artifact_subject"
+      ],
+      "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+      "source_heading_or_logical_block": "Navigation contract / Route architecture / Accessibility and interaction rules / Read-model and API translation requirements",
+      "route_or_scene_key": "portal_onboarding",
+      "title": "Portal onboarding",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/portal/onboarding",
+      "actor_profile": "CLIENT_CONTRIBUTOR",
+      "object_ownership": "ClientOnboardingJourney",
+      "dominant_question": "Which onboarding step is active, what is saved, and what still needs completion?",
+      "dominant_action": "Advance the current onboarding step without losing entered answers, uploads, or support context.",
+      "read_models": [
+        "ClientPortalWorkspace",
+        "ClientOnboardingJourney"
+      ],
+      "read_surfaces": [
+        "ClientPortalWorkspace route projection (onboarding slice)"
+      ],
+      "commands": [
+        "PORTAL_SAVE_ONBOARDING_STEP",
+        "PORTAL_ADVANCE_ONBOARDING",
+        "PORTAL_OPEN_SUPPORT"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "journey refresh",
+        "cross_device_continuity_contract"
+      ],
+      "visibility_lanes": [
+        "CUSTOMER_SAFE_PROJECTION"
+      ],
+      "artifact_posture": "Onboarding confirmations and route-local uploads stay subordinate to the active step workspace.",
+      "step_up_checkpoints": [
+        "Identity and eligibility checks stay inside the journey step where they are relevant."
+      ],
+      "stale_view_posture": "Previously entered answers and resumable draft posture stay visible during refresh, reconnect, and rebase.",
+      "recovery_and_resume_rules": [
+        "Save-and-return preserves the current step, answers, and any in-progress upload sessions.",
+        "Onboarding is only a permanent destination while active."
+      ],
+      "focus_return_rule": "Return to the active step header, current form field group, or support entry anchor.",
+      "selector_profile": "PORTAL_SHELL_V1",
+      "responsive_fallback": "The active onboarding step fills the viewport on mobile while support collapses behind explicit entry.",
+      "components": [
+        "WelcomePanel",
+        "OnboardingStepper",
+        "StepWorkspace",
+        "SupportPanel"
+      ],
+      "notes": "Onboarding continuity is route-local and must not be reinterpreted as a general portal dashboard state.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Onboarding flow",
+          "rationale": "Step save-and-return and support posture are explicit."
+        },
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Responsive fallback rules",
+          "rationale": "Mobile-width onboarding rules are explicit."
+        }
+      ]
+    },
+    {
+      "surface_family": "PORTAL",
+      "shell_family": "CLIENT_PORTAL_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "SUPPORT_PANEL",
+      "command_transport": [
+        "POST /v1/commands",
+        "POST /v1/uploads/sessions",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "client",
+        "session",
+        "customer_safe_projection",
+        "route",
+        "artifact_subject"
+      ],
+      "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+      "source_heading_or_logical_block": "Navigation contract / Route architecture / Accessibility and interaction rules / Read-model and API translation requirements",
+      "route_or_scene_key": "portal_help",
+      "title": "Portal help",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/portal/help",
+      "actor_profile": "CLIENT_VIEWER | CLIENT_CONTRIBUTOR | CLIENT_SIGNATORY",
+      "object_ownership": "PortalHelpRequest",
+      "dominant_question": "What help path matches the current problem without losing route context?",
+      "dominant_action": "Open or resume support using context-preserving case materialization.",
+      "read_models": [
+        "ClientPortalWorkspace",
+        "PortalHelpRequest"
+      ],
+      "read_surfaces": [
+        "ClientPortalWorkspace route projection (help slice)"
+      ],
+      "commands": [
+        "CLIENT_PORTAL_REQUEST_HELP"
+      ],
+      "command_semantics": "AUTHORITATIVE_ENUM",
+      "stream_sources": [
+        "help request refresh",
+        "cross_device_continuity_contract"
+      ],
+      "visibility_lanes": [
+        "CUSTOMER_SAFE_PROJECTION"
+      ],
+      "artifact_posture": "Support history and current case context stay explicit and subordinate to the active help action.",
+      "step_up_checkpoints": [
+        "Escalated help flows may invoke route-local verification while preserving the case context panel."
+      ],
+      "stale_view_posture": "The case context panel stays mounted and makes hidden/unavailable states plain-language rather than implicit.",
+      "recovery_and_resume_rules": [
+        "Help requests preserve route, reason family, and context bundle when resumed.",
+        "Return targets after support handoff restore the originating route and focus anchor."
+      ],
+      "focus_return_rule": "Return to the support entry trigger, top question row, or the originating route action that opened Help.",
+      "selector_profile": "PORTAL_SHELL_V1",
+      "responsive_fallback": "Help stays single-column with context tucked beneath the primary support options on mobile widths.",
+      "components": [
+        "HelpOptions",
+        "TopQuestions",
+        "CaseContextPanel",
+        "SupportPanel"
+      ],
+      "notes": "Help is the only portal route where the support surface is allowed to foreground itself.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+          "source_heading_or_logical_block": "Route architecture / Help",
+          "rationale": "Help route modules are explicit."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "Portal help request",
+          "rationale": "The durable `CLIENT_PORTAL_REQUEST_HELP` command is explicit."
+        }
+      ]
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "AUDIT_SIDECAR",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "source_file": "Algorithm/admin_governance_console_architecture.md",
+      "source_heading_or_logical_block": "2. Profile boundary and shell contract / 4. Information architecture and route map / 6. Shared interaction and mutation rules / 8. Accessibility and responsive requirements",
+      "route_or_scene_key": "governance_overview",
+      "title": "Governance overview",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/governance",
+      "actor_profile": "TENANT_ADMIN | AUDITOR | APPROVER | SUPPORT_OPERATOR",
+      "object_ownership": "TenantGovernanceSnapshot",
+      "dominant_question": "Where is governance attention required right now?",
+      "dominant_action": "Open the highest-priority risk, queue item, or route slice without losing the current governance basis.",
+      "read_models": [
+        "TenantGovernanceSnapshot"
+      ],
+      "read_surfaces": [
+        "GET /v1/governance/tenants/{tenant_id}/overview"
+      ],
+      "commands": [
+        "GOVERNANCE_OPEN_QUEUE_ITEM"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "durable command receipts",
+        "governance overview refresh"
+      ],
+      "visibility_lanes": [
+        "MASKED_GOVERNANCE slices",
+        "role-limited overview counts"
+      ],
+      "artifact_posture": "Overview is summary-first and never exports broader detail than the current filtered slice permits.",
+      "step_up_checkpoints": [
+        "Risky follow-on routes may trigger inline step-up before mutation staging begins."
+      ],
+      "stale_view_posture": "Overview cards stay mounted while stale basis or access drift is surfaced inline.",
+      "recovery_and_resume_rules": [
+        "Selected object, dominant question, and filters survive responsive collapse and browser back.",
+        "Overview attention rows preserve the same route anchor across refresh."
+      ],
+      "focus_return_rule": "Return to the overview attention summary row or pending change queue item that launched deeper work.",
+      "selector_profile": "GOVERNANCE_SEMANTIC_SELECTORS_V1",
+      "responsive_fallback": "On narrower widths the inventory rail compresses to a tray and the audit sidecar redocks beneath the canvas.",
+      "components": [
+        "GovernanceContextBar",
+        "SectionNav",
+        "InventoryRail",
+        "OverviewAttentionSummary",
+        "GovernanceRiskLedger",
+        "PendingChangeQueue",
+        "AuditSidcar"
+      ],
+      "notes": "Overview keeps the five-region governance grammar visible even when density collapses responsively.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/admin_governance_console_architecture.md",
+          "source_heading_or_logical_block": "4.1 `/governance`",
+          "rationale": "Overview widgets and route purpose are explicit."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "Governance read surfaces",
+          "rationale": "The overview endpoint is explicit."
+        }
+      ]
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "AUDIT_SIDECAR",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "source_file": "Algorithm/admin_governance_console_architecture.md",
+      "source_heading_or_logical_block": "2. Profile boundary and shell contract / 4. Information architecture and route map / 6. Shared interaction and mutation rules / 8. Accessibility and responsive requirements",
+      "route_or_scene_key": "governance_tenant",
+      "title": "Tenant configuration workspace",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/governance/tenant",
+      "actor_profile": "TENANT_ADMIN | APPROVER",
+      "object_ownership": "GovernancePolicySnapshot",
+      "dominant_question": "What tenant-wide change is proposed, and what is its blast radius?",
+      "dominant_action": "Stage diff-first changes into the basket and seek approval without hiding impact.",
+      "read_models": [
+        "GovernancePolicySnapshot"
+      ],
+      "read_surfaces": [
+        "GET /v1/governance/tenants/{tenant_id}/policy-snapshot"
+      ],
+      "commands": [
+        "GOVERNANCE_STAGE_TENANT_CHANGE",
+        "GOVERNANCE_SUBMIT_APPROVAL"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "durable command receipts",
+        "policy snapshot refresh"
+      ],
+      "visibility_lanes": [
+        "MASKED_GOVERNANCE"
+      ],
+      "artifact_posture": "Diffs, blast radius, and history are first-class and remain visible beside staged change posture.",
+      "step_up_checkpoints": [
+        "Approval submission and any privilege-widening change remain inline and basis-hash guarded."
+      ],
+      "stale_view_posture": "The staged diff remains visible but cannot commit once policy snapshot or dependency topology drifts.",
+      "recovery_and_resume_rules": [
+        "Change basket retains context across refresh, reconnect, and responsive collapse.",
+        "The exact basis hash must be preserved when approving or submitting staged changes."
+      ],
+      "focus_return_rule": "Return to the staged diff row, change basket item, or approval composer trigger.",
+      "selector_profile": "GOVERNANCE_SEMANTIC_SELECTORS_V1",
+      "responsive_fallback": "Sidecar redocks under the workspace and the basket remains visible before any history panel on narrow screens.",
+      "components": [
+        "ChangeBasket",
+        "ApprovalComposer",
+        "BlastRadiusPanel",
+        "ConfigHistoryTimeline",
+        "WorkspaceCanvas"
+      ],
+      "notes": "Mutation families are normalized from the governance route prose; the northbound contract instead pins stale guards and basis hashes.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/admin_governance_console_architecture.md",
+          "source_heading_or_logical_block": "4.2 `/governance/tenant`",
+          "rationale": "Tenant config widgets and basket/approval posture are explicit."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "Governance stale guards",
+          "rationale": "Policy snapshot and dependency topology hashes are explicit."
+        }
+      ]
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "AUDIT_SIDECAR",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "source_file": "Algorithm/admin_governance_console_architecture.md",
+      "source_heading_or_logical_block": "2. Profile boundary and shell contract / 4. Information architecture and route map / 6. Shared interaction and mutation rules / 8. Accessibility and responsive requirements",
+      "route_or_scene_key": "governance_access_principals",
+      "title": "Principal access directory",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/governance/access/principals",
+      "actor_profile": "TENANT_ADMIN | SUPPORT_OPERATOR",
+      "object_ownership": "PrincipalAccessView",
+      "dominant_question": "Who currently has access, and how was it granted?",
+      "dominant_action": "Inspect principal access posture and stage adjustments without losing chain-of-authority context.",
+      "read_models": [
+        "PrincipalAccessView"
+      ],
+      "read_surfaces": [
+        "GET /v1/governance/tenants/{tenant_id}/principals"
+      ],
+      "commands": [
+        "GOVERNANCE_STAGE_PRINCIPAL_CHANGE"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "durable command receipts",
+        "principal inventory refresh"
+      ],
+      "visibility_lanes": [
+        "MASKED_GOVERNANCE"
+      ],
+      "artifact_posture": "Principal detail, authority chain, and staged access changes remain side-by-side.",
+      "step_up_checkpoints": [
+        "Any privilege-widening change must preserve simulation basis and step-up posture."
+      ],
+      "stale_view_posture": "Principal detail stays visible while mutation controls fail closed when access basis drifts.",
+      "recovery_and_resume_rules": [
+        "Roving selection preserves the selected principal under responsive collapse.",
+        "Authority chain detail remains attached to the selected principal rather than resetting to list top."
+      ],
+      "focus_return_rule": "Return to the principal directory row or authority-chain invocation anchor.",
+      "selector_profile": "GOVERNANCE_SEMANTIC_SELECTORS_V1",
+      "responsive_fallback": "Directory compresses to a tray but selected principal context persists into the canvas.",
+      "components": [
+        "PrincipalDirectory",
+        "PrincipalAccessGrid",
+        "AuthorityChainPanel",
+        "AuditSidcar"
+      ],
+      "notes": "This route preserves the governance five-layer access explanation stack in detail form.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/admin_governance_console_architecture.md",
+          "source_heading_or_logical_block": "4.3 `/governance/access/principals`",
+          "rationale": "Principal route purpose and detail are explicit."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "Governance read surfaces",
+          "rationale": "The principals endpoint is explicit."
+        }
+      ]
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "AUDIT_SIDECAR",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "source_file": "Algorithm/admin_governance_console_architecture.md",
+      "source_heading_or_logical_block": "2. Profile boundary and shell contract / 4. Information architecture and route map / 6. Shared interaction and mutation rules / 8. Accessibility and responsive requirements",
+      "route_or_scene_key": "governance_access_roles",
+      "title": "Role template matrix",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/governance/access/roles",
+      "actor_profile": "TENANT_ADMIN | APPROVER",
+      "object_ownership": "RoleTemplateMatrix",
+      "dominant_question": "What does each role grant, and how would a change alter effective authority?",
+      "dominant_action": "Stage role definition changes against the matrix with diff-first review.",
+      "read_models": [
+        "RoleTemplateMatrix"
+      ],
+      "read_surfaces": [
+        "GET /v1/governance/tenants/{tenant_id}/roles/{role_id}"
+      ],
+      "commands": [
+        "GOVERNANCE_STAGE_ROLE_CHANGE"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "durable command receipts",
+        "role matrix refresh"
+      ],
+      "visibility_lanes": [
+        "MASKED_GOVERNANCE"
+      ],
+      "artifact_posture": "Role diffs, impact, and history remain visible before commit.",
+      "step_up_checkpoints": [
+        "Role changes that widen authority preserve both topology and simulation basis hashes."
+      ],
+      "stale_view_posture": "Matrix stays visible while mutation affordances fail closed on outdated basis.",
+      "recovery_and_resume_rules": [
+        "Selected role and visible diff row survive refresh and browser back.",
+        "Role edits preserve the current comparison anchor after re-render."
+      ],
+      "focus_return_rule": "Return to the selected role row, matrix cell, or change basket invocation.",
+      "selector_profile": "GOVERNANCE_SEMANTIC_SELECTORS_V1",
+      "responsive_fallback": "Matrix columns compress before the sidecar; detailed diff remains explicit.",
+      "components": [
+        "WorkspaceCanvas",
+        "ChangeBasket",
+        "ApprovalComposer",
+        "BlastRadiusPanel"
+      ],
+      "notes": "The roles route is dense but never allowed to hide diff and blast-radius posture behind collapsible noise.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/admin_governance_console_architecture.md",
+          "source_heading_or_logical_block": "4.3 `/governance/access/roles`",
+          "rationale": "Role route purpose follows the access map."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "Governance read surfaces",
+          "rationale": "The role matrix endpoint is explicit."
+        }
+      ]
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "AUDIT_SIDECAR",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "source_file": "Algorithm/admin_governance_console_architecture.md",
+      "source_heading_or_logical_block": "2. Profile boundary and shell contract / 4. Information architecture and route map / 6. Shared interaction and mutation rules / 8. Accessibility and responsive requirements",
+      "route_or_scene_key": "governance_access_simulator",
+      "title": "Access simulator",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/governance/access/simulator",
+      "actor_profile": "TENANT_ADMIN | APPROVER | AUDITOR",
+      "object_ownership": "GovernanceAccessSimulation",
+      "dominant_question": "What would authorization do under the exact current basis and topology?",
+      "dominant_action": "Run a simulation and, when lawful, stage a mutation against that exact basis.",
+      "read_models": [
+        "GovernanceAccessSimulation"
+      ],
+      "read_surfaces": [
+        "POST /v1/governance/tenants/{tenant_id}/access-simulations"
+      ],
+      "commands": [
+        "RUN_ACCESS_SIMULATION",
+        "COMMIT_SIMULATED_GOVERNANCE_CHANGE"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "durable command receipts",
+        "simulation result refresh"
+      ],
+      "visibility_lanes": [
+        "MASKED_GOVERNANCE"
+      ],
+      "artifact_posture": "Simulation basis, dependency topology, and potential blast radius are treated as first-class artifacts.",
+      "step_up_checkpoints": [
+        "Committing a simulated change requires the exact simulation basis hash and any route-local step-up."
+      ],
+      "stale_view_posture": "Simulation result remains visible but cannot be committed after basis or topology drift.",
+      "recovery_and_resume_rules": [
+        "Simulation basis hash and dependency topology hash are preserved across receipts and retries.",
+        "The simulator cannot silently rerun under a different basis when resumed."
+      ],
+      "focus_return_rule": "Return to the simulation parameter set, result card, or commit trigger.",
+      "selector_profile": "GOVERNANCE_SEMANTIC_SELECTORS_V1",
+      "responsive_fallback": "Controls collapse above results on narrow widths while preserving the same simulation anchor.",
+      "components": [
+        "PolicySimulator",
+        "ChangeBasket",
+        "ApprovalComposer",
+        "BlastRadiusPanel"
+      ],
+      "notes": "The simulator route is the most explicit place where governance basis hashes become user-visible product law.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/admin_governance_console_architecture.md",
+          "source_heading_or_logical_block": "4.3 `/governance/access/simulator`",
+          "rationale": "The simulator route is explicit."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "Access simulations",
+          "rationale": "The simulation endpoint and basis-hash rules are explicit."
+        }
+      ]
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "AUDIT_SIDECAR",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "source_file": "Algorithm/admin_governance_console_architecture.md",
+      "source_heading_or_logical_block": "2. Profile boundary and shell contract / 4. Information architecture and route map / 6. Shared interaction and mutation rules / 8. Accessibility and responsive requirements",
+      "route_or_scene_key": "governance_authority_links",
+      "title": "Authority link inventory",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/governance/authority-links",
+      "actor_profile": "TENANT_ADMIN | SUPPORT_OPERATOR | AUDITOR",
+      "object_ownership": "AuthorityLinkInventoryItem",
+      "dominant_question": "Which authority links are healthy, mismatched, drifting, or missing delegation?",
+      "dominant_action": "Inspect health and stage repairs without collapsing mismatch categories together.",
+      "read_models": [
+        "AuthorityLinkInventoryItem"
+      ],
+      "read_surfaces": [
+        "GET /v1/governance/tenants/{tenant_id}/authority-links"
+      ],
+      "commands": [
+        "GOVERNANCE_REPAIR_AUTHORITY_LINK",
+        "GOVERNANCE_REBIND_DELEGATION"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "durable command receipts",
+        "authority-link inventory refresh"
+      ],
+      "visibility_lanes": [
+        "MASKED_GOVERNANCE"
+      ],
+      "artifact_posture": "Binding mismatch, delegation gap, and environment drift are distinct and remain inspectable as separate artifacts.",
+      "step_up_checkpoints": [
+        "Repair commands stay basis-hash guarded and may demand step-up for authority-widening effects."
+      ],
+      "stale_view_posture": "Health detail remains visible while repair actions fail closed on outdated inventory or topology basis.",
+      "recovery_and_resume_rules": [
+        "The selected link item remains anchored through refresh and export eligibility checks.",
+        "Repair posture cannot silently downgrade mismatch severity or merge categories after resume."
+      ],
+      "focus_return_rule": "Return to the selected authority-link row or detail expansion trigger.",
+      "selector_profile": "GOVERNANCE_SEMANTIC_SELECTORS_V1",
+      "responsive_fallback": "Inventory rows collapse into a tray while detail and health timeline stay accessible in the canvas.",
+      "components": [
+        "AuthorityLinkInventory",
+        "AuthorityLinkDetail",
+        "BindingHealthTimeline",
+        "AuditSidcar"
+      ],
+      "notes": "Authority link health categories stay deliberately distinct to prevent semantic flattening in later UI work.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/admin_governance_console_architecture.md",
+          "source_heading_or_logical_block": "4.4 `/governance/authority-links`",
+          "rationale": "The route semantics are explicit."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "Governance read surfaces",
+          "rationale": "The authority-links endpoint is explicit."
+        }
+      ]
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "AUDIT_SIDECAR",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "source_file": "Algorithm/admin_governance_console_architecture.md",
+      "source_heading_or_logical_block": "2. Profile boundary and shell contract / 4. Information architecture and route map / 6. Shared interaction and mutation rules / 8. Accessibility and responsive requirements",
+      "route_or_scene_key": "governance_retention_policies",
+      "title": "Retention policy matrix",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/governance/retention/policies",
+      "actor_profile": "TENANT_ADMIN | APPROVER | AUDITOR",
+      "object_ownership": "RetentionGovernanceFrame",
+      "dominant_question": "Which retention minimums and exceptions govern this tenant right now?",
+      "dominant_action": "Review or stage policy changes with explicit impact preview and legal hold interaction.",
+      "read_models": [
+        "RetentionGovernanceFrame"
+      ],
+      "read_surfaces": [
+        "GET /v1/governance/tenants/{tenant_id}/retention"
+      ],
+      "commands": [
+        "GOVERNANCE_STAGE_RETENTION_POLICY_CHANGE"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "durable command receipts",
+        "retention frame refresh"
+      ],
+      "visibility_lanes": [
+        "MASKED_GOVERNANCE"
+      ],
+      "artifact_posture": "Policy matrix and impact preview remain paired; export follows the active filtered slice only.",
+      "step_up_checkpoints": [
+        "Lowering retention minimums or widening erase posture remains step-up and approval guarded."
+      ],
+      "stale_view_posture": "The matrix remains visible while commit actions fail closed on drifted retention frames.",
+      "recovery_and_resume_rules": [
+        "Retention focus order is normalized from the shared governance shell law plus route-local workspaces.",
+        "Selected policy row and impact preview remain attached under responsive collapse."
+      ],
+      "focus_return_rule": "Return to the selected policy row or impact preview toggle.",
+      "selector_profile": "GOVERNANCE_SEMANTIC_SELECTORS_V1",
+      "responsive_fallback": "Policy matrix compacts before impact preview disappears; sidecar redocks beneath the canvas.",
+      "components": [
+        "RetentionPolicyMatrix",
+        "RetentionImpactPreview",
+        "ChangeBasket",
+        "AuditSidcar"
+      ],
+      "notes": "This route uses a normalized landmark order because the contract names the workspace more strongly than exact landmark sequencing.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/admin_governance_console_architecture.md",
+          "source_heading_or_logical_block": "4.5 `/governance/retention`",
+          "rationale": "Retention routes are explicit."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "Governance read surfaces",
+          "rationale": "The retention endpoint is explicit."
+        }
+      ]
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "AUDIT_SIDECAR",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "source_file": "Algorithm/admin_governance_console_architecture.md",
+      "source_heading_or_logical_block": "2. Profile boundary and shell contract / 4. Information architecture and route map / 6. Shared interaction and mutation rules / 8. Accessibility and responsive requirements",
+      "route_or_scene_key": "governance_retention_legal_holds",
+      "title": "Legal hold register",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/governance/retention/legal-holds",
+      "actor_profile": "TENANT_ADMIN | APPROVER | AUDITOR",
+      "object_ownership": "RetentionGovernanceFrame / legal-hold slice",
+      "dominant_question": "Which legal holds are active, and what do they block or override?",
+      "dominant_action": "Open or release legal holds with explicit downstream impact in view.",
+      "read_models": [
+        "RetentionGovernanceFrame"
+      ],
+      "read_surfaces": [
+        "GET /v1/governance/tenants/{tenant_id}/retention"
+      ],
+      "commands": [
+        "GOVERNANCE_OPEN_LEGAL_HOLD",
+        "GOVERNANCE_RELEASE_LEGAL_HOLD"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "durable command receipts",
+        "retention frame refresh"
+      ],
+      "visibility_lanes": [
+        "MASKED_GOVERNANCE"
+      ],
+      "artifact_posture": "Hold records, policy impacts, and downstream constraints remain visible together.",
+      "step_up_checkpoints": [
+        "Opening or releasing a hold requires inline step-up and approval posture when policy demands it."
+      ],
+      "stale_view_posture": "Register entries remain visible but irreversible actions fail closed on stale retention basis.",
+      "recovery_and_resume_rules": [
+        "Legal hold selection and impact preview remain anchored under layout collapse.",
+        "Hold state is never inferred from a policy matrix alone; the register stays authoritative."
+      ],
+      "focus_return_rule": "Return to the legal-hold row or impact preview trigger.",
+      "selector_profile": "GOVERNANCE_SEMANTIC_SELECTORS_V1",
+      "responsive_fallback": "Register stays primary; impact preview and audit sidecar redock beneath the main workspace on narrow widths.",
+      "components": [
+        "LegalHoldRegister",
+        "RetentionImpactPreview",
+        "AuditSidcar"
+      ],
+      "notes": "Legal holds remain explicitly distinct from broader retention policy edits.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/admin_governance_console_architecture.md",
+          "source_heading_or_logical_block": "4.5 `/governance/retention/legal-holds`",
+          "rationale": "The route is explicit."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "Governance read surfaces",
+          "rationale": "The retention frame is the northbound source for legal-hold slices."
+        }
+      ]
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "AUDIT_SIDECAR",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "source_file": "Algorithm/admin_governance_console_architecture.md",
+      "source_heading_or_logical_block": "2. Profile boundary and shell contract / 4. Information architecture and route map / 6. Shared interaction and mutation rules / 8. Accessibility and responsive requirements",
+      "route_or_scene_key": "governance_retention_erasure",
+      "title": "Erasure queue",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/governance/retention/erasure",
+      "actor_profile": "TENANT_ADMIN | APPROVER | AUDITOR",
+      "object_ownership": "RetentionGovernanceFrame / erasure slice",
+      "dominant_question": "Which erasure requests are eligible, blocked, or irreversible?",
+      "dominant_action": "Inspect and approve erasure only when the current retention frame and legal-hold state permit it.",
+      "read_models": [
+        "RetentionGovernanceFrame"
+      ],
+      "read_surfaces": [
+        "GET /v1/governance/tenants/{tenant_id}/retention"
+      ],
+      "commands": [
+        "GOVERNANCE_STAGE_ERASURE_DECISION",
+        "GOVERNANCE_APPROVE_ERASURE"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "durable command receipts",
+        "retention frame refresh"
+      ],
+      "visibility_lanes": [
+        "MASKED_GOVERNANCE"
+      ],
+      "artifact_posture": "Eligibility, blocking holds, and irreversible consequences are all first-class rows, not hidden edge cases.",
+      "step_up_checkpoints": [
+        "Irreversible erasure actions are never accepted from a stale governance view."
+      ],
+      "stale_view_posture": "Queue context remains visible while erase actions fail closed with typed stale-view errors.",
+      "recovery_and_resume_rules": [
+        "Selected erasure row and blocker detail stay mounted across refresh and back.",
+        "The route preserves the same filtered slice for export and receipt review."
+      ],
+      "focus_return_rule": "Return to the erasure queue row or blocker explanation anchor.",
+      "selector_profile": "GOVERNANCE_SEMANTIC_SELECTORS_V1",
+      "responsive_fallback": "Queue remains first; blocker detail redocks beneath it before any loss of semantic meaning.",
+      "components": [
+        "ErasureQueue",
+        "RetentionImpactPreview",
+        "AuditSidcar"
+      ],
+      "notes": "This route is the clearest example of the governance stale-view hard stop on irreversible action.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/admin_governance_console_architecture.md",
+          "source_heading_or_logical_block": "4.5 `/governance/retention/erasure`",
+          "rationale": "The route is explicit."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "Governance stale-view rules",
+          "rationale": "Unmasked audit export and irreversible retention actions cannot commit from stale views."
+        }
+      ]
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "embodiment": "WEB",
+      "promoted_support_region": "AUDIT_SIDECAR",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "source_file": "Algorithm/admin_governance_console_architecture.md",
+      "source_heading_or_logical_block": "2. Profile boundary and shell contract / 4. Information architecture and route map / 6. Shared interaction and mutation rules / 8. Accessibility and responsive requirements",
+      "route_or_scene_key": "governance_audit",
+      "title": "Audit investigation workbench",
+      "route_or_scene_kind": "route",
+      "route_pattern": "/governance/audit",
+      "actor_profile": "AUDITOR | SUPPORT_OPERATOR | TENANT_ADMIN",
+      "object_ownership": "AuditInvestigationFrame",
+      "dominant_question": "What happened, when, why, and what evidence is export-eligible now?",
+      "dominant_action": "Investigate append-only event slices and compare diffs without altering the audit trail.",
+      "read_models": [
+        "AuditInvestigationFrame"
+      ],
+      "read_surfaces": [
+        "GET /v1/governance/tenants/{tenant_id}/audit-investigations"
+      ],
+      "commands": [
+        "GOVERNANCE_EXPORT_AUDIT_SLICE"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "append-only event refresh",
+        "durable command receipts"
+      ],
+      "visibility_lanes": [
+        "MASKED_GOVERNANCE",
+        "audit-retention-visible receipts"
+      ],
+      "artifact_posture": "Append-only event slices, correlation neighborhoods, and export eligibility remain explicit and non-destructive.",
+      "step_up_checkpoints": [
+        "Export remains governed by the active filtered slice and masking/export posture."
+      ],
+      "stale_view_posture": "Investigation frames stay visible while export or follow-on actions fail closed when masking or basis drift.",
+      "recovery_and_resume_rules": [
+        "Selected event, diff inspector state, and export eligibility panel survive refresh and responsive collapse.",
+        "Audit slices remain append-only and never reorder into heuristic summaries."
+      ],
+      "focus_return_rule": "Return to the selected event row or export eligibility trigger.",
+      "selector_profile": "GOVERNANCE_SEMANTIC_SELECTORS_V1",
+      "responsive_fallback": "The audit sidecar redocks but remains visible before export posture is obscured.",
+      "components": [
+        "AuditInvestigationWorkbench",
+        "AuditTape",
+        "EventDiffInspector",
+        "ExportEligibilityPanel",
+        "AuditSidcar"
+      ],
+      "notes": "This route is read-heavy and append-only, but still governed by the same return-target and support-region laws.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/admin_governance_console_architecture.md",
+          "source_heading_or_logical_block": "4.6 `/governance/audit`",
+          "rationale": "Audit route purpose is explicit."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "Governance read surfaces",
+          "rationale": "The audit-investigations endpoint is explicit."
+        }
+      ]
+    },
+    {
+      "surface_family": "NATIVE_OPERATOR",
+      "shell_family": "CALM_SHELL",
+      "embodiment": "NATIVE_MACOS",
+      "promoted_support_region": "TRAILING_INSPECTOR",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "scene_identity",
+        "canonical_object_ref",
+        "preview_subject_ref_or_null"
+      ],
+      "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+      "source_heading_or_logical_block": "4. Platform translation map / 5. Preferred window and scene architecture / 6. Data flow and synchronization model / 8. Persistence model",
+      "route_or_scene_key": "native_primary_manifest_scene",
+      "title": "Primary manifest scene",
+      "route_or_scene_kind": "scene",
+      "route_pattern": "NativeOperatorWorkspaceScene(manifest)",
+      "actor_profile": "STAFF_OPERATOR",
+      "object_ownership": "DecisionBundle + manifest experience state",
+      "dominant_question": "What is the current manifest decision state, and what support detail belongs in the inspector or a detached window?",
+      "dominant_action": "Operate on the same manifest object through sidebar, canvas, and inspector without violating browser truth.",
+      "read_models": [
+        "DecisionBundle",
+        "ExperienceCursor",
+        "WorkspaceSnapshot (linked focus when present)"
+      ],
+      "read_surfaces": [
+        "Manifest experience snapshot",
+        "Manifest experience stream",
+        "Local cache hydration envelope"
+      ],
+      "commands": [
+        "TOGGLE_SIDEBAR",
+        "TOGGLE_INSPECTOR",
+        "FOCUS_PRIMARY_CANVAS",
+        "OPEN_COMPARE_WINDOW",
+        "REFRESH_CURRENT_SCENE"
+      ],
+      "command_semantics": "LOCAL_NATIVE_COMMAND",
+      "stream_sources": [
+        "snapshot hydration",
+        "stream resume",
+        "manifest delta application"
+      ],
+      "visibility_lanes": [
+        "NATIVE_CACHED_NON_AUTHORITATIVE",
+        "CALM operator truth after northbound reconciliation"
+      ],
+      "artifact_posture": "Evidence preview, compare context, and pinned selections stay inside cache-safe native affordances.",
+      "step_up_checkpoints": [
+        "Native step-up still delegates to governed backend/browser flows rather than inventing offline legal commands."
+      ],
+      "stale_view_posture": "Previously valid content stays mounted while inspector actions fail closed and refresh/rebase becomes explicit.",
+      "recovery_and_resume_rules": [
+        "Scene restoration never reopens a manifest after tenant switch, privilege downgrade, or masking drift.",
+        "Resize or inspector collapse must preserve the same manifest scene identity, dominant question, and settlement posture."
+      ],
+      "focus_return_rule": "Return to the manifest sidebar row, canvas anchor, or inspector trigger that opened support detail.",
+      "selector_profile": "NATIVE_OPERATOR_SELECTORS_V1",
+      "responsive_fallback": "Sidebar and inspector collapse independently but the same object remains mounted in the center canvas.",
+      "components": [
+        "NativeLeadingSidebar",
+        "NativePrimaryCanvas",
+        "NativeTrailingInspector",
+        "NativeCommandSurface",
+        "NativeSceneRestoreCapsule"
+      ],
+      "notes": "Native primary scenes embody calm-shell law; they do not define a fourth shell family.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+          "source_heading_or_logical_block": "5. Preferred window and scene architecture",
+          "rationale": "The primary split-view scene is explicit."
+        },
+        {
+          "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+          "source_heading_or_logical_block": "Native secondary windows and preview subjects",
+          "rationale": "Scene legality is cache-bound."
+        }
+      ]
+    },
+    {
+      "surface_family": "NATIVE_OPERATOR",
+      "shell_family": "CALM_SHELL",
+      "embodiment": "NATIVE_MACOS",
+      "promoted_support_region": "TRAILING_INSPECTOR",
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "scene_identity",
+        "canonical_object_ref",
+        "preview_subject_ref_or_null"
+      ],
+      "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+      "source_heading_or_logical_block": "4. Platform translation map / 5. Preferred window and scene architecture / 6. Data flow and synchronization model / 8. Persistence model",
+      "route_or_scene_key": "native_primary_work_item_scene",
+      "title": "Primary work-item scene",
+      "route_or_scene_kind": "scene",
+      "route_pattern": "NativeOperatorWorkspaceScene(work-item)",
+      "actor_profile": "STAFF_OPERATOR",
+      "object_ownership": "WorkspaceSnapshot + WorkspaceCursor",
+      "dominant_question": "What is the safest next action on this work item from the native scene?",
+      "dominant_action": "Work the same collaboration object through native navigation, inspector, and shortcuts while honoring web truth.",
+      "read_models": [
+        "WorkspaceSnapshot",
+        "WorkspaceDelta",
+        "WorkspaceCursor"
+      ],
+      "read_surfaces": [
+        "Workspace snapshot",
+        "Workspace stream",
+        "Local cache hydration envelope"
+      ],
+      "commands": [
+        "TOGGLE_SIDEBAR",
+        "TOGGLE_INSPECTOR",
+        "FOCUS_SIDEBAR",
+        "FOCUS_PRIMARY_CANVAS",
+        "OPEN_AUDIT_WINDOW",
+        "OPEN_AUTHORITY_REVIEW_WINDOW",
+        "REFRESH_CURRENT_SCENE"
+      ],
+      "command_semantics": "LOCAL_NATIVE_COMMAND",
+      "stream_sources": [
+        "snapshot hydration",
+        "stream resume",
+        "workspace delta application"
+      ],
+      "visibility_lanes": [
+        "NATIVE_CACHED_NON_AUTHORITATIVE",
+        "CALM operator truth after northbound reconciliation"
+      ],
+      "artifact_posture": "Current workspace detail may be cached locally, but mutations still respect stale-view guards from the rendered surface.",
+      "step_up_checkpoints": [
+        "No blind offline legal commands; backend stale-view guards still bind every mutation-capable affordance."
+      ],
+      "stale_view_posture": "The scene stays mounted but any stale command lane downgrades inline to read-only or refresh-required posture.",
+      "recovery_and_resume_rules": [
+        "Reconnect and rebase must match the browser collaboration contract.",
+        "Scene restoration keeps the same work item, dominant question, and settlement posture when still legal."
+      ],
+      "focus_return_rule": "Return to the invoking sidebar item, selected module anchor, or inspector trigger.",
+      "selector_profile": "NATIVE_OPERATOR_SELECTORS_V1",
+      "responsive_fallback": "Scene collapses from three-pane to two-pane without replacing the work-item object or hiding the inspector law.",
+      "components": [
+        "NativeLeadingSidebar",
+        "NativePrimaryCanvas",
+        "NativeTrailingInspector",
+        "NativeCommandSurface",
+        "QuickLookPreview"
+      ],
+      "notes": "The work-item scene is the native mirror of the collaboration workspace, with native command affordances layered on top.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+          "source_heading_or_logical_block": "6. Data flow and synchronization model",
+          "rationale": "Work-item data flow and cursor/resume model are explicit."
+        },
+        {
+          "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+          "source_heading_or_logical_block": "14. Acceptance criteria",
+          "rationale": "Rebase, stale-view, and scene-identity parity are explicit acceptance criteria."
+        }
+      ]
+    },
+    {
+      "surface_family": "NATIVE_OPERATOR",
+      "shell_family": "CALM_SHELL",
+      "embodiment": "NATIVE_MACOS",
+      "promoted_support_region": "PARENT_BOUND_SUPPORT_WINDOW",
+      "command_transport": [
+        "LOCAL_NATIVE_COMMAND",
+        "POST /v1/commands when route-local actions are still legal",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "scene_identity",
+        "canonical_object_ref",
+        "preview_subject_ref_or_null"
+      ],
+      "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+      "source_heading_or_logical_block": "5. Preferred window and scene architecture / 8. Persistence model / 11. Security and runtime posture",
+      "route_or_scene_key": "native_secondary_compare_window",
+      "title": "Detached compare window",
+      "route_or_scene_kind": "scene",
+      "route_pattern": "NativeOperatorSecondaryWindowScene(compare)",
+      "actor_profile": "STAFF_OPERATOR",
+      "object_ownership": "Manifest lineage or drift comparison subject",
+      "dominant_question": "How do two evidence or decision states compare without collapsing the parent scene context?",
+      "dominant_action": "Inspect compare detail in a support-only window and return to the parent anchor.",
+      "read_models": [
+        "DecisionBundle comparison slice",
+        "preview_subject_ref_or_null"
+      ],
+      "read_surfaces": [
+        "Parent scene export to detached compare window",
+        "Local cached compare payload"
+      ],
+      "commands": [
+        "FOCUS_PRIMARY_CANVAS",
+        "CLOSE_SECONDARY_WINDOW",
+        "COPY_IDENTIFIERS"
+      ],
+      "command_semantics": "LOCAL_NATIVE_COMMAND",
+      "stream_sources": [
+        "parent scene refresh",
+        "detached window restore payload"
+      ],
+      "visibility_lanes": [
+        "NATIVE_CACHED_NON_AUTHORITATIVE"
+      ],
+      "artifact_posture": "Compare windows are support-only and cannot silently widen preview scope beyond the parent subject.",
+      "step_up_checkpoints": [],
+      "stale_view_posture": "If the parent scene basis drifts, the compare window becomes read-only or closes back to the parent anchor.",
+      "recovery_and_resume_rules": [
+        "Detached windows serialize as `NativeOperatorSecondaryWindowScene` with parent return metadata.",
+        "Preview subject legality is rechecked before scene restoration."
+      ],
+      "focus_return_rule": "Return to the exact parent compare trigger or selected evidence row.",
+      "selector_profile": "NATIVE_OPERATOR_SELECTORS_V1",
+      "responsive_fallback": "Secondary windows are native overlays; they do not collapse into browser route variants.",
+      "components": [
+        "NativeSecondaryWindowHeader",
+        "NativeCompareWindow",
+        "NativeSceneRestoreCapsule"
+      ],
+      "notes": "Secondary windows are deliberately support-only overlays, not new shell families.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+          "source_heading_or_logical_block": "5. Preferred window and scene architecture / Secondary windows",
+          "rationale": "Compare windows are explicit."
+        },
+        {
+          "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+          "source_heading_or_logical_block": "11. Security and runtime posture",
+          "rationale": "Preview subject legality and temp-artifact purges are explicit."
+        }
+      ]
+    },
+    {
+      "surface_family": "NATIVE_OPERATOR",
+      "shell_family": "CALM_SHELL",
+      "embodiment": "NATIVE_MACOS",
+      "promoted_support_region": "PARENT_BOUND_SUPPORT_WINDOW",
+      "command_transport": [
+        "LOCAL_NATIVE_COMMAND",
+        "POST /v1/commands when route-local actions are still legal",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "scene_identity",
+        "canonical_object_ref",
+        "preview_subject_ref_or_null"
+      ],
+      "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+      "source_heading_or_logical_block": "5. Preferred window and scene architecture / 8. Persistence model / 11. Security and runtime posture",
+      "route_or_scene_key": "native_secondary_audit_window",
+      "title": "Detached audit window",
+      "route_or_scene_kind": "scene",
+      "route_pattern": "NativeOperatorSecondaryWindowScene(audit)",
+      "actor_profile": "STAFF_OPERATOR | AUDITOR",
+      "object_ownership": "Audit trail and provenance slice",
+      "dominant_question": "What audit or provenance detail supports the current scene without displacing it?",
+      "dominant_action": "Inspect append-only audit detail in a parent-bound support window.",
+      "read_models": [
+        "Audit slice",
+        "preview_subject_ref_or_null"
+      ],
+      "read_surfaces": [
+        "Parent scene audit export",
+        "Local cached audit payload"
+      ],
+      "commands": [
+        "FOCUS_PRIMARY_CANVAS",
+        "CLOSE_SECONDARY_WINDOW",
+        "COPY_IDENTIFIERS"
+      ],
+      "command_semantics": "LOCAL_NATIVE_COMMAND",
+      "stream_sources": [
+        "parent scene refresh",
+        "detached window restore payload"
+      ],
+      "visibility_lanes": [
+        "NATIVE_CACHED_NON_AUTHORITATIVE"
+      ],
+      "artifact_posture": "Audit detail stays non-authoritative locally and must respect masking/export posture at open time and restore time.",
+      "step_up_checkpoints": [
+        "Export or print remains governed by masking/export posture before any helper opens."
+      ],
+      "stale_view_posture": "Audit content may remain visible but any export or print action fails closed on drift.",
+      "recovery_and_resume_rules": [
+        "Parent focus restoration is serialized and mandatory.",
+        "Quick Look, print, and export helpers purge temp artifacts if tenant, masking, or preview subject drift."
+      ],
+      "focus_return_rule": "Return to the parent audit trigger or provenance row anchor.",
+      "selector_profile": "NATIVE_OPERATOR_SELECTORS_V1",
+      "responsive_fallback": "Window remains detached rather than collapsing into a route-local drawer.",
+      "components": [
+        "NativeSecondaryWindowHeader",
+        "NativeAuditWindow",
+        "QuickLookPreview"
+      ],
+      "notes": "Audit windows inherit native support-only rules and masking-aware restore envelopes.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+          "source_heading_or_logical_block": "5. Preferred window and scene architecture / Secondary windows",
+          "rationale": "Audit windows are explicit."
+        },
+        {
+          "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+          "source_heading_or_logical_block": "11. Security and runtime posture",
+          "rationale": "Quick Look and export legality are explicit."
+        }
+      ]
+    },
+    {
+      "surface_family": "NATIVE_OPERATOR",
+      "shell_family": "CALM_SHELL",
+      "embodiment": "NATIVE_MACOS",
+      "promoted_support_region": "PARENT_BOUND_SUPPORT_WINDOW",
+      "command_transport": [
+        "LOCAL_NATIVE_COMMAND",
+        "POST /v1/commands when route-local actions are still legal",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "scene_identity",
+        "canonical_object_ref",
+        "preview_subject_ref_or_null"
+      ],
+      "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+      "source_heading_or_logical_block": "5. Preferred window and scene architecture / 8. Persistence model / 11. Security and runtime posture",
+      "route_or_scene_key": "native_secondary_filing_packet_window",
+      "title": "Detached filing-packet window",
+      "route_or_scene_kind": "scene",
+      "route_pattern": "NativeOperatorSecondaryWindowScene(filing-packet)",
+      "actor_profile": "STAFF_OPERATOR",
+      "object_ownership": "Filing packet review/export surface",
+      "dominant_question": "What packet material is ready for review, export, or print under current masking posture?",
+      "dominant_action": "Review or export packet detail in a support-only window tied to the invoking parent scene.",
+      "read_models": [
+        "Packet preview slice",
+        "preview_subject_ref_or_null"
+      ],
+      "read_surfaces": [
+        "Parent scene packet export",
+        "Local cached packet payload"
+      ],
+      "commands": [
+        "FOCUS_PRIMARY_CANVAS",
+        "CLOSE_SECONDARY_WINDOW",
+        "COPY_IDENTIFIERS"
+      ],
+      "command_semantics": "LOCAL_NATIVE_COMMAND",
+      "stream_sources": [
+        "parent scene refresh",
+        "detached window restore payload"
+      ],
+      "visibility_lanes": [
+        "NATIVE_CACHED_NON_AUTHORITATIVE"
+      ],
+      "artifact_posture": "Print-preview and export staging are governed helpers, not independent truth surfaces.",
+      "step_up_checkpoints": [
+        "Export and print helpers must recheck masking/export posture before opening or restoring."
+      ],
+      "stale_view_posture": "Packet preview may persist visually while export controls fail closed on drift.",
+      "recovery_and_resume_rules": [
+        "Temp artifacts purge when tenant, masking, or preview subject drift.",
+        "The secondary window must restore back to the exact parent packet trigger."
+      ],
+      "focus_return_rule": "Return to the parent packet review trigger or selected evidence row.",
+      "selector_profile": "NATIVE_OPERATOR_SELECTORS_V1",
+      "responsive_fallback": "Detached packet review stays a windowed support surface rather than a route mutation.",
+      "components": [
+        "NativeSecondaryWindowHeader",
+        "NativeFilingPacketWindow",
+        "QuickLookPreview"
+      ],
+      "notes": "Packet review is explicitly support-only and inherits the parent scene legality envelope.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+          "source_heading_or_logical_block": "5. Preferred window and scene architecture / Secondary windows",
+          "rationale": "Filing packet review/export windows are explicit."
+        },
+        {
+          "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+          "source_heading_or_logical_block": "11. Security and runtime posture",
+          "rationale": "Temporary artifact purge rules are explicit."
+        }
+      ]
+    },
+    {
+      "surface_family": "NATIVE_OPERATOR",
+      "shell_family": "CALM_SHELL",
+      "embodiment": "NATIVE_MACOS",
+      "promoted_support_region": "PARENT_BOUND_SUPPORT_WINDOW",
+      "command_transport": [
+        "LOCAL_NATIVE_COMMAND",
+        "POST /v1/commands when route-local actions are still legal",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "scene_identity",
+        "canonical_object_ref",
+        "preview_subject_ref_or_null"
+      ],
+      "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+      "source_heading_or_logical_block": "5. Preferred window and scene architecture / 8. Persistence model / 11. Security and runtime posture",
+      "route_or_scene_key": "native_secondary_authority_review_window",
+      "title": "Detached authority review window",
+      "route_or_scene_kind": "scene",
+      "route_pattern": "NativeOperatorSecondaryWindowScene(authority-review)",
+      "actor_profile": "STAFF_OPERATOR | SUPPORT_OPERATOR",
+      "object_ownership": "Authority interaction review slice",
+      "dominant_question": "What authority interaction detail belongs in support context without widening the parent scene?",
+      "dominant_action": "Inspect authority detail and return to the parent work surface.",
+      "read_models": [
+        "Authority interaction slice",
+        "preview_subject_ref_or_null"
+      ],
+      "read_surfaces": [
+        "Parent scene authority review export",
+        "Local cached authority payload"
+      ],
+      "commands": [
+        "FOCUS_PRIMARY_CANVAS",
+        "CLOSE_SECONDARY_WINDOW",
+        "COPY_IDENTIFIERS"
+      ],
+      "command_semantics": "LOCAL_NATIVE_COMMAND",
+      "stream_sources": [
+        "parent scene refresh",
+        "detached window restore payload"
+      ],
+      "visibility_lanes": [
+        "NATIVE_CACHED_NON_AUTHORITATIVE"
+      ],
+      "artifact_posture": "Authority review stays tied to the invoking object and cannot survive into a broader context.",
+      "step_up_checkpoints": [
+        "Any authority action still routes through governed backend or browser step-up paths."
+      ],
+      "stale_view_posture": "Authority review can stay visible, but action affordances fail closed when the parent basis drifts.",
+      "recovery_and_resume_rules": [
+        "Detached authority review restores to the exact parent invocation anchor.",
+        "Route legality is rechecked before the detached window resumes."
+      ],
+      "focus_return_rule": "Return to the parent authority review trigger.",
+      "selector_profile": "NATIVE_OPERATOR_SELECTORS_V1",
+      "responsive_fallback": "Detached authority review is never collapsed into a new browser route or shell family.",
+      "components": [
+        "NativeSecondaryWindowHeader",
+        "NativeAuthorityReviewWindow"
+      ],
+      "notes": "Authority review is support-only and parent-bound like the other detached native windows.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+          "source_heading_or_logical_block": "5. Preferred window and scene architecture / Secondary windows",
+          "rationale": "Authority interaction review is explicit."
+        },
+        {
+          "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+          "source_heading_or_logical_block": "7. Authentication and session strategy",
+          "rationale": "Authority work still uses governed browser/session flows when needed."
+        }
+      ]
+    },
+    {
+      "surface_family": "NATIVE_OPERATOR",
+      "shell_family": "CALM_SHELL",
+      "embodiment": "NATIVE_MACOS",
+      "promoted_support_region": "PARENT_BOUND_SUPPORT_WINDOW",
+      "command_transport": [
+        "LOCAL_NATIVE_COMMAND",
+        "POST /v1/commands when route-local actions are still legal",
+        "GET /v1/commands/{command_id}"
+      ],
+      "settlement_states": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ],
+      "recovery_postures": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "scene_identity",
+        "canonical_object_ref",
+        "preview_subject_ref_or_null"
+      ],
+      "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+      "source_heading_or_logical_block": "5. Preferred window and scene architecture / 8. Persistence model / 11. Security and runtime posture",
+      "route_or_scene_key": "native_auth_handoff_session",
+      "title": "Native browser auth handoff",
+      "route_or_scene_kind": "scene",
+      "route_pattern": "ASWebAuthenticationSession(authority or step-up)",
+      "actor_profile": "STAFF_OPERATOR | CLIENT_SIGNATORY",
+      "object_ownership": "Temporary external identity or authority handoff",
+      "dominant_question": "What external authority or identity task must complete before the parent scene can settle?",
+      "dominant_action": "Leave the native scene temporarily, complete the external authority step, and resume the parent scene with the same return target.",
+      "read_models": [
+        "Return target envelope",
+        "pending authority task binding"
+      ],
+      "read_surfaces": [
+        "ASWebAuthenticationSession callback",
+        "Parent scene refresh after settlement"
+      ],
+      "commands": [
+        "BEGIN_ASWEB_AUTH_SESSION",
+        "RESUME_PARENT_SCENE"
+      ],
+      "command_semantics": "LOCAL_NATIVE_AND_AUTH",
+      "stream_sources": [
+        "auth callback",
+        "parent scene refresh"
+      ],
+      "visibility_lanes": [
+        "NATIVE_CACHED_NON_AUTHORITATIVE",
+        "external authority truth"
+      ],
+      "artifact_posture": "No external handoff implies completion until the parent governed read model confirms settlement.",
+      "step_up_checkpoints": [
+        "The handoff itself is the step-up checkpoint and must serialize the parent return target."
+      ],
+      "stale_view_posture": "Parent scene remains preserved behind the handoff and resumes only after legality checks and fresh read settlement.",
+      "recovery_and_resume_rules": [
+        "Temporary external handoff is allowed but must restore the exact parent route/scene and focus anchor.",
+        "Tenant switch, privilege downgrade, or masking drift invalidate the return envelope rather than resuming heuristically."
+      ],
+      "focus_return_rule": "Return to the exact parent scene trigger that initiated the handoff.",
+      "selector_profile": "NATIVE_OPERATOR_SELECTORS_V1",
+      "responsive_fallback": "The handoff is external, not responsive; the parent scene remains preserved for resume or explicit invalidation.",
+      "components": [
+        "NativeAuthHandoff",
+        "NativeSceneRestoreCapsule"
+      ],
+      "notes": "External handoff is a temporary escape hatch, not a shell transition.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+          "source_heading_or_logical_block": "7. Authentication and session strategy",
+          "rationale": "ASWebAuthenticationSession is explicit."
+        },
+        {
+          "source_file": "Algorithm/frontend_shell_and_interaction_law.md",
+          "source_heading_or_logical_block": "2. Route continuity and shell stability",
+          "rationale": "External handoff must return to the same object and shell."
+        }
+      ]
+    }
+  ]
+}

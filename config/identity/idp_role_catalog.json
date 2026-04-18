@@ -1,0 +1,415 @@
+{
+  "schema_version": "1.0",
+  "policy_pack_id": "idp-role-catalog",
+  "provider_id": "oidc-external-idp-control-plane",
+  "provider_display_name": "OIDC External Identity Control Plane",
+  "provider_selection": {
+    "provider_selection_status": "PROVIDER_DEFAULT_APPLIED",
+    "provider_family": "OIDC_EXTERNAL_IDP",
+    "provider_vendor_adapter": "AUTH0_COMPATIBLE_DASHBOARD",
+    "provider_vendor_label": "Auth0-compatible external IdP",
+    "docs_urls": [
+      "https://auth0.com/docs/get-started/auth0-overview/create-tenants/set-up-multiple-environments",
+      "https://auth0.com/docs/manage-users/access-control/rbac",
+      "https://auth0.com/docs/secure/multi-factor-authentication/enable-mfa",
+      "https://auth0.com/docs/secure/multi-factor-authentication/step-up-authentication",
+      "https://auth0.com/docs/manage-users/sessions/configure-session-lifetime-settings",
+      "https://auth0.com/docs/manage-users/sessions/manage-user-sessions-with-auth0-management-api",
+      "https://auth0.com/docs/secure/tokens/refresh-tokens/configure-refresh-token-rotation",
+      "https://auth0.com/docs/get-started/applications/application-settings"
+    ],
+    "source_refs": [
+      {
+        "source_ref": "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
+        "rationale": "Taxat actor classes split client, tenant-human, service, and external boundaries before authorization is evaluated."
+      },
+      {
+        "source_ref": "Algorithm/actor_and_authority_model.md::L326[3.9_Policy_decision_model]",
+        "rationale": "The IdP may bootstrap authentication posture, but the engine still owns the final ALLOW or REQUIRE_STEP_UP or REQUIRE_APPROVAL or DENY decision."
+      },
+      {
+        "source_ref": "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+        "rationale": "Browser, native, machine, and limited-entry session channels must remain distinct and challenge rotation must invalidate stale pre-step-up state."
+      },
+      {
+        "source_ref": "https://auth0.com/docs/manage-users/access-control/rbac",
+        "rationale": "Current Auth0 RBAC guidance allows coarse role and permission assignment while keeping richer authorization in the application."
+      },
+      {
+        "source_ref": "https://auth0.com/docs/secure/multi-factor-authentication/step-up-authentication",
+        "rationale": "Current Auth0 step-up guidance relies on requested scopes and Actions rather than a single tenant-wide MFA toggle."
+      },
+      {
+        "source_ref": "https://auth0.com/docs/manage-users/sessions/configure-session-lifetime-settings",
+        "rationale": "Current Auth0 session guidance supports tenant defaults plus per-login overrides through Actions."
+      }
+    ]
+  },
+  "policy_version": "1.0",
+  "generated_on": "2026-04-18",
+  "summary": {
+    "role_count": 8,
+    "human_role_count": 6,
+    "service_role_count": 2
+  },
+  "roles": [
+    {
+      "role_ref": "role_portal_user",
+      "provider_role_name": "Portal User",
+      "label": "Portal user",
+      "actor_classes": [
+        "CLIENT_VIEWER",
+        "CLIENT_CONTRIBUTOR"
+      ],
+      "allowed_surface_families": [
+        "PORTAL_BROWSER",
+        "BROWSER_LIMITED_ENTRY",
+        "BROWSER_OR_MOBILE_TRANSFER"
+      ],
+      "baseline_scope_refs": [
+        "scope.portal.read",
+        "scope.portal.contribute"
+      ],
+      "requestable_scope_refs": [],
+      "assignment_posture": "HUMAN_MEMBERSHIP_ROLE",
+      "engine_owned_dimensions": [
+        "delegation_basis",
+        "client_scope",
+        "partition_scope_refs",
+        "authority_link_state",
+        "authority_of_record_outcome",
+        "approval_capabilities",
+        "masking_posture",
+        "policy_snapshot_hash"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
+          "rationale": "Portal viewer and contributor are distinct actor classes, but both remain coarse client-portal entry postures at the IdP boundary."
+        },
+        {
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L29[portal_actor_classes]",
+          "rationale": "Portal read and contribution capabilities are route-level affordances, not legal delegation truth."
+        }
+      ],
+      "notes": [
+        "This role never proves delegation to a specific client or authority scope."
+      ]
+    },
+    {
+      "role_ref": "role_portal_signatory",
+      "provider_role_name": "Portal Signatory",
+      "label": "Portal signatory",
+      "actor_classes": [
+        "CLIENT_SIGNATORY"
+      ],
+      "allowed_surface_families": [
+        "PORTAL_BROWSER",
+        "BROWSER_LIMITED_ENTRY"
+      ],
+      "baseline_scope_refs": [
+        "scope.portal.read",
+        "scope.portal.signatory.base"
+      ],
+      "requestable_scope_refs": [
+        "scope.elevated.client_signoff"
+      ],
+      "assignment_posture": "HUMAN_MEMBERSHIP_ROLE",
+      "engine_owned_dimensions": [
+        "delegation_basis",
+        "client_scope",
+        "partition_scope_refs",
+        "authority_link_state",
+        "authority_of_record_outcome",
+        "approval_capabilities",
+        "masking_posture",
+        "policy_snapshot_hash"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::L251[client_signatory_step_up_rule]",
+          "rationale": "CLIENT_SIGNATORY remains separate because sign-off may require STEP_UP_VERIFIED assurance."
+        },
+        {
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L340[Approval_and_sign-off_flow]",
+          "rationale": "Portal sign-off stays on the same approval-pack route and the IdP role cannot decide declaration legality on its own."
+        }
+      ],
+      "notes": [
+        "This role is necessary for coarse signatory entry posture, but the engine still validates frozen approval-pack state and declaration basis."
+      ]
+    },
+    {
+      "role_ref": "role_operator_workspace",
+      "provider_role_name": "Operator Workspace",
+      "label": "Operator workspace",
+      "actor_classes": [
+        "PREPARER",
+        "REVIEWER"
+      ],
+      "allowed_surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "baseline_scope_refs": [
+        "scope.operator.workspace",
+        "scope.audit.read.masked"
+      ],
+      "requestable_scope_refs": [
+        "scope.elevated.authority_link"
+      ],
+      "assignment_posture": "HUMAN_MEMBERSHIP_ROLE",
+      "engine_owned_dimensions": [
+        "delegation_basis",
+        "client_scope",
+        "partition_scope_refs",
+        "authority_link_state",
+        "authority_of_record_outcome",
+        "approval_capabilities",
+        "masking_posture",
+        "policy_snapshot_hash"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
+          "rationale": "PREPARER and REVIEWER are tenant-side humans with shared operator-shell entry posture but different server-side legality later on."
+        },
+        {
+          "source_ref": "Algorithm/macos_native_operator_workspace_blueprint.md::L372[7._Authentication_and_session_strategy]",
+          "rationale": "The operator workspace spans browser and native shells while keeping the legal session model server-authoritative."
+        }
+      ],
+      "notes": [
+        "This role does not automatically grant unmasked export, approval, or retention exception authority."
+      ]
+    },
+    {
+      "role_ref": "role_governance_admin",
+      "provider_role_name": "Governance Admin",
+      "label": "Governance admin",
+      "actor_classes": [
+        "TENANT_ADMIN",
+        "APPROVER"
+      ],
+      "allowed_surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "baseline_scope_refs": [
+        "scope.operator.workspace",
+        "scope.governance.read"
+      ],
+      "requestable_scope_refs": [
+        "scope.elevated.authority_link",
+        "scope.elevated.override_approval",
+        "scope.elevated.submit",
+        "scope.elevated.unmasked_export",
+        "scope.elevated.config_approval",
+        "scope.elevated.retention_exception",
+        "scope.elevated.governance_mutation"
+      ],
+      "assignment_posture": "HUMAN_MEMBERSHIP_ROLE",
+      "engine_owned_dimensions": [
+        "delegation_basis",
+        "client_scope",
+        "partition_scope_refs",
+        "authority_link_state",
+        "authority_of_record_outcome",
+        "approval_capabilities",
+        "masking_posture",
+        "policy_snapshot_hash"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
+          "rationale": "Governance admin posture covers the human actors that can legitimately request elevated authority-link, override, config, submission, or retention actions."
+        },
+        {
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L380[3.1_Governance_command_families]",
+          "rationale": "Governance commands that widen access or change retention posture are step-up or approval worthy and must remain explicit."
+        }
+      ],
+      "notes": [
+        "A governance admin role is still only a coarse entry point. The engine decides the exact action tuple and bounded mutation legality."
+      ]
+    },
+    {
+      "role_ref": "role_audit_review",
+      "provider_role_name": "Audit Review",
+      "label": "Audit review",
+      "actor_classes": [
+        "AUDITOR"
+      ],
+      "allowed_surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "baseline_scope_refs": [
+        "scope.audit.read.masked"
+      ],
+      "requestable_scope_refs": [
+        "scope.elevated.unmasked_export"
+      ],
+      "assignment_posture": "HUMAN_MEMBERSHIP_ROLE",
+      "engine_owned_dimensions": [
+        "delegation_basis",
+        "client_scope",
+        "partition_scope_refs",
+        "authority_link_state",
+        "authority_of_record_outcome",
+        "approval_capabilities",
+        "masking_posture",
+        "policy_snapshot_hash"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
+          "rationale": "AUDITOR is a distinct tenant-side human actor class and should not inherit governance mutation scopes by default."
+        },
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
+          "rationale": "Unmasked provenance export is elevated even for auditors."
+        }
+      ],
+      "notes": [
+        "Unmasked export remains elevated and request-scoped rather than baseline."
+      ]
+    },
+    {
+      "role_ref": "role_support_operator",
+      "provider_role_name": "Support Operator",
+      "label": "Support operator",
+      "actor_classes": [
+        "SUPPORT_OPERATOR"
+      ],
+      "allowed_surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "baseline_scope_refs": [
+        "scope.support.workspace",
+        "scope.audit.read.masked"
+      ],
+      "requestable_scope_refs": [
+        "scope.elevated.out_of_band_annotation",
+        "scope.elevated.unmasked_export"
+      ],
+      "assignment_posture": "HUMAN_MEMBERSHIP_ROLE",
+      "engine_owned_dimensions": [
+        "delegation_basis",
+        "client_scope",
+        "partition_scope_refs",
+        "authority_link_state",
+        "authority_of_record_outcome",
+        "approval_capabilities",
+        "masking_posture",
+        "policy_snapshot_hash"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
+          "rationale": "SUPPORT_OPERATOR is a separate human operator class and should not be collapsed into governance admin."
+        },
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::L539[3.12_Authority_precedence_rules]",
+          "rationale": "Out-of-band annotations stay distinct from authority truth and therefore require their own bounded elevated scope."
+        }
+      ],
+      "notes": [
+        "Support posture does not authorize silent truth rewrites or retention mutation."
+      ]
+    },
+    {
+      "role_ref": "role_service_runtime",
+      "provider_role_name": "Service Runtime",
+      "label": "Service runtime",
+      "actor_classes": [
+        "SCHEDULER_SERVICE",
+        "CONNECTOR_SERVICE",
+        "NORMALIZER_SERVICE",
+        "COMPUTE_SERVICE",
+        "GRAPH_SERVICE",
+        "FILING_SERVICE",
+        "REPLAY_SERVICE",
+        "RETENTION_SERVICE",
+        "NOTIFICATION_SERVICE"
+      ],
+      "allowed_surface_families": [
+        "API_AUTOMATION"
+      ],
+      "baseline_scope_refs": [
+        "scope.machine.runtime"
+      ],
+      "requestable_scope_refs": [],
+      "assignment_posture": "SERVICE_CLIENT_GRANT_ROLE",
+      "engine_owned_dimensions": [
+        "delegation_basis",
+        "client_scope",
+        "partition_scope_refs",
+        "authority_link_state",
+        "authority_of_record_outcome",
+        "approval_capabilities",
+        "masking_posture",
+        "policy_snapshot_hash"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::L555[3.13_Machine-actor_rules]",
+          "rationale": "Service principals remain first-class actors but never satisfy human step-up or approval paths."
+        },
+        {
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+          "rationale": "Machine automation uses short-lived non-browser credentials and must not masquerade as an interactive session."
+        }
+      ],
+      "notes": [
+        "Runtime service roles never imply human delegation or signatory legality."
+      ]
+    },
+    {
+      "role_ref": "role_provider_bootstrap_service",
+      "provider_role_name": "Provider Bootstrap Service",
+      "label": "Provider bootstrap service",
+      "actor_classes": [
+        "CONNECTOR_SERVICE"
+      ],
+      "allowed_surface_families": [
+        "API_AUTOMATION"
+      ],
+      "baseline_scope_refs": [
+        "scope.idp.bootstrap.manage"
+      ],
+      "requestable_scope_refs": [],
+      "assignment_posture": "SERVICE_CLIENT_GRANT_ROLE",
+      "engine_owned_dimensions": [
+        "delegation_basis",
+        "client_scope",
+        "partition_scope_refs",
+        "authority_link_state",
+        "authority_of_record_outcome",
+        "approval_capabilities",
+        "masking_posture",
+        "policy_snapshot_hash"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "PROMPT/Checklist.md::L72[pc_0039]",
+          "rationale": "The provider bootstrap boundary already exists as a distinct machine client family and needs its own coarse management scope."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L50[3._Secret_key_and_token_handling]",
+          "rationale": "IdP admin material must stay separated from general runtime application state."
+        }
+      ],
+      "notes": [
+        "This role exists only for controlled provisioning and provider-management automation, not product-runtime access."
+      ]
+    }
+  ],
+  "typed_gaps": [
+    "The shared operating contract shared_operating_contract_0038_to_0045.md was absent, so the pack grounded itself directly in the named algorithm contracts, prior card outputs, and current Auth0 documentation."
+  ],
+  "notes": [
+    "Roles stay intentionally coarse so the IdP never becomes the place where Taxat decides delegation, authority-link truth, or authority-of-record outcome."
+  ]
+}

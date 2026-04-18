@@ -1,0 +1,342 @@
+{
+  "schema_version": "1.0",
+  "matrix_id": "idp-session-policy-matrix",
+  "provider_id": "oidc-external-idp-control-plane",
+  "provider_display_name": "OIDC External Identity Control Plane",
+  "provider_selection": {
+    "provider_selection_status": "PROVIDER_DEFAULT_APPLIED",
+    "provider_family": "OIDC_EXTERNAL_IDP",
+    "provider_vendor_adapter": "AUTH0_COMPATIBLE_DASHBOARD",
+    "provider_vendor_label": "Auth0-compatible external IdP",
+    "docs_urls": [
+      "https://auth0.com/docs/get-started/auth0-overview/create-tenants/set-up-multiple-environments",
+      "https://auth0.com/docs/manage-users/access-control/rbac",
+      "https://auth0.com/docs/secure/multi-factor-authentication/enable-mfa",
+      "https://auth0.com/docs/secure/multi-factor-authentication/step-up-authentication",
+      "https://auth0.com/docs/manage-users/sessions/configure-session-lifetime-settings",
+      "https://auth0.com/docs/manage-users/sessions/manage-user-sessions-with-auth0-management-api",
+      "https://auth0.com/docs/secure/tokens/refresh-tokens/configure-refresh-token-rotation",
+      "https://auth0.com/docs/get-started/applications/application-settings"
+    ],
+    "source_refs": [
+      {
+        "source_ref": "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
+        "rationale": "Taxat actor classes split client, tenant-human, service, and external boundaries before authorization is evaluated."
+      },
+      {
+        "source_ref": "Algorithm/actor_and_authority_model.md::L326[3.9_Policy_decision_model]",
+        "rationale": "The IdP may bootstrap authentication posture, but the engine still owns the final ALLOW or REQUIRE_STEP_UP or REQUIRE_APPROVAL or DENY decision."
+      },
+      {
+        "source_ref": "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+        "rationale": "Browser, native, machine, and limited-entry session channels must remain distinct and challenge rotation must invalidate stale pre-step-up state."
+      },
+      {
+        "source_ref": "https://auth0.com/docs/manage-users/access-control/rbac",
+        "rationale": "Current Auth0 RBAC guidance allows coarse role and permission assignment while keeping richer authorization in the application."
+      },
+      {
+        "source_ref": "https://auth0.com/docs/secure/multi-factor-authentication/step-up-authentication",
+        "rationale": "Current Auth0 step-up guidance relies on requested scopes and Actions rather than a single tenant-wide MFA toggle."
+      },
+      {
+        "source_ref": "https://auth0.com/docs/manage-users/sessions/configure-session-lifetime-settings",
+        "rationale": "Current Auth0 session guidance supports tenant defaults plus per-login overrides through Actions."
+      }
+    ]
+  },
+  "policy_version": "1.0",
+  "generated_on": "2026-04-18",
+  "summary": {
+    "session_profile_count": 6,
+    "interactive_human_profiles": 3,
+    "non_interactive_or_limited_profiles": 3
+  },
+  "session_profiles": [
+    {
+      "session_profile_ref": "session.browser.operator",
+      "flow_id": "browser_operator_interactive",
+      "label": "Browser operator session",
+      "channel": "BROWSER",
+      "actor_classes": [
+        "TENANT_ADMIN",
+        "PREPARER",
+        "REVIEWER",
+        "APPROVER",
+        "AUDITOR",
+        "SUPPORT_OPERATOR"
+      ],
+      "allowed_surface_families": [
+        "OPERATOR_BROWSER"
+      ],
+      "session_carrier": "Secure HttpOnly same-site session cookie plus anti-CSRF binding.",
+      "auth0_application_types": [
+        "REGULAR_WEB_APPLICATION"
+      ],
+      "auth0_cookie_mode": "NON_PERSISTENT",
+      "default_idle_timeout_hours": 4,
+      "default_absolute_timeout_hours": 12,
+      "action_idle_timeout_hours": 4,
+      "action_absolute_timeout_hours": 12,
+      "refresh_token_rotation": "DISABLED",
+      "refresh_token_lifetime_seconds": null,
+      "refresh_token_leeway_seconds": null,
+      "offline_access_allowed": false,
+      "base_authn_level": "BASIC",
+      "escalated_authn_level": "STEP_UP",
+      "post_step_up_rotation": true,
+      "invalidation_events": [
+        "STEP_UP_COMPLETED",
+        "SESSION_REVOKED",
+        "TENANT_SWITCH",
+        "LOGOUT"
+      ],
+      "entry_posture": "OIDC/OAuth human sign-in through the external IdP, then server-mediated interactive session resolution.",
+      "storage_boundary": "Backend session store plus browser-safe derivable cache only.",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L30[2._Identity_session_and_command_trust]",
+        "https://auth0.com/docs/manage-users/sessions/configure-session-lifetime-settings"
+      ],
+      "notes": [
+        "Operator browser posture defaults to non-persistent cookies and no browser-facing refresh tokens."
+      ]
+    },
+    {
+      "session_profile_ref": "session.browser.portal",
+      "flow_id": "browser_portal_user_interactive",
+      "label": "Browser portal session",
+      "channel": "BROWSER",
+      "actor_classes": [
+        "CLIENT_VIEWER",
+        "CLIENT_CONTRIBUTOR",
+        "CLIENT_SIGNATORY"
+      ],
+      "allowed_surface_families": [
+        "PORTAL_BROWSER"
+      ],
+      "session_carrier": "Secure browser session cookie plus anti-CSRF binding after authenticated upgrade.",
+      "auth0_application_types": [
+        "REGULAR_WEB_APPLICATION"
+      ],
+      "auth0_cookie_mode": "PERSISTENT",
+      "default_idle_timeout_hours": 8,
+      "default_absolute_timeout_hours": 48,
+      "action_idle_timeout_hours": 8,
+      "action_absolute_timeout_hours": 48,
+      "refresh_token_rotation": "DISABLED",
+      "refresh_token_lifetime_seconds": null,
+      "refresh_token_leeway_seconds": null,
+      "offline_access_allowed": false,
+      "base_authn_level": "BASIC",
+      "escalated_authn_level": "STEP_UP",
+      "post_step_up_rotation": true,
+      "invalidation_events": [
+        "STEP_UP_COMPLETED",
+        "DEEP_LINK_OR_INVITE_EXPIRY",
+        "STALE_VIEW_REBASE",
+        "SESSION_REVOKED",
+        "LOGOUT"
+      ],
+      "entry_posture": "Normal sign-in or post-invite upgrade into a fully authenticated portal session bound to one principal class and masking posture.",
+      "storage_boundary": "Server-authored session plus client-safe resumability only.",
+      "source_refs": [
+        "Algorithm/customer_client_portal_experience_contract.md::L340[Approval_and_sign-off_flow]",
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+        "https://auth0.com/docs/manage-users/sessions/configure-session-lifetime-settings"
+      ],
+      "notes": [
+        "Portal sessions stay persistent but bounded; long-lived browser refresh tokens are intentionally not enabled."
+      ]
+    },
+    {
+      "session_profile_ref": "session.native.operator",
+      "flow_id": "native_macos_operator_interactive",
+      "label": "Native macOS operator session",
+      "channel": "NATIVE_MACOS",
+      "actor_classes": [
+        "TENANT_ADMIN",
+        "PREPARER",
+        "REVIEWER",
+        "APPROVER",
+        "AUDITOR",
+        "SUPPORT_OPERATOR"
+      ],
+      "allowed_surface_families": [
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "session_carrier": "ASWebAuthenticationSession or equivalent plus Keychain-backed product-session artifacts.",
+      "auth0_application_types": [
+        "NATIVE_APPLICATION"
+      ],
+      "auth0_cookie_mode": "NON_PERSISTENT",
+      "default_idle_timeout_hours": 8,
+      "default_absolute_timeout_hours": 24,
+      "action_idle_timeout_hours": 8,
+      "action_absolute_timeout_hours": 24,
+      "refresh_token_rotation": "ROTATING_EXPIRING",
+      "refresh_token_lifetime_seconds": 1209600,
+      "refresh_token_leeway_seconds": 3,
+      "offline_access_allowed": true,
+      "base_authn_level": "BASIC",
+      "escalated_authn_level": "STEP_UP",
+      "post_step_up_rotation": true,
+      "invalidation_events": [
+        "STEP_UP_COMPLETED",
+        "SESSION_REVOKED",
+        "TENANT_SWITCH",
+        "STALE_VIEW_REBASE"
+      ],
+      "entry_posture": "System-browser or platform auth-session sign-in only; no embedded webview primary login.",
+      "storage_boundary": "Keychain and OS-protected tenant-bound cache only.",
+      "source_refs": [
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L372[7._Authentication_and_session_strategy]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L473[11._Security_and_runtime_posture_for_the_desktop_client]",
+        "https://auth0.com/docs/secure/tokens/refresh-tokens/configure-refresh-token-rotation"
+      ],
+      "notes": [
+        "Native public clients use rotating refresh tokens with expiring lifetime and reuse detection."
+      ]
+    },
+    {
+      "session_profile_ref": "session.machine.runtime",
+      "flow_id": "machine_automation_client",
+      "label": "Machine automation client",
+      "channel": "API_AUTOMATION",
+      "actor_classes": [
+        "SCHEDULER_SERVICE",
+        "CONNECTOR_SERVICE",
+        "NORMALIZER_SERVICE",
+        "COMPUTE_SERVICE",
+        "GRAPH_SERVICE",
+        "FILING_SERVICE",
+        "REPLAY_SERVICE",
+        "RETENTION_SERVICE",
+        "NOTIFICATION_SERVICE"
+      ],
+      "allowed_surface_families": [
+        "API_AUTOMATION"
+      ],
+      "session_carrier": "Short-lived machine credential plus explicit command_id and idempotency_key.",
+      "auth0_application_types": [
+        "MACHINE_TO_MACHINE_APPLICATION"
+      ],
+      "auth0_cookie_mode": "NOT_APPLICABLE_NON_BROWSER",
+      "default_idle_timeout_hours": null,
+      "default_absolute_timeout_hours": null,
+      "action_idle_timeout_hours": null,
+      "action_absolute_timeout_hours": null,
+      "refresh_token_rotation": "NOT_APPLICABLE",
+      "refresh_token_lifetime_seconds": null,
+      "refresh_token_leeway_seconds": null,
+      "offline_access_allowed": false,
+      "base_authn_level": "BASIC",
+      "escalated_authn_level": "BASIC",
+      "post_step_up_rotation": false,
+      "invalidation_events": [
+        "SESSION_REVOKED",
+        "AUTHORITY_REBIND_OR_BINDING_DRIFT"
+      ],
+      "entry_posture": "Short-lived non-browser client credential with explicit service identity and scoped environment binding.",
+      "storage_boundary": "Managed runtime secret boundary or vault-backed credential retrieval only.",
+      "source_refs": [
+        "Algorithm/actor_and_authority_model.md::L555[3.13_Machine-actor_rules]",
+        "https://auth0.com/docs/manage-users/sessions/manage-user-sessions-with-auth0-management-api"
+      ],
+      "notes": [
+        "Machine actors never satisfy REQUIRE_STEP_UP or REQUIRE_APPROVAL for humans."
+      ]
+    },
+    {
+      "session_profile_ref": "session.browser.invite-pre-upgrade",
+      "flow_id": "invite_or_deep_link_pre_upgrade",
+      "label": "Invite or deep-link pre-upgrade",
+      "channel": "BROWSER_LIMITED_ENTRY",
+      "actor_classes": [
+        "CLIENT_VIEWER",
+        "CLIENT_CONTRIBUTOR",
+        "CLIENT_SIGNATORY"
+      ],
+      "allowed_surface_families": [
+        "BROWSER_LIMITED_ENTRY"
+      ],
+      "session_carrier": "Contextual route and return-path state only.",
+      "auth0_application_types": [
+        "REGULAR_WEB_APPLICATION"
+      ],
+      "auth0_cookie_mode": "NOT_APPLICABLE_NON_BROWSER",
+      "default_idle_timeout_hours": null,
+      "default_absolute_timeout_hours": null,
+      "action_idle_timeout_hours": null,
+      "action_absolute_timeout_hours": null,
+      "refresh_token_rotation": "NOT_APPLICABLE",
+      "refresh_token_lifetime_seconds": null,
+      "refresh_token_leeway_seconds": null,
+      "offline_access_allowed": false,
+      "base_authn_level": "BASIC",
+      "escalated_authn_level": "STEP_UP",
+      "post_step_up_rotation": false,
+      "invalidation_events": [
+        "DEEP_LINK_OR_INVITE_EXPIRY",
+        "SESSION_REVOKED",
+        "STALE_VIEW_REBASE"
+      ],
+      "entry_posture": "Notification, email invite, or deep link opens focused route context before the normal authenticated session has been re-established.",
+      "storage_boundary": "Local route context only; no trust-sensitive mutation authority.",
+      "source_refs": [
+        "Algorithm/customer_client_portal_experience_contract.md::L370[Onboarding_flow]",
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]"
+      ],
+      "notes": [
+        "This is not a full IdP-authenticated mutation session and cannot satisfy sign-off or upload on its own."
+      ]
+    },
+    {
+      "session_profile_ref": "session.upload.transfer",
+      "flow_id": "governed_upload_session",
+      "label": "Governed upload-session transfer",
+      "channel": "BROWSER_OR_MOBILE_TRANSFER",
+      "actor_classes": [
+        "CLIENT_VIEWER",
+        "CLIENT_CONTRIBUTOR",
+        "CLIENT_SIGNATORY"
+      ],
+      "allowed_surface_families": [
+        "BROWSER_OR_MOBILE_TRANSFER"
+      ],
+      "session_carrier": "Normal authenticated session plus governed upload-session binding contract.",
+      "auth0_application_types": [
+        "REGULAR_WEB_APPLICATION"
+      ],
+      "auth0_cookie_mode": "PERSISTENT",
+      "default_idle_timeout_hours": 8,
+      "default_absolute_timeout_hours": 48,
+      "action_idle_timeout_hours": 8,
+      "action_absolute_timeout_hours": 48,
+      "refresh_token_rotation": "DISABLED",
+      "refresh_token_lifetime_seconds": null,
+      "refresh_token_leeway_seconds": null,
+      "offline_access_allowed": false,
+      "base_authn_level": "BASIC",
+      "escalated_authn_level": "STEP_UP",
+      "post_step_up_rotation": true,
+      "invalidation_events": [
+        "SESSION_REVOKED",
+        "STALE_VIEW_REBASE"
+      ],
+      "entry_posture": "Authenticated portal session allocates a governed ClientUploadSession as the byte-transfer exception to the generic command surface.",
+      "storage_boundary": "Derivable transfer metadata only; attachment finalization remains a typed command.",
+      "source_refs": [
+        "Algorithm/customer_client_portal_experience_contract.md::L293[Secure_document-upload_flow]",
+        "Algorithm/northbound_api_and_session_contract.md::L184[2.2_Customer_Client_portal_and_upload-session_surfaces]"
+      ],
+      "notes": [
+        "Upload transfer is not a substitute for signatory or authority-sensitive step-up."
+      ]
+    }
+  ],
+  "typed_gaps": [],
+  "notes": [
+    "Browser, native, machine, limited-entry, and governed upload-session posture remain side-by-side so later agents do not re-derive session law from scattered prose."
+  ]
+}

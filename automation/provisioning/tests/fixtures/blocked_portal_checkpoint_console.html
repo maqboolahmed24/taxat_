@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Blocked Portal Challenge Fixture</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family:
+          "SF Pro Display", "Segoe UI", system-ui, -apple-system, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at top right, rgba(67, 93, 122, 0.16), transparent 28%),
+          linear-gradient(180deg, #f5f6f4 0%, #ecefe9 100%);
+        color: #111418;
+      }
+
+      main {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 3rem 1.5rem 4rem;
+        display: grid;
+        gap: 1rem;
+      }
+
+      .shell,
+      .summary,
+      .actions {
+        border: 1px solid rgba(17, 20, 24, 0.08);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.92);
+        padding: 1.2rem 1.25rem;
+        box-shadow: 0 12px 40px rgba(17, 20, 24, 0.05);
+      }
+
+      .eyebrow {
+        margin: 0;
+        font-size: 0.76rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #65707a;
+      }
+
+      h1,
+      h2 {
+        margin: 0.25rem 0 0;
+      }
+
+      .meta {
+        color: #65707a;
+        margin: 0.55rem 0 0;
+      }
+
+      .challenge-banner {
+        border-radius: 18px;
+        border: 1px solid rgba(166, 59, 50, 0.14);
+        background: rgba(166, 59, 50, 0.07);
+        padding: 1rem;
+        display: grid;
+        gap: 0.55rem;
+      }
+
+      [data-sensitive="true"] {
+        background: rgba(166, 59, 50, 0.12);
+        border-radius: 999px;
+        padding: 0.1rem 0.35rem;
+      }
+
+      .grid {
+        display: grid;
+        gap: 0.85rem;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      .card {
+        border: 1px solid rgba(17, 20, 24, 0.08);
+        border-radius: 16px;
+        background: #ffffff;
+        padding: 0.95rem;
+      }
+
+      .card strong {
+        display: block;
+        font-size: 0.76rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #65707a;
+      }
+
+      .card span {
+        display: block;
+        margin-top: 0.35rem;
+      }
+
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+
+      button {
+        border: 1px solid rgba(17, 20, 24, 0.08);
+        border-radius: 999px;
+        background: #435d7a;
+        color: #ffffff;
+        font: inherit;
+        padding: 0.7rem 1rem;
+        cursor: pointer;
+      }
+
+      .quiet {
+        background: #ffffff;
+        color: #111418;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="shell">
+        <p class="eyebrow" id="provider-label">Checkpoint provider</p>
+        <h1 id="challenge-title">Blocked portal challenge</h1>
+        <p class="meta" id="challenge-subtitle">
+          Synthetic local fixture for checkpoint-evidence capture only.
+        </p>
+      </section>
+
+      <section class="summary" aria-labelledby="checkpoint-heading">
+        <div class="challenge-banner">
+          <p class="eyebrow">Challenge state</p>
+          <h2 id="checkpoint-heading">Verification gate is active</h2>
+          <p id="checkpoint-copy">
+            Human verification is required before the provider session can continue.
+          </p>
+        </div>
+      </section>
+
+      <section class="summary">
+        <div class="grid">
+          <article class="card">
+            <strong>Mailbox hint</strong>
+            <span data-sensitive="true" id="mailbox-hint">ops@example.invalid</span>
+          </article>
+          <article class="card">
+            <strong>One-time code</strong>
+            <span data-sensitive="true" id="otp-hint">483920</span>
+          </article>
+          <article class="card">
+            <strong>Challenge route</strong>
+            <span id="route-label">provider.portal.blocked</span>
+          </article>
+          <article class="card">
+            <strong>Expected successor</strong>
+            <span id="post-route-label">provider.portal.successor</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="actions" aria-labelledby="action-heading">
+        <p class="eyebrow" id="action-heading">Fixture actions</p>
+        <h2>Manual checkpoint simulator</h2>
+        <p class="meta" id="fixture-status" role="status" aria-live="polite">
+          The checkpoint is currently open and requires a human step.
+        </p>
+        <div class="button-row">
+          <button id="complete-human-step" type="button">Complete human step</button>
+          <button id="reload-blocked" type="button" class="quiet">Show blocked view</button>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const scenarioKey = new URL(window.location.href).searchParams.get("scenario") || "captcha";
+      const state = new URL(window.location.href).searchParams.get("state") || "blocked";
+
+      const scenarios = {
+        captcha: {
+          providerLabel: "Auth0 Dashboard",
+          title: "Auth challenge required",
+          subtitle: "Provider-owned anti-bot checkpoint for local testing only.",
+          reasonCode: "CAPTCHA",
+          checkpointCopy:
+            "Verify you're human before the dashboard session can continue.",
+          routeRef: "idp.dashboard.sign_in.auth_challenge",
+          postRouteRef: "idp.dashboard.home",
+          mailboxHint: "ops@example.invalid",
+          otpHint: "483920"
+        },
+        mfa: {
+          providerLabel: "HMRC Developer Hub",
+          title: "2-step verification required",
+          subtitle: "Synthetic HMRC-style MFA interstitial for local testing only.",
+          reasonCode: "MFA_REQUIRED",
+          checkpointCopy:
+            "Enter the 6-digit code from your authenticator app before the session can continue.",
+          routeRef: "hmrc.developer_hub.login.checkpoint",
+          postRouteRef: "hmrc.developer_hub.applications",
+          mailboxHint: "ops@example.invalid",
+          otpHint: "483920"
+        },
+        suspicious: {
+          providerLabel: "Auth0 Dashboard",
+          title: "Suspicious login review",
+          subtitle: "Synthetic unusual-activity review for local checkpoint coverage.",
+          reasonCode: "SUSPICIOUS_LOGIN_REVIEW",
+          checkpointCopy:
+            "We noticed unusual activity from IP 203.0.113.14 and need a human review before continuing.",
+          routeRef: "idp.dashboard.sign_in.review",
+          postRouteRef: "idp.dashboard.home",
+          mailboxHint: "reviewer@example.invalid",
+          otpHint: "483920"
+        },
+        unknown: {
+          providerLabel: "Shared Portal Fixture",
+          title: "Unclassified verification gate",
+          subtitle: "Synthetic unknown checkpoint for fail-closed coverage.",
+          reasonCode: "UNKNOWN_CHALLENGE_REVIEW_REQUIRED",
+          checkpointCopy:
+            "An unclassified verification gate is active and the run requires review.",
+          routeRef: "shared.portal.unknown.challenge",
+          postRouteRef: "shared.portal.manual.review",
+          mailboxHint: "review@example.invalid",
+          otpHint: "483920"
+        }
+      };
+
+      const scenario = scenarios[scenarioKey] || scenarios.captcha;
+      const params = new URLSearchParams(window.location.search);
+      const body = document.body;
+
+      function syncBlocked() {
+        body.dataset.checkpointReasonCode = scenario.reasonCode;
+        body.dataset.routeRef = scenario.routeRef;
+        body.dataset.pageIdentity = `${scenarioKey}-checkpoint`;
+        body.dataset.postCheckpointRoute = scenario.postRouteRef;
+        body.dataset.challengeHeadline = scenario.title;
+        document.title = scenario.title;
+        document.getElementById("provider-label").textContent = scenario.providerLabel;
+        document.getElementById("challenge-title").textContent = scenario.title;
+        document.getElementById("challenge-subtitle").textContent = scenario.subtitle;
+        document.getElementById("checkpoint-heading").textContent = "Verification gate is active";
+        document.getElementById("checkpoint-copy").textContent = scenario.checkpointCopy;
+        document.getElementById("route-label").textContent = scenario.routeRef;
+        document.getElementById("post-route-label").textContent = scenario.postRouteRef;
+        document.getElementById("mailbox-hint").textContent = scenario.mailboxHint;
+        document.getElementById("otp-hint").textContent = scenario.otpHint;
+        document.getElementById("fixture-status").textContent =
+          "The checkpoint is currently open and requires a human step.";
+      }
+
+      function syncResolved() {
+        delete body.dataset.checkpointReasonCode;
+        body.dataset.routeRef = scenario.postRouteRef;
+        body.dataset.pageIdentity = `${scenarioKey}-resolved`;
+        body.dataset.postCheckpointRoute = scenario.postRouteRef;
+        body.dataset.challengeHeadline = `${scenario.title} resolved`;
+        document.title = `${scenario.title} resolved`;
+        document.getElementById("provider-label").textContent = scenario.providerLabel;
+        document.getElementById("challenge-title").textContent = `${scenario.title} resolved`;
+        document.getElementById("challenge-subtitle").textContent =
+          "Synthetic successor route for post-human resume verification.";
+        document.getElementById("checkpoint-heading").textContent = "Checkpoint resolved";
+        document.getElementById("checkpoint-copy").textContent =
+          "The human step completed. Resume only after revalidating route, session posture, and selector stability.";
+        document.getElementById("route-label").textContent = scenario.postRouteRef;
+        document.getElementById("post-route-label").textContent = scenario.postRouteRef;
+        document.getElementById("mailbox-hint").textContent = "redacted@example.invalid";
+        document.getElementById("otp-hint").textContent = "000000";
+        document.getElementById("fixture-status").textContent =
+          "Checkpoint resolved. A resume flow must still perform a no-op verification read before any mutation.";
+      }
+
+      function updateState(nextState) {
+        params.set("scenario", scenarioKey);
+        params.set("state", nextState);
+        window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+        if (nextState === "resolved") {
+          syncResolved();
+        } else {
+          syncBlocked();
+        }
+      }
+
+      document.getElementById("complete-human-step").addEventListener("click", () => {
+        updateState("resolved");
+      });
+
+      document.getElementById("reload-blocked").addEventListener("click", () => {
+        updateState("blocked");
+      });
+
+      if (state === "resolved") {
+        syncResolved();
+      } else {
+        syncBlocked();
+      }
+    </script>
+  </body>
+</html>

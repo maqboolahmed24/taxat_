@@ -1,0 +1,126 @@
+{
+  "contract_version": "1.0",
+  "generated_at": "2026-04-18",
+  "surface_policies": [
+    {
+      "surface_id": "GENERAL_LOG",
+      "default_policy": "METADATA_ONLY",
+      "notes": "Only class IDs, vault refs, lineage refs, attestation refs, and operator aliases may persist."
+    },
+    {
+      "surface_id": "PLAYWRIGHT_SCREENSHOT",
+      "default_policy": "SUPPRESS_ON_SECRET_ENTRY",
+      "notes": "Secret-entry and one-time reveal steps suppress screenshots instead of relying on pixel redaction."
+    },
+    {
+      "surface_id": "PLAYWRIGHT_TRACE",
+      "default_policy": "SUPPRESS_ON_SECRET_ENTRY",
+      "notes": "Trace capture is suppressed whenever a visible secret could appear in the timeline."
+    },
+    {
+      "surface_id": "DOM_SNAPSHOT",
+      "default_policy": "SUPPRESS_ON_SECRET_ENTRY",
+      "notes": "DOM snapshots are suppressed for auth codes, passwords, client secrets, callback secrets, cookies, and storage-state material."
+    },
+    {
+      "surface_id": "HTML_REPORT",
+      "default_policy": "SANITIZED_METADATA_ONLY",
+      "notes": "Reports may show evidence refs and rule IDs only."
+    },
+    {
+      "surface_id": "CLIPBOARD_AND_DOWNLOADS",
+      "default_policy": "PURGE_AFTER_USE",
+      "notes": "Clipboard and local downloads are contaminated surfaces until purged."
+    }
+  ],
+  "pattern_rules": [
+    {
+      "rule_id": "hmrc-client-secret-body",
+      "match_type": "REGEX",
+      "pattern": "(?i)(client_secret=)[^&\\s]+",
+      "replacement": "$1[REDACTED_CLIENT_SECRET]",
+      "applies_to": [
+        "GENERAL_LOG",
+        "HTML_REPORT"
+      ]
+    },
+    {
+      "rule_id": "authorization-bearer",
+      "match_type": "REGEX",
+      "pattern": "(?i)(authorization:\\s*bearer\\s+)[A-Za-z0-9._~+/=-]+",
+      "replacement": "$1[REDACTED_BEARER_TOKEN]",
+      "applies_to": [
+        "GENERAL_LOG",
+        "HTML_REPORT"
+      ]
+    },
+    {
+      "rule_id": "oauth-authorization-code",
+      "match_type": "REGEX",
+      "pattern": "(?i)(code=)[A-Za-z0-9._-]+",
+      "replacement": "$1[REDACTED_AUTH_CODE]",
+      "applies_to": [
+        "GENERAL_LOG",
+        "HTML_REPORT"
+      ]
+    },
+    {
+      "rule_id": "set-cookie",
+      "match_type": "REGEX",
+      "pattern": "(?i)(set-cookie:\\s*[^=]+=)[^;\\r\\n]+",
+      "replacement": "$1[REDACTED_COOKIE]",
+      "applies_to": [
+        "GENERAL_LOG",
+        "HTML_REPORT"
+      ]
+    },
+    {
+      "rule_id": "password-field",
+      "match_type": "REGEX",
+      "pattern": "(?i)(password|passcode|otp|one-time code|verification code)\\s*[:=]\\s*[^\\s,;]+",
+      "replacement": "$1=[REDACTED_SECRET_VALUE]",
+      "applies_to": [
+        "GENERAL_LOG",
+        "HTML_REPORT"
+      ]
+    },
+    {
+      "rule_id": "sandbox-test-user-password",
+      "match_type": "REGEX",
+      "pattern": "(?i)(user\\s*password|test-user password)\\s*[:=]\\s*[^\\s,;]+",
+      "replacement": "$1=[REDACTED_TEST_USER_PASSWORD]",
+      "applies_to": [
+        "GENERAL_LOG",
+        "HTML_REPORT"
+      ]
+    },
+    {
+      "rule_id": "email-address",
+      "match_type": "REGEX",
+      "pattern": "(?i)\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b",
+      "replacement": "[REDACTED_EMAIL]",
+      "applies_to": [
+        "GENERAL_LOG",
+        "HTML_REPORT"
+      ]
+    }
+  ],
+  "required_rule_ids_for_inventory_classes": {
+    "developer_hub_password_ref": [
+      "password-field",
+      "email-address"
+    ],
+    "hmrc_sandbox_client_secret_version_ref": [
+      "hmrc-client-secret-body",
+      "authorization-bearer"
+    ],
+    "sandbox_test_user_credential_bundle_ref": [
+      "sandbox-test-user-password",
+      "email-address"
+    ],
+    "hmrc_callback_binding_secret_ref": [
+      "oauth-authorization-code",
+      "set-cookie"
+    ]
+  }
+}

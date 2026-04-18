@@ -1,0 +1,618 @@
+{
+  "rows": [
+    {
+      "canonical_name": "AUDIT_EVENTS",
+      "closure_requirements": [
+        "Persist audit_stream_ref + stream_sequence ordering.",
+        "Retain object refs, reason codes, hashes, and lineage when payloads expire."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "manifest_lineage_trace_ref",
+        "manifest_branch_decision",
+        "authority_binding_ref",
+        "authority_link_ref",
+        "delegation_grant_ref",
+        "submission_record_id",
+        "authority_operation_id",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "retention_class"
+      ],
+      "domain": "AUDIT",
+      "linked_failure_or_provenance_edges": [
+        "ED_AUDITED_BY"
+      ],
+      "notes": [
+        "Audit exists to prove what happened, not to optimize runtime tuning."
+      ],
+      "producer_or_owner": "Compliance-significant decision and lifecycle boundaries",
+      "query_contract_or_projection": "get_audit_trail(root_ref, options); get_filing_evidence_ledger(submission_record_id); get_privacy_action_ledger(client_id, options); get_replay_attestation(manifest_id)",
+      "record_type": "SIGNAL_FAMILY",
+      "representative_event_types": [
+        "PrincipalAuthenticated",
+        "StepUpRequired",
+        "StepUpSatisfied"
+      ],
+      "retention_boundary": "Durable append-only retention with explicit payload_availability_state and audit_sufficiency_state when payload bodies age out.",
+      "retry_or_resolution_posture": "Not retried as telemetry; proves material decisions and legal state transitions.",
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.2 Separation of concerns / A. Audit evidence and 14.5 Audit event contract",
+      "visibility_boundary": "Append-only audit and investigation surfaces; customer-safe derivatives require explicit masking or separate projections."
+    },
+    {
+      "canonical_name": "TRACES",
+      "closure_requirements": [
+        "Error spans require typed failure_class and failure_phase detail.",
+        "Sampling may not remove mandatory audit anchors."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "manifest_lineage_trace_ref",
+        "manifest_branch_decision",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "run_kind",
+        "mode",
+        "replay_class",
+        "comparison_mode",
+        "basis_validation_state",
+        "expected_execution_basis_hash",
+        "actual_execution_basis_hash",
+        "expected_deterministic_outcome_hash",
+        "actual_deterministic_outcome_hash",
+        "input_inheritance_mode",
+        "config_inheritance_mode",
+        "config_freeze_id"
+      ],
+      "domain": "OPS",
+      "linked_failure_or_provenance_edges": [
+        "ED_CAUSED_BY_ERROR"
+      ],
+      "notes": [
+        "Trace span taxonomy freezes 22 minimum span codes.",
+        "Sampling posture enumerates MANDATORY_FORENSIC, DETERMINISTIC_RETAIN, SAMPLED_OPERATIONAL."
+      ],
+      "producer_or_owner": "Run-engine orchestration and service runtime instrumentation",
+      "query_contract_or_projection": "get_run_timeline(manifest_id)",
+      "record_type": "SIGNAL_FAMILY",
+      "representative_span_codes": [
+        "RUN_ROOT",
+        "PRIOR_MANIFEST_CONTEXT_LOAD",
+        "REUSE_CONTINUATION_DECISION",
+        "CONFIG_RESOLVE_OR_INHERITANCE_DECISION",
+        "EXISTING_DECISION_BUNDLE_RELOAD",
+        "MANIFEST_FREEZE",
+        "MANIFEST_START_CLAIM",
+        "SOURCE_COLLECTION",
+        "SNAPSHOT_BUILD",
+        "COMPUTE",
+        "PARITY",
+        "TRUST",
+        "GRAPH_BUILD",
+        "FILING_PACKET_BUILD",
+        "AUTHORITY_REQUEST_BUILD",
+        "AUTHORITY_TRANSMIT",
+        "AUTHORITY_RECONCILE",
+        "DRIFT_DETECT",
+        "AMENDMENT_EVALUATE",
+        "RETENTION_APPLY",
+        "ERASURE_EXECUTE",
+        "OTHER"
+      ],
+      "retention_boundary": "Potentially sampled, except filing-, retention-, authority-, and replay-critical spans which stay deterministic-retain or mandatory-forensic.",
+      "retry_or_resolution_posture": "Typed error spans drive remediation only when correlated ErrorRecord lineage exists.",
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.3 Signal model and 14.7 Trace contract",
+      "visibility_boundary": "Operational investigation surfaces and run-timeline views; not the proof of record."
+    },
+    {
+      "canonical_name": "METRICS",
+      "closure_requirements": [
+        "Critical decisions remain anchored in audit and typed failures rather than counters.",
+        "Dimensions must stay privacy-safe and correlation-capable."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "nightly_batch_run_ref",
+        "nightly_window_key",
+        "selection_disposition",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "retention_class"
+      ],
+      "domain": "OPS",
+      "linked_failure_or_provenance_edges": [
+        "ED_CAUSED_BY_ERROR"
+      ],
+      "notes": [
+        "Metric taxonomy freezes 39 families and COUNTER, GAUGE, HISTOGRAM instruments."
+      ],
+      "producer_or_owner": "Runtime analytics, release governance, and privacy-safe aggregates",
+      "query_contract_or_projection": "get_operator_morning_digest(tenant_id, coverage_date); ops dashboards",
+      "record_type": "SIGNAL_FAMILY",
+      "representative_metric_families": [
+        "RUN_OUTCOME_RATE",
+        "NIGHTLY_BATCH_OUTCOME_RATE",
+        "AUTHORITY_REQUEST_OUTCOME_RATE",
+        "RECONCILIATION_RESOLUTION_RATE",
+        "AMENDMENT_OUTCOME_RATE",
+        "EXPERIENCE_STREAM_RESUME_REBASE_RATE",
+        "STALE_VIEW_CONFLICT_RATE",
+        "RELEASE_CANARY_ABORT_RATE"
+      ],
+      "retention_boundary": "Shorter-lived than audit evidence; no metric row becomes proof of record.",
+      "retry_or_resolution_posture": "Metrics influence retries and alerts indirectly; they never mutate lineage by themselves.",
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.8 Metric contract",
+      "visibility_boundary": "Aggregated operator and release-governance surfaces only."
+    },
+    {
+      "canonical_name": "LOGS",
+      "closure_requirements": [
+        "Do not reintroduce masked, secret, or authority-sensitive data.",
+        "Do not reconstruct dashboard truth from logs alone."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "authority_binding_ref",
+        "authority_link_ref",
+        "delegation_grant_ref",
+        "submission_record_id",
+        "authority_operation_id",
+        "retention_class"
+      ],
+      "domain": "OPS",
+      "linked_failure_or_provenance_edges": [
+        "ED_CAUSED_BY_ERROR"
+      ],
+      "notes": [
+        "Log families: RUNTIME, SESSION_SECURITY, ACCESS_CONTROL, PRIVACY_RETENTION, AUTHORITY_EDGE.",
+        "Access tiers: STANDARD_OPERATIONS, SECURITY_RESTRICTED, PRIVACY_RESTRICTED."
+      ],
+      "producer_or_owner": "Structured runtime logging with secure access tiers",
+      "query_contract_or_projection": "get_run_timeline(manifest_id) as secondary explanation only",
+      "record_type": "SIGNAL_FAMILY",
+      "retention_boundary": "Operational logs may rotate quickly and are explicitly shorter-lived than append-only audit evidence.",
+      "retry_or_resolution_posture": "Log records can evidence runtime context but cannot close or reopen failure lineages.",
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.9 Logging contract",
+      "visibility_boundary": "Tiered by access_tier and never a substitute for audit truth."
+    },
+    {
+      "canonical_name": "SECURITY_TELEMETRY",
+      "closure_requirements": [
+        "Keep exact blocked or mismatch reason codes visible.",
+        "Preserve binding refs for step-up, delegation, and export anomalies."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "authority_binding_ref",
+        "authority_link_ref",
+        "delegation_grant_ref",
+        "submission_record_id",
+        "authority_operation_id",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "access_binding_hash",
+        "policy_snapshot_hash"
+      ],
+      "domain": "SECURITY",
+      "linked_failure_or_provenance_edges": [
+        "ED_AUDITED_BY",
+        "ED_CAUSED_BY_ERROR"
+      ],
+      "notes": [
+        "Security telemetry focuses on access decisions, privilege changes, step-up, export attempts, and session anomalies."
+      ],
+      "producer_or_owner": "Access control, session security, and authority-binding anomaly surfaces",
+      "query_contract_or_projection": "Correlated through get_audit_trail(root_ref, options) and security investigations",
+      "record_type": "SIGNAL_FAMILY",
+      "retention_boundary": "Durable enough for investigation, but still distinct from append-only audit proof.",
+      "retry_or_resolution_posture": "Security anomalies may open investigations or block retries; they never silently auto-close.",
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.2 Separation of concerns / C. Security telemetry",
+      "visibility_boundary": "Security-restricted operational surfaces with explicit customer-safe redaction."
+    },
+    {
+      "canonical_name": "PRIVACY_TELEMETRY",
+      "closure_requirements": [
+        "Keep limitation posture explicit when data is minimized or erased.",
+        "No erasure may destroy the proof that erasure happened."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "retention_class",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "authority_binding_ref",
+        "authority_link_ref",
+        "delegation_grant_ref",
+        "submission_record_id",
+        "authority_operation_id"
+      ],
+      "domain": "PRIVACY",
+      "linked_failure_or_provenance_edges": [
+        "ED_AUDITED_BY",
+        "ED_LIMITED_BY_RETENTION",
+        "ED_ERASED_UNDER"
+      ],
+      "notes": [
+        "Privacy telemetry focuses on masking, legal hold, erasure, and sensitive-view access."
+      ],
+      "producer_or_owner": "Retention and privacy control plane",
+      "query_contract_or_projection": "get_privacy_action_ledger(client_id, options); get_retention_limitation_path(object_id)",
+      "record_type": "SIGNAL_FAMILY",
+      "retention_boundary": "Retention-limited but explicit; lawful absence must remain distinguishable from corruption.",
+      "retry_or_resolution_posture": "Privacy issues open typed errors, remediation, or accepted-risk branches rather than quiet omission.",
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.2 Separation of concerns / D. Privacy telemetry and 14.10 Audit versus telemetry retention",
+      "visibility_boundary": "Privacy-restricted surfaces and dedicated customer-safe explanations only."
+    },
+    {
+      "canonical_name": "ErrorRecord",
+      "closure_requirements": [
+        "No open error without lawful owner, next path, or scheduled retry.",
+        "No accepted-risk refs outside ACCEPTED_RISK state."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "manifest_lineage_trace_ref",
+        "manifest_branch_decision",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "authority_binding_ref",
+        "authority_link_ref",
+        "delegation_grant_ref",
+        "submission_record_id",
+        "authority_operation_id",
+        "retention_class"
+      ],
+      "domain": "FAILURE",
+      "linked_failure_or_provenance_edges": [
+        "ED_CAUSED_BY_ERROR",
+        "ED_AUDITED_BY"
+      ],
+      "notes": [
+        "Error families: AUTHN_ERROR, AUTHZ_ERROR, MANIFEST_ERROR, CONFIG_ERROR, INPUT_BOUNDARY_ERROR, SOURCE_COLLECTION_ERROR, CANONICALIZATION_ERROR, DATA_QUALITY_ERROR, PARITY_ERROR, TRUST_ERROR, WORKFLOW_ERROR, AUTHORITY_PROTOCOL_ERROR, AUTHORITY_RECONCILIATION_ERROR, AMENDMENT_ERROR, RETENTION_ERROR, PRIVACY_ERROR, PROVENANCE_ERROR, IDEMPOTENCY_ERROR, SYSTEM_FAULT.",
+        "Resolution states: OPEN, IN_PROGRESS, MONITORING, RESOLVED, ACCEPTED_RISK, SUPERSEDED, CANCELLED."
+      ],
+      "producer_or_owner": "Structured failure boundary",
+      "query_contract_or_projection": "Failure lifecycle dashboard projection; get_run_timeline(manifest_id)",
+      "record_type": "FAILURE_OBJECT",
+      "retention_boundary": "Governed by error retention class and companion artifact_retention_ref when retention/privacy is causal.",
+      "retry_or_resolution_posture": "Carries severity, blocking class, retry class, remediation class, and resolution state as closed sets.",
+      "source_file": "Algorithm/error_model_and_remediation_model.md",
+      "source_heading_or_logical_block": "13.2 Canonical error object",
+      "visibility_boundary": "Operator-visible typed failure detail with customer and operator visibility classes."
+    },
+    {
+      "canonical_name": "RemediationTask",
+      "closure_requirements": [
+        "Task closure must preserve evidence and effect on the source error.",
+        "Task completion cannot silently claim source-error closure."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "manifest_lineage_trace_ref",
+        "manifest_branch_decision",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "retention_class"
+      ],
+      "domain": "REMEDIATION",
+      "linked_failure_or_provenance_edges": [
+        "ED_TRIGGERED_WORKFLOW",
+        "ED_AUDITED_BY"
+      ],
+      "notes": [
+        "Task taxonomy includes 12 minimum task types."
+      ],
+      "producer_or_owner": "Tracked remediation and follow-up work boundary",
+      "query_contract_or_projection": "Failure lifecycle dashboard projection",
+      "record_type": "FAILURE_OBJECT",
+      "retention_boundary": "Persists as a typed lifecycle child object until effect on the source error is closed.",
+      "retry_or_resolution_posture": "Carries task type, state, priority, and explicit error_resolution_effect.",
+      "source_file": "Algorithm/error_model_and_remediation_model.md",
+      "source_heading_or_logical_block": "13.8 Remediation task object and 13.11 Resolution states",
+      "visibility_boundary": "Operator and workflow coordination surfaces only."
+    },
+    {
+      "canonical_name": "FailureInvestigation",
+      "closure_requirements": [
+        "Outcome, evidence, and accepted-risk linkage remain durable.",
+        "No investigation collapses into a UI-only note."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "manifest_lineage_trace_ref",
+        "manifest_branch_decision",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "authority_binding_ref",
+        "authority_link_ref",
+        "delegation_grant_ref",
+        "submission_record_id",
+        "authority_operation_id",
+        "retention_class"
+      ],
+      "domain": "REMEDIATION",
+      "linked_failure_or_provenance_edges": [
+        "ED_CAUSED_BY_ERROR",
+        "ED_AUDITED_BY"
+      ],
+      "notes": [
+        "Investigation classes: AUTHORITY_STATE_AMBIGUITY, AMENDMENT_READINESS, RETENTION_PRIVACY_EXCEPTION, AUDIT_PROVENANCE_DIVERGENCE, SECURITY_ACCESS_ANOMALY, SYSTEM_INVARIANT_BREACH, MULTI_ERROR_CORRELATION."
+      ],
+      "producer_or_owner": "Durable forensic branch for unresolved ambiguity",
+      "query_contract_or_projection": "Failure lifecycle dashboard projection; get_provenance(object_type, object_id, options)",
+      "record_type": "FAILURE_OBJECT",
+      "retention_boundary": "Persists through ambiguity, accepted risk, or supersession resolution.",
+      "retry_or_resolution_posture": "Investigation stays open as a typed branch until a durable outcome exists.",
+      "source_file": "Algorithm/error_model_and_remediation_model.md",
+      "source_heading_or_logical_block": "13.9 Investigation companion object",
+      "visibility_boundary": "Restricted operator and investigation surfaces."
+    },
+    {
+      "canonical_name": "CompensationRecord",
+      "closure_requirements": [
+        "Retain owner, verification basis, and closure evidence.",
+        "Do not hide the underlying error lineage."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "manifest_lineage_trace_ref",
+        "manifest_branch_decision",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "authority_binding_ref",
+        "authority_link_ref",
+        "delegation_grant_ref",
+        "submission_record_id",
+        "authority_operation_id"
+      ],
+      "domain": "REMEDIATION",
+      "linked_failure_or_provenance_edges": [
+        "ED_COMPENSATED_BY",
+        "ED_AUDITED_BY"
+      ],
+      "notes": [
+        "Compensation modes: NONE, MARK_AS_VOID, MARK_AS_SUPERSEDED, REVERT_DERIVED_ONLY, OPEN_RECONCILIATION, PRESERVE_AND_LIMIT, REQUIRE_MANUAL_SETTLEMENT."
+      ],
+      "producer_or_owner": "Settlement and compensation branch",
+      "query_contract_or_projection": "Failure lifecycle dashboard projection",
+      "record_type": "FAILURE_OBJECT",
+      "retention_boundary": "Persists until compensation is verified, cancelled, superseded, or archived under policy.",
+      "retry_or_resolution_posture": "Compensation does not replace the underlying error chain; it alters settlement posture.",
+      "source_file": "Algorithm/error_model_and_remediation_model.md",
+      "source_heading_or_logical_block": "13.9 Compensation model",
+      "visibility_boundary": "Operator-visible settlement lineage, never customer-safe by default."
+    },
+    {
+      "canonical_name": "AcceptedRiskApproval",
+      "closure_requirements": [
+        "Approval basis, bounded scope, and expiry are mandatory.",
+        "Current accountable owner remains visible while active."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "manifest_lineage_trace_ref",
+        "manifest_branch_decision",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "retention_class"
+      ],
+      "domain": "RISK",
+      "linked_failure_or_provenance_edges": [
+        "ED_AUDITED_BY"
+      ],
+      "notes": [
+        "Approval states: ACTIVE, EXPIRED, REVOKED, SUPERSEDED.",
+        "Approver types: APPROVER, TENANT_ADMIN, SECURITY_OPERATOR, SYSTEM_POLICY."
+      ],
+      "producer_or_owner": "Bounded exception and approval boundary",
+      "query_contract_or_projection": "Failure lifecycle dashboard projection",
+      "record_type": "FAILURE_OBJECT",
+      "retention_boundary": "Retains approval lineage, scope, and expiry for the life of the exception.",
+      "retry_or_resolution_posture": "Accepted risk does not close lineage silently; it creates an explicit risk posture with expiry review.",
+      "source_file": "Algorithm/error_model_and_remediation_model.md",
+      "source_heading_or_logical_block": "13.9 Accepted-risk approval companion object",
+      "visibility_boundary": "Operator, approver, tenant-admin, or security-operator surfaces depending on scope."
+    },
+    {
+      "canonical_name": "FailureLifecycleDashboard",
+      "closure_requirements": [
+        "No log-only or free-text status reconstruction.",
+        "Underlying error remains visible through compensation and accepted risk."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "manifest_lineage_trace_ref",
+        "manifest_branch_decision",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "authority_binding_ref",
+        "authority_link_ref",
+        "delegation_grant_ref",
+        "submission_record_id",
+        "authority_operation_id",
+        "retention_class"
+      ],
+      "domain": "FAILURE",
+      "linked_failure_or_provenance_edges": [
+        "ED_CAUSED_BY_ERROR",
+        "ED_COMPENSATED_BY",
+        "ED_AUDITED_BY"
+      ],
+      "notes": [
+        "Current lineage states: OPEN_FAILURE, RETRY_SCHEDULED, REMEDIATION_ACTIVE, INVESTIGATION_ACTIVE, COMPENSATION_ACTIVE, ACCEPTED_RISK_ACTIVE, RESOLVED, SUPERSEDED, CANCELLED.",
+        "Source artifact types: ERROR_RECORD, REMEDIATION_TASK, COMPENSATION_RECORD, FAILURE_INVESTIGATION, ACCEPTED_RISK_APPROVAL, WORKFLOW_ITEM.",
+        "Owner types: SYSTEM, SERVICE_OPERATOR, REVIEWER, APPROVER, CLIENT, TENANT_ADMIN, SECURITY_OPERATOR."
+      ],
+      "producer_or_owner": "Authoritative persisted read-side projection",
+      "query_contract_or_projection": "BUILD_FAILURE_LIFECYCLE_DASHBOARD(...)",
+      "record_type": "READ_MODEL",
+      "retention_boundary": "Persists as the read-side truth for one governed lineage until archival policy says otherwise.",
+      "retry_or_resolution_posture": "Projects current lineage state, owner, next legal action, and compensation/investigation/risk posture from typed objects only.",
+      "source_file": "Algorithm/failure_lifecycle_dashboard_and_lineage_contract.md",
+      "source_heading_or_logical_block": "Governing Model and Construction Rule",
+      "visibility_boundary": "Operator-facing failure inspection and downstream surface projections only."
+    }
+  ],
+  "summary": {
+    "domain_counts": {
+      "AUDIT": 1,
+      "FAILURE": 2,
+      "OPS": 3,
+      "PRIVACY": 1,
+      "REMEDIATION": 3,
+      "RISK": 1,
+      "SECURITY": 1
+    },
+    "failure_object_count": 6,
+    "row_count": 12,
+    "signal_family_count": 6
+  }
+}

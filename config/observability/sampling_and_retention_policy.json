@@ -1,0 +1,2321 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "sampling_and_retention_policy",
+  "selection_status": "PROVIDER_SELECTION_REQUIRED",
+  "topology_mode": "HYBRID_DIRECT_SDK_AND_WORKLOAD_AGENT_TO_ENVIRONMENT_GATEWAY_WITH_SIGNAL_SPECIFIC_FIRST_PARTY_BACKENDS",
+  "retention_class_rows": [
+    {
+      "retention_class_ref": "retention.telemetry.trace_hot_14d",
+      "label": "Trace hot window",
+      "hot_window": "14d",
+      "warm_window": "30d",
+      "access_posture": "runtime and incident operators only",
+      "legal_boundary": "Operational explanation only; audit proof remains elsewhere.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "Long enough for incident triage and release regression comparison."
+      ]
+    },
+    {
+      "retention_class_ref": "retention.telemetry.metric_rollup_30d",
+      "label": "Metric rollup window",
+      "hot_window": "30d",
+      "warm_window": "90d",
+      "access_posture": "runtime, release, and SRE operators",
+      "legal_boundary": "Aggregate operational telemetry only.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "Rollups survive longer than raw traces because release and capacity comparisons need trend windows."
+      ]
+    },
+    {
+      "retention_class_ref": "retention.telemetry.logs_hot_30d",
+      "label": "Operational log window",
+      "hot_window": "30d",
+      "warm_window": "60d",
+      "access_posture": "runtime and restricted support operators with customer-safe filters",
+      "legal_boundary": "Structured operational explanation only; never raw evidence or declaration text.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "Shorter than audit retention and bounded by log allowlist law."
+      ]
+    },
+    {
+      "retention_class_ref": "retention.telemetry.security_restricted_90d",
+      "label": "Restricted security telemetry",
+      "hot_window": "90d",
+      "warm_window": "180d",
+      "access_posture": "security and break-glass operators only",
+      "legal_boundary": "Security telemetry remains separate from security audit proof and is never vendor-exportable.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "Supports investigation windows without collapsing into the audit store."
+      ]
+    },
+    {
+      "retention_class_ref": "retention.telemetry.privacy_restricted_90d",
+      "label": "Restricted privacy telemetry",
+      "hot_window": "90d",
+      "warm_window": "180d",
+      "access_posture": "privacy and compliance operators only",
+      "legal_boundary": "Privacy telemetry remains minimized and separately restricted from general operations views.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "Allows investigation of masking, export, and erasure workflow health without keeping raw data."
+      ]
+    },
+    {
+      "retention_class_ref": "retention.telemetry.audit_link_30d",
+      "label": "Audit-link join window",
+      "hot_window": "30d",
+      "warm_window": "90d",
+      "access_posture": "investigation and incident operators",
+      "legal_boundary": "Derived join data only; canonical proof remains in control and audit stores.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "Join indices are rebuildable and may expire independently of audit evidence."
+      ]
+    }
+  ],
+  "cardinality_budget_rows": [
+    {
+      "cardinality_budget_ref": "budget.http_gateway_dimensions",
+      "label": "HTTP gateway dimensions",
+      "allowed_high_cardinality_dimensions": [
+        "http.route",
+        "status.code"
+      ],
+      "normalized_or_hashed_dimensions": [
+        "tenant_id",
+        "client_id",
+        "access_binding_hash",
+        "request_hash"
+      ],
+      "forbidden_dimensions": [
+        "user.email",
+        "full_url",
+        "raw_query_string",
+        "authority_payload_id"
+      ],
+      "enforcement_posture": "Normalize route templates and hash tenant/client lineage before gateway export.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "Avoids cardinality blow-up from raw IDs or URLs."
+      ]
+    },
+    {
+      "cardinality_budget_ref": "budget.manifest_lineage_dimensions",
+      "label": "Manifest lineage dimensions",
+      "allowed_high_cardinality_dimensions": [
+        "run_kind",
+        "mode"
+      ],
+      "normalized_or_hashed_dimensions": [
+        "manifest_id",
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "manifest_lineage_trace_ref"
+      ],
+      "forbidden_dimensions": [
+        "decision_bundle_body",
+        "evidence_text",
+        "declaration_text"
+      ],
+      "enforcement_posture": "Keep lineage refs opaque and never attach free-form decision or evidence bodies to spans or metrics.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "Lineage richness belongs in opaque refs, not raw payload dimensions."
+      ]
+    },
+    {
+      "cardinality_budget_ref": "budget.worker_dimensions",
+      "label": "Worker execution dimensions",
+      "allowed_high_cardinality_dimensions": [
+        "worker.role",
+        "queue.result"
+      ],
+      "normalized_or_hashed_dimensions": [
+        "manifest_id",
+        "authority_operation_id",
+        "workflow_item_id"
+      ],
+      "forbidden_dimensions": [
+        "document_filename",
+        "object_storage_key",
+        "upload_path"
+      ],
+      "enforcement_posture": "Worker metrics stay aggregate-first and attach only opaque IDs.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "Object refs are allowed only in logs with approved opaque names."
+      ]
+    },
+    {
+      "cardinality_budget_ref": "budget.authority_dimensions",
+      "label": "Authority dimensions",
+      "allowed_high_cardinality_dimensions": [
+        "authority.operation_family",
+        "authority.response_class"
+      ],
+      "normalized_or_hashed_dimensions": [
+        "authority_operation_id",
+        "submission_record_id",
+        "authority_binding_ref",
+        "access_binding_hash"
+      ],
+      "forbidden_dimensions": [
+        "authority.request_body",
+        "authority.response_body",
+        "token_value"
+      ],
+      "enforcement_posture": "Keep authority lineage explicit while banning raw request or response material from telemetry attributes.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "Critical for HMRC send, reconcile, and callback flows."
+      ]
+    },
+    {
+      "cardinality_budget_ref": "budget.projection_dimensions",
+      "label": "Projection dimensions",
+      "allowed_high_cardinality_dimensions": [
+        "projection.family",
+        "projection.result"
+      ],
+      "normalized_or_hashed_dimensions": [
+        "manifest_id",
+        "delivery_binding_hash"
+      ],
+      "forbidden_dimensions": [
+        "portal_copy_text",
+        "operator_comment_preview"
+      ],
+      "enforcement_posture": "Projection telemetry can describe freshness, lag, and rebuildability, but not customer-facing text.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "Supports projector health without leaking read-model content."
+      ]
+    },
+    {
+      "cardinality_budget_ref": "budget.client_surface_dimensions",
+      "label": "Client surface dimensions",
+      "allowed_high_cardinality_dimensions": [
+        "shell.family_code",
+        "route.family_code",
+        "resume.outcome"
+      ],
+      "normalized_or_hashed_dimensions": [
+        "tenant_id",
+        "client_id",
+        "session_binding_hash",
+        "access_binding_hash",
+        "opaque_object_ref"
+      ],
+      "forbidden_dimensions": [
+        "dom_text",
+        "screenshot",
+        "clipboard",
+        "keystrokes"
+      ],
+      "enforcement_posture": "Client telemetry uses coded routes and opaque refs only.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "Applies to browser operator, customer portal, and native shells."
+      ]
+    },
+    {
+      "cardinality_budget_ref": "budget.native_surface_dimensions",
+      "label": "Native surface dimensions",
+      "allowed_high_cardinality_dimensions": [
+        "scene.code",
+        "restore.outcome"
+      ],
+      "normalized_or_hashed_dimensions": [
+        "session_binding_hash",
+        "projection_guard_ref",
+        "opaque_object_ref"
+      ],
+      "forbidden_dimensions": [
+        "window_title_text",
+        "preview_content",
+        "local_file_path"
+      ],
+      "enforcement_posture": "Native telemetry codes scene and restore posture instead of serializing rendered text or file-system details.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "Protects native scene restoration and preview safety."
+      ]
+    },
+    {
+      "cardinality_budget_ref": "budget.collector_internal_dimensions",
+      "label": "Collector internal dimensions",
+      "allowed_high_cardinality_dimensions": [
+        "exporter.name",
+        "pipeline.id"
+      ],
+      "normalized_or_hashed_dimensions": [
+        "service.instance.id"
+      ],
+      "forbidden_dimensions": [
+        "collector.raw_header",
+        "collector.payload_sample"
+      ],
+      "enforcement_posture": "Self-observability stays about queue size, refused signals, and exporter failures only.",
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "Collector internal metrics are needed to explain backpressure and drops."
+      ]
+    }
+  ],
+  "policy_rows": [
+    {
+      "sampling_policy_ref": "sampling.traces",
+      "signal_family_ref": "TRACES",
+      "label": "Trace sampling and retention",
+      "retention_class_ref": "retention.telemetry.trace_hot_14d",
+      "cardinality_budget_ref": "budget.manifest_lineage_dimensions",
+      "unsampled_fallback_requirements": [
+        "Audit event still emitted for every compliance-significant action.",
+        "Blocking gates, authority mutations, step-up events, manual checkpoints, filing, amendment, retention, erasure, and replay traces are always kept.",
+        "Unsampled ordinary requests still preserve error_id, request_hash, and workflow or object anchors in logs and audit where operationally relevant."
+      ],
+      "posture_variants": [
+        {
+          "posture_ref": "default",
+          "collection_mode": "TAIL_SAMPLE",
+          "baseline_rate_percent_or_null": 10,
+          "max_window_minutes_or_null": null,
+          "approval_requirement": "No approval required for baseline policy.",
+          "always_keep_conditions": [
+            "status=ERROR",
+            "authority transmit or reconcile",
+            "filing packet build",
+            "amendment evaluate",
+            "retention apply",
+            "erasure execute",
+            "gate hard block",
+            "manual checkpoint",
+            "replay or recovery lineage",
+            "latency > 5000ms on critical services"
+          ],
+          "vendor_export_allowed": true
+        },
+        {
+          "posture_ref": "elevated_debug",
+          "collection_mode": "TIME_BOUND_FULL_CAPTURE",
+          "baseline_rate_percent_or_null": 100,
+          "max_window_minutes_or_null": 120,
+          "approval_requirement": "Named incident or debug approval plus recorded expiry required.",
+          "always_keep_conditions": [
+            "explicit approved debug window only"
+          ],
+          "vendor_export_allowed": false
+        },
+        {
+          "posture_ref": "incident",
+          "collection_mode": "TIME_BOUND_FULL_CAPTURE",
+          "baseline_rate_percent_or_null": 100,
+          "max_window_minutes_or_null": 240,
+          "approval_requirement": "Incident commander approval and audit evidence required.",
+          "always_keep_conditions": [
+            "affected service families only"
+          ],
+          "vendor_export_allowed": false
+        },
+        {
+          "posture_ref": "privacy_constrained",
+          "collection_mode": "MINIMIZED_ALLOWLIST_ONLY",
+          "baseline_rate_percent_or_null": 5,
+          "max_window_minutes_or_null": null,
+          "approval_requirement": "Automatic when privacy or retention posture narrows scope.",
+          "always_keep_conditions": [
+            "authority and filing critical traces stay kept but with minimized attributes"
+          ],
+          "vendor_export_allowed": false
+        }
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "No compliance-significant span may rely on best-effort probabilistic sampling alone."
+      ]
+    },
+    {
+      "sampling_policy_ref": "sampling.metrics",
+      "signal_family_ref": "METRICS",
+      "label": "Metric aggregation and retention",
+      "retention_class_ref": "retention.telemetry.metric_rollup_30d",
+      "cardinality_budget_ref": "budget.worker_dimensions",
+      "unsampled_fallback_requirements": [
+        "Critical counters remain emitted as aggregate metrics even if trace volume is reduced.",
+        "Metric loss must not be mistaken for missing audit or workflow truth."
+      ],
+      "posture_variants": [
+        {
+          "posture_ref": "default",
+          "collection_mode": "ALWAYS_ON_AGGREGATE",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": null,
+          "approval_requirement": "No approval required for aggregate metrics.",
+          "always_keep_conditions": [
+            "all metric points subject to cardinality budget"
+          ],
+          "vendor_export_allowed": false
+        },
+        {
+          "posture_ref": "elevated_debug",
+          "collection_mode": "ALWAYS_ON_AGGREGATE",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": 120,
+          "approval_requirement": "Additional histograms or exemplars require time-bound approval.",
+          "always_keep_conditions": [
+            "affected service families only"
+          ],
+          "vendor_export_allowed": false
+        },
+        {
+          "posture_ref": "incident",
+          "collection_mode": "ALWAYS_ON_AGGREGATE",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": 240,
+          "approval_requirement": "Incident approval for temporary higher-resolution buckets.",
+          "always_keep_conditions": [
+            "affected service families only"
+          ],
+          "vendor_export_allowed": false
+        },
+        {
+          "posture_ref": "privacy_constrained",
+          "collection_mode": "MINIMIZED_ALLOWLIST_ONLY",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": null,
+          "approval_requirement": "Automatic when sensitive surface posture narrows dimensions.",
+          "always_keep_conditions": [
+            "aggregate counts only"
+          ],
+          "vendor_export_allowed": false
+        }
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "Metrics remain aggregate-first and never carry raw payload fields."
+      ]
+    },
+    {
+      "sampling_policy_ref": "sampling.logs",
+      "signal_family_ref": "LOGS",
+      "label": "Structured operational logs",
+      "retention_class_ref": "retention.telemetry.logs_hot_30d",
+      "cardinality_budget_ref": "budget.http_gateway_dimensions",
+      "unsampled_fallback_requirements": [
+        "Warning-or-higher logs always include structured correlation fields.",
+        "General info logs remain code-and-template driven rather than text-dump driven."
+      ],
+      "posture_variants": [
+        {
+          "posture_ref": "default",
+          "collection_mode": "LOG_SEVERITY_GATE",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": null,
+          "approval_requirement": "No approval required for structured warning/error logs.",
+          "always_keep_conditions": [
+            "warning+",
+            "error+",
+            "explicit lifecycle event codes"
+          ],
+          "vendor_export_allowed": false
+        },
+        {
+          "posture_ref": "elevated_debug",
+          "collection_mode": "TIME_BOUND_FULL_CAPTURE",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": 120,
+          "approval_requirement": "Explicit debug approval required and still subject to allowlist.",
+          "always_keep_conditions": [
+            "affected service families only",
+            "still no raw bodies or secrets"
+          ],
+          "vendor_export_allowed": false
+        },
+        {
+          "posture_ref": "incident",
+          "collection_mode": "TIME_BOUND_FULL_CAPTURE",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": 240,
+          "approval_requirement": "Incident approval required and recorded in audit.",
+          "always_keep_conditions": [
+            "affected service families only",
+            "still no raw bodies or secrets"
+          ],
+          "vendor_export_allowed": false
+        },
+        {
+          "posture_ref": "privacy_constrained",
+          "collection_mode": "MINIMIZED_ALLOWLIST_ONLY",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": null,
+          "approval_requirement": "Automatic for privacy-sensitive routes and masked surfaces.",
+          "always_keep_conditions": [
+            "code-only and hash-only fields"
+          ],
+          "vendor_export_allowed": false
+        }
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "Structured allowlist remains in force even during incidents."
+      ]
+    },
+    {
+      "sampling_policy_ref": "sampling.security",
+      "signal_family_ref": "SECURITY",
+      "label": "Restricted security telemetry",
+      "retention_class_ref": "retention.telemetry.security_restricted_90d",
+      "cardinality_budget_ref": "budget.authority_dimensions",
+      "unsampled_fallback_requirements": [
+        "Step-up, access denial, revocation, and egress-policy events always emit restricted telemetry and matching audit evidence."
+      ],
+      "posture_variants": [
+        {
+          "posture_ref": "default",
+          "collection_mode": "ALWAYS_ON_AGGREGATE",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": null,
+          "approval_requirement": "No approval required for restricted security telemetry.",
+          "always_keep_conditions": [
+            "all security events"
+          ],
+          "vendor_export_allowed": false
+        },
+        {
+          "posture_ref": "elevated_debug",
+          "collection_mode": "TIME_BOUND_FULL_CAPTURE",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": 120,
+          "approval_requirement": "Security approval and expiry required.",
+          "always_keep_conditions": [
+            "affected scopes only",
+            "still no raw credentials or payloads"
+          ],
+          "vendor_export_allowed": false
+        },
+        {
+          "posture_ref": "incident",
+          "collection_mode": "TIME_BOUND_FULL_CAPTURE",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": 240,
+          "approval_requirement": "Security incident approval and audit evidence required.",
+          "always_keep_conditions": [
+            "affected scopes only",
+            "still no raw credentials or payloads"
+          ],
+          "vendor_export_allowed": false
+        },
+        {
+          "posture_ref": "privacy_constrained",
+          "collection_mode": "MINIMIZED_ALLOWLIST_ONLY",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": null,
+          "approval_requirement": "Automatic when privacy scope narrows.",
+          "always_keep_conditions": [
+            "hash-only and code-only fields"
+          ],
+          "vendor_export_allowed": false
+        }
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "Restricted security telemetry never leaves the first-party boundary."
+      ]
+    },
+    {
+      "sampling_policy_ref": "sampling.privacy",
+      "signal_family_ref": "PRIVACY",
+      "label": "Restricted privacy telemetry",
+      "retention_class_ref": "retention.telemetry.privacy_restricted_90d",
+      "cardinality_budget_ref": "budget.client_surface_dimensions",
+      "unsampled_fallback_requirements": [
+        "Masking, export, legal-hold, and erasure workflow telemetry always remains correlation-capable and restricted."
+      ],
+      "posture_variants": [
+        {
+          "posture_ref": "default",
+          "collection_mode": "ALWAYS_ON_AGGREGATE",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": null,
+          "approval_requirement": "No approval required for restricted privacy telemetry.",
+          "always_keep_conditions": [
+            "all privacy events"
+          ],
+          "vendor_export_allowed": false
+        },
+        {
+          "posture_ref": "elevated_debug",
+          "collection_mode": "TIME_BOUND_FULL_CAPTURE",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": 120,
+          "approval_requirement": "Privacy approval and expiry required.",
+          "always_keep_conditions": [
+            "affected scopes only",
+            "still no raw personal data or bodies"
+          ],
+          "vendor_export_allowed": false
+        },
+        {
+          "posture_ref": "incident",
+          "collection_mode": "TIME_BOUND_FULL_CAPTURE",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": 240,
+          "approval_requirement": "Privacy or compliance incident approval required.",
+          "always_keep_conditions": [
+            "affected scopes only",
+            "still no raw personal data or bodies"
+          ],
+          "vendor_export_allowed": false
+        },
+        {
+          "posture_ref": "privacy_constrained",
+          "collection_mode": "MINIMIZED_ALLOWLIST_ONLY",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": null,
+          "approval_requirement": "Automatic on privacy-sensitive views and erasure flows.",
+          "always_keep_conditions": [
+            "hash-only and code-only fields"
+          ],
+          "vendor_export_allowed": false
+        }
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "Privacy telemetry is restricted, minimized, and separately searchable."
+      ]
+    },
+    {
+      "sampling_policy_ref": "sampling.audit_links",
+      "signal_family_ref": "AUDIT_LINKS",
+      "label": "Audit-link join indices",
+      "retention_class_ref": "retention.telemetry.audit_link_30d",
+      "cardinality_budget_ref": "budget.collector_internal_dimensions",
+      "unsampled_fallback_requirements": [
+        "If the join index degrades or expires, investigations still reconstruct from trace/log refs plus durable audit truth."
+      ],
+      "posture_variants": [
+        {
+          "posture_ref": "default",
+          "collection_mode": "JOIN_INDEX_ONLY",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": null,
+          "approval_requirement": "No approval required for derived join rows.",
+          "always_keep_conditions": [
+            "derived join rows only"
+          ],
+          "vendor_export_allowed": false
+        },
+        {
+          "posture_ref": "elevated_debug",
+          "collection_mode": "JOIN_INDEX_ONLY",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": 120,
+          "approval_requirement": "No widening of payload; only additional join detail refs allowed.",
+          "always_keep_conditions": [
+            "still derived join rows only"
+          ],
+          "vendor_export_allowed": false
+        },
+        {
+          "posture_ref": "incident",
+          "collection_mode": "JOIN_INDEX_ONLY",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": 240,
+          "approval_requirement": "Investigation approval recorded in audit.",
+          "always_keep_conditions": [
+            "still derived join rows only"
+          ],
+          "vendor_export_allowed": false
+        },
+        {
+          "posture_ref": "privacy_constrained",
+          "collection_mode": "MINIMIZED_ALLOWLIST_ONLY",
+          "baseline_rate_percent_or_null": null,
+          "max_window_minutes_or_null": null,
+          "approval_requirement": "Automatic for privacy-limited investigations.",
+          "always_keep_conditions": [
+            "derived join rows only"
+          ],
+          "vendor_export_allowed": false
+        }
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.2 Separation of concerns",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.7 Trace contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.8 Metric contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.9 Logging contract",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+        },
+        {
+          "source_file": "Algorithm/observability_and_audit_contract.md",
+          "source_heading_or_logical_block": "14.13 Invariants",
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+          "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+        },
+        {
+          "source_file": "Algorithm/retention_error_and_observability_contract.md",
+          "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+          "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "Evidence required for promotion",
+          "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+          "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+        },
+        {
+          "source_file": "PROMPT/CARDS/pc_0044.md",
+          "source_heading_or_logical_block": "Execution Summary",
+          "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+          "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+          "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+        }
+      ],
+      "notes": [
+        "Audit-link rows accelerate queries but are not proof-of-record."
+      ]
+    }
+  ],
+  "truth_boundary_statement": "Sampling changes telemetry cost and queryability only. Audit evidence, authority proof, and release evidence stay durable and unsampled.",
+  "typed_gaps": [
+    "GAP_BACKEND_STORAGE_CLASS_IMPLEMENTATION_DEFERRED_UNTIL_PROVIDER_SELECTION"
+  ],
+  "notes": [
+    "Debug and incident widening are time-bounded, auditable, and still bound by allowlist/redaction law."
+  ],
+  "source_refs": [
+    {
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.2 Separation of concerns",
+      "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+      "rationale": "Operational, security, and privacy telemetry must remain distinct from append-only audit evidence."
+    },
+    {
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.4 Mandatory correlation keys",
+      "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+      "rationale": "Every signal family needs correlation keys that bind telemetry back to manifest, authority, workflow, and release lineage."
+    },
+    {
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.7 Trace contract",
+      "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+      "rationale": "Compliance-capable traces must preserve manifest-rooted structure and explicit sampling posture for critical flows."
+    },
+    {
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.8 Metric contract",
+      "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+      "rationale": "Reliability, security, privacy, and delivery metrics are mandatory even when backend product choice remains open."
+    },
+    {
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.9 Logging contract",
+      "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+      "rationale": "Structured logging must include correlation keys and message-template posture while excluding raw secrets and sensitive bodies."
+    },
+    {
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.10 Audit versus telemetry retention",
+      "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+      "rationale": "Sampling and retention decisions for telemetry may never erase required audit history or collapse restricted event families into generic logs."
+    },
+    {
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.13 Invariants",
+      "source_ref": "Algorithm/observability_and_audit_contract.md::L631[14.13_Invariants]",
+      "rationale": "Critical spans, authority mutations, and blocking gates require explicit trace and audit linkage rather than best-effort telemetry."
+    },
+    {
+      "source_file": "Algorithm/retention_error_and_observability_contract.md",
+      "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+      "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+      "rationale": "Visibility classes, masking posture, and retention state have to survive across the telemetry and audit split."
+    },
+    {
+      "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+      "source_heading_or_logical_block": "3. Secret, key, and token handling",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L52[3._Secret_key_and_token_handling]",
+      "rationale": "Telemetry secrets, headers, and downstream credentials must stay in governed secret boundaries and out of logs or repo-tracked payloads."
+    },
+    {
+      "source_file": "Algorithm/deployment_and_resilience_contract.md",
+      "source_heading_or_logical_block": "1. Reference runtime topology",
+      "source_ref": "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+      "rationale": "The runtime topology already separates operator access, orchestrator, workers, authority gateway, broker, control store, and audit store, so telemetry topology must match those boundaries."
+    },
+    {
+      "source_file": "Algorithm/verification_and_release_gates.md",
+      "source_heading_or_logical_block": "Evidence required for promotion",
+      "source_ref": "Algorithm/verification_and_release_gates.md::L273[4._Evidence_required_for_promotion]",
+      "rationale": "Release correlation requires build digest, candidate identity, schema bundle, and admissibility lineage inside telemetry resources and joins."
+    },
+    {
+      "source_file": "PROMPT/CARDS/pc_0044.md",
+      "source_heading_or_logical_block": "Execution Summary",
+      "source_ref": "PROMPT/CARDS/pc_0044.md::L177[pc_0044_execution_summary]",
+      "rationale": "The Sentry-compatible monitoring workspace already exists as a secondary vendor overlay and must not be mistaken for the primary telemetry substrate."
+    },
+    {
+      "source_file": "data/analysis/dependency_register.json",
+      "source_heading_or_logical_block": "OPENTELEMETRY_COLLECTION_AND_BACKEND",
+      "source_ref": "data/analysis/dependency_register.json::dependency_key=OPENTELEMETRY_COLLECTION_AND_BACKEND",
+      "rationale": "The dependency register keeps core OpenTelemetry backends in procurement or platform-choice posture, so this card must stay portable and fail closed."
+    }
+  ]
+}

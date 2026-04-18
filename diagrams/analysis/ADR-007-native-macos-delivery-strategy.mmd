@@ -1,0 +1,36 @@
+flowchart LR
+  operator["Internal operator"]
+  browser["System browser / ASWebAuthenticationSession"]
+
+  subgraph Native["Signed macOS app"]
+    app["InternalOperatorWorkspaceMac"]
+    swiftui["SwiftUI shell + scenes"]
+    appkit["Targeted AppKit acceleration"]
+    cache["Keychain + tenant-bound disposable cache"]
+  end
+
+  subgraph Packages["Workspace packages"]
+    domain["OperatorDomain"]
+    sdk["OperatorPlatformSDK"]
+    persistence["OperatorPersistence"]
+    ui["OperatorUI + OperatorDesktopKit"]
+    flags["OperatorFeatureFlags + Diagnostics"]
+  end
+
+  north["Northbound API + stream + receipt surfaces"]
+
+  operator --> app
+  app --> swiftui
+  app --> appkit
+  app --> cache
+  app --> browser
+
+  swiftui --> domain
+  swiftui --> ui
+  appkit --> ui
+  app --> sdk
+  app --> persistence
+  app --> flags
+
+  sdk --> north
+  persistence --> north

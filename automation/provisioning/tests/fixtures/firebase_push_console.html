@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Device Messaging Control Plane Fixture</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        background: #f5f6f4;
+        color: #111418;
+      }
+
+      header,
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: center;
+        padding: 24px 0 16px;
+      }
+
+      nav {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+
+      nav a {
+        color: #456a88;
+        text-decoration: none;
+      }
+
+      main {
+        display: grid;
+        gap: 1rem;
+        padding-bottom: 32px;
+      }
+
+      section {
+        background: #ffffff;
+        border: 1px solid rgba(17, 20, 24, 0.08);
+        border-radius: 18px;
+        padding: 24px;
+      }
+
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: start;
+        margin-bottom: 18px;
+      }
+
+      .badge,
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 999px;
+        padding: 0.35rem 0.7rem;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .badge {
+        background: rgba(69, 106, 136, 0.12);
+        color: #456a88;
+      }
+
+      .chip {
+        background: rgba(78, 108, 94, 0.12);
+        color: #4e6c5e;
+      }
+
+      .chip[data-state="warning"] {
+        background: rgba(138, 92, 24, 0.12);
+        color: #8a5c18;
+      }
+
+      button {
+        border: 1px solid rgba(17, 20, 24, 0.1);
+        border-radius: 999px;
+        background: #456a88;
+        color: #ffffff;
+        padding: 11px 16px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .grid {
+        display: grid;
+        gap: 14px;
+      }
+
+      .card {
+        border: 1px solid rgba(17, 20, 24, 0.08);
+        border-radius: 14px;
+        padding: 16px;
+        background: #f8faf8;
+      }
+
+      .row-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: start;
+      }
+
+      .meta {
+        color: #65707a;
+        font-size: 14px;
+      }
+
+      strong {
+        display: block;
+        font-size: 13px;
+        color: #65707a;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      code {
+        font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+        font-size: 13px;
+      }
+
+      .row-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+      }
+    </style>
+  </head>
+  <body data-scenario="existing">
+    <header>
+      <div>
+        <p class="meta">Provisioning fixture</p>
+        <h1>Device messaging control plane</h1>
+      </div>
+      <nav aria-label="Provider navigation">
+        <a href="#project">Project</a>
+        <a href="#credentials">Credentials</a>
+        <a href="#channels">Channel catalog</a>
+        <a href="#continuity">Continuity matrix</a>
+      </nav>
+    </header>
+    <main>
+      <section id="project">
+        <div class="section-head">
+          <div>
+            <p class="meta">Provider workspace</p>
+            <h2>Project</h2>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <span class="badge">FCM-compatible</span>
+            <button id="project-action" type="button">Create or adopt messaging project</button>
+          </div>
+        </div>
+        <div class="grid" id="project-list"></div>
+      </section>
+
+      <section id="credentials">
+        <div class="section-head">
+          <div>
+            <p class="meta">Vault-safe lineage</p>
+            <h2>Credentials</h2>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <span class="chip" id="apns-state-chip">APNs bound</span>
+            <button id="credential-action" type="button">Bind APNs and vault-safe credentials</button>
+          </div>
+        </div>
+        <div class="grid" id="credential-list"></div>
+      </section>
+
+      <section id="channels">
+        <div class="section-head">
+          <div>
+            <p class="meta">Active delivery surfaces</p>
+            <h2>Channel catalog</h2>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <span class="badge" id="surface-state-chip">Native macOS only</span>
+            <button id="channel-action" type="button">Validate channel catalog</button>
+          </div>
+        </div>
+        <div class="grid" id="channel-list"></div>
+      </section>
+
+      <section id="continuity">
+        <div class="section-head">
+          <div>
+            <p class="meta">Same-object reopen rules</p>
+            <h2>Continuity matrix</h2>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <span class="badge">Work item continuity</span>
+            <button id="continuity-action" type="button">Validate continuity targets</button>
+          </div>
+        </div>
+        <div class="grid" id="continuity-list"></div>
+      </section>
+    </main>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const scenario = params.get("scenario") || "existing";
+      document.body.dataset.scenario = scenario;
+
+      const projectList = document.getElementById("project-list");
+      const credentialList = document.getElementById("credential-list");
+      const channelList = document.getElementById("channel-list");
+      const continuityList = document.getElementById("continuity-list");
+      const apnsStateChip = document.getElementById("apns-state-chip");
+      const surfaceStateChip = document.getElementById("surface-state-chip");
+
+      const projectRows = [
+        {
+          label: "Sandbox native operator project",
+          alias: "push-sandbox",
+          projectId: "taxat-device-messaging-sandbox",
+          scope: "Native macOS internal only",
+          disposition: scenario === "fresh" ? "Created during run" : "Adopted existing"
+        },
+        {
+          label: "Production native operator project",
+          alias: "push-production",
+          projectId: "taxat-device-messaging-production",
+          scope: "Native macOS internal only",
+          disposition: "Adopted existing"
+        }
+      ];
+
+      const credentialRows = [
+        {
+          label: "Sandbox FCM service account",
+          vaultRef: "vault://push/fcm/sandbox/service-account",
+          state: "Vault only"
+        },
+        {
+          label: "Sandbox APNs auth key",
+          vaultRef: "vault://push/apns/sandbox/auth-key",
+          state: scenario === "apns-missing" ? "Missing" : "Bound"
+        }
+      ];
+
+      const channelRows = [
+        {
+          label: "Native macOS system notification",
+          surface: "NATIVE_MACOS_OPERATOR",
+          state: "Active",
+          families: "ESCALATION, CUSTOMER_REPLY, SLA_OVERDUE, SLA_BREACHED"
+        },
+        {
+          label: "Customer portal web push",
+          surface: "CLIENT_PORTAL_WEB",
+          state: "Deferred",
+          families: "No push families"
+        }
+      ];
+
+      const continuityRows = [
+        {
+          label: "Escalation",
+          target: "native_primary_work_item_scene",
+          focus: "focus.escalation-summary:{item_id}",
+          fallback: "native_primary_manifest_scene"
+        },
+        {
+          label: "Customer reply",
+          target: "native_primary_work_item_scene",
+          focus: "focus.customer-activity.latest-reply:{item_id}",
+          fallback: "native_primary_manifest_scene"
+        }
+      ];
+
+      function renderCard(parent, row, extraMarkup = "") {
+        const article = document.createElement("article");
+        article.className = "card";
+        if (row.projectId) {
+          article.dataset.testid = "push-project-row";
+        }
+        article.innerHTML = `
+          <div class="row-header">
+            <div>
+              <strong>${row.label}</strong>
+              <p class="meta">${row.alias || row.surface || row.target}</p>
+            </div>
+            <span class="chip">${row.state || row.disposition || "Visible"}</span>
+          </div>
+          <div class="row-grid">
+            ${extraMarkup}
+          </div>
+        `;
+        parent.append(article);
+      }
+
+      projectRows.forEach((row) => {
+        renderCard(
+          projectList,
+          row,
+          `
+            <div><strong>Project ID</strong><code>${row.projectId}</code></div>
+            <div><strong>Scope</strong><span>${row.scope}</span></div>
+          `,
+        );
+      });
+
+      credentialRows.forEach((row) => {
+        renderCard(
+          credentialList,
+          row,
+          `
+            <div><strong>Vault ref</strong><code>${row.vaultRef}</code></div>
+            <div><strong>Posture</strong><span>${row.state}</span></div>
+          `,
+        );
+      });
+
+      channelRows.forEach((row) => {
+        renderCard(
+          channelList,
+          row,
+          `
+            <div><strong>Surface</strong><span>${row.surface}</span></div>
+            <div><strong>Families</strong><span>${row.families}</span></div>
+          `,
+        );
+      });
+
+      continuityRows.forEach((row) => {
+        renderCard(
+          continuityList,
+          row,
+          `
+            <div><strong>Target</strong><code>${row.target}</code></div>
+            <div><strong>Focus</strong><code>${row.focus}</code></div>
+            <div><strong>Fallback</strong><code>${row.fallback}</code></div>
+          `,
+        );
+      });
+
+      if (scenario === "apns-missing") {
+        apnsStateChip.textContent = "APNs missing";
+        apnsStateChip.dataset.state = "warning";
+      }
+      if (scenario === "fresh") {
+        surfaceStateChip.textContent = "Projects created";
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,977 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Auth0-Compatible IdP Control Plane Fixture</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        background: #f5f6f4;
+        color: #111418;
+      }
+
+      header,
+      main {
+        max-width: 1160px;
+        margin: 0 auto;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        padding: 24px 0 16px;
+      }
+
+      nav {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+
+      nav a {
+        color: #415e78;
+        text-decoration: none;
+      }
+
+      main {
+        display: grid;
+        gap: 1rem;
+        padding-bottom: 32px;
+      }
+
+      section {
+        background: #ffffff;
+        border: 1px solid rgba(17, 20, 24, 0.08);
+        border-radius: 18px;
+        padding: 24px;
+      }
+
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: start;
+        margin-bottom: 18px;
+      }
+
+      .badge,
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 999px;
+        padding: 0.35rem 0.7rem;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .badge {
+        background: rgba(65, 94, 120, 0.1);
+        color: #415e78;
+      }
+
+      .chip {
+        background: rgba(84, 112, 93, 0.1);
+        color: #54705d;
+      }
+
+      .warning {
+        background: rgba(138, 92, 24, 0.12);
+        color: #8a5c18;
+      }
+
+      button {
+        border: 1px solid rgba(17, 20, 24, 0.1);
+        border-radius: 999px;
+        background: #415e78;
+        color: #ffffff;
+        padding: 11px 16px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: #ffffff;
+        color: #111418;
+      }
+
+      .grid {
+        display: grid;
+        gap: 14px;
+      }
+
+      .tenant-row,
+      .client-row,
+      .policy-row {
+        border: 1px solid rgba(17, 20, 24, 0.08);
+        border-radius: 14px;
+        padding: 14px 16px;
+        background: #f8faf8;
+      }
+
+      .row-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: start;
+      }
+
+      .meta {
+        color: #65707a;
+        font-size: 14px;
+      }
+
+      .row-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      strong {
+        display: block;
+        font-size: 13px;
+        color: #65707a;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      code {
+        font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+        font-size: 13px;
+      }
+
+      .policy-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .policy-chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <p class="meta">Provisioning fixture</p>
+        <h1>Identity control plane</h1>
+      </div>
+      <nav aria-label="Provider navigation">
+        <a href="#tenants">Tenants</a>
+        <a href="#applications">Application clients</a>
+        <a href="#machine-clients">Machine clients</a>
+        <a href="#access-and-session-policy">Access and session policy</a>
+      </nav>
+    </header>
+    <main>
+      <section id="tenants">
+        <div class="section-head">
+          <div>
+            <p class="meta">Provider tenant topology</p>
+            <h2>Tenants</h2>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <span class="badge">Auth0-compatible</span>
+            <button id="create-tenants" type="button">Create recommended tenants</button>
+          </div>
+        </div>
+        <div class="grid" id="tenant-list"></div>
+      </section>
+
+      <section id="applications">
+        <div class="section-head">
+          <div>
+            <p class="meta">Interactive surface topology</p>
+            <h2>Application clients</h2>
+          </div>
+          <button id="create-clients" type="button">Create recommended clients</button>
+        </div>
+        <div class="grid" id="interactive-client-list"></div>
+      </section>
+
+      <section id="machine-clients">
+        <div class="section-head">
+          <div>
+            <p class="meta">Machine and bootstrap boundary</p>
+            <h2>Machine clients</h2>
+          </div>
+          <span class="chip warning">No human MFA semantics</span>
+        </div>
+        <div class="grid" id="machine-client-list"></div>
+      </section>
+
+      <section id="access-and-session-policy">
+        <div class="section-head">
+          <div>
+            <p class="meta">Policy workspace</p>
+            <h2>Access and session policy</h2>
+          </div>
+          <span class="badge">Source-backed</span>
+        </div>
+
+        <div class="grid">
+          <section id="roles-and-scopes-section">
+            <div class="section-head">
+              <div>
+                <p class="meta">Coarse entry posture</p>
+                <h3>Roles and scopes</h3>
+              </div>
+              <button id="apply-roles-and-scopes" type="button">Apply recommended roles and scopes</button>
+            </div>
+            <div class="policy-grid" id="role-scope-policy-list"></div>
+          </section>
+
+          <section id="mfa-step-up-section">
+            <div class="section-head">
+              <div>
+                <p class="meta">Explicit challenge model</p>
+                <h3>MFA and step-up</h3>
+              </div>
+              <button id="apply-mfa-and-step-up" type="button">Apply MFA and step-up posture</button>
+            </div>
+            <div class="policy-grid" id="mfa-policy-list"></div>
+          </section>
+
+          <section id="session-policy-section">
+            <div class="section-head">
+              <div>
+                <p class="meta">Channel-specific session law</p>
+                <h3>Session policies</h3>
+              </div>
+              <button id="apply-session-policies" type="button">Apply session policies</button>
+            </div>
+            <div class="policy-grid" id="session-policy-list"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const scenario = params.get("scenario") || "fresh";
+
+      const tenantList = document.getElementById("tenant-list");
+      const interactiveClientList = document.getElementById("interactive-client-list");
+      const machineClientList = document.getElementById("machine-client-list");
+      const createTenantsButton = document.getElementById("create-tenants");
+      const createClientsButton = document.getElementById("create-clients");
+      const roleScopePolicyList = document.getElementById("role-scope-policy-list");
+      const mfaPolicyList = document.getElementById("mfa-policy-list");
+      const sessionPolicyList = document.getElementById("session-policy-list");
+      const applyRolesAndScopesButton = document.getElementById("apply-roles-and-scopes");
+      const applyMfaAndStepUpButton = document.getElementById("apply-mfa-and-step-up");
+      const applySessionPoliciesButton = document.getElementById("apply-session-policies");
+
+      function fingerprint(value) {
+        let hash = 0;
+        for (let index = 0; index < value.length; index += 1) {
+          hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
+        }
+        return `sha256:${hash.toString(16).padStart(8, "0")}`;
+      }
+
+      const recommendedTenants = [
+        {
+          tenantRef: "idp_tenant_dev_shared",
+          tenantLabel: "Taxat Development Shared Tenant",
+          tenantDomainAlias: "taxat-dev.eu.auth0.test",
+          customDomain: "auth.dev.taxat.example",
+          providerEnvironmentTag: "Development",
+          region: "EU",
+          productEnvironmentIds: ["env_local_provisioning_workstation"],
+          secretNamespaceRefs: ["sec_local_provisioning_sandbox"],
+          sourceDisposition: "CREATED_DURING_RUN"
+        },
+        {
+          tenantRef: "idp_tenant_staging_runtime",
+          tenantLabel: "Taxat Staging Runtime Tenant",
+          tenantDomainAlias: "taxat-staging.eu.auth0.test",
+          customDomain: "auth.sandbox-preprod.taxat.example",
+          providerEnvironmentTag: "Staging",
+          region: "EU",
+          productEnvironmentIds: [
+            "env_shared_sandbox_integration",
+            "env_preproduction_verification"
+          ],
+          secretNamespaceRefs: [
+            "sec_sandbox_runtime",
+            "sec_preprod_runtime"
+          ],
+          sourceDisposition: "CREATED_DURING_RUN"
+        },
+        {
+          tenantRef: "idp_tenant_production_runtime",
+          tenantLabel: "Taxat Production Runtime Tenant",
+          tenantDomainAlias: "taxat-production.eu.auth0.test",
+          customDomain: "auth.production.taxat.example",
+          providerEnvironmentTag: "Production",
+          region: "EU",
+          productEnvironmentIds: ["env_production"],
+          secretNamespaceRefs: ["sec_production_runtime"],
+          sourceDisposition: "CREATED_DURING_RUN"
+        }
+      ];
+
+      const recommendedInteractiveClients = [
+        {
+          clientRef: "idp_client_operator_browser_sandbox",
+          family: "OPERATOR_BROWSER",
+          productEnvironmentId: "env_shared_sandbox_integration",
+          tenantRef: "idp_tenant_staging_runtime",
+          applicationType: "REGULAR_WEB_APPLICATION",
+          clientVisibility: "CONFIDENTIAL",
+          deployableId: "operator-web",
+          clientDisplayName: "Taxat Operator Web Sandbox",
+          clientIdAlias: "idp-operator-web-sandbox",
+          clientSecret: "sandbox-operator-secret",
+          callbackProfileRef: "idp_cb_operator_browser_sandbox",
+          callbackUrls: ["https://auth.sandbox.taxat.example/oauth/idp/operator/callback"],
+          logoutUrls: ["https://operator.sandbox.taxat.example/auth/logout-complete"],
+          allowedWebOrigins: ["https://operator.sandbox.taxat.example"],
+          bundleIdentifier: null,
+          tokenEndpointAuthMethod: "client_secret_post",
+          grantPosture: ["authorization_code", "refresh_token"],
+          sourceDisposition: "CREATED_DURING_RUN",
+          secretNamespaceRef: "sec_sandbox_runtime"
+        },
+        {
+          clientRef: "idp_client_portal_browser_sandbox",
+          family: "PORTAL_BROWSER",
+          productEnvironmentId: "env_shared_sandbox_integration",
+          tenantRef: "idp_tenant_staging_runtime",
+          applicationType: "REGULAR_WEB_APPLICATION",
+          clientVisibility: "CONFIDENTIAL",
+          deployableId: "client-portal-web",
+          clientDisplayName: "Taxat Portal Web Sandbox",
+          clientIdAlias: "idp-portal-web-sandbox",
+          clientSecret: "sandbox-portal-secret",
+          callbackProfileRef: "idp_cb_portal_browser_sandbox",
+          callbackUrls: ["https://auth.sandbox.taxat.example/oauth/idp/portal/callback"],
+          logoutUrls: ["https://portal.sandbox.taxat.example/auth/logout-complete"],
+          allowedWebOrigins: ["https://portal.sandbox.taxat.example"],
+          bundleIdentifier: null,
+          tokenEndpointAuthMethod: "client_secret_post",
+          grantPosture: ["authorization_code", "refresh_token"],
+          sourceDisposition: "CREATED_DURING_RUN",
+          secretNamespaceRef: "sec_sandbox_runtime"
+        },
+        {
+          clientRef: "idp_client_native_operator_sandbox",
+          family: "NATIVE_MACOS_OPERATOR",
+          productEnvironmentId: "env_shared_sandbox_integration",
+          tenantRef: "idp_tenant_staging_runtime",
+          applicationType: "NATIVE_APPLICATION",
+          clientVisibility: "PUBLIC",
+          deployableId: "Apps/InternalOperatorWorkspaceMac",
+          clientDisplayName: "Taxat Native Operator Sandbox",
+          clientIdAlias: "idp-native-operator-sandbox",
+          clientSecret: null,
+          callbackProfileRef: "idp_cb_native_operator_sandbox",
+          callbackUrls: ["https://auth.sandbox.taxat.example/oauth/idp/native/operator/callback"],
+          logoutUrls: ["https://auth.sandbox.taxat.example/oauth/idp/native/operator/callback"],
+          allowedWebOrigins: [],
+          bundleIdentifier: "dev.taxat.InternalOperatorWorkspaceMac",
+          tokenEndpointAuthMethod: "none",
+          grantPosture: ["authorization_code", "refresh_token", "pkce"],
+          sourceDisposition: "CREATED_DURING_RUN",
+          secretNamespaceRef: null
+        },
+        {
+          clientRef: "idp_client_operator_browser_preprod",
+          family: "OPERATOR_BROWSER",
+          productEnvironmentId: "env_preproduction_verification",
+          tenantRef: "idp_tenant_staging_runtime",
+          applicationType: "REGULAR_WEB_APPLICATION",
+          clientVisibility: "CONFIDENTIAL",
+          deployableId: "operator-web",
+          clientDisplayName: "Taxat Operator Web Pre-production",
+          clientIdAlias: "idp-operator-web-preprod",
+          clientSecret: "preprod-operator-secret",
+          callbackProfileRef: "idp_cb_operator_browser_preprod",
+          callbackUrls: ["https://auth.preprod.taxat.example/oauth/idp/operator/callback"],
+          logoutUrls: ["https://operator.preprod.taxat.example/auth/logout-complete"],
+          allowedWebOrigins: ["https://operator.preprod.taxat.example"],
+          bundleIdentifier: null,
+          tokenEndpointAuthMethod: "client_secret_post",
+          grantPosture: ["authorization_code", "refresh_token"],
+          sourceDisposition: "CREATED_DURING_RUN",
+          secretNamespaceRef: "sec_preprod_runtime"
+        },
+        {
+          clientRef: "idp_client_portal_browser_preprod",
+          family: "PORTAL_BROWSER",
+          productEnvironmentId: "env_preproduction_verification",
+          tenantRef: "idp_tenant_staging_runtime",
+          applicationType: "REGULAR_WEB_APPLICATION",
+          clientVisibility: "CONFIDENTIAL",
+          deployableId: "client-portal-web",
+          clientDisplayName: "Taxat Portal Web Pre-production",
+          clientIdAlias: "idp-portal-web-preprod",
+          clientSecret: "preprod-portal-secret",
+          callbackProfileRef: "idp_cb_portal_browser_preprod",
+          callbackUrls: ["https://auth.preprod.taxat.example/oauth/idp/portal/callback"],
+          logoutUrls: ["https://portal.preprod.taxat.example/auth/logout-complete"],
+          allowedWebOrigins: ["https://portal.preprod.taxat.example"],
+          bundleIdentifier: null,
+          tokenEndpointAuthMethod: "client_secret_post",
+          grantPosture: ["authorization_code", "refresh_token"],
+          sourceDisposition: "CREATED_DURING_RUN",
+          secretNamespaceRef: "sec_preprod_runtime"
+        },
+        {
+          clientRef: "idp_client_native_operator_preprod",
+          family: "NATIVE_MACOS_OPERATOR",
+          productEnvironmentId: "env_preproduction_verification",
+          tenantRef: "idp_tenant_staging_runtime",
+          applicationType: "NATIVE_APPLICATION",
+          clientVisibility: "PUBLIC",
+          deployableId: "Apps/InternalOperatorWorkspaceMac",
+          clientDisplayName: "Taxat Native Operator Pre-production",
+          clientIdAlias: "idp-native-operator-preprod",
+          clientSecret: null,
+          callbackProfileRef: "idp_cb_native_operator_preprod",
+          callbackUrls: ["https://auth.preprod.taxat.example/oauth/idp/native/operator/callback"],
+          logoutUrls: ["https://auth.preprod.taxat.example/oauth/idp/native/operator/callback"],
+          allowedWebOrigins: [],
+          bundleIdentifier: "dev.taxat.InternalOperatorWorkspaceMac",
+          tokenEndpointAuthMethod: "none",
+          grantPosture: ["authorization_code", "refresh_token", "pkce"],
+          sourceDisposition: "CREATED_DURING_RUN",
+          secretNamespaceRef: null
+        },
+        {
+          clientRef: "idp_client_operator_browser_production",
+          family: "OPERATOR_BROWSER",
+          productEnvironmentId: "env_production",
+          tenantRef: "idp_tenant_production_runtime",
+          applicationType: "REGULAR_WEB_APPLICATION",
+          clientVisibility: "CONFIDENTIAL",
+          deployableId: "operator-web",
+          clientDisplayName: "Taxat Operator Web Production",
+          clientIdAlias: "idp-operator-web-production",
+          clientSecret: "production-operator-secret",
+          callbackProfileRef: "idp_cb_operator_browser_production",
+          callbackUrls: ["https://auth.production.taxat.example/oauth/idp/operator/callback"],
+          logoutUrls: ["https://operator.production.taxat.example/auth/logout-complete"],
+          allowedWebOrigins: ["https://operator.production.taxat.example"],
+          bundleIdentifier: null,
+          tokenEndpointAuthMethod: "client_secret_post",
+          grantPosture: ["authorization_code", "refresh_token"],
+          sourceDisposition: "CREATED_DURING_RUN",
+          secretNamespaceRef: "sec_production_runtime"
+        },
+        {
+          clientRef: "idp_client_portal_browser_production",
+          family: "PORTAL_BROWSER",
+          productEnvironmentId: "env_production",
+          tenantRef: "idp_tenant_production_runtime",
+          applicationType: "REGULAR_WEB_APPLICATION",
+          clientVisibility: "CONFIDENTIAL",
+          deployableId: "client-portal-web",
+          clientDisplayName: "Taxat Portal Web Production",
+          clientIdAlias: "idp-portal-web-production",
+          clientSecret: "production-portal-secret",
+          callbackProfileRef: "idp_cb_portal_browser_production",
+          callbackUrls: ["https://auth.production.taxat.example/oauth/idp/portal/callback"],
+          logoutUrls: ["https://portal.production.taxat.example/auth/logout-complete"],
+          allowedWebOrigins: ["https://portal.production.taxat.example"],
+          bundleIdentifier: null,
+          tokenEndpointAuthMethod: "client_secret_post",
+          grantPosture: ["authorization_code", "refresh_token"],
+          sourceDisposition: "CREATED_DURING_RUN",
+          secretNamespaceRef: "sec_production_runtime"
+        },
+        {
+          clientRef: "idp_client_native_operator_production",
+          family: "NATIVE_MACOS_OPERATOR",
+          productEnvironmentId: "env_production",
+          tenantRef: "idp_tenant_production_runtime",
+          applicationType: "NATIVE_APPLICATION",
+          clientVisibility: "PUBLIC",
+          deployableId: "Apps/InternalOperatorWorkspaceMac",
+          clientDisplayName: "Taxat Native Operator Production",
+          clientIdAlias: "idp-native-operator-production",
+          clientSecret: null,
+          callbackProfileRef: "idp_cb_native_operator_production",
+          callbackUrls: ["https://auth.production.taxat.example/oauth/idp/native/operator/callback"],
+          logoutUrls: ["https://auth.production.taxat.example/oauth/idp/native/operator/callback"],
+          allowedWebOrigins: [],
+          bundleIdentifier: "dev.taxat.InternalOperatorWorkspaceMac",
+          tokenEndpointAuthMethod: "none",
+          grantPosture: ["authorization_code", "refresh_token", "pkce"],
+          sourceDisposition: "CREATED_DURING_RUN",
+          secretNamespaceRef: null
+        }
+      ];
+
+      const recommendedMachineClients = [
+        {
+          clientRef: "idp_client_backend_automation_sandbox",
+          family: "BACKEND_SERVICE_AUTOMATION",
+          productEnvironmentId: "env_shared_sandbox_integration",
+          tenantRef: "idp_tenant_staging_runtime",
+          applicationType: "MACHINE_TO_MACHINE_APPLICATION",
+          clientVisibility: "CONFIDENTIAL",
+          deployableId: "control-plane-automation",
+          clientDisplayName: "Taxat Backend Automation Sandbox",
+          clientIdAlias: "idp-backend-automation-sandbox",
+          clientSecret: "sandbox-backend-automation-secret",
+          callbackProfileRef: null,
+          callbackUrls: [],
+          logoutUrls: [],
+          allowedWebOrigins: [],
+          bundleIdentifier: null,
+          tokenEndpointAuthMethod: "client_secret_post",
+          grantPosture: ["client_credentials"],
+          sourceDisposition: "CREATED_DURING_RUN",
+          secretNamespaceRef: "sec_sandbox_runtime"
+        },
+        {
+          clientRef: "idp_client_backend_automation_preprod",
+          family: "BACKEND_SERVICE_AUTOMATION",
+          productEnvironmentId: "env_preproduction_verification",
+          tenantRef: "idp_tenant_staging_runtime",
+          applicationType: "MACHINE_TO_MACHINE_APPLICATION",
+          clientVisibility: "CONFIDENTIAL",
+          deployableId: "control-plane-automation",
+          clientDisplayName: "Taxat Backend Automation Pre-production",
+          clientIdAlias: "idp-backend-automation-preprod",
+          clientSecret: "preprod-backend-automation-secret",
+          callbackProfileRef: null,
+          callbackUrls: [],
+          logoutUrls: [],
+          allowedWebOrigins: [],
+          bundleIdentifier: null,
+          tokenEndpointAuthMethod: "client_secret_post",
+          grantPosture: ["client_credentials"],
+          sourceDisposition: "CREATED_DURING_RUN",
+          secretNamespaceRef: "sec_preprod_runtime"
+        },
+        {
+          clientRef: "idp_client_backend_automation_production",
+          family: "BACKEND_SERVICE_AUTOMATION",
+          productEnvironmentId: "env_production",
+          tenantRef: "idp_tenant_production_runtime",
+          applicationType: "MACHINE_TO_MACHINE_APPLICATION",
+          clientVisibility: "CONFIDENTIAL",
+          deployableId: "control-plane-automation",
+          clientDisplayName: "Taxat Backend Automation Production",
+          clientIdAlias: "idp-backend-automation-production",
+          clientSecret: "production-backend-automation-secret",
+          callbackProfileRef: null,
+          callbackUrls: [],
+          logoutUrls: [],
+          allowedWebOrigins: [],
+          bundleIdentifier: null,
+          tokenEndpointAuthMethod: "client_secret_post",
+          grantPosture: ["client_credentials"],
+          sourceDisposition: "CREATED_DURING_RUN",
+          secretNamespaceRef: "sec_production_runtime"
+        },
+        {
+          clientRef: "idp_client_management_bootstrap_dev",
+          family: "PROVIDER_MANAGEMENT_BOOTSTRAP",
+          productEnvironmentId: null,
+          tenantRef: "idp_tenant_dev_shared",
+          applicationType: "MACHINE_TO_MACHINE_APPLICATION",
+          clientVisibility: "CONFIDENTIAL",
+          deployableId: "provider-management-bootstrap",
+          clientDisplayName: "Taxat Provider Management Bootstrap Development",
+          clientIdAlias: "idp-management-bootstrap-dev",
+          clientSecret: "development-management-secret",
+          callbackProfileRef: null,
+          callbackUrls: [],
+          logoutUrls: [],
+          allowedWebOrigins: [],
+          bundleIdentifier: null,
+          tokenEndpointAuthMethod: "client_secret_post",
+          grantPosture: ["client_credentials"],
+          sourceDisposition: "CREATED_DURING_RUN",
+          secretNamespaceRef: "sec_local_provisioning_sandbox"
+        },
+        {
+          clientRef: "idp_client_management_bootstrap_staging",
+          family: "PROVIDER_MANAGEMENT_BOOTSTRAP",
+          productEnvironmentId: null,
+          tenantRef: "idp_tenant_staging_runtime",
+          applicationType: "MACHINE_TO_MACHINE_APPLICATION",
+          clientVisibility: "CONFIDENTIAL",
+          deployableId: "provider-management-bootstrap",
+          clientDisplayName: "Taxat Provider Management Bootstrap Staging",
+          clientIdAlias: "idp-management-bootstrap-staging",
+          clientSecret: "staging-management-secret",
+          callbackProfileRef: null,
+          callbackUrls: [],
+          logoutUrls: [],
+          allowedWebOrigins: [],
+          bundleIdentifier: null,
+          tokenEndpointAuthMethod: "client_secret_post",
+          grantPosture: ["client_credentials"],
+          sourceDisposition: "CREATED_DURING_RUN",
+          secretNamespaceRef: "sec_preprod_runtime"
+        },
+        {
+          clientRef: "idp_client_management_bootstrap_production",
+          family: "PROVIDER_MANAGEMENT_BOOTSTRAP",
+          productEnvironmentId: null,
+          tenantRef: "idp_tenant_production_runtime",
+          applicationType: "MACHINE_TO_MACHINE_APPLICATION",
+          clientVisibility: "CONFIDENTIAL",
+          deployableId: "provider-management-bootstrap",
+          clientDisplayName: "Taxat Provider Management Bootstrap Production",
+          clientIdAlias: "idp-management-bootstrap-production",
+          clientSecret: "production-management-secret",
+          callbackProfileRef: null,
+          callbackUrls: [],
+          logoutUrls: [],
+          allowedWebOrigins: [],
+          bundleIdentifier: null,
+          tokenEndpointAuthMethod: "client_secret_post",
+          grantPosture: ["client_credentials"],
+          sourceDisposition: "CREATED_DURING_RUN",
+          secretNamespaceRef: "sec_production_runtime"
+        }
+      ];
+
+      const state = {
+        providerLabel: "Auth0-compatible external IdP",
+        providerMonogram: "OIDC",
+        workspaceIdentityRef: "auth0-team.taxat-control-plane",
+        region: "EU",
+        tenantAdminAlias: "ops.idp.bootstrap",
+        tenants: [],
+        interactiveClients: [],
+        machineClients: [],
+        policy: {
+          policyVersion: "1.0",
+          sourceDisposition: "CREATED_DURING_RUN",
+          roleRefs: [],
+          scopeRefs: [],
+          enabledFactors: [],
+          tenantDefaultMfaPolicy: "",
+          sessionProfileRefs: [],
+          notes: []
+        },
+        notes: [
+          "Fixture only. Production-like topology is modeled without exposing real provider credentials.",
+          "The vendor default remains explicit because earlier ADRs fixed the topology but not the vendor contract."
+        ]
+      };
+
+      const recommendedPolicyState = {
+        policyVersion: "1.0",
+        sourceDisposition: "ADOPTED_EXISTING",
+        roleRefs: [
+          "role_portal_user",
+          "role_portal_signatory",
+          "role_operator_workspace",
+          "role_governance_admin",
+          "role_audit_review",
+          "role_support_operator",
+          "role_service_runtime",
+          "role_provider_bootstrap_service"
+        ],
+        scopeRefs: [
+          "scope.portal.read",
+          "scope.portal.contribute",
+          "scope.portal.signatory.base",
+          "scope.operator.workspace",
+          "scope.governance.read",
+          "scope.audit.read.masked",
+          "scope.support.workspace",
+          "scope.machine.runtime",
+          "scope.idp.bootstrap.manage",
+          "scope.elevated.authority_link",
+          "scope.elevated.override_approval",
+          "scope.elevated.submit",
+          "scope.elevated.out_of_band_annotation",
+          "scope.elevated.unmasked_export",
+          "scope.elevated.config_approval",
+          "scope.elevated.retention_exception",
+          "scope.elevated.governance_mutation",
+          "scope.elevated.client_signoff"
+        ],
+        enabledFactors: ["webauthn_roaming", "otp", "recovery_code"],
+        tenantDefaultMfaPolicy: "NEVER_WITH_ACTION_DRIVEN_STEP_UP",
+        sessionProfileRefs: [
+          "session.browser.operator",
+          "session.browser.portal",
+          "session.native.operator",
+          "session.machine.runtime",
+          "session.browser.invite-pre-upgrade",
+          "session.upload.transfer"
+        ],
+        notes: [
+          "Tenant-default MFA remains off so source-backed elevated scopes decide when step-up runs.",
+          "Browser, native, machine, and limited-entry session posture are kept side by side."
+        ]
+      };
+
+      function clone(value) {
+        return JSON.parse(JSON.stringify(value));
+      }
+
+      function createExistingCopies(rows) {
+        return rows.map((row) => ({
+          ...clone(row),
+          sourceDisposition: "ADOPTED_EXISTING",
+          clientSecretFingerprint: row.clientSecret ? fingerprint(row.clientSecret) : null,
+          clientSecret: null
+        }));
+      }
+
+      function seedScenario() {
+        if (scenario === "existing") {
+          state.tenants = recommendedTenants.map((tenant) => ({
+            ...clone(tenant),
+            sourceDisposition: "ADOPTED_EXISTING"
+          }));
+          state.interactiveClients = createExistingCopies(recommendedInteractiveClients);
+          state.machineClients = createExistingCopies(recommendedMachineClients);
+          state.policy = clone(recommendedPolicyState);
+        } else if (scenario === "policy-drift") {
+          state.tenants = recommendedTenants.map((tenant) => ({
+            ...clone(tenant),
+            sourceDisposition: "ADOPTED_EXISTING"
+          }));
+          state.interactiveClients = createExistingCopies(recommendedInteractiveClients);
+          state.machineClients = createExistingCopies(recommendedMachineClients);
+          state.policy = {
+            policyVersion: "1.0",
+            sourceDisposition: "ADOPTED_EXISTING",
+            roleRefs: [
+              "role_portal_user",
+              "role_operator_workspace",
+              "role_governance_admin",
+              "role_service_runtime"
+            ],
+            scopeRefs: [
+              "scope.portal.read",
+              "scope.operator.workspace",
+              "scope.governance.read",
+              "scope.machine.runtime"
+            ],
+            enabledFactors: ["otp"],
+            tenantDefaultMfaPolicy: "ALWAYS",
+            sessionProfileRefs: ["session.browser.operator", "session.browser.portal"],
+            notes: [
+              "Intentional drift fixture for fail-closed policy validation."
+            ]
+          };
+        }
+      }
+
+      function renderTenantRow(tenant) {
+        return `
+          <article class="tenant-row" data-testid="tenant-row">
+            <div class="row-header">
+              <div>
+                <p class="meta">${tenant.providerEnvironmentTag} tenant</p>
+                <h3>${tenant.tenantLabel}</h3>
+              </div>
+              <span class="chip">${tenant.sourceDisposition.replaceAll("_", " ")}</span>
+            </div>
+            <div class="row-grid">
+              <div><strong>Tenant ref</strong><code>${tenant.tenantRef}</code></div>
+              <div><strong>Domain alias</strong><code>${tenant.tenantDomainAlias}</code></div>
+              <div><strong>Custom domain</strong><code>${tenant.customDomain}</code></div>
+              <div><strong>Product environments</strong><code>${tenant.productEnvironmentIds.join(", ")}</code></div>
+            </div>
+          </article>
+        `;
+      }
+
+      function renderClientRow(client) {
+        const callbackCopy = client.callbackUrls.length
+          ? client.callbackUrls.join("<br />")
+          : "<span class=\"meta\">None</span>";
+        const originCopy = client.allowedWebOrigins.length
+          ? client.allowedWebOrigins.join("<br />")
+          : "<span class=\"meta\">None</span>";
+        return `
+          <article class="client-row" data-testid="client-row">
+            <div class="row-header">
+              <div>
+                <p class="meta">${client.applicationType.replaceAll("_", " ")}</p>
+                <h3>${client.clientDisplayName}</h3>
+              </div>
+              <span class="chip">${client.sourceDisposition.replaceAll("_", " ")}</span>
+            </div>
+            <div class="row-grid">
+              <div><strong>Client ref</strong><code>${client.clientRef}</code></div>
+              <div><strong>Client alias</strong><code>${client.clientIdAlias}</code></div>
+              <div><strong>Family</strong><code>${client.family}</code></div>
+              <div><strong>Environment</strong><code>${client.productEnvironmentId ?? "tenant-admin"}</code></div>
+              <div><strong>Callback</strong><code>${callbackCopy}</code></div>
+              <div><strong>Allowed origins</strong><code>${originCopy}</code></div>
+            </div>
+          </article>
+        `;
+      }
+
+      function renderPolicyRow(title, eyebrow, values, note) {
+        const chipCopy = values.length
+          ? values.map((value) => `<span class="chip">${value}</span>`).join("")
+          : "<span class=\"meta\">Not configured</span>";
+        return `
+          <article class="policy-row" data-testid="policy-row">
+            <div class="row-header">
+              <div>
+                <p class="meta">${eyebrow}</p>
+                <h3>${title}</h3>
+              </div>
+              <span class="chip ${values.length ? "" : "warning"}">${values.length ? state.policy.sourceDisposition.replaceAll("_", " ") : "Pending"}</span>
+            </div>
+            <div class="policy-chip-row">${chipCopy}</div>
+            <p class="meta" style="margin-top:12px;">${note}</p>
+          </article>
+        `;
+      }
+
+      function render() {
+        tenantList.innerHTML = state.tenants.length
+          ? state.tenants.map(renderTenantRow).join("")
+          : "<p class=\"meta\">No provider tenants provisioned yet.</p>";
+        interactiveClientList.innerHTML = state.interactiveClients.length
+          ? state.interactiveClients.map(renderClientRow).join("")
+          : "<p class=\"meta\">No interactive application clients provisioned yet.</p>";
+        machineClientList.innerHTML = state.machineClients.length
+          ? state.machineClients.map(renderClientRow).join("")
+          : "<p class=\"meta\">No machine or bootstrap clients provisioned yet.</p>";
+        roleScopePolicyList.innerHTML = [
+          renderPolicyRow(
+            "Roles",
+            "Coarse role pack",
+            state.policy.roleRefs,
+            "Roles stay intentionally coarse so the provider never becomes Taxat's authorization engine."
+          ),
+          renderPolicyRow(
+            "Scopes",
+            "Requestable scope pack",
+            state.policy.scopeRefs,
+            "Elevated scopes are request-time challenge hints, not final legality."
+          )
+        ].join("");
+        mfaPolicyList.innerHTML = [
+          renderPolicyRow(
+            "Enabled factors",
+            "Independent and dependent factors",
+            state.policy.enabledFactors,
+            "WebAuthn roaming key plus OTP remain the primary factors; recovery code is retained as a dependent recovery path."
+          ),
+          renderPolicyRow(
+            "Tenant default MFA policy",
+            "Challenge timing posture",
+            state.policy.tenantDefaultMfaPolicy ? [state.policy.tenantDefaultMfaPolicy] : [],
+            "Tenant default stays off so source-backed elevated scopes drive challenge timing."
+          )
+        ].join("");
+        sessionPolicyList.innerHTML = renderPolicyRow(
+          "Session profiles",
+          "Channel-specific posture",
+          state.policy.sessionProfileRefs,
+          "Browser, native, machine, and limited-entry session policies remain explicit and separate."
+        );
+      }
+
+      function createRecommendedTenants() {
+        if (state.tenants.length) {
+          return;
+        }
+        state.tenants = recommendedTenants.map((tenant) => clone(tenant));
+        render();
+      }
+
+      function createRecommendedClients() {
+        if (!state.tenants.length) {
+          createRecommendedTenants();
+        }
+        if (state.interactiveClients.length || state.machineClients.length) {
+          return;
+        }
+        state.interactiveClients = recommendedInteractiveClients.map((client) => clone(client));
+        state.machineClients = recommendedMachineClients.map((client) => clone(client));
+        render();
+      }
+
+      function applyRecommendedRolesAndScopes() {
+        state.policy.roleRefs = clone(recommendedPolicyState.roleRefs);
+        state.policy.scopeRefs = clone(recommendedPolicyState.scopeRefs);
+        state.policy.notes = clone(recommendedPolicyState.notes);
+        if (state.policy.sourceDisposition !== "ADOPTED_EXISTING") {
+          state.policy.sourceDisposition = "CREATED_DURING_RUN";
+        }
+        render();
+      }
+
+      function applyRecommendedMfaAndStepUp() {
+        state.policy.enabledFactors = clone(recommendedPolicyState.enabledFactors);
+        state.policy.tenantDefaultMfaPolicy = recommendedPolicyState.tenantDefaultMfaPolicy;
+        state.policy.notes = clone(recommendedPolicyState.notes);
+        if (state.policy.sourceDisposition !== "ADOPTED_EXISTING") {
+          state.policy.sourceDisposition = "CREATED_DURING_RUN";
+        }
+        render();
+      }
+
+      function applyRecommendedSessionPolicies() {
+        state.policy.sessionProfileRefs = clone(recommendedPolicyState.sessionProfileRefs);
+        state.policy.notes = clone(recommendedPolicyState.notes);
+        if (state.policy.sourceDisposition !== "ADOPTED_EXISTING") {
+          state.policy.sourceDisposition = "CREATED_DURING_RUN";
+        }
+        render();
+      }
+
+      createTenantsButton.addEventListener("click", createRecommendedTenants);
+      createClientsButton.addEventListener("click", createRecommendedClients);
+      applyRolesAndScopesButton.addEventListener("click", applyRecommendedRolesAndScopes);
+      applyMfaAndStepUpButton.addEventListener("click", applyRecommendedMfaAndStepUp);
+      applySessionPoliciesButton.addEventListener("click", applyRecommendedSessionPolicies);
+
+      seedScenario();
+      render();
+
+      window.__idpFixture = {
+        getState() {
+          return clone(state);
+        },
+        getPolicyState() {
+          return clone(state.policy);
+        },
+        runAction(name) {
+          if (name === "createRecommendedTenants") {
+            createRecommendedTenants();
+            return;
+          }
+          if (name === "createRecommendedClients") {
+            createRecommendedClients();
+            return;
+          }
+          if (name === "applyRecommendedRolesAndScopes") {
+            applyRecommendedRolesAndScopes();
+            return;
+          }
+          if (name === "applyRecommendedMfaAndStepUp") {
+            applyRecommendedMfaAndStepUp();
+            return;
+          }
+          if (name === "applyRecommendedSessionPolicies") {
+            applyRecommendedSessionPolicies();
+          }
+        }
+      };
+    </script>
+  </body>
+</html>
