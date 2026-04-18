@@ -1,0 +1,47 @@
+flowchart LR
+  subgraph Signals["Signal braid"]
+    AUD["Audit events"]
+    TR["Traces"]
+    ME["Metrics"]
+    LO["Structured logs"]
+    SE["Security telemetry"]
+    PR["Privacy telemetry"]
+  end
+
+  subgraph Failure["Failure lineage"]
+    ER["ErrorRecord"]
+    RT["RemediationTask"]
+    IN["FailureInvestigation"]
+    CO["CompensationRecord"]
+    AR["AcceptedRiskApproval"]
+    FD["FailureLifecycleDashboard"]
+  end
+
+  subgraph Provenance["Provenance graph"]
+    AE["EN_AUDIT_EVENT"]
+    EE["EN_ERROR_RECORD"]
+    CE["EN_COMPENSATION_RECORD"]
+    PB["PATH_REMEDIATION_CHAIN"]
+  end
+
+  TR -->|"manifest_id, trace_id, error_id"| ER
+  ME -->|"nightly_batch_run_ref, manifest_id"| AUD
+  LO -->|"error_id, authority_operation_id"| ER
+  SE -->|"access_binding_hash, policy_snapshot_hash"| AUD
+  PR -->|"retention_class, artifact lineage"| ER
+  AUD -->|"ED_AUDITED_BY"| AE
+  ER -->|"ED_CAUSED_BY_ERROR"| EE
+  CO -->|"ED_COMPENSATED_BY"| CE
+  ER --> RT
+  ER --> IN
+  ER --> CO
+  ER --> AR
+  RT --> FD
+  IN --> FD
+  CO --> FD
+  AR --> FD
+  ER --> FD
+  FD -->|"root_error_ref -> current_error_ref"| PB
+  AE --> PB
+  EE --> PB
+  CE --> PB

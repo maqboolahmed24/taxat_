@@ -1,0 +1,350 @@
+{
+  "schema_version": "1.0",
+  "profile_id": "hmrc_web_app_via_server",
+  "provider_id": "hmrc-developer-hub",
+  "provider_display_name": "HMRC Developer Hub",
+  "fraud_header_profile_ref": "fph_web_app_via_server",
+  "connection_method": "WEB_APP_VIA_SERVER",
+  "verified_on": "2026-04-18",
+  "validator_api": {
+    "base_url": "https://test-api.service.hmrc.gov.uk",
+    "validate_path": "/test/fraud-prevention-headers/validate",
+    "validation_feedback_path": "/test/fraud-prevention-headers/{api}/validation-feedback"
+  },
+  "capture_boundary": {
+    "originating_surface": "WEB_OPERATOR_SHELL_ROUTED_VIA_TAXAT_GATEWAY",
+    "device_context_capture_owner": "BROWSER_RUNTIME_PLUS_GATEWAY_EDGE",
+    "header_serialization_owner": "CONTROLLED_AUTHORITY_GATEWAY",
+    "raw_value_persistence_policy": "SUMMARY_ONLY_NO_RAW_REPO_TRACKING"
+  },
+  "fields": [
+    {
+      "field_id": "gov_client_connection_method",
+      "header_name": "Gov-Client-Connection-Method",
+      "value_kind": "SCALAR",
+      "presence": "MANDATORY",
+      "encoding_strategy": "RAW",
+      "collection_timing": "PER_REQUEST",
+      "collected_by": "CONTROLLED_AUTHORITY_GATEWAY",
+      "serialized_by": "CONTROLLED_AUTHORITY_GATEWAY",
+      "stability_expectation": "REFRESH_PER_REQUEST",
+      "sensitive_value_policy": "SUMMARY_ONLY_REPO_SAFE",
+      "missing_data_posture": {
+        "allowed_after_hmrc_agreement": false,
+        "serialization_when_missing": "FORBID",
+        "evidence_requirement": "The connection method is part of the executable profile law and cannot be omitted."
+      },
+      "notes": [
+        "Taxat's browser flows remain server-mediated, so the value is locked to WEB_APP_VIA_SERVER."
+      ]
+    },
+    {
+      "field_id": "gov_client_browser_js_user_agent",
+      "header_name": "Gov-Client-Browser-JS-User-Agent",
+      "value_kind": "SCALAR",
+      "presence": "MANDATORY",
+      "encoding_strategy": "RAW",
+      "collection_timing": "INTERACTION_TIME",
+      "collected_by": "BROWSER_RUNTIME",
+      "serialized_by": "CONTROLLED_AUTHORITY_GATEWAY",
+      "stability_expectation": "REFRESH_PER_INTERACTION",
+      "sensitive_value_policy": "SUPPRESS_RAW_VALUE_IN_REPO_ARTIFACTS",
+      "missing_data_posture": {
+        "allowed_after_hmrc_agreement": false,
+        "serialization_when_missing": "FORBID",
+        "evidence_requirement": "The browser JS user agent is required for web-app-via-server requests."
+      },
+      "notes": [
+        "Captured in the originating browser and forwarded to the gateway for HMRC serialization."
+      ]
+    },
+    {
+      "field_id": "gov_client_device_id",
+      "header_name": "Gov-Client-Device-ID",
+      "value_kind": "SCALAR",
+      "presence": "MANDATORY",
+      "encoding_strategy": "RAW",
+      "collection_timing": "DEVICE_BOOT_OR_INSTALL",
+      "collected_by": "PRODUCT_SESSION_GATEWAY",
+      "serialized_by": "CONTROLLED_AUTHORITY_GATEWAY",
+      "stability_expectation": "STABLE_PER_INSTALL",
+      "sensitive_value_policy": "SUPPRESS_RAW_VALUE_IN_REPO_ARTIFACTS",
+      "missing_data_posture": {
+        "allowed_after_hmrc_agreement": false,
+        "serialization_when_missing": "FORBID",
+        "evidence_requirement": "Stable device identity is required where HMRC expects continuity across calls."
+      },
+      "notes": [
+        "The identifier must remain stable for the originating browser/device pairing."
+      ]
+    },
+    {
+      "field_id": "gov_client_multi_factor",
+      "header_name": "Gov-Client-Multi-Factor",
+      "value_kind": "LIST_OF_KEY_VALUE_PAIRS",
+      "presence": "CONDITIONALLY_UNAVAILABLE",
+      "encoding_strategy": "PERCENT_ENCODE_LIST_OF_KV_COMPONENTS",
+      "collection_timing": "INTERACTION_TIME",
+      "collected_by": "PRODUCT_SESSION_GATEWAY",
+      "serialized_by": "CONTROLLED_AUTHORITY_GATEWAY",
+      "stability_expectation": "REFRESH_PER_INTERACTION",
+      "sensitive_value_policy": "SUPPRESS_RAW_VALUE_IN_REPO_ARTIFACTS",
+      "missing_data_posture": {
+        "allowed_after_hmrc_agreement": true,
+        "serialization_when_missing": "OMIT",
+        "evidence_requirement": "Any omission must remain explicit in fraud_header_exemption_reason and later evidence."
+      },
+      "notes": [
+        "Percent-encode every key and value within each MFA fact tuple."
+      ]
+    },
+    {
+      "field_id": "gov_client_public_ip",
+      "header_name": "Gov-Client-Public-IP",
+      "value_kind": "SCALAR",
+      "presence": "CONDITIONALLY_UNAVAILABLE",
+      "encoding_strategy": "RAW",
+      "collection_timing": "PER_REQUEST",
+      "collected_by": "GATEWAY_EDGE",
+      "serialized_by": "CONTROLLED_AUTHORITY_GATEWAY",
+      "stability_expectation": "REFRESH_PER_REQUEST",
+      "sensitive_value_policy": "SUPPRESS_RAW_VALUE_IN_REPO_ARTIFACTS",
+      "missing_data_posture": {
+        "allowed_after_hmrc_agreement": true,
+        "serialization_when_missing": "OMIT",
+        "evidence_requirement": "Private-network or proxy-only topologies require explicit gap evidence before omission is lawful."
+      },
+      "notes": [
+        "The value must be the public IP visible to HMRC for the originating client path where collectable."
+      ]
+    },
+    {
+      "field_id": "gov_client_public_ip_timestamp",
+      "header_name": "Gov-Client-Public-IP-Timestamp",
+      "value_kind": "SCALAR",
+      "presence": "CONDITIONALLY_UNAVAILABLE",
+      "encoding_strategy": "RAW",
+      "collection_timing": "PER_REQUEST",
+      "collected_by": "GATEWAY_EDGE",
+      "serialized_by": "CONTROLLED_AUTHORITY_GATEWAY",
+      "stability_expectation": "REFRESH_PER_REQUEST",
+      "sensitive_value_policy": "SUMMARY_ONLY_REPO_SAFE",
+      "missing_data_posture": {
+        "allowed_after_hmrc_agreement": true,
+        "serialization_when_missing": "OMIT",
+        "evidence_requirement": "Timestamp omission must track the same justification as the public IP omission."
+      },
+      "notes": []
+    },
+    {
+      "field_id": "gov_client_public_port",
+      "header_name": "Gov-Client-Public-Port",
+      "value_kind": "SCALAR",
+      "presence": "CONDITIONALLY_UNAVAILABLE",
+      "encoding_strategy": "RAW",
+      "collection_timing": "PER_REQUEST",
+      "collected_by": "GATEWAY_EDGE",
+      "serialized_by": "CONTROLLED_AUTHORITY_GATEWAY",
+      "stability_expectation": "REFRESH_PER_REQUEST",
+      "sensitive_value_policy": "SUMMARY_ONLY_REPO_SAFE",
+      "missing_data_posture": {
+        "allowed_after_hmrc_agreement": true,
+        "serialization_when_missing": "OMIT",
+        "evidence_requirement": "If the public port cannot be observed lawfully, the omission must remain explicit."
+      },
+      "notes": []
+    },
+    {
+      "field_id": "gov_client_screens",
+      "header_name": "Gov-Client-Screens",
+      "value_kind": "LIST_OF_KEY_VALUE_PAIRS",
+      "presence": "MANDATORY",
+      "encoding_strategy": "PERCENT_ENCODE_LIST_OF_KV_COMPONENTS",
+      "collection_timing": "INTERACTION_TIME",
+      "collected_by": "BROWSER_RUNTIME",
+      "serialized_by": "CONTROLLED_AUTHORITY_GATEWAY",
+      "stability_expectation": "REFRESH_PER_INTERACTION",
+      "sensitive_value_policy": "SUPPRESS_RAW_VALUE_IN_REPO_ARTIFACTS",
+      "missing_data_posture": {
+        "allowed_after_hmrc_agreement": false,
+        "serialization_when_missing": "FORBID",
+        "evidence_requirement": "Screen geometry is a required web-app-via-server header."
+      },
+      "notes": [
+        "Each screen must include width, height, scaling factor, and colour depth."
+      ]
+    },
+    {
+      "field_id": "gov_client_timezone",
+      "header_name": "Gov-Client-Timezone",
+      "value_kind": "SCALAR",
+      "presence": "MANDATORY",
+      "encoding_strategy": "RAW",
+      "collection_timing": "INTERACTION_TIME",
+      "collected_by": "BROWSER_RUNTIME",
+      "serialized_by": "CONTROLLED_AUTHORITY_GATEWAY",
+      "stability_expectation": "REFRESH_PER_INTERACTION",
+      "sensitive_value_policy": "SUMMARY_ONLY_REPO_SAFE",
+      "missing_data_posture": {
+        "allowed_after_hmrc_agreement": false,
+        "serialization_when_missing": "FORBID",
+        "evidence_requirement": "The timezone value must be present and in UTC±hh:mm format."
+      },
+      "notes": []
+    },
+    {
+      "field_id": "gov_client_user_ids",
+      "header_name": "Gov-Client-User-IDs",
+      "value_kind": "KEY_VALUE_PAIRS",
+      "presence": "MANDATORY",
+      "encoding_strategy": "PERCENT_ENCODE_KV_COMPONENTS",
+      "collection_timing": "PER_REQUEST",
+      "collected_by": "PRODUCT_SESSION_GATEWAY",
+      "serialized_by": "CONTROLLED_AUTHORITY_GATEWAY",
+      "stability_expectation": "REFRESH_PER_REQUEST",
+      "sensitive_value_policy": "SUPPRESS_RAW_VALUE_IN_REPO_ARTIFACTS",
+      "missing_data_posture": {
+        "allowed_after_hmrc_agreement": false,
+        "serialization_when_missing": "FORBID",
+        "evidence_requirement": "The profile must always state which operator/user identifier families are present."
+      },
+      "notes": [
+        "Keys and values must be percent-encoded individually."
+      ]
+    },
+    {
+      "field_id": "gov_client_window_size",
+      "header_name": "Gov-Client-Window-Size",
+      "value_kind": "KEY_VALUE_PAIRS",
+      "presence": "MANDATORY",
+      "encoding_strategy": "PERCENT_ENCODE_KV_COMPONENTS",
+      "collection_timing": "INTERACTION_TIME",
+      "collected_by": "BROWSER_RUNTIME",
+      "serialized_by": "CONTROLLED_AUTHORITY_GATEWAY",
+      "stability_expectation": "REFRESH_PER_INTERACTION",
+      "sensitive_value_policy": "SUMMARY_ONLY_REPO_SAFE",
+      "missing_data_posture": {
+        "allowed_after_hmrc_agreement": false,
+        "serialization_when_missing": "FORBID",
+        "evidence_requirement": "Window size is mandatory for the web-app-via-server header set."
+      },
+      "notes": []
+    },
+    {
+      "field_id": "gov_vendor_forwarded",
+      "header_name": "Gov-Vendor-Forwarded",
+      "value_kind": "LIST_OF_KEY_VALUE_PAIRS",
+      "presence": "CONDITIONALLY_UNAVAILABLE",
+      "encoding_strategy": "PERCENT_ENCODE_LIST_OF_KV_COMPONENTS",
+      "collection_timing": "PER_REQUEST",
+      "collected_by": "GATEWAY_EDGE",
+      "serialized_by": "CONTROLLED_AUTHORITY_GATEWAY",
+      "stability_expectation": "REFRESH_PER_REQUEST",
+      "sensitive_value_policy": "SUPPRESS_RAW_VALUE_IN_REPO_ARTIFACTS",
+      "missing_data_posture": {
+        "allowed_after_hmrc_agreement": true,
+        "serialization_when_missing": "OMIT",
+        "evidence_requirement": "If the full forwarding chain is unavailable, the gap must stay explicit and cross-checked against public-IP evidence."
+      },
+      "notes": [
+        "Cross-validation matters: at least one by/for pair must reconcile to vendor and client public IPs."
+      ]
+    },
+    {
+      "field_id": "gov_vendor_license_ids",
+      "header_name": "Gov-Vendor-License-IDs",
+      "value_kind": "KEY_VALUE_PAIRS",
+      "presence": "CONDITIONALLY_UNAVAILABLE",
+      "encoding_strategy": "PERCENT_ENCODE_KV_COMPONENTS",
+      "collection_timing": "RELEASE_OR_DEPLOY_TIME",
+      "collected_by": "RELEASE_MANIFEST",
+      "serialized_by": "CONTROLLED_AUTHORITY_GATEWAY",
+      "stability_expectation": "STABLE_PER_RELEASE",
+      "sensitive_value_policy": "SUPPRESS_RAW_VALUE_IN_REPO_ARTIFACTS",
+      "missing_data_posture": {
+        "allowed_after_hmrc_agreement": true,
+        "serialization_when_missing": "OMIT",
+        "evidence_requirement": "If no vendor licence identifiers exist for the deployable, the omission must remain explicit."
+      },
+      "notes": []
+    },
+    {
+      "field_id": "gov_vendor_product_name",
+      "header_name": "Gov-Vendor-Product-Name",
+      "value_kind": "SCALAR",
+      "presence": "MANDATORY",
+      "encoding_strategy": "PERCENT_ENCODE_VALUE",
+      "collection_timing": "RELEASE_OR_DEPLOY_TIME",
+      "collected_by": "RELEASE_MANIFEST",
+      "serialized_by": "CONTROLLED_AUTHORITY_GATEWAY",
+      "stability_expectation": "STABLE_PER_RELEASE",
+      "sensitive_value_policy": "SUMMARY_ONLY_REPO_SAFE",
+      "missing_data_posture": {
+        "allowed_after_hmrc_agreement": false,
+        "serialization_when_missing": "FORBID",
+        "evidence_requirement": "HMRC requires the vendor product name."
+      },
+      "notes": []
+    },
+    {
+      "field_id": "gov_vendor_public_ip",
+      "header_name": "Gov-Vendor-Public-IP",
+      "value_kind": "SCALAR",
+      "presence": "CONDITIONALLY_UNAVAILABLE",
+      "encoding_strategy": "RAW",
+      "collection_timing": "PER_REQUEST",
+      "collected_by": "GATEWAY_EDGE",
+      "serialized_by": "CONTROLLED_AUTHORITY_GATEWAY",
+      "stability_expectation": "REFRESH_PER_REQUEST",
+      "sensitive_value_policy": "SUPPRESS_RAW_VALUE_IN_REPO_ARTIFACTS",
+      "missing_data_posture": {
+        "allowed_after_hmrc_agreement": true,
+        "serialization_when_missing": "OMIT",
+        "evidence_requirement": "Private-network or managed-ingress gaps must remain typed and candidate-bound."
+      },
+      "notes": []
+    },
+    {
+      "field_id": "gov_vendor_version",
+      "header_name": "Gov-Vendor-Version",
+      "value_kind": "KEY_VALUE_PAIRS",
+      "presence": "MANDATORY",
+      "encoding_strategy": "PERCENT_ENCODE_KV_COMPONENTS",
+      "collection_timing": "RELEASE_OR_DEPLOY_TIME",
+      "collected_by": "RELEASE_MANIFEST",
+      "serialized_by": "CONTROLLED_AUTHORITY_GATEWAY",
+      "stability_expectation": "STABLE_PER_RELEASE",
+      "sensitive_value_policy": "SUMMARY_ONLY_REPO_SAFE",
+      "missing_data_posture": {
+        "allowed_after_hmrc_agreement": false,
+        "serialization_when_missing": "FORBID",
+        "evidence_requirement": "For client-server architectures, Taxat records both client and gateway versions."
+      },
+      "notes": [
+        "Submit both client and server component versions for this server-mediated profile."
+      ]
+    }
+  ],
+  "source_refs": [
+    {
+      "source": "https://developer.service.hmrc.gov.uk/guides/fraud-prevention/connection-method/web-app-via-server/",
+      "rationale": "Current HMRC-required header set for web applications routed via intermediary servers."
+    },
+    {
+      "source": "https://developer.service.hmrc.gov.uk/guides/fraud-prevention/getting-it-right/",
+      "rationale": "Percent-encoding and missing-data rules."
+    },
+    {
+      "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/txm-fph-validator-api/1.0",
+      "rationale": "Sandbox validator endpoints and validation result codes."
+    },
+    {
+      "source": "Algorithm/authority_interaction_protocol.md::L601[9.7_Fraud-prevention_header_rule]",
+      "rationale": "Taxat protocol law requiring executable fraud-header profile, capture, and validation refs."
+    }
+  ],
+  "notes": [
+    "This profile is for Taxat browser-originated authority journeys that remain server-mediated end to end.",
+    "Raw header values must never be persisted in repo-tracked artifacts."
+  ]
+}

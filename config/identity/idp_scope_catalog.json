@@ -1,0 +1,498 @@
+{
+  "schema_version": "1.0",
+  "catalog_id": "idp-scope-catalog",
+  "provider_id": "oidc-external-idp-control-plane",
+  "provider_display_name": "OIDC External Identity Control Plane",
+  "provider_selection": {
+    "provider_selection_status": "PROVIDER_DEFAULT_APPLIED",
+    "provider_family": "OIDC_EXTERNAL_IDP",
+    "provider_vendor_adapter": "AUTH0_COMPATIBLE_DASHBOARD",
+    "provider_vendor_label": "Auth0-compatible external IdP",
+    "docs_urls": [
+      "https://auth0.com/docs/get-started/auth0-overview/create-tenants/set-up-multiple-environments",
+      "https://auth0.com/docs/manage-users/access-control/rbac",
+      "https://auth0.com/docs/secure/multi-factor-authentication/enable-mfa",
+      "https://auth0.com/docs/secure/multi-factor-authentication/step-up-authentication",
+      "https://auth0.com/docs/manage-users/sessions/configure-session-lifetime-settings",
+      "https://auth0.com/docs/manage-users/sessions/manage-user-sessions-with-auth0-management-api",
+      "https://auth0.com/docs/secure/tokens/refresh-tokens/configure-refresh-token-rotation",
+      "https://auth0.com/docs/get-started/applications/application-settings"
+    ],
+    "source_refs": [
+      {
+        "source_ref": "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
+        "rationale": "Taxat actor classes split client, tenant-human, service, and external boundaries before authorization is evaluated."
+      },
+      {
+        "source_ref": "Algorithm/actor_and_authority_model.md::L326[3.9_Policy_decision_model]",
+        "rationale": "The IdP may bootstrap authentication posture, but the engine still owns the final ALLOW or REQUIRE_STEP_UP or REQUIRE_APPROVAL or DENY decision."
+      },
+      {
+        "source_ref": "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+        "rationale": "Browser, native, machine, and limited-entry session channels must remain distinct and challenge rotation must invalidate stale pre-step-up state."
+      },
+      {
+        "source_ref": "https://auth0.com/docs/manage-users/access-control/rbac",
+        "rationale": "Current Auth0 RBAC guidance allows coarse role and permission assignment while keeping richer authorization in the application."
+      },
+      {
+        "source_ref": "https://auth0.com/docs/secure/multi-factor-authentication/step-up-authentication",
+        "rationale": "Current Auth0 step-up guidance relies on requested scopes and Actions rather than a single tenant-wide MFA toggle."
+      },
+      {
+        "source_ref": "https://auth0.com/docs/manage-users/sessions/configure-session-lifetime-settings",
+        "rationale": "Current Auth0 session guidance supports tenant defaults plus per-login overrides through Actions."
+      }
+    ]
+  },
+  "policy_version": "1.0",
+  "generated_on": "2026-04-18",
+  "summary": {
+    "scope_count": 18,
+    "baseline_scope_count": 9,
+    "elevated_scope_count": 9
+  },
+  "scopes": [
+    {
+      "scope_ref": "scope.portal.read",
+      "provider_permission_name": "portal:read",
+      "label": "Portal read",
+      "scope_class": "BASELINE",
+      "allowed_actor_classes": [
+        "CLIENT_VIEWER",
+        "CLIENT_CONTRIBUTOR",
+        "CLIENT_SIGNATORY"
+      ],
+      "allowed_surface_families": [
+        "PORTAL_BROWSER",
+        "BROWSER_LIMITED_ENTRY"
+      ],
+      "idp_enforcement_meaning": "Allows the client portal shell to open after login; it does not prove delegation to any specific reporting subject.",
+      "engine_authorization_boundary": "The engine still decides client scope, masking, and per-object legality.",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L29[portal_actor_classes]",
+          "rationale": "Portal viewer-style access is a coarse client-facing posture."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "scope_ref": "scope.portal.contribute",
+      "provider_permission_name": "portal:contribute",
+      "label": "Portal contribute",
+      "scope_class": "BASELINE",
+      "allowed_actor_classes": [
+        "CLIENT_CONTRIBUTOR",
+        "CLIENT_SIGNATORY"
+      ],
+      "allowed_surface_families": [
+        "PORTAL_BROWSER",
+        "BROWSER_LIMITED_ENTRY",
+        "BROWSER_OR_MOBILE_TRANSFER"
+      ],
+      "idp_enforcement_meaning": "Allows onboarding and upload-capable entry posture once the normal authenticated portal session exists.",
+      "engine_authorization_boundary": "The engine still validates upload-session binding, request scope, and stale-view guards.",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L405[3.2_Client_portal_command_families]",
+          "rationale": "Upload and onboarding commands are typed backend commands and remain server-authorized."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "scope_ref": "scope.portal.signatory.base",
+      "provider_permission_name": "portal:signatory-base",
+      "label": "Portal signatory base",
+      "scope_class": "BASELINE",
+      "allowed_actor_classes": [
+        "CLIENT_SIGNATORY"
+      ],
+      "allowed_surface_families": [
+        "PORTAL_BROWSER",
+        "BROWSER_LIMITED_ENTRY"
+      ],
+      "idp_enforcement_meaning": "Marks that the account may enter signatory-capable portal surfaces before pack-specific legality is checked.",
+      "engine_authorization_boundary": "The engine still decides if a particular approval pack is signable and whether fresh step-up proof is mandatory.",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::L251[client_signatory_step_up_rule]",
+          "rationale": "CLIENT_SIGNATORY is distinct from viewer or contributor and may later need STEP_UP_VERIFIED assurance."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "scope_ref": "scope.operator.workspace",
+      "provider_permission_name": "operator:workspace",
+      "label": "Operator workspace",
+      "scope_class": "BASELINE",
+      "allowed_actor_classes": [
+        "TENANT_ADMIN",
+        "PREPARER",
+        "REVIEWER",
+        "APPROVER",
+        "AUDITOR",
+        "SUPPORT_OPERATOR"
+      ],
+      "allowed_surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "idp_enforcement_meaning": "Allows the internal operator shell to open after sign-in.",
+      "engine_authorization_boundary": "Per-client delegation, authority-link safety, and command legality remain server-authored.",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/admin_governance_console_architecture.md::L1[governance_console_root]",
+          "rationale": "Operator and governance surfaces are shared shell vocabulary, but action legality is not string-matched from role names."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "scope_ref": "scope.governance.read",
+      "provider_permission_name": "governance:read",
+      "label": "Governance read",
+      "scope_class": "BASELINE",
+      "allowed_actor_classes": [
+        "TENANT_ADMIN",
+        "APPROVER"
+      ],
+      "allowed_surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "idp_enforcement_meaning": "Allows access to governance-density routes and policy explainability surfaces.",
+      "engine_authorization_boundary": "Mutation authority still depends on structured AUTHORIZE(...) results, not this coarse scope alone.",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::L579[3.15_Frontend_and_governance-console_rendering_contract]",
+          "rationale": "Governance views must show separate permission, delegation, authority-link, and authn dimensions."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "scope_ref": "scope.audit.read.masked",
+      "provider_permission_name": "audit:read-masked",
+      "label": "Audit read masked",
+      "scope_class": "BASELINE",
+      "allowed_actor_classes": [
+        "TENANT_ADMIN",
+        "PREPARER",
+        "REVIEWER",
+        "APPROVER",
+        "AUDITOR",
+        "SUPPORT_OPERATOR"
+      ],
+      "allowed_surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "idp_enforcement_meaning": "Allows masked audit and provenance inspection as a baseline read posture.",
+      "engine_authorization_boundary": "Unmasked export still requires an elevated request plus server-side legality.",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::L326[3.9_Policy_decision_model]",
+          "rationale": "ALLOW_MASKED is a first-class decision that must stay explicit."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "scope_ref": "scope.support.workspace",
+      "provider_permission_name": "support:workspace",
+      "label": "Support workspace",
+      "scope_class": "BASELINE",
+      "allowed_actor_classes": [
+        "SUPPORT_OPERATOR"
+      ],
+      "allowed_surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "idp_enforcement_meaning": "Allows support-oriented investigation surfaces without implying governance admin posture.",
+      "engine_authorization_boundary": "The engine still decides if the support operator may annotate or export unmasked evidence.",
+      "source_refs": [
+        {
+          "source_ref": "docs/analysis/14_multisurface_requirements_pack.md::L79[Audit_investigation_workbench]",
+          "rationale": "Support and audit investigation are explicit governed surfaces with their own viewer capability profiles."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "scope_ref": "scope.machine.runtime",
+      "provider_permission_name": "machine:runtime",
+      "label": "Machine runtime",
+      "scope_class": "BASELINE",
+      "allowed_actor_classes": [
+        "SCHEDULER_SERVICE",
+        "CONNECTOR_SERVICE",
+        "NORMALIZER_SERVICE",
+        "COMPUTE_SERVICE",
+        "GRAPH_SERVICE",
+        "FILING_SERVICE",
+        "REPLAY_SERVICE",
+        "RETENTION_SERVICE",
+        "NOTIFICATION_SERVICE"
+      ],
+      "allowed_surface_families": [
+        "API_AUTOMATION"
+      ],
+      "idp_enforcement_meaning": "Allows service-to-service machine identity for product runtime clients only.",
+      "engine_authorization_boundary": "The engine still checks per-command PrincipalContext, idempotency, and service scope.",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::L555[3.13_Machine-actor_rules]",
+          "rationale": "Service principals stay first-class actors but never substitute for humans."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "scope_ref": "scope.idp.bootstrap.manage",
+      "provider_permission_name": "idp:bootstrap-manage",
+      "label": "IdP bootstrap manage",
+      "scope_class": "BASELINE",
+      "allowed_actor_classes": [
+        "CONNECTOR_SERVICE"
+      ],
+      "allowed_surface_families": [
+        "API_AUTOMATION"
+      ],
+      "idp_enforcement_meaning": "Allows the dedicated provider bootstrap client to manage Auth0-compatible control-plane settings.",
+      "engine_authorization_boundary": "This scope is outside product-runtime authorization and remains limited to provisioning automation.",
+      "source_refs": [
+        {
+          "source_ref": "PROMPT/CARDS/pc_0039.md",
+          "rationale": "The earlier IdP topology card established a separate provider-management bootstrap client family."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "scope_ref": "scope.elevated.authority_link",
+      "provider_permission_name": "elevated:authority-link",
+      "label": "Elevated authority link",
+      "scope_class": "ELEVATED",
+      "allowed_actor_classes": [
+        "TENANT_ADMIN",
+        "PREPARER",
+        "APPROVER"
+      ],
+      "allowed_surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "idp_enforcement_meaning": "Requesting this scope is the coarse signal that an authority-link or relink operation needs fresh MFA-capable step-up.",
+      "engine_authorization_boundary": "The engine still validates AuthorityBinding freshness, subject match, and bounded client scope.",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
+          "rationale": "Linking or re-linking software to the authority is explicitly elevated."
+        },
+        {
+          "source_ref": "https://auth0.com/docs/secure/multi-factor-authentication/step-up-authentication",
+          "rationale": "Current Auth0 step-up guidance uses requested scopes plus Actions to trigger MFA for sensitive resources."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "scope_ref": "scope.elevated.override_approval",
+      "provider_permission_name": "elevated:override-approval",
+      "label": "Elevated override approval",
+      "scope_class": "ELEVATED",
+      "allowed_actor_classes": [
+        "TENANT_ADMIN",
+        "APPROVER"
+      ],
+      "allowed_surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "idp_enforcement_meaning": "Requests fresh MFA-capable posture before override approval affecting filing or parity outcome.",
+      "engine_authorization_boundary": "The engine still validates rationale, expiry, exact scope, and stale-view basis.",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
+          "rationale": "Override approval is explicitly elevated and bounded."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "scope_ref": "scope.elevated.submit",
+      "provider_permission_name": "elevated:submit",
+      "label": "Elevated submit",
+      "scope_class": "ELEVATED",
+      "allowed_actor_classes": [
+        "TENANT_ADMIN",
+        "APPROVER"
+      ],
+      "allowed_surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "idp_enforcement_meaning": "Requests fresh MFA-capable posture before operator-side submission or amendment send.",
+      "engine_authorization_boundary": "The engine still validates approval state, trust, authority link, packet readiness, and send-time identity.",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/authority_interaction_protocol.md::L509[9.5_Preflight_sequence]",
+          "rationale": "Submission requires a current preflight sequence, not just a coarse elevated scope."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "scope_ref": "scope.elevated.out_of_band_annotation",
+      "provider_permission_name": "elevated:out-of-band-annotation",
+      "label": "Elevated out-of-band annotation",
+      "scope_class": "ELEVATED",
+      "allowed_actor_classes": [
+        "TENANT_ADMIN",
+        "APPROVER",
+        "SUPPORT_OPERATOR"
+      ],
+      "allowed_surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "idp_enforcement_meaning": "Requests fresh human-gated posture before an out-of-band truth annotation is staged.",
+      "engine_authorization_boundary": "The engine still keeps UNKNOWN and OUT_OF_BAND truth distinct from confirmed authority acknowledgement.",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::L539[3.12_Authority_precedence_rules]",
+          "rationale": "Out-of-band truth cannot silently become confirmed authority truth."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "scope_ref": "scope.elevated.unmasked_export",
+      "provider_permission_name": "elevated:unmasked-export",
+      "label": "Elevated unmasked export",
+      "scope_class": "ELEVATED",
+      "allowed_actor_classes": [
+        "TENANT_ADMIN",
+        "APPROVER",
+        "AUDITOR",
+        "SUPPORT_OPERATOR"
+      ],
+      "allowed_surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "idp_enforcement_meaning": "Requests fresh MFA-capable posture before full evidence or unmasked provenance export.",
+      "engine_authorization_boundary": "The engine still evaluates masking rules, export posture, retention gates, and admissibility.",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
+          "rationale": "Unmasked export is explicitly elevated."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "scope_ref": "scope.elevated.config_approval",
+      "provider_permission_name": "elevated:config-approval",
+      "label": "Elevated config approval",
+      "scope_class": "ELEVATED",
+      "allowed_actor_classes": [
+        "TENANT_ADMIN",
+        "APPROVER"
+      ],
+      "allowed_surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "idp_enforcement_meaning": "Requests fresh MFA-capable posture before compliance-mode config approval.",
+      "engine_authorization_boundary": "The engine still verifies dependency topology hash, simulation basis hash, and bounded_safe_mutation posture.",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::L326[3.9_Policy_decision_model]",
+          "rationale": "Governance mutation-capable actions preserve extra hashes and approval requirements beyond IdP posture."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "scope_ref": "scope.elevated.retention_exception",
+      "provider_permission_name": "elevated:retention-exception",
+      "label": "Elevated retention exception",
+      "scope_class": "ELEVATED",
+      "allowed_actor_classes": [
+        "TENANT_ADMIN",
+        "APPROVER"
+      ],
+      "allowed_surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "idp_enforcement_meaning": "Requests fresh MFA-capable posture before erasure, legal-hold release, or retention exception execution.",
+      "engine_authorization_boundary": "The engine still checks legal-hold, retention minimum, and irreversible mutation guards.",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
+          "rationale": "Retention exceptions are explicitly elevated and bounded."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "scope_ref": "scope.elevated.governance_mutation",
+      "provider_permission_name": "elevated:governance-mutation",
+      "label": "Elevated governance mutation",
+      "scope_class": "ELEVATED",
+      "allowed_actor_classes": [
+        "TENANT_ADMIN",
+        "APPROVER"
+      ],
+      "allowed_surface_families": [
+        "OPERATOR_BROWSER",
+        "NATIVE_MACOS_OPERATOR"
+      ],
+      "idp_enforcement_meaning": "Requests fresh MFA-capable posture for governance mutations that widen access, change step-up posture, or relink authority scope.",
+      "engine_authorization_boundary": "The engine still binds the exact mutation tuple, affected client scope, and stale-view basis.",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L405[governance_mutation_step_up_or_approval]",
+          "rationale": "Governance mutations that widen access or relink authority scope are elevated by source law."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "scope_ref": "scope.elevated.client_signoff",
+      "provider_permission_name": "elevated:client-signoff",
+      "label": "Elevated client sign-off",
+      "scope_class": "ELEVATED",
+      "allowed_actor_classes": [
+        "CLIENT_SIGNATORY"
+      ],
+      "allowed_surface_families": [
+        "PORTAL_BROWSER",
+        "BROWSER_LIMITED_ENTRY"
+      ],
+      "idp_enforcement_meaning": "Requests a fresh MFA-capable signatory checkpoint when the current approval pack demands step-up.",
+      "engine_authorization_boundary": "The engine still checks approval-pack hash, stale-view guard, declaration acknowledgement, and signability.",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::L429[fresh_step_up_proof_for_signoff]",
+          "rationale": "Sign-off requires fresh step-up proof whenever the pack or frozen policy demands it."
+        },
+        {
+          "source_ref": "https://auth0.com/docs/secure/multi-factor-authentication/step-up-authentication",
+          "rationale": "Current Auth0 step-up guidance supports requesting elevated scopes to trigger MFA for sensitive routes."
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "typed_gaps": [],
+  "notes": [
+    "Elevated scopes are request-time challenge hints only; the backend still owns the final command-level authorization result."
+  ]
+}

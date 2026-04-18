@@ -1,0 +1,418 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/postgres/postgres_store_topology.schema.json",
+  "title": "PostgreSQL Control and Audit Store Inventory",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "inventory_id",
+    "provider_id",
+    "flow_id",
+    "policy_version",
+    "run_id",
+    "workspace_id",
+    "operator_identity_alias",
+    "selection_status",
+    "selected_service_type_or_null",
+    "topology_mode",
+    "provider_resolution_posture",
+    "cluster_shape_rationale",
+    "provider_service_options",
+    "environment_rows",
+    "store_rows",
+    "role_matrix_ref",
+    "pitr_policy_ref",
+    "audit_policy_ref",
+    "source_refs",
+    "typed_gaps",
+    "notes",
+    "last_verified_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "inventory_id": {
+      "const": "postgres_store_inventory"
+    },
+    "provider_id": {
+      "const": "postgres-control-audit-store"
+    },
+    "flow_id": {
+      "const": "provision-primary-postgresql-control-store-and-append-only-audit-store"
+    },
+    "policy_version": {
+      "const": "1.0"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workspace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operator_identity_alias": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selection_status": {
+      "enum": [
+        "PROVIDER_SELECTION_REQUIRED",
+        "SERVICE_TYPE_SELECTED"
+      ]
+    },
+    "selected_service_type_or_null": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "enum": [
+            "MANAGED_POSTGRESQL",
+            "SELF_HOSTED_POSTGRESQL"
+          ]
+        }
+      ]
+    },
+    "topology_mode": {
+      "const": "SINGLE_CLUSTER_TWO_DATABASES_HARD_BOUNDARY"
+    },
+    "provider_resolution_posture": {
+      "const": "PLATFORM_PROVIDER_SELECTION_REQUIRED"
+    },
+    "cluster_shape_rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_service_options": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "$ref": "#/$defs/providerServiceOption"
+      }
+    },
+    "environment_rows": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/environmentRow"
+      }
+    },
+    "store_rows": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "$ref": "#/$defs/storeRow"
+      }
+    },
+    "role_matrix_ref": {
+      "const": "config/postgres/role_and_privilege_matrix.json"
+    },
+    "pitr_policy_ref": {
+      "const": "config/postgres/pitr_backup_restore_policy.json"
+    },
+    "audit_policy_ref": {
+      "const": "config/postgres/audit_append_only_enforcement.json"
+    },
+    "source_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/sourceRef"
+      }
+    },
+    "typed_gaps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "last_verified_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "sourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_file",
+        "source_heading_or_logical_block",
+        "source_ref",
+        "rationale"
+      ],
+      "properties": {
+        "source_file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_heading_or_logical_block": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "providerServiceOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "service_type",
+        "selection_state",
+        "summary",
+        "fit_notes",
+        "docs_urls",
+        "source_refs"
+      ],
+      "properties": {
+        "service_type": {
+          "enum": [
+            "MANAGED_POSTGRESQL",
+            "SELF_HOSTED_POSTGRESQL"
+          ]
+        },
+        "selection_state": {
+          "enum": [
+            "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION",
+            "SELF_HOST_DECISION_REQUIRED"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fit_notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "docs_urls": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "source_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        }
+      }
+    },
+    "environmentRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "environment_ref",
+        "label",
+        "cluster_alias",
+        "provider_binding_state",
+        "region_selector_ref",
+        "region_resolution_state",
+        "residency_class",
+        "ha_posture",
+        "read_replica_posture",
+        "control_secret_alias_ref",
+        "audit_secret_alias_ref",
+        "wal_archive_policy_ref",
+        "restore_profile_ref",
+        "source_refs",
+        "notes"
+      ],
+      "properties": {
+        "environment_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cluster_alias": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider_binding_state": {
+          "const": "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION"
+        },
+        "region_selector_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "region_resolution_state": {
+          "const": "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION"
+        },
+        "residency_class": {
+          "enum": [
+            "LOCAL_ONLY_NON_AUTHORITATIVE",
+            "UK_NON_PRODUCTION_PRIMARY",
+            "UK_PREPRODUCTION_PRIMARY",
+            "UK_PRODUCTION_PRIMARY",
+            "UK_RESTORE_DRILL_ISOLATED"
+          ]
+        },
+        "ha_posture": {
+          "enum": [
+            "LOCAL_SINGLE_NODE_ONLY",
+            "SINGLE_PRIMARY_WITH_STANDBY_REQUIRED",
+            "MULTI_ZONE_SYNCHRONOUS_STANDBY_REQUIRED",
+            "RESTORE_ONLY_NO_COMMIT_TRAFFIC"
+          ]
+        },
+        "read_replica_posture": {
+          "enum": [
+            "NONE",
+            "OPTIONAL_READ_ONLY_REPLICA",
+            "REQUIRED_READ_ONLY_REPLICA",
+            "RESTORE_READ_ONLY_UNTIL_GATES_PASS"
+          ]
+        },
+        "control_secret_alias_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "audit_secret_alias_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "wal_archive_policy_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "restore_profile_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "storeRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "store_ref",
+        "label",
+        "store_kind",
+        "database_name_or_null",
+        "schema_names",
+        "owner_role_ref",
+        "runtime_role_refs",
+        "topology_posture",
+        "append_only_posture",
+        "order_guarantee",
+        "retention_or_restore_posture",
+        "source_refs",
+        "notes"
+      ],
+      "properties": {
+        "store_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "store_kind": {
+          "enum": [
+            "CONTROL_STORE",
+            "AUDIT_STORE",
+            "READ_REPLICA_PROFILE",
+            "RESTORE_PROFILE"
+          ]
+        },
+        "database_name_or_null": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        },
+        "schema_names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "owner_role_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runtime_role_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "topology_posture": {
+          "type": "string",
+          "minLength": 1
+        },
+        "append_only_posture": {
+          "enum": [
+            "NOT_APPLICABLE",
+            "TRIGGER_GUARDED_APPEND_ONLY_LEDGER"
+          ]
+        },
+        "order_guarantee": {
+          "type": "string",
+          "minLength": 1
+        },
+        "retention_or_restore_posture": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

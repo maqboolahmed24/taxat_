@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Error Monitoring Control Plane Fixture</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        background: #f5f6f4;
+        color: #111418;
+      }
+
+      header,
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: center;
+        padding: 24px 0 16px;
+      }
+
+      nav {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+
+      nav a {
+        color: #465f74;
+        text-decoration: none;
+      }
+
+      main {
+        display: grid;
+        gap: 1rem;
+        padding-bottom: 32px;
+      }
+
+      section {
+        background: #ffffff;
+        border: 1px solid rgba(17, 20, 24, 0.08);
+        border-radius: 18px;
+        padding: 24px;
+      }
+
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: start;
+        margin-bottom: 18px;
+      }
+
+      .badge,
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 999px;
+        padding: 0.35rem 0.7rem;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .badge {
+        background: rgba(70, 95, 116, 0.12);
+        color: #465f74;
+      }
+
+      .chip {
+        background: rgba(138, 101, 27, 0.12);
+        color: #8a651b;
+      }
+
+      .chip[data-state="warning"] {
+        background: rgba(166, 59, 50, 0.12);
+        color: #a63b32;
+      }
+
+      button {
+        border: 1px solid rgba(17, 20, 24, 0.1);
+        border-radius: 999px;
+        background: #465f74;
+        color: #ffffff;
+        padding: 11px 16px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .grid {
+        display: grid;
+        gap: 14px;
+      }
+
+      .card {
+        border: 1px solid rgba(17, 20, 24, 0.08);
+        border-radius: 14px;
+        padding: 16px;
+        background: #f8faf8;
+      }
+
+      .row-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: start;
+      }
+
+      .meta {
+        color: #65707a;
+        font-size: 14px;
+      }
+
+      strong {
+        display: block;
+        font-size: 13px;
+        color: #65707a;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      code {
+        font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body data-scenario="existing">
+    <header>
+      <div>
+        <p class="meta">Provisioning fixture</p>
+        <h1>Error monitoring control plane</h1>
+      </div>
+      <nav aria-label="Provider navigation">
+        <a href="#workspace">Workspace</a>
+        <a href="#projects">Projects</a>
+        <a href="#scrubbing">Scrubbing</a>
+        <a href="#alerts">Alerts and release mapping</a>
+      </nav>
+    </header>
+    <main>
+      <section id="workspace">
+        <div class="section-head">
+          <div>
+            <p class="meta">Vendor workspace</p>
+            <h2>Workspace</h2>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <span class="badge">Sentry-compatible</span>
+            <button id="workspace-action" type="button">Create or adopt monitoring workspace</button>
+          </div>
+        </div>
+        <div class="grid" id="workspace-list"></div>
+      </section>
+
+      <section id="projects">
+        <div class="section-head">
+          <div>
+            <p class="meta">Environment-scoped projects</p>
+            <h2>Projects</h2>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <span class="badge">Deployable split</span>
+            <button id="project-action" type="button">Create or adopt projects and token refs</button>
+          </div>
+        </div>
+        <div class="grid" id="project-list"></div>
+      </section>
+
+      <section id="scrubbing">
+        <div class="section-head">
+          <div>
+            <p class="meta">Boundary enforcement</p>
+            <h2>Scrubbing</h2>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <span class="chip" id="scrub-state-chip">Scrub posture governed</span>
+            <button id="scrubbing-action" type="button">Validate scrubbing and inbound filters</button>
+          </div>
+        </div>
+        <div class="grid" id="scrub-list"></div>
+      </section>
+
+      <section id="alerts">
+        <div class="section-head">
+          <div>
+            <p class="meta">Release and alert posture</p>
+            <h2>Alerts and release mapping</h2>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <span class="badge">Release-bound</span>
+            <button id="alerts-action" type="button">Validate alerts and release mapping</button>
+          </div>
+        </div>
+        <div class="grid" id="alert-list"></div>
+      </section>
+    </main>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const scenario = params.get("scenario") || "existing";
+      document.body.dataset.scenario = scenario;
+
+      const workspaceList = document.getElementById("workspace-list");
+      const projectList = document.getElementById("project-list");
+      const scrubList = document.getElementById("scrub-list");
+      const alertList = document.getElementById("alert-list");
+      const scrubStateChip = document.getElementById("scrub-state-chip");
+
+      const workspaceRows = [
+        {
+          label: "Sandbox workspace",
+          detail: "taxat-observability / reliability-release",
+          disposition: scenario === "fresh" ? "Created during run" : "Adopted existing"
+        },
+        {
+          label: "Production workspace",
+          detail: "taxat-observability / reliability-release",
+          disposition: "Adopted existing"
+        }
+      ];
+
+      const projectRows = [
+        {
+          label: "Sandbox backend runtime",
+          detail: "vault://monitoring/sentry/sandbox/backend-runtime/dsn",
+          state: scenario === "fresh" ? "Created during run" : "Adopted existing"
+        },
+        {
+          label: "Production authority gateway",
+          detail: "vault://monitoring/sentry/production/authority-gateway/dsn",
+          state: "Adopted existing"
+        }
+      ];
+
+      const scrubRows = [
+        {
+          label: "Secret and token material",
+          detail: "Mask secrets, bearer tokens, DSNs, and cookies"
+        },
+        {
+          label: "Authority credentials",
+          detail: scenario === "scrub-drift" ? "Observed drift: callback payload body capture still enabled" : "Authority payload bodies disabled"
+        }
+      ];
+
+      const alertRows = [
+        {
+          label: "Backend exception regression",
+          detail: "ops.reliability.primary · preprod + production"
+        },
+        {
+          label: "Authority gateway auth failure",
+          detail: "ops.authority.gateway · preprod + production"
+        }
+      ];
+
+      if (scenario === "scrub-drift") {
+        scrubStateChip.dataset.state = "warning";
+        scrubStateChip.textContent = "Scrub drift detected";
+      }
+
+      const renderCard = (row, extra) => {
+        const article = document.createElement("article");
+        article.className = "card";
+        article.dataset.testid = "monitoring-project-row";
+        article.innerHTML = `
+          <div class="row-header">
+            <div>
+              <strong>${row.label}</strong>
+              <p>${row.detail}</p>
+            </div>
+            ${extra}
+          </div>
+        `;
+        return article;
+      };
+
+      workspaceRows.forEach((row) => {
+        workspaceList.append(
+          renderCard(row, `<span class="badge">${row.disposition}</span>`)
+        );
+      });
+
+      projectRows.forEach((row) => {
+        projectList.append(
+          renderCard(row, `<span class="badge">${row.state}</span>`)
+        );
+      });
+
+      scrubRows.forEach((row) => {
+        scrubList.append(
+          renderCard(row, `<span class="chip">${scenario === "scrub-drift" && row.label === "Authority credentials" ? "Blocked" : "Governed"}</span>`)
+        );
+      });
+
+      alertRows.forEach((row) => {
+        alertList.append(renderCard(row, `<span class="badge">Actionable</span>`));
+      });
+    </script>
+  </body>
+</html>

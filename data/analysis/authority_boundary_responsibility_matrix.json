@@ -1,0 +1,336 @@
+{
+  "generated_at": "2026-04-17",
+  "responsibility_record_count": 12,
+  "responsibility_records": [
+    {
+      "authoritative_artifacts": [
+        "customer-safe projections only",
+        "route_context and return-target metadata"
+      ],
+      "boundary_class": "INTERACTIVE_PRESENTATION_EDGE",
+      "component_id": "BROWSER_AND_PORTAL_SURFACES",
+      "label": "Browser and portal surfaces",
+      "may_do": [
+        "Collect user intent and display customer-safe or operator-safe authority posture.",
+        "Initiate commands and authority-link workflows only through the northbound session gateway.",
+        "Preserve same-object return targets across step-up and authority handoffs."
+      ],
+      "must_do": [
+        "Keep authority truth visibly typed so UNKNOWN, PENDING_ACK, and OUT_OF_BAND do not render as confirmed.",
+        "Treat authority-facing actions as command intents rather than direct provider calls."
+      ],
+      "must_never_do": [
+        "Call authority providers directly.",
+        "Persist raw authority tokens, client secrets, or fraud-header payloads.",
+        "Settle authority confirmation from optimistic UI state or inline copy."
+      ],
+      "source_refs": [
+        "Algorithm/actor_and_authority_model.md::L596[3.15_Frontend_and_governance-console_rendering_contract]",
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+        "Algorithm/modules.md::L865[never_access_providers_directly_from_application_code]"
+      ]
+    },
+    {
+      "authoritative_artifacts": [
+        "local session and resume metadata only",
+        "no legal truth surface"
+      ],
+      "boundary_class": "INTERACTIVE_PRESENTATION_EDGE",
+      "component_id": "NATIVE_OPERATOR_WORKSPACE",
+      "label": "Native operator workspace",
+      "may_do": [
+        "Render operator status, launch browser-managed authority auth flows, and send commands through the northbound gateway.",
+        "Store only product-session artifacts and tenant-bound local cache state."
+      ],
+      "must_do": [
+        "Keep device-local storage free of raw authority credentials.",
+        "Return users to the same manifest or workflow context after external handoff."
+      ],
+      "must_never_do": [
+        "Hold raw authority access or refresh tokens on device.",
+        "Bypass the northbound gateway or controlled authority gateway."
+      ],
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L78[4._Browser_native-client_API_and_transport_hardening]",
+        "Algorithm/modules.md::L865[never_access_providers_directly_from_application_code]"
+      ]
+    },
+    {
+      "authoritative_artifacts": [
+        "command envelopes and receipts only"
+      ],
+      "boundary_class": "NON_HUMAN_CALLER",
+      "component_id": "MACHINE_AUTOMATION_CLIENTS",
+      "label": "Machine automation clients",
+      "may_do": [
+        "Issue explicit commands with service identity, command_id, and idempotency_key.",
+        "Trigger read or reconciliation flows permitted by server-side policy."
+      ],
+      "must_do": [
+        "Remain distinct from human sessions and human-only step-up or approval posture.",
+        "Use the northbound command surface rather than direct provider traffic."
+      ],
+      "must_never_do": [
+        "Masquerade as a human signatory or approval actor.",
+        "Satisfy human-only step-up by virtue of machine credentials.",
+        "Call providers directly with raw authority credentials."
+      ],
+      "source_refs": [
+        "Algorithm/actor_and_authority_model.md::L555[3.13_Machine-actor_rules]",
+        "Algorithm/northbound_api_and_session_contract.md::L295[3._Command_envelope]",
+        "Algorithm/modules.md::L865[never_access_providers_directly_from_application_code]"
+      ]
+    },
+    {
+      "authoritative_artifacts": [
+        "CommandEnvelope",
+        "CommandReceipt"
+      ],
+      "boundary_class": "SESSION_AND_COMMAND_EDGE",
+      "component_id": "NORTHBOUND_API_AND_SESSION_GATEWAY",
+      "label": "Northbound API and session gateway",
+      "may_do": [
+        "Authenticate browser, native, and machine callers.",
+        "Validate command envelopes, stale-view guards, and anti-CSRF or session posture.",
+        "Emit command receipts and serve read surfaces derived from durable truth."
+      ],
+      "must_do": [
+        "Preserve actor, session, and command identity without embedding raw authority credentials in commands.",
+        "Pass authority-facing intents into the manifest control plane rather than directly to providers."
+      ],
+      "must_never_do": [
+        "Perform direct provider transport.",
+        "Settle authority truth from session or UI state."
+      ],
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L295[3._Command_envelope]",
+        "Algorithm/northbound_api_and_session_contract.md::L456[4._Command_receipt]",
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]"
+      ]
+    },
+    {
+      "authoritative_artifacts": [
+        "AuthorityBinding",
+        "AuthorityRequestEnvelope identity",
+        "AuthorityInteractionRecord",
+        "SubmissionRecord",
+        "WorkflowItem"
+      ],
+      "boundary_class": "DURABLE_COMMAND_CORE",
+      "component_id": "MANIFEST_WORKFLOW_CONTROL_PLANE",
+      "label": "Manifest and workflow control plane",
+      "may_do": [
+        "Authorize action families and freeze PrincipalContext, AuthorityBinding, and request identity.",
+        "Resolve operation profiles, submission lineage, and reconciliation control state.",
+        "Own legal-state mutation of SubmissionRecord, AuthorityInteractionRecord, and subordinate mirrors."
+      ],
+      "must_do": [
+        "Begin request lineage before transport.",
+        "Persist reconciliation control and resend legality before any recovery path resumes.",
+        "Keep queue and projection layers subordinate to durable truth artifacts."
+      ],
+      "must_never_do": [
+        "Silently rebind requests to a new client, subject, or authority link.",
+        "Treat callbacks as settled truth before checkpoint, normalization, and correlation complete."
+      ],
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L22[9.1_Boundary_rule]",
+        "Algorithm/authority_interaction_protocol.md::L854[9.10_Submission-state_write_rules]",
+        "Algorithm/modules.md::L1746[AUTHORITY_PREFLIGHT_...]",
+        "Algorithm/modules.md::L2063[PERSIST_AUTHORITY_RECONCILIATION_CONTROL_...]",
+        "Algorithm/modules.md::L2085[RECONCILE_AUTHORITY_STATE_...]"
+      ]
+    },
+    {
+      "authoritative_artifacts": [
+        "transport-level send witness",
+        "AuthorityIngressReceipt checkpoint evidence"
+      ],
+      "boundary_class": "PROVIDER_TRANSPORT_EDGE",
+      "component_id": "CONTROLLED_AUTHORITY_GATEWAY",
+      "label": "Controlled authority gateway",
+      "may_do": [
+        "Perform provider-specific transport, callback authentication, and delivery dedupe.",
+        "Hydrate vault-held credentials by opaque ref for lawful send-time use.",
+        "Checkpoint inbound payloads before handing normalized evidence back to the control plane."
+      ],
+      "must_do": [
+        "Run send-time revalidation against current binding lineage and policy snapshot.",
+        "Preserve sandbox versus production separation and profile-specific fraud-header rules.",
+        "Persist AuthorityIngressReceipt before normalization or state mutation."
+      ],
+      "must_never_do": [
+        "Expose raw credentials to browser, native, queue, or read-model paths.",
+        "Settle legal truth on its own.",
+        "Silently swap client, subject, authority scope, or provider environment on a prepared request."
+      ],
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+        "Algorithm/authority_interaction_protocol.md::L509[9.5_Preflight_sequence]",
+        "Algorithm/authority_interaction_protocol.md::L792[9.9A_Inbound_authority_ingress_protocol]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L99[5._Service-to-service_and_network_hardening]",
+        "Algorithm/modules.md::L1921[SUBMIT_TO_AUTHORITY_...]"
+      ]
+    },
+    {
+      "authoritative_artifacts": [
+        "SecretVersion",
+        "vault-held authority token bundle",
+        "vault-held client-secret material"
+      ],
+      "boundary_class": "SECRET_ISOLATION_BOUNDARY",
+      "component_id": "TOKEN_VAULT_AND_KMS",
+      "label": "Token vault and KMS/HSM",
+      "may_do": [
+        "Store raw authority tokens, client secrets, and secret-version lineage.",
+        "Support rotation, attestation, and versioned release of credential material to the controlled gateway."
+      ],
+      "must_do": [
+        "Keep sandbox and production credentials partitioned.",
+        "Expose only opaque refs outside the boundary."
+      ],
+      "must_never_do": [
+        "Write raw tokens into queues, logs, read models, browser storage, or device caches.",
+        "Allow rotation to silently widen scope or change subject lineage."
+      ],
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L50[3._Secret_key_and_token_handling]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L161[8._Operational_security_release_gates]"
+      ]
+    },
+    {
+      "authoritative_artifacts": [
+        "SubmissionRecord",
+        "AuthorityInteractionRecord",
+        "AuthorityIngressReceipt",
+        "gate and workflow state"
+      ],
+      "boundary_class": "DURABLE_STATE_BOUNDARY",
+      "component_id": "PRIMARY_CONTROL_STORE",
+      "label": "Primary control store",
+      "may_do": [
+        "Persist manifests, submission records, authority interaction ledgers, ingress receipts, and workflow state.",
+        "Anchor duplicate suppression, resend legality, and response history."
+      ],
+      "must_do": [
+        "Remain the source of truth for replay, restore, and reconciliation.",
+        "Preserve canonical receipt refs and request identity fields durably."
+      ],
+      "must_never_do": [
+        "Treat queues or projections as the source of legal truth.",
+        "Collapse timeout placeholders, conflict evidence, or correction history during recovery."
+      ],
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+        "Algorithm/deployment_and_resilience_contract.md::L161[restore_of_authority-integrated_workloads_SHALL_rebuild_outstanding_transmit_and_reconciliation_work]",
+        "Algorithm/modules.md::L2004[MERGE_AUTHORITY_RESPONSE_OBSERVATION_...]"
+      ]
+    },
+    {
+      "authoritative_artifacts": [
+        "none; transport-only"
+      ],
+      "boundary_class": "DELIVERY_FABRIC",
+      "component_id": "QUEUE_AND_BROKER",
+      "label": "Queue and broker",
+      "may_do": [
+        "Coordinate workers and deliver outbox or inbox signals.",
+        "Carry opaque refs to durable command-side records."
+      ],
+      "must_do": [
+        "Remain rebuildable from durable truth.",
+        "Never become the system of record for authority or settlement truth."
+      ],
+      "must_never_do": [
+        "Act as a bearer credential by itself.",
+        "Authorize resend of live authority mutations without control-plane checks."
+      ],
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+        "Algorithm/deployment_and_resilience_contract.md::L228[8._Release_and_resilience_invariants]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L174[9._Security_invariants]"
+      ]
+    },
+    {
+      "authoritative_artifacts": [
+        "ObligationMirror projection",
+        "ClientTimelineEvent"
+      ],
+      "boundary_class": "DISPOSABLE_PROJECTION_BOUNDARY",
+      "component_id": "READ_SIDE_PROJECTOR_AND_STREAM_BROKER",
+      "label": "Read-side projector and stream broker",
+      "may_do": [
+        "Materialize operator and customer-safe projections from durable truth artifacts.",
+        "Publish low-noise frames, timeline events, and resumable read surfaces."
+      ],
+      "must_do": [
+        "Keep pending, unknown, and out-of-band posture typed and non-confirming.",
+        "Rebuild from durable command-side artifacts after drift or restore."
+      ],
+      "must_never_do": [
+        "Upgrade authority truth from cached projection state.",
+        "Create settlement state without command-side evidence."
+      ],
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+        "Algorithm/authority_truth_and_internal_projection_separation_contract.md::L69[Surface_Rules]",
+        "Algorithm/northbound_api_and_session_contract.md::L646[7._Stream_and_reconnect_rules]"
+      ]
+    },
+    {
+      "authoritative_artifacts": [
+        "AuthorityOperationPlanned",
+        "AuthorityRequestBuilt",
+        "AuthorityRequestSent",
+        "AuthorityResponseReceived",
+        "AuthorityReconciliationResolved"
+      ],
+      "boundary_class": "FORENSIC_EVIDENCE_BOUNDARY",
+      "component_id": "APPEND_ONLY_AUDIT_STORE",
+      "label": "Append-only audit store",
+      "may_do": [
+        "Retain immutable evidence for authority planning, send, ingress, normalization, and reconciliation events.",
+        "Support investigation after restore, rollback, or late corrections."
+      ],
+      "must_do": [
+        "Keep request_hash, idempotency_key, authority_link_ref, and token_binding_ref lineage available.",
+        "Remain append-only across rebuilds and rollback."
+      ],
+      "must_never_do": [
+        "Overwrite or hide already-persisted authority evidence.",
+        "Serve as a mutable workflow coordination store."
+      ],
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]",
+        "Algorithm/authority_interaction_protocol.md::L1175[9.15_Audit_invariants]",
+        "Algorithm/deployment_and_resilience_contract.md::L177[6._Rollout_rollback_and_fail-forward_posture]"
+      ]
+    },
+    {
+      "authoritative_artifacts": [
+        "external authority truth only"
+      ],
+      "boundary_class": "EXTERNAL_LEGAL_SYSTEM",
+      "component_id": "AUTHORITY_PROVIDER",
+      "label": "Authority provider",
+      "may_do": [
+        "Issue the legal or regulatory observations that Taxat must treat as authority-of-record evidence.",
+        "Return synchronous acknowledgements and asynchronous callbacks or poll-visible state."
+      ],
+      "must_do": [
+        "Remain explicitly separated by provider environment, API version, and profile binding."
+      ],
+      "must_never_do": [
+        "Be treated as an internal projection boundary.",
+        "Be reachable directly from browser, native, or machine callers outside the controlled gateway."
+      ],
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L47[9.2_Protocol_scope]",
+        "Algorithm/authority_interaction_protocol.md::L67[9.3_Core_protocol_objects]",
+        "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "inventory_id": "hmrc-sandbox-app-wk-local-provisioning-sandbox-taxat-sandbox-income-tax-redirect-uri-inventory",
+  "provider_id": "hmrc-developer-hub",
+  "provider_display_name": "HMRC Developer Hub",
+  "run_id": "run-template-hmrc-sandbox-app-oauth-001",
+  "workspace_id": "wk-local-provisioning-sandbox",
+  "flow_id": "sandbox-app-registration",
+  "application_record_ref": "./hmrc_sandbox_application_record.template.json",
+  "required_api_baseline_ref": "./hmrc_required_api_set_baseline.json",
+  "provider_environment_target": "sandbox",
+  "redirect_uri_budget_max": 5,
+  "configured_rows": [
+    {
+      "slot_index": 1,
+      "callback_profile_ref": "cb_sandbox_web",
+      "connection_method": "WEB_APP_VIA_SERVER",
+      "environment_ref": "env_shared_sandbox_integration",
+      "owning_deployable_id": "deployable_northbound_api_session_gateway",
+      "redirect_uri": "https://auth.sandbox.taxat.example/oauth/hmrc/callback",
+      "registration_decision": "CONFIGURE_NOW",
+      "rationale": "Canonical shared-sandbox browser callback. Every interactive browser-originated HMRC journey returns through the server-authoritative gateway.",
+      "host_separation_rule": "Sandbox uses its own non-production hosts and never shares them with pre-production or production.",
+      "provider_ingress_uri_pattern": "https://authority-ingress.sandbox.taxat.example/hmrc/inbox",
+      "source_refs": [
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/reference-guide",
+          "rationale": "HMRC redirect URI rules govern registered callback patterns."
+        }
+      ]
+    },
+    {
+      "slot_index": 2,
+      "callback_profile_ref": "cb_sandbox_desktop",
+      "connection_method": "DESKTOP_APP_VIA_SERVER",
+      "environment_ref": "env_shared_sandbox_integration",
+      "owning_deployable_id": "deployable_native_macos_operator_client",
+      "redirect_uri": "http://localhost:46080/oauth/hmrc/sandbox/native-callback",
+      "registration_decision": "CONFIGURE_NOW",
+      "rationale": "Canonical sandbox desktop callback. The macOS client may receive the authorisation result on localhost, but the governed gateway still owns token exchange and raw token custody.",
+      "host_separation_rule": "Sandbox native loopback path is port-and-path segregated from pre-production and production native callbacks.",
+      "provider_ingress_uri_pattern": "https://authority-ingress.sandbox.taxat.example/hmrc/inbox",
+      "source_refs": [
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints",
+          "rationale": "HMRC installed-application redirect rules govern native loopback callbacks."
+        }
+      ]
+    },
+    {
+      "slot_index": 3,
+      "callback_profile_ref": "cb_preprod_web",
+      "connection_method": "WEB_APP_VIA_SERVER",
+      "environment_ref": "env_preproduction_verification",
+      "owning_deployable_id": "deployable_northbound_api_session_gateway",
+      "redirect_uri": "https://auth.preprod.taxat.example/oauth/hmrc/callback",
+      "registration_decision": "CONFIGURE_NOW",
+      "rationale": "Pre-production web callback is configured now because release-candidate verification already depends on a stable sandbox-backed pre-production surface.",
+      "host_separation_rule": "Pre-production keeps a production-like but still sandbox-only callback surface.",
+      "provider_ingress_uri_pattern": "https://authority-ingress.preprod.taxat.example/hmrc/inbox",
+      "source_refs": [
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/reference-guide",
+          "rationale": "HMRC redirect URI rules govern registered callback patterns."
+        }
+      ]
+    },
+    {
+      "slot_index": 4,
+      "callback_profile_ref": "cb_preprod_desktop",
+      "connection_method": "DESKTOP_APP_VIA_SERVER",
+      "environment_ref": "env_preproduction_verification",
+      "owning_deployable_id": "deployable_native_macos_operator_client",
+      "redirect_uri": "http://localhost:46180/oauth/hmrc/preprod/native-callback",
+      "registration_decision": "CONFIGURE_NOW",
+      "rationale": "Pre-production desktop callback is configured now so native verification can mirror the chosen production-like topology without consuming the final fifth slot.",
+      "host_separation_rule": "Pre-production native loopback callback uses a dedicated path and port range distinct from sandbox and production.",
+      "provider_ingress_uri_pattern": "https://authority-ingress.preprod.taxat.example/hmrc/inbox",
+      "source_refs": [
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints",
+          "rationale": "HMRC installed-application redirect rules govern native loopback callbacks."
+        }
+      ]
+    }
+  ],
+  "disallowed_rows": [
+    {
+      "slot_index": null,
+      "callback_profile_ref": "cb_local_browser_loopback_sandbox",
+      "connection_method": "WEB_APP_VIA_SERVER",
+      "environment_ref": "env_local_provisioning_workstation",
+      "owning_deployable_id": "deployable_local_provisioning_workspace",
+      "redirect_uri": "http://localhost:45080/oauth/hmrc/sandbox/browser-callback",
+      "registration_decision": "DO_NOT_REGISTER_ON_SANDBOX_APP",
+      "rationale": "Local browser loopback is a non-promotable provisioning convenience, not the canonical web callback shape. Taxat uses the HTTPS gateway callback for browser-originated flows.",
+      "host_separation_rule": "Local provisioning loopback only; never register for production.",
+      "provider_ingress_uri_pattern": null,
+      "source_refs": [
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/reference-guide",
+          "rationale": "The localhost exception exists for installed-application redirects, not as Taxat's canonical browser callback posture."
+        }
+      ]
+    },
+    {
+      "slot_index": null,
+      "callback_profile_ref": "cb_local_native_loopback_sandbox",
+      "connection_method": "DESKTOP_APP_VIA_SERVER",
+      "environment_ref": "env_local_provisioning_workstation",
+      "owning_deployable_id": "deployable_local_provisioning_workspace",
+      "redirect_uri": "http://localhost:45081/oauth/hmrc/sandbox/native-callback",
+      "registration_decision": "DO_NOT_REGISTER_ON_SANDBOX_APP",
+      "rationale": "Local provisioning native loopback would spend a slot on a workstation-only bootstrap surface. The registered sandbox desktop callback already covers the installed-app pattern.",
+      "host_separation_rule": "Local native loopback only; reserved for sandbox bootstrap and native auth-session testing.",
+      "provider_ingress_uri_pattern": null,
+      "source_refs": [
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints",
+          "rationale": "Installed-application localhost remains supported, but this local bootstrap URI is not the canonical runtime callback."
+        }
+      ]
+    },
+    {
+      "slot_index": null,
+      "callback_profile_ref": "cb_production_web",
+      "connection_method": "WEB_APP_VIA_SERVER",
+      "environment_ref": "env_production",
+      "owning_deployable_id": "deployable_northbound_api_session_gateway",
+      "redirect_uri": "https://auth.production.taxat.example/oauth/hmrc/callback",
+      "registration_decision": "DO_NOT_REGISTER_ON_SANDBOX_APP",
+      "rationale": "Production callback hosts must stay disjoint from sandbox registration and belong on the separate HMRC production application.",
+      "host_separation_rule": "Production must remain disjoint from every non-production callback domain.",
+      "provider_ingress_uri_pattern": "https://authority-ingress.production.taxat.example/hmrc/inbox",
+      "source_refs": [
+        {
+          "source": "Algorithm/deployment_and_resilience_contract.md::L230[Promotion_boundary]",
+          "rationale": "Production promotion freezes live provider trust separately from sandbox."
+        }
+      ]
+    },
+    {
+      "slot_index": null,
+      "callback_profile_ref": "cb_production_desktop",
+      "connection_method": "DESKTOP_APP_VIA_SERVER",
+      "environment_ref": "env_production",
+      "owning_deployable_id": "deployable_native_macos_operator_client",
+      "redirect_uri": "http://localhost:46280/oauth/hmrc/production/native-callback",
+      "registration_decision": "DO_NOT_REGISTER_ON_SANDBOX_APP",
+      "rationale": "Production desktop callback belongs on the HMRC production application, not on the sandbox app.",
+      "host_separation_rule": "Production native callback uses a dedicated port and path distinct from all non-production callbacks.",
+      "provider_ingress_uri_pattern": "https://authority-ingress.production.taxat.example/hmrc/inbox",
+      "source_refs": [
+        {
+          "source": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L23[ReleaseCandidateIdentityContract]",
+          "rationale": "Production provider trust is frozen only at governed promotion time."
+        }
+      ]
+    }
+  ],
+  "unallocated_slot_count": 1,
+  "configured_redirect_uris": [
+    "https://auth.sandbox.taxat.example/oauth/hmrc/callback",
+    "http://localhost:46080/oauth/hmrc/sandbox/native-callback",
+    "https://auth.preprod.taxat.example/oauth/hmrc/callback",
+    "http://localhost:46180/oauth/hmrc/preprod/native-callback"
+  ],
+  "typed_gaps": [
+    "HMRC's user-restricted guidance currently documents sandbox authorisation at https://test-www.tax.service.gov.uk/oauth/authorize and token exchange at https://test-api.service.hmrc.gov.uk/oauth/token, while current API OAS files still publish https://api.service.hmrc.gov.uk/oauth/authorize and /oauth/token in their security schemes. Taxat follows the user-restricted guidance for sandbox runtime endpoint selection and keeps the discrepancy explicit."
+  ],
+  "evidence_refs": [
+    "evidence://run-template-hmrc-sandbox-app-oauth-001/hmrc.devhub.sandbox-app.open-redirect-settings.note.1",
+    "evidence://run-template-hmrc-sandbox-app-oauth-001/hmrc.devhub.sandbox-app.reconcile-redirect-uris.note.1"
+  ],
+  "notes": [
+    "Template only. One HMRC redirect slot intentionally remains unconsumed so later sandbox-side evolution does not require immediate churn in the app registration.",
+    "Production callback hosts are intentionally excluded from the sandbox application registration."
+  ],
+  "last_verified_at": "2026-04-18T16:00:00.000Z"
+}

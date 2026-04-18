@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.example/schemas/provisioning/email/delivery_event_callback.schema.json",
+  "title": "EmailWebhookEndpointRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "callback_ref",
+    "product_environment_id",
+    "message_stream_ref",
+    "callback_url",
+    "authentication",
+    "replay_protection",
+    "idempotency_contract",
+    "enabled_event_types",
+    "disabled_event_types",
+    "correlation_keys",
+    "source_refs",
+    "notes"
+  ],
+  "properties": {
+    "callback_ref": {
+      "type": "string",
+      "pattern": "^email_webhook_[a-z0-9_]+$"
+    },
+    "product_environment_id": {
+      "enum": [
+        "env_shared_sandbox_integration",
+        "env_preproduction_verification",
+        "env_production"
+      ]
+    },
+    "message_stream_ref": {
+      "enum": [
+        "email_stream_sandbox_customer_transactional",
+        "email_stream_preproduction_customer_transactional",
+        "email_stream_production_customer_transactional"
+      ]
+    },
+    "callback_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "authentication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "basic_auth_username_ref",
+        "basic_auth_password_ref",
+        "custom_header_name",
+        "custom_header_secret_ref",
+        "provider_signature_mode"
+      ],
+      "properties": {
+        "mode": {
+          "const": "HTTPS_BASIC_AUTH_PLUS_CUSTOM_HEADER"
+        },
+        "basic_auth_username_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "basic_auth_password_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "custom_header_name": {
+          "const": "X-Taxat-Webhook-Secret"
+        },
+        "custom_header_secret_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider_signature_mode": {
+          "const": "NOT_SUPPORTED_PROVIDER_NATIVE_EQUIVALENT_AUTH"
+        }
+      }
+    },
+    "replay_protection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "require_https",
+        "max_age_hours",
+        "duplicate_response_code"
+      ],
+      "properties": {
+        "require_https": {
+          "const": true
+        },
+        "max_age_hours": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "duplicate_response_code": {
+          "const": 200
+        }
+      }
+    },
+    "idempotency_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fingerprint_fields",
+        "ledger_ref",
+        "duplicate_effect"
+      ],
+      "properties": {
+        "fingerprint_fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "ledger_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "duplicate_effect": {
+          "const": "RETURN_200_NO_DUPLICATE_EVIDENCE"
+        }
+      }
+    },
+    "enabled_event_types": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "enum": [
+          "Delivery",
+          "Bounce",
+          "SpamComplaint",
+          "SubscriptionChange"
+        ]
+      }
+    },
+    "disabled_event_types": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "Open",
+          "Click"
+        ]
+      }
+    },
+    "correlation_keys": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "source_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/sourceRef"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "sourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_ref",
+        "rationale"
+      ],
+      "properties": {
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

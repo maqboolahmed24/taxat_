@@ -1,0 +1,284 @@
+{
+  "contract_version": "2026-04-18",
+  "counterfactual_and_corruption_policy": {
+    "allowed_counterfactual_verdicts": [
+      "EXPECTED_EQUIVALENCE",
+      "EXPECTED_DIFFERENCE",
+      "LIMITED_COMPARABLE",
+      "UNEXPECTED_MISMATCH"
+    ],
+    "must_fail_closed_when": [
+      "basis component missing",
+      "artifact corrupt or hash mismatched",
+      "schema reader incompatible",
+      "payload retention limits exact comparison"
+    ],
+    "source_refs": [
+      "Algorithm/verification_and_release_gates.md::L317[4A._Replayability_verification_additions]",
+      "Algorithm/replay_and_reproducibility_contract.md::L656[Corruption_and_incomplete_basis_handling]"
+    ]
+  },
+  "deterministic_golden_pack_strategy": {
+    "artifact_name": "DeterministicGoldenPack",
+    "required_contents": [
+      "candidate identity, schema bundle, and config bundle binding",
+      "byte-stable module payload hashes",
+      "explicit ordered null-slot coverage",
+      "exact-decimal expectations rendered as canonical decimal strings",
+      "named state-machine tuples with previous state, current state, and transition event",
+      "replay fixtures with expected execution_basis_hash and deterministic_outcome_hash",
+      "deterministic retry and reconciliation cadence fixtures with jitter_policy = NONE"
+    ],
+    "review_policy": "Any green deterministic gate retains the reviewed DeterministicGoldenPack ref; broad pass summaries are insufficient.",
+    "source_refs": [
+      "Algorithm/replay_and_reproducibility_contract.md::L780[Deterministic_golden-fixture_boundary]",
+      "Algorithm/verification_and_release_gates.md::L108[2._Release_gate]"
+    ]
+  },
+  "exact_replay_preconditions": [
+    "continuation basis names the exact lineage edge being replayed or recovered",
+    "config inheritance mode remains exact",
+    "input inheritance mode remains exact",
+    "source manifest is sealed and historically readable",
+    "ConfigFreeze is available and schema-readable",
+    "InputFreeze and authoritative intake artifacts are available and schema-readable",
+    "reader window or exact historical bundle remains loadable",
+    "pre-seal tape is available and internally consistent",
+    "authority and late-data basis is present when it materially influenced the original run",
+    "runtime can deserialize and decrypt retained artifacts",
+    "requested replay scope carries no live mutation token"
+  ],
+  "fixture_artifacts": [
+    {
+      "artifact_name": "RunManifest",
+      "must_be_frozen_before": "post-seal execution and any candidate-bound deterministic suite",
+      "role": "Root execution and lineage truth; carries the pre-seal, basis-hash, and lifecycle envelope later replayed or recovered.",
+      "source_refs": [
+        "Algorithm/manifest_and_config_freeze_contract.md::L78[5.3_RunManifest_required_field_groups]"
+      ]
+    },
+    {
+      "artifact_name": "ConfigFreeze",
+      "must_be_frozen_before": "decision, compute, submission, or replay",
+      "role": "Captures the exact config surface and minimum config artifacts used by live, replay, nightly, and release flows.",
+      "source_refs": [
+        "Algorithm/manifest_and_config_freeze_contract.md::L338[5.4_ConfigFreeze_contract]",
+        "Algorithm/manifest_and_config_freeze_contract.md::L440[5.5_Freeze_timing_rules]"
+      ]
+    },
+    {
+      "artifact_name": "InputFreeze",
+      "must_be_frozen_before": "compute and exact replay claims",
+      "role": "Captures exact input and intake lineage so replay cannot replace historical intake with fresh source reads.",
+      "source_refs": [
+        "Algorithm/manifest_and_config_freeze_contract.md::L651[5.8_Input_freeze_contract]"
+      ]
+    },
+    {
+      "artifact_name": "HashSet",
+      "must_be_frozen_before": "any replay-safe evidence or deterministic gate claim",
+      "role": "Carries config, input, execution-basis, manifest, deterministic-outcome, and decision-bundle hashes.",
+      "source_refs": [
+        "Algorithm/manifest_and_config_freeze_contract.md::L744[5.9_Hash_contract]"
+      ]
+    },
+    {
+      "artifact_name": "preseal_gate_evaluation",
+      "must_be_frozen_before": "manifest seal and start claim",
+      "role": "Freezes the canonical pre-start gate tape so replay and reuse do not recompute seal posture from ambient truth.",
+      "source_refs": [
+        "Algorithm/manifest_and_config_freeze_contract.md::L951[Pre-seal_gate_evaluation_contract]"
+      ]
+    },
+    {
+      "artifact_name": "manifest_start_claim",
+      "must_be_frozen_before": "run_started",
+      "role": "Keeps same-attempt recovery distinct from fresh start and blocks duplicate execution on stale queue heuristics.",
+      "source_refs": [
+        "Algorithm/manifest_start_claim_protocol.md::L8[1._Durable_control_object]",
+        "Algorithm/manifest_start_claim_protocol.md::L27[2._Legal_claim_outcomes]"
+      ]
+    },
+    {
+      "artifact_name": "ManifestBranchDecisionContract and ManifestLineageTrace",
+      "must_be_frozen_before": "return, reuse, replay, recovery, or child allocation",
+      "role": "Freeze branch action, reason, lineage anchor, request identity hash, and recovery or replay semantics so continuation does not drift silently.",
+      "source_refs": [
+        "Algorithm/manifest_branch_selection_contract.md::L9[Contract_Boundary]",
+        "Algorithm/manifest_branch_selection_contract.md::L31[Branch_Actions]",
+        "Algorithm/manifest_branch_selection_contract.md::L63[Typed_Branch_Reasons]"
+      ]
+    },
+    {
+      "artifact_name": "DeterministicGoldenPack",
+      "must_be_frozen_before": "green deterministic gate or release promotion",
+      "role": "Candidate-bound durable fixture boundary for blocking deterministic and state-machine suites.",
+      "source_refs": [
+        "Algorithm/replay_and_reproducibility_contract.md::L780[Deterministic_golden-fixture_boundary]",
+        "Algorithm/verification_and_release_gates.md::L21[B._Deterministic_module_and_formula_tests]"
+      ]
+    }
+  ],
+  "frozen_basis_dimensions": [
+    {
+      "dimension_id": "identity_and_authority_context",
+      "fields": [
+        "client_id",
+        "period",
+        "authority_scope_ref",
+        "principal_context_ref",
+        "access_binding_hash",
+        "authority_context_ref",
+        "environment_ref",
+        "provider_environment_refs[]"
+      ],
+      "source_refs": [
+        "Algorithm/replay_and_reproducibility_contract.md::L113[Required_frozen_basis_dimensions]"
+      ],
+      "why_it_is_frozen": "Exact replay and exact recovery cannot claim sameness if principal, authority scope, or environment changed."
+    },
+    {
+      "dimension_id": "executable_basis",
+      "fields": [
+        "code_build_id",
+        "code_commit_sha",
+        "container_image_digest",
+        "schema_bundle_hash",
+        "feature_flag_snapshot_hash"
+      ],
+      "source_refs": [
+        "Algorithm/replay_and_reproducibility_contract.md::L113[Required_frozen_basis_dimensions]"
+      ],
+      "why_it_is_frozen": "Executable sameness is part of basis equality, not ambient runtime context."
+    },
+    {
+      "dimension_id": "frozen_config_basis",
+      "fields": [
+        "config_freeze_ref",
+        "config_freeze_hash",
+        "config_surface_hash",
+        "minimum_config_artifact identities"
+      ],
+      "source_refs": [
+        "Algorithm/replay_and_reproducibility_contract.md::L113[Required_frozen_basis_dimensions]",
+        "Algorithm/manifest_and_config_freeze_contract.md::L338[5.4_ConfigFreeze_contract]"
+      ],
+      "why_it_is_frozen": "Formula or policy substitutions would invalidate exact replay and release evidence claims."
+    },
+    {
+      "dimension_id": "frozen_input_basis",
+      "fields": [
+        "input_freeze_ref",
+        "input_set_hash",
+        "source-plan identities",
+        "normalization context",
+        "authoritative intake artifact identities"
+      ],
+      "source_refs": [
+        "Algorithm/replay_and_reproducibility_contract.md::L113[Required_frozen_basis_dimensions]",
+        "Algorithm/manifest_and_config_freeze_contract.md::L651[5.8_Input_freeze_contract]"
+      ],
+      "why_it_is_frozen": "Exact replay fails closed when historical inputs or intake basis are missing or replaced."
+    },
+    {
+      "dimension_id": "determinism_controls",
+      "fields": [
+        "deterministic_seed",
+        "non_deterministic_module_allowlist[]",
+        "timezone",
+        "locale",
+        "decimal context",
+        "path-prefix mapping"
+      ],
+      "source_refs": [
+        "Algorithm/replay_and_reproducibility_contract.md::L153[Canonical_execution-basis_hash]",
+        "Algorithm/manifest_and_config_freeze_contract.md::L215[G._Determinism_controls]"
+      ],
+      "why_it_is_frozen": "Runtime-visible perturbations must be part of the basis hash if they can change outcomes."
+    },
+    {
+      "dimension_id": "persisted_post_seal_basis_when_material",
+      "fields": [
+        "append_only_outcome_projection.post_seal_basis",
+        "authority-context result lineage",
+        "late-data monitor result lineage"
+      ],
+      "source_refs": [
+        "Algorithm/replay_and_reproducibility_contract.md::L113[Required_frozen_basis_dimensions]",
+        "Algorithm/replay_and_reproducibility_contract.md::L329[Historical_post-seal_basis]"
+      ],
+      "why_it_is_frozen": "Post-seal material effects cannot be silently recomputed during exact replay."
+    }
+  ],
+  "replay_classes": [
+    {
+      "evidence_required": [
+        "ReplayAttestation",
+        "execution_basis_hash",
+        "deterministic_outcome_hash"
+      ],
+      "legal_effect_boundary": "historical_read_only",
+      "replay_class": "STANDARD_REPLAY",
+      "source_refs": [
+        "Algorithm/replay_and_reproducibility_contract.md::L71[STANDARD_REPLAY]",
+        "Algorithm/replay_and_reproducibility_contract.md::L564[Replay_attestation_artifact]"
+      ],
+      "what_changes": "nothing material may change; compare against exact historical basis and outcome"
+    },
+    {
+      "evidence_required": [
+        "ReplayAttestation",
+        "auditor explanation form"
+      ],
+      "legal_effect_boundary": "historical_read_only_audit_form",
+      "replay_class": "AUDIT_REPLAY",
+      "source_refs": [
+        "Algorithm/replay_and_reproducibility_contract.md::L80[AUDIT_REPLAY]",
+        "Algorithm/replay_and_reproducibility_contract.md::L709[Operator_and_auditor_explanation_contract]"
+      ],
+      "what_changes": "same exact replay semantics as standard replay, but explanation posture is auditor-oriented"
+    },
+    {
+      "evidence_required": [
+        "ReplayAttestation",
+        "declared variance taxonomy",
+        "comparison verdict"
+      ],
+      "legal_effect_boundary": "analysis_only_no_authority_mutation",
+      "replay_class": "COUNTERFACTUAL_ANALYSIS",
+      "source_refs": [
+        "Algorithm/replay_and_reproducibility_contract.md::L88[COUNTERFACTUAL_ANALYSIS]",
+        "Algorithm/replay_and_reproducibility_contract.md::L397[Replay_comparison_contract]"
+      ],
+      "what_changes": "declared basis drift is allowed only when labeled and compared under expected-equivalence or expected-difference posture"
+    }
+  ],
+  "stable_hash_posture": {
+    "deterministic_outcome_hash_rule": "Persisted replay or deterministic suite outcomes require a durable deterministic_outcome_hash.",
+    "execution_basis_hash_rule": "Ordered digest over normalized basis-dimension payloads; missing dimensions remain limited or invalid, not silently unequal.",
+    "source_refs": [
+      "Algorithm/replay_and_reproducibility_contract.md::L153[Canonical_execution-basis_hash]",
+      "Algorithm/replay_and_reproducibility_contract.md::L341[Deterministic_outcome_contract]",
+      "Algorithm/replay_and_reproducibility_contract.md::L797[Non-negotiable_prohibitions]"
+    ]
+  },
+  "summary": {
+    "fixture_artifact_count": 8,
+    "frozen_basis_dimension_count": 6,
+    "golden_pack_content_count": 7,
+    "replay_class_count": 3,
+    "replay_precondition_count": 11
+  },
+  "typed_gaps_or_deferred_decisions": [
+    {
+      "id": "fixture_materialization_tooling_deferred",
+      "source_refs": [
+        "Algorithm/replay_and_reproducibility_contract.md::L780[Deterministic_golden-fixture_boundary]",
+        "Algorithm/manifest_and_config_freeze_contract.md::L744[5.9_Hash_contract]"
+      ],
+      "status": "intentional",
+      "summary": "The strategy fixes what must be frozen and proven, but later implementation tasks may still choose the exact golden-pack materialization scripts or storage layout.",
+      "type": "DEFERRED_DECISION"
+    }
+  ]
+}

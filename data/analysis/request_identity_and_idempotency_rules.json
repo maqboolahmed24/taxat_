@@ -1,0 +1,130 @@
+{
+  "collision_rules": [
+    {
+      "required_action": "block send and persist explicit collision posture",
+      "rule_code": "BODY_COLLISION",
+      "severity": "HARD_BLOCK",
+      "trigger": "same idempotency_key with different request_body_hash"
+    },
+    {
+      "required_action": "block send and require a new request identity",
+      "rule_code": "IDENTITY_NAMESPACE_COLLISION",
+      "severity": "HARD_BLOCK",
+      "trigger": "same idempotency_key or request_hash with different frozen namespace tuple"
+    }
+  ],
+  "contract_version": "AUTHORITY_REQUEST_IDENTITY_REGISTRY_V1",
+  "fraud_prevention_rules": [
+    "fraud-prevention header capture is protocol validity, not optional transport metadata",
+    "profile refs, capture evidence, validation posture, and exemptions must persist explicitly",
+    "redaction-safe logging must never emit raw secrets or raw fraud-header payloads"
+  ],
+  "hash_derivation_steps": [
+    {
+      "formula": "hash(canonical_payload_bytes_or_<NONE>)",
+      "hash_name": "request_body_hash",
+      "purpose": "freezes exact payload identity under canonical byte rendering",
+      "step_index": 1
+    },
+    {
+      "formula": "hash(identity_profile_version | tenant_id | client_id | authority_name | authority_scope | provider_environment | provider_api_version | operation_family | normalized_obligation_ref | normalized_basis_type | business_partitions[] | access_binding_hash | canonical_path | canonical_query)",
+      "hash_name": "identity_namespace_hash",
+      "purpose": "freezes the semantic request namespace for collision detection",
+      "step_index": 2
+    },
+    {
+      "formula": "hash(identity_profile_version | authority_name | authority_scope | operation_family | normalized_obligation_ref | normalized_basis_type | business_partitions[] | access_binding_hash | attempt_lineage_manifest_id)",
+      "hash_name": "duplicate_meaning_key",
+      "purpose": "freezes the resend-versus-reconcile bucket for the same legal meaning",
+      "step_index": 3
+    },
+    {
+      "formula": "hash(identity_namespace_hash | http_method | canonical_path | canonical_query | ordered_header_profile_refs[] | request_body_hash)",
+      "hash_name": "request_hash",
+      "purpose": "freezes the exact sealed request identity",
+      "step_index": 4
+    },
+    {
+      "formula": "hash(identity_profile_version | duplicate_meaning_key)",
+      "hash_name": "idempotency_key",
+      "purpose": "freezes the provider-visible idempotency reuse key for the same semantic meaning",
+      "step_index": 5
+    }
+  ],
+  "identity_profile_version": "AUTHORITY_REQUEST_IDENTITY_V2",
+  "replay_and_recovery_rules": [
+    "Safe recovery may reuse the exact request lineage only while resend_legality_state permits it.",
+    "RECOVERY_READ and RECONCILIATION_POLL reuse the same grouped binding drift sentinel boundary.",
+    "A newer token version may be used only when send-time revalidation approves rotation inside the same binding_lineage_ref.",
+    "Replay never proves legal truth on its own; reconciliation must consume persisted authority evidence."
+  ],
+  "request_identity_fields": [
+    "identity_profile_version",
+    "tenant_id",
+    "client_id",
+    "manifest_id",
+    "attempt_lineage_manifest_id",
+    "operation_family",
+    "authority_name",
+    "authority_product_profile",
+    "provider_environment",
+    "provider_api_version",
+    "authority_scope",
+    "http_method",
+    "canonical_path",
+    "canonical_query",
+    "header_profile_refs[]",
+    "business_partitions[]",
+    "normalized_obligation_ref",
+    "normalized_basis_type",
+    "access_binding_hash",
+    "policy_snapshot_hash",
+    "authority_binding_ref",
+    "authority_link_ref",
+    "delegation_grant_ref",
+    "binding_lineage_ref",
+    "subject_ref",
+    "acting_party_ref",
+    "request_body_hash",
+    "identity_namespace_hash",
+    "duplicate_meaning_key",
+    "request_hash",
+    "idempotency_key"
+  ],
+  "sealed_identity_exclusions": [
+    "token_version_ref"
+  ],
+  "send_revalidation_checks": [
+    "authority link state unchanged or lawfully rotated inside lineage",
+    "same client, subject, acting party, and authority scope",
+    "same provider environment and API version",
+    "same access_binding_hash and policy_snapshot_hash posture",
+    "required step-up and approval evidence still satisfied",
+    "no newer stronger truth or duplicate occupancy blocks transmit",
+    "exclusive send claim acquired on the persisted exchange identity"
+  ],
+  "source_refs": [
+    "Algorithm/authority_interaction_protocol.md::L621[request_hashing_and_idempotency]",
+    "Algorithm/authority_interaction_protocol.md::L649[idempotency_rule]",
+    "Algorithm/authority_interaction_protocol.md::L655[collision_rule]",
+    "Algorithm/authority_interaction_protocol.md::L601[fraud_prevention_header_rule]",
+    "Algorithm/authority_interaction_protocol.md::L549[send_time_revalidation_rule]",
+    "Algorithm/modules.md::L1825[DERIVE_AUTHORITY_REQUEST_HASHES_...]",
+    "Algorithm/modules.md::L1835[BUILD_AUTHORITY_REQUEST_ENVELOPE_...]"
+  ],
+  "summary": {
+    "collision_rule_count": 2,
+    "request_identity_field_count": 31,
+    "send_revalidation_check_count": 7,
+    "unsafe_retry_condition_count": 7
+  },
+  "unsafe_retry_conditions": [
+    "binding_lineage_ref changed",
+    "BODY_COLLISION open",
+    "IDENTITY_NAMESPACE_COLLISION open",
+    "duplicate bucket occupied by stronger authority truth",
+    "authenticated ambiguous or unbound ingress remains unresolved",
+    "reconciliation_budget_state in {EXHAUSTED, ESCALATED}",
+    "resend_legality_state in {BLOCKED_BY_RECONCILIATION, BLOCKED_BY_ESCALATION, CLOSED_NO_RESEND}"
+  ]
+}

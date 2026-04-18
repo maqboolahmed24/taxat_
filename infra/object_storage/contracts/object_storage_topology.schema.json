@@ -1,0 +1,258 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/object_storage_topology.schema.json",
+  "title": "ObjectStorageTopology",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "inventory_id",
+    "provider_id",
+    "flow_id",
+    "policy_version",
+    "run_id",
+    "workspace_id",
+    "operator_identity_alias",
+    "selection_status",
+    "managed_default_status",
+    "selected_provider_family_or_null",
+    "namespace_strategy",
+    "provider_option_rows",
+    "environment_rows",
+    "bucket_rows",
+    "bucket_purpose_matrix_ref",
+    "object_key_naming_contract_ref",
+    "lifecycle_retention_policy_ref",
+    "event_notification_contract_ref",
+    "quarantine_isolation_policy_ref",
+    "source_refs",
+    "typed_gaps",
+    "notes",
+    "last_verified_at"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "inventory_id": { "const": "object_storage_inventory" },
+    "provider_id": { "const": "object-storage-topology" },
+    "flow_id": {
+      "const": "provision-buckets-for-evidence-artifacts-exports-and-quarantine"
+    },
+    "policy_version": { "const": "1.0" },
+    "run_id": { "type": "string", "minLength": 1 },
+    "workspace_id": { "type": "string", "minLength": 1 },
+    "operator_identity_alias": { "type": "string", "minLength": 1 },
+    "selection_status": {
+      "enum": ["PROVIDER_SELECTION_REQUIRED", "PROVIDER_SELECTED"]
+    },
+    "managed_default_status": {
+      "const": "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION"
+    },
+    "selected_provider_family_or_null": {
+      "type": ["string", "null"],
+      "enum": [
+        "AWS_S3",
+        "GCP_CLOUD_STORAGE",
+        "AZURE_BLOB_STORAGE",
+        "SELF_HOSTED_S3_COMPATIBLE",
+        null
+      ]
+    },
+    "namespace_strategy": {
+      "const": "ENVIRONMENT_SCOPED_BUCKET_SET_PER_PURPOSE"
+    },
+    "provider_option_rows": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "provider_family",
+          "selection_state",
+          "provider_label",
+          "docs_urls",
+          "versioning_summary",
+          "lifecycle_summary",
+          "event_notification_summary",
+          "notes",
+          "source_refs"
+        ],
+        "properties": {
+          "provider_family": {
+            "enum": [
+              "AWS_S3",
+              "GCP_CLOUD_STORAGE",
+              "AZURE_BLOB_STORAGE",
+              "SELF_HOSTED_S3_COMPATIBLE"
+            ]
+          },
+          "selection_state": {
+            "enum": [
+              "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION",
+              "SELF_HOST_DECISION_REQUIRED"
+            ]
+          },
+          "provider_label": { "type": "string", "minLength": 1 },
+          "docs_urls": {
+            "type": "array",
+            "minItems": 3,
+            "items": { "type": "string", "format": "uri" }
+          },
+          "versioning_summary": { "type": "string", "minLength": 1 },
+          "lifecycle_summary": { "type": "string", "minLength": 1 },
+          "event_notification_summary": { "type": "string", "minLength": 1 },
+          "notes": { "type": "array", "items": { "type": "string" } },
+          "source_refs": { "$ref": "#/$defs/sourceRefArray" }
+        }
+      }
+    },
+    "environment_rows": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "environment_ref",
+          "label",
+          "bucket_prefix",
+          "residency_class",
+          "namespace_resolution_state",
+          "encryption_posture",
+          "event_delivery_posture",
+          "source_refs",
+          "notes"
+        ],
+        "properties": {
+          "environment_ref": { "type": "string", "minLength": 1 },
+          "label": { "type": "string", "minLength": 1 },
+          "bucket_prefix": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "residency_class": {
+            "enum": [
+              "LOCAL_ONLY_NON_AUTHORITATIVE",
+              "UK_NON_PRODUCTION_PRIMARY",
+              "UK_PREPRODUCTION_PRIMARY",
+              "UK_PRODUCTION_PRIMARY",
+              "UK_RESTORE_DRILL_ISOLATED"
+            ]
+          },
+          "namespace_resolution_state": {
+            "const": "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION"
+          },
+          "encryption_posture": {
+            "const": "SERVER_SIDE_ENCRYPTION_REQUIRED_WITH_KMS_OR_EQUIVALENT"
+          },
+          "event_delivery_posture": {
+            "const": "AT_LEAST_ONCE_OUT_OF_ORDER_POSSIBLE"
+          },
+          "source_refs": { "$ref": "#/$defs/sourceRefArray" },
+          "notes": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "bucket_rows": {
+      "type": "array",
+      "minItems": 40,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "bucket_ref",
+          "environment_ref",
+          "purpose_ref",
+          "zone_ref",
+          "bucket_name",
+          "versioning_state",
+          "encryption_posture",
+          "public_access_state",
+          "direct_download_posture",
+          "preview_posture",
+          "retention_profile_ref",
+          "event_profile_ref",
+          "source_refs",
+          "notes"
+        ],
+        "properties": {
+          "bucket_ref": { "type": "string", "minLength": 1 },
+          "environment_ref": { "type": "string", "minLength": 1 },
+          "purpose_ref": { "type": "string", "minLength": 1 },
+          "zone_ref": {
+            "enum": [
+              "UPLOAD_INTAKE",
+              "RETAINED_EVIDENCE",
+              "DERIVED_EXPORT",
+              "QUARANTINE"
+            ]
+          },
+          "bucket_name": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "versioning_state": { "const": "ENABLED_REQUIRED" },
+          "encryption_posture": {
+            "const": "SERVER_SIDE_ENCRYPTION_REQUIRED_WITH_KMS_OR_EQUIVALENT"
+          },
+          "public_access_state": { "const": "PUBLIC_ACCESS_BLOCKED" },
+          "direct_download_posture": {
+            "enum": [
+              "NONE",
+              "SIGNED_GATEWAY_ONLY_CURRENT_GOVERNED",
+              "SIGNED_GATEWAY_ONLY_MASKED_EXPORT",
+              "SIGNED_GATEWAY_ONLY_OPERATOR_STEP_UP"
+            ]
+          },
+          "preview_posture": {
+            "enum": [
+              "NOT_AVAILABLE",
+              "GATEWAY_PREVIEW_CURRENT_ONLY",
+              "GATEWAY_PREVIEW_DERIVED_ONLY"
+            ]
+          },
+          "retention_profile_ref": { "type": "string", "minLength": 1 },
+          "event_profile_ref": { "type": "string", "minLength": 1 },
+          "source_refs": { "$ref": "#/$defs/sourceRefArray" },
+          "notes": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "bucket_purpose_matrix_ref": {
+      "const": "config/object_storage/bucket_purpose_matrix.json"
+    },
+    "object_key_naming_contract_ref": {
+      "const": "config/object_storage/object_key_naming_contract.json"
+    },
+    "lifecycle_retention_policy_ref": {
+      "const": "config/object_storage/lifecycle_retention_policy.json"
+    },
+    "event_notification_contract_ref": {
+      "const": "config/object_storage/event_notification_contract.json"
+    },
+    "quarantine_isolation_policy_ref": {
+      "const": "config/object_storage/quarantine_isolation_policy.json"
+    },
+    "source_refs": { "$ref": "#/$defs/sourceRefArray" },
+    "typed_gaps": { "type": "array", "items": { "type": "string" } },
+    "notes": { "type": "array", "items": { "type": "string" } },
+    "last_verified_at": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "sourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_file",
+        "source_heading_or_logical_block",
+        "source_ref",
+        "rationale"
+      ],
+      "properties": {
+        "source_file": { "type": "string", "minLength": 1 },
+        "source_heading_or_logical_block": { "type": "string", "minLength": 1 },
+        "source_ref": { "type": "string", "minLength": 1 },
+        "rationale": { "type": "string", "minLength": 1 }
+      }
+    },
+    "sourceRefArray": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/sourceRef" }
+    }
+  }
+}

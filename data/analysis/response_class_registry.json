@@ -1,0 +1,387 @@
+{
+  "contract_version": "AUTHORITY_RESPONSE_CLASS_REGISTRY_V1",
+  "merge_postures": [
+    {
+      "derivation_posture": "PRIMARY_OBSERVATION",
+      "legal_effect_posture": "DIRECT_STATE_MUTATION",
+      "required_follow_up": "may become active meaning when admissible"
+    },
+    {
+      "derivation_posture": "CORROBORATING_OBSERVATION",
+      "legal_effect_posture": "NO_STATE_MUTATION",
+      "required_follow_up": "never create a second legal-state mutation"
+    },
+    {
+      "derivation_posture": "SUPERSEDES_TIMEOUT_PLACEHOLDER",
+      "legal_effect_posture": "RECONCILIATION_ONLY",
+      "required_follow_up": "retain superseded timeout lineage and reconcile before changing legal truth"
+    },
+    {
+      "derivation_posture": "CONFLICTING_OBSERVATION",
+      "legal_effect_posture": "RECONCILIATION_ONLY",
+      "required_follow_up": "enter RECONCILIATION_REQUIRED and block last-writer-wins behavior"
+    },
+    {
+      "derivation_posture": "TIMEOUT_PLACEHOLDER",
+      "legal_effect_posture": "PROVISIONAL_STATE_MUTATION",
+      "required_follow_up": "retain provisional unknown posture until later reconciliation closes it"
+    }
+  ],
+  "response_classes": [
+    {
+      "correlation_statuses": [
+        "BOUND"
+      ],
+      "default_submission_state_or_null": "CONFIRMED",
+      "derivation_posture": "PRIMARY_OBSERVATION",
+      "legal_effect_posture": "DIRECT_STATE_MUTATION",
+      "merge_behavior": "admissible meaning may become active_response_id",
+      "notes": [
+        "Success may still require reconciliation when it supersedes a timeout placeholder or conflicts with stronger authority evidence."
+      ],
+      "response_class": "ACK_SUCCESS",
+      "retry_class_floor": "NO_RETRY",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L667[response_classes]",
+        "Algorithm/authority_interaction_protocol.md::L681[default_normalization_rules]"
+      ]
+    },
+    {
+      "correlation_statuses": [
+        "BOUND"
+      ],
+      "default_submission_state_or_null": "PENDING_ACK",
+      "derivation_posture": "PRIMARY_OBSERVATION",
+      "legal_effect_posture": "DIRECT_STATE_MUTATION",
+      "merge_behavior": "opens bounded follow-up read posture instead of blind resend",
+      "notes": [
+        "Accepted transmit is not final settlement confirmation."
+      ],
+      "response_class": "ACK_ACCEPTED_PENDING",
+      "retry_class_floor": "RECONCILE_THEN_RETRY",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L667[response_classes]",
+        "Algorithm/authority_interaction_protocol.md::L681[default_normalization_rules]"
+      ]
+    },
+    {
+      "correlation_statuses": [
+        "BOUND"
+      ],
+      "default_submission_state_or_null": "REJECTED",
+      "derivation_posture": "PRIMARY_OBSERVATION",
+      "legal_effect_posture": "DIRECT_STATE_MUTATION",
+      "merge_behavior": "admissible terminal rejection when bound to exact lineage",
+      "notes": [
+        "Payload or business validation rejection remains authority evidence and must retain authority_evidence_ref."
+      ],
+      "response_class": "ACK_REJECTED_VALIDATION",
+      "retry_class_floor": "REBUILD_THEN_RETRY",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L667[response_classes]",
+        "Algorithm/authority_interaction_protocol.md::L681[default_normalization_rules]"
+      ]
+    },
+    {
+      "correlation_statuses": [
+        "BOUND"
+      ],
+      "default_submission_state_or_null": null,
+      "derivation_posture": "PRIMARY_OBSERVATION",
+      "legal_effect_posture": "DIRECT_STATE_MUTATION",
+      "merge_behavior": "high-severity audit and no legal progression",
+      "notes": [
+        "Authentication or authorization rejection does not imply confirmed or rejected filing settlement."
+      ],
+      "response_class": "ACK_REJECTED_AUTH",
+      "retry_class_floor": "HUMAN_REVIEW_THEN_RETRY",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L667[response_classes]",
+        "Algorithm/authority_interaction_protocol.md::L681[default_normalization_rules]"
+      ]
+    },
+    {
+      "correlation_statuses": [
+        "BOUND"
+      ],
+      "default_submission_state_or_null": "PROFILE_DEPENDENT_PENDING_ACK_OR_UNKNOWN",
+      "derivation_posture": "PRIMARY_OBSERVATION",
+      "legal_effect_posture": "DIRECT_STATE_MUTATION",
+      "merge_behavior": "profile decides whether the immediate normalized settlement posture is pending or unknown",
+      "notes": [
+        "Retryable failure still remains bound authority evidence and feeds reconciliation policy."
+      ],
+      "response_class": "ACK_RETRYABLE_FAILURE",
+      "retry_class_floor": "SAFE_RETRY",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L667[response_classes]",
+        "Algorithm/authority_interaction_protocol.md::L681[default_normalization_rules]"
+      ]
+    },
+    {
+      "correlation_statuses": [
+        "UNSPECIFIED_TIMEOUT_PLACEHOLDER"
+      ],
+      "default_submission_state_or_null": "UNKNOWN",
+      "derivation_posture": "TIMEOUT_PLACEHOLDER",
+      "legal_effect_posture": "PROVISIONAL_STATE_MUTATION",
+      "merge_behavior": "placeholder may be superseded later but only through explicit reconciliation",
+      "notes": [
+        "Timeout and no-body outcomes must never be normalized as synthetic success."
+      ],
+      "response_class": "ACK_TIMEOUT_OR_NO_RESOLUTION",
+      "retry_class_floor": "RECONCILE_THEN_RETRY",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L667[response_classes]",
+        "Algorithm/authority_interaction_protocol.md::L681[default_normalization_rules]"
+      ]
+    },
+    {
+      "correlation_statuses": [
+        "BOUND"
+      ],
+      "default_submission_state_or_null": "OUT_OF_BAND",
+      "derivation_posture": "PRIMARY_OBSERVATION",
+      "legal_effect_posture": "DIRECT_STATE_MUTATION",
+      "merge_behavior": "opens reconciliation under out-of-band posture",
+      "notes": [
+        "External state discovery means authority truth exists outside the active packet flow."
+      ],
+      "response_class": "ACK_EXTERNAL_STATE_DISCOVERED",
+      "retry_class_floor": "NO_RETRY",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L667[response_classes]",
+        "Algorithm/authority_interaction_protocol.md::L681[default_normalization_rules]"
+      ]
+    },
+    {
+      "correlation_statuses": [
+        "BOUND_WITH_AUTHORITY_REFERENCE_ONLY",
+        "AMBIGUOUS",
+        "UNBOUND"
+      ],
+      "default_submission_state_or_null": null,
+      "derivation_posture": "PRIMARY_OBSERVATION",
+      "legal_effect_posture": "RECONCILIATION_ONLY",
+      "merge_behavior": "quarantine and explicit ownership; no terminal or pending-success mutation",
+      "notes": [
+        "Weak or ambiguous binding may not mutate settlement or mirror truth."
+      ],
+      "response_class": "ACK_AMBIGUOUS_CORRELATION",
+      "retry_class_floor": "RECONCILE_THEN_RETRY",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L667[response_classes]",
+        "Algorithm/authority_interaction_protocol.md::L681[default_normalization_rules]"
+      ]
+    },
+    {
+      "correlation_statuses": [
+        "BOUND",
+        "BOUND_WITH_AUTHORITY_REFERENCE_ONLY"
+      ],
+      "default_submission_state_or_null": null,
+      "derivation_posture": "CONFLICTING_OBSERVATION",
+      "legal_effect_posture": "RECONCILIATION_ONLY",
+      "merge_behavior": "forces quantitative reconciliation instead of source precedence or last-writer-wins",
+      "notes": [
+        "Conflicting authority evidence blocks automatic resend and may escalate."
+      ],
+      "response_class": "ACK_INCONSISTENT_STATE",
+      "retry_class_floor": "MANUAL_INTERVENTION_REQUIRED",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L667[response_classes]",
+        "Algorithm/authority_interaction_protocol.md::L681[default_normalization_rules]"
+      ]
+    }
+  ],
+  "source_refs": [
+    "Algorithm/authority_interaction_protocol.md::L667[response_classes]",
+    "Algorithm/authority_interaction_protocol.md::L681[default_normalization_rules]",
+    "Algorithm/authority_interaction_protocol.md::L756[multi_source_response_merge]",
+    "Algorithm/authority_interaction_protocol.md::L854[submission_state_write_rules]"
+  ],
+  "submission_state_write_rules": [
+    {
+      "allowed_states": [
+        "INTENT_RECORDED",
+        "TRANSMIT_PENDING",
+        "TRANSMITTED"
+      ],
+      "prohibitions": [
+        "Must freeze request_identity_contract before the request leaves the engine."
+      ],
+      "protected_surfaces": [
+        "SubmissionRecord"
+      ],
+      "rule_id": "WRITE_INTENT_ONLY_BEFORE_SEND",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L854[submission_state_write_rules]",
+        "Algorithm/authority_interaction_protocol.md::L859[allowed_write_rules]"
+      ],
+      "trigger_classes": [
+        "REQUEST_BUILD",
+        "SEND_GATE_CLEAR",
+        "SEND_DISPATCHED"
+      ]
+    },
+    {
+      "allowed_states": [
+        "PENDING_ACK"
+      ],
+      "prohibitions": [
+        "Pending posture must stay explicit and non-confirming."
+      ],
+      "protected_surfaces": [
+        "SubmissionRecord",
+        "ObligationMirror"
+      ],
+      "rule_id": "WRITE_PENDING_ACK_ONLY_FROM_ACCEPTED_OR_PROFILED_RETRYABLE_OUTCOME",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L854[submission_state_write_rules]",
+        "Algorithm/authority_interaction_protocol.md::L859[allowed_write_rules]"
+      ],
+      "trigger_classes": [
+        "ACK_ACCEPTED_PENDING",
+        "ACK_RETRYABLE_FAILURE",
+        "RECONCILED_STILL_PENDING"
+      ]
+    },
+    {
+      "allowed_states": [
+        "CONFIRMED"
+      ],
+      "prohibitions": [
+        "Internal optimism, workflow completion, override, and accepted-risk posture cannot confirm legal truth."
+      ],
+      "protected_surfaces": [
+        "SubmissionRecord",
+        "ObligationMirror",
+        "ClientTimelineEvent"
+      ],
+      "rule_id": "WRITE_CONFIRMED_ONLY_FROM_VALIDATED_AUTHORITY_EVIDENCE",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L854[submission_state_write_rules]",
+        "Algorithm/authority_interaction_protocol.md::L859[allowed_write_rules]"
+      ],
+      "trigger_classes": [
+        "ACK_SUCCESS",
+        "RECONCILED_CONFIRMED"
+      ]
+    },
+    {
+      "allowed_states": [
+        "REJECTED"
+      ],
+      "prohibitions": [
+        "Rejection must keep authority_evidence_ref."
+      ],
+      "protected_surfaces": [
+        "SubmissionRecord",
+        "ObligationMirror"
+      ],
+      "rule_id": "WRITE_REJECTED_ONLY_FROM_VALIDATED_AUTHORITY_EVIDENCE",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L854[submission_state_write_rules]",
+        "Algorithm/authority_interaction_protocol.md::L859[allowed_write_rules]"
+      ],
+      "trigger_classes": [
+        "ACK_REJECTED_VALIDATION",
+        "RECONCILED_REJECTED"
+      ]
+    },
+    {
+      "allowed_states": [
+        "UNKNOWN"
+      ],
+      "prohibitions": [
+        "Unknown posture cannot silently reopen blind resend or customer reassurance."
+      ],
+      "protected_surfaces": [
+        "SubmissionRecord",
+        "ObligationMirror",
+        "WorkflowItem"
+      ],
+      "rule_id": "WRITE_UNKNOWN_ONLY_FROM_TIMEOUT_OR_UNRESOLVED_RECONCILIATION",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L854[submission_state_write_rules]",
+        "Algorithm/authority_interaction_protocol.md::L859[allowed_write_rules]"
+      ],
+      "trigger_classes": [
+        "ACK_TIMEOUT_OR_NO_RESOLUTION",
+        "RECONCILED_UNRESOLVED"
+      ]
+    },
+    {
+      "allowed_states": [
+        "OUT_OF_BAND"
+      ],
+      "prohibitions": [
+        "Out-of-band state must open reconciliation rather than being absorbed into the active manifest flow."
+      ],
+      "protected_surfaces": [
+        "SubmissionRecord",
+        "ObligationMirror",
+        "ClientTimelineEvent"
+      ],
+      "rule_id": "WRITE_OUT_OF_BAND_ONLY_FROM_EXTERNAL_DISCOVERY_OR_CORRECTION",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L854[submission_state_write_rules]",
+        "Algorithm/authority_interaction_protocol.md::L859[allowed_write_rules]"
+      ],
+      "trigger_classes": [
+        "ACK_EXTERNAL_STATE_DISCOVERED",
+        "RECONCILED_OUT_OF_BAND"
+      ]
+    },
+    {
+      "allowed_states": [
+        "PENDING_ACK",
+        "CONFIRMED",
+        "REJECTED",
+        "UNKNOWN",
+        "OUT_OF_BAND"
+      ],
+      "prohibitions": [
+        "Callback, poll, and recovery transport memory may not mutate legal state before AuthorityIngressReceipt is durable and correlated."
+      ],
+      "protected_surfaces": [
+        "SubmissionRecord",
+        "ObligationMirror"
+      ],
+      "rule_id": "REQUEST_BACKED_MUTATION_REQUIRES_PERSISTED_INGRESS_PROOF",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L854[submission_state_write_rules]",
+        "Algorithm/authority_interaction_protocol.md::L859[allowed_write_rules]"
+      ],
+      "trigger_classes": [
+        "ASYNC_NORMALIZATION",
+        "RECONCILIATION_RESULT"
+      ]
+    },
+    {
+      "allowed_states": [],
+      "prohibitions": [
+        "The protocol may never infer confirmation from dispatch alone, UI completion, workflow closure, override, or accepted-risk posture."
+      ],
+      "protected_surfaces": [
+        "SubmissionRecord",
+        "ObligationMirror",
+        "WorkflowItem",
+        "ClientTimelineEvent"
+      ],
+      "rule_id": "FORBID_INTERNAL_OPTIMISTIC_CONFIRMATION",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L854[submission_state_write_rules]",
+        "Algorithm/authority_interaction_protocol.md::L859[allowed_write_rules]"
+      ],
+      "trigger_classes": [
+        "ALL"
+      ]
+    }
+  ],
+  "summary": {
+    "merge_posture_count": 5,
+    "response_class_count": 9,
+    "submission_state_write_rule_count": 8
+  }
+}

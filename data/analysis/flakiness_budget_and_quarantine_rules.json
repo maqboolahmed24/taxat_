@@ -1,0 +1,190 @@
+{
+  "contract_version": "2026-04-18",
+  "family_rules": [
+    {
+      "family_id": "schema_contract_validation",
+      "manual_waiver_allowed_for_blocking_green": false,
+      "quarantine_allowed_for_blocking_green": false,
+      "reason": "Schema and contract failures are deterministic by nature and must not be normalized away.",
+      "retry_policy": "no_retry_for_product_failures; one infrastructure rerun only if the original suite never reached test execution",
+      "triage_metadata": [
+        "candidate_identity_hash",
+        "compatibility_gate_hash_or_null",
+        "schema_bundle_hash",
+        "fixture_ref"
+      ]
+    },
+    {
+      "family_id": "deterministic_formula_and_module",
+      "manual_waiver_allowed_for_blocking_green": false,
+      "quarantine_allowed_for_blocking_green": false,
+      "reason": "Deterministic suites are the anti-flake foundation and lose value if rerun until green.",
+      "retry_policy": "no_retry unless the runner crashed before fixture execution began",
+      "triage_metadata": [
+        "candidate_identity_hash",
+        "deterministic_golden_pack_ref",
+        "deterministic_seed",
+        "fixture_hash"
+      ]
+    },
+    {
+      "family_id": "state_machine_and_model_based",
+      "manual_waiver_allowed_for_blocking_green": false,
+      "quarantine_allowed_for_blocking_green": false,
+      "reason": "Illegal-transition posture must stay reproducible from the same seed and cannot depend on ad hoc reruns.",
+      "retry_policy": "seed-preserving rerun only when infrastructure noise interrupted execution",
+      "triage_metadata": [
+        "candidate_identity_hash",
+        "generator_seed",
+        "transition_fixture_ref",
+        "error_code_or_reason_code"
+      ]
+    },
+    {
+      "family_id": "northbound_api_and_operator_contracts",
+      "manual_waiver_allowed_for_blocking_green": false,
+      "quarantine_allowed_for_blocking_green": false,
+      "reason": "API suites may experience infrastructure noise, but a blocking green result still must stay scope-identical and unquarantined.",
+      "retry_policy": "same-candidate same-scope rerun permitted for confirmed environment noise",
+      "triage_metadata": [
+        "candidate_identity_hash",
+        "compatibility_gate_hash_or_null",
+        "supported_client_window_ref_or_null",
+        "receipt_or_stream_fixture_ref"
+      ]
+    },
+    {
+      "family_id": "browser_surface_acceptance",
+      "manual_waiver_allowed_for_blocking_green": false,
+      "quarantine_allowed_for_blocking_green": false,
+      "reason": "Browser suites are slower and noisier than deterministic packs, but release green posture still cannot depend on quarantine or silent retries.",
+      "retry_policy": "same-candidate same-route-profile rerun allowed for actionability-safe infra noise only; preserve failing traces and screenshots",
+      "triage_metadata": [
+        "candidate_identity_hash",
+        "route_id",
+        "selector_profile",
+        "trace_ref",
+        "screenshot_ref"
+      ]
+    },
+    {
+      "family_id": "native_surface_automation",
+      "manual_waiver_allowed_for_blocking_green": false,
+      "quarantine_allowed_for_blocking_green": false,
+      "reason": "Native suites may need occasional environmental reruns, but a blocking pass still must be admissible and current.",
+      "retry_policy": "same-candidate same-scene rerun allowed only when device or simulator instability is isolated",
+      "triage_metadata": [
+        "candidate_identity_hash",
+        "compatibility_gate_hash_or_null",
+        "scene_id",
+        "restore_fixture_ref",
+        "device_or_runtime_fingerprint"
+      ]
+    },
+    {
+      "family_id": "authority_sandbox_and_controlled_edge",
+      "manual_waiver_allowed_for_blocking_green": false,
+      "quarantine_allowed_for_blocking_green": false,
+      "reason": "Authority breadth evidence loses promotion value if reruns drift across profiles, operation families, or namespace isolation.",
+      "retry_policy": "rerun only with the identical enabled provider-profile set, identical namespace scope, and explicit preservation of exercised operation families",
+      "triage_metadata": [
+        "candidate_identity_hash",
+        "enabled_provider_profile_refs",
+        "authority_sandbox_coverage_hash_or_null",
+        "identity_namespace_hash",
+        "operation_family_set"
+      ]
+    },
+    {
+      "family_id": "replay_recovery_and_restore",
+      "manual_waiver_allowed_for_blocking_green": false,
+      "quarantine_allowed_for_blocking_green": false,
+      "reason": "Restore or replay evidence is only meaningful if the claimed checkpoint and basis stay identical throughout rerun and admissibility.",
+      "retry_policy": "same-candidate same-checkpoint rerun only when the drill environment failed before evidence completion; replay cases otherwise stay single-shot and deterministic",
+      "triage_metadata": [
+        "candidate_identity_hash",
+        "compatibility_gate_hash_or_null",
+        "restore_checkpoint_ref",
+        "restore_drill_ref",
+        "execution_basis_hash"
+      ]
+    },
+    {
+      "family_id": "security_verification",
+      "manual_waiver_allowed_for_blocking_green": false,
+      "quarantine_allowed_for_blocking_green": false,
+      "reason": "Critical security or artifact integrity failures are not waiveable for blocking green posture.",
+      "retry_policy": "same-candidate rerun allowed only for infrastructure failures in the harness; security findings themselves are never retried to green",
+      "triage_metadata": [
+        "candidate_identity_hash",
+        "artifact_digest",
+        "distribution_target",
+        "finding_or_rule_id"
+      ]
+    },
+    {
+      "family_id": "performance_canary_and_failure_mode",
+      "manual_waiver_allowed_for_blocking_green": false,
+      "quarantine_allowed_for_blocking_green": false,
+      "reason": "Canary and failure-mode evidence can be noisy, but promotion still requires a current, admissible, unwaived result.",
+      "retry_policy": "bounded same-candidate rerun allowed for environment noise, but SLO or error-budget failures remain product-significant until disproven with equivalent scope",
+      "triage_metadata": [
+        "candidate_identity_hash",
+        "load_profile_ref",
+        "canary_summary_ref",
+        "fault_profile_ref",
+        "slo_window_ref"
+      ]
+    }
+  ],
+  "global_rules": [
+    {
+      "policy": "A blocking suite result counts only when bound to the exact candidate, current, same-scope, and serialized with quarantine posture NONE and manual waiver posture NONE.",
+      "rule_id": "blocking_green_requires_admissible_unquarantined_evidence",
+      "source_refs": [
+        "Algorithm/verification_and_release_gates.md::L160[Gate_admissibility_rules]",
+        "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L78[3._Admissibility_boundary]"
+      ]
+    },
+    {
+      "policy": "Any rerun used to recover from environment noise must preserve candidate identity, scope, and supporting compatibility or sandbox breadth boundaries.",
+      "rule_id": "reruns_must_preserve_candidate_and_scope",
+      "source_refs": [
+        "Algorithm/verification_and_release_gates.md::L160[Gate_admissibility_rules]",
+        "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L78[3._Admissibility_boundary]"
+      ]
+    },
+    {
+      "policy": "Schema compatibility, authority mutation safety, restore or DR, signed build integrity, and critical security suites cannot be manually overridden into green release posture.",
+      "rule_id": "critical_suites_cannot_be_manually_overridden",
+      "source_refs": [
+        "Algorithm/verification_and_release_gates.md::L210[manual_override_cannot_bypass_critical_gates]"
+      ]
+    },
+    {
+      "policy": "Flake triage keeps traces, screenshots, seeds, error objects, and correlation keys so diagnosability improves instead of being erased by reruns.",
+      "rule_id": "trace_and_failure_artifacts_must_survive_triage",
+      "source_refs": [
+        "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+        "Algorithm/error_model_and_remediation_model.md::L41[13.2_Canonical_error_object]"
+      ]
+    }
+  ],
+  "summary": {
+    "blocking_green_manual_waiver_allowed_count": 0,
+    "blocking_green_quarantine_allowed_count": 0,
+    "family_rule_count": 10,
+    "global_rule_count": 4
+  },
+  "typed_gaps_or_deferred_decisions": [
+    {
+      "id": "non_blocking_quarantine_reclassification_process_deferred",
+      "source_refs": [
+        "Algorithm/verification_and_release_gates.md::L210[reclassification_required_before_quarantine_stops_blocking]"
+      ],
+      "status": "intentional",
+      "summary": "The governance process for reclassifying a family from blocking to non-blocking belongs to later platform or release operations work; ADR-008 only fixes the release-time constraint that the change cannot happen ad hoc during the judged release.",
+      "type": "DEFERRED_DECISION"
+    }
+  ]
+}

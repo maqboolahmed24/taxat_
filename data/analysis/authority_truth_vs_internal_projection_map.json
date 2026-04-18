@@ -1,0 +1,201 @@
+{
+  "contract_version": "AUTHORITY_TRUTH_PROJECTION_MAP_V1",
+  "northbound_command_constraints": [
+    "payload{} SHALL NOT embed authority tokens, raw audit signatures, or client-derived legal-state flags",
+    "truth and recovery semantics stay bound to durable ids and receipts rather than read-side projection identity",
+    "projection input policy stays limited to stale guards rather than direct state writeback"
+  ],
+  "source_refs": [
+    "Algorithm/authority_truth_and_internal_projection_separation_contract.md::L3[truth_projection_purpose]",
+    "Algorithm/authority_truth_and_internal_projection_separation_contract.md::L13[truth_projection_model]",
+    "Algorithm/authority_truth_and_internal_projection_separation_contract.md::L38[truth_projection_vocabulary]",
+    "Algorithm/authority_truth_and_internal_projection_separation_contract.md::L55[truth_projection_required_outcomes]",
+    "Algorithm/authority_truth_and_internal_projection_separation_contract.md::L69[truth_projection_surface_rules]",
+    "Algorithm/northbound_api_and_session_contract.md::L295[northbound_command_envelope]"
+  ],
+  "summary": {
+    "boundary_scopes_covered": [
+      "AUTHORITY_INTERACTION_RECORD",
+      "AUTHORITY_INGRESS_RECEIPT",
+      "SUBMISSION_RECORD",
+      "OBLIGATION_MIRROR",
+      "WORKFLOW_ITEM",
+      "CLIENT_TIMELINE_EVENT"
+    ],
+    "schema_boundary_scopes": [
+      "AUTHORITY_INTERACTION_RECORD",
+      "AUTHORITY_INGRESS_RECEIPT",
+      "SUBMISSION_RECORD",
+      "OBLIGATION_MIRROR",
+      "WORKFLOW_ITEM",
+      "CLIENT_TIMELINE_EVENT"
+    ],
+    "schema_truth_surface_roles": [
+      "AUTHORITY_RUNTIME_LEDGER",
+      "AUTHORITY_INGRESS_CHECKPOINT",
+      "AUTHORITY_SETTLEMENT_LEDGER",
+      "INTERNAL_OBLIGATION_MIRROR",
+      "INTERNAL_WORKFLOW_COORDINATION",
+      "CUSTOMER_SAFE_STATUS_PROJECTION"
+    ],
+    "surface_count": 6,
+    "truth_surface_roles_covered": [
+      "AUTHORITY_RUNTIME_LEDGER",
+      "AUTHORITY_INGRESS_CHECKPOINT",
+      "AUTHORITY_SETTLEMENT_LEDGER",
+      "INTERNAL_OBLIGATION_MIRROR",
+      "INTERNAL_WORKFLOW_COORDINATION",
+      "CUSTOMER_SAFE_STATUS_PROJECTION"
+    ]
+  },
+  "surfaces": [
+    {
+      "allowed_authority_states": [
+        "NOT_REQUESTED",
+        "UNKNOWN",
+        "PENDING_ACK",
+        "CONFIRMED",
+        "REJECTED",
+        "OUT_OF_BAND"
+      ],
+      "artifact_name": "AuthorityInteractionRecord",
+      "authoritative_source_policy": "RUNTIME_LEDGER_ONLY",
+      "boundary_scope": "AUTHORITY_INTERACTION_RECORD",
+      "forbidden_promotions": [
+        "must not be rendered as confirmed customer truth merely because a response exists"
+      ],
+      "projection_rules": [
+        "Tracks active admissible meaning and response history but does not itself settle customer or workflow truth.",
+        "Carries resend legality, reconciliation budget, and escalation posture as authoritative runtime control state."
+      ],
+      "source_refs": [
+        "Algorithm/authority_truth_and_internal_projection_separation_contract.md::L13[truth_projection_model]",
+        "Algorithm/authority_truth_and_internal_projection_separation_contract.md::L69[truth_projection_surface_rules]",
+        "Algorithm/authority_interaction_protocol.md::L363[authority_interaction_record]"
+      ],
+      "truth_surface_role": "AUTHORITY_RUNTIME_LEDGER"
+    },
+    {
+      "allowed_authority_states": [
+        "NOT_APPLICABLE",
+        "UNKNOWN"
+      ],
+      "artifact_name": "AuthorityIngressReceipt",
+      "authoritative_source_policy": "CHECKPOINT_ONLY",
+      "boundary_scope": "AUTHORITY_INGRESS_RECEIPT",
+      "forbidden_promotions": [
+        "cannot settle legal truth before strong binding and normalization complete"
+      ],
+      "projection_rules": [
+        "May prove authenticated transport and correlation posture only.",
+        "Must retain grouped ingress proof and correlation contract for later reuse."
+      ],
+      "source_refs": [
+        "Algorithm/authority_truth_and_internal_projection_separation_contract.md::L69[truth_projection_surface_rules]",
+        "Algorithm/authority_interaction_protocol.md::L792[inbound_authority_ingress]"
+      ],
+      "truth_surface_role": "AUTHORITY_INGRESS_CHECKPOINT"
+    },
+    {
+      "allowed_authority_states": [
+        "UNKNOWN",
+        "PENDING_ACK",
+        "CONFIRMED",
+        "REJECTED",
+        "OUT_OF_BAND"
+      ],
+      "artifact_name": "SubmissionRecord",
+      "authoritative_source_policy": "AUTHORITY_SETTLEMENT_ONLY",
+      "boundary_scope": "SUBMISSION_RECORD",
+      "forbidden_promotions": [
+        "no internal optimism or workflow completion may write CONFIRMED"
+      ],
+      "projection_rules": [
+        "The only durable settlement ledger for one meaning.",
+        "Request-backed settlement changes require bound authority_ingress_proof_contract for async paths."
+      ],
+      "source_refs": [
+        "Algorithm/authority_truth_and_internal_projection_separation_contract.md::L69[truth_projection_surface_rules]",
+        "Algorithm/authority_interaction_protocol.md::L854[submission_state_write_rules]"
+      ],
+      "truth_surface_role": "AUTHORITY_SETTLEMENT_LEDGER"
+    },
+    {
+      "allowed_authority_states": [
+        "NOT_REQUESTED",
+        "UNKNOWN",
+        "PENDING_ACK",
+        "CONFIRMED",
+        "REJECTED",
+        "OUT_OF_BAND"
+      ],
+      "artifact_name": "ObligationMirror",
+      "authoritative_source_policy": "SUBORDINATE_TO_SUBMISSION_RECORD",
+      "boundary_scope": "OBLIGATION_MIRROR",
+      "forbidden_promotions": [
+        "cannot reuse confirmed anchors for unknown, rejected, or out-of-band posture"
+      ],
+      "projection_rules": [
+        "Keeps pending lineage, confirmed lineage, and readiness anchors distinct.",
+        "Reopens on late authority corrections instead of preserving stale resolved posture."
+      ],
+      "source_refs": [
+        "Algorithm/authority_truth_and_internal_projection_separation_contract.md::L69[truth_projection_surface_rules]",
+        "Algorithm/authority_interaction_protocol.md::L998[reconciliation_protocol]"
+      ],
+      "truth_surface_role": "INTERNAL_OBLIGATION_MIRROR"
+    },
+    {
+      "allowed_authority_states": [
+        "NOT_APPLICABLE",
+        "UNKNOWN",
+        "PENDING_ACK",
+        "CONFIRMED",
+        "REJECTED",
+        "OUT_OF_BAND"
+      ],
+      "artifact_name": "WorkflowItem",
+      "authoritative_source_policy": "COORDINATION_ONLY",
+      "boundary_scope": "WORKFLOW_ITEM",
+      "forbidden_promotions": [
+        "workflow DONE may not imply resolved authority truth while settlement remains pending, unknown, or out-of-band"
+      ],
+      "projection_rules": [
+        "Coordinates escalation and human review while exposing typed authority_truth_state.",
+        "Escalation ownership and due time come from grouped reconciliation control packets."
+      ],
+      "source_refs": [
+        "Algorithm/authority_truth_and_internal_projection_separation_contract.md::L69[truth_projection_surface_rules]",
+        "Algorithm/authority_interaction_protocol.md::L1042[reconciliation_budget_and_escalation]",
+        "Algorithm/test_vectors.md::L1282[TV_70U]"
+      ],
+      "truth_surface_role": "INTERNAL_WORKFLOW_COORDINATION"
+    },
+    {
+      "allowed_authority_states": [
+        "NOT_APPLICABLE",
+        "UNKNOWN",
+        "PENDING_ACK",
+        "CONFIRMED",
+        "REJECTED",
+        "OUT_OF_BAND"
+      ],
+      "artifact_name": "ClientTimelineEvent",
+      "authoritative_source_policy": "CUSTOMER_SAFE_PROJECTION_ONLY",
+      "boundary_scope": "CLIENT_TIMELINE_EVENT",
+      "forbidden_promotions": [
+        "cannot render pending, unknown, or out-of-band posture as resolved reassurance"
+      ],
+      "projection_rules": [
+        "Customer-safe headlines must remain compatible with authority_truth_state.",
+        "Authority-neutral events keep authority_truth_state = NOT_APPLICABLE."
+      ],
+      "source_refs": [
+        "Algorithm/authority_truth_and_internal_projection_separation_contract.md::L69[truth_projection_surface_rules]",
+        "Algorithm/authority_truth_and_internal_projection_separation_contract.md::L55[truth_projection_required_outcomes]",
+        "Algorithm/test_vectors.md::L1247[TV_70I]"
+      ],
+      "truth_surface_role": "CUSTOMER_SAFE_STATUS_PROJECTION"
+    }
+  ]
+}

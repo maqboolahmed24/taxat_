@@ -1,0 +1,139 @@
+{
+  "contract_version": "2026-04-18",
+  "rows": [
+    {
+      "decision_posture": "ROLLBACK_ALLOWED",
+      "native_client_window_state": "VERIFIED_COMPATIBLE",
+      "operator_message": "Abort the candidate and return to the prior baseline while the compatibility window remains open.",
+      "reader_window_state": "OPEN_AND_BACKWARD_COMPATIBLE",
+      "required_evidence": [
+        "CanaryHealthSummary",
+        "ReleaseVerificationManifest",
+        "DeploymentRelease"
+      ],
+      "restore_implication": "previous release baseline may remain serving while the candidate is withdrawn",
+      "scenario_id": "canary_failure_before_contract_phase",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L44[2._Promotion_pipeline]",
+        "Algorithm/deployment_and_resilience_contract.md::L177[6._Rollout_rollback_and_fail-forward_posture]"
+      ]
+    },
+    {
+      "decision_posture": "ROLLBACK_ALLOWED",
+      "native_client_window_state": "VERIFIED_COMPATIBLE",
+      "operator_message": "Rollback is lawful only while reader-window, migration, and client-window guarantees are still green.",
+      "reader_window_state": "OPEN_AND_BACKWARD_COMPATIBLE",
+      "required_evidence": [
+        "schema_bundle_compatibility_gate_contract",
+        "DeploymentRelease.rollback_boundary_state"
+      ],
+      "restore_implication": "no restore posture change if durable truth remains intact",
+      "scenario_id": "code_regression_with_open_reader_window",
+      "source_refs": [
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L127[Rollback_and_fail-forward_law]",
+        "Algorithm/deployment_and_resilience_contract.md::L177[6._Rollout_rollback_and_fail-forward_posture]"
+      ]
+    },
+    {
+      "decision_posture": "PROMOTION_BLOCKED",
+      "native_client_window_state": "BLOCKED",
+      "operator_message": "Promotion must stop when the shared compatibility gate records a blocked native client window.",
+      "reader_window_state": "WINDOW_MAY_BE_OPEN",
+      "required_evidence": [
+        "ClientCompatibilityMatrix",
+        "schema_bundle_compatibility_gate_contract"
+      ],
+      "restore_implication": "promotion never proceeds, so rollback is not yet the correct tool",
+      "scenario_id": "native_supported_window_blocked",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L72[3._Schema_and_datastore_migration_rules]",
+        "Algorithm/verification_and_release_gates.md::L271[4._Evidence_required_for_promotion]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L161[8._Operational_security_release_gates]"
+      ]
+    },
+    {
+      "decision_posture": "FAIL_FORWARD_ONLY",
+      "native_client_window_state": "VERIFIED_COMPATIBLE_OR_NOT_APPLICABLE",
+      "operator_message": "Once the compatibility window closes or destructive change begins, rollback is unlawful and the system must use a compensating forward fix.",
+      "reader_window_state": "CONTRACT_ELIGIBLE_WINDOW_CLOSED",
+      "required_evidence": [
+        "SchemaMigrationLedger",
+        "DeploymentRelease.rollback_boundary_state",
+        "ReleaseVerificationManifest"
+      ],
+      "restore_implication": "historical and restore readers must rely on preserved frozen basis rather than rollback",
+      "scenario_id": "destructive_contract_started_or_window_closed",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L72[3._Schema_and_datastore_migration_rules]",
+        "Algorithm/deployment_and_resilience_contract.md::L177[6._Rollout_rollback_and_fail-forward_posture]",
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L127[Rollback_and_fail-forward_law]"
+      ]
+    },
+    {
+      "decision_posture": "FAIL_FORWARD_ONLY",
+      "native_client_window_state": "VERIFIED_COMPATIBLE",
+      "operator_message": "Do not contract or roll back in a way that strands in-flight manifests under a broken reader window.",
+      "reader_window_state": "OPEN_FOR_PROTECTED_INFLIGHT_OR_HISTORICAL_MANIFESTS",
+      "required_evidence": [
+        "schema_reader_window_contract",
+        "RunManifest.schema_bundle_hash",
+        "SchemaMigrationLedger"
+      ],
+      "restore_implication": "do not strand in-flight manifests; preserve frozen lineage while forward-fixing the candidate",
+      "scenario_id": "inflight_manifest_depends_on_old_shape",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L72[3._Schema_and_datastore_migration_rules]",
+        "Algorithm/manifest_and_config_freeze_contract.md::L78[5.3_RunManifest_required_field_groups]"
+      ]
+    },
+    {
+      "decision_posture": "FAIL_CLOSED_PENDING_REOPEN",
+      "native_client_window_state": "MUST_MATCH_RESTORE_COMPATIBILITY_GATE",
+      "operator_message": "A restore checkpoint that is not READY_FOR_REOPEN is not lawful evidence for reopen or for claiming recovery success.",
+      "reader_window_state": "MUST_MATCH_RESTORE_COMPATIBILITY_GATE",
+      "required_evidence": [
+        "RecoveryCheckpoint",
+        "RestoreDrillResult",
+        "privacy_reconciliation_contract"
+      ],
+      "restore_implication": "reopen stays blocked until privacy reconciliation, queue rebuild, audit continuity, and authority revalidation complete",
+      "scenario_id": "restore_checkpoint_not_reopen_ready",
+      "source_refs": [
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L44[Recovery_checkpoint_law]",
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[Restore_privacy_reconciliation_law]",
+        "Algorithm/deployment_and_resilience_contract.md::L133[5._Backup_restore_and_DR_rules]"
+      ]
+    },
+    {
+      "decision_posture": "FAILED_FORWARD",
+      "native_client_window_state": "BOUND_TO_COMPENSATING_RELEASE_PLAN",
+      "operator_message": "Failed-forward posture is only lawful when the compensating release plan and accountable owner are explicit.",
+      "reader_window_state": "CLOSED_OR_UNSAFE_FOR_ROLLBACK",
+      "required_evidence": [
+        "DeploymentRelease.compensating_release_id_or_null",
+        "DeploymentRelease.fail_forward_owner_ref_or_null",
+        "ReleaseVerificationManifest"
+      ],
+      "restore_implication": "truth remains append-only; the forward fix and its owner must be explicit",
+      "scenario_id": "fail_forward_active_with_compensating_release",
+      "source_refs": [
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L127[Rollback_and_fail-forward_law]",
+        "Algorithm/deployment_and_resilience_contract.md::L177[6._Rollout_rollback_and_fail-forward_posture]"
+      ]
+    }
+  ],
+  "selected_strategy_id": "manifest_centered_candidate_bound_release_doctrine",
+  "summary": {
+    "fail_forward_only_count": 2,
+    "promotion_block_count": 1,
+    "rollback_allowed_count": 2,
+    "scenario_count": 7
+  },
+  "typed_gaps_or_deferred_decisions": [
+    {
+      "id": "traffic_split_mechanics_deferred",
+      "summary": "ADR-009 chooses release truth and rollback legality, but not the exact traffic-splitting mechanics used during canary or global rollout.",
+      "type": "DEFERRED_DECISION"
+    }
+  ]
+}

@@ -1,0 +1,422 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/messaging_topology.schema.json",
+  "title": "MessagingTopologyInventory",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "inventory_id",
+    "provider_id",
+    "flow_id",
+    "policy_version",
+    "run_id",
+    "workspace_id",
+    "operator_identity_alias",
+    "selection_status",
+    "managed_default_status",
+    "selected_provider_family_or_null",
+    "topology_mode",
+    "provider_option_rows",
+    "environment_rows",
+    "channel_rows",
+    "outbox_inbox_channel_matrix_ref",
+    "retry_dead_letter_policy_ref",
+    "ordering_and_partitioning_policy_ref",
+    "idempotency_and_dedupe_policy_ref",
+    "source_refs",
+    "typed_gaps",
+    "notes",
+    "last_verified_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "inventory_id": {
+      "const": "messaging_inventory"
+    },
+    "provider_id": {
+      "const": "message-coordination-fabric"
+    },
+    "flow_id": {
+      "const": "provision-queue-or-broker-for-outbox-inbox-and-worker-coordination"
+    },
+    "policy_version": {
+      "const": "1.0"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workspace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operator_identity_alias": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selection_status": {
+      "enum": [
+        "PROVIDER_SELECTION_REQUIRED",
+        "PROVIDER_SELECTED"
+      ]
+    },
+    "managed_default_status": {
+      "enum": [
+        "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION",
+        "READY_TO_ADOPT_PLATFORM_MESSAGING"
+      ]
+    },
+    "selected_provider_family_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "AWS_SQS_FIFO",
+        "GCP_PUBSUB",
+        "AZURE_SERVICE_BUS",
+        "SELF_HOSTED_RABBITMQ_QUORUM",
+        null
+      ]
+    },
+    "topology_mode": {
+      "const": "TRANSACTIONAL_OUTBOX_AND_AUTHENTICATED_DEDUPE_INBOX_REBUILDABLE_TRANSPORT_ONLY_BROKER"
+    },
+    "provider_option_rows": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "$ref": "#/$defs/providerOptionRow"
+      }
+    },
+    "environment_rows": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "$ref": "#/$defs/environmentRow"
+      }
+    },
+    "channel_rows": {
+      "type": "array",
+      "minItems": 10,
+      "items": {
+        "$ref": "#/$defs/channelRow"
+      }
+    },
+    "outbox_inbox_channel_matrix_ref": {
+      "const": "config/messaging/outbox_inbox_channel_matrix.json"
+    },
+    "retry_dead_letter_policy_ref": {
+      "const": "config/messaging/retry_dead_letter_policy.json"
+    },
+    "ordering_and_partitioning_policy_ref": {
+      "const": "config/messaging/ordering_and_partitioning_policy.json"
+    },
+    "idempotency_and_dedupe_policy_ref": {
+      "const": "config/messaging/idempotency_and_dedupe_policy.json"
+    },
+    "source_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/sourceRef"
+      }
+    },
+    "typed_gaps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "last_verified_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "sourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_file",
+        "source_heading_or_logical_block",
+        "source_ref",
+        "rationale"
+      ],
+      "properties": {
+        "source_file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_heading_or_logical_block": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "providerOptionRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider_family",
+        "selection_state",
+        "provider_label",
+        "docs_urls",
+        "delivery_summary",
+        "ordering_summary",
+        "retry_dead_letter_summary",
+        "dedupe_summary",
+        "notes",
+        "source_refs"
+      ],
+      "properties": {
+        "provider_family": {
+          "enum": [
+            "AWS_SQS_FIFO",
+            "GCP_PUBSUB",
+            "AZURE_SERVICE_BUS",
+            "SELF_HOSTED_RABBITMQ_QUORUM"
+          ]
+        },
+        "selection_state": {
+          "enum": [
+            "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION",
+            "SELF_HOST_DECISION_REQUIRED"
+          ]
+        },
+        "provider_label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "docs_urls": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "delivery_summary": {
+          "type": "string"
+        },
+        "ordering_summary": {
+          "type": "string"
+        },
+        "retry_dead_letter_summary": {
+          "type": "string"
+        },
+        "dedupe_summary": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        }
+      }
+    },
+    "environmentRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "environment_ref",
+        "label",
+        "namespace_prefix",
+        "credential_namespace_ref",
+        "runtime_secret_alias_ref",
+        "admin_secret_alias_ref",
+        "provider_binding_state",
+        "recovery_posture",
+        "source_refs",
+        "notes"
+      ],
+      "properties": {
+        "environment_ref": {
+          "type": "string",
+          "pattern": "^env_"
+        },
+        "label": {
+          "type": "string"
+        },
+        "namespace_prefix": {
+          "type": "string"
+        },
+        "credential_namespace_ref": {
+          "type": "string"
+        },
+        "runtime_secret_alias_ref": {
+          "type": "string"
+        },
+        "admin_secret_alias_ref": {
+          "type": "string"
+        },
+        "provider_binding_state": {
+          "const": "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION"
+        },
+        "recovery_posture": {
+          "enum": [
+            "FIXTURE_ONLY_NO_AUTHORITATIVE_RECOVERY",
+            "REBUILD_FROM_DURABLE_TRUTH_ONLY",
+            "RESTORE_DRILL_REBUILD_FROM_DURABLE_TRUTH_ONLY"
+          ]
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "channelRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "channel_ref",
+        "label",
+        "family_ref",
+        "outbox_mode",
+        "outbox_ref_or_null",
+        "outbox_identity_fields",
+        "broker_delivery_class",
+        "broker_entity_alias_template",
+        "inbox_mode",
+        "inbox_ref",
+        "consumer_binding_ref",
+        "payload_posture",
+        "ordering_policy_ref",
+        "retry_policy_ref",
+        "dedupe_policy_ref",
+        "rebuild_basis_refs",
+        "truth_boundary_statement",
+        "source_refs",
+        "notes"
+      ],
+      "properties": {
+        "channel_ref": {
+          "type": "string",
+          "pattern": "^channel\\."
+        },
+        "label": {
+          "type": "string"
+        },
+        "family_ref": {
+          "type": "string",
+          "pattern": "^family\\."
+        },
+        "outbox_mode": {
+          "enum": [
+            "TRANSACTIONAL_OUTBOX_REQUIRED",
+            "NONE_EXTERNAL_SOURCE"
+          ]
+        },
+        "outbox_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "outbox_identity_fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "broker_delivery_class": {
+          "enum": [
+            "ORDERED_PARTITION_CHANNEL",
+            "UNORDERED_FANOUT_CHANNEL",
+            "AUTHENTICATED_CALLBACK_CHANNEL"
+          ]
+        },
+        "broker_entity_alias_template": {
+          "type": "string"
+        },
+        "inbox_mode": {
+          "enum": [
+            "WORKER_EXECUTION_INBOX_REQUIRED",
+            "AUTHENTICATED_DEDUPE_INBOX_REQUIRED",
+            "DELIVERY_EVIDENCE_INBOX_REQUIRED",
+            "RESTORE_REBUILD_INBOX_REQUIRED"
+          ]
+        },
+        "inbox_ref": {
+          "type": "string"
+        },
+        "consumer_binding_ref": {
+          "type": "string"
+        },
+        "payload_posture": {
+          "enum": [
+            "OPAQUE_REFS_AND_BASIS_HASHES_ONLY",
+            "OPAQUE_REFS_PLUS_AUTH_METADATA_NO_SECRETS"
+          ]
+        },
+        "ordering_policy_ref": {
+          "type": "string",
+          "pattern": "^ordering\\."
+        },
+        "retry_policy_ref": {
+          "type": "string",
+          "pattern": "^retry\\."
+        },
+        "dedupe_policy_ref": {
+          "type": "string",
+          "pattern": "^dedupe\\."
+        },
+        "rebuild_basis_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "truth_boundary_statement": {
+          "type": "string"
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,519 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/infra/observability/telemetry_topology.schema.json",
+  "title": "ObservabilityTopologyInventory",
+  "description": "Sanitized provider-neutral OpenTelemetry topology inventory for Taxat. The schema freezes provider options, environment partitions, collector tiers, backend ownership boundaries, and references to the machine-readable signal, export, sampling, correlation, and log-scrub policy packs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "inventory_id",
+    "provider_id",
+    "flow_id",
+    "policy_version",
+    "run_id",
+    "workspace_id",
+    "operator_identity_alias",
+    "selection_status",
+    "managed_default_status",
+    "selected_provider_family_or_null",
+    "topology_mode",
+    "truth_boundary_statement",
+    "provider_option_rows",
+    "environment_rows",
+    "collector_tier_rows",
+    "backend_rows",
+    "signal_backend_catalog_ref",
+    "otlp_export_matrix_ref",
+    "sampling_and_retention_policy_ref",
+    "correlation_key_policy_ref",
+    "log_scrub_and_field_allowlist_ref",
+    "monitoring_overlay_refs",
+    "source_refs",
+    "typed_gaps",
+    "notes",
+    "last_verified_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "inventory_id": {
+      "const": "observability_inventory"
+    },
+    "provider_id": {
+      "const": "opentelemetry-collection-and-backends"
+    },
+    "flow_id": {
+      "const": "provision-otel-collection-and-backends"
+    },
+    "policy_version": {
+      "const": "1.0"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workspace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operator_identity_alias": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selection_status": {
+      "type": "string",
+      "enum": [
+        "PROVIDER_SELECTION_REQUIRED",
+        "PROVIDER_SELECTED"
+      ]
+    },
+    "managed_default_status": {
+      "type": "string",
+      "enum": [
+        "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION",
+        "READY_TO_ADOPT_PLATFORM_TELEMETRY_BACKENDS"
+      ]
+    },
+    "selected_provider_family_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "SELF_HOSTED_LGTM_COLLECTOR_STACK",
+        "PLATFORM_NATIVE_OTLP_BACKENDS",
+        "MANAGED_OTLP_SEARCH_AND_METRIC_STACK",
+        null
+      ]
+    },
+    "topology_mode": {
+      "const": "HYBRID_DIRECT_SDK_AND_WORKLOAD_AGENT_TO_ENVIRONMENT_GATEWAY_WITH_SIGNAL_SPECIFIC_FIRST_PARTY_BACKENDS"
+    },
+    "truth_boundary_statement": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_option_rows": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "$ref": "#/$defs/providerOptionRow"
+      }
+    },
+    "environment_rows": {
+      "type": "array",
+      "minItems": 6,
+      "items": {
+        "$ref": "#/$defs/environmentRow"
+      }
+    },
+    "collector_tier_rows": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "$ref": "#/$defs/collectorTierRow"
+      }
+    },
+    "backend_rows": {
+      "type": "array",
+      "minItems": 7,
+      "items": {
+        "$ref": "#/$defs/backendRow"
+      }
+    },
+    "signal_backend_catalog_ref": {
+      "const": "config/observability/signal_backend_catalog.json"
+    },
+    "otlp_export_matrix_ref": {
+      "const": "config/observability/otlp_export_matrix.json"
+    },
+    "sampling_and_retention_policy_ref": {
+      "const": "config/observability/sampling_and_retention_policy.json"
+    },
+    "correlation_key_policy_ref": {
+      "const": "config/observability/correlation_key_policy.json"
+    },
+    "log_scrub_and_field_allowlist_ref": {
+      "const": "config/observability/log_scrub_and_field_allowlist.json"
+    },
+    "monitoring_overlay_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "source_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/sourceRef"
+      }
+    },
+    "typed_gaps": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "last_verified_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "sourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_file",
+        "source_heading_or_logical_block",
+        "source_ref",
+        "rationale"
+      ],
+      "properties": {
+        "source_file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_heading_or_logical_block": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "providerOptionRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider_family",
+        "selection_state",
+        "provider_label",
+        "docs_urls",
+        "topology_summary",
+        "backend_summary",
+        "privacy_summary",
+        "notes",
+        "source_refs"
+      ],
+      "properties": {
+        "provider_family": {
+          "type": "string",
+          "enum": [
+            "SELF_HOSTED_LGTM_COLLECTOR_STACK",
+            "PLATFORM_NATIVE_OTLP_BACKENDS",
+            "MANAGED_OTLP_SEARCH_AND_METRIC_STACK"
+          ]
+        },
+        "selection_state": {
+          "type": "string",
+          "enum": [
+            "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION",
+            "SELF_HOST_DECISION_REQUIRED"
+          ]
+        },
+        "provider_label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "docs_urls": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "topology_summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "backend_summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "privacy_summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        }
+      }
+    },
+    "environmentRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "environment_ref",
+        "label",
+        "collector_namespace_prefix",
+        "environment_gateway_alias",
+        "provider_binding_state",
+        "authority_lane_posture",
+        "release_debug_posture",
+        "notes",
+        "source_refs"
+      ],
+      "properties": {
+        "environment_ref": {
+          "type": "string",
+          "pattern": "^env_"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "collector_namespace_prefix": {
+          "type": "string",
+          "minLength": 1
+        },
+        "environment_gateway_alias": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider_binding_state": {
+          "const": "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION"
+        },
+        "authority_lane_posture": {
+          "type": "string",
+          "enum": [
+            "NONE",
+            "SANDBOX_WEB_DESKTOP_BATCH",
+            "PREPROD_SANDBOX_WEB_DESKTOP_BATCH",
+            "LIVE_WEB_DESKTOP_BATCH",
+            "DRILL_DISABLED_BY_DEFAULT"
+          ]
+        },
+        "release_debug_posture": {
+          "type": "string",
+          "enum": [
+            "LOCAL_AND_FIXTURE_ONLY",
+            "TIME_BOUND_ELEVATION_WITH_APPROVAL",
+            "NO_PERSISTENT_DEBUG_WIDENING"
+          ]
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        }
+      }
+    },
+    "collectorTierRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tier_ref",
+        "label",
+        "tier_kind",
+        "deployment_scope",
+        "signal_families",
+        "ingress_mode",
+        "resilience_posture",
+        "processors",
+        "notes",
+        "source_refs"
+      ],
+      "properties": {
+        "tier_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tier_kind": {
+          "type": "string",
+          "enum": [
+            "SDK_DIRECT",
+            "WORKLOAD_AGENT",
+            "ENVIRONMENT_GATEWAY",
+            "EXPORT_BRIDGE"
+          ]
+        },
+        "deployment_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signal_families": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/signalFamilyRef"
+          }
+        },
+        "ingress_mode": {
+          "type": "string",
+          "minLength": 1
+        },
+        "resilience_posture": {
+          "type": "string",
+          "minLength": 1
+        },
+        "processors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        }
+      }
+    },
+    "backendRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "backend_ref",
+        "label",
+        "backend_kind",
+        "binding_state",
+        "signal_families",
+        "ownership_boundary",
+        "access_posture",
+        "storage_class",
+        "provider_secret_alias_ref_or_null",
+        "notes",
+        "source_refs"
+      ],
+      "properties": {
+        "backend_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "backend_kind": {
+          "type": "string",
+          "enum": [
+            "TRACE_BACKEND",
+            "METRIC_BACKEND",
+            "LOG_BACKEND",
+            "RESTRICTED_LOG_BACKEND",
+            "JOIN_INDEX",
+            "VENDOR_MONITORING_OVERLAY"
+          ]
+        },
+        "binding_state": {
+          "type": "string",
+          "enum": [
+            "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION",
+            "ADOPTED_EXISTING"
+          ]
+        },
+        "signal_families": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/signalFamilyRef"
+          }
+        },
+        "ownership_boundary": {
+          "type": "string",
+          "enum": [
+            "FIRST_PARTY_REQUIRED",
+            "FIRST_PARTY_RESTRICTED",
+            "FIRST_PARTY_DERIVED_FROM_CONTROL_AND_AUDIT",
+            "VENDOR_SECONDARY_OVERLAY"
+          ]
+        },
+        "access_posture": {
+          "type": "string",
+          "minLength": 1
+        },
+        "storage_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider_secret_alias_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        }
+      }
+    },
+    "signalFamilyRef": {
+      "type": "string",
+      "enum": [
+        "TRACES",
+        "METRICS",
+        "LOGS",
+        "SECURITY",
+        "PRIVACY",
+        "AUDIT_LINKS"
+      ]
+    }
+  }
+}

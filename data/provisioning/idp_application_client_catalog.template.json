@@ -1,0 +1,560 @@
+{
+  "schema_version": "1.0",
+  "catalog_id": "idp-application-client-catalog-wk-local-provisioning-idp",
+  "provider_id": "oidc-external-idp-control-plane",
+  "provider_display_name": "OIDC External Identity Control Plane",
+  "run_id": "run-template-idp-bootstrap-001",
+  "flow_id": "idp-tenant-and-clients-bootstrap",
+  "workspace_id": "wk-local-provisioning-idp",
+  "operator_identity_alias": "ops.idp.bootstrap",
+  "provider_selection": {
+    "provider_selection_status": "PROVIDER_DEFAULT_APPLIED",
+    "provider_family": "OIDC_EXTERNAL_IDP",
+    "provider_vendor_adapter": "AUTH0_COMPATIBLE_DASHBOARD",
+    "provider_vendor_label": "Auth0-compatible external IdP",
+    "docs_urls": [
+      "https://auth0.com/docs/get-started/auth0-overview/create-tenants/set-up-multiple-environments",
+      "https://auth0.com/docs/get-started/applications/application-settings",
+      "https://auth0.com/docs/get-started/auth0-overview/create-applications/regular-web-apps",
+      "https://auth0.com/docs/get-started/auth0-overview/create-applications/native-apps",
+      "https://auth0.com/docs/get-started/auth0-overview/create-applications/machine-to-machine-apps",
+      "https://auth0.com/docs/get-started/applications/confidential-and-public-applications/view-application-type"
+    ],
+    "source_refs": [
+      {
+        "source_ref": "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+        "rationale": "Taxat requires server-mediated browser sessions, separate native posture, and distinct machine credentials."
+      },
+      {
+        "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L30[2._Identity_session_and_command_trust]",
+        "rationale": "The IdP is a bootstrap boundary for authentication posture, not the engine of product legality."
+      },
+      {
+        "source_ref": "https://auth0.com/docs/get-started/auth0-overview/create-tenants/set-up-multiple-environments",
+        "rationale": "Current Auth0 guidance recommends separate tenants for development, staging, and production environments."
+      },
+      {
+        "source_ref": "https://auth0.com/docs/get-started/applications/application-settings",
+        "rationale": "Current Auth0 application settings guidance constrains callback, logout, origin, and native redirect posture."
+      }
+    ]
+  },
+  "tenant_record_ref": "./idp_tenant_record.template.json",
+  "application_clients": [
+    {
+      "client_ref": "idp_client_operator_browser_sandbox",
+      "surface_family": "OPERATOR_BROWSER",
+      "product_environment_id": "env_shared_sandbox_integration",
+      "tenant_ref": "idp_tenant_staging_runtime",
+      "deployable_id": "operator-web",
+      "application_type": "REGULAR_WEB_APPLICATION",
+      "client_visibility": "CONFIDENTIAL",
+      "client_display_name": "Taxat Operator Web Sandbox",
+      "client_id_alias": "idp-operator-web-sandbox",
+      "client_id_fingerprint": "sha256:dc92d6cd122b4e234d411400d8d546ba8db0d4ed40c8011ed1ed08f6b54d2e16",
+      "source_disposition": "ADOPTED_EXISTING",
+      "callback_profile_ref": "idp_cb_operator_browser_sandbox",
+      "callback_urls": [
+        "https://auth.sandbox.taxat.example/oauth/idp/operator/callback"
+      ],
+      "logout_urls": [
+        "https://operator.sandbox.taxat.example/auth/logout-complete"
+      ],
+      "allowed_web_origins": [
+        "https://operator.sandbox.taxat.example"
+      ],
+      "bundle_identifier": null,
+      "token_endpoint_auth_method": "client_secret_post",
+      "grant_posture": [
+        "authorization_code",
+        "refresh_token"
+      ],
+      "session_bootstrap_posture": "Server-mediated browser session bootstrap via confidential regular-web client.",
+      "engine_authorization_boundary": "IdP client identity bootstraps authentication posture only; Taxat still resolves actor class, delegation, authority-link truth, and legality server-side.",
+      "secret_posture": {
+        "requires_vault_secret": true,
+        "secret_namespace_ref": "sec_sandbox_runtime",
+        "secret_class_id": "idp_application_client_secret",
+        "client_id_metadata_store_ref": "vault://metadata/sec_sandbox_runtime/idp/idp_client_operator_browser_sandbox/client-id",
+        "client_secret_store_ref": "vault://kv/sec_sandbox_runtime/idp/idp_client_operator_browser_sandbox/client-secret/current",
+        "client_secret_metadata_ref": "vault://metadata/sec_sandbox_runtime/idp/idp_client_operator_browser_sandbox/client-secret/current",
+        "vault_write_receipt_ref": "vault-write://sec_sandbox_runtime/idp_client_operator_browser_sandbox",
+        "client_secret_fingerprint": "sha256:7debc6088ba169da70e10e27d1cd607cc3c19eadd93a0f5910bcd4520fb12619",
+        "capture_posture": "ADOPT_EXISTING_VAULT_BINDING"
+      },
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/data_model.md::L1811[ActorSession]",
+          "rationale": "ActorSession state is server-authored, so the IdP client only supplies coarse authentication bootstrap."
+        },
+        {
+          "source_ref": "https://auth0.com/docs/get-started/applications/application-settings",
+          "rationale": "Current Auth0 application settings govern callback, logout, allowed origin, and native redirect handling."
+        }
+      ],
+      "typed_gaps": [],
+      "notes": [
+        "Operator browser client is kept separate from portal posture to preserve internal shell isolation and independent secret rotation."
+      ]
+    },
+    {
+      "client_ref": "idp_client_portal_browser_sandbox",
+      "surface_family": "PORTAL_BROWSER",
+      "product_environment_id": "env_shared_sandbox_integration",
+      "tenant_ref": "idp_tenant_staging_runtime",
+      "deployable_id": "client-portal-web",
+      "application_type": "REGULAR_WEB_APPLICATION",
+      "client_visibility": "CONFIDENTIAL",
+      "client_display_name": "Taxat Portal Web Sandbox",
+      "client_id_alias": "idp-portal-web-sandbox",
+      "client_id_fingerprint": "sha256:b4e770b6ddb5f4b7c74f3dd8ca2f6b8937ea8b4d916b44465082e5f8d47888e9",
+      "source_disposition": "ADOPTED_EXISTING",
+      "callback_profile_ref": "idp_cb_portal_browser_sandbox",
+      "callback_urls": [
+        "https://auth.sandbox.taxat.example/oauth/idp/portal/callback"
+      ],
+      "logout_urls": [
+        "https://portal.sandbox.taxat.example/auth/logout-complete"
+      ],
+      "allowed_web_origins": [
+        "https://portal.sandbox.taxat.example"
+      ],
+      "bundle_identifier": null,
+      "token_endpoint_auth_method": "client_secret_post",
+      "grant_posture": [
+        "authorization_code",
+        "refresh_token"
+      ],
+      "session_bootstrap_posture": "Server-mediated browser session bootstrap via confidential regular-web client.",
+      "engine_authorization_boundary": "IdP client identity bootstraps authentication posture only; Taxat still resolves actor class, delegation, authority-link truth, and legality server-side.",
+      "secret_posture": {
+        "requires_vault_secret": true,
+        "secret_namespace_ref": "sec_sandbox_runtime",
+        "secret_class_id": "idp_application_client_secret",
+        "client_id_metadata_store_ref": "vault://metadata/sec_sandbox_runtime/idp/idp_client_portal_browser_sandbox/client-id",
+        "client_secret_store_ref": "vault://kv/sec_sandbox_runtime/idp/idp_client_portal_browser_sandbox/client-secret/current",
+        "client_secret_metadata_ref": "vault://metadata/sec_sandbox_runtime/idp/idp_client_portal_browser_sandbox/client-secret/current",
+        "vault_write_receipt_ref": "vault-write://sec_sandbox_runtime/idp_client_portal_browser_sandbox",
+        "client_secret_fingerprint": "sha256:bdf293f742c6b99562d248da0d48f1722cfaacd99654ad2d327bfdb9ca34a734",
+        "capture_posture": "ADOPT_EXISTING_VAULT_BINDING"
+      },
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/data_model.md::L1811[ActorSession]",
+          "rationale": "ActorSession state is server-authored, so the IdP client only supplies coarse authentication bootstrap."
+        },
+        {
+          "source_ref": "https://auth0.com/docs/get-started/applications/application-settings",
+          "rationale": "Current Auth0 application settings govern callback, logout, allowed origin, and native redirect handling."
+        }
+      ],
+      "typed_gaps": [],
+      "notes": [
+        "Portal browser client remains customer-safe and does not inherit governance-only origins or callback routes."
+      ]
+    },
+    {
+      "client_ref": "idp_client_native_operator_sandbox",
+      "surface_family": "NATIVE_MACOS_OPERATOR",
+      "product_environment_id": "env_shared_sandbox_integration",
+      "tenant_ref": "idp_tenant_staging_runtime",
+      "deployable_id": "Apps/InternalOperatorWorkspaceMac",
+      "application_type": "NATIVE_APPLICATION",
+      "client_visibility": "PUBLIC",
+      "client_display_name": "Taxat Native Operator Sandbox",
+      "client_id_alias": "idp-native-operator-sandbox",
+      "client_id_fingerprint": "sha256:0c3e1acbcb31e25e9e879533afa586467ad0b9fd327510c468d5765430408c65",
+      "source_disposition": "ADOPTED_EXISTING",
+      "callback_profile_ref": "idp_cb_native_operator_sandbox",
+      "callback_urls": [
+        "https://auth.sandbox.taxat.example/oauth/idp/native/operator/callback"
+      ],
+      "logout_urls": [
+        "https://auth.sandbox.taxat.example/oauth/idp/native/operator/callback"
+      ],
+      "allowed_web_origins": [],
+      "bundle_identifier": "dev.taxat.InternalOperatorWorkspaceMac",
+      "token_endpoint_auth_method": "none",
+      "grant_posture": [
+        "authorization_code",
+        "refresh_token",
+        "pkce"
+      ],
+      "session_bootstrap_posture": "System-browser Auth Code + PKCE bootstrap only; no embedded-webview primary sign-in.",
+      "engine_authorization_boundary": "IdP client identity bootstraps authentication posture only; Taxat still resolves actor class, delegation, authority-link truth, and legality server-side.",
+      "secret_posture": {
+        "requires_vault_secret": false,
+        "secret_namespace_ref": null,
+        "secret_class_id": null,
+        "client_id_metadata_store_ref": "vault://metadata/public-client/idp/idp_client_native_operator_sandbox/client-id",
+        "client_secret_store_ref": null,
+        "client_secret_metadata_ref": null,
+        "vault_write_receipt_ref": null,
+        "client_secret_fingerprint": null,
+        "capture_posture": "PUBLIC_CLIENT_NO_SHARED_SECRET"
+      },
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/data_model.md::L1811[ActorSession]",
+          "rationale": "ActorSession state is server-authored, so the IdP client only supplies coarse authentication bootstrap."
+        },
+        {
+          "source_ref": "https://auth0.com/docs/get-started/applications/application-settings",
+          "rationale": "Current Auth0 application settings govern callback, logout, allowed origin, and native redirect handling."
+        }
+      ],
+      "typed_gaps": [
+        "Bundle identifier is frozen here for IdP client binding, but the concrete Xcode target and signing profile remain for later app scaffolding cards."
+      ],
+      "notes": [
+        "Native client stays public and PKCE-based; no shared secret is stored for the desktop app."
+      ]
+    },
+    {
+      "client_ref": "idp_client_operator_browser_preprod",
+      "surface_family": "OPERATOR_BROWSER",
+      "product_environment_id": "env_preproduction_verification",
+      "tenant_ref": "idp_tenant_staging_runtime",
+      "deployable_id": "operator-web",
+      "application_type": "REGULAR_WEB_APPLICATION",
+      "client_visibility": "CONFIDENTIAL",
+      "client_display_name": "Taxat Operator Web Pre-production",
+      "client_id_alias": "idp-operator-web-preprod",
+      "client_id_fingerprint": "sha256:085c4082207f2177e2168495abb535ee092a5a00fc9986a8ed4341b2a3cfcf54",
+      "source_disposition": "ADOPTED_EXISTING",
+      "callback_profile_ref": "idp_cb_operator_browser_preprod",
+      "callback_urls": [
+        "https://auth.preprod.taxat.example/oauth/idp/operator/callback"
+      ],
+      "logout_urls": [
+        "https://operator.preprod.taxat.example/auth/logout-complete"
+      ],
+      "allowed_web_origins": [
+        "https://operator.preprod.taxat.example"
+      ],
+      "bundle_identifier": null,
+      "token_endpoint_auth_method": "client_secret_post",
+      "grant_posture": [
+        "authorization_code",
+        "refresh_token"
+      ],
+      "session_bootstrap_posture": "Server-mediated browser session bootstrap via confidential regular-web client.",
+      "engine_authorization_boundary": "IdP client identity bootstraps authentication posture only; Taxat still resolves actor class, delegation, authority-link truth, and legality server-side.",
+      "secret_posture": {
+        "requires_vault_secret": true,
+        "secret_namespace_ref": "sec_preprod_runtime",
+        "secret_class_id": "idp_application_client_secret",
+        "client_id_metadata_store_ref": "vault://metadata/sec_preprod_runtime/idp/idp_client_operator_browser_preprod/client-id",
+        "client_secret_store_ref": "vault://kv/sec_preprod_runtime/idp/idp_client_operator_browser_preprod/client-secret/current",
+        "client_secret_metadata_ref": "vault://metadata/sec_preprod_runtime/idp/idp_client_operator_browser_preprod/client-secret/current",
+        "vault_write_receipt_ref": "vault-write://sec_preprod_runtime/idp_client_operator_browser_preprod",
+        "client_secret_fingerprint": "sha256:d90422ce037208e321c6a5fc579d04b5dfb9bb6a1561bb3f97ef423124bfbd01",
+        "capture_posture": "ADOPT_EXISTING_VAULT_BINDING"
+      },
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/data_model.md::L1811[ActorSession]",
+          "rationale": "ActorSession state is server-authored, so the IdP client only supplies coarse authentication bootstrap."
+        },
+        {
+          "source_ref": "https://auth0.com/docs/get-started/applications/application-settings",
+          "rationale": "Current Auth0 application settings govern callback, logout, allowed origin, and native redirect handling."
+        }
+      ],
+      "typed_gaps": [],
+      "notes": [
+        "Operator browser client is kept separate from portal posture to preserve internal shell isolation and independent secret rotation."
+      ]
+    },
+    {
+      "client_ref": "idp_client_portal_browser_preprod",
+      "surface_family": "PORTAL_BROWSER",
+      "product_environment_id": "env_preproduction_verification",
+      "tenant_ref": "idp_tenant_staging_runtime",
+      "deployable_id": "client-portal-web",
+      "application_type": "REGULAR_WEB_APPLICATION",
+      "client_visibility": "CONFIDENTIAL",
+      "client_display_name": "Taxat Portal Web Pre-production",
+      "client_id_alias": "idp-portal-web-preprod",
+      "client_id_fingerprint": "sha256:86132f6d779c7e4ca4560a3ab1bdd4a300a1b742fa361b215dad7bf0d9b41c17",
+      "source_disposition": "ADOPTED_EXISTING",
+      "callback_profile_ref": "idp_cb_portal_browser_preprod",
+      "callback_urls": [
+        "https://auth.preprod.taxat.example/oauth/idp/portal/callback"
+      ],
+      "logout_urls": [
+        "https://portal.preprod.taxat.example/auth/logout-complete"
+      ],
+      "allowed_web_origins": [
+        "https://portal.preprod.taxat.example"
+      ],
+      "bundle_identifier": null,
+      "token_endpoint_auth_method": "client_secret_post",
+      "grant_posture": [
+        "authorization_code",
+        "refresh_token"
+      ],
+      "session_bootstrap_posture": "Server-mediated browser session bootstrap via confidential regular-web client.",
+      "engine_authorization_boundary": "IdP client identity bootstraps authentication posture only; Taxat still resolves actor class, delegation, authority-link truth, and legality server-side.",
+      "secret_posture": {
+        "requires_vault_secret": true,
+        "secret_namespace_ref": "sec_preprod_runtime",
+        "secret_class_id": "idp_application_client_secret",
+        "client_id_metadata_store_ref": "vault://metadata/sec_preprod_runtime/idp/idp_client_portal_browser_preprod/client-id",
+        "client_secret_store_ref": "vault://kv/sec_preprod_runtime/idp/idp_client_portal_browser_preprod/client-secret/current",
+        "client_secret_metadata_ref": "vault://metadata/sec_preprod_runtime/idp/idp_client_portal_browser_preprod/client-secret/current",
+        "vault_write_receipt_ref": "vault-write://sec_preprod_runtime/idp_client_portal_browser_preprod",
+        "client_secret_fingerprint": "sha256:eb9384af61b4a90704b8e20dd9992464cababcd0344217fb935a7e08caefb830",
+        "capture_posture": "ADOPT_EXISTING_VAULT_BINDING"
+      },
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/data_model.md::L1811[ActorSession]",
+          "rationale": "ActorSession state is server-authored, so the IdP client only supplies coarse authentication bootstrap."
+        },
+        {
+          "source_ref": "https://auth0.com/docs/get-started/applications/application-settings",
+          "rationale": "Current Auth0 application settings govern callback, logout, allowed origin, and native redirect handling."
+        }
+      ],
+      "typed_gaps": [],
+      "notes": [
+        "Portal browser client remains customer-safe and does not inherit governance-only origins or callback routes."
+      ]
+    },
+    {
+      "client_ref": "idp_client_native_operator_preprod",
+      "surface_family": "NATIVE_MACOS_OPERATOR",
+      "product_environment_id": "env_preproduction_verification",
+      "tenant_ref": "idp_tenant_staging_runtime",
+      "deployable_id": "Apps/InternalOperatorWorkspaceMac",
+      "application_type": "NATIVE_APPLICATION",
+      "client_visibility": "PUBLIC",
+      "client_display_name": "Taxat Native Operator Pre-production",
+      "client_id_alias": "idp-native-operator-preprod",
+      "client_id_fingerprint": "sha256:f1a8e19fd29bb800580adc136e088316673ae724605c15bc50bdc8d6f1b44997",
+      "source_disposition": "ADOPTED_EXISTING",
+      "callback_profile_ref": "idp_cb_native_operator_preprod",
+      "callback_urls": [
+        "https://auth.preprod.taxat.example/oauth/idp/native/operator/callback"
+      ],
+      "logout_urls": [
+        "https://auth.preprod.taxat.example/oauth/idp/native/operator/callback"
+      ],
+      "allowed_web_origins": [],
+      "bundle_identifier": "dev.taxat.InternalOperatorWorkspaceMac",
+      "token_endpoint_auth_method": "none",
+      "grant_posture": [
+        "authorization_code",
+        "refresh_token",
+        "pkce"
+      ],
+      "session_bootstrap_posture": "System-browser Auth Code + PKCE bootstrap only; no embedded-webview primary sign-in.",
+      "engine_authorization_boundary": "IdP client identity bootstraps authentication posture only; Taxat still resolves actor class, delegation, authority-link truth, and legality server-side.",
+      "secret_posture": {
+        "requires_vault_secret": false,
+        "secret_namespace_ref": null,
+        "secret_class_id": null,
+        "client_id_metadata_store_ref": "vault://metadata/public-client/idp/idp_client_native_operator_preprod/client-id",
+        "client_secret_store_ref": null,
+        "client_secret_metadata_ref": null,
+        "vault_write_receipt_ref": null,
+        "client_secret_fingerprint": null,
+        "capture_posture": "PUBLIC_CLIENT_NO_SHARED_SECRET"
+      },
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/data_model.md::L1811[ActorSession]",
+          "rationale": "ActorSession state is server-authored, so the IdP client only supplies coarse authentication bootstrap."
+        },
+        {
+          "source_ref": "https://auth0.com/docs/get-started/applications/application-settings",
+          "rationale": "Current Auth0 application settings govern callback, logout, allowed origin, and native redirect handling."
+        }
+      ],
+      "typed_gaps": [
+        "Bundle identifier is frozen here for IdP client binding, but the concrete Xcode target and signing profile remain for later app scaffolding cards."
+      ],
+      "notes": [
+        "Native client stays public and PKCE-based; no shared secret is stored for the desktop app."
+      ]
+    },
+    {
+      "client_ref": "idp_client_operator_browser_production",
+      "surface_family": "OPERATOR_BROWSER",
+      "product_environment_id": "env_production",
+      "tenant_ref": "idp_tenant_production_runtime",
+      "deployable_id": "operator-web",
+      "application_type": "REGULAR_WEB_APPLICATION",
+      "client_visibility": "CONFIDENTIAL",
+      "client_display_name": "Taxat Operator Web Production",
+      "client_id_alias": "idp-operator-web-production",
+      "client_id_fingerprint": "sha256:c21d77c2f7f309ed642b0f48d97302e4558f5391c47998c8744b33a728b42d0d",
+      "source_disposition": "ADOPTED_EXISTING",
+      "callback_profile_ref": "idp_cb_operator_browser_production",
+      "callback_urls": [
+        "https://auth.production.taxat.example/oauth/idp/operator/callback"
+      ],
+      "logout_urls": [
+        "https://operator.production.taxat.example/auth/logout-complete"
+      ],
+      "allowed_web_origins": [
+        "https://operator.production.taxat.example"
+      ],
+      "bundle_identifier": null,
+      "token_endpoint_auth_method": "client_secret_post",
+      "grant_posture": [
+        "authorization_code",
+        "refresh_token"
+      ],
+      "session_bootstrap_posture": "Server-mediated browser session bootstrap via confidential regular-web client.",
+      "engine_authorization_boundary": "IdP client identity bootstraps authentication posture only; Taxat still resolves actor class, delegation, authority-link truth, and legality server-side.",
+      "secret_posture": {
+        "requires_vault_secret": true,
+        "secret_namespace_ref": "sec_production_runtime",
+        "secret_class_id": "idp_application_client_secret",
+        "client_id_metadata_store_ref": "vault://metadata/sec_production_runtime/idp/idp_client_operator_browser_production/client-id",
+        "client_secret_store_ref": "vault://kv/sec_production_runtime/idp/idp_client_operator_browser_production/client-secret/current",
+        "client_secret_metadata_ref": "vault://metadata/sec_production_runtime/idp/idp_client_operator_browser_production/client-secret/current",
+        "vault_write_receipt_ref": "vault-write://sec_production_runtime/idp_client_operator_browser_production",
+        "client_secret_fingerprint": "sha256:649b875a19d95a7222fc5f431b51265531a53d5902d937469f5548f894633248",
+        "capture_posture": "ADOPT_EXISTING_VAULT_BINDING"
+      },
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/data_model.md::L1811[ActorSession]",
+          "rationale": "ActorSession state is server-authored, so the IdP client only supplies coarse authentication bootstrap."
+        },
+        {
+          "source_ref": "https://auth0.com/docs/get-started/applications/application-settings",
+          "rationale": "Current Auth0 application settings govern callback, logout, allowed origin, and native redirect handling."
+        }
+      ],
+      "typed_gaps": [],
+      "notes": [
+        "Operator browser client is kept separate from portal posture to preserve internal shell isolation and independent secret rotation."
+      ]
+    },
+    {
+      "client_ref": "idp_client_portal_browser_production",
+      "surface_family": "PORTAL_BROWSER",
+      "product_environment_id": "env_production",
+      "tenant_ref": "idp_tenant_production_runtime",
+      "deployable_id": "client-portal-web",
+      "application_type": "REGULAR_WEB_APPLICATION",
+      "client_visibility": "CONFIDENTIAL",
+      "client_display_name": "Taxat Portal Web Production",
+      "client_id_alias": "idp-portal-web-production",
+      "client_id_fingerprint": "sha256:c74afc1b62eae076f17ce6c816edf095366dbd4401013999199f6a6699f4371d",
+      "source_disposition": "ADOPTED_EXISTING",
+      "callback_profile_ref": "idp_cb_portal_browser_production",
+      "callback_urls": [
+        "https://auth.production.taxat.example/oauth/idp/portal/callback"
+      ],
+      "logout_urls": [
+        "https://portal.production.taxat.example/auth/logout-complete"
+      ],
+      "allowed_web_origins": [
+        "https://portal.production.taxat.example"
+      ],
+      "bundle_identifier": null,
+      "token_endpoint_auth_method": "client_secret_post",
+      "grant_posture": [
+        "authorization_code",
+        "refresh_token"
+      ],
+      "session_bootstrap_posture": "Server-mediated browser session bootstrap via confidential regular-web client.",
+      "engine_authorization_boundary": "IdP client identity bootstraps authentication posture only; Taxat still resolves actor class, delegation, authority-link truth, and legality server-side.",
+      "secret_posture": {
+        "requires_vault_secret": true,
+        "secret_namespace_ref": "sec_production_runtime",
+        "secret_class_id": "idp_application_client_secret",
+        "client_id_metadata_store_ref": "vault://metadata/sec_production_runtime/idp/idp_client_portal_browser_production/client-id",
+        "client_secret_store_ref": "vault://kv/sec_production_runtime/idp/idp_client_portal_browser_production/client-secret/current",
+        "client_secret_metadata_ref": "vault://metadata/sec_production_runtime/idp/idp_client_portal_browser_production/client-secret/current",
+        "vault_write_receipt_ref": "vault-write://sec_production_runtime/idp_client_portal_browser_production",
+        "client_secret_fingerprint": "sha256:0aa9e19a5e1d0e4520c13242be9bf3c81e094a182b2b8e9bbed87c622c350e9d",
+        "capture_posture": "ADOPT_EXISTING_VAULT_BINDING"
+      },
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/data_model.md::L1811[ActorSession]",
+          "rationale": "ActorSession state is server-authored, so the IdP client only supplies coarse authentication bootstrap."
+        },
+        {
+          "source_ref": "https://auth0.com/docs/get-started/applications/application-settings",
+          "rationale": "Current Auth0 application settings govern callback, logout, allowed origin, and native redirect handling."
+        }
+      ],
+      "typed_gaps": [],
+      "notes": [
+        "Portal browser client remains customer-safe and does not inherit governance-only origins or callback routes."
+      ]
+    },
+    {
+      "client_ref": "idp_client_native_operator_production",
+      "surface_family": "NATIVE_MACOS_OPERATOR",
+      "product_environment_id": "env_production",
+      "tenant_ref": "idp_tenant_production_runtime",
+      "deployable_id": "Apps/InternalOperatorWorkspaceMac",
+      "application_type": "NATIVE_APPLICATION",
+      "client_visibility": "PUBLIC",
+      "client_display_name": "Taxat Native Operator Production",
+      "client_id_alias": "idp-native-operator-production",
+      "client_id_fingerprint": "sha256:a893974be56e252aa42728e33fe2fc4405da5578a4cd2ec9836e361c7b1124f3",
+      "source_disposition": "ADOPTED_EXISTING",
+      "callback_profile_ref": "idp_cb_native_operator_production",
+      "callback_urls": [
+        "https://auth.production.taxat.example/oauth/idp/native/operator/callback"
+      ],
+      "logout_urls": [
+        "https://auth.production.taxat.example/oauth/idp/native/operator/callback"
+      ],
+      "allowed_web_origins": [],
+      "bundle_identifier": "dev.taxat.InternalOperatorWorkspaceMac",
+      "token_endpoint_auth_method": "none",
+      "grant_posture": [
+        "authorization_code",
+        "refresh_token",
+        "pkce"
+      ],
+      "session_bootstrap_posture": "System-browser Auth Code + PKCE bootstrap only; no embedded-webview primary sign-in.",
+      "engine_authorization_boundary": "IdP client identity bootstraps authentication posture only; Taxat still resolves actor class, delegation, authority-link truth, and legality server-side.",
+      "secret_posture": {
+        "requires_vault_secret": false,
+        "secret_namespace_ref": null,
+        "secret_class_id": null,
+        "client_id_metadata_store_ref": "vault://metadata/public-client/idp/idp_client_native_operator_production/client-id",
+        "client_secret_store_ref": null,
+        "client_secret_metadata_ref": null,
+        "vault_write_receipt_ref": null,
+        "client_secret_fingerprint": null,
+        "capture_posture": "PUBLIC_CLIENT_NO_SHARED_SECRET"
+      },
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/data_model.md::L1811[ActorSession]",
+          "rationale": "ActorSession state is server-authored, so the IdP client only supplies coarse authentication bootstrap."
+        },
+        {
+          "source_ref": "https://auth0.com/docs/get-started/applications/application-settings",
+          "rationale": "Current Auth0 application settings govern callback, logout, allowed origin, and native redirect handling."
+        }
+      ],
+      "typed_gaps": [
+        "Bundle identifier is frozen here for IdP client binding, but the concrete Xcode target and signing profile remain for later app scaffolding cards."
+      ],
+      "notes": [
+        "Native client stays public and PKCE-based; no shared secret is stored for the desktop app."
+      ]
+    }
+  ],
+  "typed_gaps": [
+    "Preview and workstation-local browser origins are intentionally excluded from canonical IdP client registration; they remain non-promotable bootstrap or review surfaces."
+  ],
+  "notes": [
+    "Interactive browser clients are one-per-surface-per-environment to keep secrets, logout posture, and callback hosts isolated.",
+    "Native macOS bootstrap uses a public native client with claimed HTTPS callbacks and platform-secure local credential storage."
+  ],
+  "last_verified_at": "2026-04-18T05:26:27.649Z"
+}

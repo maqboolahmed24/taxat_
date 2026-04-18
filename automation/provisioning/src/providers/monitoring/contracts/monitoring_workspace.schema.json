@@ -1,0 +1,424 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/monitoring_workspace.schema.json",
+  "title": "MonitoringWorkspaceTemplate",
+  "description": "Deterministic error-monitoring workspace template. This schema freezes environment-scoped workspace posture, project inventory, and vault-safe token lineage without persisting raw vendor credentials.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "workspace_template_id",
+    "provider_id",
+    "provider_display_name",
+    "run_id",
+    "flow_id",
+    "workspace_id",
+    "operator_identity_alias",
+    "provider_selection",
+    "workspace_rows",
+    "project_rows",
+    "project_catalog_ref",
+    "scrub_rules_ref",
+    "alert_policy_ref",
+    "release_mapping_ref",
+    "telemetry_audit_boundary_ref",
+    "typed_gaps",
+    "notes",
+    "last_verified_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "workspace_template_id": {
+      "type": "string",
+      "const": "error_monitoring_workspace"
+    },
+    "provider_id": {
+      "type": "string",
+      "const": "runtime-error-monitoring-control-plane"
+    },
+    "provider_display_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "flow_id": {
+      "type": "string",
+      "const": "error-monitoring-workspace-bootstrap"
+    },
+    "workspace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operator_identity_alias": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider_selection_status",
+        "provider_family",
+        "provider_vendor_adapter",
+        "provider_vendor_label",
+        "docs_urls",
+        "source_refs"
+      ],
+      "properties": {
+        "provider_selection_status": {
+          "type": "string",
+          "const": "PROVIDER_DEFAULT_APPLIED"
+        },
+        "provider_family": {
+          "type": "string",
+          "const": "ERROR_MONITORING_OVERLAY"
+        },
+        "provider_vendor_adapter": {
+          "type": "string",
+          "const": "SENTRY_COMPATIBLE_MONITORING_CONTROL_PLANE"
+        },
+        "provider_vendor_label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "docs_urls": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "source_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        }
+      }
+    },
+    "workspace_rows": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "workspace_ref",
+          "product_environment_id",
+          "provider_environment_name",
+          "organization_slug_alias",
+          "team_slug_alias",
+          "source_disposition",
+          "automation_token_metadata_ref",
+          "automation_token_fingerprint",
+          "automation_token_scopes",
+          "relay_mode",
+          "project_refs",
+          "source_refs",
+          "notes"
+        ],
+        "properties": {
+          "workspace_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "product_environment_id": {
+            "$ref": "#/$defs/environmentId"
+          },
+          "provider_environment_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "organization_slug_alias": {
+            "type": "string",
+            "minLength": 1
+          },
+          "team_slug_alias": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_disposition": {
+            "$ref": "#/$defs/sourceDisposition"
+          },
+          "automation_token_metadata_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "automation_token_fingerprint": {
+            "type": "string",
+            "pattern": "^sha256:[A-Fa-f0-9]{64}$"
+          },
+          "automation_token_scopes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "relay_mode": {
+            "type": "string",
+            "enum": [
+              "DIRECT_VENDOR_INGEST_SERVER_SIDE_SCRUBBING",
+              "LOCAL_FIXTURE_ONLY"
+            ]
+          },
+          "project_refs": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "source_refs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/sourceRef"
+            }
+          },
+          "notes": {
+            "$ref": "#/$defs/stringArray"
+          }
+        }
+      }
+    },
+    "project_rows": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "project_ref",
+          "workspace_ref",
+          "product_environment_id",
+          "project_kind",
+          "provider_project_slug",
+          "provider_project_label",
+          "source_disposition",
+          "ingest_dsn_secret_ref",
+          "dsn_fingerprint",
+          "signal_domains",
+          "release_track_ref",
+          "scrub_rule_refs",
+          "inbound_filter_refs",
+          "alert_rule_refs",
+          "release_health_enabled",
+          "capture_modes",
+          "source_refs",
+          "notes"
+        ],
+        "properties": {
+          "project_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "workspace_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "product_environment_id": {
+            "$ref": "#/$defs/environmentId"
+          },
+          "project_kind": {
+            "type": "string",
+            "enum": [
+              "LOCAL_FIXTURE",
+              "BACKEND_RUNTIME",
+              "AUTHORITY_GATEWAY",
+              "OPERATOR_WEB",
+              "CLIENT_PORTAL_WEB",
+              "NATIVE_MACOS_OPERATOR"
+            ]
+          },
+          "provider_project_slug": {
+            "type": "string",
+            "minLength": 1
+          },
+          "provider_project_label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_disposition": {
+            "$ref": "#/$defs/sourceDisposition"
+          },
+          "ingest_dsn_secret_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dsn_fingerprint": {
+            "type": "string",
+            "pattern": "^sha256:[A-Fa-f0-9]{64}$"
+          },
+          "signal_domains": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "enum": [
+                "OPS",
+                "SECURITY",
+                "FAILURE",
+                "RELEASE"
+              ]
+            }
+          },
+          "release_track_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scrub_rule_refs": {
+            "$ref": "#/$defs/nonEmptyStringArray"
+          },
+          "inbound_filter_refs": {
+            "$ref": "#/$defs/nonEmptyStringArray"
+          },
+          "alert_rule_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "release_health_enabled": {
+            "type": "boolean"
+          },
+          "capture_modes": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "error_events",
+              "transaction_traces",
+              "profiling",
+              "session_replay",
+              "attachments"
+            ],
+            "properties": {
+              "error_events": {
+                "type": "boolean",
+                "const": true
+              },
+              "transaction_traces": {
+                "type": "boolean"
+              },
+              "profiling": {
+                "type": "boolean",
+                "const": false
+              },
+              "session_replay": {
+                "type": "boolean",
+                "const": false
+              },
+              "attachments": {
+                "type": "boolean",
+                "const": false
+              }
+            }
+          },
+          "source_refs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/sourceRef"
+            }
+          },
+          "notes": {
+            "$ref": "#/$defs/stringArray"
+          }
+        }
+      }
+    },
+    "project_catalog_ref": {
+      "type": "string",
+      "const": "config/observability/error_monitoring_project_catalog.json"
+    },
+    "scrub_rules_ref": {
+      "type": "string",
+      "const": "config/observability/error_monitoring_scrub_rules.json"
+    },
+    "alert_policy_ref": {
+      "type": "string",
+      "const": "config/observability/error_monitoring_alert_policy.json"
+    },
+    "release_mapping_ref": {
+      "type": "string",
+      "const": "config/observability/error_monitoring_release_mapping.json"
+    },
+    "telemetry_audit_boundary_ref": {
+      "type": "string",
+      "const": "config/observability/telemetry_vs_audit_boundary.json"
+    },
+    "typed_gaps": {
+      "$ref": "#/$defs/stringArray"
+    },
+    "notes": {
+      "$ref": "#/$defs/stringArray"
+    },
+    "last_verified_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "environmentId": {
+      "type": "string",
+      "enum": [
+        "env_local_provisioning_workstation",
+        "env_shared_sandbox_integration",
+        "env_preproduction_verification",
+        "env_production"
+      ]
+    },
+    "sourceDisposition": {
+      "type": "string",
+      "enum": [
+        "CREATED_DURING_RUN",
+        "ADOPTED_EXISTING"
+      ]
+    },
+    "sourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_ref",
+        "rationale"
+      ],
+      "properties": {
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "stringArray": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "nonEmptyStringArray": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

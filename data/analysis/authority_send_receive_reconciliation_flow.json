@@ -1,0 +1,143 @@
+{
+  "flow_count": 6,
+  "flows": [
+    {
+      "flow_id": "live_submission_send",
+      "label": "Live authority submission send",
+      "quarantine_or_block_conditions": [
+        "binding drift",
+        "step-up or approval expiry",
+        "duplicate occupancy",
+        "token-client mismatch"
+      ],
+      "settlement_surface": "SubmissionRecord only when bound authority evidence lawfully permits mutation",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L509[9.5_Preflight_sequence]",
+        "Algorithm/authority_interaction_protocol.md::L540[9.6_Token_and_client_binding_rule]",
+        "Algorithm/modules.md::L1921[SUBMIT_TO_AUTHORITY_...]"
+      ],
+      "steps": [
+        "Northbound API authenticates caller and persists CommandReceipt.",
+        "Control plane authorizes, freezes PrincipalContext and AuthorityBinding, derives request hashes, and begins SubmissionRecord lineage.",
+        "Controlled authority gateway hydrates vault-held credential material by ref, attaches fraud headers, acquires exclusive send claim, and runs send-time revalidation.",
+        "Authority provider receives the request and returns synchronous acknowledgement or later async evidence.",
+        "Control plane records AuthorityInteractionRecord and only writes allowed non-confirming submission states until bound authority evidence settles truth."
+      ],
+      "trigger": "Human-approved submission command"
+    },
+    {
+      "flow_id": "inline_acknowledgement_observation",
+      "label": "Inline acknowledgement observation",
+      "quarantine_or_block_conditions": [
+        "ambiguous correlation",
+        "inconsistent state",
+        "timeout placeholder superseded by stronger evidence"
+      ],
+      "settlement_surface": "SubmissionRecord for direct bound mutations; otherwise AuthorityInteractionRecord until reconciliation resolves",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L667[9.9_Response_classes]",
+        "Algorithm/modules.md::L1984[NORMALIZE_AUTHORITY_RESPONSE_...]",
+        "Algorithm/modules.md::L2004[MERGE_AUTHORITY_RESPONSE_OBSERVATION_...]"
+      ],
+      "steps": [
+        "Gateway returns the provider response to the control plane as transport evidence rather than customer truth.",
+        "Normalizer classifies the response into canonical response classes.",
+        "Control plane appends response history and may set PENDING_ACK, REJECTED, or other admissible states where exact lineage binding is present."
+      ],
+      "trigger": "Synchronous provider response on the live send path"
+    },
+    {
+      "flow_id": "async_callback_or_poll_ingress",
+      "label": "Asynchronous callback or poll ingress",
+      "quarantine_or_block_conditions": [
+        "weak authority-reference-only binding",
+        "unbound delivery",
+        "provider authentication failure"
+      ],
+      "settlement_surface": "AuthorityIngressReceipt is checkpoint only; SubmissionRecord remains the settlement ledger",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L792[9.9A_Inbound_authority_ingress_protocol]",
+        "Algorithm/authority_truth_and_internal_projection_separation_contract.md::L69[Surface_Rules]",
+        "Algorithm/modules.md::L1939[CHECKPOINT_AUTHORITY_INGRESS_...]"
+      ],
+      "steps": [
+        "Controlled gateway authenticates the provider channel and computes the delivery dedupe key.",
+        "Gateway persists AuthorityIngressReceipt before normalization or state mutation.",
+        "Control plane reuses the ingress proof contract, normalizes the payload, and merges it into authority response history.",
+        "Only bound and admissible evidence can update SubmissionRecord or subordinate mirrors."
+      ],
+      "trigger": "Provider callback, poll result, or recovered gateway response"
+    },
+    {
+      "flow_id": "duplicate_or_ambiguous_ingress_quarantine",
+      "label": "Duplicate or ambiguous ingress quarantine",
+      "quarantine_or_block_conditions": [
+        "duplicate delivery",
+        "authority_reference-only match",
+        "ambiguous lineage",
+        "unbound payload"
+      ],
+      "settlement_surface": "None until strong bound evidence exists",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L792[9.9A_Inbound_authority_ingress_protocol]",
+        "Algorithm/authority_interaction_protocol.md::L952[9.12_Duplicate_and_pending-state_rules]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L99[5._Service-to-service_and_network_hardening]"
+      ],
+      "steps": [
+        "Gateway binds the payload against expected lineage and canonical receipt identity.",
+        "Duplicate deliveries become DUPLICATE_SUPPRESSED with canonical_ingress_receipt_ref set.",
+        "Weak, ambiguous, or unbound deliveries become QUARANTINED with explicit investigation ownership.",
+        "No second normalized response or settlement mutation is emitted until stronger evidence exists."
+      ],
+      "trigger": "Duplicate callback, reordered delivery, or weakly correlated provider payload"
+    },
+    {
+      "flow_id": "reconciliation_after_pending_timeout_or_conflict",
+      "label": "Reconciliation after pending, timeout, or conflicting evidence",
+      "quarantine_or_block_conditions": [
+        "budget exhausted",
+        "blocked by escalation",
+        "contradictory evidence below confidence threshold"
+      ],
+      "settlement_surface": "SubmissionRecord after reconciliation; subordinate mirrors reopen downstream",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L998[9.13_Reconciliation_protocol]",
+        "Algorithm/authority_interaction_protocol.md::L1042[9.13A_Reconciliation_budget_and_escalation_rule]",
+        "Algorithm/authority_interaction_protocol.md::L1126[9.13B_Quantitative_reconciliation_confidence_and_ambiguity]",
+        "Algorithm/authority_interaction_protocol.md::L1158[9.14_Out-of-band_and_authority-correction_semantics]"
+      ],
+      "steps": [
+        "Control plane resumes from persisted reconciliation_control_contract rather than worker memory.",
+        "Gateway performs allowed follow-up read or status operations inside the same binding lineage.",
+        "Merge logic compares response history, correlation evidence, and source confidence.",
+        "SubmissionRecord, ObligationMirror, WorkflowItem, and ClientTimelineEvent update only after reconciliation resolves or escalates."
+      ],
+      "trigger": "PENDING_ACK, timeout placeholder, contradictory callback, or out-of-band discovery"
+    },
+    {
+      "flow_id": "recovery_after_queue_loss_restart_or_rollback",
+      "label": "Recovery after queue loss, worker restart, or rollback",
+      "quarantine_or_block_conditions": [
+        "resend_legality_state blocks fresh transmit",
+        "authority_binding_revalidation not verified",
+        "authority_rebuild not verified"
+      ],
+      "settlement_surface": "Persisted command-side truth only; broker state is never authoritative",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L161[restore_of_authority-integrated_workloads_SHALL_rebuild_outstanding_transmit_and_reconciliation_work]",
+        "Algorithm/deployment_and_resilience_contract.md::L236[no_disaster-recovery_or_queue_rebuild_path_may_re-send_a_live_authority_mutation_without]",
+        "Algorithm/modules.md::L2063[PERSIST_AUTHORITY_RECONCILIATION_CONTROL_...]",
+        "Algorithm/modules.md::L1921[SUBMIT_TO_AUTHORITY_...]"
+      ],
+      "steps": [
+        "Recovery reloads persisted SubmissionRecord, AuthorityInteractionRecord, AuthorityIngressReceipt, and inbox truth from the primary store.",
+        "Outstanding transmit and reconciliation work resumes from canonical ingress receipt refs and reconciliation control state.",
+        "Any follow-up send re-runs request-lineage comparison, idempotency verification, and send-time binding revalidation.",
+        "If resend legality is blocked, recovery remains read-only or escalates instead of emitting a new live mutation."
+      ],
+      "trigger": "Queue rebuild, worker reclaim, release rollback, or disaster recovery"
+    }
+  ],
+  "generated_at": "2026-04-17",
+  "step_count": 24
+}

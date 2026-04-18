@@ -1,0 +1,191 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "email_sender_identity_policy",
+  "provider_selection": {
+    "provider_selection_status": "PROVIDER_DEFAULT_APPLIED",
+    "provider_family": "TRANSACTIONAL_EMAIL_DELIVERY",
+    "provider_vendor_adapter": "POSTMARK_COMPATIBLE_CONTROL_PLANE",
+    "provider_vendor_label": "Postmark-compatible transactional email provider",
+    "docs_urls": [
+      "https://postmarkapp.com/developer/api/overview",
+      "https://postmarkapp.com/developer/api/servers-api",
+      "https://postmarkapp.com/developer/api/domains-api",
+      "https://postmarkapp.com/developer/api/signatures-api",
+      "https://postmarkapp.com/developer/api/message-streams-api",
+      "https://postmarkapp.com/developer/api/suppressions-api",
+      "https://postmarkapp.com/developer/user-guide/sandbox-mode",
+      "https://postmarkapp.com/developer/webhooks/bounce-webhook",
+      "https://postmarkapp.com/developer/webhooks/webhooks-overview"
+    ]
+  },
+  "truth_boundary_statement": "Email delivery, bounce, complaint, open, click, and suppression state remain transport or observability projections only. They never become workflow truth, authority truth, or notification legality on their own.",
+  "workspace_topology": [
+    {
+      "workspace_ref": "email_ws_local_bootstrap",
+      "product_environment_id": "env_local_provisioning_workstation",
+      "provider_environment_tag": "LOCAL_BOOTSTRAP",
+      "server_label": "Taxat Local Provisioning Bootstrap",
+      "server_alias": "taxat-local-email-bootstrap",
+      "server_delivery_type": "Sandbox",
+      "sender_domain_ref": "email_domain_notify_sandbox",
+      "allows_live_recipients": false,
+      "account_token_metadata_ref": "vault://metadata/sec_local_provisioning_sandbox/email/account-token",
+      "server_token_metadata_ref": "vault://metadata/sec_local_provisioning_sandbox/email/server-token/bootstrap",
+      "webhook_configuration_state": "NOT_APPLICABLE_ON_BOOTSTRAP",
+      "message_stream_refs": [
+        "email_stream_local_bootstrap_sink"
+      ],
+      "notes": [
+        "Local provisioning reuses sandbox posture for setup automation only and never gets a production-trusted sender identity."
+      ]
+    },
+    {
+      "workspace_ref": "email_ws_sandbox",
+      "product_environment_id": "env_shared_sandbox_integration",
+      "provider_environment_tag": "SANDBOX",
+      "server_label": "Taxat Sandbox Transactional",
+      "server_alias": "taxat-sandbox-transactional",
+      "server_delivery_type": "Sandbox",
+      "sender_domain_ref": "email_domain_notify_sandbox",
+      "allows_live_recipients": false,
+      "account_token_metadata_ref": "vault://metadata/sec_delivery_platform/email/account-token",
+      "server_token_metadata_ref": "vault://metadata/sec_sandbox_runtime/email/taxat-sandbox-transactional/server-token",
+      "webhook_configuration_state": "DEFERRED_TO_PC_0042",
+      "message_stream_refs": [
+        "email_stream_sandbox_customer_transactional",
+        "email_stream_sandbox_operator_security",
+        "email_stream_sandbox_test_sink"
+      ],
+      "notes": [
+        "Sandbox remains sink-safe or allowlist-bound."
+      ]
+    },
+    {
+      "workspace_ref": "email_ws_preprod",
+      "product_environment_id": "env_preproduction_verification",
+      "provider_environment_tag": "PREPRODUCTION",
+      "server_label": "Taxat Preproduction Transactional",
+      "server_alias": "taxat-preprod-transactional",
+      "server_delivery_type": "Live",
+      "sender_domain_ref": "email_domain_notify_preprod",
+      "allows_live_recipients": false,
+      "account_token_metadata_ref": "vault://metadata/sec_delivery_platform/email/account-token",
+      "server_token_metadata_ref": "vault://metadata/sec_preprod_runtime/email/taxat-preprod-transactional/server-token",
+      "webhook_configuration_state": "DEFERRED_TO_PC_0042",
+      "message_stream_refs": [
+        "email_stream_preproduction_customer_transactional",
+        "email_stream_preproduction_operator_security",
+        "email_stream_preproduction_test_sink"
+      ],
+      "notes": [
+        "Preproduction stays allowlist-bound until callback and template work is complete."
+      ]
+    },
+    {
+      "workspace_ref": "email_ws_production",
+      "product_environment_id": "env_production",
+      "provider_environment_tag": "PRODUCTION",
+      "server_label": "Taxat Production Transactional",
+      "server_alias": "taxat-production-transactional",
+      "server_delivery_type": "Live",
+      "sender_domain_ref": "email_domain_notify_production",
+      "allows_live_recipients": true,
+      "account_token_metadata_ref": "vault://metadata/sec_delivery_platform/email/account-token",
+      "server_token_metadata_ref": "vault://metadata/sec_production_runtime/email/taxat-production-transactional/server-token",
+      "webhook_configuration_state": "DEFERRED_TO_PC_0042",
+      "message_stream_refs": [
+        "email_stream_production_customer_transactional",
+        "email_stream_production_operator_security"
+      ],
+      "notes": [
+        "Only customer-safe transactional templates may reach live production recipients."
+      ]
+    }
+  ],
+  "sender_domain_strategy": [
+    {
+      "domain_ref": "email_domain_notify_sandbox",
+      "environment_ref": "env_shared_sandbox_integration",
+      "sender_domain": "notify.sandbox.taxat.example",
+      "return_path_domain": "pm-bounces.notify.sandbox.taxat.example"
+    },
+    {
+      "domain_ref": "email_domain_notify_preprod",
+      "environment_ref": "env_preproduction_verification",
+      "sender_domain": "notify.preprod.taxat.example",
+      "return_path_domain": "pm-bounces.notify.preprod.taxat.example"
+    },
+    {
+      "domain_ref": "email_domain_notify_production",
+      "environment_ref": "env_production",
+      "sender_domain": "notify.production.taxat.example",
+      "return_path_domain": "pm-bounces.notify.production.taxat.example"
+    }
+  ],
+  "message_stream_partitioning": [
+    {
+      "stream_ref": "email_stream_sandbox_customer_transactional",
+      "allowed_recipient_posture": "CUSTOMER_VISIBLE_TRANSACTIONAL_ONLY"
+    },
+    {
+      "stream_ref": "email_stream_sandbox_operator_security",
+      "allowed_recipient_posture": "INTERNAL_OPERATOR_SECURITY_ONLY"
+    },
+    {
+      "stream_ref": "email_stream_sandbox_test_sink",
+      "allowed_recipient_posture": "ALLOWLIST_OR_BLACKHOLE_TEST_ONLY"
+    },
+    {
+      "stream_ref": "email_stream_preproduction_customer_transactional",
+      "allowed_recipient_posture": "CUSTOMER_VISIBLE_TRANSACTIONAL_ONLY"
+    },
+    {
+      "stream_ref": "email_stream_preproduction_operator_security",
+      "allowed_recipient_posture": "INTERNAL_OPERATOR_SECURITY_ONLY"
+    },
+    {
+      "stream_ref": "email_stream_preproduction_test_sink",
+      "allowed_recipient_posture": "ALLOWLIST_OR_BLACKHOLE_TEST_ONLY"
+    },
+    {
+      "stream_ref": "email_stream_production_customer_transactional",
+      "allowed_recipient_posture": "CUSTOMER_VISIBLE_TRANSACTIONAL_ONLY"
+    },
+    {
+      "stream_ref": "email_stream_production_operator_security",
+      "allowed_recipient_posture": "INTERNAL_OPERATOR_SECURITY_ONLY"
+    }
+  ],
+  "suppression_and_bounce_posture": {
+    "suppression_scope": "PER_STREAM_WITH_MANUAL_REACTIVATION",
+    "complaint_posture": "DEFERRED_CALLBACK_BINDING_PC_0042",
+    "bounce_posture": "DEFERRED_CALLBACK_BINDING_PC_0042",
+    "sandbox_posture": "Use sink-safe streams and fake-bounce rehearsal only."
+  },
+  "source_refs": [
+    {
+      "source_ref": "Algorithm/collaboration_workspace_contract.md::L1844[Customer_notifications]",
+      "rationale": "Customer-visible email is optional delivery for governed notification events."
+    },
+    {
+      "source_ref": "Algorithm/data_model.md::L195[WorkItemNotification]",
+      "rationale": "Delivery channel is explicit, but workflow legality remains engine-owned."
+    },
+    {
+      "source_ref": "https://postmarkapp.com/developer/api/servers-api",
+      "rationale": "Current provider guidance separates account-level and server-level posture."
+    },
+    {
+      "source_ref": "https://postmarkapp.com/developer/api/domains-api",
+      "rationale": "Current provider guidance requires explicit domain, DKIM, and Return-Path verification."
+    }
+  ],
+  "typed_gaps": [
+    "shared_operating_contract_0038_to_0045.md was absent at execution time, so this policy grounded itself directly in the algorithm corpus, pc_0018, pc_0031, pc_0033, and pc_0040 plus current provider documentation.",
+    "Webhook and delivery-event callback wiring remain deferred to pc_0042."
+  ],
+  "notes": [
+    "Persistence is vendor-neutral even while the active adapter is Postmark-compatible.",
+    "Message streams are the explicit partitioning boundary between customer-safe mail, operator/security mail, and non-production sink traffic."
+  ]
+}

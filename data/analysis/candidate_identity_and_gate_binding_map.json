@@ -1,0 +1,446 @@
+{
+  "admissibility_requirements": [
+    {
+      "requirement": "Gate result is bound to the exact candidate tuple.",
+      "rule_id": "release_admissibility_requirement_1",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L78[3._Admissibility_boundary]"
+    },
+    {
+      "requirement": "Freshness remains valid for the candidate being promoted.",
+      "rule_id": "release_admissibility_requirement_2",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L78[3._Admissibility_boundary]"
+    },
+    {
+      "requirement": "Rerun scope remains identical to the blocking suite scope.",
+      "rule_id": "release_admissibility_requirement_3",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L78[3._Admissibility_boundary]"
+    },
+    {
+      "requirement": "Quarantine posture is NONE.",
+      "rule_id": "release_admissibility_requirement_4",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L78[3._Admissibility_boundary]"
+    },
+    {
+      "requirement": "Manual waiver posture is NONE.",
+      "rule_id": "release_admissibility_requirement_5",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L78[3._Admissibility_boundary]"
+    }
+  ],
+  "batch_and_recovery_identity_rules": [
+    {
+      "rule": "Nightly selection freezes a batch envelope before execution so duplicate suppression and later evidence reuse do not silently widen the judged candidate or operating window.",
+      "rule_id": "frozen_batch_envelope_prevents_candidate_drift",
+      "source_refs": [
+        "Algorithm/nightly_autopilot_contract.md::L48[2._Trigger_contract_and_frozen_operating_window]",
+        "Algorithm/nightly_autopilot_contract.md::L147[4._Portfolio_selection_and_eligibility_contract]"
+      ]
+    },
+    {
+      "rule": "Stale-batch reclaim may recover ownership, but it may not treat a reclaimed attempt as valid release evidence if schema, migration, or client-window identity drifted.",
+      "rule_id": "stale_batch_reclaim_must_not_reuse_incompatible_attempts",
+      "source_refs": [
+        "Algorithm/nightly_autopilot_contract.md::L602[10._Crash_recovery_and_stale-checkpoint_resolution]",
+        "Algorithm/nightly_selection_disposition_and_batch_isolation_contract.md::L69[Recovery-reclaim_law]"
+      ]
+    },
+    {
+      "rule": "Manifest start-claim and branch-selection identity inputs stay frozen so recovery, continuation, and replay cannot collapse into ordinary fresh execution under a new release boundary.",
+      "rule_id": "manifest_start_claim_freezes_lineage_inputs",
+      "source_refs": [
+        "Algorithm/nightly_selection_disposition_and_batch_isolation_contract.md::L17[Identity_law]",
+        "Algorithm/nightly_selection_disposition_and_batch_isolation_contract.md::L35[Selection_law]"
+      ]
+    },
+    {
+      "rule": "ReleaseVerificationManifest assembly must echo candidate, compatibility, and authority-sandbox hashes per gate so mixed canary or mixed full-release evidence fails closed.",
+      "rule_id": "manifest_assembly_must_echo_gate_hashes",
+      "source_refs": [
+        "Algorithm/verification_and_release_gates.md::L108[2._Release_gate]",
+        "Algorithm/verification_and_release_gates.md::L271[4._Evidence_required_for_promotion]"
+      ]
+    }
+  ],
+  "blocking_gate_bindings": [
+    {
+      "expected_suite_families": [
+        "schema_contract_validation"
+      ],
+      "gate_id": "SCHEMA_COMPATIBILITY",
+      "required_evidence": [
+        "VerificationSuiteResult",
+        "GateAdmissibilityRecord",
+        "schema_bundle_compatibility_gate_contract"
+      ],
+      "required_hash_echoes": [
+        "candidate_identity_hash",
+        "compatibility_gate_hash"
+      ]
+    },
+    {
+      "expected_suite_families": [
+        "deterministic_formula_and_module",
+        "state_machine_and_model_based"
+      ],
+      "gate_id": "DETERMINISTIC_AND_STATE_MACHINE",
+      "required_evidence": [
+        "VerificationSuiteResult",
+        "GateAdmissibilityRecord",
+        "DeterministicGoldenPack"
+      ],
+      "required_hash_echoes": [
+        "candidate_identity_hash"
+      ]
+    },
+    {
+      "expected_suite_families": [
+        "northbound_api_and_operator_contracts"
+      ],
+      "gate_id": "NORTHBOUND_API",
+      "required_evidence": [
+        "VerificationSuiteResult",
+        "GateAdmissibilityRecord"
+      ],
+      "required_hash_echoes": [
+        "candidate_identity_hash"
+      ]
+    },
+    {
+      "expected_suite_families": [
+        "authority_sandbox_and_controlled_edge"
+      ],
+      "gate_id": "AUTHORITY_SANDBOX",
+      "required_evidence": [
+        "VerificationSuiteResult",
+        "GateAdmissibilityRecord",
+        "authority_sandbox_coverage_contract"
+      ],
+      "required_hash_echoes": [
+        "candidate_identity_hash",
+        "authority_sandbox_coverage_hash_or_null"
+      ]
+    },
+    {
+      "expected_suite_families": [
+        "northbound_api_and_operator_contracts",
+        "browser_surface_acceptance",
+        "native_surface_automation"
+      ],
+      "gate_id": "OPERATOR_CLIENT",
+      "required_evidence": [
+        "VerificationSuiteResult",
+        "GateAdmissibilityRecord",
+        "ClientCompatibilityMatrix"
+      ],
+      "required_hash_echoes": [
+        "candidate_identity_hash",
+        "compatibility_gate_hash"
+      ]
+    },
+    {
+      "expected_suite_families": [
+        "security_verification"
+      ],
+      "gate_id": "SECURITY",
+      "required_evidence": [
+        "VerificationSuiteResult",
+        "GateAdmissibilityRecord"
+      ],
+      "required_hash_echoes": [
+        "candidate_identity_hash"
+      ]
+    },
+    {
+      "expected_suite_families": [
+        "performance_canary_and_failure_mode"
+      ],
+      "gate_id": "PERFORMANCE_CANARY",
+      "required_evidence": [
+        "VerificationSuiteResult",
+        "GateAdmissibilityRecord",
+        "CanaryHealthSummary"
+      ],
+      "required_hash_echoes": [
+        "candidate_identity_hash"
+      ]
+    },
+    {
+      "expected_suite_families": [
+        "replay_recovery_and_restore"
+      ],
+      "gate_id": "RESTORE_DRILL",
+      "required_evidence": [
+        "VerificationSuiteResult",
+        "GateAdmissibilityRecord",
+        "RestoreDrillResult",
+        "RecoveryCheckpoint"
+      ],
+      "required_hash_echoes": [
+        "candidate_identity_hash",
+        "compatibility_gate_hash"
+      ]
+    },
+    {
+      "expected_suite_families": [
+        "schema_contract_validation",
+        "replay_recovery_and_restore"
+      ],
+      "gate_id": "MIGRATION_VERIFICATION",
+      "required_evidence": [
+        "VerificationSuiteResult",
+        "GateAdmissibilityRecord",
+        "migration ledger outcome"
+      ],
+      "required_hash_echoes": [
+        "candidate_identity_hash",
+        "compatibility_gate_hash"
+      ]
+    },
+    {
+      "expected_suite_families": [
+        "security_verification"
+      ],
+      "gate_id": "ARTIFACT_INTEGRITY_AND_NOTARIZATION",
+      "required_evidence": [
+        "BuildArtifact digest",
+        "SBOM",
+        "provenance attestation",
+        "macOS notarization evidence when shipped"
+      ],
+      "required_hash_echoes": [
+        "candidate_identity_hash"
+      ]
+    },
+    {
+      "expected_suite_families": [
+        "schema_contract_validation",
+        "deterministic_formula_and_module",
+        "state_machine_and_model_based",
+        "northbound_api_and_operator_contracts",
+        "browser_surface_acceptance",
+        "native_surface_automation",
+        "authority_sandbox_and_controlled_edge",
+        "replay_recovery_and_restore",
+        "security_verification",
+        "performance_canary_and_failure_mode"
+      ],
+      "gate_id": "SUITE_ADMISSIBILITY",
+      "required_evidence": [
+        "GateAdmissibilityRecord"
+      ],
+      "required_hash_echoes": [
+        "candidate_identity_hash",
+        "compatibility_gate_hash_or_null"
+      ]
+    }
+  ],
+  "candidate_identity_fields": [
+    {
+      "field": "contract_version",
+      "purpose": "ReleaseCandidateIdentityContract requires `contract_version`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L12[1._Governing_candidate_identity_model]"
+    },
+    {
+      "field": "candidate_identity_hash",
+      "purpose": "ReleaseCandidateIdentityContract requires `candidate_identity_hash`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L12[1._Governing_candidate_identity_model]"
+    },
+    {
+      "field": "candidate_environment_ref",
+      "purpose": "ReleaseCandidateIdentityContract requires `candidate_environment_ref`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L12[1._Governing_candidate_identity_model]"
+    },
+    {
+      "field": "build_artifact_ref",
+      "purpose": "ReleaseCandidateIdentityContract requires `build_artifact_ref`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L12[1._Governing_candidate_identity_model]"
+    },
+    {
+      "field": "artifact_digest",
+      "purpose": "ReleaseCandidateIdentityContract requires `artifact_digest`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L12[1._Governing_candidate_identity_model]"
+    },
+    {
+      "field": "schema_bundle_hash",
+      "purpose": "ReleaseCandidateIdentityContract requires `schema_bundle_hash`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L12[1._Governing_candidate_identity_model]"
+    },
+    {
+      "field": "config_bundle_hash",
+      "purpose": "ReleaseCandidateIdentityContract requires `config_bundle_hash`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L12[1._Governing_candidate_identity_model]"
+    },
+    {
+      "field": "migration_plan_ref_or_null",
+      "purpose": "ReleaseCandidateIdentityContract requires `migration_plan_ref_or_null`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L12[1._Governing_candidate_identity_model]"
+    },
+    {
+      "field": "enabled_provider_profile_refs",
+      "purpose": "ReleaseCandidateIdentityContract requires `enabled_provider_profile_refs`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L12[1._Governing_candidate_identity_model]"
+    },
+    {
+      "field": "supported_client_window_ref_or_null",
+      "purpose": "ReleaseCandidateIdentityContract requires `supported_client_window_ref_or_null`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L12[1._Governing_candidate_identity_model]"
+    },
+    {
+      "field": "array_canonicalization_policy",
+      "purpose": "ReleaseCandidateIdentityContract requires `array_canonicalization_policy`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L12[1._Governing_candidate_identity_model]"
+    },
+    {
+      "field": "suite_context_policy",
+      "purpose": "ReleaseCandidateIdentityContract requires `suite_context_policy`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L12[1._Governing_candidate_identity_model]"
+    },
+    {
+      "field": "admissibility_binding_policy",
+      "purpose": "ReleaseCandidateIdentityContract requires `admissibility_binding_policy`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L12[1._Governing_candidate_identity_model]"
+    }
+  ],
+  "compatibility_gate_fields": [
+    {
+      "field": "contract_version",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `contract_version`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "compatibility_gate_hash",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `compatibility_gate_hash`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "candidate_identity_hash",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `candidate_identity_hash`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "candidate_identity_contract",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `candidate_identity_contract`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "schema_bundle_hash",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `schema_bundle_hash`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "compatibility_window_ref",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `compatibility_window_ref`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "reader_window_state",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `reader_window_state`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "schema_reader_window_contract",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `schema_reader_window_contract`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "migration_plan_ref_or_null",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `migration_plan_ref_or_null`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "migration_ledger_refs",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `migration_ledger_refs`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "supported_client_window_ref_or_null",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `supported_client_window_ref_or_null`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "historical_manifest_guard_state",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `historical_manifest_guard_state`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "replay_restore_guard_state",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `replay_restore_guard_state`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "native_client_window_state",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `native_client_window_state`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "migration_chronology_state",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `migration_chronology_state`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "destructive_contract_state",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `destructive_contract_state`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "rollback_boundary_state",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `rollback_boundary_state`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "reason_codes",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `reason_codes`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "historical_manifest_policy",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `historical_manifest_policy`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "destructive_change_policy",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `destructive_change_policy`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "rollback_boundary_policy",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `rollback_boundary_policy`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "fail_forward_policy",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `fail_forward_policy`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "replay_restore_policy",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `replay_restore_policy`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "client_persistence_policy",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `client_persistence_policy`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    },
+    {
+      "field": "evidence_binding_policy",
+      "purpose": "SchemaBundleCompatibilityGateContract requires `evidence_binding_policy`.",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]"
+    }
+  ],
+  "contract_version": "2026-04-18",
+  "selected_strategy_id": "manifest_centered_candidate_bound_release_doctrine",
+  "summary": {
+    "admissibility_requirement_count": 5,
+    "batch_identity_rule_count": 4,
+    "blocking_gate_binding_count": 11,
+    "candidate_identity_field_count": 13,
+    "compatibility_gate_field_count": 25
+  },
+  "typed_gaps_or_deferred_decisions": [
+    {
+      "id": "shared_operating_contract_0022_0029_missing",
+      "summary": "The referenced shared operating contract for cards 0022 through 0029 is absent, so ADR-009 is grounded directly in named algorithm contracts and prior analysis outputs.",
+      "type": "SOURCE_GAP"
+    }
+  ]
+}

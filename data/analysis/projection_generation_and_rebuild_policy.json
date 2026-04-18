@@ -1,0 +1,304 @@
+{
+  "contract_version": "2026-04-18",
+  "policies": [
+    {
+      "browser_cache_hydration": "Browser cache stores only route-partitioned disposable projections keyed by shell stability and publication generation.",
+      "command_side_truth_changes": "Manifest, workflow, authority, or receipt truth changes append durable truth first.",
+      "full_rebuild_after_drift_schema_or_restore": "Discard all cached projections and rebuild from durable bundle truth when schema, restore, or replay drift is detected.",
+      "native_cache_hydration": "Native scenes hydrate from the same northbound snapshot and typed deltas; local persistence remains disposable.",
+      "owned_read_models": [
+        "ActionStripState",
+        "ContextBarState",
+        "DecisionBundle",
+        "DecisionSummaryState",
+        "DetailDrawerState",
+        "ExperienceCursor",
+        "ExperienceDelta",
+        "ExperienceStreamEvent",
+        "LowNoiseBudgetAudit",
+        "LowNoiseExperienceFrame",
+        "TwinView"
+      ],
+      "owner_boundary": "MANIFEST_READ_MODEL_BOUNDARY",
+      "precompute_mode": "PRECOMPUTED_FRAME_WITH_STREAM_COMPANION",
+      "projection_family": "manifest_experience",
+      "projection_family_label": "Manifest calm-shell projections",
+      "projection_owner": "BUILD_SNAPSHOT(...) + EXTRACT_AUTHORITY_VIEWS(...) + BUILD_LIVE_EXPERIENCE_FRAME(...)",
+      "projector_updates": "The manifest projector regenerates DecisionBundle and the calm-shell frame deterministically from durable truth.",
+      "reconnect_and_catchup": "Resume by cursor and sequence; if epoch or guard drift appears, fetch a fresh snapshot and preserve the same manifest shell when legal.",
+      "schema_evolution_reader_window": "Support additive reader windows by versioning snapshot envelopes and forcing rebase when a reader cannot honor the current projection version.",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L43[2._Required_northbound_surfaces]",
+        "Algorithm/northbound_api_and_session_contract.md::L646[7._Stream_and_reconnect_rules]",
+        "Algorithm/frontend_shell_and_interaction_law.md::L19[1._Shell_families_and_object_ownership]",
+        "Algorithm/frontend_shell_and_interaction_law.md::L56[2.2_Stable_route_keys]",
+        "Algorithm/modules.md::L1128[BUILD_SNAPSHOT_...]",
+        "Algorithm/modules.md::L1214[EXTRACT_AUTHORITY_VIEWS_...]",
+        "Algorithm/modules.md::L2630[BUILD_LIVE_EXPERIENCE_FRAME_...]"
+      ],
+      "source_truth_surfaces": [
+        "RunManifest",
+        "WorkflowItem",
+        "SubmissionRecord",
+        "AuthorityInteractionRecord",
+        "ApiCommandReceipt"
+      ],
+      "stream_publication": "Publish the fresh calm-shell frame or typed delta with ordered resume metadata after the authoritative bundle commits.",
+      "update_mode": "SERVER_AUTHORED_SNAPSHOT_PLUS_TYPED_DELTA"
+    },
+    {
+      "browser_cache_hydration": "Browser cache stores queue rows under tenant, session, masking, route, and visibility partition keys.",
+      "command_side_truth_changes": "Workflow state, assignment, escalation, and request-for-info truth updates commit first.",
+      "full_rebuild_after_drift_schema_or_restore": "Regenerate the full queue snapshot from workflow truth after restore, replay, or incompatible schema change.",
+      "native_cache_hydration": "Native consumers may cache the queue as a disposable mirror but must honor the same visibility and route bindings.",
+      "owned_read_models": [
+        "WorkInboxDelta",
+        "WorkInboxSnapshot",
+        "WorkItemNotification"
+      ],
+      "owner_boundary": "COLLABORATION_QUEUE_PROJECTION_BOUNDARY",
+      "precompute_mode": "PRECOMPUTED_QUEUE_ROWS_WITH_MONOTONIC_DELTA",
+      "projection_family": "collaboration_queue",
+      "projection_family_label": "Collaboration queue and notification projections",
+      "projection_owner": "PLAN_WORKFLOW(...) + UPSERT_WORKFLOW_ITEMS(...) + collaboration queue projector",
+      "projector_updates": "Queue rows and badges are recomputed from the current workflow truth basis with deterministic ordering.",
+      "reconnect_and_catchup": "Resume by sequence; duplicate deliveries stay idempotent, and compaction or guard drift forces a fresh WorkInboxSnapshot.",
+      "schema_evolution_reader_window": "Readers may accept additive row fields, but ordering basis and visibility partition changes require a snapshot refresh.",
+      "source_refs": [
+        "Algorithm/collaboration_workspace_contract.md::L971[7.3_Read_models]",
+        "Algorithm/collaboration_workspace_contract.md::L1640[8._Command_and_read_API_additions]",
+        "Algorithm/collaboration_workspace_contract.md::L1778[9._Stream_events_and_notifications]",
+        "Algorithm/frontend_shell_and_interaction_law.md::L153[2.5_Queue_and_inbox_continuity]"
+      ],
+      "source_truth_surfaces": [
+        "WorkflowItem",
+        "SubmissionRecord",
+        "AuthorityInteractionRecord",
+        "WorkItemNotification",
+        "ApiCommandReceipt"
+      ],
+      "stream_publication": "Emit WorkInboxDelta in strictly monotonic sequence for the tenant/route scope.",
+      "update_mode": "SERVER_AUTHORED_QUEUE_SNAPSHOT_PLUS_TYPED_DELTA"
+    },
+    {
+      "browser_cache_hydration": "Browser cache partitions the mounted workspace by tenant/client, access binding, masking, route, and visibility partition.",
+      "command_side_truth_changes": "Workflow, collaboration, attachment, and receipt truth append first.",
+      "full_rebuild_after_drift_schema_or_restore": "Discard cached workspace state and regenerate from workflow truth and append-only collaboration artifacts.",
+      "native_cache_hydration": "Native work-item scenes hydrate the same snapshot and apply typed deltas idempotently.",
+      "owned_read_models": [
+        "CollaborationActivitySlice",
+        "CollaborationAttachmentSlice",
+        "CustomerRequestListSnapshot",
+        "WorkspaceCursor",
+        "WorkspaceDelta",
+        "WorkspaceSnapshot",
+        "WorkspaceStreamEvent"
+      ],
+      "owner_boundary": "COLLABORATION_WORKSPACE_PROJECTION_BOUNDARY",
+      "precompute_mode": "PRECOMPUTED_WORKSPACE_WITH_PAGED_SUPPORT_SLICES",
+      "projection_family": "collaboration_workspace",
+      "projection_family_label": "Collaboration workspace and customer-request projections",
+      "projection_owner": "BUILD_SNAPSHOT(...) + collaboration workspace projector",
+      "projector_updates": "WorkspaceSnapshot, support slices, and customer request list projections rebuild deterministically from the latest durable state.",
+      "reconnect_and_catchup": "Resume by workspace cursor or sequence; epoch drift or stale-view rejection forces an inline rebase while preserving the same object and shell.",
+      "schema_evolution_reader_window": "Additive fields are tolerated inside the same workspace version family; incompatible reader windows require a full workspace refresh.",
+      "source_refs": [
+        "Algorithm/collaboration_workspace_contract.md::L971[7.3_Read_models]",
+        "Algorithm/collaboration_workspace_contract.md::L1640[8._Command_and_read_API_additions]",
+        "Algorithm/collaboration_workspace_contract.md::L1778[9._Stream_events_and_notifications]",
+        "Algorithm/collaboration_workspace_contract.md::L1953[12._Playwright_scenarios]",
+        "Algorithm/frontend_shell_and_interaction_law.md::L402[5._State_freshness_visibility_and_recovery_presentation]"
+      ],
+      "source_truth_surfaces": [
+        "WorkflowItem",
+        "RequestInfoRecord",
+        "CollaborationThread",
+        "CollaborationEntry",
+        "CollaborationAttachment",
+        "WorkItemParticipant",
+        "SubmissionRecord",
+        "AuthorityInteractionRecord",
+        "ApiCommandReceipt"
+      ],
+      "stream_publication": "WorkspaceDelta and activity append events publish only after the mounted workspace basis is durable.",
+      "update_mode": "SERVER_AUTHORED_WORKSPACE_SNAPSHOT_PLUS_TYPED_DELTA"
+    },
+    {
+      "browser_cache_hydration": "Browser cache partitions by client, session, route, object, projection version, and customer-safe visibility partition.",
+      "command_side_truth_changes": "Durable workflow, receipt, authority, and obligation truth changes commit first.",
+      "full_rebuild_after_drift_schema_or_restore": "Drop portal caches and regenerate from durable truth whenever schema, restore, or binding drift invalidates the current customer-safe boundary.",
+      "native_cache_hydration": "A native portal cache may only mirror the exact same customer-safe slice and must purge on access-binding or masking drift.",
+      "owned_read_models": [
+        "ClientApprovalPack",
+        "ClientDocumentRequest",
+        "ClientOnboardingJourney",
+        "ClientPortalWorkspace",
+        "ClientTimelineEvent",
+        "ClientUploadSession",
+        "PortalHelpRequest"
+      ],
+      "owner_boundary": "PORTAL_CUSTOMER_SAFE_PROJECTION_BOUNDARY",
+      "precompute_mode": "PRECOMPUTED_ROUTE_SNAPSHOT_WITH_RECEIPT_DRIVEN_REHYDRATION",
+      "projection_family": "portal_customer_safe",
+      "projection_family_label": "Portal customer-safe projections",
+      "projection_owner": "BUILD_CLIENT_PORTAL_WORKSPACE(...) + route-level customer-safe projectors",
+      "projector_updates": "Portal route projections regenerate by applying customer-safe translation rules before serialization.",
+      "reconnect_and_catchup": "Reconnect preserves the same route and object anchor; stale or degraded posture stays explicit until a fresh snapshot clears it.",
+      "schema_evolution_reader_window": "Portal readers may accept additive copy or support fields, but customer-safe boundary and stale-guard changes require a full route refresh.",
+      "source_refs": [
+        "Algorithm/customer_client_portal_experience_contract.md::L479[Read-model_and_API_translation_requirements]",
+        "Algorithm/customer_client_portal_experience_contract.md::L683[Minimum_semantic_selectors]",
+        "Algorithm/customer_client_portal_experience_contract.md::L701[Playwright_validation_minimum]",
+        "Algorithm/frontend_shell_and_interaction_law.md::L19[1._Shell_families_and_object_ownership]",
+        "Algorithm/frontend_shell_and_interaction_law.md::L56[2.2_Stable_route_keys]",
+        "Algorithm/modules.md::L2737[BUILD_CLIENT_PORTAL_WORKSPACE_...]"
+      ],
+      "source_truth_surfaces": [
+        "WorkflowItem",
+        "SubmissionRecord",
+        "AuthorityInteractionRecord",
+        "ObligationMirror",
+        "ApiCommandReceipt",
+        "ProblemEnvelope"
+      ],
+      "stream_publication": "Portal routes refresh through role-filtered snapshot publication and continuity contracts rather than raw internal deltas.",
+      "update_mode": "SERVER_AUTHORED_CUSTOMER_SAFE_SNAPSHOT_WITH_REFRESH"
+    },
+    {
+      "browser_cache_hydration": "Browser caches governance snapshots by tenant, session, access binding, masking, route, and policy basis hashes.",
+      "command_side_truth_changes": "Governance commands settle durable config, access, retention, or audit truth first.",
+      "full_rebuild_after_drift_schema_or_restore": "Recompute all governance snapshots from durable config and audit truth after restore, replay, or incompatible schema change.",
+      "native_cache_hydration": "No first-class native governance cache is assumed; any future client must treat these projections as disposable.",
+      "owned_read_models": [
+        "AuditInvestigationFrame",
+        "AuthorityLinkInventoryItem",
+        "GovernanceAccessSimulation",
+        "GovernancePolicySnapshot",
+        "GovernanceRiskLedger",
+        "PendingChangeQueue",
+        "PrincipalAccessView",
+        "RetentionGovernanceFrame",
+        "RoleTemplateMatrix",
+        "TenantConfigWorkspace",
+        "TenantGovernanceSnapshot"
+      ],
+      "owner_boundary": "GOVERNANCE_PROJECTION_BOUNDARY",
+      "precompute_mode": "PRECOMPUTED_ROUTE_SNAPSHOTS_WITH_ON_DEMAND_SIMULATION",
+      "projection_family": "governance_control_plane",
+      "projection_family_label": "Governance read models and simulation projections",
+      "projection_owner": "BUILD_TENANT_GOVERNANCE_SNAPSHOT(...) + governance read-side projectors",
+      "projector_updates": "Governance snapshots and simulations recompute from the committed truth basis or declared simulation basis hash.",
+      "reconnect_and_catchup": "Reconnect preserves the same object and route anchor; stale basis hashes force inline refresh before further mutation.",
+      "schema_evolution_reader_window": "Additive route fields are acceptable, but changes to policy basis hashes or simulation contracts require a fresh snapshot.",
+      "source_refs": [
+        "Algorithm/admin_governance_console_architecture.md::L536[6._Shared_interaction_and_mutation_rules]",
+        "Algorithm/admin_governance_console_architecture.md::L661[7._Frontend_systems_architecture]",
+        "Algorithm/admin_governance_console_architecture.md::L724[7.6_Minimum_route_read_models]",
+        "Algorithm/admin_governance_console_architecture.md::L840[8._Accessibility_and_responsive_requirements]",
+        "Algorithm/modules.md::L2805[BUILD_TENANT_GOVERNANCE_SNAPSHOT_...]"
+      ],
+      "source_truth_surfaces": [
+        "PrincipalContext",
+        "DelegationGrant",
+        "AuthorityLink",
+        "ConfigChangeRequest",
+        "RetentionTag",
+        "ArtifactRetention",
+        "AuditEvent",
+        "ApiCommandReceipt"
+      ],
+      "stream_publication": "Governance favors receipt-driven refresh and selective snapshot invalidation over free-form client recomposition.",
+      "update_mode": "SERVER_AUTHORED_GOVERNANCE_SNAPSHOT_WITH_RECEIPT_REFRESH"
+    },
+    {
+      "browser_cache_hydration": "Not applicable; this family exists to mirror browser doctrine in native form.",
+      "command_side_truth_changes": "Server truth settles first; native never authors legal state locally.",
+      "full_rebuild_after_drift_schema_or_restore": "Purge native caches and rebuild entirely from northbound truth on restore, replay, or incompatible schema migration.",
+      "native_cache_hydration": "Hydrate the latest compatible snapshot, mark cached posture explicitly, then fetch fresh and attach to resume streams.",
+      "owned_read_models": [
+        "NativeOperatorSecondaryWindowScene",
+        "NativeOperatorWorkspaceScene"
+      ],
+      "owner_boundary": "NATIVE_CACHE_HYDRATION_BOUNDARY",
+      "precompute_mode": "ON_DEMAND_HYDRATION_WITH_TYPED_RESUME",
+      "projection_family": "native_projection_mirror",
+      "projection_family_label": "Native cached mirrors",
+      "projection_owner": "Northbound snapshot hydrator + native resume engine",
+      "projector_updates": "Northbound projectors publish the same snapshot and delta contracts that browser clients consume.",
+      "reconnect_and_catchup": "Reconnect by resume token; if drift or incompatibility appears, fetch a fresh snapshot and keep the same scene when the object still resolves.",
+      "schema_evolution_reader_window": "Native readers may accept additive fields within a compatible projection version, but incompatible schema drift requires full purge and rehydrate.",
+      "source_refs": [
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L15[1._Architectural_thesis]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L134[4._Platform_translation_map]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L294[6._Data_flow_and_synchronization_model]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L576[FE-25_Cache_Isolation]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L580[FE-75_Native_Cache_Hydration_Purge_and_Rebase]"
+      ],
+      "source_truth_surfaces": [
+        "RunManifest",
+        "WorkflowItem",
+        "SubmissionRecord",
+        "AuthorityInteractionRecord",
+        "ApiCommandReceipt"
+      ],
+      "stream_publication": "Native applies typed deltas idempotently or rebases to a fresh snapshot when guards drift.",
+      "update_mode": "SERVER_AUTHORED_SNAPSHOT_WITH_DISPOSABLE_NATIVE_CACHE"
+    },
+    {
+      "browser_cache_hydration": "If cached at all, cache by query basis and projection version only.",
+      "command_side_truth_changes": "Append-only ingress, reconciliation, audit, and failure evidence settles first.",
+      "full_rebuild_after_drift_schema_or_restore": "Re-run the derivation over durable evidence after restore or incompatible schema drift.",
+      "native_cache_hydration": "Native mirrors are optional and remain disposable.",
+      "owned_read_models": [
+        "AuthorityIngressInvestigationSnapshot",
+        "AuthorityReconciliationAnalyticsSnapshot",
+        "FailureLifecycleDashboard",
+        "OperatorMorningDigest"
+      ],
+      "owner_boundary": "OPS_ANALYTICS_PROJECTION_BOUNDARY",
+      "precompute_mode": "BATCH_OR_ON_DEMAND_DERIVATION",
+      "projection_family": "ops_and_analytics",
+      "projection_family_label": "Ops and analytics projections",
+      "projection_owner": "Named investigation, reconciliation, and failure projectors",
+      "projector_updates": "Derived dashboards and investigation snapshots rebuild from append-only truth and typed aggregations.",
+      "reconnect_and_catchup": "Refresh from the declared query basis rather than replaying opaque local calculations.",
+      "schema_evolution_reader_window": "Favor additive evidence and versioned query envelopes; incompatible analytics readers must refresh completely.",
+      "source_refs": [
+        "Algorithm/authority_truth_and_internal_projection_separation_contract.md::L55[Required_Outcomes]",
+        "Algorithm/modules.md::L1970[PROJECT_AUTHORITY_INGRESS_INVESTIGATION_...]",
+        "Algorithm/modules.md::L2117[EMIT_AUTHORITY_RECONCILIATION_ANALYTICS_...]",
+        "Algorithm/modules.md::L2337[BUILD_FAILURE_LIFECYCLE_DASHBOARD_...]"
+      ],
+      "source_truth_surfaces": [
+        "AuthorityIngressReceipt",
+        "AuthorityInteractionRecord",
+        "SubmissionRecord",
+        "AuditEvent",
+        "FailureInvestigation"
+      ],
+      "stream_publication": "These projections usually refresh by polling or explicit query rather than long-lived UX deltas.",
+      "update_mode": "SERVER_AUTHORED_DERIVED_SNAPSHOT"
+    }
+  ],
+  "selected_strategy": {
+    "doctrine": "Each route or scene binds to a server-authored projection contract; browser and native clients may compose local view state only and SHALL NOT infer legal posture from granular truth fragments.",
+    "forbidden_client_moves": [
+      "Derive legal truth from caches, deltas, or local graph composition.",
+      "Widen customer-safe visibility from route path or hidden staff fields.",
+      "Treat native or browser cached state as authoritative after stale-view rejection."
+    ],
+    "strategy_id": "server_authored_per_surface_typed_projections"
+  },
+  "summary": {
+    "precompute_modes": {
+      "BATCH_OR_ON_DEMAND_DERIVATION": 1,
+      "ON_DEMAND_HYDRATION_WITH_TYPED_RESUME": 1,
+      "PRECOMPUTED_FRAME_WITH_STREAM_COMPANION": 1,
+      "PRECOMPUTED_QUEUE_ROWS_WITH_MONOTONIC_DELTA": 1,
+      "PRECOMPUTED_ROUTE_SNAPSHOTS_WITH_ON_DEMAND_SIMULATION": 1,
+      "PRECOMPUTED_ROUTE_SNAPSHOT_WITH_RECEIPT_DRIVEN_REHYDRATION": 1,
+      "PRECOMPUTED_WORKSPACE_WITH_PAGED_SUPPORT_SLICES": 1
+    },
+    "projection_family_count": 7
+  }
+}

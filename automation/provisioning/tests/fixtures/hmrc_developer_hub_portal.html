@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HMRC Developer Hub Fixture</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        background: #f6f7f8;
+        color: #111418;
+      }
+
+      .cookie-banner,
+      header,
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+      }
+
+      .cookie-banner {
+        background: #ffffff;
+        border: 1px solid rgba(17, 20, 24, 0.12);
+        margin-top: 12px;
+        padding: 16px;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 0 16px;
+      }
+
+      nav {
+        display: flex;
+        gap: 16px;
+      }
+
+      nav a {
+        color: #1d70b8;
+        text-decoration: none;
+      }
+
+      main {
+        background: #ffffff;
+        border: 1px solid rgba(17, 20, 24, 0.08);
+        padding: 32px;
+        margin-bottom: 32px;
+      }
+
+      form {
+        display: grid;
+        gap: 12px;
+        max-width: 640px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        font-weight: 600;
+      }
+
+      input {
+        padding: 10px 12px;
+        border: 1px solid rgba(17, 20, 24, 0.18);
+        border-radius: 8px;
+      }
+
+      button,
+      .button-link {
+        width: fit-content;
+        border: none;
+        border-radius: 999px;
+        background: #1d70b8;
+        color: #ffffff;
+        padding: 10px 16px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .secondary {
+        background: #eef1ec;
+        color: #111418;
+      }
+
+      .status {
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: #eef1ec;
+        margin-bottom: 16px;
+      }
+
+      .warning {
+        background: #fff4d2;
+      }
+
+      .error {
+        background: #f9d8d3;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .stack {
+        display: grid;
+        gap: 16px;
+      }
+
+      .application-card {
+        border: 1px solid rgba(17, 20, 24, 0.08);
+        border-radius: 14px;
+        padding: 18px;
+      }
+
+      .meta {
+        color: #52606d;
+        font-size: 14px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: #eef4ff;
+        color: #1d70b8;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .api-row {
+        border: 1px solid rgba(17, 20, 24, 0.08);
+        border-radius: 14px;
+        padding: 14px;
+      }
+
+      .api-row label {
+        grid-template-columns: 24px 1fr;
+        align-items: start;
+        gap: 10px;
+      }
+
+      .api-row input[type="checkbox"] {
+        margin-top: 2px;
+      }
+
+      .redirect-slot {
+        border: 1px solid rgba(17, 20, 24, 0.08);
+        border-radius: 14px;
+        padding: 14px;
+      }
+
+      .scope-chip {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 6px 12px;
+        background: #eef4ff;
+        color: #1d70b8;
+        font-weight: 700;
+        font-size: 13px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .readonly-grid {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      .readonly-grid input[readonly],
+      .secret-panel input[readonly] {
+        background: #f8faf8;
+      }
+
+      .secret-row {
+        border: 1px solid rgba(17, 20, 24, 0.08);
+        border-radius: 14px;
+        padding: 14px;
+      }
+
+      .secret-row__header {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .secret-panel {
+        border: 1px solid rgba(17, 20, 24, 0.08);
+        border-radius: 14px;
+        padding: 16px;
+        background: #fff8e6;
+      }
+    </style>
+  </head>
+  <body data-screen="loading">
+    <div class="cookie-banner" id="cookie-banner" role="region" aria-label="Cookies on HMRC services">
+      <h2>Cookies on HMRC services</h2>
+      <p>We use some essential cookies to make our services work.</p>
+      <button type="button" id="accept-cookies">Accept additional cookies</button>
+      <button type="button" class="secondary" id="reject-cookies">Reject additional cookies</button>
+    </div>
+    <header>
+      <strong>HMRC Developer Hub</strong>
+      <nav aria-label="Menu">
+        <a href="#" id="nav-getting-started">Getting started</a>
+        <a href="#" id="nav-api-documentation">API documentation</a>
+        <a href="#" id="nav-applications">Applications</a>
+        <a href="#" id="nav-support">Support</a>
+      </nav>
+    </header>
+    <main id="app"></main>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const scenario = params.get("scenario") || "fresh";
+      const requestedScreen = params.get("screen") || "register";
+      const requestedApplication = params.get("application") || "";
+      const app = document.getElementById("app");
+      const cookieBanner = document.getElementById("cookie-banner");
+
+      const canonicalApplicationName = "Taxat Sandbox Income Tax";
+      const stateStorageKey = `hmrc-developer-hub-fixture:${scenario}`;
+      let globalSecretCounter = 0;
+
+      const canonicalApiCatalog = [
+        {
+          key: "business_details",
+          canonicalLabel: "Business Details (MTD)",
+          driftLabel: "Income Tax Business Details",
+          scope: "required"
+        },
+        {
+          key: "obligations",
+          canonicalLabel: "Obligations (MTD)",
+          driftLabel: "Quarterly obligations",
+          scope: "required"
+        },
+        {
+          key: "individual_calculations",
+          canonicalLabel: "Individual Calculations (MTD)",
+          driftLabel: "Income Tax calculations and final declaration",
+          scope: "required"
+        },
+        {
+          key: "self_employment_business",
+          canonicalLabel: "Self Employment Business (MTD)",
+          driftLabel: "Self employment income and expenses",
+          scope: "required"
+        },
+        {
+          key: "property_business",
+          canonicalLabel: "Property Business (MTD)",
+          driftLabel: "Property income and expenses",
+          scope: "required"
+        },
+        {
+          key: "business_source_adjustable_summary",
+          canonicalLabel: "Business Source Adjustable Summary (MTD)",
+          driftLabel: "Business accounting adjustments",
+          scope: "later"
+        },
+        {
+          key: "individual_losses",
+          canonicalLabel: "Individual Losses (MTD)",
+          driftLabel: "Loss claims",
+          scope: "later"
+        }
+      ];
+
+      function deriveApplicationId(name) {
+        return `HMRC-APP-SBX-${String(name.length * 41).padStart(4, "0")}`;
+      }
+
+      function deriveClientId(name) {
+        return `${name.toLowerCase().replace(/[^a-z0-9]+/g, "_")}_sandbox_client_id`;
+      }
+
+      function seedSecretVersion(ordinal, state = "ACTIVE") {
+        return {
+          versionId: `hmrc-secret-v${ordinal}`,
+          state,
+          createdAt: "2026-04-18T12:00:00.000Z"
+        };
+      }
+
+      function createApplication(name, options = {}) {
+        const labelMode = options.labelMode || "canonical";
+        const subscriptionSeed = options.subscriptions || {};
+        const subscriptions = {};
+        for (const api of canonicalApiCatalog) {
+          subscriptions[api.key] = Boolean(subscriptionSeed[api.key]);
+        }
+        return {
+          name,
+          labelMode,
+          subscriptions,
+          redirectUris: [...(options.redirectUris || [])],
+          applicationId: options.applicationId || deriveApplicationId(name),
+          clientId: options.clientId || deriveClientId(name),
+          secretVersions: [...(options.secretVersions || [])],
+          revealedSecret: options.revealedSecret || null
+        };
+      }
+
+      function persistState() {
+        sessionStorage.setItem(stateStorageKey, JSON.stringify(state));
+      }
+
+      function createScenarioState(currentScenario) {
+        switch (currentScenario) {
+          case "already-signed-in":
+            return { signedIn: true, applications: [] };
+          case "app-create-new":
+            return { signedIn: true, applications: [] };
+          case "app-existing":
+            return {
+              signedIn: true,
+              applications: [
+                createApplication(canonicalApplicationName, {
+                  subscriptions: {
+                    business_details: true,
+                    obligations: true,
+                    individual_calculations: true,
+                    self_employment_business: true,
+                    property_business: true
+                  }
+                })
+              ]
+            };
+          case "app-partial":
+            return {
+              signedIn: true,
+              applications: [
+                createApplication(canonicalApplicationName, {
+                  subscriptions: {
+                    business_details: true,
+                    obligations: true,
+                    individual_calculations: false,
+                    self_employment_business: true,
+                    property_business: false
+                  }
+                })
+              ]
+            };
+          case "app-label-drift":
+            return {
+              signedIn: true,
+              applications: [
+                createApplication(canonicalApplicationName, {
+                  labelMode: "drift",
+                  subscriptions: {
+                    business_details: true,
+                    obligations: false,
+                    individual_calculations: false,
+                    self_employment_business: false,
+                    property_business: false
+                  }
+                })
+              ]
+            };
+          case "app-oauth-clean":
+            return {
+              signedIn: true,
+              applications: [
+                createApplication(canonicalApplicationName, {
+                  subscriptions: {
+                    business_details: true,
+                    obligations: true,
+                    individual_calculations: true,
+                    self_employment_business: true,
+                    property_business: true
+                  },
+                  redirectUris: []
+                })
+              ]
+            };
+          case "app-oauth-stale":
+            return {
+              signedIn: true,
+              applications: [
+                createApplication(canonicalApplicationName, {
+                  subscriptions: {
+                    business_details: true,
+                    obligations: true,
+                    individual_calculations: true,
+                    self_employment_business: true,
+                    property_business: true
+                  },
+                  redirectUris: [
+                    "https://legacy.sandbox.taxat.example/oauth/hmrc/callback",
+                    "https://auth.sandbox.taxat.example/oauth/hmrc/callback",
+                    "https://auth.sandbox.taxat.example/oauth/hmrc/callback",
+                    "https://auth.production.taxat.example/oauth/hmrc/callback"
+                  ]
+                })
+              ]
+            };
+          default:
+            return { signedIn: false, applications: [] };
+        }
+      }
+
+      const persistedState = sessionStorage.getItem(stateStorageKey);
+      const state = persistedState ? JSON.parse(persistedState) : createScenarioState(scenario);
+      persistState();
+
+      document.getElementById("accept-cookies").addEventListener("click", () => {
+        cookieBanner.classList.add("hidden");
+      });
+      document.getElementById("reject-cookies").addEventListener("click", () => {
+        cookieBanner.classList.add("hidden");
+      });
+
+      function currentApplicationName(defaultName = canonicalApplicationName) {
+        return requestedApplication || defaultName;
+      }
+
+      function getApplication(name) {
+        return state.applications.find((entry) => entry.name === name) || null;
+      }
+
+      function subscriptionLabel(applicationRecord, apiRecord) {
+        if (applicationRecord && applicationRecord.labelMode === "drift") {
+          return apiRecord.driftLabel;
+        }
+        return apiRecord.canonicalLabel;
+      }
+
+      function requiredSubscriptionCount(applicationRecord) {
+        return canonicalApiCatalog
+          .filter((apiRecord) => apiRecord.scope === "required")
+          .filter((apiRecord) => applicationRecord.subscriptions[apiRecord.key]).length;
+      }
+
+      function updateUrl(screen, applicationName = "") {
+        const next = new URL(window.location.href);
+        next.searchParams.set("screen", screen);
+        if (applicationName) {
+          next.searchParams.set("application", applicationName);
+        } else {
+          next.searchParams.delete("application");
+        }
+        window.history.replaceState({}, "", next);
+        document.body.dataset.screen = screen;
+        persistState();
+      }
+
+      function renderCheckpoint(reason, title, message) {
+        updateUrl("checkpoint");
+        document.body.dataset.checkpointReason = reason;
+        app.innerHTML = `
+          <h1>${title}</h1>
+          <div class="status warning">${message}</div>
+          <p>Manual checkpoint required before this flow may continue.</p>
+        `;
+      }
+
+      function renderApplications(sourceLabel) {
+        updateUrl("applications");
+        delete document.body.dataset.checkpointReason;
+        delete document.body.dataset.registrationDisposition;
+        delete document.body.dataset.signInDisposition;
+        const cards =
+          state.applications.length === 0
+            ? `<p class="meta">No sandbox applications have been registered yet.</p>`
+            : state.applications
+                .map((applicationRecord) => {
+                  const subscribedCount = requiredSubscriptionCount(applicationRecord);
+                  return `
+                    <article class="application-card" data-testid="application-row" data-application-name="${applicationRecord.name}">
+                      <div class="stack">
+                        <div class="actions">
+                          <span class="badge">Sandbox</span>
+                          <span class="meta">${subscribedCount}/5 required APIs subscribed</span>
+                        </div>
+                        <h2><a href="#" class="open-application" data-application-name="${applicationRecord.name}">${applicationRecord.name}</a></h2>
+                        <p class="meta">Adopt or manage the canonical sandbox application from here.</p>
+                      </div>
+                    </article>
+                  `;
+                })
+                .join("");
+
+        app.innerHTML = `
+          <h1>Applications</h1>
+          <div class="status">Applications area verified via ${sourceLabel}.</div>
+          <p>You can manage subscriptions and credentials here.</p>
+          <div class="actions">
+            <a href="#" id="add-application">Add an application</a>
+          </div>
+          <section aria-label="Registered applications" class="stack">${cards}</section>
+        `;
+
+        const addApplication = document.getElementById("add-application");
+        addApplication.addEventListener("click", (event) => {
+          event.preventDefault();
+          renderCreateApplication();
+        });
+
+        for (const link of document.querySelectorAll(".open-application")) {
+          link.addEventListener("click", (event) => {
+            event.preventDefault();
+            renderApplicationConsole(event.currentTarget.dataset.applicationName, "list");
+          });
+        }
+      }
+
+      function renderCreateApplication() {
+        updateUrl("create");
+        app.innerHTML = `
+          <h1>Add an application</h1>
+          <div class="status">Create or adopt the canonical sandbox application for this workspace.</div>
+          <form id="create-application-form">
+            <label>Application name <input aria-label="Application name" name="applicationName" value="${canonicalApplicationName}" /></label>
+            <div class="actions">
+              <button type="submit">Create application</button>
+              <button type="button" class="secondary" id="cancel-create-application">Cancel</button>
+            </div>
+          </form>
+        `;
+
+        document
+          .getElementById("create-application-form")
+          .addEventListener("submit", (event) => {
+            event.preventDefault();
+            const formData = new FormData(event.currentTarget);
+            const applicationName = String(formData.get("applicationName") || "").trim();
+            const existing = getApplication(applicationName);
+            if (existing) {
+              document.body.dataset.applicationDisposition = "existing-application";
+              app.insertAdjacentHTML(
+                "beforeend",
+                `<div class="status error">An application with this name already exists.</div>`
+              );
+              return;
+            }
+
+            const labelMode = scenario === "app-label-drift" ? "drift" : "canonical";
+            state.applications.push(
+              createApplication(applicationName, {
+                labelMode
+              })
+            );
+            persistState();
+            renderApplicationConsole(applicationName, "creation");
+          });
+
+        document
+          .getElementById("cancel-create-application")
+          .addEventListener("click", () => renderApplications("creation cancel"));
+      }
+
+      function renderApplicationConsole(applicationName, sourceLabel) {
+        updateUrl("appconsole", applicationName);
+        const applicationRecord = getApplication(applicationName);
+        if (!applicationRecord) {
+          renderApplications("missing application");
+          return;
+        }
+
+        app.innerHTML = `
+          <h1>${applicationRecord.name}</h1>
+          <div class="status">Sandbox application console verified via ${sourceLabel}.</div>
+          <div class="actions">
+            <span class="badge">Sandbox</span>
+            <a href="#" id="manage-api-subscriptions">Manage API subscriptions</a>
+            <a href="#" id="manage-redirect-uris">Manage redirect URIs</a>
+            <a href="#" id="manage-application-credentials">Manage application credentials</a>
+            <a href="#" id="back-to-applications">Back to applications</a>
+          </div>
+          <p class="meta">${requiredSubscriptionCount(applicationRecord)}/5 required APIs currently subscribed.</p>
+          <p class="meta">${applicationRecord.redirectUris.length}/5 redirect slots currently populated.</p>
+          <p class="meta">${applicationRecord.secretVersions.length}/5 client secret slots currently populated.</p>
+        `;
+
+        document
+          .getElementById("manage-api-subscriptions")
+          .addEventListener("click", (event) => {
+            event.preventDefault();
+            renderSubscriptions(applicationName);
+          });
+
+        document
+          .getElementById("manage-redirect-uris")
+          .addEventListener("click", (event) => {
+            event.preventDefault();
+            renderRedirectSettings(applicationName);
+          });
+
+        document
+          .getElementById("manage-application-credentials")
+          .addEventListener("click", (event) => {
+            event.preventDefault();
+            renderApplicationCredentials(applicationName);
+          });
+
+        document.getElementById("back-to-applications").addEventListener("click", (event) => {
+          event.preventDefault();
+          renderApplications("application console");
+        });
+      }
+
+      function renderSubscriptions(applicationName) {
+        updateUrl("subscriptions", applicationName);
+        const applicationRecord = getApplication(applicationName);
+        if (!applicationRecord) {
+          renderApplications("missing application");
+          return;
+        }
+
+        const rows = canonicalApiCatalog
+          .map((apiRecord) => {
+            const label = subscriptionLabel(applicationRecord, apiRecord);
+            const checked = applicationRecord.subscriptions[apiRecord.key] ? "checked" : "";
+            const scopeCaption =
+              apiRecord.scope === "required"
+                ? "Required now for the current roadmap slice."
+                : "Likely required later. Kept visible to test deferred-scope handling.";
+            return `
+              <div class="api-row" data-testid="api-subscription-row" data-api-key="${apiRecord.key}">
+                <label>
+                  <input type="checkbox" name="${apiRecord.key}" aria-label="${label}" ${checked} />
+                  <span>
+                    <strong>${label}</strong>
+                    <span class="meta">${scopeCaption}</span>
+                  </span>
+                </label>
+              </div>
+            `;
+          })
+          .join("");
+
+        app.innerHTML = `
+          <h1>Manage API subscriptions</h1>
+          <div class="status">Reconcile required and deferred API subscriptions for ${applicationRecord.name}.</div>
+          <form id="subscription-form" class="stack">
+            ${rows}
+            <div class="actions">
+              <button type="submit">Save subscriptions</button>
+              <button type="button" class="secondary" id="back-to-application">Back to application</button>
+            </div>
+          </form>
+        `;
+
+        document.getElementById("subscription-form").addEventListener("submit", (event) => {
+          event.preventDefault();
+          const formData = new FormData(event.currentTarget);
+          for (const apiRecord of canonicalApiCatalog) {
+            applicationRecord.subscriptions[apiRecord.key] = Boolean(formData.get(apiRecord.key));
+          }
+          persistState();
+          renderSubscriptions(applicationName);
+        });
+
+        document.getElementById("back-to-application").addEventListener("click", () => {
+          renderApplicationConsole(applicationName, "subscription back");
+        });
+      }
+
+      function renderRedirectSettings(applicationName) {
+        updateUrl("oauth-settings", applicationName);
+        const applicationRecord = getApplication(applicationName);
+        if (!applicationRecord) {
+          renderApplications("missing application");
+          return;
+        }
+
+        const slots = Array.from({ length: 5 }, (_, index) => {
+          const label = `Redirect URI ${index + 1}`;
+          const value = applicationRecord.redirectUris[index] || "";
+          return `
+            <div class="redirect-slot" data-testid="redirect-uri-slot" data-slot-label="${label}">
+              <label>${label}
+                <input aria-label="${label}" name="redirectUri${index + 1}" value="${value}" />
+              </label>
+            </div>
+          `;
+        }).join("");
+
+        const scopeChips = ["read:self-assessment", "write:self-assessment"]
+          .map((scope) => `<span class="scope-chip">${scope}</span>`)
+          .join("");
+
+        app.innerHTML = `
+          <h1>Redirect URIs</h1>
+          <div class="status">Configure and verify the canonical HMRC callback inventory for ${applicationRecord.name}.</div>
+          <div class="stack">
+            <section aria-label="Requested scopes">
+              <h2>Requested scopes</h2>
+              <p class="meta">Current interactive HMRC scope set for the subscribed Income Tax APIs.</p>
+              <div class="actions">${scopeChips}</div>
+            </section>
+            <form id="redirect-uri-form" class="stack">
+              ${slots}
+              <div class="actions">
+                <button type="submit">Save redirect URIs</button>
+                <button type="button" class="secondary" id="back-to-app-console">Back to application</button>
+              </div>
+            </form>
+          </div>
+        `;
+
+        document.getElementById("redirect-uri-form").addEventListener("submit", (event) => {
+          event.preventDefault();
+          const formData = new FormData(event.currentTarget);
+          applicationRecord.redirectUris = Array.from({ length: 5 }, (_, index) =>
+            String(formData.get(`redirectUri${index + 1}`) || "").trim()
+          ).filter(Boolean);
+          persistState();
+          renderRedirectSettings(applicationName);
+        });
+
+        document.getElementById("back-to-app-console").addEventListener("click", () => {
+          renderApplicationConsole(applicationName, "redirect settings back");
+        });
+      }
+
+      function nextGeneratedSecret(applicationRecord) {
+        globalSecretCounter += 1;
+        const ordinal = applicationRecord.secretVersions.length + 1;
+        return `HMRC-SECRET-${scenario.toUpperCase()}-${String(globalSecretCounter).padStart(2, "0")}-ORD${ordinal}!`;
+      }
+
+      function renderApplicationCredentials(applicationName) {
+        updateUrl("credentials", applicationName);
+        const applicationRecord = getApplication(applicationName);
+        if (!applicationRecord) {
+          renderApplications("missing application");
+          return;
+        }
+
+        const rows =
+          applicationRecord.secretVersions.length === 0
+            ? `<p class="meta">No governed client-secret lineage exists yet for this fixture application.</p>`
+            : applicationRecord.secretVersions
+                .map((secretVersion) => `
+                  <article class="secret-row" data-testid="client-secret-row" data-version-id="${secretVersion.versionId}">
+                    <div class="secret-row__header">
+                      <div>
+                        <strong>${secretVersion.versionId}</strong>
+                        <p class="meta">State: ${secretVersion.state}</p>
+                      </div>
+                      <span class="badge">${secretVersion.state}</span>
+                    </div>
+                  </article>
+                `)
+                .join("");
+
+        const revealPanel = applicationRecord.revealedSecret
+          ? `
+            <section class="secret-panel" aria-label="One-time reveal panel">
+              <h2>One-time reveal</h2>
+              <p class="meta">Export the revealed value directly into governed vault refs.</p>
+              <label>Client secret
+                <input aria-label="Client secret" value="${applicationRecord.revealedSecret}" readonly />
+              </label>
+            </section>
+          `
+          : "";
+
+        app.innerHTML = `
+          <h1>Application credentials</h1>
+          <div class="status">Inspect sandbox application identifiers and export them into governed credential lineage for ${applicationRecord.name}.</div>
+          <section class="stack" aria-label="Application identity">
+            <div class="readonly-grid">
+              <label>Application ID
+                <input aria-label="Application ID" value="${applicationRecord.applicationId}" readonly />
+              </label>
+              <label>Client ID
+                <input aria-label="Client ID" value="${applicationRecord.clientId}" readonly />
+              </label>
+            </div>
+          </section>
+          <section class="stack" aria-label="Client secret rotation">
+            <h2>Rotate your client secret regularly</h2>
+            <p class="meta">HMRC allows additive rotation before the inactive secret is retired.</p>
+            ${rows}
+          </section>
+          ${revealPanel}
+          <div class="actions">
+            <button type="button" id="generate-client-secret">Generate client secret</button>
+            <button type="button" class="secondary" id="back-to-app-console-from-credentials">Back to application</button>
+          </div>
+        `;
+
+        document.getElementById("generate-client-secret").addEventListener("click", () => {
+          const rawSecret = nextGeneratedSecret(applicationRecord);
+          const nextOrdinal = applicationRecord.secretVersions.length + 1;
+          applicationRecord.secretVersions.push(seedSecretVersion(nextOrdinal));
+          applicationRecord.revealedSecret = rawSecret;
+          persistState();
+          renderApplicationCredentials(applicationName);
+        });
+
+        document
+          .getElementById("back-to-app-console-from-credentials")
+          .addEventListener("click", () => {
+            renderApplicationConsole(applicationName, "credentials back");
+          });
+      }
+
+      function renderRegister() {
+        updateUrl("register");
+        delete document.body.dataset.checkpointReason;
+        delete document.body.dataset.registrationDisposition;
+        app.innerHTML = `
+          <h1>Register for a developer account</h1>
+          <p>Register for a developer account to start using our RESTful APIs in your applications.</p>
+          <form id="register-form">
+            <label>First name <input aria-label="First name" name="firstName" /></label>
+            <label>Last name <input aria-label="Last name" name="lastName" /></label>
+            <label>Email address <input aria-label="Email address" name="emailAddress" /></label>
+            <label>Create password <input aria-label="Create password" type="password" name="password" /></label>
+            <label>Confirm password <input aria-label="Confirm password" type="password" name="confirmPassword" /></label>
+            <button type="submit">${scenario === "drift-register" ? "Create account" : "Register"}</button>
+          </form>
+          <p>Already registered? <a href="#" id="go-to-sign-in">Sign in</a>.</p>
+        `;
+
+        document.getElementById("register-form").addEventListener("submit", (event) => {
+          event.preventDefault();
+          if (scenario === "activation") {
+            renderCheckpoint(
+              "EMAIL_VERIFICATION",
+              "Check your email",
+              "We sent you an activation link. Activate your account before resuming."
+            );
+            return;
+          }
+          if (scenario === "duplicate") {
+            document.body.dataset.registrationDisposition = "existing-account";
+            app.insertAdjacentHTML(
+              "beforeend",
+              `<div class="status error">This account already exists. Sign in to continue.</div>`
+            );
+            return;
+          }
+          state.signedIn = true;
+          persistState();
+          renderApplications("registration");
+        });
+
+        document.getElementById("go-to-sign-in").addEventListener("click", (event) => {
+          event.preventDefault();
+          renderLogin();
+        });
+      }
+
+      function renderLogin() {
+        updateUrl("login");
+        delete document.body.dataset.checkpointReason;
+        delete document.body.dataset.signInDisposition;
+        app.innerHTML = `
+          <h1>Sign in</h1>
+          <form id="sign-in-form">
+            <label>Email address <input aria-label="Email address" name="emailAddress" /></label>
+            <label>Password <input aria-label="Password" type="password" name="password" /></label>
+            <p><a href="#">I've forgotten my password</a></p>
+            <button type="submit">Sign in</button>
+          </form>
+          <p>Not registered yet? <a href="#" id="go-to-register">Register for an account</a></p>
+        `;
+
+        document.getElementById("sign-in-form").addEventListener("submit", (event) => {
+          event.preventDefault();
+          if (scenario === "existing-security") {
+            renderCheckpoint(
+              "MFA",
+              "2-step verification required",
+              "Complete the 2-step verification challenge before continuing."
+            );
+            return;
+          }
+          if (scenario === "sign-in-needs-register") {
+            document.body.dataset.signInDisposition = "register";
+            app.insertAdjacentHTML(
+              "beforeend",
+              `<div class="status error">We could not find an account. Register for an account to continue.</div>`
+            );
+            return;
+          }
+          state.signedIn = true;
+          persistState();
+          renderApplications("sign-in");
+        });
+
+        document.getElementById("go-to-register").addEventListener("click", (event) => {
+          event.preventDefault();
+          renderRegister();
+        });
+      }
+
+      function boot() {
+        if (requestedScreen === "applications") {
+          if (state.signedIn) {
+            renderApplications("direct entry");
+          } else {
+            renderLogin();
+          }
+          return;
+        }
+
+        if (requestedScreen === "appconsole") {
+          if (state.signedIn) {
+            renderApplicationConsole(currentApplicationName(), "direct entry");
+          } else {
+            renderLogin();
+          }
+          return;
+        }
+
+        if (requestedScreen === "subscriptions") {
+          if (state.signedIn) {
+            renderSubscriptions(currentApplicationName());
+          } else {
+            renderLogin();
+          }
+          return;
+        }
+
+        if (requestedScreen === "oauth-settings") {
+          if (state.signedIn) {
+            renderRedirectSettings(currentApplicationName());
+          } else {
+            renderLogin();
+          }
+          return;
+        }
+
+        if (requestedScreen === "credentials") {
+          if (state.signedIn) {
+            renderApplicationCredentials(currentApplicationName());
+          } else {
+            renderLogin();
+          }
+          return;
+        }
+
+        if (requestedScreen === "login") {
+          renderLogin();
+          return;
+        }
+
+        renderRegister();
+      }
+
+      document.getElementById("nav-applications").addEventListener("click", (event) => {
+        event.preventDefault();
+        if (state.signedIn) {
+          renderApplications("navigation");
+        } else {
+          renderLogin();
+        }
+      });
+
+      boot();
+    </script>
+  </body>
+</html>

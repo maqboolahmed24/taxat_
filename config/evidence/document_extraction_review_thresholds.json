@@ -1,0 +1,250 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "document_extraction_review_thresholds",
+  "selection_status": "SELF_HOST_DECISION_REQUIRED",
+  "truth_boundary_statement": "Document extraction may produce provider raw output, normalized extraction output, and candidate facts only. Canonical facts still require later normalization, validation, scoping, and promotion grounded in Taxat evidence law.",
+  "allowed_upload_gate_states": [
+    "CHECKSUM_VERIFIED",
+    "SCAN_CLEAR_OR_EQUIVALENT_ADOPTION",
+    "REQUEST_BINDING_FROZEN",
+    "ATTACHMENT_CONFIRMED"
+  ],
+  "blocked_upload_gate_states": [
+    "TRANSFER_PENDING",
+    "CHECKSUM_PENDING",
+    "SCAN_PENDING",
+    "QUARANTINED",
+    "VALIDATION_FAILED",
+    "ATTACHMENT_UNCONFIRMED"
+  ],
+  "confidence_bands": [
+    {
+      "band_ref": "confidence_auto_candidate",
+      "min_inclusive": 0.985,
+      "max_exclusive": 1.001,
+      "action": "AUTO_ACCEPT_TO_CANDIDATE",
+      "summary": "Only bounded fields on low-ambiguity profiles may enter candidate facts automatically in this band."
+    },
+    {
+      "band_ref": "confidence_review_required",
+      "min_inclusive": 0.9,
+      "max_exclusive": 0.985,
+      "action": "REVIEW_REQUIRED",
+      "summary": "Human review is required before candidate-fact use for the affected field or profile."
+    },
+    {
+      "band_ref": "confidence_layout_only",
+      "min_inclusive": 0.75,
+      "max_exclusive": 0.9,
+      "action": "LAYOUT_ONLY_RETAIN",
+      "summary": "Retain normalized extraction for evidence and review, but do not emit active candidate facts."
+    },
+    {
+      "band_ref": "confidence_quality_too_low",
+      "min_inclusive": 0,
+      "max_exclusive": 0.75,
+      "action": "QUALITY_TOO_LOW",
+      "summary": "Image quality or OCR reliability is too weak for candidate-fact emission."
+    }
+  ],
+  "typed_actions": [
+    "AUTO_ACCEPT_TO_CANDIDATE",
+    "REVIEW_REQUIRED",
+    "LAYOUT_ONLY_RETAIN",
+    "UNSUPPORTED_FORMAT",
+    "QUALITY_TOO_LOW",
+    "BLOCKED_BY_QUARANTINE"
+  ],
+  "profile_rules": [
+    {
+      "profile_ref": "doc_profile_receipt_capture",
+      "auto_accept_min_confidence_or_null": 0.985,
+      "review_min_confidence": 0.92,
+      "quality_floor_confidence": 0.75,
+      "default_action_if_above_review_min": "AUTO_ACCEPT_TO_CANDIDATE",
+      "multi_page_statement_action": "REVIEW_REQUIRED",
+      "handwriting_detected_action": "REVIEW_REQUIRED",
+      "mixed_language_action": "REVIEW_REQUIRED",
+      "rotation_or_skew_action": "REVIEW_REQUIRED",
+      "table_density_action": "REVIEW_REQUIRED",
+      "quarantine_action": "BLOCKED_BY_QUARANTINE",
+      "duplicate_submission_policy": "DEDUP_BY_STABLE_OBJECT_VERSION_AND_PROFILE",
+      "provider_version_drift_action": "REVIEW_REQUIRED",
+      "stale_request_rebase_action": "REVIEW_REQUIRED",
+      "notes": [
+        "Receipts may auto-promote to candidate facts only for bounded supplier/date/total fields after the upload gate is satisfied."
+      ]
+    },
+    {
+      "profile_ref": "doc_profile_invoice_pdf",
+      "auto_accept_min_confidence_or_null": 0.99,
+      "review_min_confidence": 0.94,
+      "quality_floor_confidence": 0.8,
+      "default_action_if_above_review_min": "AUTO_ACCEPT_TO_CANDIDATE",
+      "multi_page_statement_action": "REVIEW_REQUIRED",
+      "handwriting_detected_action": "REVIEW_REQUIRED",
+      "mixed_language_action": "REVIEW_REQUIRED",
+      "rotation_or_skew_action": "REVIEW_REQUIRED",
+      "table_density_action": "REVIEW_REQUIRED",
+      "quarantine_action": "BLOCKED_BY_QUARANTINE",
+      "duplicate_submission_policy": "DEDUP_BY_STABLE_OBJECT_VERSION_AND_PROFILE",
+      "provider_version_drift_action": "REVIEW_REQUIRED",
+      "stale_request_rebase_action": "REVIEW_REQUIRED",
+      "notes": [
+        "Invoices can emit candidate invoice identifiers and amount candidates, but downstream validation must still choose any canonical tax or filing use."
+      ]
+    },
+    {
+      "profile_ref": "doc_profile_bank_statement_pdf",
+      "auto_accept_min_confidence_or_null": null,
+      "review_min_confidence": 0.9,
+      "quality_floor_confidence": 0.78,
+      "default_action_if_above_review_min": "REVIEW_REQUIRED",
+      "multi_page_statement_action": "REVIEW_REQUIRED",
+      "handwriting_detected_action": "REVIEW_REQUIRED",
+      "mixed_language_action": "REVIEW_REQUIRED",
+      "rotation_or_skew_action": "REVIEW_REQUIRED",
+      "table_density_action": "REVIEW_REQUIRED",
+      "quarantine_action": "BLOCKED_BY_QUARANTINE",
+      "duplicate_submission_policy": "DEDUP_BY_STABLE_OBJECT_VERSION_AND_PROFILE",
+      "provider_version_drift_action": "REVIEW_REQUIRED",
+      "stale_request_rebase_action": "REVIEW_REQUIRED",
+      "notes": [
+        "Bank statement table extraction is never auto-accepted into candidate facts without review because row segmentation drift can materially change meaning."
+      ]
+    },
+    {
+      "profile_ref": "doc_profile_authority_correspondence_pdf",
+      "auto_accept_min_confidence_or_null": 0.985,
+      "review_min_confidence": 0.93,
+      "quality_floor_confidence": 0.78,
+      "default_action_if_above_review_min": "AUTO_ACCEPT_TO_CANDIDATE",
+      "multi_page_statement_action": "REVIEW_REQUIRED",
+      "handwriting_detected_action": "REVIEW_REQUIRED",
+      "mixed_language_action": "REVIEW_REQUIRED",
+      "rotation_or_skew_action": "REVIEW_REQUIRED",
+      "table_density_action": "REVIEW_REQUIRED",
+      "quarantine_action": "BLOCKED_BY_QUARANTINE",
+      "duplicate_submission_policy": "DEDUP_BY_STABLE_OBJECT_VERSION_AND_PROFILE",
+      "provider_version_drift_action": "REVIEW_REQUIRED",
+      "stale_request_rebase_action": "REVIEW_REQUIRED",
+      "notes": [
+        "Reference numbers and dates may auto-promote into candidate facts, but correspondence meaning remains reviewable text."
+      ]
+    },
+    {
+      "profile_ref": "doc_profile_screenshot_capture",
+      "auto_accept_min_confidence_or_null": null,
+      "review_min_confidence": 0.95,
+      "quality_floor_confidence": 0.8,
+      "default_action_if_above_review_min": "LAYOUT_ONLY_RETAIN",
+      "multi_page_statement_action": "REVIEW_REQUIRED",
+      "handwriting_detected_action": "REVIEW_REQUIRED",
+      "mixed_language_action": "REVIEW_REQUIRED",
+      "rotation_or_skew_action": "REVIEW_REQUIRED",
+      "table_density_action": "LAYOUT_ONLY_RETAIN",
+      "quarantine_action": "BLOCKED_BY_QUARANTINE",
+      "duplicate_submission_policy": "DEDUP_BY_STABLE_OBJECT_VERSION_AND_PROFILE",
+      "provider_version_drift_action": "REVIEW_REQUIRED",
+      "stale_request_rebase_action": "REVIEW_REQUIRED",
+      "notes": [
+        "Screenshot content stays layout-first and usually retains text for human review rather than emitting many candidate facts automatically."
+      ]
+    },
+    {
+      "profile_ref": "doc_profile_handwritten_note",
+      "auto_accept_min_confidence_or_null": null,
+      "review_min_confidence": 0.9,
+      "quality_floor_confidence": 0.78,
+      "default_action_if_above_review_min": "REVIEW_REQUIRED",
+      "multi_page_statement_action": "REVIEW_REQUIRED",
+      "handwriting_detected_action": "REVIEW_REQUIRED",
+      "mixed_language_action": "REVIEW_REQUIRED",
+      "rotation_or_skew_action": "REVIEW_REQUIRED",
+      "table_density_action": "REVIEW_REQUIRED",
+      "quarantine_action": "BLOCKED_BY_QUARANTINE",
+      "duplicate_submission_policy": "DEDUP_BY_STABLE_OBJECT_VERSION_AND_PROFILE",
+      "provider_version_drift_action": "REVIEW_REQUIRED",
+      "stale_request_rebase_action": "REVIEW_REQUIRED",
+      "notes": [
+        "Handwriting is always review-gated regardless of confidence because language and semantics are too fragile for silent candidate promotion."
+      ]
+    },
+    {
+      "profile_ref": "doc_profile_mixed_language_bundle",
+      "auto_accept_min_confidence_or_null": null,
+      "review_min_confidence": 0.99,
+      "quality_floor_confidence": 0.9,
+      "default_action_if_above_review_min": "UNSUPPORTED_FORMAT",
+      "multi_page_statement_action": "UNSUPPORTED_FORMAT",
+      "handwriting_detected_action": "UNSUPPORTED_FORMAT",
+      "mixed_language_action": "UNSUPPORTED_FORMAT",
+      "rotation_or_skew_action": "UNSUPPORTED_FORMAT",
+      "table_density_action": "UNSUPPORTED_FORMAT",
+      "quarantine_action": "BLOCKED_BY_QUARANTINE",
+      "duplicate_submission_policy": "DEDUP_BY_STABLE_OBJECT_VERSION_AND_PROFILE",
+      "provider_version_drift_action": "REVIEW_REQUIRED",
+      "stale_request_rebase_action": "REVIEW_REQUIRED",
+      "notes": [
+        "Mixed-language bundled documents remain intentionally unsupported in the initial profile pack."
+      ]
+    }
+  ],
+  "source_refs": [
+    {
+      "source_ref": "PROMPT/shared_operating_contract_0046_to_0053.md::OCR / document extraction",
+      "rationale": "The shared operating contract requires either a lawful managed workspace or an explicit self-host/not-selected decision with typed rationale."
+    },
+    {
+      "source_ref": "data/analysis/dependency_register.json::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+      "rationale": "The dependency register marks OCR/document extraction as optional vendor selection rather than a preselected runtime dependency."
+    },
+    {
+      "source_ref": "docs/analysis/18_external_services_apis_and_control_plane_dependencies.md::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+      "rationale": "The external dependency pack keeps OCR outside the core engine while still inside broader product scope."
+    },
+    {
+      "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::Class E - DOCUMENTARY_EVIDENCE",
+      "rationale": "Documentary evidence must retain source lineage and extraction metadata before any candidate facts can exist."
+    },
+    {
+      "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::Prohibited promotion rules",
+      "rationale": "Raw OCR text or extracted key-values may not jump directly to canonical truth."
+    },
+    {
+      "source_ref": "Algorithm/data_model.md::EvidenceItem",
+      "rationale": "EvidenceItem carries extraction method, confidence, lineage refs, retention tags, and erasure posture."
+    },
+    {
+      "source_ref": "Algorithm/data_model.md::CandidateFact",
+      "rationale": "CandidateFact remains the lawful intermediate layer between documentary evidence and any later canonical promotion."
+    },
+    {
+      "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::Frozen request lineage",
+      "rationale": "Extraction lineage must stay bound to the frozen upload session even when stale-request posture is detected."
+    },
+    {
+      "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::Scanner and validation separation",
+      "rationale": "Transfer completion, scan, validation, and attachment confirmation remain distinct before extraction is admissible."
+    },
+    {
+      "source_ref": "Algorithm/customer_client_portal_experience_contract.md::Secure upload flow",
+      "rationale": "Portal upload posture must surface scan, validation, and attachment state distinctly instead of collapsing them into a generic uploaded state."
+    },
+    {
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::Governed secret and worker boundary",
+      "rationale": "Provider credentials, raw outputs, and worker ingress remain scoped to the governed secret and egress boundary."
+    },
+    {
+      "source_ref": "Algorithm/retention_and_privacy.md::Evidence retention",
+      "rationale": "Evidence-bearing artifacts, normalized extraction output, and derived previews must remain retention-classified and distinguishable."
+    }
+  ],
+  "typed_gaps": [
+    "SELF_HOST_DECISION_REQUIRED: review thresholds are frozen, but no runtime is yet chosen to execute them."
+  ],
+  "notes": [
+    "Thresholds intentionally fail closed: low confidence, quarantine, drift, stale rebase, or unsupported format never produce trust-ready facts.",
+    "Duplicate extraction requests collapse onto a stable object-version plus profile identity before any new candidate set is emitted."
+  ]
+}

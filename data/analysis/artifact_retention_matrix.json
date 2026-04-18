@@ -1,0 +1,1271 @@
+{
+  "artifact_lifecycle_state_enum": [
+    "ACTIVE",
+    "LIMITED",
+    "LEGAL_HOLD",
+    "ERASURE_PENDING",
+    "PSEUDONYMISED",
+    "ERASED"
+  ],
+  "erasure_eligibility_enum": [
+    "ELIGIBLE",
+    "BLOCKED_LEGAL_HOLD",
+    "BLOCKED_STATUTORY_MINIMUM",
+    "BLOCKED_PROOF_PRESERVATION",
+    "BLOCKED_AUTHORITY_AMBIGUITY"
+  ],
+  "explicit_gaps": [
+    {
+      "description": "The corpus defines retention classes, expiry basis, and erasure blockers, but does not publish one canonical per-artifact duration matrix.",
+      "gap_id": "artifact_specific_retention_windows_not_canonicalized",
+      "severity": "medium",
+      "source_ref": "Algorithm/retention_and_privacy.md::L3[Retention_and_privacy]"
+    },
+    {
+      "description": "Threat classes are normatively defined in prose in the runtime hardening contract, but no dedicated schema-backed enum exists in the current corpus.",
+      "gap_id": "threat_class_enum_is_prose_only",
+      "severity": "medium",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L13[1._Threat_classes]"
+    },
+    {
+      "description": "The corpus forbids stored authority login credentials by design, so there is no dedicated persisted schema artifact for that credential class.",
+      "gap_id": "authority_login_credentials_have_no_schema_because_persistence_is_forbidden",
+      "severity": "low",
+      "source_ref": "Algorithm/retention_and_privacy.md::L184[authority_login_credentials_forbidden]"
+    },
+    {
+      "description": "Restore privacy reconciliation states are defined, but the corpus does not separately publish a per-surface reopen matrix for each operator and customer route family.",
+      "gap_id": "restore_reopen_surface_specific_matrix_not_expanded_in_source",
+      "severity": "medium",
+      "source_ref": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[Restore_privacy_reconciliation_law]"
+    }
+  ],
+  "legal_hold_state_enum": [
+    "NONE",
+    "ACTIVE",
+    "RELEASE_ELIGIBLE",
+    "RELEASED"
+  ],
+  "limitation_behavior_enum": [
+    "NONE",
+    "SURVIVE_WITH_LIMITATION_NOTES",
+    "EXPIRED_PLACEHOLDER_ONLY",
+    "PSEUDONYMISED_SURVIVAL"
+  ],
+  "retention_class_enum": [
+    "regulated_record",
+    "derived_artifact",
+    "operational_log",
+    "analytics_projection",
+    "policy_governed_other"
+  ],
+  "rows": [
+    {
+      "artifact_or_control_id": "ActorSession",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "session control store",
+      "category": "SESSION_CONTROL_OBJECT",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "server-side validation, anti-CSRF or device binding, and explicit revocation audit",
+      "erasure_behavior": "Session invalidation rotates or revokes challenge state and blocks replay of stale commands.",
+      "legal_hold_behavior": "Session audit lineage survives logout, compromise response, or administrator invalidation.",
+      "notes": [
+        "Browser, native, and automation sessions share one machine-readable contract."
+      ],
+      "projection_allowed": "RUNTIME_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "SESSION_REVOKED",
+        "STEP_UP_COMPLETED",
+        "PRIVILEGE_DOWNGRADE"
+      ],
+      "release_gate_dependency": [
+        "SESSION_AND_ANTI_CSRF_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": false,
+      "retention_basis": "short_lived_session_with_revocation_and_step_up_posture",
+      "retention_tag": "policy_governed_other",
+      "schema_required_fields": [
+        "artifact_type",
+        "session_id",
+        "tenant_id",
+        "principal_ref",
+        "principal_class",
+        "session_client_class",
+        "authn_level",
+        "step_up_state",
+        "session_binding_hash",
+        "csrf_ref",
+        "device_binding_state",
+        "issued_at",
+        "expires_at",
+        "revoked_at",
+        "revocation_reason",
+        "step_up_completed_at",
+        "last_seen_at"
+      ],
+      "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+      "source_heading_or_logical_block": "2. Identity, session, and command trust",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L36[ActorSession]",
+      "survivability_or_fidelity_formula": "not_formula_based__every_command_validated_against_current_actor_session_state"
+    },
+    {
+      "artifact_or_control_id": "ApiCommandReceipt",
+      "cache_scope": [
+        "LOW_NOISE_FRAME",
+        "NATIVE_OPERATOR_WORKSPACE_SCENE"
+      ],
+      "canonical_store_or_boundary": "command receipt store",
+      "category": "READ_PROJECTION",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "durable command_id, request_hash, idempotency_key, and authoritative object refs",
+      "erasure_behavior": "Expired success projections keep the same recovery-anchor family instead of degrading into transport-only timeout markers.",
+      "legal_hold_behavior": "Receipts preserve command recovery anchors and session lineage during investigations or incident review.",
+      "notes": [
+        "Durable receipts are the northbound recovery anchor after lost POST responses or app relaunch."
+      ],
+      "projection_allowed": "OPERATOR_AND_RUNTIME_ONLY",
+      "purge_trigger": [
+        "SESSION_REVOKED",
+        "SCHEMA_INCOMPATIBLE"
+      ],
+      "release_gate_dependency": [
+        "STALE_VIEW_AND_IDEMPOTENCY_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": false,
+      "retention_basis": "idempotent_command_recovery_anchor",
+      "retention_tag": "derived_artifact",
+      "source_file": "Algorithm/northbound_api_and_session_contract.md",
+      "source_heading_or_logical_block": "2. Required northbound surfaces",
+      "source_ref": "Algorithm/northbound_api_and_session_contract.md::L48[ApiCommandReceipt]",
+      "survivability_or_fidelity_formula": "duplicate submits collapse onto one durable receipt and one legal state transition."
+    },
+    {
+      "artifact_or_control_id": "ArtifactRetention",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "artifact retention lifecycle store",
+      "category": "RETENTION_CONTROL_OBJECT",
+      "contains_personal_or_sensitive_data": false,
+      "encryption_or_protection_control": "schema-validated lifecycle state plus canonical retention-tag alignment",
+      "erasure_behavior": "PSEUDONYMISED and ERASED states require durable request/action/proof linkage.",
+      "legal_hold_behavior": "LEGAL_HOLD and ERASURE_PENDING states require concrete follow-up workflow refs and next checkpoints.",
+      "notes": [
+        "Lifecycle-owned follow-up refs must not leak into terminal-only states."
+      ],
+      "projection_allowed": "OPERATOR_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": true,
+      "retention_basis": "canonical_artifact_lifecycle_control",
+      "retention_tag": "policy_governed_other",
+      "schema_required_fields": [
+        "artifact_type",
+        "retention_scope_class",
+        "retention_id",
+        "tenant_id",
+        "artifact_ref",
+        "retention_tag_ref",
+        "retention_class",
+        "lifecycle_state",
+        "minimum_expiry_at",
+        "policy_expiry_at",
+        "effective_expiry_at",
+        "state_changed_at",
+        "last_evaluated_at",
+        "hold_ref",
+        "next_checkpoint_at",
+        "workflow_item_refs",
+        "limitation_behavior",
+        "limitation_reason_codes",
+        "erasure_request_ref",
+        "erasure_action_ref",
+        "erasure_proof_ref"
+      ],
+      "source_file": "Algorithm/retention_and_privacy.md",
+      "source_heading_or_logical_block": "Artifact retention contract",
+      "source_ref": "Algorithm/retention_and_privacy.md::L58[ArtifactRetention]",
+      "survivability_or_fidelity_formula": "lifecycle posture participates directly in RETENTION_EVIDENCE_GATE and downstream blocking effects."
+    },
+    {
+      "artifact_or_control_id": "AuditEvent",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "append-only audit store",
+      "category": "AUDIT_AND_OBSERVABILITY",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "append-only audit evidence with minimized sensitive payloads",
+      "erasure_behavior": "Payload bodies may expire, but object, reason, lineage, and audit-family minimums must survive.",
+      "legal_hold_behavior": "Audit evidence remains durably queryable during legal hold and release transitions.",
+      "notes": [
+        "Audit events survive payload expiry as the proof-of-record boundary."
+      ],
+      "projection_allowed": "OPERATOR_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "post_expiry_audit_reconstruction_minimum",
+      "retention_tag": "operational_log",
+      "source_file": "Algorithm/retention_limited_explainability_and_audit_sufficiency_contract.md",
+      "source_heading_or_logical_block": "Required Outcomes",
+      "source_ref": "Algorithm/retention_limited_explainability_and_audit_sufficiency_contract.md::L61[AuditEvent]",
+      "survivability_or_fidelity_formula": "audit-sufficiency policy requires object, reason, and lineage minimum after payload expiry."
+    },
+    {
+      "artifact_or_control_id": "AuthorityIngressReceipt",
+      "cache_scope": [
+        "PRINCIPAL_ACCESS_VIEW"
+      ],
+      "canonical_store_or_boundary": "authenticated authority ingress checkpoint and inbox",
+      "category": "AUTHORITY_TRANSPORT",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "authenticated provider channel, dedupe key, and request-lineage binding",
+      "erasure_behavior": "Ingress authentication and lineage proof may be minimized, but cannot be reconstructed from transient transport memory.",
+      "legal_hold_behavior": "Authority ingress proof survives legal hold because it anchors request-lineage and duplicate suppression.",
+      "notes": [
+        "Legal-state mutation is blocked until authenticated ingress, dedupe, and request-lineage correlation complete."
+      ],
+      "projection_allowed": "OPERATOR_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "AUTHORITY_REBINDING",
+        "SESSION_REVOKED"
+      ],
+      "release_gate_dependency": [
+        "AUTHORITY_SANDBOX_BINDING_GATE",
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "authenticated_ingress_checkpoint",
+      "retention_tag": "regulated_record",
+      "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+      "source_heading_or_logical_block": "5. Service-to-service and network hardening",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L113[AuthorityIngressReceipt]",
+      "survivability_or_fidelity_formula": "not_formula_based__authority_ingress_authentication_and_lineage_proof_must_survive_transport_retries"
+    },
+    {
+      "artifact_or_control_id": "AuthorityInteractionRecord",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "authority interaction ledger",
+      "category": "AUTHORITY_TRANSPORT",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "binding-lineage refs plus request hash and idempotency lineage",
+      "erasure_behavior": "Deletion is blocked where it would obscure already observed authority history.",
+      "legal_hold_behavior": "Authority-facing history ambiguity cannot be resolved by deletion and must remain explicit.",
+      "notes": [
+        "Authority history ambiguity is reconciled, never erased."
+      ],
+      "projection_allowed": "OPERATOR_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "AUTHORITY_SANDBOX_BINDING_GATE",
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "authority_request_response_lineage",
+      "retention_tag": "regulated_record",
+      "source_file": "Algorithm/retention_error_and_observability_contract.md",
+      "source_heading_or_logical_block": "15.1 Contract composition and precedence",
+      "source_ref": "Algorithm/retention_error_and_observability_contract.md::L35[AuthorityInteractionRecord]",
+      "survivability_or_fidelity_formula": "authority-state reconciliation outranks any attempt to erase or silently rewind already observed legal state."
+    },
+    {
+      "artifact_or_control_id": "CacheIsolationContract",
+      "cache_scope": [
+        "LOW_NOISE_FRAME",
+        "WORKSPACE_SNAPSHOT",
+        "WORK_INBOX_SNAPSHOT",
+        "CLIENT_PORTAL_WORKSPACE",
+        "CUSTOMER_REQUEST_LIST",
+        "TENANT_GOVERNANCE_SNAPSHOT",
+        "GOVERNANCE_POLICY_SNAPSHOT",
+        "PRINCIPAL_ACCESS_VIEW",
+        "ROLE_TEMPLATE_MATRIX",
+        "NATIVE_OPERATOR_WORKSPACE_SCENE",
+        "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE"
+      ],
+      "canonical_store_or_boundary": "shared cache identity contract serialized on read models and native scenes",
+      "category": "CACHE_CONTROL_OBJECT",
+      "contains_personal_or_sensitive_data": false,
+      "encryption_or_protection_control": "exact security-context match, delivery revalidation, and temporary artifact purge policy",
+      "erasure_behavior": "Broader variants purge immediately on access or masking narrowing and must not silently survive.",
+      "legal_hold_behavior": "Hold does not widen cache reuse; the contract only controls lawful reuse and purge semantics.",
+      "notes": [
+        "Cache identity is a security boundary rather than a performance-only concern."
+      ],
+      "projection_allowed": "OPERATOR_AND_RUNTIME_ONLY",
+      "purge_trigger": [
+        "TENANT_SWITCH",
+        "PRINCIPAL_CLASS_CHANGE",
+        "SESSION_BINDING_CHANGE",
+        "ACCESS_BINDING_CHANGE",
+        "MASKING_CHANGE",
+        "ROUTE_OR_OBJECT_DRIFT"
+      ],
+      "release_gate_dependency": [
+        "CROSS_TENANT_CACHE_ISOLATION_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": false,
+      "retention_basis": "exact_cache_identity_envelope",
+      "retention_tag": "policy_governed_other",
+      "schema_required_fields": [
+        "contract_version",
+        "cache_scope_class",
+        "tenant_id",
+        "client_id_or_null",
+        "principal_class",
+        "session_binding_hash",
+        "access_binding_hash_or_null",
+        "masking_posture_fingerprint_or_null",
+        "shell_stability_ref_or_null",
+        "route_identity_ref",
+        "canonical_object_ref",
+        "shell_family",
+        "projection_version_ref",
+        "cache_partition_ref",
+        "visibility_cache_partition_key_or_null",
+        "customer_safe_projection",
+        "preview_subject_ref_or_null",
+        "delivery_binding_hash",
+        "shared_cache_reuse_policy",
+        "shared_layer_cache_policy",
+        "local_storage_reuse_policy",
+        "hydration_guard_policy",
+        "scope_narrowing_invalidation_policy",
+        "preview_export_reuse_policy",
+        "delivery_revalidation_policy",
+        "temporary_artifact_policy"
+      ],
+      "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+      "source_heading_or_logical_block": "Contract Fields",
+      "source_ref": "Algorithm/cache_isolation_and_secure_reuse_contract.md::L16[CacheIsolationContract]",
+      "survivability_or_fidelity_formula": "reject reuse on context, route, projection-version, or preview mismatch."
+    },
+    {
+      "artifact_or_control_id": "ClientPortalWorkspace",
+      "cache_scope": [
+        "CLIENT_PORTAL_WORKSPACE",
+        "CUSTOMER_REQUEST_LIST"
+      ],
+      "canonical_store_or_boundary": "client portal read model and visibility cache boundary",
+      "category": "CACHE_AND_PROJECTION",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "cache_isolation_contract plus externalization_governance_contract.delivery_binding_hash",
+      "erasure_behavior": "Background refresh, stale tabs, or direct URLs cannot widen the reviewed slice once masking or route context drifts.",
+      "legal_hold_behavior": "Portal reuse remains bound to customer-safe projection and visibility posture even under retention limitation.",
+      "notes": [
+        "Portal caches are always customer-safe and must stay exact to client, route, and visibility partition."
+      ],
+      "projection_allowed": "CUSTOMER_SAFE_ONLY",
+      "purge_trigger": [
+        "TENANT_SWITCH",
+        "ACCESS_BINDING_CHANGE",
+        "MASKING_CHANGE",
+        "ROUTE_OR_OBJECT_DRIFT"
+      ],
+      "release_gate_dependency": [
+        "CROSS_TENANT_CACHE_ISOLATION_GATE",
+        "SESSION_AND_ANTI_CSRF_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": false,
+      "retention_basis": "customer_safe_projection_boundary",
+      "retention_tag": "analytics_projection",
+      "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+      "source_heading_or_logical_block": "FE-25 Cache Isolation",
+      "source_ref": "Algorithm/customer_client_portal_experience_contract.md::L753[ClientPortalWorkspace]",
+      "survivability_or_fidelity_formula": "projection_information_ratio(o) and delivery_binding_hash bound the customer-safe slice."
+    },
+    {
+      "artifact_or_control_id": "ClientUploadSession",
+      "cache_scope": [
+        "CLIENT_PORTAL_WORKSPACE",
+        "CUSTOMER_REQUEST_LIST"
+      ],
+      "canonical_store_or_boundary": "governed upload session and staging store",
+      "category": "UPLOAD_AND_COLLABORATION",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "frozen request identity plus checksum/scanner and binding posture",
+      "erasure_behavior": "Staged bytes remain non-downloadable and cannot satisfy a rebased request silently.",
+      "legal_hold_behavior": "Follow-on hold or erasure decisions must preserve staged lineage and publish posture explicitly.",
+      "notes": [
+        "Binary transfer is the governed exception to the general command surface."
+      ],
+      "projection_allowed": "LIMITED_EXPLICIT_ONLY",
+      "purge_trigger": [
+        "ACCESS_BINDING_CHANGE",
+        "TENANT_SWITCH",
+        "SESSION_REVOKED"
+      ],
+      "release_gate_dependency": [
+        "SESSION_AND_ANTI_CSRF_GATE",
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": true,
+      "retention_basis": "governed_upload_staging",
+      "retention_tag": "derived_artifact",
+      "source_file": "Algorithm/northbound_api_and_session_contract.md",
+      "source_heading_or_logical_block": "2.2 Customer/Client portal and upload-session surfaces",
+      "source_ref": "Algorithm/northbound_api_and_session_contract.md::L59[ClientUploadSession]",
+      "survivability_or_fidelity_formula": "not_formula_based__stale_bytes_never_satisfy_current_request"
+    },
+    {
+      "artifact_or_control_id": "CollaborationAttachment",
+      "cache_scope": [
+        "WORKSPACE_SNAPSHOT",
+        "CLIENT_PORTAL_WORKSPACE"
+      ],
+      "canonical_store_or_boundary": "collaboration attachment store",
+      "category": "UPLOAD_AND_COLLABORATION",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "upload session lineage, visibility binding, and malware-scan gated publication",
+      "erasure_behavior": "Quarantined or policy-limited files render as typed unavailable state rather than disappearing silently.",
+      "legal_hold_behavior": "Published attachment lineage and unavailable reasons remain visible during hold or quarantine review.",
+      "notes": [
+        "A customer-visible attachment may appear as pending placeholder but not as downloadable content before scan clearance."
+      ],
+      "projection_allowed": "MASKED_OR_LIMITED_ONLY",
+      "purge_trigger": [
+        "MASKING_CHANGE",
+        "ACCESS_BINDING_CHANGE",
+        "TENANT_SWITCH"
+      ],
+      "release_gate_dependency": [
+        "CROSS_TENANT_CACHE_ISOLATION_GATE",
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": true,
+      "retention_basis": "published_attachment_with_scan_and_visibility_posture",
+      "retention_tag": "regulated_record",
+      "source_file": "Algorithm/collaboration_workspace_contract.md",
+      "source_heading_or_logical_block": "7.2 New append-only collaboration artifacts",
+      "source_ref": "Algorithm/collaboration_workspace_contract.md::L851[CollaborationAttachment]",
+      "survivability_or_fidelity_formula": "not_formula_based__customer-visible_downloadability_requires_clean_scan_and_available_publication_state"
+    },
+    {
+      "artifact_or_control_id": "ConfigFreeze",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "sealed config freeze store",
+      "category": "AUTHORITATIVE_TRUTH",
+      "contains_personal_or_sensitive_data": false,
+      "encryption_or_protection_control": "integrity-sealed frozen config with durable hash lineage",
+      "erasure_behavior": "If direct payload retention narrows, explicit limitation placeholders must preserve the frozen execution basis.",
+      "legal_hold_behavior": "Legal hold blocks erasure when the config freeze remains necessary for proof preservation.",
+      "notes": [
+        "ConfigFreeze belongs to the preserved basis set for historical replay."
+      ],
+      "projection_allowed": "OPERATOR_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "minimum_replay_and_audit_basis",
+      "retention_tag": "regulated_record",
+      "source_file": "Algorithm/retention_and_privacy.md",
+      "source_heading_or_logical_block": "Basis-preserving retention for replay",
+      "source_ref": "Algorithm/retention_and_privacy.md::L240[ConfigFreeze]",
+      "survivability_or_fidelity_formula": "Replay-safe basis retention; if unavailable, surface RETENTION_LIMITED rather than silently swapping newer configuration."
+    },
+    {
+      "artifact_or_control_id": "DecisionBundle",
+      "cache_scope": [
+        "LOW_NOISE_FRAME",
+        "NATIVE_OPERATOR_WORKSPACE_SCENE"
+      ],
+      "canonical_store_or_boundary": "materialized decision projection store",
+      "category": "READ_PROJECTION",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "masked projection policy plus stable ref/hash lineage",
+      "erasure_behavior": "Visible confidence and explainability must degrade rather than overclaim when retained support narrows.",
+      "legal_hold_behavior": "Underlying legal hold preserves the truth basis that informs the bundle's visible limitation posture.",
+      "notes": [
+        "DecisionBundle is a disposable read model and cannot replace authoritative truth after restore or replay."
+      ],
+      "projection_allowed": "MASKED_OR_LIMITED_ONLY",
+      "purge_trigger": [
+        "ACCESS_BINDING_CHANGE",
+        "MASKING_CHANGE",
+        "SCHEMA_INCOMPATIBLE"
+      ],
+      "release_gate_dependency": [
+        "CROSS_TENANT_CACHE_ISOLATION_GATE",
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": true,
+      "retention_basis": "decision_projection_with_retention_sensitive_confidence",
+      "retention_tag": "derived_artifact",
+      "source_file": "Algorithm/retention_and_privacy.md",
+      "source_heading_or_logical_block": "Quantitative survivability and privacy-preserving projection",
+      "source_ref": "Algorithm/retention_and_privacy.md::L150[DecisionBundle]",
+      "survivability_or_fidelity_formula": "projection_fidelity(o) degrades user-visible certainty relative to retained decision-side confidence; masking must never overstate certainty."
+    },
+    {
+      "artifact_or_control_id": "EnquiryPack",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "enquiry export pack store",
+      "category": "EXPLAINABILITY_ARTIFACT",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "masked export policy with explicit omission_entries[]",
+      "erasure_behavior": "Exports must keep retention binding, omission entries, and limitation notes under retention pressure.",
+      "legal_hold_behavior": "Legal hold and omission posture must travel with the export when relevant.",
+      "notes": [
+        "An enquiry export must remain honest about lawful omissions."
+      ],
+      "projection_allowed": "MASKED_OR_LIMITED_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "scrutiny_export_with_retention_disclosure",
+      "retention_tag": "regulated_record",
+      "source_file": "Algorithm/retention_limited_explainability_and_audit_sufficiency_contract.md",
+      "source_heading_or_logical_block": "Artifact Rules",
+      "source_ref": "Algorithm/retention_limited_explainability_and_audit_sufficiency_contract.md::L44[EnquiryPack]",
+      "survivability_or_fidelity_formula": "projection_fidelity(o) may narrow exported visibility, but omission and limitation disclosure must remain explicit."
+    },
+    {
+      "artifact_or_control_id": "ErasureProof",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "erasure workflow and proof store",
+      "category": "RETENTION_CONTROL_OBJECT",
+      "contains_personal_or_sensitive_data": false,
+      "encryption_or_protection_control": "append-only proof lineage with workflow and audit refs",
+      "erasure_behavior": "Erasure can never destroy the append-only proof that request, decision basis, and execution outcome occurred.",
+      "legal_hold_behavior": "Erasure proof must show when legal hold blocked or released the workflow.",
+      "notes": [
+        "Erasure proof is durable even when the erased content is not."
+      ],
+      "projection_allowed": "OPERATOR_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": true,
+      "retention_basis": "erasure_request_decision_and_execution_proof",
+      "retention_tag": "operational_log",
+      "source_file": "Algorithm/retention_and_privacy.md",
+      "source_heading_or_logical_block": "Erasure and legal-hold workflow",
+      "source_ref": "Algorithm/retention_and_privacy.md::L175[ErasureProof]",
+      "survivability_or_fidelity_formula": "not_formula_based__proof_of_erasure_must_remain_durable"
+    },
+    {
+      "artifact_or_control_id": "EvidenceGraph",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "evidence graph store",
+      "category": "EXPLAINABILITY_ARTIFACT",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "retention-limited explainability contract with typed omission semantics",
+      "erasure_behavior": "Expired or erased edges must remain explicit present-but-limited evidence, not broken graph absence.",
+      "legal_hold_behavior": "If legal hold blocks erasure, the graph must show the retained-limited posture rather than hiding it.",
+      "notes": [
+        "EvidenceGraph cannot render retention limitation as a missing edge."
+      ],
+      "projection_allowed": "LIMITED_EXPLICIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "present_limited_truth_not_missing_edges",
+      "retention_tag": "derived_artifact",
+      "source_file": "Algorithm/retention_limited_explainability_and_audit_sufficiency_contract.md",
+      "source_heading_or_logical_block": "Artifact Rules",
+      "source_ref": "Algorithm/retention_limited_explainability_and_audit_sufficiency_contract.md::L40[EvidenceGraph]",
+      "survivability_or_fidelity_formula": "limitation_explicitness(o) must remain typed and non-zero wherever support narrows."
+    },
+    {
+      "artifact_or_control_id": "GateDecisionRecordLineage",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "append-only gate record ledger",
+      "category": "AUTHORITATIVE_TRUTH",
+      "contains_personal_or_sensitive_data": false,
+      "encryption_or_protection_control": "sealed ordered gate tape and audit lineage",
+      "erasure_behavior": "Derived gate lineage may survive with explicit limitation notes even when underlying support narrows.",
+      "legal_hold_behavior": "Gate lineage remains on hold when needed to preserve decisive-path audibility.",
+      "notes": [
+        "Retention-driven gate changes must also emit correlated error and audit objects."
+      ],
+      "projection_allowed": "OPERATOR_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "ordered_gate_history_required_for_explainability_and_replay",
+      "retention_tag": "regulated_record",
+      "source_file": "Algorithm/retention_and_privacy.md",
+      "source_heading_or_logical_block": "Basis-preserving retention for replay",
+      "source_ref": "Algorithm/retention_and_privacy.md::L248[gate_lineage]",
+      "survivability_or_fidelity_formula": "Decisive path continuity must keep silent_ambiguity(o) = 0 or progression blocks."
+    },
+    {
+      "artifact_or_control_id": "HashSetExecutionBasis",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "hash set and basis lineage store",
+      "category": "AUTHORITATIVE_TRUTH",
+      "contains_personal_or_sensitive_data": false,
+      "encryption_or_protection_control": "sealed hash lineage with append-only provenance",
+      "erasure_behavior": "Hashes survive payload minimization and may outlive direct content as the lawful replay placeholder.",
+      "legal_hold_behavior": "Any hold preserving replay basis must preserve execution-basis hash lineage.",
+      "notes": [
+        "Hash lineage is preserved even when human-readable payload detail is no longer retained."
+      ],
+      "projection_allowed": "OPERATOR_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "execution_basis_hash_is_replay_critical",
+      "retention_tag": "regulated_record",
+      "source_file": "Algorithm/retention_and_privacy.md",
+      "source_heading_or_logical_block": "Basis-preserving retention for replay",
+      "source_ref": "Algorithm/retention_and_privacy.md::L246[execution_basis_hash]",
+      "survivability_or_fidelity_formula": "execution_basis hash continuity is mandatory even when payload artifacts degrade to RETENTION_LIMITED posture."
+    },
+    {
+      "artifact_or_control_id": "InputFreeze",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "frozen input object store",
+      "category": "AUTHORITATIVE_TRUTH",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "per-tenant envelope encryption and explicit limitation/tombstone semantics",
+      "erasure_behavior": "Eligible content may be minimized or pseudonymised, but the engine must preserve hashes, lineage, and limitation notes.",
+      "legal_hold_behavior": "Legal hold preserves auditable input lineage while keeping any erasure blocker explicit.",
+      "notes": [
+        "Authoritative intake basis hashes must remain queryable even when payload content is minimized."
+      ],
+      "projection_allowed": "LIMITED_EXPLICIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "minimum_replay_and_audit_basis",
+      "retention_tag": "regulated_record",
+      "source_file": "Algorithm/retention_and_privacy.md",
+      "source_heading_or_logical_block": "Basis-preserving retention for replay",
+      "source_ref": "Algorithm/retention_and_privacy.md::L240[InputFreeze]",
+      "survivability_or_fidelity_formula": "survivability(o) and limitation_explicitness(o) govern whether the frozen input remains filing-capable, review-only, or tombstoned."
+    },
+    {
+      "artifact_or_control_id": "MaskedExportArtifact",
+      "cache_scope": [
+        "CLIENT_PORTAL_WORKSPACE",
+        "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE"
+      ],
+      "canonical_store_or_boundary": "governed export and delivery boundary",
+      "category": "EXPORT_AND_VIEW",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "delivery_binding_hash plus masked export policy and typed omission entries",
+      "erasure_behavior": "Exports inherit masking/export policy and may not bypass it through direct object-store URLs.",
+      "legal_hold_behavior": "Export limitation posture stays explicit if hold or minimization narrows the delivered slice.",
+      "notes": [
+        "Masked exports prefer summaries, masked fields, and lawful omission rather than raw payload copies."
+      ],
+      "projection_allowed": "MASKED_ONLY",
+      "purge_trigger": [
+        "MASKING_CHANGE",
+        "ROUTE_OR_OBJECT_DRIFT",
+        "AUTHORITY_REBINDING"
+      ],
+      "release_gate_dependency": [
+        "CROSS_TENANT_CACHE_ISOLATION_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": true,
+      "retention_basis": "sensitive_view_and_export_minimization",
+      "retention_tag": "derived_artifact",
+      "source_file": "Algorithm/retention_and_privacy.md",
+      "source_heading_or_logical_block": "Privacy and minimization defaults",
+      "source_ref": "Algorithm/retention_and_privacy.md::L208[MaskedExportArtifact]",
+      "survivability_or_fidelity_formula": "projection_information_ratio(o) must never exceed decision_information_ratio(o)."
+    },
+    {
+      "artifact_or_control_id": "NativeCacheHydrationContract",
+      "cache_scope": [
+        "EXPERIENCE_CURSOR",
+        "WORKSPACE_CURSOR",
+        "NATIVE_PRIMARY_SCENE",
+        "NATIVE_SECONDARY_WINDOW"
+      ],
+      "canonical_store_or_boundary": "native hydration legality envelope on cursors and scenes",
+      "category": "CACHE_CONTROL_OBJECT",
+      "contains_personal_or_sensitive_data": false,
+      "encryption_or_protection_control": "schema compatibility, projection guard, session lineage, and purge inventory",
+      "erasure_behavior": "Purges regulated local artifacts on tenant, session, masking, route, preview, or schema drift.",
+      "legal_hold_behavior": "Hold does not bypass first-paint legality or live rebase requirements.",
+      "notes": [
+        "Native speed may reuse compatible state but may not outrun legality."
+      ],
+      "projection_allowed": "NATIVE_RESTORE_ONLY_WHEN_FULL_MATCH",
+      "purge_trigger": [
+        "TENANT_SWITCH",
+        "PRINCIPAL_CLASS_CHANGE",
+        "PRIVILEGE_DOWNGRADE",
+        "SESSION_REVOKED",
+        "SESSION_BINDING_CHANGE",
+        "ACCESS_BINDING_CHANGE",
+        "MASKING_CHANGE",
+        "SCHEMA_INCOMPATIBLE",
+        "ROUTE_OR_OBJECT_DRIFT"
+      ],
+      "release_gate_dependency": [
+        "CROSS_TENANT_CACHE_ISOLATION_GATE",
+        "NATIVE_DESKTOP_HARDENING_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": false,
+      "retention_basis": "native_restore_legality_envelope",
+      "retention_tag": "policy_governed_other",
+      "schema_required_fields": [
+        "contract_version",
+        "hydration_scope_class",
+        "tenant_id",
+        "principal_class",
+        "session_binding_hash",
+        "session_lineage_ref_or_null",
+        "access_binding_hash_or_null",
+        "masking_posture_fingerprint",
+        "route_identity_ref",
+        "canonical_object_ref",
+        "shell_family",
+        "schema_compatibility_ref",
+        "projection_guard_ref",
+        "resume_binding_ref_or_null",
+        "restoration_anchor_ref_or_null",
+        "preview_subject_ref_or_null",
+        "compatibility_dimensions",
+        "purge_trigger_reason_codes",
+        "regulated_local_artifact_classes",
+        "first_paint_policy",
+        "purge_execution_policy",
+        "cursor_lineage_policy",
+        "restoration_reuse_policy",
+        "mutation_gate_policy",
+        "local_artifact_purge_policy"
+      ],
+      "source_file": "Algorithm/native_cache_hydration_purge_and_rebase_contract.md",
+      "source_heading_or_logical_block": "Authoritative artifacts",
+      "source_ref": "Algorithm/native_cache_hydration_purge_and_rebase_contract.md::L14[NativeCacheHydrationContract]",
+      "survivability_or_fidelity_formula": "verify compatibility before render or restore; no mutation after cache-only restore until live legality returns."
+    },
+    {
+      "artifact_or_control_id": "NativeLocalArtifactSet",
+      "cache_scope": [
+        "NATIVE_OPERATOR_WORKSPACE_SCENE",
+        "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE"
+      ],
+      "canonical_store_or_boundary": "device-local structured cache, resume metadata, preview cache, temp export, local search index",
+      "category": "CACHE_AND_EXPORT",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "OS-protected storage plus shared purge policy and route/object binding",
+      "erasure_behavior": "NSUserActivity, preview caches, temporary exports, and search indices are purged or invalidated with cache state.",
+      "legal_hold_behavior": "Local derivatives purge with the same revocation and masking boundaries as structured cache.",
+      "notes": [
+        "Desktop-local derivatives inherit the same masking/export posture as the underlying server object."
+      ],
+      "projection_allowed": "NATIVE_LOCAL_ONLY_WITH_FULL_BINDING",
+      "purge_trigger": [
+        "TENANT_SWITCH",
+        "PRIVILEGE_DOWNGRADE",
+        "SESSION_REVOKED",
+        "MASKING_CHANGE",
+        "SCHEMA_INCOMPATIBLE"
+      ],
+      "release_gate_dependency": [
+        "NATIVE_DESKTOP_HARDENING_GATE",
+        "CROSS_TENANT_CACHE_ISOLATION_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": false,
+      "retention_basis": "regulated_device_local_derivatives",
+      "retention_tag": "analytics_projection",
+      "source_file": "Algorithm/macos_native_operator_workspace_blueprint.md",
+      "source_heading_or_logical_block": "11. Security and runtime posture for the desktop client",
+      "source_ref": "Algorithm/macos_native_operator_workspace_blueprint.md::L488[NativeLocalArtifactSet]",
+      "survivability_or_fidelity_formula": "local_artifact_purge_policy requires purge with cache state on revocation, masking change, or schema incompatibility."
+    },
+    {
+      "artifact_or_control_id": "ProofBundle",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "proof bundle store",
+      "category": "EXPLAINABILITY_ARTIFACT",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "retention_binding plus limitation_notes and explicit support posture",
+      "erasure_behavior": "A filing-capable bundle must downgrade when decisive support falls below \u03c4_submit or any decisive limitation is silent.",
+      "legal_hold_behavior": "Hold may preserve proof-path support while keeping hold lineage explicit on the retained bundle.",
+      "notes": [
+        "ProofBundle is retained explainability, not a viewer cache.",
+        "Silent proof degradation is forbidden."
+      ],
+      "projection_allowed": "LIMITED_EXPLICIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "retained_explainability_and_filing_proof_boundary",
+      "retention_tag": "regulated_record",
+      "source_file": "Algorithm/retention_and_privacy.md",
+      "source_heading_or_logical_block": "Proof-bundle retention semantics",
+      "source_ref": "Algorithm/retention_and_privacy.md::L218[ProofBundle]",
+      "survivability_or_fidelity_formula": "controlling proof only when survivability(o) >= \u03c4_submit and silent_ambiguity(o) = 0; otherwise downgrade to review/audit posture with limitation notes."
+    },
+    {
+      "artifact_or_control_id": "ReplayAttestation",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "replay attestation store",
+      "category": "AUTHORITATIVE_TRUTH",
+      "contains_personal_or_sensitive_data": false,
+      "encryption_or_protection_control": "candidate-bound comparison evidence and basis hash lineage",
+      "erasure_behavior": "If supporting payload narrows, replay must surface RETENTION_LIMITED explicitly instead of synthesizing a newer basis.",
+      "legal_hold_behavior": "Replay attestation persists when required to prove historical comparison outcome.",
+      "notes": [
+        "Replay attestation is part of the preserved historical comparison trail."
+      ],
+      "projection_allowed": "OPERATOR_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "historical_comparison_basis",
+      "retention_tag": "regulated_record",
+      "source_file": "Algorithm/retention_and_privacy.md",
+      "source_heading_or_logical_block": "Basis-preserving retention for replay",
+      "source_ref": "Algorithm/retention_and_privacy.md::L250[ReplayAttestation]",
+      "survivability_or_fidelity_formula": "Replay basis remains lawful only when preserved artifacts or placeholders keep deterministic comparison honest."
+    },
+    {
+      "artifact_or_control_id": "RestorePrivacyReconciliationContract",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "restore privacy reconciliation boundary",
+      "category": "RESTORE_CONTROL_OBJECT",
+      "contains_personal_or_sensitive_data": false,
+      "encryption_or_protection_control": "checkpoint, restore drill, audit continuity, replay limitation, and compensating re-erasure lineage",
+      "erasure_behavior": "Restore-time resurrected erased data opens compensating re-erasure workflow before reopen.",
+      "legal_hold_behavior": "Blocked legal hold, proof preservation, and authority ambiguity states remain explicit legal posture, not notes.",
+      "notes": [
+        "Restore evidence is not lawful production evidence until privacy reconciliation reaches a reconciled state."
+      ],
+      "projection_allowed": "RUNTIME_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "post_restore_privacy_and_reopen_boundary",
+      "retention_tag": "policy_governed_other",
+      "schema_required_fields": [
+        "contract_version",
+        "reconciliation_contract_hash",
+        "checkpoint_ref",
+        "restore_drill_ref",
+        "reconciliation_scope_policy",
+        "resurrected_data_posture",
+        "resurrected_subject_count_or_null",
+        "privacy_reconciliation_state",
+        "privacy_reconciliation_outcome_ref",
+        "compensating_re_erasure_state",
+        "compensating_re_erasure_workflow_ref_or_null",
+        "compensating_re_erasure_audit_ref_or_null",
+        "legal_hold_ref_or_null",
+        "proof_preservation_basis_ref_or_null",
+        "authority_ambiguity_ref_or_null",
+        "audit_chain_continuity_state",
+        "audit_chain_continuity_ref",
+        "replay_limitation_state",
+        "enquiry_limitation_state",
+        "reopen_access_state",
+        "reconciliation_decided_at_or_null",
+        "re_erasure_completed_at_or_null"
+      ],
+      "source_file": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md",
+      "source_heading_or_logical_block": "Restore privacy reconciliation law",
+      "source_ref": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[RestorePrivacyReconciliationContract]",
+      "survivability_or_fidelity_formula": "reopen_access_state remains BLOCKED or LIMITED until privacy reconciliation reaches a reconciled state."
+    },
+    {
+      "artifact_or_control_id": "RetentionTag",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "retention control store",
+      "category": "RETENTION_CONTROL_OBJECT",
+      "contains_personal_or_sensitive_data": false,
+      "encryption_or_protection_control": "schema-validated control object with durable basis refs",
+      "erasure_behavior": "Carries erasure_eligibility, erasure_reason_codes, limitation behavior, proof preservation basis, and authority ambiguity blockers.",
+      "legal_hold_behavior": "Canonical legal-hold state, hold ref, and change chronology live here.",
+      "notes": [
+        "The tag carries effective expiry and blocker refs rather than delegating recomputation downstream."
+      ],
+      "projection_allowed": "OPERATOR_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": true,
+      "retention_basis": "canonical_retention_decision_boundary",
+      "retention_tag": "policy_governed_other",
+      "schema_required_fields": [
+        "artifact_type",
+        "retention_tag_id",
+        "retention_class",
+        "anchor_event",
+        "anchor_timestamp",
+        "minimum_expiry_at",
+        "policy_expiry_at",
+        "effective_expiry_at",
+        "legal_hold_state",
+        "legal_hold_ref",
+        "legal_hold_changed_at",
+        "erasure_eligibility",
+        "erasure_decided_at",
+        "erasure_reason_codes",
+        "pseudonymisation_mode",
+        "limitation_behavior",
+        "limitation_reason_codes",
+        "retention_basis_ref",
+        "proof_preservation_basis_ref",
+        "authority_ambiguity_ref"
+      ],
+      "source_file": "Algorithm/retention_and_privacy.md",
+      "source_heading_or_logical_block": "Retention tag contract",
+      "source_ref": "Algorithm/retention_and_privacy.md::L13[RetentionTag]",
+      "survivability_or_fidelity_formula": "tag drives downstream retention_evidence gate and fail-closed erasure posture."
+    },
+    {
+      "artifact_or_control_id": "RunManifest",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "sealed manifest control store",
+      "category": "AUTHORITATIVE_TRUTH",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "per-tenant envelope encryption plus append-only manifest sealing",
+      "erasure_behavior": "Payload minimization may remove direct content, but manifest lineage and RETENTION_LIMITED placeholders must survive without rewriting basis hashes.",
+      "legal_hold_behavior": "Legal hold may block erasure and must remain visibly queryable via the canonical retention tag.",
+      "notes": [
+        "RunManifest is part of the minimum lawful replay basis.",
+        "Retained history must never silently collapse into not applicable."
+      ],
+      "projection_allowed": "LIMITED_EXPLICIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "minimum_replay_and_audit_basis",
+      "retention_tag": "regulated_record",
+      "source_file": "Algorithm/retention_and_privacy.md",
+      "source_heading_or_logical_block": "Basis-preserving retention for replay",
+      "source_ref": "Algorithm/retention_and_privacy.md::L240[RunManifest]",
+      "survivability_or_fidelity_formula": "survivability(o) >= \u03c4_audit for tombstone continuity; controlling proof requires survivability(o) >= \u03c4_submit and silent_ambiguity(o) = 0."
+    },
+    {
+      "artifact_or_control_id": "SecretVersion",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "token vault / secret store metadata boundary",
+      "category": "SECRET_CONTROL_OBJECT",
+      "contains_personal_or_sensitive_data": false,
+      "encryption_or_protection_control": "versioned secret lineage, KMS/HSM rooted master keys, and attestation refs",
+      "erasure_behavior": "Rotation fails closed if attestation or version binding is unknown; retired and revoked chronology remains serialized.",
+      "legal_hold_behavior": "Secret rotation chronology remains auditable even across retirement or revocation.",
+      "notes": [
+        "No secret lineage may self-supersede or invert attestation chronology."
+      ],
+      "projection_allowed": "RUNTIME_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "SECRET_ROTATION",
+        "REVOCATION_REASON_CHANGED"
+      ],
+      "release_gate_dependency": [
+        "SECRET_ROTATION_ATTESTATION_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": true,
+      "retention_basis": "versioned_secret_rotation_attestation",
+      "retention_tag": "policy_governed_other",
+      "schema_required_fields": [
+        "artifact_type",
+        "secret_version_id",
+        "secret_class",
+        "store_ref",
+        "key_version_ref",
+        "policy_profile_ref",
+        "lineage_ref",
+        "issued_at",
+        "expires_at",
+        "rotation_state",
+        "last_attested_at",
+        "attestation_ref",
+        "activated_at",
+        "rotation_started_at",
+        "retired_at",
+        "revoked_at",
+        "revocation_reason_code",
+        "historical_read_window_until",
+        "superseded_by_secret_version_id"
+      ],
+      "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+      "source_heading_or_logical_block": "3. Secret, key, and token handling",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L67[SecretVersion]",
+      "survivability_or_fidelity_formula": "not_formula_based__attested_rotation_cutover_and_historical_read_window_must_remain_monotonic"
+    },
+    {
+      "artifact_or_control_id": "SubmissionRecord",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "submission and reconciliation ledger",
+      "category": "AUTHORITY_TRANSPORT",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "request-lineage, token-binding, and reconciliation proof",
+      "erasure_behavior": "Restore or queue recovery cannot blindly replay mutations from transport artifacts alone.",
+      "legal_hold_behavior": "Submission history remains preserved when required for legal-state audit and replay-safe recovery.",
+      "notes": [
+        "Queue recovery is transport rebuild, not truth replay."
+      ],
+      "projection_allowed": "OPERATOR_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "AUTHORITY_SANDBOX_BINDING_GATE",
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": true,
+      "restore_reconciliation_required": true,
+      "retention_basis": "authority_mutation_and_reconciliation_history",
+      "retention_tag": "regulated_record",
+      "source_file": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md",
+      "source_heading_or_logical_block": "Queue and authority recovery law",
+      "source_ref": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L113[SubmissionRecord]",
+      "survivability_or_fidelity_formula": "authority mutations require lineage and binding revalidation before resend or reopen."
+    },
+    {
+      "artifact_or_control_id": "TelemetryLogTrace",
+      "cache_scope": [
+        "NOT_APPLICABLE"
+      ],
+      "canonical_store_or_boundary": "observability pipeline and audit-adjacent log store",
+      "category": "AUDIT_AND_OBSERVABILITY",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "redaction, masked values, stable refs, and audit-vs-telemetry separation",
+      "erasure_behavior": "Diagnostic logging must not reintroduce personal or authority-secret data that policy would otherwise hide.",
+      "legal_hold_behavior": "Logs and traces preserve correlation lineage but remain subordinate to audit proof.",
+      "notes": [
+        "Telemetry omits high-volume detail when needed, but cannot remove mandatory audit history."
+      ],
+      "projection_allowed": "OPERATOR_ONLY_MINIMIZED",
+      "purge_trigger": [
+        "NOT_APPLICABLE"
+      ],
+      "release_gate_dependency": [
+        "SESSION_AND_ANTI_CSRF_GATE",
+        "SECRET_ROTATION_ATTESTATION_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": true,
+      "retention_basis": "runtime_observability_with_minimization",
+      "retention_tag": "operational_log",
+      "source_file": "Algorithm/retention_error_and_observability_contract.md",
+      "source_heading_or_logical_block": "15.4 Correlation, visibility, and signal separation",
+      "source_ref": "Algorithm/retention_error_and_observability_contract.md::L141[TelemetryLogTrace]",
+      "survivability_or_fidelity_formula": "not_formula_based__telemetry_never_becomes_proof_of_record_for_erasure_or_hold"
+    },
+    {
+      "artifact_or_control_id": "UploadRequestBindingContract",
+      "cache_scope": [
+        "CLIENT_PORTAL_WORKSPACE",
+        "CUSTOMER_REQUEST_LIST"
+      ],
+      "canonical_store_or_boundary": "upload binding control object",
+      "category": "UPLOAD_AND_COLLABORATION",
+      "contains_personal_or_sensitive_data": false,
+      "encryption_or_protection_control": "frozen binding scope hash and typed rebinding state",
+      "erasure_behavior": "Rebases and supersession surface as typed states rather than silent rebinding.",
+      "legal_hold_behavior": "Binding posture survives so upload rebase decisions remain auditable during legal or retention review.",
+      "notes": [
+        "Upload rebinding is explicit and machine-readable."
+      ],
+      "projection_allowed": "OPERATOR_AND_AUDIT_ONLY",
+      "purge_trigger": [
+        "TENANT_SWITCH",
+        "ACCESS_BINDING_CHANGE",
+        "SESSION_REVOKED"
+      ],
+      "release_gate_dependency": [
+        "SESSION_AND_ANTI_CSRF_GATE",
+        "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": true,
+      "retention_basis": "request_identity_and_rebind_posture",
+      "retention_tag": "policy_governed_other",
+      "source_file": "Algorithm/northbound_api_and_session_contract.md",
+      "source_heading_or_logical_block": "2.2 Customer/Client portal and upload-session surfaces",
+      "source_ref": "Algorithm/northbound_api_and_session_contract.md::L206[UploadRequestBindingContract]",
+      "survivability_or_fidelity_formula": "resume existing session only; stale bytes never satisfy current request."
+    },
+    {
+      "artifact_or_control_id": "WorkInboxSnapshot",
+      "cache_scope": [
+        "WORK_INBOX_SNAPSHOT"
+      ],
+      "canonical_store_or_boundary": "read model store plus cache partition",
+      "category": "CACHE_AND_PROJECTION",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "cache_isolation_contract and visibility cache partition key",
+      "erasure_behavior": "Caches rebuild from durable truth; broader variants purge immediately on visibility or masking narrowing.",
+      "legal_hold_behavior": "Snapshot visibility remains subordinate to upstream truth and retention posture.",
+      "notes": [
+        "Inbox caches must remain visibility-scoped and never widen across staff/customer boundaries."
+      ],
+      "projection_allowed": "MASKED_OR_LIMITED_ONLY",
+      "purge_trigger": [
+        "TENANT_SWITCH",
+        "ACCESS_BINDING_CHANGE",
+        "MASKING_CHANGE",
+        "ROUTE_OR_OBJECT_DRIFT"
+      ],
+      "release_gate_dependency": [
+        "CROSS_TENANT_CACHE_ISOLATION_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": false,
+      "retention_basis": "disposable_read_model_rebuildable_from_truth",
+      "retention_tag": "analytics_projection",
+      "source_file": "Algorithm/collaboration_workspace_contract.md",
+      "source_heading_or_logical_block": "FE-25 Cache Isolation",
+      "source_ref": "Algorithm/collaboration_workspace_contract.md::L2163[WorkInboxSnapshot]",
+      "survivability_or_fidelity_formula": "projection_fidelity(o) and visibility partition constrain what may be reused."
+    },
+    {
+      "artifact_or_control_id": "WorkspaceSnapshot",
+      "cache_scope": [
+        "WORKSPACE_SNAPSHOT",
+        "LOW_NOISE_FRAME"
+      ],
+      "canonical_store_or_boundary": "workspace snapshot store and route-stable stream spine",
+      "category": "CACHE_AND_PROJECTION",
+      "contains_personal_or_sensitive_data": true,
+      "encryption_or_protection_control": "shell stability token, access binding, masking fingerprint, cache partition key",
+      "erasure_behavior": "Cached workspace posture is rebuildable from durable truth and must rebase rather than infer missed transitions.",
+      "legal_hold_behavior": "Workspace reads surface retention-limited or quarantined state explicitly rather than masking it as absence.",
+      "notes": [
+        "Clients recover through resume or rebase, never by recreating hidden transitions locally."
+      ],
+      "projection_allowed": "MASKED_OR_LIMITED_ONLY",
+      "purge_trigger": [
+        "TENANT_SWITCH",
+        "ACCESS_BINDING_CHANGE",
+        "MASKING_CHANGE",
+        "SESSION_REVOKED",
+        "SCHEMA_INCOMPATIBLE"
+      ],
+      "release_gate_dependency": [
+        "CROSS_TENANT_CACHE_ISOLATION_GATE",
+        "STALE_VIEW_AND_IDEMPOTENCY_GATE"
+      ],
+      "replay_preservation_required": false,
+      "restore_reconciliation_required": false,
+      "retention_basis": "disposable_workspace_projection",
+      "retention_tag": "analytics_projection",
+      "source_file": "Algorithm/northbound_api_and_session_contract.md",
+      "source_heading_or_logical_block": "2. Required northbound surfaces",
+      "source_ref": "Algorithm/northbound_api_and_session_contract.md::L50[WorkspaceSnapshot]",
+      "survivability_or_fidelity_formula": "projection_fidelity(o) narrows visible certainty; stream_recovery_contract governs replay-safe continuity."
+    }
+  ],
+  "summary": {
+    "artifact_count": 32,
+    "explicit_gap_count": 4,
+    "row_count": 32
+  }
+}

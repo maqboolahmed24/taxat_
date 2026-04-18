@@ -1,0 +1,568 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "resume_token_binding_policy",
+  "selection_status": "PROVIDER_SELECTION_REQUIRED",
+  "topology_mode": "DISPOSABLE_SHARED_CACHE_PLUS_ROUTE_BOUND_RESUME_METADATA_WITH_STRICT_PARTITION_ISOLATION",
+  "binding_rows": [
+    {
+      "policy_ref": "resume.manifest_experience",
+      "label": "Manifest experience resume binding",
+      "family_ref": "family.manifest_experience",
+      "stream_scope_class_or_null": "MANIFEST_EXPERIENCE",
+      "raw_resume_token_policy": "TRANSPORT_ONLY_NEVER_PERSIST_RAW_TOKEN",
+      "envelope_fields": [
+        "resume_binding_hash_or_null",
+        "route_identity_ref",
+        "canonical_object_ref",
+        "shell_stability_token",
+        "session_ref",
+        "session_binding_hash",
+        "access_binding_hash",
+        "masking_context_hash",
+        "publication_generation",
+        "frame_epoch",
+        "last_published_sequence",
+        "compaction_floor_sequence_or_null",
+        "delivery_window_state",
+        "rebase_reason_code_or_null",
+        "expires_at"
+      ],
+      "required_binding_dimensions": [
+        "route_identity_ref",
+        "canonical_object_ref",
+        "shell_stability_token",
+        "session_ref",
+        "session_binding_hash",
+        "access_binding_hash",
+        "masking_context_hash",
+        "publication_generation",
+        "frame_epoch"
+      ],
+      "delivery_window_states": [
+        "LIVE_RESUMABLE",
+        "REBASE_REQUIRED",
+        "ACCESS_REBIND_REQUIRED",
+        "SNAPSHOT_ONLY"
+      ],
+      "local_persistence_policy": "BROWSER_SESSION_EPHEMERAL_ONLY",
+      "shared_store_role": "SHARED_RESUME_METADATA_NAMESPACE",
+      "notes": [
+        "Raw tokens remain transport-only. Cached manifest resume state stores hashes, frontier, and legality posture only."
+      ],
+      "source_refs": [
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 fixed caches and resume stores as disposable accelerators rather than durable workflow truth."
+        },
+        {
+          "source_file": "docs/architecture/adr/ADR-003-identity-step-up-and-session-model.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-003-identity-step-up-and-session-model.md::Decision",
+          "rationale": "Session revocation, step-up rotation, and bounded interactive scope govern whether resume lineage remains lawful."
+        },
+        {
+          "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+          "source_heading_or_logical_block": "Contract Fields / Reuse Law / Scope Rules",
+          "source_ref": "Algorithm/cache_isolation_and_secure_reuse_contract.md::Contract_Fields_Reuse_Law_Scope_Rules",
+          "rationale": "Cache identity must bind tenant, client, principal, session, access, masking, route, object, projection version, visibility partition, and preview selection together."
+        },
+        {
+          "source_file": "Algorithm/stream_resume_and_catch_up_ordering_contract.md",
+          "source_heading_or_logical_block": "Purpose / Required rules",
+          "source_ref": "Algorithm/stream_resume_and_catch_up_ordering_contract.md::Purpose_Required_rules",
+          "rationale": "Resume tokens are exact-route objects and catch-up ordering is monotonic, gap-free, and rebound to session, access, and masking context."
+        },
+        {
+          "source_file": "Algorithm/native_cache_hydration_purge_and_rebase_contract.md",
+          "source_heading_or_logical_block": "Required rules / Coverage requirements",
+          "source_ref": "Algorithm/native_cache_hydration_purge_and_rebase_contract.md::Required_rules_Coverage_requirements",
+          "rationale": "Native hydration requires compatibility-before-render, selective purge, lineage invalidation, and cache-only restore that remains read-only until live legality returns."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "8. Session, browser, and native-client rules / FE-25 Cache Isolation",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::8._Session_browser_and_native-client_rules_FE-25",
+          "rationale": "Browser and native caches are derivable, invalidated on drift, and never lawful bearer-credential stores."
+        },
+        {
+          "source_file": "data/analysis/route_landmark_and_focus_order_registry.json",
+          "source_heading_or_logical_block": "calm_manifest_workspace / portal_request_detail",
+          "source_ref": "data/analysis/route_landmark_and_focus_order_registry.json::calm_manifest_workspace_portal_request_detail",
+          "rationale": "The route atlas already froze stable manifest and portal route identities that cache keys must reuse exactly."
+        },
+        {
+          "source_file": "data/analysis/native_scene_window_topology.json",
+          "source_heading_or_logical_block": "primary_scenes / secondary windows",
+          "source_ref": "data/analysis/native_scene_window_topology.json::primary_scenes_secondary_windows",
+          "rationale": "The native scene topology already freezes scene identity, preview subject bounds, and restoration law for primary and detached windows."
+        },
+        {
+          "source_file": "config/messaging/outbox_inbox_channel_matrix.json",
+          "source_heading_or_logical_block": "restore and ingress channel rows",
+          "source_ref": "config/messaging/outbox_inbox_channel_matrix.json::restore_and_ingress_channel_rows",
+          "rationale": "Resume and cache policy must stay subordinate to the transport-only broker and the durable inbox or outbox boundaries established in pc_0052."
+        }
+      ]
+    },
+    {
+      "policy_ref": "resume.collaboration_workspace",
+      "label": "Workspace resume binding",
+      "family_ref": "family.collaboration_workspace",
+      "stream_scope_class_or_null": "WORKSPACE",
+      "raw_resume_token_policy": "TRANSPORT_ONLY_NEVER_PERSIST_RAW_TOKEN",
+      "envelope_fields": [
+        "resume_binding_hash_or_null",
+        "route_identity_ref",
+        "canonical_object_ref",
+        "visibility_cache_partition_key_or_null",
+        "session_ref",
+        "session_binding_hash",
+        "access_binding_hash",
+        "masking_context_hash",
+        "publication_generation",
+        "frame_epoch",
+        "last_published_sequence",
+        "delivery_window_state",
+        "rebase_reason_code_or_null",
+        "expires_at"
+      ],
+      "required_binding_dimensions": [
+        "route_identity_ref",
+        "canonical_object_ref",
+        "visibility_cache_partition_key_or_null",
+        "session_ref",
+        "session_binding_hash",
+        "access_binding_hash",
+        "masking_context_hash",
+        "publication_generation"
+      ],
+      "delivery_window_states": [
+        "LIVE_RESUMABLE",
+        "REBASE_REQUIRED",
+        "ACCESS_REBIND_REQUIRED",
+        "SNAPSHOT_ONLY"
+      ],
+      "local_persistence_policy": "BROWSER_SESSION_EPHEMERAL_ONLY",
+      "shared_store_role": "SHARED_RESUME_METADATA_NAMESPACE",
+      "notes": [
+        "Workspace resume stays bound to visibility partition and read-only downgrade posture; replay cannot outrun narrower access."
+      ],
+      "source_refs": [
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 fixed caches and resume stores as disposable accelerators rather than durable workflow truth."
+        },
+        {
+          "source_file": "docs/architecture/adr/ADR-003-identity-step-up-and-session-model.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-003-identity-step-up-and-session-model.md::Decision",
+          "rationale": "Session revocation, step-up rotation, and bounded interactive scope govern whether resume lineage remains lawful."
+        },
+        {
+          "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+          "source_heading_or_logical_block": "Contract Fields / Reuse Law / Scope Rules",
+          "source_ref": "Algorithm/cache_isolation_and_secure_reuse_contract.md::Contract_Fields_Reuse_Law_Scope_Rules",
+          "rationale": "Cache identity must bind tenant, client, principal, session, access, masking, route, object, projection version, visibility partition, and preview selection together."
+        },
+        {
+          "source_file": "Algorithm/stream_resume_and_catch_up_ordering_contract.md",
+          "source_heading_or_logical_block": "Purpose / Required rules",
+          "source_ref": "Algorithm/stream_resume_and_catch_up_ordering_contract.md::Purpose_Required_rules",
+          "rationale": "Resume tokens are exact-route objects and catch-up ordering is monotonic, gap-free, and rebound to session, access, and masking context."
+        },
+        {
+          "source_file": "Algorithm/native_cache_hydration_purge_and_rebase_contract.md",
+          "source_heading_or_logical_block": "Required rules / Coverage requirements",
+          "source_ref": "Algorithm/native_cache_hydration_purge_and_rebase_contract.md::Required_rules_Coverage_requirements",
+          "rationale": "Native hydration requires compatibility-before-render, selective purge, lineage invalidation, and cache-only restore that remains read-only until live legality returns."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "8. Session, browser, and native-client rules / FE-25 Cache Isolation",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::8._Session_browser_and_native-client_rules_FE-25",
+          "rationale": "Browser and native caches are derivable, invalidated on drift, and never lawful bearer-credential stores."
+        },
+        {
+          "source_file": "data/analysis/route_landmark_and_focus_order_registry.json",
+          "source_heading_or_logical_block": "calm_manifest_workspace / portal_request_detail",
+          "source_ref": "data/analysis/route_landmark_and_focus_order_registry.json::calm_manifest_workspace_portal_request_detail",
+          "rationale": "The route atlas already froze stable manifest and portal route identities that cache keys must reuse exactly."
+        },
+        {
+          "source_file": "data/analysis/native_scene_window_topology.json",
+          "source_heading_or_logical_block": "primary_scenes / secondary windows",
+          "source_ref": "data/analysis/native_scene_window_topology.json::primary_scenes_secondary_windows",
+          "rationale": "The native scene topology already freezes scene identity, preview subject bounds, and restoration law for primary and detached windows."
+        },
+        {
+          "source_file": "config/messaging/outbox_inbox_channel_matrix.json",
+          "source_heading_or_logical_block": "restore and ingress channel rows",
+          "source_ref": "config/messaging/outbox_inbox_channel_matrix.json::restore_and_ingress_channel_rows",
+          "rationale": "Resume and cache policy must stay subordinate to the transport-only broker and the durable inbox or outbox boundaries established in pc_0052."
+        }
+      ]
+    },
+    {
+      "policy_ref": "resume.client_portal_workspace",
+      "label": "Portal workspace resume binding",
+      "family_ref": "family.client_portal_workspace",
+      "stream_scope_class_or_null": "WORKSPACE",
+      "raw_resume_token_policy": "TRANSPORT_ONLY_NEVER_PERSIST_RAW_TOKEN",
+      "envelope_fields": [
+        "resume_binding_hash_or_null",
+        "route_identity_ref",
+        "canonical_object_ref",
+        "visibility_cache_partition_key_or_null",
+        "customer_safe_projection_ref",
+        "session_ref",
+        "session_binding_hash",
+        "access_binding_hash",
+        "masking_context_hash",
+        "publication_generation",
+        "last_published_sequence",
+        "delivery_window_state",
+        "rebase_reason_code_or_null",
+        "expires_at"
+      ],
+      "required_binding_dimensions": [
+        "route_identity_ref",
+        "canonical_object_ref",
+        "visibility_cache_partition_key_or_null",
+        "customer_safe_projection_ref",
+        "session_ref",
+        "session_binding_hash",
+        "access_binding_hash",
+        "masking_context_hash"
+      ],
+      "delivery_window_states": [
+        "LIVE_RESUMABLE",
+        "REBASE_REQUIRED",
+        "ACCESS_REBIND_REQUIRED",
+        "SNAPSHOT_ONLY"
+      ],
+      "local_persistence_policy": "BROWSER_SESSION_EPHEMERAL_ONLY",
+      "shared_store_role": "SHARED_RESUME_METADATA_NAMESPACE",
+      "notes": [
+        "Portal resume law stays customer-safe and session-bound; a prior token cannot widen visibility after invite upgrade, masking drift, or session reissue."
+      ],
+      "source_refs": [
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 fixed caches and resume stores as disposable accelerators rather than durable workflow truth."
+        },
+        {
+          "source_file": "docs/architecture/adr/ADR-003-identity-step-up-and-session-model.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-003-identity-step-up-and-session-model.md::Decision",
+          "rationale": "Session revocation, step-up rotation, and bounded interactive scope govern whether resume lineage remains lawful."
+        },
+        {
+          "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+          "source_heading_or_logical_block": "Contract Fields / Reuse Law / Scope Rules",
+          "source_ref": "Algorithm/cache_isolation_and_secure_reuse_contract.md::Contract_Fields_Reuse_Law_Scope_Rules",
+          "rationale": "Cache identity must bind tenant, client, principal, session, access, masking, route, object, projection version, visibility partition, and preview selection together."
+        },
+        {
+          "source_file": "Algorithm/stream_resume_and_catch_up_ordering_contract.md",
+          "source_heading_or_logical_block": "Purpose / Required rules",
+          "source_ref": "Algorithm/stream_resume_and_catch_up_ordering_contract.md::Purpose_Required_rules",
+          "rationale": "Resume tokens are exact-route objects and catch-up ordering is monotonic, gap-free, and rebound to session, access, and masking context."
+        },
+        {
+          "source_file": "Algorithm/native_cache_hydration_purge_and_rebase_contract.md",
+          "source_heading_or_logical_block": "Required rules / Coverage requirements",
+          "source_ref": "Algorithm/native_cache_hydration_purge_and_rebase_contract.md::Required_rules_Coverage_requirements",
+          "rationale": "Native hydration requires compatibility-before-render, selective purge, lineage invalidation, and cache-only restore that remains read-only until live legality returns."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "8. Session, browser, and native-client rules / FE-25 Cache Isolation",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::8._Session_browser_and_native-client_rules_FE-25",
+          "rationale": "Browser and native caches are derivable, invalidated on drift, and never lawful bearer-credential stores."
+        },
+        {
+          "source_file": "data/analysis/route_landmark_and_focus_order_registry.json",
+          "source_heading_or_logical_block": "calm_manifest_workspace / portal_request_detail",
+          "source_ref": "data/analysis/route_landmark_and_focus_order_registry.json::calm_manifest_workspace_portal_request_detail",
+          "rationale": "The route atlas already froze stable manifest and portal route identities that cache keys must reuse exactly."
+        },
+        {
+          "source_file": "data/analysis/native_scene_window_topology.json",
+          "source_heading_or_logical_block": "primary_scenes / secondary windows",
+          "source_ref": "data/analysis/native_scene_window_topology.json::primary_scenes_secondary_windows",
+          "rationale": "The native scene topology already freezes scene identity, preview subject bounds, and restoration law for primary and detached windows."
+        },
+        {
+          "source_file": "config/messaging/outbox_inbox_channel_matrix.json",
+          "source_heading_or_logical_block": "restore and ingress channel rows",
+          "source_ref": "config/messaging/outbox_inbox_channel_matrix.json::restore_and_ingress_channel_rows",
+          "rationale": "Resume and cache policy must stay subordinate to the transport-only broker and the durable inbox or outbox boundaries established in pc_0052."
+        }
+      ]
+    },
+    {
+      "policy_ref": "resume.upload_session_recovery",
+      "label": "Upload-session recovery binding",
+      "family_ref": "family.upload_session_recovery",
+      "stream_scope_class_or_null": null,
+      "raw_resume_token_policy": "TRANSPORT_ONLY_NEVER_PERSIST_RAW_TOKEN",
+      "envelope_fields": [
+        "resume_binding_hash_or_null",
+        "route_identity_ref",
+        "canonical_object_ref",
+        "request_binding_hash",
+        "session_binding_hash",
+        "access_binding_hash_or_null",
+        "masking_context_hash_or_null",
+        "request_rebase_generation",
+        "schema_compatibility_ref",
+        "delivery_window_state",
+        "invalidation_reason_code_or_null",
+        "expires_at"
+      ],
+      "required_binding_dimensions": [
+        "route_identity_ref",
+        "canonical_object_ref",
+        "request_binding_hash",
+        "session_binding_hash",
+        "access_binding_hash_or_null",
+        "request_rebase_generation",
+        "schema_compatibility_ref"
+      ],
+      "delivery_window_states": [
+        "LIVE_RESUMABLE",
+        "REBASE_REQUIRED",
+        "ACCESS_REBIND_REQUIRED",
+        "SNAPSHOT_ONLY"
+      ],
+      "local_persistence_policy": "BROWSER_SESSION_EPHEMERAL_ONLY",
+      "shared_store_role": "SHARED_UPLOAD_RECOVERY_NAMESPACE",
+      "notes": [
+        "Upload-session recovery may restore view context only. Mutation and attachment remain blocked until live request legality is re-established."
+      ],
+      "source_refs": [
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 fixed caches and resume stores as disposable accelerators rather than durable workflow truth."
+        },
+        {
+          "source_file": "docs/architecture/adr/ADR-003-identity-step-up-and-session-model.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-003-identity-step-up-and-session-model.md::Decision",
+          "rationale": "Session revocation, step-up rotation, and bounded interactive scope govern whether resume lineage remains lawful."
+        },
+        {
+          "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+          "source_heading_or_logical_block": "Contract Fields / Reuse Law / Scope Rules",
+          "source_ref": "Algorithm/cache_isolation_and_secure_reuse_contract.md::Contract_Fields_Reuse_Law_Scope_Rules",
+          "rationale": "Cache identity must bind tenant, client, principal, session, access, masking, route, object, projection version, visibility partition, and preview selection together."
+        },
+        {
+          "source_file": "Algorithm/stream_resume_and_catch_up_ordering_contract.md",
+          "source_heading_or_logical_block": "Purpose / Required rules",
+          "source_ref": "Algorithm/stream_resume_and_catch_up_ordering_contract.md::Purpose_Required_rules",
+          "rationale": "Resume tokens are exact-route objects and catch-up ordering is monotonic, gap-free, and rebound to session, access, and masking context."
+        },
+        {
+          "source_file": "Algorithm/native_cache_hydration_purge_and_rebase_contract.md",
+          "source_heading_or_logical_block": "Required rules / Coverage requirements",
+          "source_ref": "Algorithm/native_cache_hydration_purge_and_rebase_contract.md::Required_rules_Coverage_requirements",
+          "rationale": "Native hydration requires compatibility-before-render, selective purge, lineage invalidation, and cache-only restore that remains read-only until live legality returns."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "8. Session, browser, and native-client rules / FE-25 Cache Isolation",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::8._Session_browser_and_native-client_rules_FE-25",
+          "rationale": "Browser and native caches are derivable, invalidated on drift, and never lawful bearer-credential stores."
+        },
+        {
+          "source_file": "data/analysis/route_landmark_and_focus_order_registry.json",
+          "source_heading_or_logical_block": "calm_manifest_workspace / portal_request_detail",
+          "source_ref": "data/analysis/route_landmark_and_focus_order_registry.json::calm_manifest_workspace_portal_request_detail",
+          "rationale": "The route atlas already froze stable manifest and portal route identities that cache keys must reuse exactly."
+        },
+        {
+          "source_file": "data/analysis/native_scene_window_topology.json",
+          "source_heading_or_logical_block": "primary_scenes / secondary windows",
+          "source_ref": "data/analysis/native_scene_window_topology.json::primary_scenes_secondary_windows",
+          "rationale": "The native scene topology already freezes scene identity, preview subject bounds, and restoration law for primary and detached windows."
+        },
+        {
+          "source_file": "config/messaging/outbox_inbox_channel_matrix.json",
+          "source_heading_or_logical_block": "restore and ingress channel rows",
+          "source_ref": "config/messaging/outbox_inbox_channel_matrix.json::restore_and_ingress_channel_rows",
+          "rationale": "Resume and cache policy must stay subordinate to the transport-only broker and the durable inbox or outbox boundaries established in pc_0052."
+        }
+      ]
+    },
+    {
+      "policy_ref": "resume.native_operator_hydration",
+      "label": "Native hydration cursor binding",
+      "family_ref": "family.native_operator_hydration",
+      "stream_scope_class_or_null": "WORKSPACE",
+      "raw_resume_token_policy": "TRANSPORT_ONLY_NEVER_PERSIST_RAW_TOKEN",
+      "envelope_fields": [
+        "resume_binding_hash_or_null",
+        "route_identity_ref",
+        "canonical_object_ref",
+        "session_binding_hash",
+        "session_lineage_ref_or_null",
+        "access_binding_hash_or_null",
+        "masking_posture_fingerprint",
+        "schema_compatibility_ref",
+        "projection_guard_ref",
+        "preview_subject_ref_or_null",
+        "delivery_window_state",
+        "invalidation_reason_code_or_null",
+        "expires_at"
+      ],
+      "required_binding_dimensions": [
+        "route_identity_ref",
+        "canonical_object_ref",
+        "session_binding_hash",
+        "session_lineage_ref_or_null",
+        "access_binding_hash_or_null",
+        "masking_posture_fingerprint",
+        "schema_compatibility_ref",
+        "projection_guard_ref"
+      ],
+      "delivery_window_states": [
+        "LIVE_RESUMABLE",
+        "REBASE_REQUIRED",
+        "ACCESS_REBIND_REQUIRED",
+        "SNAPSHOT_ONLY"
+      ],
+      "local_persistence_policy": "NATIVE_DISK_WITH_PURGE_ONLY",
+      "shared_store_role": "SHARED_RESUME_METADATA_NAMESPACE",
+      "notes": [
+        "Native hydration persists hashes and legality guards, never raw resume tokens, and must purge local derivatives together on drift."
+      ],
+      "source_refs": [
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 fixed caches and resume stores as disposable accelerators rather than durable workflow truth."
+        },
+        {
+          "source_file": "docs/architecture/adr/ADR-003-identity-step-up-and-session-model.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-003-identity-step-up-and-session-model.md::Decision",
+          "rationale": "Session revocation, step-up rotation, and bounded interactive scope govern whether resume lineage remains lawful."
+        },
+        {
+          "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+          "source_heading_or_logical_block": "Contract Fields / Reuse Law / Scope Rules",
+          "source_ref": "Algorithm/cache_isolation_and_secure_reuse_contract.md::Contract_Fields_Reuse_Law_Scope_Rules",
+          "rationale": "Cache identity must bind tenant, client, principal, session, access, masking, route, object, projection version, visibility partition, and preview selection together."
+        },
+        {
+          "source_file": "Algorithm/stream_resume_and_catch_up_ordering_contract.md",
+          "source_heading_or_logical_block": "Purpose / Required rules",
+          "source_ref": "Algorithm/stream_resume_and_catch_up_ordering_contract.md::Purpose_Required_rules",
+          "rationale": "Resume tokens are exact-route objects and catch-up ordering is monotonic, gap-free, and rebound to session, access, and masking context."
+        },
+        {
+          "source_file": "Algorithm/native_cache_hydration_purge_and_rebase_contract.md",
+          "source_heading_or_logical_block": "Required rules / Coverage requirements",
+          "source_ref": "Algorithm/native_cache_hydration_purge_and_rebase_contract.md::Required_rules_Coverage_requirements",
+          "rationale": "Native hydration requires compatibility-before-render, selective purge, lineage invalidation, and cache-only restore that remains read-only until live legality returns."
+        },
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "8. Session, browser, and native-client rules / FE-25 Cache Isolation",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::8._Session_browser_and_native-client_rules_FE-25",
+          "rationale": "Browser and native caches are derivable, invalidated on drift, and never lawful bearer-credential stores."
+        },
+        {
+          "source_file": "data/analysis/route_landmark_and_focus_order_registry.json",
+          "source_heading_or_logical_block": "calm_manifest_workspace / portal_request_detail",
+          "source_ref": "data/analysis/route_landmark_and_focus_order_registry.json::calm_manifest_workspace_portal_request_detail",
+          "rationale": "The route atlas already froze stable manifest and portal route identities that cache keys must reuse exactly."
+        },
+        {
+          "source_file": "data/analysis/native_scene_window_topology.json",
+          "source_heading_or_logical_block": "primary_scenes / secondary windows",
+          "source_ref": "data/analysis/native_scene_window_topology.json::primary_scenes_secondary_windows",
+          "rationale": "The native scene topology already freezes scene identity, preview subject bounds, and restoration law for primary and detached windows."
+        },
+        {
+          "source_file": "config/messaging/outbox_inbox_channel_matrix.json",
+          "source_heading_or_logical_block": "restore and ingress channel rows",
+          "source_ref": "config/messaging/outbox_inbox_channel_matrix.json::restore_and_ingress_channel_rows",
+          "rationale": "Resume and cache policy must stay subordinate to the transport-only broker and the durable inbox or outbox boundaries established in pc_0052."
+        }
+      ]
+    }
+  ],
+  "source_refs": [
+    {
+      "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+      "source_heading_or_logical_block": "Decision",
+      "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+      "rationale": "ADR-002 fixed caches and resume stores as disposable accelerators rather than durable workflow truth."
+    },
+    {
+      "source_file": "docs/architecture/adr/ADR-003-identity-step-up-and-session-model.md",
+      "source_heading_or_logical_block": "Decision",
+      "source_ref": "docs/architecture/adr/ADR-003-identity-step-up-and-session-model.md::Decision",
+      "rationale": "Session revocation, step-up rotation, and bounded interactive scope govern whether resume lineage remains lawful."
+    },
+    {
+      "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+      "source_heading_or_logical_block": "Contract Fields / Reuse Law / Scope Rules",
+      "source_ref": "Algorithm/cache_isolation_and_secure_reuse_contract.md::Contract_Fields_Reuse_Law_Scope_Rules",
+      "rationale": "Cache identity must bind tenant, client, principal, session, access, masking, route, object, projection version, visibility partition, and preview selection together."
+    },
+    {
+      "source_file": "Algorithm/stream_resume_and_catch_up_ordering_contract.md",
+      "source_heading_or_logical_block": "Purpose / Required rules",
+      "source_ref": "Algorithm/stream_resume_and_catch_up_ordering_contract.md::Purpose_Required_rules",
+      "rationale": "Resume tokens are exact-route objects and catch-up ordering is monotonic, gap-free, and rebound to session, access, and masking context."
+    },
+    {
+      "source_file": "Algorithm/native_cache_hydration_purge_and_rebase_contract.md",
+      "source_heading_or_logical_block": "Required rules / Coverage requirements",
+      "source_ref": "Algorithm/native_cache_hydration_purge_and_rebase_contract.md::Required_rules_Coverage_requirements",
+      "rationale": "Native hydration requires compatibility-before-render, selective purge, lineage invalidation, and cache-only restore that remains read-only until live legality returns."
+    },
+    {
+      "source_file": "Algorithm/northbound_api_and_session_contract.md",
+      "source_heading_or_logical_block": "8. Session, browser, and native-client rules / FE-25 Cache Isolation",
+      "source_ref": "Algorithm/northbound_api_and_session_contract.md::8._Session_browser_and_native-client_rules_FE-25",
+      "rationale": "Browser and native caches are derivable, invalidated on drift, and never lawful bearer-credential stores."
+    },
+    {
+      "source_file": "data/analysis/route_landmark_and_focus_order_registry.json",
+      "source_heading_or_logical_block": "calm_manifest_workspace / portal_request_detail",
+      "source_ref": "data/analysis/route_landmark_and_focus_order_registry.json::calm_manifest_workspace_portal_request_detail",
+      "rationale": "The route atlas already froze stable manifest and portal route identities that cache keys must reuse exactly."
+    },
+    {
+      "source_file": "data/analysis/native_scene_window_topology.json",
+      "source_heading_or_logical_block": "primary_scenes / secondary windows",
+      "source_ref": "data/analysis/native_scene_window_topology.json::primary_scenes_secondary_windows",
+      "rationale": "The native scene topology already freezes scene identity, preview subject bounds, and restoration law for primary and detached windows."
+    },
+    {
+      "source_file": "config/messaging/outbox_inbox_channel_matrix.json",
+      "source_heading_or_logical_block": "restore and ingress channel rows",
+      "source_ref": "config/messaging/outbox_inbox_channel_matrix.json::restore_and_ingress_channel_rows",
+      "rationale": "Resume and cache policy must stay subordinate to the transport-only broker and the durable inbox or outbox boundaries established in pc_0052."
+    }
+  ],
+  "typed_gaps": [
+    "Exact resume expiry TTL and store-level eviction knobs remain platform-specific and are deferred until provider adoption."
+  ],
+  "notes": [
+    "Resume lineage is authoritative only as a hashed envelope plus legality posture. Raw tokens are never cache identity."
+  ]
+}

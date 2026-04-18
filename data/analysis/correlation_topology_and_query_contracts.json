@@ -1,0 +1,985 @@
+{
+  "integrity_posture_enum": [
+    "VERIFIED",
+    "PARTIAL_GAP",
+    "BROKEN",
+    "PENDING_REBUILD"
+  ],
+  "mandatory_correlation_keys": {
+    "allowed_enum_snapshots": {
+      "basis_validation_state": [
+        "VALID",
+        "RETENTION_LIMITED",
+        "MISSING_DEPENDENCY",
+        "CORRUPT",
+        "SCHEMA_INCOMPATIBLE",
+        "BUILD_UNAVAILABLE"
+      ],
+      "comparison_mode": [
+        "EXACT_HASH_MATCH",
+        "COUNTERFACTUAL_DECLARED",
+        "LIMITED_HISTORICAL_COMPARISON",
+        "BASIS_INCOMPLETE",
+        "BASIS_CORRUPT"
+      ],
+      "config_inheritance_mode": [
+        "FRESH_CHILD_RESOLUTION",
+        "REPLAY_EXACT",
+        "RECOVERY_EXACT",
+        "HISTORICAL_EXPLICIT"
+      ],
+      "input_inheritance_mode": [
+        "FRESH_CHILD_COLLECTION",
+        "REPLAY_EXACT",
+        "RECOVERY_EXACT",
+        "HISTORICAL_EXPLICIT"
+      ],
+      "mode": [
+        "COMPLIANCE",
+        "ANALYSIS"
+      ],
+      "replay_class": [
+        "STANDARD_REPLAY",
+        "AUDIT_REPLAY",
+        "COUNTERFACTUAL_ANALYSIS"
+      ],
+      "run_kind": [
+        "INTERACTIVE",
+        "NIGHTLY",
+        "BACKFILL",
+        "REPLAY",
+        "REMEDIATION",
+        "AMENDMENT",
+        "MIGRATION"
+      ],
+      "selection_disposition": [
+        "EXECUTE_NEW_MANIFEST",
+        "EXECUTE_CONTINUATION_CHILD",
+        "REUSE_EXISTING_TERMINAL_RESULT",
+        "DEFER_ACTIVE_ATTEMPT",
+        "DEFER_RETRY_WINDOW",
+        "ESCALATE_ONLY",
+        "SKIP_INELIGIBLE"
+      ]
+    },
+    "authority": [
+      "authority_binding_ref",
+      "authority_link_ref",
+      "delegation_grant_ref",
+      "submission_record_id",
+      "authority_operation_id"
+    ],
+    "branch_selection": [
+      "idempotency_key",
+      "request_hash",
+      "identity_namespace_hash",
+      "duplicate_meaning_key",
+      "continuation_basis",
+      "access_binding_hash",
+      "policy_snapshot_hash"
+    ],
+    "core": [
+      "tenant_id",
+      "client_id",
+      "manifest_id",
+      "trace_id",
+      "service_name",
+      "environment_ref"
+    ],
+    "failure": [
+      "error_id",
+      "workflow_item_id",
+      "task_id",
+      "investigation_id",
+      "compensation_id",
+      "accepted_risk_approval_id"
+    ],
+    "lineage": [
+      "root_manifest_id",
+      "parent_manifest_id",
+      "continuation_of_manifest_id",
+      "replay_of_manifest_id",
+      "manifest_lineage_trace_ref",
+      "manifest_branch_decision"
+    ],
+    "nightly": [
+      "nightly_batch_run_ref",
+      "nightly_window_key",
+      "selection_disposition"
+    ],
+    "replay": [
+      "run_kind",
+      "mode",
+      "replay_class",
+      "comparison_mode",
+      "basis_validation_state",
+      "expected_execution_basis_hash",
+      "actual_execution_basis_hash",
+      "expected_deterministic_outcome_hash",
+      "actual_deterministic_outcome_hash",
+      "input_inheritance_mode",
+      "config_inheritance_mode",
+      "config_freeze_id"
+    ],
+    "retention": [
+      "retention_class"
+    ]
+  },
+  "ordering_basis_enum": [
+    "AUDIT_STREAM_SEQUENCE",
+    "RECORDED_AT_THEN_STREAM_SEQUENCE"
+  ],
+  "query_contracts": [
+    {
+      "canonical_name": "get_audit_trail(root_ref, options)",
+      "closure_requirements": [
+        "Ordering basis and integrity posture must remain explicit in the response contract.",
+        "Logs and metrics may appear as supporting explanation only, never as sole proof of record."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "manifest_lineage_trace_ref",
+        "manifest_branch_decision",
+        "authority_binding_ref",
+        "authority_link_ref",
+        "delegation_grant_ref",
+        "submission_record_id",
+        "authority_operation_id",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "retention_class"
+      ],
+      "domain": "AUDIT",
+      "integrity_posture": "VERIFIED",
+      "linked_failure_or_provenance_edges": [
+        "ED_AUDITED_BY",
+        "ED_CAUSED_BY_ERROR",
+        "ED_COMPENSATED_BY"
+      ],
+      "notes": [
+        "Append-only event ledger merged by recorded_at and audit_stream_ref + stream_sequence."
+      ],
+      "ordering_basis": "AUDIT_STREAM_SEQUENCE",
+      "producer_or_owner": "Audit investigation frame",
+      "query_code": "AUDIT_TRAIL",
+      "query_contract_or_projection": "get_audit_trail(root_ref, options)",
+      "record_type": "QUERY_CONTRACT",
+      "retention_boundary": "Query results surface explicit limitation posture when underlying payloads are minimized, sampled, hash-only, tombstoned, or erased.",
+      "retry_or_resolution_posture": "Query surfaces explain current truth and lineage; they do not mutate or resolve the lifecycle by themselves.",
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.11 Query contracts / get_audit_trail(root_ref, options)",
+      "visibility_boundary": "Query surface visibility follows the underlying signal domain and never widens beyond the most restrictive contributing record."
+    },
+    {
+      "canonical_name": "get_run_timeline(manifest_id)",
+      "closure_requirements": [
+        "Ordering basis and integrity posture must remain explicit in the response contract.",
+        "Logs and metrics may appear as supporting explanation only, never as sole proof of record."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "manifest_lineage_trace_ref",
+        "manifest_branch_decision",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "gate_code"
+      ],
+      "domain": "OPS",
+      "integrity_posture": "VERIFIED",
+      "linked_failure_or_provenance_edges": [
+        "ED_AUDITED_BY",
+        "ED_CAUSED_BY_ERROR",
+        "ED_COMPENSATED_BY"
+      ],
+      "notes": [
+        "Joins traces, audit events, typed failures, and gate outcomes without flattening signal classes."
+      ],
+      "ordering_basis": "RECORDED_AT_THEN_STREAM_SEQUENCE",
+      "producer_or_owner": "Run-level investigation view",
+      "query_code": "RUN_TIMELINE",
+      "query_contract_or_projection": "get_run_timeline(manifest_id)",
+      "record_type": "QUERY_CONTRACT",
+      "retention_boundary": "Query results surface explicit limitation posture when underlying payloads are minimized, sampled, hash-only, tombstoned, or erased.",
+      "retry_or_resolution_posture": "Query surfaces explain current truth and lineage; they do not mutate or resolve the lifecycle by themselves.",
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.11 Query contracts / get_run_timeline(manifest_id)",
+      "visibility_boundary": "Query surface visibility follows the underlying signal domain and never widens beyond the most restrictive contributing record."
+    },
+    {
+      "canonical_name": "get_nightly_batch_timeline(batch_run_id)",
+      "closure_requirements": [
+        "Ordering basis and integrity posture must remain explicit in the response contract.",
+        "Logs and metrics may appear as supporting explanation only, never as sole proof of record."
+      ],
+      "correlation_keys": [
+        "nightly_batch_run_ref",
+        "nightly_window_key",
+        "selection_disposition",
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "manifest_lineage_trace_ref",
+        "manifest_branch_decision"
+      ],
+      "domain": "OPS",
+      "integrity_posture": "VERIFIED",
+      "linked_failure_or_provenance_edges": [
+        "ED_AUDITED_BY",
+        "ED_CAUSED_BY_ERROR",
+        "ED_COMPENSATED_BY"
+      ],
+      "notes": [
+        "Shows batch allocation, selection disposition, shard claims, deferrals, and digests."
+      ],
+      "ordering_basis": "RECORDED_AT_THEN_STREAM_SEQUENCE",
+      "producer_or_owner": "Nightly control-plane inspection",
+      "query_code": "NIGHTLY_BATCH_TIMELINE",
+      "query_contract_or_projection": "get_nightly_batch_timeline(batch_run_id)",
+      "record_type": "QUERY_CONTRACT",
+      "retention_boundary": "Query results surface explicit limitation posture when underlying payloads are minimized, sampled, hash-only, tombstoned, or erased.",
+      "retry_or_resolution_posture": "Query surfaces explain current truth and lineage; they do not mutate or resolve the lifecycle by themselves.",
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.11 Query contracts / get_nightly_batch_timeline(batch_run_id)",
+      "visibility_boundary": "Query surface visibility follows the underlying signal domain and never widens beyond the most restrictive contributing record."
+    },
+    {
+      "canonical_name": "get_filing_evidence_ledger(submission_record_id)",
+      "closure_requirements": [
+        "Ordering basis and integrity posture must remain explicit in the response contract.",
+        "Logs and metrics may appear as supporting explanation only, never as sole proof of record."
+      ],
+      "correlation_keys": [
+        "authority_binding_ref",
+        "authority_link_ref",
+        "delegation_grant_ref",
+        "submission_record_id",
+        "authority_operation_id",
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id"
+      ],
+      "domain": "AUDIT",
+      "integrity_posture": "VERIFIED",
+      "linked_failure_or_provenance_edges": [
+        "ED_AUDITED_BY",
+        "ED_CAUSED_BY_ERROR",
+        "ED_COMPENSATED_BY"
+      ],
+      "notes": [
+        "Pairs filing packet, request/response lineage, and authority reconciliation evidence."
+      ],
+      "ordering_basis": "AUDIT_STREAM_SEQUENCE",
+      "producer_or_owner": "Authority-facing evidence ledger",
+      "query_code": "FILING_EVIDENCE_LEDGER",
+      "query_contract_or_projection": "get_filing_evidence_ledger(submission_record_id)",
+      "record_type": "QUERY_CONTRACT",
+      "retention_boundary": "Query results surface explicit limitation posture when underlying payloads are minimized, sampled, hash-only, tombstoned, or erased.",
+      "retry_or_resolution_posture": "Query surfaces explain current truth and lineage; they do not mutate or resolve the lifecycle by themselves.",
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.11 Query contracts / get_filing_evidence_ledger(submission_record_id)",
+      "visibility_boundary": "Query surface visibility follows the underlying signal domain and never widens beyond the most restrictive contributing record."
+    },
+    {
+      "canonical_name": "get_privacy_action_ledger(client_id, options)",
+      "closure_requirements": [
+        "Ordering basis and integrity posture must remain explicit in the response contract.",
+        "Logs and metrics may appear as supporting explanation only, never as sole proof of record."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "retention_class",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id"
+      ],
+      "domain": "PRIVACY",
+      "integrity_posture": "VERIFIED",
+      "linked_failure_or_provenance_edges": [
+        "ED_AUDITED_BY",
+        "ED_CAUSED_BY_ERROR",
+        "ED_COMPENSATED_BY"
+      ],
+      "notes": [
+        "Privacy-safe ledger of masking, legal hold, erasure, and sensitive-view events with explicit limitations."
+      ],
+      "ordering_basis": "AUDIT_STREAM_SEQUENCE",
+      "producer_or_owner": "Privacy and retention review surface",
+      "query_code": "PRIVACY_ACTION_LEDGER",
+      "query_contract_or_projection": "get_privacy_action_ledger(client_id, options)",
+      "record_type": "QUERY_CONTRACT",
+      "retention_boundary": "Query results surface explicit limitation posture when underlying payloads are minimized, sampled, hash-only, tombstoned, or erased.",
+      "retry_or_resolution_posture": "Query surfaces explain current truth and lineage; they do not mutate or resolve the lifecycle by themselves.",
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.11 Query contracts / get_privacy_action_ledger(client_id, options)",
+      "visibility_boundary": "Query surface visibility follows the underlying signal domain and never widens beyond the most restrictive contributing record."
+    },
+    {
+      "canonical_name": "get_operator_morning_digest(tenant_id, coverage_date)",
+      "closure_requirements": [
+        "Ordering basis and integrity posture must remain explicit in the response contract.",
+        "Logs and metrics may appear as supporting explanation only, never as sole proof of record."
+      ],
+      "correlation_keys": [
+        "nightly_batch_run_ref",
+        "nightly_window_key",
+        "selection_disposition",
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id"
+      ],
+      "domain": "OPS",
+      "integrity_posture": "PARTIAL_GAP",
+      "linked_failure_or_provenance_edges": [
+        "ED_AUDITED_BY",
+        "ED_CAUSED_BY_ERROR",
+        "ED_COMPENSATED_BY"
+      ],
+      "notes": [
+        "Summarized operational briefing backed by batch audit evidence and exceptions."
+      ],
+      "ordering_basis": "RECORDED_AT_THEN_STREAM_SEQUENCE",
+      "producer_or_owner": "Morning digest projection",
+      "query_code": "OPERATOR_MORNING_DIGEST",
+      "query_contract_or_projection": "get_operator_morning_digest(tenant_id, coverage_date)",
+      "record_type": "QUERY_CONTRACT",
+      "retention_boundary": "Query results surface explicit limitation posture when underlying payloads are minimized, sampled, hash-only, tombstoned, or erased.",
+      "retry_or_resolution_posture": "Query surfaces explain current truth and lineage; they do not mutate or resolve the lifecycle by themselves.",
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.11 Query contracts / get_operator_morning_digest(tenant_id, coverage_date)",
+      "visibility_boundary": "Query surface visibility follows the underlying signal domain and never widens beyond the most restrictive contributing record."
+    },
+    {
+      "canonical_name": "get_replay_attestation(manifest_id)",
+      "closure_requirements": [
+        "Ordering basis and integrity posture must remain explicit in the response contract.",
+        "Logs and metrics may appear as supporting explanation only, never as sole proof of record."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "manifest_lineage_trace_ref",
+        "manifest_branch_decision",
+        "run_kind",
+        "mode",
+        "replay_class",
+        "comparison_mode",
+        "basis_validation_state",
+        "expected_execution_basis_hash",
+        "actual_execution_basis_hash",
+        "expected_deterministic_outcome_hash",
+        "actual_deterministic_outcome_hash",
+        "input_inheritance_mode",
+        "config_inheritance_mode",
+        "config_freeze_id",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id"
+      ],
+      "domain": "AUDIT",
+      "integrity_posture": "VERIFIED",
+      "linked_failure_or_provenance_edges": [
+        "ED_AUDITED_BY",
+        "ED_CAUSED_BY_ERROR",
+        "ED_COMPENSATED_BY"
+      ],
+      "notes": [
+        "Replay basis validation, comparison mode, deterministic outcome hashes, and attestation posture."
+      ],
+      "ordering_basis": "AUDIT_STREAM_SEQUENCE",
+      "producer_or_owner": "Replay comparison and attestation surface",
+      "query_code": "REPLAY_ATTESTATION",
+      "query_contract_or_projection": "get_replay_attestation(manifest_id)",
+      "record_type": "QUERY_CONTRACT",
+      "retention_boundary": "Query results surface explicit limitation posture when underlying payloads are minimized, sampled, hash-only, tombstoned, or erased.",
+      "retry_or_resolution_posture": "Query surfaces explain current truth and lineage; they do not mutate or resolve the lifecycle by themselves.",
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.14A Replay and reproducibility observability / get_replay_attestation(manifest_id)",
+      "visibility_boundary": "Query surface visibility follows the underlying signal domain and never widens beyond the most restrictive contributing record."
+    },
+    {
+      "canonical_name": "get_provenance(object_type, object_id, options)",
+      "closure_requirements": [
+        "Ordering basis and integrity posture must remain explicit in the response contract.",
+        "Logs and metrics may appear as supporting explanation only, never as sole proof of record."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "manifest_lineage_trace_ref",
+        "manifest_branch_decision",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "authority_binding_ref",
+        "authority_link_ref",
+        "delegation_grant_ref",
+        "submission_record_id",
+        "authority_operation_id"
+      ],
+      "domain": "FAILURE",
+      "integrity_posture": "VERIFIED",
+      "linked_failure_or_provenance_edges": [
+        "ED_AUDITED_BY",
+        "ED_CAUSED_BY_ERROR",
+        "ED_COMPENSATED_BY"
+      ],
+      "notes": [
+        "Stable graph traversal over durable nodes, edges, and lineage boundaries."
+      ],
+      "ordering_basis": "PATH_ORDER",
+      "producer_or_owner": "General provenance explorer",
+      "query_code": "PROVENANCE_OBJECT",
+      "query_contract_or_projection": "get_provenance(object_type, object_id, options)",
+      "record_type": "QUERY_CONTRACT",
+      "retention_boundary": "Query results surface explicit limitation posture when underlying payloads are minimized, sampled, hash-only, tombstoned, or erased.",
+      "retry_or_resolution_posture": "Query surfaces explain current truth and lineage; they do not mutate or resolve the lifecycle by themselves.",
+      "source_file": "Algorithm/provenance_graph_semantics.md",
+      "source_heading_or_logical_block": "Path classes and query contracts",
+      "visibility_boundary": "Query surface visibility follows the underlying signal domain and never widens beyond the most restrictive contributing record."
+    },
+    {
+      "canonical_name": "get_defence_path(target_ref, options)",
+      "closure_requirements": [
+        "Ordering basis and integrity posture must remain explicit in the response contract.",
+        "Logs and metrics may appear as supporting explanation only, never as sole proof of record."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "manifest_lineage_trace_ref",
+        "manifest_branch_decision",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "authority_binding_ref",
+        "authority_link_ref",
+        "delegation_grant_ref",
+        "submission_record_id",
+        "authority_operation_id"
+      ],
+      "domain": "FAILURE",
+      "integrity_posture": "VERIFIED",
+      "linked_failure_or_provenance_edges": [
+        "ED_AUDITED_BY",
+        "ED_CAUSED_BY_ERROR",
+        "ED_COMPENSATED_BY"
+      ],
+      "notes": [
+        "Returns proof closure, contradiction isolation, and support state for a target claim."
+      ],
+      "ordering_basis": "PATH_ORDER",
+      "producer_or_owner": "Proof-closure path builder",
+      "query_code": "DEFENCE_PATH",
+      "query_contract_or_projection": "get_defence_path(target_ref, options)",
+      "record_type": "QUERY_CONTRACT",
+      "retention_boundary": "Query results surface explicit limitation posture when underlying payloads are minimized, sampled, hash-only, tombstoned, or erased.",
+      "retry_or_resolution_posture": "Query surfaces explain current truth and lineage; they do not mutate or resolve the lifecycle by themselves.",
+      "source_file": "Algorithm/provenance_graph_semantics.md",
+      "source_heading_or_logical_block": "Proof-path closure semantics",
+      "visibility_boundary": "Query surface visibility follows the underlying signal domain and never widens beyond the most restrictive contributing record."
+    },
+    {
+      "canonical_name": "get_authority_state_path(submission_record_id)",
+      "closure_requirements": [
+        "Ordering basis and integrity posture must remain explicit in the response contract.",
+        "Logs and metrics may appear as supporting explanation only, never as sole proof of record."
+      ],
+      "correlation_keys": [
+        "authority_binding_ref",
+        "authority_link_ref",
+        "delegation_grant_ref",
+        "submission_record_id",
+        "authority_operation_id",
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id"
+      ],
+      "domain": "AUDIT",
+      "integrity_posture": "VERIFIED",
+      "linked_failure_or_provenance_edges": [
+        "ED_AUDITED_BY",
+        "ED_CAUSED_BY_ERROR",
+        "ED_COMPENSATED_BY"
+      ],
+      "notes": [
+        "Traverses request, response, normalization, and reconciliation nodes without hidden joins."
+      ],
+      "ordering_basis": "PATH_ORDER",
+      "producer_or_owner": "Authority-state reconciliation path",
+      "query_code": "AUTHORITY_STATE_PATH",
+      "query_contract_or_projection": "get_authority_state_path(submission_record_id)",
+      "record_type": "QUERY_CONTRACT",
+      "retention_boundary": "Query results surface explicit limitation posture when underlying payloads are minimized, sampled, hash-only, tombstoned, or erased.",
+      "retry_or_resolution_posture": "Query surfaces explain current truth and lineage; they do not mutate or resolve the lifecycle by themselves.",
+      "source_file": "Algorithm/provenance_graph_semantics.md",
+      "source_heading_or_logical_block": "Path classes",
+      "visibility_boundary": "Query surface visibility follows the underlying signal domain and never widens beyond the most restrictive contributing record."
+    },
+    {
+      "canonical_name": "get_drift_path(drift_id)",
+      "closure_requirements": [
+        "Ordering basis and integrity posture must remain explicit in the response contract.",
+        "Logs and metrics may appear as supporting explanation only, never as sole proof of record."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "manifest_lineage_trace_ref",
+        "manifest_branch_decision",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "authority_binding_ref",
+        "authority_link_ref",
+        "delegation_grant_ref",
+        "submission_record_id",
+        "authority_operation_id"
+      ],
+      "domain": "FAILURE",
+      "integrity_posture": "VERIFIED",
+      "linked_failure_or_provenance_edges": [
+        "ED_AUDITED_BY",
+        "ED_CAUSED_BY_ERROR",
+        "ED_COMPENSATED_BY"
+      ],
+      "notes": [
+        "Explains baseline, contradiction, supersession, and amendment justification lineage."
+      ],
+      "ordering_basis": "PATH_ORDER",
+      "producer_or_owner": "Drift and amendment investigation",
+      "query_code": "DRIFT_PATH",
+      "query_contract_or_projection": "get_drift_path(drift_id)",
+      "record_type": "QUERY_CONTRACT",
+      "retention_boundary": "Query results surface explicit limitation posture when underlying payloads are minimized, sampled, hash-only, tombstoned, or erased.",
+      "retry_or_resolution_posture": "Query surfaces explain current truth and lineage; they do not mutate or resolve the lifecycle by themselves.",
+      "source_file": "Algorithm/provenance_graph_semantics.md",
+      "source_heading_or_logical_block": "Path classes",
+      "visibility_boundary": "Query surface visibility follows the underlying signal domain and never widens beyond the most restrictive contributing record."
+    },
+    {
+      "canonical_name": "get_retention_limitation_path(object_id)",
+      "closure_requirements": [
+        "Ordering basis and integrity posture must remain explicit in the response contract.",
+        "Logs and metrics may appear as supporting explanation only, never as sole proof of record."
+      ],
+      "correlation_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "retention_class",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id"
+      ],
+      "domain": "PRIVACY",
+      "integrity_posture": "VERIFIED",
+      "linked_failure_or_provenance_edges": [
+        "ED_AUDITED_BY",
+        "ED_CAUSED_BY_ERROR",
+        "ED_COMPENSATED_BY"
+      ],
+      "notes": [
+        "Explains lawful absence versus corruption through explicit limited or erased placeholders."
+      ],
+      "ordering_basis": "PATH_ORDER",
+      "producer_or_owner": "Retention-limitation proof surface",
+      "query_code": "RETENTION_LIMITATION_PATH",
+      "query_contract_or_projection": "get_retention_limitation_path(object_id)",
+      "record_type": "QUERY_CONTRACT",
+      "retention_boundary": "Query results surface explicit limitation posture when underlying payloads are minimized, sampled, hash-only, tombstoned, or erased.",
+      "retry_or_resolution_posture": "Query surfaces explain current truth and lineage; they do not mutate or resolve the lifecycle by themselves.",
+      "source_file": "Algorithm/provenance_graph_semantics.md",
+      "source_heading_or_logical_block": "Path classes",
+      "visibility_boundary": "Query surface visibility follows the underlying signal domain and never widens beyond the most restrictive contributing record."
+    }
+  ],
+  "summary": {
+    "mandatory_correlation_key_count": 46,
+    "query_contract_count": 12,
+    "topology_edge_count": 9
+  },
+  "topology_edges": [
+    {
+      "edge_id": "signal-traces-to-audit",
+      "from_record": "TRACES",
+      "join_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "manifest_lineage_trace_ref",
+        "manifest_branch_decision",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id"
+      ],
+      "lineage_basis": "Run timeline joins runtime spans to compliance-significant audit events without collapsing them into one stream.",
+      "provenance_edges": [
+        "ED_AUDITED_BY"
+      ],
+      "to_record": "AUDIT_EVENTS"
+    },
+    {
+      "edge_id": "metrics-to-audit",
+      "from_record": "METRICS",
+      "join_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "nightly_batch_run_ref",
+        "nightly_window_key",
+        "selection_disposition",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id"
+      ],
+      "lineage_basis": "Operational aggregates remain explainers of runtime posture while audit events stay the legal record.",
+      "provenance_edges": [
+        "ED_AUDITED_BY"
+      ],
+      "to_record": "AUDIT_EVENTS"
+    },
+    {
+      "edge_id": "logs-to-errors",
+      "from_record": "LOGS",
+      "join_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "authority_binding_ref",
+        "authority_link_ref",
+        "delegation_grant_ref",
+        "submission_record_id",
+        "authority_operation_id"
+      ],
+      "lineage_basis": "A log line may evidence runtime context, but typed ErrorRecord remains the canonical failure statement.",
+      "provenance_edges": [
+        "ED_CAUSED_BY_ERROR"
+      ],
+      "to_record": "ErrorRecord"
+    },
+    {
+      "edge_id": "audit-to-error",
+      "from_record": "AUDIT_EVENTS",
+      "join_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "retention_class"
+      ],
+      "lineage_basis": "Gate and lifecycle events must correlate to typed failure objects when blocking or remediation exists.",
+      "provenance_edges": [
+        "ED_AUDITED_BY",
+        "ED_CAUSED_BY_ERROR"
+      ],
+      "to_record": "ErrorRecord"
+    },
+    {
+      "edge_id": "error-to-remediation",
+      "from_record": "ErrorRecord",
+      "join_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "retention_class"
+      ],
+      "lineage_basis": "Source error links directly to remediation, investigation, compensation, or accepted-risk companions.",
+      "provenance_edges": [
+        "ED_TRIGGERED_WORKFLOW",
+        "ED_CAUSED_BY_ERROR"
+      ],
+      "to_record": "RemediationTask"
+    },
+    {
+      "edge_id": "error-to-compensation",
+      "from_record": "ErrorRecord",
+      "join_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "authority_binding_ref",
+        "authority_link_ref",
+        "delegation_grant_ref",
+        "submission_record_id",
+        "authority_operation_id"
+      ],
+      "lineage_basis": "Settlement branches remain anchored to the underlying failure lineage.",
+      "provenance_edges": [
+        "ED_COMPENSATED_BY"
+      ],
+      "to_record": "CompensationRecord"
+    },
+    {
+      "edge_id": "retention-to-failure",
+      "from_record": "PRIVACY_TELEMETRY",
+      "join_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "retention_class",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id",
+        "authority_binding_ref",
+        "authority_link_ref",
+        "delegation_grant_ref",
+        "submission_record_id",
+        "authority_operation_id"
+      ],
+      "lineage_basis": "Retention- or privacy-driven limitations must materialize as typed failure objects or an explicit no-error statement.",
+      "provenance_edges": [
+        "ED_LIMITED_BY_RETENTION",
+        "ED_ERASED_UNDER"
+      ],
+      "to_record": "ErrorRecord"
+    },
+    {
+      "edge_id": "dashboard-to-lineage",
+      "from_record": "FailureLifecycleDashboard",
+      "join_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "manifest_lineage_trace_ref",
+        "manifest_branch_decision",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id"
+      ],
+      "lineage_basis": "The dashboard consumes persisted failure, workflow, audit, and provenance objects only.",
+      "provenance_edges": [
+        "ED_CAUSED_BY_ERROR",
+        "ED_COMPENSATED_BY",
+        "ED_AUDITED_BY"
+      ],
+      "to_record": "ErrorRecord"
+    },
+    {
+      "edge_id": "replay-to-attestation",
+      "from_record": "AUDIT_EVENTS",
+      "join_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "service_name",
+        "environment_ref",
+        "root_manifest_id",
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "manifest_lineage_trace_ref",
+        "manifest_branch_decision",
+        "run_kind",
+        "mode",
+        "replay_class",
+        "comparison_mode",
+        "basis_validation_state",
+        "expected_execution_basis_hash",
+        "actual_execution_basis_hash",
+        "expected_deterministic_outcome_hash",
+        "actual_deterministic_outcome_hash",
+        "input_inheritance_mode",
+        "config_inheritance_mode",
+        "config_freeze_id",
+        "error_id",
+        "workflow_item_id",
+        "task_id",
+        "investigation_id",
+        "compensation_id",
+        "accepted_risk_approval_id"
+      ],
+      "lineage_basis": "Replay outcomes remain explainable through dedicated replay events and typed failure reasons.",
+      "provenance_edges": [
+        "ED_AUDITED_BY",
+        "ED_CAUSED_BY_ERROR"
+      ],
+      "to_record": "FailureLifecycleDashboard"
+    }
+  ]
+}

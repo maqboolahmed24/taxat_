@@ -1,0 +1,265 @@
+{
+  "schema_version": "1.0",
+  "mapping_id": "email_delivery_event_mapping",
+  "provider_selection": {
+    "provider_selection_status": "PROVIDER_DEFAULT_APPLIED",
+    "provider_family": "TRANSACTIONAL_EMAIL_DELIVERY",
+    "provider_vendor_adapter": "POSTMARK_COMPATIBLE_CONTROL_PLANE",
+    "provider_vendor_label": "Postmark-compatible transactional email provider",
+    "docs_urls": [
+      "https://postmarkapp.com/developer/api/overview",
+      "https://postmarkapp.com/developer/api/templates-api",
+      "https://postmarkapp.com/developer/user-guide/content/templates",
+      "https://postmarkapp.com/developer/user-guide/content/templates/mustachio-syntax",
+      "https://postmarkapp.com/developer/webhooks/webhooks-overview",
+      "https://postmarkapp.com/developer/webhooks/delivery-webhook",
+      "https://postmarkapp.com/developer/webhooks/bounce-webhook",
+      "https://postmarkapp.com/developer/webhooks/spam-complaint-webhook",
+      "https://postmarkapp.com/developer/webhooks/subscription-change-webhook",
+      "https://postmarkapp.com/developer/webhooks/open-webhook",
+      "https://postmarkapp.com/developer/webhooks/click-webhook",
+      "https://postmarkapp.com/developer/user-guide/tracking-opens/tracking-opens-per-email"
+    ],
+    "source_refs": [
+      {
+        "source_ref": "Algorithm/collaboration_workspace_contract.md::L1838[Customer_notifications]",
+        "rationale": "Only explicit customer-visible collaboration events may fan out into optional customer email."
+      },
+      {
+        "source_ref": "Algorithm/data_model.md::L195[WorkItemNotification]",
+        "rationale": "Notification routing, continuity, and customer-safe projection must remain explicit and typed."
+      },
+      {
+        "source_ref": "Algorithm/data_model.md::L2240[PortalHelpRequest]",
+        "rationale": "Contextual help acknowledgements must preserve route and case context instead of becoming free-form tickets."
+      },
+      {
+        "source_ref": "https://postmarkapp.com/developer/api/templates-api",
+        "rationale": "Current provider documentation exposes API-managed template aliases and server-scoped template records."
+      },
+      {
+        "source_ref": "https://postmarkapp.com/developer/webhooks/webhooks-overview",
+        "rationale": "Current provider webhook posture is configured per server and authenticated with HTTPS, Basic Auth, and custom headers."
+      }
+    ]
+  },
+  "policy_version": "1.0",
+  "generated_on": "2026-04-18",
+  "truth_boundary_statement": "External email delivery events remain transport or observability projections only. They may append internal notification evidence, suppression posture, retry posture, and counters, but they never mutate work-item truth, approval truth, portal-help lifecycle truth, or authority truth directly.",
+  "telemetry_defaults": {
+    "track_opens": false,
+    "track_links": "None",
+    "rationale": "The corpus never grants workflow value to open or click telemetry, so privacy-minimizing defaults keep both disabled until a later explicit decision exists."
+  },
+  "correlation_key_fields": [
+    "RecordType",
+    "MessageID",
+    "MessageStream",
+    "Metadata.notification_id",
+    "Metadata.item_id",
+    "Metadata.help_request_id",
+    "Recipient"
+  ],
+  "idempotency_policy": {
+    "fingerprint_fields": [
+      "RecordType",
+      "MessageID",
+      "MessageStream",
+      "Metadata.notification_id",
+      "Metadata.help_request_id",
+      "Recipient"
+    ],
+    "replay_window_hours": 168,
+    "duplicate_effect": "RETURN_200_NO_DUPLICATE_EVIDENCE"
+  },
+  "event_mappings": [
+    {
+      "provider_event_type": "Delivery",
+      "enabled_by_default": true,
+      "normalized_evidence_type": "EMAIL_NOTIFICATION_DELIVERED",
+      "allowed_internal_updates": [
+        "WorkItemNotification.delivered_at",
+        "WorkItemNotification.suppressed_reason_codes[]:no-change",
+        "AuditEvent.WorkItemNotificationDelivered",
+        "observability.email.delivery_confirmed"
+      ],
+      "prohibited_internal_updates": [
+        "WorkflowItem.lifecycle_state",
+        "ClientApprovalPack.approval_state",
+        "PortalHelpRequest.lifecycle_state",
+        "AuthorityTruthContract.truth_surface_role"
+      ],
+      "suppression_posture_effect": "NONE",
+      "retry_posture_effect": "NO_RETRY_REQUIRED",
+      "observability_counter_keys": [
+        "email.delivery.confirmed"
+      ],
+      "privacy_capture_mode": "METADATA_ONLY",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/collaboration_workspace_contract.md::L1897[WorkItemNotificationDelivered]",
+          "rationale": "Delivered state belongs in audit evidence, not workflow mutation."
+        },
+        {
+          "source_ref": "https://postmarkapp.com/developer/webhooks/delivery-webhook",
+          "rationale": "Current delivery webhook fields support message-level delivery evidence and metadata correlation."
+        }
+      ],
+      "notes": [
+        "Delivery confirmation may update notification evidence only."
+      ]
+    },
+    {
+      "provider_event_type": "Bounce",
+      "enabled_by_default": true,
+      "normalized_evidence_type": "EMAIL_NOTIFICATION_BOUNCED",
+      "allowed_internal_updates": [
+        "NotificationDeliveryEvidence.bounce_class",
+        "RecipientSuppressionCandidate.created",
+        "observability.email.bounced"
+      ],
+      "prohibited_internal_updates": [
+        "WorkflowItem.lifecycle_state",
+        "ClientApprovalPack.approval_state",
+        "PortalHelpRequest.lifecycle_state",
+        "AuthorityTruthContract.truth_surface_role"
+      ],
+      "suppression_posture_effect": "CREATE_SUPPRESSION_CANDIDATE",
+      "retry_posture_effect": "STOP_AUTOMATIC_RETRY_PENDING_OPERATOR_REVIEW",
+      "observability_counter_keys": [
+        "email.delivery.bounce",
+        "email.delivery.retry_blocked"
+      ],
+      "privacy_capture_mode": "METADATA_AND_REDACTED_REASON",
+      "source_refs": [
+        {
+          "source_ref": "https://postmarkapp.com/developer/webhooks/bounce-webhook",
+          "rationale": "Bounce webhook fields support bounce classification, metadata echo, and recipient-level suppression handling."
+        }
+      ],
+      "notes": [
+        "Bounce state may halt automatic resend but cannot close, reopen, or escalate the work item itself."
+      ]
+    },
+    {
+      "provider_event_type": "SpamComplaint",
+      "enabled_by_default": true,
+      "normalized_evidence_type": "EMAIL_NOTIFICATION_COMPLAINT",
+      "allowed_internal_updates": [
+        "RecipientSuppressionCandidate.confirmed",
+        "NotificationDeliveryEvidence.complaint_state",
+        "observability.email.complaint"
+      ],
+      "prohibited_internal_updates": [
+        "WorkflowItem.lifecycle_state",
+        "ClientApprovalPack.approval_state",
+        "PortalHelpRequest.lifecycle_state",
+        "AuthorityTruthContract.truth_surface_role"
+      ],
+      "suppression_posture_effect": "CONFIRM_SUPPRESSION",
+      "retry_posture_effect": "HARD_BLOCK_RESEND",
+      "observability_counter_keys": [
+        "email.delivery.complaint"
+      ],
+      "privacy_capture_mode": "METADATA_AND_REDACTED_REASON",
+      "source_refs": [
+        {
+          "source_ref": "https://postmarkapp.com/developer/webhooks/spam-complaint-webhook",
+          "rationale": "Spam complaint callbacks support complaint evidence and suppression posture."
+        }
+      ],
+      "notes": [
+        "Complaints force suppression posture and operator review, not workflow mutation."
+      ]
+    },
+    {
+      "provider_event_type": "SubscriptionChange",
+      "enabled_by_default": true,
+      "normalized_evidence_type": "EMAIL_RECIPIENT_SUBSCRIPTION_CHANGED",
+      "allowed_internal_updates": [
+        "RecipientSuppressionCandidate.confirmed",
+        "observability.email.subscription_change"
+      ],
+      "prohibited_internal_updates": [
+        "WorkflowItem.lifecycle_state",
+        "ClientApprovalPack.approval_state",
+        "PortalHelpRequest.lifecycle_state",
+        "AuthorityTruthContract.truth_surface_role"
+      ],
+      "suppression_posture_effect": "CONFIRM_SUPPRESSION",
+      "retry_posture_effect": "HARD_BLOCK_RESEND",
+      "observability_counter_keys": [
+        "email.delivery.subscription_change"
+      ],
+      "privacy_capture_mode": "METADATA_ONLY",
+      "source_refs": [
+        {
+          "source_ref": "https://postmarkapp.com/developer/webhooks/subscription-change-webhook",
+          "rationale": "Subscription-change callbacks support opt-out suppression evidence only."
+        }
+      ],
+      "notes": [
+        "Unsubscribe state affects future send eligibility only."
+      ]
+    },
+    {
+      "provider_event_type": "Open",
+      "enabled_by_default": false,
+      "normalized_evidence_type": "EMAIL_OPEN_EVENT_DISABLED",
+      "allowed_internal_updates": [],
+      "prohibited_internal_updates": [
+        "WorkflowItem.lifecycle_state",
+        "ClientApprovalPack.approval_state",
+        "PortalHelpRequest.lifecycle_state",
+        "AuthorityTruthContract.truth_surface_role",
+        "NotificationEligibilityState"
+      ],
+      "suppression_posture_effect": "NONE",
+      "retry_posture_effect": "NONE",
+      "observability_counter_keys": [],
+      "privacy_capture_mode": "METADATA_ONLY",
+      "source_refs": [
+        {
+          "source_ref": "https://postmarkapp.com/developer/webhooks/open-webhook",
+          "rationale": "Open callbacks exist at the provider boundary but remain disabled by Taxat's current privacy-minimizing posture."
+        }
+      ],
+      "notes": [
+        "Disabled by default; no current source contract grants workflow value to open tracking."
+      ]
+    },
+    {
+      "provider_event_type": "Click",
+      "enabled_by_default": false,
+      "normalized_evidence_type": "EMAIL_CLICK_EVENT_DISABLED",
+      "allowed_internal_updates": [],
+      "prohibited_internal_updates": [
+        "WorkflowItem.lifecycle_state",
+        "ClientApprovalPack.approval_state",
+        "PortalHelpRequest.lifecycle_state",
+        "AuthorityTruthContract.truth_surface_role",
+        "NotificationEligibilityState"
+      ],
+      "suppression_posture_effect": "NONE",
+      "retry_posture_effect": "NONE",
+      "observability_counter_keys": [],
+      "privacy_capture_mode": "METADATA_ONLY",
+      "source_refs": [
+        {
+          "source_ref": "https://postmarkapp.com/developer/webhooks/click-webhook",
+          "rationale": "Click callbacks exist at the provider boundary but remain disabled by Taxat's current privacy-minimizing posture."
+        }
+      ],
+      "notes": [
+        "Disabled by default; route opens already carry explicit internal continuity and do not need external click telemetry."
+      ]
+    }
+  ],
+  "typed_gaps": [
+    "Open and click tracking remain disabled by default; a later decision would need to justify them against privacy law and customer-value doctrine."
+  ],
+  "notes": [
+    "Every enabled callback path is idempotent and evidence-only.",
+    "Provider transport events can narrow future send eligibility, but they never author new workflow truth."
+  ]
+}

@@ -1,0 +1,541 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "error_monitoring_alert_policy",
+  "provider_selection": {
+    "provider_selection_status": "PROVIDER_DEFAULT_APPLIED",
+    "provider_family": "ERROR_MONITORING_OVERLAY",
+    "provider_vendor_adapter": "SENTRY_COMPATIBLE_MONITORING_CONTROL_PLANE",
+    "provider_vendor_label": "Sentry-compatible error monitoring overlay",
+    "docs_urls": [
+      "https://docs.sentry.io/hosted/api/auth/",
+      "https://docs.sentry.io/api/guides/create-auth-token/",
+      "https://docs.sentry.io/api/projects/create-a-new-project/",
+      "https://docs.sentry.io/api/projects/create-a-new-client-key/",
+      "https://docs.sentry.io/api/projects/list-a-projects-client-keys/",
+      "https://docs.sentry.io/api/projects/update-an-inbound-data-filter/",
+      "https://docs.sentry.io/api/alerts/",
+      "https://docs.sentry.io/api/monitors/create-an-alert-for-an-organization/",
+      "https://docs.sentry.io/api/releases/",
+      "https://docs.sentry.io/api/releases/retrieve-release-health-session-statistics/",
+      "https://docs.sentry.io/product/relay/modes/pii-and-data-scrubbing/"
+    ],
+    "source_refs": [
+      {
+        "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+        "rationale": "The vendor overlay must remain secondary to first-party audit evidence and operational telemetry."
+      },
+      {
+        "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+        "rationale": "All vendor-visible monitoring still depends on the corpus correlation keys that bind events back to manifest and authority lineage."
+      },
+      {
+        "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+        "rationale": "Trace and error overlays need release and manifest-rooted runtime lineage rather than free-floating exception feeds."
+      },
+      {
+        "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+        "rationale": "Alert posture must focus on actionable reliability, security, and release regressions instead of vanity noise."
+      },
+      {
+        "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+        "rationale": "Monitoring capture must redact secrets, tokens, and high-risk payloads before they ever become vendor-visible."
+      },
+      {
+        "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+        "rationale": "Sampled or filtered telemetry may never become the proof-of-record substitute for audit evidence."
+      },
+      {
+        "source_ref": "Algorithm/retention_error_and_observability_contract.md::L20[15.1_Contract_composition_and_precedence]",
+        "rationale": "Privacy minimization outranks diagnostic convenience, so the monitoring overlay must fail closed when settings drift."
+      },
+      {
+        "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+        "rationale": "Visibility and signal separation remain explicit even when several telemetry lanes share identifiers."
+      },
+      {
+        "source_ref": "Algorithm/retention_error_and_observability_contract.md::L167[15.4_Correlation_visibility_and_signal_separation]",
+        "rationale": "Diagnostic logging must not reintroduce personal or authority-secret data that minimization policy already excludes."
+      },
+      {
+        "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L50[3._Secret_key_and_token_handling]",
+        "rationale": "Vendor DSNs and automation tokens must stay inside the governed secret boundary and only safe refs may persist in repo artifacts."
+      },
+      {
+        "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L161[8._Operational_security_release_gates]",
+        "rationale": "Release and operational security gates require explicit health and secret-rotation posture before promotion."
+      }
+    ]
+  },
+  "policy_version": "1.0",
+  "generated_on": "2026-04-18",
+  "truth_boundary_statement": "Alerts exist to surface actionable runtime regressions and security anomalies, not vanity activity or audit-only events.",
+  "alert_rules": [
+    {
+      "rule_ref": "alert.backend_exception_regression",
+      "label": "Backend exception regression",
+      "target_project_refs": [
+        "monitoring_project_production_backend_runtime",
+        "monitoring_project_preprod_backend_runtime"
+      ],
+      "target_environment_ids": [
+        "env_preproduction_verification",
+        "env_production"
+      ],
+      "trigger_summary": "Trigger on new or regressed backend issues affecting release candidates or live production traffic.",
+      "noise_controls": [
+        "Filter healthcheck transactions",
+        "Suppress localhost and synthetic fixture traffic",
+        "Require environment and release correlation"
+      ],
+      "routing_target_alias": "ops.reliability.primary",
+      "release_gate_binding": "RELEASE_HEALTH_AND_ERROR_BUDGET_GATE",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "The vendor overlay must remain secondary to first-party audit evidence and operational telemetry."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "All vendor-visible monitoring still depends on the corpus correlation keys that bind events back to manifest and authority lineage."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Trace and error overlays need release and manifest-rooted runtime lineage rather than free-floating exception feeds."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Alert posture must focus on actionable reliability, security, and release regressions instead of vanity noise."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Monitoring capture must redact secrets, tokens, and high-risk payloads before they ever become vendor-visible."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampled or filtered telemetry may never become the proof-of-record substitute for audit evidence."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L20[15.1_Contract_composition_and_precedence]",
+          "rationale": "Privacy minimization outranks diagnostic convenience, so the monitoring overlay must fail closed when settings drift."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility and signal separation remain explicit even when several telemetry lanes share identifiers."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L167[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Diagnostic logging must not reintroduce personal or authority-secret data that minimization policy already excludes."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L50[3._Secret_key_and_token_handling]",
+          "rationale": "Vendor DSNs and automation tokens must stay inside the governed secret boundary and only safe refs may persist in repo artifacts."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L161[8._Operational_security_release_gates]",
+          "rationale": "Release and operational security gates require explicit health and secret-rotation posture before promotion."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "rule_ref": "alert.worker_failure_cluster",
+      "label": "Worker failure cluster",
+      "target_project_refs": [
+        "monitoring_project_production_backend_runtime",
+        "monitoring_project_preprod_backend_runtime"
+      ],
+      "target_environment_ids": [
+        "env_preproduction_verification",
+        "env_production"
+      ],
+      "trigger_summary": "Trigger on clustered worker exceptions or queue-consumer failures across the same release window.",
+      "noise_controls": [
+        "Group by release and queue family",
+        "Do not page on one-off sandbox fixture errors"
+      ],
+      "routing_target_alias": "ops.runtime.workers",
+      "release_gate_binding": "RECOVERY_AND_BACKGROUND_WORKER_GATE",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "The vendor overlay must remain secondary to first-party audit evidence and operational telemetry."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "All vendor-visible monitoring still depends on the corpus correlation keys that bind events back to manifest and authority lineage."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Trace and error overlays need release and manifest-rooted runtime lineage rather than free-floating exception feeds."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Alert posture must focus on actionable reliability, security, and release regressions instead of vanity noise."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Monitoring capture must redact secrets, tokens, and high-risk payloads before they ever become vendor-visible."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampled or filtered telemetry may never become the proof-of-record substitute for audit evidence."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L20[15.1_Contract_composition_and_precedence]",
+          "rationale": "Privacy minimization outranks diagnostic convenience, so the monitoring overlay must fail closed when settings drift."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility and signal separation remain explicit even when several telemetry lanes share identifiers."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L167[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Diagnostic logging must not reintroduce personal or authority-secret data that minimization policy already excludes."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L50[3._Secret_key_and_token_handling]",
+          "rationale": "Vendor DSNs and automation tokens must stay inside the governed secret boundary and only safe refs may persist in repo artifacts."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L161[8._Operational_security_release_gates]",
+          "rationale": "Release and operational security gates require explicit health and secret-rotation posture before promotion."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "rule_ref": "alert.authority_gateway_auth_failure",
+      "label": "Authority gateway auth failure",
+      "target_project_refs": [
+        "monitoring_project_production_authority_gateway",
+        "monitoring_project_preprod_authority_gateway"
+      ],
+      "target_environment_ids": [
+        "env_preproduction_verification",
+        "env_production"
+      ],
+      "trigger_summary": "Trigger on callback-auth failures, token-binding mismatches, or gateway exception spikes at the authority edge.",
+      "noise_controls": [
+        "Do not include provider payload bodies",
+        "Require authority-operation or submission correlation when present"
+      ],
+      "routing_target_alias": "ops.authority.gateway",
+      "release_gate_binding": "AUTHORITY_GATEWAY_SAFETY_GATE",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "The vendor overlay must remain secondary to first-party audit evidence and operational telemetry."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "All vendor-visible monitoring still depends on the corpus correlation keys that bind events back to manifest and authority lineage."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Trace and error overlays need release and manifest-rooted runtime lineage rather than free-floating exception feeds."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Alert posture must focus on actionable reliability, security, and release regressions instead of vanity noise."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Monitoring capture must redact secrets, tokens, and high-risk payloads before they ever become vendor-visible."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampled or filtered telemetry may never become the proof-of-record substitute for audit evidence."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L20[15.1_Contract_composition_and_precedence]",
+          "rationale": "Privacy minimization outranks diagnostic convenience, so the monitoring overlay must fail closed when settings drift."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility and signal separation remain explicit even when several telemetry lanes share identifiers."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L167[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Diagnostic logging must not reintroduce personal or authority-secret data that minimization policy already excludes."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L50[3._Secret_key_and_token_handling]",
+          "rationale": "Vendor DSNs and automation tokens must stay inside the governed secret boundary and only safe refs may persist in repo artifacts."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L161[8._Operational_security_release_gates]",
+          "rationale": "Release and operational security gates require explicit health and secret-rotation posture before promotion."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "rule_ref": "alert.authority_gateway_error_spike",
+      "label": "Authority gateway error spike",
+      "target_project_refs": [
+        "monitoring_project_production_authority_gateway"
+      ],
+      "target_environment_ids": [
+        "env_production"
+      ],
+      "trigger_summary": "Trigger on sustained gateway error spikes correlated to one production release or deploy window.",
+      "noise_controls": [
+        "Require production environment",
+        "Filter synthetic callback probes"
+      ],
+      "routing_target_alias": "ops.authority.gateway",
+      "release_gate_binding": "AUTHORITY_GATEWAY_SAFETY_GATE",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "The vendor overlay must remain secondary to first-party audit evidence and operational telemetry."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "All vendor-visible monitoring still depends on the corpus correlation keys that bind events back to manifest and authority lineage."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Trace and error overlays need release and manifest-rooted runtime lineage rather than free-floating exception feeds."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Alert posture must focus on actionable reliability, security, and release regressions instead of vanity noise."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Monitoring capture must redact secrets, tokens, and high-risk payloads before they ever become vendor-visible."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampled or filtered telemetry may never become the proof-of-record substitute for audit evidence."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L20[15.1_Contract_composition_and_precedence]",
+          "rationale": "Privacy minimization outranks diagnostic convenience, so the monitoring overlay must fail closed when settings drift."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility and signal separation remain explicit even when several telemetry lanes share identifiers."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L167[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Diagnostic logging must not reintroduce personal or authority-secret data that minimization policy already excludes."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L50[3._Secret_key_and_token_handling]",
+          "rationale": "Vendor DSNs and automation tokens must stay inside the governed secret boundary and only safe refs may persist in repo artifacts."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L161[8._Operational_security_release_gates]",
+          "rationale": "Release and operational security gates require explicit health and secret-rotation posture before promotion."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "rule_ref": "alert.operator_web_release_regression",
+      "label": "Operator web release regression",
+      "target_project_refs": [
+        "monitoring_project_production_operator_web",
+        "monitoring_project_preprod_operator_web"
+      ],
+      "target_environment_ids": [
+        "env_preproduction_verification",
+        "env_production"
+      ],
+      "trigger_summary": "Trigger on operator-web release regressions or crash-free-session drops for new deploys.",
+      "noise_controls": [
+        "Suppress browser extension noise",
+        "Filter localhost and legacy-browser traffic"
+      ],
+      "routing_target_alias": "ops.operator.web",
+      "release_gate_binding": "WEB_RELEASE_REGRESSION_GATE",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "The vendor overlay must remain secondary to first-party audit evidence and operational telemetry."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "All vendor-visible monitoring still depends on the corpus correlation keys that bind events back to manifest and authority lineage."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Trace and error overlays need release and manifest-rooted runtime lineage rather than free-floating exception feeds."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Alert posture must focus on actionable reliability, security, and release regressions instead of vanity noise."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Monitoring capture must redact secrets, tokens, and high-risk payloads before they ever become vendor-visible."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampled or filtered telemetry may never become the proof-of-record substitute for audit evidence."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L20[15.1_Contract_composition_and_precedence]",
+          "rationale": "Privacy minimization outranks diagnostic convenience, so the monitoring overlay must fail closed when settings drift."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility and signal separation remain explicit even when several telemetry lanes share identifiers."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L167[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Diagnostic logging must not reintroduce personal or authority-secret data that minimization policy already excludes."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L50[3._Secret_key_and_token_handling]",
+          "rationale": "Vendor DSNs and automation tokens must stay inside the governed secret boundary and only safe refs may persist in repo artifacts."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L161[8._Operational_security_release_gates]",
+          "rationale": "Release and operational security gates require explicit health and secret-rotation posture before promotion."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "rule_ref": "alert.portal_web_release_regression",
+      "label": "Portal web release regression",
+      "target_project_refs": [
+        "monitoring_project_production_client_portal_web",
+        "monitoring_project_preprod_client_portal_web"
+      ],
+      "target_environment_ids": [
+        "env_preproduction_verification",
+        "env_production"
+      ],
+      "trigger_summary": "Trigger on customer-portal release regressions with customer-safe route and module codes only.",
+      "noise_controls": [
+        "Suppress browser extensions, web crawlers, and localhost",
+        "Do not allow session replay or DOM capture in supporting evidence"
+      ],
+      "routing_target_alias": "ops.portal.runtime",
+      "release_gate_binding": "WEB_RELEASE_REGRESSION_GATE",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "The vendor overlay must remain secondary to first-party audit evidence and operational telemetry."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "All vendor-visible monitoring still depends on the corpus correlation keys that bind events back to manifest and authority lineage."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Trace and error overlays need release and manifest-rooted runtime lineage rather than free-floating exception feeds."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Alert posture must focus on actionable reliability, security, and release regressions instead of vanity noise."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Monitoring capture must redact secrets, tokens, and high-risk payloads before they ever become vendor-visible."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampled or filtered telemetry may never become the proof-of-record substitute for audit evidence."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L20[15.1_Contract_composition_and_precedence]",
+          "rationale": "Privacy minimization outranks diagnostic convenience, so the monitoring overlay must fail closed when settings drift."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility and signal separation remain explicit even when several telemetry lanes share identifiers."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L167[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Diagnostic logging must not reintroduce personal or authority-secret data that minimization policy already excludes."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L50[3._Secret_key_and_token_handling]",
+          "rationale": "Vendor DSNs and automation tokens must stay inside the governed secret boundary and only safe refs may persist in repo artifacts."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L161[8._Operational_security_release_gates]",
+          "rationale": "Release and operational security gates require explicit health and secret-rotation posture before promotion."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "rule_ref": "alert.native_macos_crash_spike",
+      "label": "Native macOS crash spike",
+      "target_project_refs": [
+        "monitoring_project_production_native_macos_operator",
+        "monitoring_project_preprod_native_macos_operator"
+      ],
+      "target_environment_ids": [
+        "env_preproduction_verification",
+        "env_production"
+      ],
+      "trigger_summary": "Trigger on crash spikes or release regressions in the native macOS operator workspace.",
+      "noise_controls": [
+        "Require release track correlation",
+        "Do not store raw authority credentials, tokens, or payload bodies"
+      ],
+      "routing_target_alias": "ops.native.workspace",
+      "release_gate_binding": "NATIVE_RELEASE_REGRESSION_GATE",
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+          "rationale": "The vendor overlay must remain secondary to first-party audit evidence and operational telemetry."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L79[14.4_Mandatory_correlation_keys]",
+          "rationale": "All vendor-visible monitoring still depends on the corpus correlation keys that bind events back to manifest and authority lineage."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+          "rationale": "Trace and error overlays need release and manifest-rooted runtime lineage rather than free-floating exception feeds."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+          "rationale": "Alert posture must focus on actionable reliability, security, and release regressions instead of vanity noise."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+          "rationale": "Monitoring capture must redact secrets, tokens, and high-risk payloads before they ever become vendor-visible."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+          "rationale": "Sampled or filtered telemetry may never become the proof-of-record substitute for audit evidence."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L20[15.1_Contract_composition_and_precedence]",
+          "rationale": "Privacy minimization outranks diagnostic convenience, so the monitoring overlay must fail closed when settings drift."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L143[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Visibility and signal separation remain explicit even when several telemetry lanes share identifiers."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L167[15.4_Correlation_visibility_and_signal_separation]",
+          "rationale": "Diagnostic logging must not reintroduce personal or authority-secret data that minimization policy already excludes."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L50[3._Secret_key_and_token_handling]",
+          "rationale": "Vendor DSNs and automation tokens must stay inside the governed secret boundary and only safe refs may persist in repo artifacts."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L161[8._Operational_security_release_gates]",
+          "rationale": "Release and operational security gates require explicit health and secret-rotation posture before promotion."
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "typed_gaps": [
+    "Metric-alert parity is intentionally summarized here in vendor-neutral terms rather than binding to one provider-specific workflow object model."
+  ],
+  "notes": [
+    "Alerts remain targeted and environment-scoped. No vanity activity or customer-behavior heuristics are included."
+  ]
+}

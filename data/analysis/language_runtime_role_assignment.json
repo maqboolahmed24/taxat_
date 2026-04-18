@@ -1,0 +1,151 @@
+{
+  "chosen_primary_stack": "TypeScript-first product stack on the current active Node LTS line, with Python retained for validators/tooling and Swift retained for the native macOS client.",
+  "decision_id": "ADR-001",
+  "runtime_roles": [
+    {
+      "hard_rules": [
+        "semantic selectors remain first-class",
+        "route and shell continuity stays contract-authored",
+        "browser layout and design-token iteration remain rapid"
+      ],
+      "host_runtime": "browser + Node-based build tooling",
+      "ownership_reason": "Portal, collaboration, and governance surfaces are selector-heavy, route-rich, and Playwright-first.",
+      "primary_runtime": "TypeScript",
+      "role": "browser_frontend",
+      "secondary_runtimes": [],
+      "source_refs": [
+        "Algorithm/frontend_shell_and_interaction_law.md::L644[10._Automation_anchors_and_UI_observability_fencing]",
+        "Algorithm/customer_client_portal_experience_contract.md::L701[Playwright_validation_minimum]",
+        "Algorithm/admin_governance_console_architecture.md::L661[7._Frontend_systems_architecture]"
+      ]
+    },
+    {
+      "hard_rules": [
+        "money-bearing logic must use exact-decimal abstractions only",
+        "canonical hashing must be centralized",
+        "stream resume and command idempotency remain contract-shaped"
+      ],
+      "host_runtime": "Node.js",
+      "ownership_reason": "Northbound command, snapshot, stream, and authority-adapter services benefit from sharing contract types and test fixtures with the browser layer.",
+      "primary_runtime": "TypeScript on current active Node LTS",
+      "role": "backend_northbound_apis_and_runtime_services",
+      "secondary_runtimes": [
+        "Python (offline validation only)"
+      ],
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L295[3._Command_envelope]",
+        "Algorithm/northbound_api_and_session_contract.md::L646[7._Stream_and_reconnect_rules]",
+        "Algorithm/authority_interaction_protocol.md::L621[9.8_Request_hashing_and_idempotency]"
+      ]
+    },
+    {
+      "hard_rules": [
+        "closed schemas stay authoritative",
+        "canonical decimal strings stay cross-runtime stable",
+        "no handwritten DTO drift without an explicit adapter boundary"
+      ],
+      "host_runtime": "schema generation pipeline",
+      "ownership_reason": "The product core should consume generated or tightly aligned TypeScript models while Python and Swift consume the same schema source through dedicated adapters.",
+      "primary_runtime": "JSON Schema as source, TypeScript as primary product-consumption target",
+      "role": "shared_contract_and_model_packages",
+      "secondary_runtimes": [
+        "Python validation wrappers",
+        "Swift Codable/Decodable models"
+      ],
+      "source_refs": [
+        "Algorithm/implementation_conventions.md::L19[2._Schema_conventions]",
+        "Algorithm/README.md::L90[schema_inventory]"
+      ]
+    },
+    {
+      "hard_rules": [
+        "Python remains the authoritative offline contract-validation toolchain for the corpus",
+        "tooling consumes schemas and golden fixtures rather than inventing parallel models"
+      ],
+      "host_runtime": "Python 3",
+      "ownership_reason": "The repository already has a substantial Python validator, analysis, and forensic toolchain that should remain first-class rather than being rewritten prematurely.",
+      "primary_runtime": "Python",
+      "role": "cli_analysis_and_forensic_tooling",
+      "secondary_runtimes": [],
+      "source_refs": [
+        "Algorithm/README.md::L157[authoritative_validator_entrypoints]",
+        "Algorithm/README.md::L158[validator_command]"
+      ]
+    },
+    {
+      "hard_rules": [
+        "tests reuse semantic selectors",
+        "fixtures stay contract-driven",
+        "browser automation remains mandatory regardless of backend runtime"
+      ],
+      "host_runtime": "Playwright on Node.js",
+      "ownership_reason": "Playwright is already present in the repo and is explicitly required by the UI/UX and browser-surface contracts.",
+      "primary_runtime": "TypeScript",
+      "role": "browser_test_automation",
+      "secondary_runtimes": [],
+      "source_refs": [
+        "Algorithm/UIUX_DESIGN_SKILL.md::L716[Playwright-first_XCUITest-first_design_expectation]",
+        "package.json::L9[playwright_dependency]"
+      ]
+    },
+    {
+      "hard_rules": [
+        "server remains source of legal truth",
+        "native client stays projection-and-command only",
+        "SwiftUI default with AppKit for dense evidence surfaces"
+      ],
+      "host_runtime": "SwiftUI with targeted AppKit",
+      "ownership_reason": "The macOS operator workspace is a first-class native embodiment and must not be reduced to a browser wrapper.",
+      "primary_runtime": "Swift",
+      "role": "native_desktop_client",
+      "secondary_runtimes": [],
+      "source_refs": [
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L15[1._Architectural_thesis]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L428[9._SwiftUI_versus_AppKit_decision_matrix]"
+      ]
+    },
+    {
+      "hard_rules": [
+        "native semantic identifiers mirror browser semantic selectors where the contract says so"
+      ],
+      "host_runtime": "XCUITest",
+      "ownership_reason": "Native executable validation belongs in the design loop alongside Playwright for browser surfaces.",
+      "primary_runtime": "Swift",
+      "role": "native_ui_automation",
+      "secondary_runtimes": [],
+      "source_refs": [
+        "Algorithm/UIUX_DESIGN_SKILL.md::L716[Playwright-first_XCUITest-first_design_expectation]",
+        "Algorithm/UIUX_DESIGN_SKILL.md::L744[Selector_strategy]"
+      ]
+    },
+    {
+      "hard_rules": [
+        "no gratuitous runtime proliferation",
+        "glue scripts should consume shared contracts rather than hard-coded ad hoc payloads"
+      ],
+      "host_runtime": "Node.js or Python",
+      "ownership_reason": "Avoid inventing a fourth first-class runtime for ordinary glue. Prefer the existing product-core runtime unless Python already owns the tool surface.",
+      "primary_runtime": "TypeScript for product-adjacent automation, Python where existing validator/analysis scripts already own the job",
+      "role": "product_adjacent_glue_and_ops_scripts",
+      "secondary_runtimes": [],
+      "source_refs": [
+        "Algorithm/README.md::L157[python_tooling_is_real]",
+        "package.json::L4[node_tooling_is_real]"
+      ]
+    }
+  ],
+  "seam_rules": [
+    {
+      "boundary": "TypeScript product core <-> Python tooling",
+      "rule": "Share schemas, canonical fixtures, and generated metadata; do not duplicate product business logic in Python except for offline verification and analysis packs."
+    },
+    {
+      "boundary": "TypeScript product core <-> Swift macOS client",
+      "rule": "Share northbound contracts and generated models; keep legal truth, gate logic, and authority mutation semantics on the server."
+    },
+    {
+      "boundary": "TypeScript browser frontend <-> TypeScript backend",
+      "rule": "Share contract-shaped DTOs and validation helpers, but keep UI state and server truth concerns separated."
+    }
+  ]
+}

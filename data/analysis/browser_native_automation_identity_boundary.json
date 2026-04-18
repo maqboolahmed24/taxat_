@@ -1,0 +1,141 @@
+{
+  "boundaries": [
+    {
+      "allowed_credentials_or_material": [
+        "IdP redirect artifacts",
+        "server-mediated session identifier",
+        "anti-CSRF binding"
+      ],
+      "boundary_id": "interactive_browser_human",
+      "can_satisfy_human_only_actions": true,
+      "forbidden_credentials_or_material": [
+        "browser-held raw authority credentials",
+        "unsafe primary bearer-token storage for browser writes"
+      ],
+      "label": "Interactive browser human boundary",
+      "principal_resolution": "Human principal resolved server-side before route composition, stream issuance, upload-session allocation, or command acceptance.",
+      "session_carrier": "Secure browser session cookie or equivalent same-origin protected session plus anti-CSRF binding.",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L30[2._Identity_session_and_command_trust]"
+      ],
+      "step_up_support": "Yes; contained escalation path with session challenge rotation.",
+      "storage_boundary": "Backend session store plus browser-safe derivable cache only."
+    },
+    {
+      "allowed_credentials_or_material": [
+        "invite token or deep-link context",
+        "focused request or approval anchor"
+      ],
+      "boundary_id": "portal_pre_upgrade_context",
+      "can_satisfy_human_only_actions": false,
+      "forbidden_credentials_or_material": [
+        "sensitive mutation authority before authenticated upgrade",
+        "scope widening from deep-link context alone"
+      ],
+      "label": "Portal invite or deep-link pre-upgrade boundary",
+      "principal_resolution": "Context may be known, but sensitive mutation authority is not live until authenticated upgrade completes.",
+      "session_carrier": "Contextual route and return-path state only.",
+      "source_refs": [
+        "Algorithm/customer_client_portal_experience_contract.md::L370[Onboarding_flow]",
+        "Algorithm/customer_client_portal_experience_contract.md::L399[Artifact_print_and_browser-handoff_rules]",
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]"
+      ],
+      "step_up_support": "Only after authenticated upgrade into the normal portal session.",
+      "storage_boundary": "Local route context only; no trust-sensitive mutation state."
+    },
+    {
+      "allowed_credentials_or_material": [
+        "product-session artifacts",
+        "resume metadata",
+        "redaction-safe local cache"
+      ],
+      "boundary_id": "interactive_native_human",
+      "can_satisfy_human_only_actions": true,
+      "forbidden_credentials_or_material": [
+        "raw authority credentials on device",
+        "unrestricted embedded credential surfaces for primary sign-in or step-up"
+      ],
+      "label": "Interactive native human boundary",
+      "principal_resolution": "Human principal resolved through system-browser or platform-auth-session sign-in and server-side actor-session validation.",
+      "session_carrier": "ASWebAuthenticationSession or equivalent plus Keychain-backed product-session material.",
+      "source_refs": [
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L372[7._Authentication_and_session_strategy]",
+        "Algorithm/macos_native_operator_workspace_blueprint.md::L473[11._Security_and_runtime_posture_for_the_desktop_client]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L78[4._Browser_native-client_API_and_transport_hardening]"
+      ],
+      "step_up_support": "Yes; via system-browser or platform auth session with challenge rotation on completion.",
+      "storage_boundary": "Keychain and OS-protected tenant-bound cache only."
+    },
+    {
+      "allowed_credentials_or_material": [
+        "short-lived non-browser bearer or client credential",
+        "service identity ref"
+      ],
+      "boundary_id": "machine_automation",
+      "can_satisfy_human_only_actions": false,
+      "forbidden_credentials_or_material": [
+        "human interactive session cookies",
+        "human step-up or approval substitution"
+      ],
+      "label": "Machine automation boundary",
+      "principal_resolution": "Service principal or external automation identity resolved per command; never treated as an interactive human session.",
+      "session_carrier": "Short-lived machine credential and explicit `command_id` plus `idempotency_key`.",
+      "source_refs": [
+        "Algorithm/actor_and_authority_model.md::L555[3.13_Machine-actor_rules]",
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]"
+      ],
+      "step_up_support": "No; machine actors cannot satisfy human step-up or approval paths.",
+      "storage_boundary": "Managed runtime secret boundary or vault-backed credential retrieval."
+    },
+    {
+      "allowed_credentials_or_material": [
+        "non-sensitive documentation context"
+      ],
+      "boundary_id": "embedded_webview_low_risk_only",
+      "can_satisfy_human_only_actions": false,
+      "forbidden_credentials_or_material": [
+        "primary sign-in",
+        "step-up completion",
+        "HMRC-only task handoff"
+      ],
+      "label": "Embedded web-view boundary",
+      "principal_resolution": "Not trusted as the primary sign-in, step-up, or authority handoff authority.",
+      "session_carrier": "Low-risk documentation or help content only.",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+        "Algorithm/security_and_runtime_hardening_contract.md::L78[4._Browser_native-client_API_and_transport_hardening]"
+      ],
+      "step_up_support": "No.",
+      "storage_boundary": "No sensitive session authority should be anchored here."
+    },
+    {
+      "allowed_credentials_or_material": [
+        "vault-held authority token lineage",
+        "vault-held IdP client secrets or private keys"
+      ],
+      "boundary_id": "authority_token_vault_boundary",
+      "can_satisfy_human_only_actions": false,
+      "forbidden_credentials_or_material": [
+        "raw authority access or refresh tokens in browser, queue, read model, or device cache",
+        "mixed storage of IdP tenant-admin material with general application state"
+      ],
+      "label": "Authority-token and IdP secret boundary",
+      "principal_resolution": "Interactive and machine identities may trigger authority work, but raw token and client-secret material stays in governed secret boundaries.",
+      "session_carrier": "Vault-held authority tokens, IdP admin material, and client-secret records referenced indirectly from application flows.",
+      "source_refs": [
+        "Algorithm/security_and_runtime_hardening_contract.md::L50[3._Secret_key_and_token_handling]",
+        "PROMPT/Checklist.md::L74[pc_0039]",
+        "PROMPT/Checklist.md::L75[pc_0040]"
+      ],
+      "step_up_support": "Not applicable directly; this boundary exists to keep downstream token handling governed.",
+      "storage_boundary": "SECRETS_MANAGER_OR_TOKEN_VAULT"
+    }
+  ],
+  "decision_id": "ADR-003",
+  "summary": {
+    "boundary_count": 6,
+    "interactive_human_boundaries": 2,
+    "non_interactive_or_limited_boundaries": 4
+  }
+}

@@ -1,0 +1,408 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/infra/cache/cache_resume_topology.schema.json",
+  "title": "CacheResumeTopologyInventory",
+  "description": "Sanitized provider-neutral cache and stream-resume topology inventory. The schema freezes provider option rows, environment partitions, governed cache families, and references to the machine-readable policy packs that define partition keys, resume binding, TTLs, invalidation, and local-versus-shared storage law.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "inventory_id",
+    "provider_id",
+    "flow_id",
+    "policy_version",
+    "run_id",
+    "workspace_id",
+    "operator_identity_alias",
+    "selection_status",
+    "managed_default_status",
+    "selected_provider_family_or_null",
+    "topology_mode",
+    "provider_option_rows",
+    "environment_rows",
+    "family_rows",
+    "cache_partition_key_contract_ref",
+    "resume_token_binding_policy_ref",
+    "ttl_and_invalidation_matrix_ref",
+    "local_vs_shared_cache_policy_ref",
+    "stream_resume_contract_map_ref",
+    "source_refs",
+    "typed_gaps",
+    "notes",
+    "last_verified_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "inventory_id": {
+      "const": "cache_resume_inventory"
+    },
+    "provider_id": {
+      "const": "cache-and-stream-resume-store"
+    },
+    "flow_id": {
+      "const": "provision-cache-and-stream-resume-store"
+    },
+    "policy_version": {
+      "const": "1.0"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workspace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operator_identity_alias": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selection_status": {
+      "type": "string",
+      "enum": [
+        "PROVIDER_SELECTION_REQUIRED",
+        "PROVIDER_SELECTED"
+      ]
+    },
+    "managed_default_status": {
+      "type": "string",
+      "enum": [
+        "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION",
+        "READY_TO_ADOPT_PLATFORM_CACHE"
+      ]
+    },
+    "selected_provider_family_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "AWS_ELASTICACHE_SERVERLESS_VALKEY",
+        "GCP_MEMORYSTORE_REDIS_CLUSTER",
+        "AZURE_MANAGED_REDIS",
+        "SELF_HOSTED_REDIS_CLUSTER",
+        null
+      ]
+    },
+    "topology_mode": {
+      "const": "DISPOSABLE_SHARED_CACHE_PLUS_ROUTE_BOUND_RESUME_METADATA_WITH_STRICT_PARTITION_ISOLATION"
+    },
+    "provider_option_rows": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "$ref": "#/$defs/providerOptionRow"
+      }
+    },
+    "environment_rows": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "$ref": "#/$defs/environmentRow"
+      }
+    },
+    "family_rows": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "$ref": "#/$defs/familyRow"
+      }
+    },
+    "cache_partition_key_contract_ref": {
+      "const": "config/cache/cache_partition_key_contract.json"
+    },
+    "resume_token_binding_policy_ref": {
+      "const": "config/cache/resume_token_binding_policy.json"
+    },
+    "ttl_and_invalidation_matrix_ref": {
+      "const": "config/cache/ttl_and_invalidation_matrix.json"
+    },
+    "local_vs_shared_cache_policy_ref": {
+      "const": "config/cache/local_vs_shared_cache_policy.json"
+    },
+    "stream_resume_contract_map_ref": {
+      "const": "config/cache/stream_resume_contract_map.json"
+    },
+    "source_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/sourceRef"
+      }
+    },
+    "typed_gaps": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "last_verified_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "sourceRef": {
+      "type": "object",
+      "required": [
+        "source_file",
+        "source_heading_or_logical_block",
+        "source_ref",
+        "rationale"
+      ],
+      "properties": {
+        "source_file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_heading_or_logical_block": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "providerOptionRow": {
+      "type": "object",
+      "required": [
+        "provider_family",
+        "selection_state",
+        "provider_label",
+        "docs_urls",
+        "topology_summary",
+        "isolation_summary",
+        "acl_tls_summary",
+        "persistence_summary",
+        "notes",
+        "source_refs"
+      ],
+      "properties": {
+        "provider_family": {
+          "type": "string",
+          "enum": [
+            "AWS_ELASTICACHE_SERVERLESS_VALKEY",
+            "GCP_MEMORYSTORE_REDIS_CLUSTER",
+            "AZURE_MANAGED_REDIS",
+            "SELF_HOSTED_REDIS_CLUSTER"
+          ]
+        },
+        "selection_state": {
+          "type": "string",
+          "enum": [
+            "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION",
+            "SELF_HOST_DECISION_REQUIRED"
+          ]
+        },
+        "provider_label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "docs_urls": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "topology_summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "isolation_summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "acl_tls_summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "persistence_summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "environmentRow": {
+      "type": "object",
+      "required": [
+        "environment_ref",
+        "label",
+        "namespace_prefix",
+        "runtime_secret_alias_ref",
+        "admin_secret_alias_ref",
+        "local_resume_namespace_ref",
+        "provider_binding_state",
+        "recovery_posture",
+        "notes",
+        "source_refs"
+      ],
+      "properties": {
+        "environment_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "namespace_prefix": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runtime_secret_alias_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "admin_secret_alias_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "local_resume_namespace_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider_binding_state": {
+          "const": "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION"
+        },
+        "recovery_posture": {
+          "type": "string",
+          "enum": [
+            "FIXTURE_ONLY_NO_AUTHORITATIVE_RECOVERY",
+            "WARM_REBUILD_FROM_DURABLE_TRUTH_ONLY",
+            "RESTORE_DRILL_REBUILD_FROM_DURABLE_TRUTH_ONLY"
+          ]
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "familyRow": {
+      "type": "object",
+      "required": [
+        "family_ref",
+        "label",
+        "cache_scope_class_or_null",
+        "stream_scope_class_or_null",
+        "route_identity_pattern",
+        "canonical_object_pattern",
+        "visibility_partition_required",
+        "local_resume_allowed",
+        "notes",
+        "source_refs"
+      ],
+      "properties": {
+        "family_ref": {
+          "type": "string",
+          "enum": [
+            "family.manifest_experience",
+            "family.collaboration_workspace",
+            "family.client_portal_workspace",
+            "family.upload_session_recovery",
+            "family.native_operator_hydration"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cache_scope_class_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "LOW_NOISE_FRAME",
+            "WORKSPACE_SNAPSHOT",
+            "CLIENT_PORTAL_WORKSPACE",
+            "NATIVE_OPERATOR_WORKSPACE_SCENE",
+            null
+          ]
+        },
+        "stream_scope_class_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "MANIFEST_EXPERIENCE",
+            "WORKSPACE",
+            null
+          ]
+        },
+        "route_identity_pattern": {
+          "type": "string",
+          "minLength": 1
+        },
+        "canonical_object_pattern": {
+          "type": "string",
+          "minLength": 1
+        },
+        "visibility_partition_required": {
+          "type": "boolean"
+        },
+        "local_resume_allowed": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceRef"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

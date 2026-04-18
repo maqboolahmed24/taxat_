@@ -1,0 +1,494 @@
+{
+  "rows": [
+    {
+      "artifact_family_id": "manifest_and_execution_basis",
+      "backup_posture": "Tier 0 direct backup; exact replay cannot reconstruct these from projections.",
+      "canonical_store": "PRIMARY_CONTROL_STORE",
+      "eventing_posture": "Changes append outbox records and append-only outcome references; never inferred from broker history.",
+      "examples": [
+        "RunManifest",
+        "ConfigFreeze",
+        "InputFreeze",
+        "HashSet",
+        "ContinuationSet",
+        "FrozenExecutionBinding"
+      ],
+      "label": "Manifest and execution-basis artifacts",
+      "privacy_reconciliation_required_before_reopen": false,
+      "rationale": "These artifacts are the canonical execution and lineage spine and therefore remain transactional source-of-truth rather than append-only viewer cache or stream payload.",
+      "rebuildability": "DIRECT_BACKUP_REQUIRED",
+      "retention_posture": "Basis-preserving replay retention applies through the full lawful review window.",
+      "source_refs": [
+        "Algorithm/manifest_and_config_freeze_contract.md::L78[5.3_RunManifest_required_field_groups]",
+        "Algorithm/manifest_and_config_freeze_contract.md::L338[5.4_ConfigFreeze_contract]",
+        "Algorithm/manifest_and_config_freeze_contract.md::L651[5.8_Input_freeze_contract]",
+        "Algorithm/manifest_and_config_freeze_contract.md::L744[5.9_Hash_contract]",
+        "Algorithm/replay_and_reproducibility_contract.md::L109[Execution-basis_freeze_contract]"
+      ],
+      "truth_class": "SYSTEM_OF_RECORD"
+    },
+    {
+      "artifact_family_id": "release_migration_and_recovery_control",
+      "backup_posture": "Tier 0 direct backup; release and restore governance cannot be reconstructed from CI dashboards or deploy logs.",
+      "canonical_store": "PRIMARY_CONTROL_STORE",
+      "eventing_posture": "Promotion, rollback, and restore gates may publish events, but governance truth remains in persisted control objects.",
+      "examples": [
+        "DeploymentRelease",
+        "SchemaMigrationLedger",
+        "RecoveryCheckpoint",
+        "ClientCompatibilityMatrix",
+        "ReleaseVerificationManifest"
+      ],
+      "label": "Release, migration, and recovery control objects",
+      "privacy_reconciliation_required_before_reopen": true,
+      "rationale": "These records freeze schema-reader windows, restore evidence, and rollback-vs-fail-forward posture, so they must stay in the same durable control plane as other legal truth.",
+      "rebuildability": "DIRECT_BACKUP_REQUIRED",
+      "retention_posture": "Governed by release/resilience proof retention and historical reader-window protection.",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L72[3._Schema_and_datastore_migration_rules]",
+        "Algorithm/deployment_and_resilience_contract.md::L133[5._Backup_restore_and_DR_rules]",
+        "Algorithm/deployment_and_resilience_contract.md::L177[6._Rollout_rollback_and_fail-forward_posture]",
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L44[Recovery_checkpoint_law]"
+      ],
+      "truth_class": "SYSTEM_OF_RECORD"
+    },
+    {
+      "artifact_family_id": "workflow_filing_and_submission_state",
+      "backup_posture": "Tier 0 direct backup for authority-facing settlement and workflow control.",
+      "canonical_store": "PRIMARY_CONTROL_STORE",
+      "eventing_posture": "Mutations emit durable receipts, outbox work, audit events, and projection refreshes.",
+      "examples": [
+        "WorkflowItem",
+        "FilingCase",
+        "SubmissionRecord",
+        "ObligationMirror",
+        "AmendmentCase"
+      ],
+      "label": "Workflow, filing, and submission state",
+      "privacy_reconciliation_required_before_reopen": true,
+      "rationale": "The corpus explicitly forbids inferring settled legal posture from UI or transport, so these mutable entities belong in the transactional system of record.",
+      "rebuildability": "DIRECT_BACKUP_REQUIRED",
+      "retention_posture": "Retention-controlled mutable state with linked append-only evidence refs.",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L854[9.10_Submission-state_write_rules]",
+        "Algorithm/collaboration_workspace_contract.md::L538[6._State_transitions]",
+        "Algorithm/deployment_and_resilience_contract.md::L9[1._Reference_runtime_topology]"
+      ],
+      "truth_class": "SYSTEM_OF_RECORD"
+    },
+    {
+      "artifact_family_id": "durable_command_receipts_and_outbox_inbox",
+      "backup_posture": "Tier 0 backup because queue rebuild and client recovery anchor on these records.",
+      "canonical_store": "PRIMARY_CONTROL_STORE",
+      "eventing_posture": "Queue drains from these ledgers; queue loss is recoverable from them.",
+      "examples": [
+        "ApiCommandReceipt",
+        "command receipt refs",
+        "transactional outbox rows",
+        "durable inbox rows",
+        "dispatch refs"
+      ],
+      "label": "Durable command receipts and outbox/inbox ledgers",
+      "privacy_reconciliation_required_before_reopen": false,
+      "rationale": "The northbound and resilience contracts require durable receipts and outbox/inbox truth before transport or reconnect can be trusted.",
+      "rebuildability": "DIRECT_BACKUP_REQUIRED",
+      "retention_posture": "Receipts may age out of fast paths, but durable recovery anchors remain queryable for their governed window.",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L456[4._Command_receipt]",
+        "Algorithm/northbound_api_and_session_contract.md::L751[durable_command_receipt_invariant]",
+        "Algorithm/deployment_and_resilience_contract.md::L41[outbox_inbox_queue_loss_recoverable]"
+      ],
+      "truth_class": "SYSTEM_OF_RECORD"
+    },
+    {
+      "artifact_family_id": "authority_interaction_control",
+      "backup_posture": "Tier 0 direct backup because legal resend and reconciliation posture depend on these records.",
+      "canonical_store": "PRIMARY_CONTROL_STORE",
+      "eventing_posture": "Queue jobs and callbacks update from these records; they are never reconstructed from broker timing alone.",
+      "examples": [
+        "AuthorityInteractionRecord",
+        "reconciliation budget state",
+        "resend legality state",
+        "dispatch refs"
+      ],
+      "label": "Authority interaction control records",
+      "privacy_reconciliation_required_before_reopen": true,
+      "rationale": "Authority recovery law requires resend and reconciliation control to survive queue loss and restore independently of transport artifacts.",
+      "rebuildability": "DIRECT_BACKUP_REQUIRED",
+      "retention_posture": "Regulated control objects with durable lineage to request/response evidence.",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L363[AuthorityInteractionRecord]",
+        "Algorithm/authority_interaction_protocol.md::L998[9.13_Reconciliation_protocol]",
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L113[Queue_and_authority_recovery_law]"
+      ],
+      "truth_class": "SYSTEM_OF_RECORD"
+    },
+    {
+      "artifact_family_id": "retention_control_objects",
+      "backup_posture": "Tier 0 direct backup when retention posture gates reopen or legal visibility.",
+      "canonical_store": "PRIMARY_CONTROL_STORE",
+      "eventing_posture": "Retention transitions emit append-only events and proofs, but current lifecycle state stays mutable here.",
+      "examples": [
+        "RetentionTag",
+        "ArtifactRetention",
+        "RestorePrivacyReconciliationContract"
+      ],
+      "label": "Retention and privacy control objects",
+      "privacy_reconciliation_required_before_reopen": true,
+      "rationale": "Retention tags, artifact-retention state, and privacy-reconciliation outcomes are mutable governance truth, not derived views.",
+      "rebuildability": "DIRECT_BACKUP_REQUIRED",
+      "retention_posture": "This is the retention-control layer itself.",
+      "source_refs": [
+        "Algorithm/retention_and_privacy.md::L13[Retention_tag_contract]",
+        "Algorithm/retention_and_privacy.md::L58[Artifact_retention_contract]",
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[Restore_privacy_reconciliation_law]"
+      ],
+      "truth_class": "SYSTEM_OF_RECORD"
+    },
+    {
+      "artifact_family_id": "authority_request_and_response_evidence",
+      "backup_posture": "Tier 0 direct backup; request and response bodies plus identity hashes are replay and forensics evidence.",
+      "canonical_store": "APPEND_ONLY_AUDIT_STORE",
+      "eventing_posture": "Workers may dispatch or normalize from them, but the envelopes themselves remain immutable append-only artifacts.",
+      "examples": [
+        "AuthorityRequestEnvelope",
+        "AuthorityResponseEnvelope",
+        "request identity contract",
+        "response correlation lineage"
+      ],
+      "label": "Authority request and response envelope evidence",
+      "privacy_reconciliation_required_before_reopen": true,
+      "rationale": "Sealed authority envelopes are evidence-bearing append-only artifacts linked from mutable interaction control records rather than mutable state in their own right.",
+      "rebuildability": "DIRECT_BACKUP_REQUIRED",
+      "retention_posture": "Regulated records with explicit body refs and lineage preservation.",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L212[AuthorityRequestEnvelope]",
+        "Algorithm/authority_interaction_protocol.md::L300[AuthorityResponseEnvelope]",
+        "Algorithm/authority_interaction_protocol.md::L621[9.8_Request_hashing_and_idempotency]"
+      ],
+      "truth_class": "APPEND_ONLY_EVIDENCE"
+    },
+    {
+      "artifact_family_id": "authority_ingress_receipts",
+      "backup_posture": "Tier 0 direct backup because restore and no-blind-resend posture depend on first-seen ingress checkpoints.",
+      "canonical_store": "APPEND_ONLY_AUDIT_STORE",
+      "eventing_posture": "Callbacks, polls, and recovery reads may create more receipts, but canonical receipts stay immutable.",
+      "examples": [
+        "AuthorityIngressReceipt",
+        "authority ingress proof contract",
+        "canonical ingress receipt refs"
+      ],
+      "label": "Authority ingress receipts and duplicate-suppression checkpoints",
+      "privacy_reconciliation_required_before_reopen": true,
+      "rationale": "The ingress protocol treats receipts as durable checkpoints that must exist before legal-state mutation or duplicate suppression.",
+      "rebuildability": "DIRECT_BACKUP_REQUIRED",
+      "retention_posture": "Regulated ingress evidence with explicit dedupe and quarantine posture.",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L792[9.9A_Inbound_authority_ingress_protocol]",
+        "Algorithm/authority_interaction_protocol.md::L824[no_transport_memory_only_mutation]"
+      ],
+      "truth_class": "APPEND_ONLY_EVIDENCE"
+    },
+    {
+      "artifact_family_id": "audit_event_ledger",
+      "backup_posture": "Tier 0 direct backup; audit continuity is a reopen gate.",
+      "canonical_store": "APPEND_ONLY_AUDIT_STORE",
+      "eventing_posture": "Append-only writes only; projections or queries read from this ledger.",
+      "examples": [
+        "AuditEvent",
+        "Manifest lifecycle events",
+        "Submission audit events",
+        "Retention and privacy events"
+      ],
+      "label": "Audit event ledger",
+      "privacy_reconciliation_required_before_reopen": true,
+      "rationale": "Audit evidence is explicitly distinct from mutable operational state and must remain append-only under rebuild, rollback, and retention pressure.",
+      "rebuildability": "DIRECT_BACKUP_REQUIRED",
+      "retention_posture": "Payloads may limit or tombstone, but object, reason, and lineage minimums must survive.",
+      "source_refs": [
+        "Algorithm/observability_and_audit_contract.md::L154[14.5_Audit_event_contract]",
+        "Algorithm/observability_and_audit_contract.md::L537[14.10_Audit_versus_telemetry_retention]",
+        "Algorithm/retention_limited_explainability_and_audit_sufficiency_contract.md::L33[Artifact_Rules]"
+      ],
+      "truth_class": "APPEND_ONLY_EVIDENCE"
+    },
+    {
+      "artifact_family_id": "provenance_graph_evidence",
+      "backup_posture": "Tier 0 direct backup for decisive-path replay and explainability.",
+      "canonical_store": "APPEND_ONLY_AUDIT_STORE",
+      "eventing_posture": "Graph evidence appends alongside audit events; read-side graph views are disposable.",
+      "examples": [
+        "provenance entity nodes",
+        "provenance activity nodes",
+        "provenance edges",
+        "path closure semantics"
+      ],
+      "label": "Provenance graph evidence",
+      "privacy_reconciliation_required_before_reopen": true,
+      "rationale": "The provenance contract requires causally ordered, partitioned, append-only evidence paths rather than ephemeral graph cache reconstruction.",
+      "rebuildability": "DIRECT_BACKUP_REQUIRED",
+      "retention_posture": "Retention-limited placeholders remain explicit instead of removing path segments.",
+      "source_refs": [
+        "Algorithm/provenance_graph_semantics.md::L215[11.6_Construction_rules]",
+        "Algorithm/provenance_graph_semantics.md::L617[11.14D_Replay-safe_proof_reconstruction]",
+        "Algorithm/provenance_graph_semantics.md::L638[11.14E_Explainability_output_contract]"
+      ],
+      "truth_class": "APPEND_ONLY_EVIDENCE"
+    },
+    {
+      "artifact_family_id": "replay_attestations_and_erasure_proofs",
+      "backup_posture": "Tier 0 direct backup because audit claims and DR claims rely on bound historical evidence.",
+      "canonical_store": "APPEND_ONLY_AUDIT_STORE",
+      "eventing_posture": "Produced by replay, restore, and privacy workflows; consumed by audit queries and release gates.",
+      "examples": [
+        "ReplayAttestation",
+        "RestoreDrillResult",
+        "ErasureProof",
+        "ReleaseVerificationManifest evidence refs"
+      ],
+      "label": "Replay attestations, restore drill evidence, and erasure proofs",
+      "privacy_reconciliation_required_before_reopen": true,
+      "rationale": "These artifacts prove replay, restore, and erasure outcomes and therefore belong in append-only evidence storage rather than mutable control rows.",
+      "rebuildability": "DIRECT_BACKUP_REQUIRED",
+      "retention_posture": "Proof-bearing evidence with retention-limited explainability semantics where needed.",
+      "source_refs": [
+        "Algorithm/replay_and_reproducibility_contract.md::L564[Replay_attestation_artifact]",
+        "Algorithm/deployment_and_resilience_contract.md::L133[5._Backup_restore_and_DR_rules]",
+        "Algorithm/retention_and_privacy.md::L214[retention_tag_artifact_retention_erasure_proof_schemas]"
+      ],
+      "truth_class": "APPEND_ONLY_EVIDENCE"
+    },
+    {
+      "artifact_family_id": "upload_session_metadata",
+      "backup_posture": "Tier 0 or Tier 1 depending attachment criticality; metadata is authoritative even when blob bodies live elsewhere.",
+      "canonical_store": "PRIMARY_CONTROL_STORE",
+      "eventing_posture": "Scan transitions, publication commands, and read-side updates derive from this metadata plus object-store refs.",
+      "examples": [
+        "ClientUploadSession",
+        "CollaborationAttachment metadata",
+        "upload request binding contract",
+        "current upload refs"
+      ],
+      "label": "Upload session and attachment metadata",
+      "privacy_reconciliation_required_before_reopen": true,
+      "rationale": "The product must preserve request binding, lane identity, and publish-time state durably even though the uploaded bytes live in object storage.",
+      "rebuildability": "DIRECT_BACKUP_REQUIRED",
+      "retention_posture": "Governed by request-binding, scan, publication, and replacement lifecycle rules.",
+      "source_refs": [
+        "Algorithm/customer_client_portal_experience_contract.md::L293[Secure_document-upload_flow]",
+        "Algorithm/collaboration_workspace_contract.md::L1673[8.2_Upload_staging]"
+      ],
+      "truth_class": "SYSTEM_OF_RECORD"
+    },
+    {
+      "artifact_family_id": "immutable_upload_and_quarantine_bodies",
+      "backup_posture": "Inventory-linked backup or replication required for authoritative or non-regenerable blob bodies.",
+      "canonical_store": "IMMUTABLE_OBJECT_STORE",
+      "eventing_posture": "Blob create/scan/publish notifications are transport or projection concerns; the bodies themselves are immutable objects.",
+      "examples": [
+        "uploaded file bodies",
+        "quarantined binaries",
+        "response body refs",
+        "request payload refs"
+      ],
+      "label": "Immutable upload, quarantine, and authority body blobs",
+      "privacy_reconciliation_required_before_reopen": true,
+      "rationale": "The corpus explicitly places payload, evidence, and artifact bodies in object storage referenced by immutable refs rather than inside transactional rows or queues.",
+      "rebuildability": "DIRECT_BACKUP_REQUIRED_FOR_AUTHORITATIVE_BLOBS",
+      "retention_posture": "Blob bodies may age into tombstones or masked placeholders, but durable refs remain explicit.",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L25[object_store_payload_evidence_artifact_bodies]",
+        "Algorithm/customer_client_portal_experience_contract.md::L293[Secure_document-upload_flow]",
+        "Algorithm/authority_interaction_protocol.md::L667[9.9_Response_classes]"
+      ],
+      "truth_class": "APPEND_ONLY_EVIDENCE"
+    },
+    {
+      "artifact_family_id": "generated_exports_and_proof_bundle_bodies",
+      "backup_posture": "Direct backup for filed or authority-linked artifacts; regenerable exports may rebuild from authoritative refs if policy allows.",
+      "canonical_store": "IMMUTABLE_OBJECT_STORE",
+      "eventing_posture": "Rendered artifacts may trigger notifications or downloads, but the bodies remain immutable objects referenced from truth stores.",
+      "examples": [
+        "ProofBundle body",
+        "EnquiryPack export",
+        "rendered filing artifacts",
+        "customer export packages"
+      ],
+      "label": "Generated export and proof-bundle bodies",
+      "privacy_reconciliation_required_before_reopen": true,
+      "rationale": "Proof and export bodies are too large and too versioned for the primary control store, but still need immutable refs and retention-aware lifecycle handling.",
+      "rebuildability": "SOME_REGENERABLE_SOME_DIRECT_BACKUP",
+      "retention_posture": "Retention-limited explainability rules determine whether bundles remain filing-capable, review-only, or tombstoned.",
+      "source_refs": [
+        "Algorithm/retention_and_privacy.md::L218[Proof-bundle_retention_semantics]",
+        "Algorithm/provenance_graph_semantics.md::L638[11.14E_Explainability_output_contract]",
+        "Algorithm/customer_client_portal_experience_contract.md::L399[artifact_print_and_browser_handoff_rules]"
+      ],
+      "truth_class": "APPEND_ONLY_EVIDENCE"
+    },
+    {
+      "artifact_family_id": "derived_read_models_and_snapshots",
+      "backup_posture": "Tier 1 rebuildable; direct backup optional.",
+      "canonical_store": "PROJECTION_STORE",
+      "eventing_posture": "Refreshed by projectors from durable truth and then fanned out to clients.",
+      "examples": [
+        "DecisionBundle",
+        "ExperienceDelta",
+        "LowNoiseExperienceFrame",
+        "ClientPortalWorkspace",
+        "WorkspaceSnapshot"
+      ],
+      "label": "Derived read models and snapshots",
+      "privacy_reconciliation_required_before_reopen": false,
+      "rationale": "The deployment contract explicitly marks route-facing bundles and workspaces as derived disposable projections rather than command-side truth.",
+      "rebuildability": "REBUILD_FROM_CONTROL_AND_EVIDENCE",
+      "retention_posture": "Retention-limited projections must degrade explicitly and never overwrite evidence.",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L35[projector_derives_disposable_surfaces]",
+        "Algorithm/customer_client_portal_experience_contract.md::L479[Read-model_and_API_translation_requirements]",
+        "Algorithm/collaboration_workspace_contract.md::L971[7.3_Read_models]"
+      ],
+      "truth_class": "DERIVED_PROJECTION"
+    },
+    {
+      "artifact_family_id": "resume_tokens_and_route_cursors",
+      "backup_posture": "Best-effort only; loss forces rebase or fresh snapshot issuance, not legal-state loss.",
+      "canonical_store": "CACHE_RESUME_STORE",
+      "eventing_posture": "Feeds reconnect and stale-view handling; never authorizes legal mutation on its own.",
+      "examples": [
+        "ExperienceCursor",
+        "workspace resume tokens",
+        "latest snapshot refs",
+        "last published sequence frontiers"
+      ],
+      "label": "Resume tokens, route cursors, and server-side reconnect helpers",
+      "privacy_reconciliation_required_before_reopen": false,
+      "rationale": "Cursors and resume tokens are durable enough for reconnect ergonomics but explicitly not authoritative truth.",
+      "rebuildability": "REHYDRATE_FROM_SNAPSHOTS_AND_RECEIPTS",
+      "retention_posture": "Short-lived resumability aids with explicit invalidation and expiry semantics.",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L646[7._Stream_and_reconnect_rules]",
+        "Algorithm/collaboration_workspace_contract.md::L106[2.2_Stream_recovery_catch-up_and_cursor_continuity]"
+      ],
+      "truth_class": "CACHE_ONLY"
+    },
+    {
+      "artifact_family_id": "queue_messages_and_worker_claims",
+      "backup_posture": "No primary backup dependency; transport loss is acceptable when durable truth survives.",
+      "canonical_store": "QUEUE_BROKER",
+      "eventing_posture": "Primary role is delivery; legal mutation and history remain anchored elsewhere.",
+      "examples": [
+        "outbox-delivered jobs",
+        "projector work items",
+        "reconciliation jobs",
+        "notification jobs"
+      ],
+      "label": "Queue messages, broker envelopes, and worker claims",
+      "privacy_reconciliation_required_before_reopen": true,
+      "rationale": "The queue or broker is explicitly transport-only and must be rebuildable from durable outbox, inbox, receipt, interaction, workflow, and audit truth.",
+      "rebuildability": "REBUILD_FROM_OUTBOX_INBOX_AND_CONTROL_TRUTH",
+      "retention_posture": "Short-lived transport retention only.",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L33[queue_not_system_of_record]",
+        "Algorithm/deployment_and_resilience_contract.md::L155[queues_rebuilt_from_outbox_inbox_truth]",
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L113[Queue_and_authority_recovery_law]"
+      ],
+      "truth_class": "TRANSPORT_ONLY"
+    },
+    {
+      "artifact_family_id": "live_stream_and_notification_fanout",
+      "backup_posture": "No direct backup required; clients rebase to snapshots when history compacts or fanout is lost.",
+      "canonical_store": "QUEUE_BROKER",
+      "eventing_posture": "Idempotent-by-sequence client delivery with explicit rebase on compacted history or epoch change.",
+      "examples": [
+        "experience.delta",
+        "workspace.delta",
+        "notification.badge",
+        "heartbeat"
+      ],
+      "label": "Live SSE frames and notification fanout",
+      "privacy_reconciliation_required_before_reopen": false,
+      "rationale": "The stream contracts make live events reconnect-safe and typed, but still derived from snapshots and durable refs rather than canonical truth.",
+      "rebuildability": "REISSUE_FROM_PROJECTION_AND_CURSOR_STATE",
+      "retention_posture": "Ephemeral fanout only; durable snapshots live elsewhere.",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L646[7._Stream_and_reconnect_rules]",
+        "Algorithm/collaboration_workspace_contract.md::L1780[collaboration_sse_event_types]"
+      ],
+      "truth_class": "TRANSPORT_ONLY"
+    },
+    {
+      "artifact_family_id": "client_side_disposable_scene_caches",
+      "backup_posture": "No backup dependence; invalidate on revocation, masking change, tenant switch, or schema incompatibility.",
+      "canonical_store": "CACHE_RESUME_STORE",
+      "eventing_posture": "Hydrated from authoritative snapshots and invalidated by session or schema events.",
+      "examples": [
+        "native scene cache",
+        "browser route cache",
+        "masked view cache",
+        "local relaunch snapshots"
+      ],
+      "label": "Client-side disposable scene and route caches",
+      "privacy_reconciliation_required_before_reopen": false,
+      "rationale": "The browser and native session contracts permit local persistence only for derivable state and explicitly forbid it from becoming legal truth.",
+      "rebuildability": "RELOAD_FROM_SERVER_TRUTH",
+      "retention_posture": "Strictly disposable runtime cache posture.",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
+        "Algorithm/deployment_and_resilience_contract.md::L39[desktop_caches_disposable_and_rebuildable]"
+      ],
+      "truth_class": "CACHE_ONLY"
+    }
+  ],
+  "store_catalog": [
+    {
+      "durability_posture": "Direct backup required; Tier 0 for control-plane legal truth.",
+      "label": "Primary control store",
+      "rebuildability": "Not rebuildable from projections or transport.",
+      "role": "Transactional system of record for mutable legal, workflow, control-plane, and idempotency state.",
+      "store_id": "PRIMARY_CONTROL_STORE"
+    },
+    {
+      "durability_posture": "Direct backup required; Tier 0 for compliance-significant evidence.",
+      "label": "Append-only audit store",
+      "rebuildability": "Not rebuildable from projections; only derivable from preserved evidence itself.",
+      "role": "Immutable or append-only evidence ledger for audit events, provenance, envelopes, ingress checkpoints, replay attestations, and erasure proofs.",
+      "store_id": "APPEND_ONLY_AUDIT_STORE"
+    },
+    {
+      "durability_posture": "Direct backup or inventory-linked replication required for non-regenerable bodies.",
+      "label": "Immutable object store",
+      "rebuildability": "Some generated exports can be regenerated; authoritative uploaded or authority-returned bodies cannot.",
+      "role": "Blob storage for uploaded bytes, quarantined binaries, exports, proof bodies, response bodies, and other large immutable payloads referenced by durable refs.",
+      "store_id": "IMMUTABLE_OBJECT_STORE"
+    },
+    {
+      "durability_posture": "Tier 1 rebuildable; direct backup optional.",
+      "label": "Projection store",
+      "rebuildability": "Rebuild from control truth, append-only evidence, and immutable object refs.",
+      "role": "Disposable read-side materializations for route-facing bundles, snapshots, workspace views, and search/index helpers.",
+      "store_id": "PROJECTION_STORE"
+    },
+    {
+      "durability_posture": "Transport loss tolerated if outbox/inbox truth survives.",
+      "label": "Queue or broker",
+      "rebuildability": "Rebuildable from durable outbox, inbox, receipt, interaction, workflow, and audit truth.",
+      "role": "Transport-only delivery fabric for worker coordination, outbox drain, reconciliation jobs, notifications, and live fanout.",
+      "store_id": "QUEUE_BROKER"
+    },
+    {
+      "durability_posture": "Tier 2 disposable; best-effort backup only.",
+      "label": "Cache and resume store",
+      "rebuildability": "Rehydratable from authoritative snapshots, receipts, and projection state.",
+      "role": "Ephemeral resumability, route cursor, session-adjacent cache, and reconnect helpers.",
+      "store_id": "CACHE_RESUME_STORE"
+    }
+  ],
+  "truth_class_enum": [
+    "APPEND_ONLY_EVIDENCE",
+    "CACHE_ONLY",
+    "DERIVED_PROJECTION",
+    "SYSTEM_OF_RECORD",
+    "TRANSPORT_ONLY"
+  ]
+}

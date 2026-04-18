@@ -1,0 +1,558 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "messaging_ordering_and_partitioning_policy",
+  "selection_status": "PROVIDER_SELECTION_REQUIRED",
+  "topology_mode": "TRANSACTIONAL_OUTBOX_AND_AUTHENTICATED_DEDUPE_INBOX_REBUILDABLE_TRANSPORT_ONLY_BROKER",
+  "policy_rows": [
+    {
+      "policy_ref": "ordering.manifest_ref_fifo",
+      "label": "Per-manifest ordered partition",
+      "channel_refs": [
+        "channel.manifest.stage.dispatch",
+        "channel.evidence.manifest.binding"
+      ],
+      "partition_key_fields": [
+        "tenant_id",
+        "manifest_ref"
+      ],
+      "strict_order_scope": "All messages for one manifest must preserve stage or evidence-binding order; cross-manifest order is intentionally unconstrained.",
+      "concurrency_rule": "One active consumer claim per partition key at a time; horizontal scale comes from many manifests, not from reordering one manifest.",
+      "backlog_hazard": "A poison message can stall one manifest lane, so dead-letter posture must unblock later work for other manifests without skipping durable truth.",
+      "source_refs": [
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 fixed the broker as a transport-only fabric fed by transactional outbox and inbox receipts, explicitly rebuildable from durable truth."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L26[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology names a queue or broker for outbox and worker coordination while forbidding it from becoming legal truth."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "5. Backup, restore, and DR rules",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L155[5._Backup_restore_and_DR_rules]",
+          "rationale": "Queue backlog rebuild must come from durable outbox, inbox, interaction, workflow, and audit truth rather than broker history."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L55[3._Secret_key_and_token_handling]",
+          "rationale": "Outbox messages, queues, read models, and general logs may only carry opaque refs and basis hashes, never raw tokens or secrets."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "5. Service-to-service and network hardening",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L99[5._Service-to-service_and_network_hardening]",
+          "rationale": "Inbound callbacks and worker results must enter through authenticated transactional inbox and dedupe layers before any state transition."
+        },
+        {
+          "source_file": "Algorithm/authority_interaction_protocol.md",
+          "source_heading_or_logical_block": "9.4 Request identity, idempotency, and ingress proof",
+          "source_ref": "Algorithm/authority_interaction_protocol.md::L123[9.4_Request_identity_idempotency_and_ingress_proof]",
+          "rationale": "Authority callbacks and recovery reads must preserve request lineage, canonical ingress receipts, and duplicate suppression before mutation."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "QUEUE_OR_BROKER_COORDINATION_FABRIC dependency row",
+          "source_ref": "data/analysis/dependency_register.json::QUEUE_OR_BROKER_COORDINATION_FABRIC",
+          "rationale": "The dependency register marks the broker as MVP-required but still unresolved as a procurement or platform choice."
+        },
+        {
+          "source_file": "config/object_storage/event_notification_contract.json",
+          "source_heading_or_logical_block": "route rows",
+          "source_ref": "config/object_storage/event_notification_contract.json::route_rows",
+          "rationale": "Object-store notifications already freeze logical channel names for scan, validation, evidence binding, preview, export, quarantine, retention, and restore flows."
+        },
+        {
+          "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+          "source_heading_or_logical_block": "truth boundary statement",
+          "source_ref": "config/notifications/email_webhook_endpoint_contract.json::truth_boundary_statement",
+          "rationale": "Delivery callbacks remain evidence-only transport inputs and must not upgrade workflow truth directly."
+        },
+        {
+          "source_file": "Algorithm/nightly_autopilot_contract.md",
+          "source_heading_or_logical_block": "scheduler identity contract",
+          "source_ref": "Algorithm/nightly_autopilot_contract.md::L73[scheduler_dedupe_key]",
+          "rationale": "Scheduler and retry work must preserve durable dedupe tuples rather than deriving legality from worker-local retry memory."
+        }
+      ],
+      "notes": [
+        "This keeps one manifest from becoming a distributed race between worker instances."
+      ]
+    },
+    {
+      "policy_ref": "ordering.upload_session_fifo",
+      "label": "Per-upload-session ordered partition",
+      "channel_refs": [
+        "channel.upload.scan.request",
+        "channel.upload.validation.recheck",
+        "channel.preview.registration"
+      ],
+      "partition_key_fields": [
+        "tenant_id",
+        "upload_session_id"
+      ],
+      "strict_order_scope": "Upload-session lifecycle events stay ordered per session so scan, validation, and preview registration cannot overtake one another.",
+      "concurrency_rule": "Independent upload sessions may process concurrently; one upload session remains serial at the broker lane.",
+      "backlog_hazard": "Long-running scan or validation work must not block unrelated upload sessions or prompt unsafe key reuse.",
+      "source_refs": [
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 fixed the broker as a transport-only fabric fed by transactional outbox and inbox receipts, explicitly rebuildable from durable truth."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L26[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology names a queue or broker for outbox and worker coordination while forbidding it from becoming legal truth."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "5. Backup, restore, and DR rules",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L155[5._Backup_restore_and_DR_rules]",
+          "rationale": "Queue backlog rebuild must come from durable outbox, inbox, interaction, workflow, and audit truth rather than broker history."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L55[3._Secret_key_and_token_handling]",
+          "rationale": "Outbox messages, queues, read models, and general logs may only carry opaque refs and basis hashes, never raw tokens or secrets."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "5. Service-to-service and network hardening",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L99[5._Service-to-service_and_network_hardening]",
+          "rationale": "Inbound callbacks and worker results must enter through authenticated transactional inbox and dedupe layers before any state transition."
+        },
+        {
+          "source_file": "Algorithm/authority_interaction_protocol.md",
+          "source_heading_or_logical_block": "9.4 Request identity, idempotency, and ingress proof",
+          "source_ref": "Algorithm/authority_interaction_protocol.md::L123[9.4_Request_identity_idempotency_and_ingress_proof]",
+          "rationale": "Authority callbacks and recovery reads must preserve request lineage, canonical ingress receipts, and duplicate suppression before mutation."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "QUEUE_OR_BROKER_COORDINATION_FABRIC dependency row",
+          "source_ref": "data/analysis/dependency_register.json::QUEUE_OR_BROKER_COORDINATION_FABRIC",
+          "rationale": "The dependency register marks the broker as MVP-required but still unresolved as a procurement or platform choice."
+        },
+        {
+          "source_file": "config/object_storage/event_notification_contract.json",
+          "source_heading_or_logical_block": "route rows",
+          "source_ref": "config/object_storage/event_notification_contract.json::route_rows",
+          "rationale": "Object-store notifications already freeze logical channel names for scan, validation, evidence binding, preview, export, quarantine, retention, and restore flows."
+        },
+        {
+          "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+          "source_heading_or_logical_block": "truth boundary statement",
+          "source_ref": "config/notifications/email_webhook_endpoint_contract.json::truth_boundary_statement",
+          "rationale": "Delivery callbacks remain evidence-only transport inputs and must not upgrade workflow truth directly."
+        },
+        {
+          "source_file": "Algorithm/nightly_autopilot_contract.md",
+          "source_heading_or_logical_block": "scheduler identity contract",
+          "source_ref": "Algorithm/nightly_autopilot_contract.md::L73[scheduler_dedupe_key]",
+          "rationale": "Scheduler and retry work must preserve durable dedupe tuples rather than deriving legality from worker-local retry memory."
+        }
+      ],
+      "notes": [
+        "This matches the upload recovery law that a session keeps one governed identity across reconnect and retry."
+      ]
+    },
+    {
+      "policy_ref": "ordering.authority_interaction_fifo",
+      "label": "Per-authority-interaction ordered partition",
+      "channel_refs": [
+        "channel.authority.transmit.dispatch",
+        "channel.authority.reconciliation.poll"
+      ],
+      "partition_key_fields": [
+        "tenant_id",
+        "authority_interaction_ref"
+      ],
+      "strict_order_scope": "One authority interaction preserves send, poll, and retry order under a single interaction ref.",
+      "concurrency_rule": "Independent authority interactions may run concurrently, but one interaction cannot have overlapping active send or poll claims.",
+      "backlog_hazard": "A stuck interaction must not permit blind resend or poll floods that outrun the durable reconciliation contract.",
+      "source_refs": [
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 fixed the broker as a transport-only fabric fed by transactional outbox and inbox receipts, explicitly rebuildable from durable truth."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L26[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology names a queue or broker for outbox and worker coordination while forbidding it from becoming legal truth."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "5. Backup, restore, and DR rules",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L155[5._Backup_restore_and_DR_rules]",
+          "rationale": "Queue backlog rebuild must come from durable outbox, inbox, interaction, workflow, and audit truth rather than broker history."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L55[3._Secret_key_and_token_handling]",
+          "rationale": "Outbox messages, queues, read models, and general logs may only carry opaque refs and basis hashes, never raw tokens or secrets."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "5. Service-to-service and network hardening",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L99[5._Service-to-service_and_network_hardening]",
+          "rationale": "Inbound callbacks and worker results must enter through authenticated transactional inbox and dedupe layers before any state transition."
+        },
+        {
+          "source_file": "Algorithm/authority_interaction_protocol.md",
+          "source_heading_or_logical_block": "9.4 Request identity, idempotency, and ingress proof",
+          "source_ref": "Algorithm/authority_interaction_protocol.md::L123[9.4_Request_identity_idempotency_and_ingress_proof]",
+          "rationale": "Authority callbacks and recovery reads must preserve request lineage, canonical ingress receipts, and duplicate suppression before mutation."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "QUEUE_OR_BROKER_COORDINATION_FABRIC dependency row",
+          "source_ref": "data/analysis/dependency_register.json::QUEUE_OR_BROKER_COORDINATION_FABRIC",
+          "rationale": "The dependency register marks the broker as MVP-required but still unresolved as a procurement or platform choice."
+        },
+        {
+          "source_file": "config/object_storage/event_notification_contract.json",
+          "source_heading_or_logical_block": "route rows",
+          "source_ref": "config/object_storage/event_notification_contract.json::route_rows",
+          "rationale": "Object-store notifications already freeze logical channel names for scan, validation, evidence binding, preview, export, quarantine, retention, and restore flows."
+        },
+        {
+          "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+          "source_heading_or_logical_block": "truth boundary statement",
+          "source_ref": "config/notifications/email_webhook_endpoint_contract.json::truth_boundary_statement",
+          "rationale": "Delivery callbacks remain evidence-only transport inputs and must not upgrade workflow truth directly."
+        },
+        {
+          "source_file": "Algorithm/nightly_autopilot_contract.md",
+          "source_heading_or_logical_block": "scheduler identity contract",
+          "source_ref": "Algorithm/nightly_autopilot_contract.md::L73[scheduler_dedupe_key]",
+          "rationale": "Scheduler and retry work must preserve durable dedupe tuples rather than deriving legality from worker-local retry memory."
+        }
+      ],
+      "notes": [
+        "This row keeps request-backed authority recovery deterministic after queue or worker loss."
+      ]
+    },
+    {
+      "policy_ref": "ordering.authority_ingress_delivery",
+      "label": "Authority delivery dedupe partition",
+      "channel_refs": [
+        "channel.authority.callback.ingress",
+        "channel.authority.payload.normalization"
+      ],
+      "partition_key_fields": [
+        "authority_profile_ref",
+        "delivery_dedupe_key"
+      ],
+      "strict_order_scope": "Ingress processing serializes per provider-delivery identity until one canonical receipt and outcome exist.",
+      "concurrency_rule": "Different delivery identities may normalize in parallel, but one dedupe key must never have two concurrent mutation-capable consumers.",
+      "backlog_hazard": "Provider duplicate storms can stall one dedupe key, so canonical receipt collapse is mandatory before higher-cost normalization repeats.",
+      "source_refs": [
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 fixed the broker as a transport-only fabric fed by transactional outbox and inbox receipts, explicitly rebuildable from durable truth."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L26[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology names a queue or broker for outbox and worker coordination while forbidding it from becoming legal truth."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "5. Backup, restore, and DR rules",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L155[5._Backup_restore_and_DR_rules]",
+          "rationale": "Queue backlog rebuild must come from durable outbox, inbox, interaction, workflow, and audit truth rather than broker history."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L55[3._Secret_key_and_token_handling]",
+          "rationale": "Outbox messages, queues, read models, and general logs may only carry opaque refs and basis hashes, never raw tokens or secrets."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "5. Service-to-service and network hardening",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L99[5._Service-to-service_and_network_hardening]",
+          "rationale": "Inbound callbacks and worker results must enter through authenticated transactional inbox and dedupe layers before any state transition."
+        },
+        {
+          "source_file": "Algorithm/authority_interaction_protocol.md",
+          "source_heading_or_logical_block": "9.4 Request identity, idempotency, and ingress proof",
+          "source_ref": "Algorithm/authority_interaction_protocol.md::L123[9.4_Request_identity_idempotency_and_ingress_proof]",
+          "rationale": "Authority callbacks and recovery reads must preserve request lineage, canonical ingress receipts, and duplicate suppression before mutation."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "QUEUE_OR_BROKER_COORDINATION_FABRIC dependency row",
+          "source_ref": "data/analysis/dependency_register.json::QUEUE_OR_BROKER_COORDINATION_FABRIC",
+          "rationale": "The dependency register marks the broker as MVP-required but still unresolved as a procurement or platform choice."
+        },
+        {
+          "source_file": "config/object_storage/event_notification_contract.json",
+          "source_heading_or_logical_block": "route rows",
+          "source_ref": "config/object_storage/event_notification_contract.json::route_rows",
+          "rationale": "Object-store notifications already freeze logical channel names for scan, validation, evidence binding, preview, export, quarantine, retention, and restore flows."
+        },
+        {
+          "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+          "source_heading_or_logical_block": "truth boundary statement",
+          "source_ref": "config/notifications/email_webhook_endpoint_contract.json::truth_boundary_statement",
+          "rationale": "Delivery callbacks remain evidence-only transport inputs and must not upgrade workflow truth directly."
+        },
+        {
+          "source_file": "Algorithm/nightly_autopilot_contract.md",
+          "source_heading_or_logical_block": "scheduler identity contract",
+          "source_ref": "Algorithm/nightly_autopilot_contract.md::L73[scheduler_dedupe_key]",
+          "rationale": "Scheduler and retry work must preserve durable dedupe tuples rather than deriving legality from worker-local retry memory."
+        }
+      ],
+      "notes": [
+        "This is the key transport boundary that keeps provider callback duplication from becoming legal-state duplication."
+      ]
+    },
+    {
+      "policy_ref": "ordering.delivery_binding_partition",
+      "label": "Per-delivery-binding partition",
+      "channel_refs": [
+        "channel.notification.transactional.send",
+        "channel.export.delivery.attestation",
+        "channel.export.delivery.attestation.restricted",
+        "channel.retention.limitation.audit"
+      ],
+      "partition_key_fields": [
+        "tenant_id",
+        "delivery_binding_hash"
+      ],
+      "strict_order_scope": "Evidence append order is preserved per delivery binding or governance binding only; global order is unnecessary.",
+      "concurrency_rule": "Delivery and governance work may fan out freely across bindings but should serialize within one binding identity.",
+      "backlog_hazard": "Provider retries or webhook duplicates can flood one binding, so the inbox ledger must absorb duplicates without generating duplicate evidence.",
+      "source_refs": [
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 fixed the broker as a transport-only fabric fed by transactional outbox and inbox receipts, explicitly rebuildable from durable truth."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L26[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology names a queue or broker for outbox and worker coordination while forbidding it from becoming legal truth."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "5. Backup, restore, and DR rules",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L155[5._Backup_restore_and_DR_rules]",
+          "rationale": "Queue backlog rebuild must come from durable outbox, inbox, interaction, workflow, and audit truth rather than broker history."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L55[3._Secret_key_and_token_handling]",
+          "rationale": "Outbox messages, queues, read models, and general logs may only carry opaque refs and basis hashes, never raw tokens or secrets."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "5. Service-to-service and network hardening",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L99[5._Service-to-service_and_network_hardening]",
+          "rationale": "Inbound callbacks and worker results must enter through authenticated transactional inbox and dedupe layers before any state transition."
+        },
+        {
+          "source_file": "Algorithm/authority_interaction_protocol.md",
+          "source_heading_or_logical_block": "9.4 Request identity, idempotency, and ingress proof",
+          "source_ref": "Algorithm/authority_interaction_protocol.md::L123[9.4_Request_identity_idempotency_and_ingress_proof]",
+          "rationale": "Authority callbacks and recovery reads must preserve request lineage, canonical ingress receipts, and duplicate suppression before mutation."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "QUEUE_OR_BROKER_COORDINATION_FABRIC dependency row",
+          "source_ref": "data/analysis/dependency_register.json::QUEUE_OR_BROKER_COORDINATION_FABRIC",
+          "rationale": "The dependency register marks the broker as MVP-required but still unresolved as a procurement or platform choice."
+        },
+        {
+          "source_file": "config/object_storage/event_notification_contract.json",
+          "source_heading_or_logical_block": "route rows",
+          "source_ref": "config/object_storage/event_notification_contract.json::route_rows",
+          "rationale": "Object-store notifications already freeze logical channel names for scan, validation, evidence binding, preview, export, quarantine, retention, and restore flows."
+        },
+        {
+          "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+          "source_heading_or_logical_block": "truth boundary statement",
+          "source_ref": "config/notifications/email_webhook_endpoint_contract.json::truth_boundary_statement",
+          "rationale": "Delivery callbacks remain evidence-only transport inputs and must not upgrade workflow truth directly."
+        },
+        {
+          "source_file": "Algorithm/nightly_autopilot_contract.md",
+          "source_heading_or_logical_block": "scheduler identity contract",
+          "source_ref": "Algorithm/nightly_autopilot_contract.md::L73[scheduler_dedupe_key]",
+          "rationale": "Scheduler and retry work must preserve durable dedupe tuples rather than deriving legality from worker-local retry memory."
+        }
+      ],
+      "notes": [
+        "The binding hash is a safer ordering dimension than recipient address or export filename alone."
+      ]
+    },
+    {
+      "policy_ref": "ordering.restore_checkpoint_partition",
+      "label": "Per-checkpoint restore partition",
+      "channel_refs": [
+        "channel.restore.archive.index"
+      ],
+      "partition_key_fields": [
+        "checkpoint_ref",
+        "candidate_identity_hash"
+      ],
+      "strict_order_scope": "Restore indexing stays ordered per checkpoint and candidate identity because reopen gates are checkpoint-bound.",
+      "concurrency_rule": "Different checkpoints may index concurrently; one checkpoint lane remains serial until evidence and reopen gates settle.",
+      "backlog_hazard": "A broken restore-index task must block only its checkpoint lane and keep reopen law explicit rather than losing evidence in a broad retry storm.",
+      "source_refs": [
+        {
+          "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+          "source_heading_or_logical_block": "Decision",
+          "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+          "rationale": "ADR-002 fixed the broker as a transport-only fabric fed by transactional outbox and inbox receipts, explicitly rebuildable from durable truth."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "1. Reference runtime topology",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L26[1._Reference_runtime_topology]",
+          "rationale": "The runtime topology names a queue or broker for outbox and worker coordination while forbidding it from becoming legal truth."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "5. Backup, restore, and DR rules",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::L155[5._Backup_restore_and_DR_rules]",
+          "rationale": "Queue backlog rebuild must come from durable outbox, inbox, interaction, workflow, and audit truth rather than broker history."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "3. Secret, key, and token handling",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L55[3._Secret_key_and_token_handling]",
+          "rationale": "Outbox messages, queues, read models, and general logs may only carry opaque refs and basis hashes, never raw tokens or secrets."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "5. Service-to-service and network hardening",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L99[5._Service-to-service_and_network_hardening]",
+          "rationale": "Inbound callbacks and worker results must enter through authenticated transactional inbox and dedupe layers before any state transition."
+        },
+        {
+          "source_file": "Algorithm/authority_interaction_protocol.md",
+          "source_heading_or_logical_block": "9.4 Request identity, idempotency, and ingress proof",
+          "source_ref": "Algorithm/authority_interaction_protocol.md::L123[9.4_Request_identity_idempotency_and_ingress_proof]",
+          "rationale": "Authority callbacks and recovery reads must preserve request lineage, canonical ingress receipts, and duplicate suppression before mutation."
+        },
+        {
+          "source_file": "data/analysis/dependency_register.json",
+          "source_heading_or_logical_block": "QUEUE_OR_BROKER_COORDINATION_FABRIC dependency row",
+          "source_ref": "data/analysis/dependency_register.json::QUEUE_OR_BROKER_COORDINATION_FABRIC",
+          "rationale": "The dependency register marks the broker as MVP-required but still unresolved as a procurement or platform choice."
+        },
+        {
+          "source_file": "config/object_storage/event_notification_contract.json",
+          "source_heading_or_logical_block": "route rows",
+          "source_ref": "config/object_storage/event_notification_contract.json::route_rows",
+          "rationale": "Object-store notifications already freeze logical channel names for scan, validation, evidence binding, preview, export, quarantine, retention, and restore flows."
+        },
+        {
+          "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+          "source_heading_or_logical_block": "truth boundary statement",
+          "source_ref": "config/notifications/email_webhook_endpoint_contract.json::truth_boundary_statement",
+          "rationale": "Delivery callbacks remain evidence-only transport inputs and must not upgrade workflow truth directly."
+        },
+        {
+          "source_file": "Algorithm/nightly_autopilot_contract.md",
+          "source_heading_or_logical_block": "scheduler identity contract",
+          "source_ref": "Algorithm/nightly_autopilot_contract.md::L73[scheduler_dedupe_key]",
+          "rationale": "Scheduler and retry work must preserve durable dedupe tuples rather than deriving legality from worker-local retry memory."
+        }
+      ],
+      "notes": [
+        "This row makes disaster-recovery admissibility mechanically explainable."
+      ]
+    }
+  ],
+  "source_refs": [
+    {
+      "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+      "source_heading_or_logical_block": "Decision",
+      "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+      "rationale": "ADR-002 fixed the broker as a transport-only fabric fed by transactional outbox and inbox receipts, explicitly rebuildable from durable truth."
+    },
+    {
+      "source_file": "Algorithm/deployment_and_resilience_contract.md",
+      "source_heading_or_logical_block": "1. Reference runtime topology",
+      "source_ref": "Algorithm/deployment_and_resilience_contract.md::L26[1._Reference_runtime_topology]",
+      "rationale": "The runtime topology names a queue or broker for outbox and worker coordination while forbidding it from becoming legal truth."
+    },
+    {
+      "source_file": "Algorithm/deployment_and_resilience_contract.md",
+      "source_heading_or_logical_block": "5. Backup, restore, and DR rules",
+      "source_ref": "Algorithm/deployment_and_resilience_contract.md::L155[5._Backup_restore_and_DR_rules]",
+      "rationale": "Queue backlog rebuild must come from durable outbox, inbox, interaction, workflow, and audit truth rather than broker history."
+    },
+    {
+      "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+      "source_heading_or_logical_block": "3. Secret, key, and token handling",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L55[3._Secret_key_and_token_handling]",
+      "rationale": "Outbox messages, queues, read models, and general logs may only carry opaque refs and basis hashes, never raw tokens or secrets."
+    },
+    {
+      "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+      "source_heading_or_logical_block": "5. Service-to-service and network hardening",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::L99[5._Service-to-service_and_network_hardening]",
+      "rationale": "Inbound callbacks and worker results must enter through authenticated transactional inbox and dedupe layers before any state transition."
+    },
+    {
+      "source_file": "Algorithm/authority_interaction_protocol.md",
+      "source_heading_or_logical_block": "9.4 Request identity, idempotency, and ingress proof",
+      "source_ref": "Algorithm/authority_interaction_protocol.md::L123[9.4_Request_identity_idempotency_and_ingress_proof]",
+      "rationale": "Authority callbacks and recovery reads must preserve request lineage, canonical ingress receipts, and duplicate suppression before mutation."
+    },
+    {
+      "source_file": "data/analysis/dependency_register.json",
+      "source_heading_or_logical_block": "QUEUE_OR_BROKER_COORDINATION_FABRIC dependency row",
+      "source_ref": "data/analysis/dependency_register.json::QUEUE_OR_BROKER_COORDINATION_FABRIC",
+      "rationale": "The dependency register marks the broker as MVP-required but still unresolved as a procurement or platform choice."
+    },
+    {
+      "source_file": "config/object_storage/event_notification_contract.json",
+      "source_heading_or_logical_block": "route rows",
+      "source_ref": "config/object_storage/event_notification_contract.json::route_rows",
+      "rationale": "Object-store notifications already freeze logical channel names for scan, validation, evidence binding, preview, export, quarantine, retention, and restore flows."
+    },
+    {
+      "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+      "source_heading_or_logical_block": "truth boundary statement",
+      "source_ref": "config/notifications/email_webhook_endpoint_contract.json::truth_boundary_statement",
+      "rationale": "Delivery callbacks remain evidence-only transport inputs and must not upgrade workflow truth directly."
+    },
+    {
+      "source_file": "Algorithm/nightly_autopilot_contract.md",
+      "source_heading_or_logical_block": "scheduler identity contract",
+      "source_ref": "Algorithm/nightly_autopilot_contract.md::L73[scheduler_dedupe_key]",
+      "rationale": "Scheduler and retry work must preserve durable dedupe tuples rather than deriving legality from worker-local retry memory."
+    }
+  ],
+  "typed_gaps": [
+    "Provider-specific throughput quotas per partition or session are deferred until the broker family is selected."
+  ],
+  "notes": [
+    "Ordering is intentionally per durable identity boundary, never one global queue-wide order."
+  ]
+}

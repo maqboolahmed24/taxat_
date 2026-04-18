@@ -1,0 +1,251 @@
+{
+  "schema_version": "1.0",
+  "contract_id": "email_webhook_endpoint_contract",
+  "provider_selection": {
+    "provider_selection_status": "PROVIDER_DEFAULT_APPLIED",
+    "provider_family": "TRANSACTIONAL_EMAIL_DELIVERY",
+    "provider_vendor_adapter": "POSTMARK_COMPATIBLE_CONTROL_PLANE",
+    "provider_vendor_label": "Postmark-compatible transactional email provider",
+    "docs_urls": [
+      "https://postmarkapp.com/developer/api/overview",
+      "https://postmarkapp.com/developer/api/templates-api",
+      "https://postmarkapp.com/developer/user-guide/content/templates",
+      "https://postmarkapp.com/developer/user-guide/content/templates/mustachio-syntax",
+      "https://postmarkapp.com/developer/webhooks/webhooks-overview",
+      "https://postmarkapp.com/developer/webhooks/delivery-webhook",
+      "https://postmarkapp.com/developer/webhooks/bounce-webhook",
+      "https://postmarkapp.com/developer/webhooks/spam-complaint-webhook",
+      "https://postmarkapp.com/developer/webhooks/subscription-change-webhook",
+      "https://postmarkapp.com/developer/webhooks/open-webhook",
+      "https://postmarkapp.com/developer/webhooks/click-webhook",
+      "https://postmarkapp.com/developer/user-guide/tracking-opens/tracking-opens-per-email"
+    ],
+    "source_refs": [
+      {
+        "source_ref": "Algorithm/collaboration_workspace_contract.md::L1838[Customer_notifications]",
+        "rationale": "Only explicit customer-visible collaboration events may fan out into optional customer email."
+      },
+      {
+        "source_ref": "Algorithm/data_model.md::L195[WorkItemNotification]",
+        "rationale": "Notification routing, continuity, and customer-safe projection must remain explicit and typed."
+      },
+      {
+        "source_ref": "Algorithm/data_model.md::L2240[PortalHelpRequest]",
+        "rationale": "Contextual help acknowledgements must preserve route and case context instead of becoming free-form tickets."
+      },
+      {
+        "source_ref": "https://postmarkapp.com/developer/api/templates-api",
+        "rationale": "Current provider documentation exposes API-managed template aliases and server-scoped template records."
+      },
+      {
+        "source_ref": "https://postmarkapp.com/developer/webhooks/webhooks-overview",
+        "rationale": "Current provider webhook posture is configured per server and authenticated with HTTPS, Basic Auth, and custom headers."
+      }
+    ]
+  },
+  "policy_version": "1.0",
+  "generated_on": "2026-04-18",
+  "truth_boundary_statement": "External email delivery events remain transport or observability projections only. They may append internal notification evidence, suppression posture, retry posture, and counters, but they never mutate work-item truth, approval truth, portal-help lifecycle truth, or authority truth directly.",
+  "callback_records": [
+    {
+      "callback_ref": "email_webhook_customer_transactional_sandbox",
+      "product_environment_id": "env_shared_sandbox_integration",
+      "message_stream_ref": "email_stream_sandbox_customer_transactional",
+      "callback_url": "https://notification-ingress.sandbox.taxat.example/webhooks/email/postmark/customer-transactional",
+      "authentication": {
+        "mode": "HTTPS_BASIC_AUTH_PLUS_CUSTOM_HEADER",
+        "basic_auth_username_ref": "vault://metadata/sec_sandbox_runtime/email/webhooks/customer-transactional/basic-auth-username",
+        "basic_auth_password_ref": "vault://metadata/sec_sandbox_runtime/email/webhooks/customer-transactional/basic-auth-password",
+        "custom_header_name": "X-Taxat-Webhook-Secret",
+        "custom_header_secret_ref": "vault://metadata/sec_sandbox_runtime/email/webhooks/customer-transactional/header-secret",
+        "provider_signature_mode": "NOT_SUPPORTED_PROVIDER_NATIVE_EQUIVALENT_AUTH"
+      },
+      "replay_protection": {
+        "require_https": true,
+        "max_age_hours": 168,
+        "duplicate_response_code": 200
+      },
+      "idempotency_contract": {
+        "fingerprint_fields": [
+          "RecordType",
+          "MessageID",
+          "MessageStream",
+          "Metadata.notification_id",
+          "Metadata.item_id",
+          "Metadata.help_request_id",
+          "Recipient"
+        ],
+        "ledger_ref": "vault://metadata/sec_sandbox_runtime/email/webhooks/customer-transactional/idempotency-ledger",
+        "duplicate_effect": "RETURN_200_NO_DUPLICATE_EVIDENCE"
+      },
+      "enabled_event_types": [
+        "Delivery",
+        "Bounce",
+        "SpamComplaint",
+        "SubscriptionChange"
+      ],
+      "disabled_event_types": [
+        "Open",
+        "Click"
+      ],
+      "correlation_keys": [
+        "MessageID",
+        "MessageStream",
+        "Metadata.notification_id",
+        "Metadata.item_id",
+        "Metadata.help_request_id",
+        "Recipient"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "https://postmarkapp.com/developer/webhooks/webhooks-overview",
+          "rationale": "Webhook URLs, HTTPS enforcement, Basic Auth, and custom headers are current provider-supported controls."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L1",
+          "rationale": "Observed provider payloads must be normalized into evidence rather than promoted to business truth."
+        }
+      ],
+      "notes": [
+        "Provider-native signed payloads are not available, so Taxat uses provider-supported equivalent authentication plus idempotency and replay protection.",
+        "Open and click event types remain disabled at configuration time."
+      ]
+    },
+    {
+      "callback_ref": "email_webhook_customer_transactional_preprod",
+      "product_environment_id": "env_preproduction_verification",
+      "message_stream_ref": "email_stream_preproduction_customer_transactional",
+      "callback_url": "https://notification-ingress.preprod.taxat.example/webhooks/email/postmark/customer-transactional",
+      "authentication": {
+        "mode": "HTTPS_BASIC_AUTH_PLUS_CUSTOM_HEADER",
+        "basic_auth_username_ref": "vault://metadata/sec_preprod_runtime/email/webhooks/customer-transactional/basic-auth-username",
+        "basic_auth_password_ref": "vault://metadata/sec_preprod_runtime/email/webhooks/customer-transactional/basic-auth-password",
+        "custom_header_name": "X-Taxat-Webhook-Secret",
+        "custom_header_secret_ref": "vault://metadata/sec_preprod_runtime/email/webhooks/customer-transactional/header-secret",
+        "provider_signature_mode": "NOT_SUPPORTED_PROVIDER_NATIVE_EQUIVALENT_AUTH"
+      },
+      "replay_protection": {
+        "require_https": true,
+        "max_age_hours": 168,
+        "duplicate_response_code": 200
+      },
+      "idempotency_contract": {
+        "fingerprint_fields": [
+          "RecordType",
+          "MessageID",
+          "MessageStream",
+          "Metadata.notification_id",
+          "Metadata.item_id",
+          "Metadata.help_request_id",
+          "Recipient"
+        ],
+        "ledger_ref": "vault://metadata/sec_preprod_runtime/email/webhooks/customer-transactional/idempotency-ledger",
+        "duplicate_effect": "RETURN_200_NO_DUPLICATE_EVIDENCE"
+      },
+      "enabled_event_types": [
+        "Delivery",
+        "Bounce",
+        "SpamComplaint",
+        "SubscriptionChange"
+      ],
+      "disabled_event_types": [
+        "Open",
+        "Click"
+      ],
+      "correlation_keys": [
+        "MessageID",
+        "MessageStream",
+        "Metadata.notification_id",
+        "Metadata.item_id",
+        "Metadata.help_request_id",
+        "Recipient"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "https://postmarkapp.com/developer/webhooks/webhooks-overview",
+          "rationale": "Webhook URLs, HTTPS enforcement, Basic Auth, and custom headers are current provider-supported controls."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L1",
+          "rationale": "Observed provider payloads must be normalized into evidence rather than promoted to business truth."
+        }
+      ],
+      "notes": [
+        "Provider-native signed payloads are not available, so Taxat uses provider-supported equivalent authentication plus idempotency and replay protection.",
+        "Open and click event types remain disabled at configuration time."
+      ]
+    },
+    {
+      "callback_ref": "email_webhook_customer_transactional_production",
+      "product_environment_id": "env_production",
+      "message_stream_ref": "email_stream_production_customer_transactional",
+      "callback_url": "https://notification-ingress.production.taxat.example/webhooks/email/postmark/customer-transactional",
+      "authentication": {
+        "mode": "HTTPS_BASIC_AUTH_PLUS_CUSTOM_HEADER",
+        "basic_auth_username_ref": "vault://metadata/sec_production_runtime/email/webhooks/customer-transactional/basic-auth-username",
+        "basic_auth_password_ref": "vault://metadata/sec_production_runtime/email/webhooks/customer-transactional/basic-auth-password",
+        "custom_header_name": "X-Taxat-Webhook-Secret",
+        "custom_header_secret_ref": "vault://metadata/sec_production_runtime/email/webhooks/customer-transactional/header-secret",
+        "provider_signature_mode": "NOT_SUPPORTED_PROVIDER_NATIVE_EQUIVALENT_AUTH"
+      },
+      "replay_protection": {
+        "require_https": true,
+        "max_age_hours": 168,
+        "duplicate_response_code": 200
+      },
+      "idempotency_contract": {
+        "fingerprint_fields": [
+          "RecordType",
+          "MessageID",
+          "MessageStream",
+          "Metadata.notification_id",
+          "Metadata.item_id",
+          "Metadata.help_request_id",
+          "Recipient"
+        ],
+        "ledger_ref": "vault://metadata/sec_production_runtime/email/webhooks/customer-transactional/idempotency-ledger",
+        "duplicate_effect": "RETURN_200_NO_DUPLICATE_EVIDENCE"
+      },
+      "enabled_event_types": [
+        "Delivery",
+        "Bounce",
+        "SpamComplaint",
+        "SubscriptionChange"
+      ],
+      "disabled_event_types": [
+        "Open",
+        "Click"
+      ],
+      "correlation_keys": [
+        "MessageID",
+        "MessageStream",
+        "Metadata.notification_id",
+        "Metadata.item_id",
+        "Metadata.help_request_id",
+        "Recipient"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "https://postmarkapp.com/developer/webhooks/webhooks-overview",
+          "rationale": "Webhook URLs, HTTPS enforcement, Basic Auth, and custom headers are current provider-supported controls."
+        },
+        {
+          "source_ref": "Algorithm/retention_error_and_observability_contract.md::L1",
+          "rationale": "Observed provider payloads must be normalized into evidence rather than promoted to business truth."
+        }
+      ],
+      "notes": [
+        "Provider-native signed payloads are not available, so Taxat uses provider-supported equivalent authentication plus idempotency and replay protection.",
+        "Open and click event types remain disabled at configuration time."
+      ]
+    }
+  ],
+  "typed_gaps": [
+    "Provider-native webhook signatures are not available in the active Postmark-compatible recipe, so equivalent authentication is used instead.",
+    "Operator/security mail shares the same provider but is intentionally outside this customer-safe callback pack."
+  ],
+  "notes": [
+    "Callback secrets remain vault-bound only.",
+    "Sandbox callback hosts are safe for render rehearsal; production stays distinct."
+  ]
+}

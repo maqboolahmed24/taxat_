@@ -1,0 +1,1104 @@
+{
+  "shared_command_law": {
+    "default_command_surface": "POST /v1/commands",
+    "durable_receipt_surface": "GET /v1/commands/{command_id}",
+    "binary_transfer_exception": "POST /v1/uploads/sessions allocates resumable upload sessions; attachment finalization still returns to POST /v1/commands.",
+    "source_refs": [
+      {
+        "source_file": "Algorithm/northbound_api_and_session_contract.md",
+        "source_heading_or_logical_block": "Command surface",
+        "rationale": "Command and receipt surfaces are explicit."
+      },
+      {
+        "source_file": "Algorithm/northbound_api_and_session_contract.md",
+        "source_heading_or_logical_block": "Binary transfer exception",
+        "rationale": "The upload-session exception is explicit."
+      }
+    ]
+  },
+  "bindings": [
+    {
+      "surface_family": "COLLABORATION",
+      "route_or_scene_key": "collaboration_staff_inbox",
+      "route_or_scene_kind": "route",
+      "shell_family": "CALM_SHELL",
+      "read_models": [
+        "WorkInboxSnapshot",
+        "WorkInboxDelta"
+      ],
+      "read_surfaces": [
+        "GET /v1/work-items?assignee=...&lifecycle_state=...&waiting_on=...&due_state=...&customer_projection=...",
+        "GET /v1/work-items/stream?resume_token=..."
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "ASSIGN_WORK_ITEM",
+        "REASSIGN_WORK_ITEM",
+        "ESCALATE_WORK_ITEM"
+      ],
+      "command_semantics": "AUTHORITATIVE_ENUM",
+      "stream_sources": [
+        "workspace.delta",
+        "notification.badge",
+        "heartbeat"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "masking",
+        "route",
+        "work_item_id",
+        "visibility_partition"
+      ],
+      "notes": "The inbox is the staff collaboration queue root and must update in place."
+    },
+    {
+      "surface_family": "COLLABORATION",
+      "route_or_scene_key": "collaboration_staff_workspace",
+      "route_or_scene_kind": "route",
+      "shell_family": "CALM_SHELL",
+      "read_models": [
+        "WorkspaceSnapshot",
+        "WorkspaceDelta"
+      ],
+      "read_surfaces": [
+        "GET /v1/work-items/{item_id}/workspace/snapshot",
+        "GET /v1/work-items/{item_id}/workspace/stream?resume_token=..."
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "ASSIGN_WORK_ITEM",
+        "CHANGE_WORK_ITEM_STATUS",
+        "SET_WORK_ITEM_DUE_DATES",
+        "REQUEST_CUSTOMER_INFO"
+      ],
+      "command_semantics": "AUTHORITATIVE_ENUM",
+      "stream_sources": [
+        "workspace.snapshot",
+        "workspace.delta",
+        "notification.badge",
+        "heartbeat"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "masking",
+        "route",
+        "work_item_id",
+        "visibility_partition"
+      ],
+      "notes": "This is the canonical calm-shell collaboration workspace and owns same-object/same-shell continuity for work items."
+    },
+    {
+      "surface_family": "COLLABORATION",
+      "route_or_scene_key": "collaboration_staff_customer_activity_module",
+      "route_or_scene_kind": "route",
+      "shell_family": "CALM_SHELL",
+      "read_models": [
+        "CollaborationActivitySlice",
+        "WorkspaceDelta"
+      ],
+      "read_surfaces": [
+        "GET /v1/work-items/{item_id}/activity?thread=customer&before_sequence=...",
+        "GET /v1/work-items/{item_id}/workspace/stream?resume_token=..."
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "ADD_CUSTOMER_COMMENT",
+        "REQUEST_CUSTOMER_INFO"
+      ],
+      "command_semantics": "AUTHORITATIVE_ENUM",
+      "stream_sources": [
+        "activity.appended",
+        "workspace.delta"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "masking",
+        "route",
+        "work_item_id",
+        "visibility_partition"
+      ],
+      "notes": "Customer-visible activity is a separate stream and cannot be contaminated by internal-only facts."
+    },
+    {
+      "surface_family": "COLLABORATION",
+      "route_or_scene_key": "collaboration_staff_internal_activity_module",
+      "route_or_scene_kind": "route",
+      "shell_family": "CALM_SHELL",
+      "read_models": [
+        "CollaborationActivitySlice",
+        "WorkspaceDelta"
+      ],
+      "read_surfaces": [
+        "GET /v1/work-items/{item_id}/activity?thread=internal&before_sequence=...",
+        "GET /v1/work-items/{item_id}/workspace/stream?resume_token=..."
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "ADD_INTERNAL_NOTE"
+      ],
+      "command_semantics": "AUTHORITATIVE_ENUM",
+      "stream_sources": [
+        "activity.appended",
+        "workspace.delta"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "masking",
+        "route",
+        "work_item_id",
+        "visibility_partition"
+      ],
+      "notes": "This module is the hard internal/customer boundary inside collaboration."
+    },
+    {
+      "surface_family": "COLLABORATION",
+      "route_or_scene_key": "collaboration_staff_files_module",
+      "route_or_scene_kind": "route",
+      "shell_family": "CALM_SHELL",
+      "read_models": [
+        "CollaborationAttachmentSlice",
+        "WorkspaceDelta"
+      ],
+      "read_surfaces": [
+        "GET /v1/work-items/{item_id}/attachments?visibility=customer|internal",
+        "GET /v1/work-items/{item_id}/workspace/stream?resume_token=..."
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [],
+      "command_semantics": "READ_ONLY_ATTACHMENT_POSTURE",
+      "stream_sources": [
+        "workspace.delta"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "masking",
+        "route",
+        "work_item_id",
+        "visibility_partition"
+      ],
+      "notes": "The files module is the collaboration truth surface for current-vs-history artifact posture."
+    },
+    {
+      "surface_family": "COLLABORATION",
+      "route_or_scene_key": "collaboration_manifest_focus_jump",
+      "route_or_scene_kind": "route",
+      "shell_family": "CALM_SHELL",
+      "read_models": [
+        "DecisionBundle",
+        "WorkspaceSnapshot",
+        "WorkspaceDelta"
+      ],
+      "read_surfaces": [
+        "Manifest experience snapshot and stream surfaces from the northbound contract",
+        "GET /v1/work-items/{item_id}/workspace/snapshot"
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "MANIFEST_ROUTE_LOCAL_COMMANDS",
+        "REQUEST_CUSTOMER_INFO"
+      ],
+      "command_semantics": "MIXED_MANIFEST_AND_COLLABORATION",
+      "stream_sources": [
+        "manifest experience stream",
+        "workspace.delta"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "masking",
+        "route",
+        "work_item_id",
+        "visibility_partition"
+      ],
+      "notes": "This route normalizes the explicit workflow focus deep link into the cross-surface atlas."
+    },
+    {
+      "surface_family": "COLLABORATION",
+      "route_or_scene_key": "collaboration_customer_request_list",
+      "route_or_scene_kind": "route",
+      "shell_family": "CLIENT_PORTAL_SHELL",
+      "read_models": [
+        "CustomerRequestListSnapshot"
+      ],
+      "read_surfaces": [
+        "Customer-visible request-list projection under the collaboration contract"
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [],
+      "command_semantics": "READ_ONLY_ENTRY_SURFACE",
+      "stream_sources": [
+        "notification.badge",
+        "customer-safe list refresh"
+      ],
+      "cache_partition_basis": [
+        "client",
+        "session",
+        "customer_safe_projection",
+        "route",
+        "request_id",
+        "visibility_partition"
+      ],
+      "notes": "The customer request list is collaboration truth rendered through portal-safe language and visibility rules."
+    },
+    {
+      "surface_family": "COLLABORATION",
+      "route_or_scene_key": "collaboration_customer_request_detail",
+      "route_or_scene_kind": "route",
+      "shell_family": "CLIENT_PORTAL_SHELL",
+      "read_models": [
+        "WorkspaceSnapshot",
+        "CollaborationActivitySlice",
+        "CollaborationAttachmentSlice"
+      ],
+      "read_surfaces": [
+        "Customer-visible request-detail projection",
+        "GET /v1/work-items/{item_id}/activity?thread=customer&before_sequence=..."
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "RESPOND_TO_REQUEST_INFO",
+        "ADD_CUSTOMER_COMMENT"
+      ],
+      "command_semantics": "AUTHORITATIVE_ENUM",
+      "stream_sources": [
+        "activity.appended",
+        "customer-safe request refresh"
+      ],
+      "cache_partition_basis": [
+        "client",
+        "session",
+        "customer_safe_projection",
+        "route",
+        "request_id",
+        "visibility_partition"
+      ],
+      "notes": "This is the customer-safe collaboration detail route that shares portal shell law without inheriting staff-only vocabulary."
+    },
+    {
+      "surface_family": "PORTAL",
+      "route_or_scene_key": "portal_home",
+      "route_or_scene_kind": "route",
+      "shell_family": "CLIENT_PORTAL_SHELL",
+      "read_models": [
+        "ClientPortalWorkspace",
+        "ClientTimelineEvent"
+      ],
+      "read_surfaces": [
+        "ClientPortalWorkspace route projection (root home slice)"
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "POST /v1/uploads/sessions",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "PORTAL_OPEN_REQUEST",
+        "PORTAL_OPEN_HELP_CASE"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "role-filtered portal refresh",
+        "cross_device_continuity_contract"
+      ],
+      "cache_partition_basis": [
+        "client",
+        "session",
+        "customer_safe_projection",
+        "route",
+        "artifact_subject"
+      ],
+      "notes": "The atlas binds Home to `/portal` as the canonical root route because the contract names Home but not `/portal/home`."
+    },
+    {
+      "surface_family": "PORTAL",
+      "route_or_scene_key": "portal_documents",
+      "route_or_scene_kind": "route",
+      "shell_family": "CLIENT_PORTAL_SHELL",
+      "read_models": [
+        "ClientPortalWorkspace",
+        "ClientDocumentRequest",
+        "ClientUploadSession"
+      ],
+      "read_surfaces": [
+        "ClientPortalWorkspace route projection (documents slice)",
+        "POST /v1/uploads/sessions"
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "POST /v1/uploads/sessions",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "PORTAL_START_UPLOAD",
+        "PORTAL_RETRY_UPLOAD",
+        "PORTAL_REPLACE_DOCUMENT",
+        "PORTAL_ATTACH_FINALIZED_UPLOAD"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "upload session progress",
+        "role-filtered portal refresh"
+      ],
+      "cache_partition_basis": [
+        "client",
+        "session",
+        "customer_safe_projection",
+        "route",
+        "artifact_subject"
+      ],
+      "notes": "Upload action families are normalized from prose because the contract names the flow and the byte-session exception, not a complete command enum."
+    },
+    {
+      "surface_family": "PORTAL",
+      "route_or_scene_key": "portal_approvals",
+      "route_or_scene_kind": "route",
+      "shell_family": "CLIENT_PORTAL_SHELL",
+      "read_models": [
+        "ClientPortalWorkspace",
+        "ClientApprovalPack"
+      ],
+      "read_surfaces": [
+        "ClientPortalWorkspace route projection (approvals slice)"
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "POST /v1/uploads/sessions",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "PORTAL_ACCEPT_APPROVAL",
+        "PORTAL_DECLINE_APPROVAL",
+        "PORTAL_ACKNOWLEDGE_CHANGE_DIGEST"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "approval pack refresh",
+        "cross_device_continuity_contract"
+      ],
+      "cache_partition_basis": [
+        "client",
+        "session",
+        "customer_safe_projection",
+        "route",
+        "artifact_subject"
+      ],
+      "notes": "Approval command names are normalized from route-local action prose rather than a published command enum."
+    },
+    {
+      "surface_family": "PORTAL",
+      "route_or_scene_key": "portal_onboarding",
+      "route_or_scene_kind": "route",
+      "shell_family": "CLIENT_PORTAL_SHELL",
+      "read_models": [
+        "ClientPortalWorkspace",
+        "ClientOnboardingJourney"
+      ],
+      "read_surfaces": [
+        "ClientPortalWorkspace route projection (onboarding slice)"
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "POST /v1/uploads/sessions",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "PORTAL_SAVE_ONBOARDING_STEP",
+        "PORTAL_ADVANCE_ONBOARDING",
+        "PORTAL_OPEN_SUPPORT"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "journey refresh",
+        "cross_device_continuity_contract"
+      ],
+      "cache_partition_basis": [
+        "client",
+        "session",
+        "customer_safe_projection",
+        "route",
+        "artifact_subject"
+      ],
+      "notes": "Onboarding continuity is route-local and must not be reinterpreted as a general portal dashboard state."
+    },
+    {
+      "surface_family": "PORTAL",
+      "route_or_scene_key": "portal_help",
+      "route_or_scene_kind": "route",
+      "shell_family": "CLIENT_PORTAL_SHELL",
+      "read_models": [
+        "ClientPortalWorkspace",
+        "PortalHelpRequest"
+      ],
+      "read_surfaces": [
+        "ClientPortalWorkspace route projection (help slice)"
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "POST /v1/uploads/sessions",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "CLIENT_PORTAL_REQUEST_HELP"
+      ],
+      "command_semantics": "AUTHORITATIVE_ENUM",
+      "stream_sources": [
+        "help request refresh",
+        "cross_device_continuity_contract"
+      ],
+      "cache_partition_basis": [
+        "client",
+        "session",
+        "customer_safe_projection",
+        "route",
+        "artifact_subject"
+      ],
+      "notes": "Help is the only portal route where the support surface is allowed to foreground itself."
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "route_or_scene_key": "governance_overview",
+      "route_or_scene_kind": "route",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "read_models": [
+        "TenantGovernanceSnapshot"
+      ],
+      "read_surfaces": [
+        "GET /v1/governance/tenants/{tenant_id}/overview"
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "GOVERNANCE_OPEN_QUEUE_ITEM"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "durable command receipts",
+        "governance overview refresh"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "notes": "Overview keeps the five-region governance grammar visible even when density collapses responsively."
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "route_or_scene_key": "governance_tenant",
+      "route_or_scene_kind": "route",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "read_models": [
+        "GovernancePolicySnapshot"
+      ],
+      "read_surfaces": [
+        "GET /v1/governance/tenants/{tenant_id}/policy-snapshot"
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "GOVERNANCE_STAGE_TENANT_CHANGE",
+        "GOVERNANCE_SUBMIT_APPROVAL"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "durable command receipts",
+        "policy snapshot refresh"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "notes": "Mutation families are normalized from the governance route prose; the northbound contract instead pins stale guards and basis hashes."
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "route_or_scene_key": "governance_access_principals",
+      "route_or_scene_kind": "route",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "read_models": [
+        "PrincipalAccessView"
+      ],
+      "read_surfaces": [
+        "GET /v1/governance/tenants/{tenant_id}/principals"
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "GOVERNANCE_STAGE_PRINCIPAL_CHANGE"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "durable command receipts",
+        "principal inventory refresh"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "notes": "This route preserves the governance five-layer access explanation stack in detail form."
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "route_or_scene_key": "governance_access_roles",
+      "route_or_scene_kind": "route",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "read_models": [
+        "RoleTemplateMatrix"
+      ],
+      "read_surfaces": [
+        "GET /v1/governance/tenants/{tenant_id}/roles/{role_id}"
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "GOVERNANCE_STAGE_ROLE_CHANGE"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "durable command receipts",
+        "role matrix refresh"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "notes": "The roles route is dense but never allowed to hide diff and blast-radius posture behind collapsible noise."
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "route_or_scene_key": "governance_access_simulator",
+      "route_or_scene_kind": "route",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "read_models": [
+        "GovernanceAccessSimulation"
+      ],
+      "read_surfaces": [
+        "POST /v1/governance/tenants/{tenant_id}/access-simulations"
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "RUN_ACCESS_SIMULATION",
+        "COMMIT_SIMULATED_GOVERNANCE_CHANGE"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "durable command receipts",
+        "simulation result refresh"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "notes": "The simulator route is the most explicit place where governance basis hashes become user-visible product law."
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "route_or_scene_key": "governance_authority_links",
+      "route_or_scene_kind": "route",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "read_models": [
+        "AuthorityLinkInventoryItem"
+      ],
+      "read_surfaces": [
+        "GET /v1/governance/tenants/{tenant_id}/authority-links"
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "GOVERNANCE_REPAIR_AUTHORITY_LINK",
+        "GOVERNANCE_REBIND_DELEGATION"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "durable command receipts",
+        "authority-link inventory refresh"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "notes": "Authority link health categories stay deliberately distinct to prevent semantic flattening in later UI work."
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "route_or_scene_key": "governance_retention_policies",
+      "route_or_scene_kind": "route",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "read_models": [
+        "RetentionGovernanceFrame"
+      ],
+      "read_surfaces": [
+        "GET /v1/governance/tenants/{tenant_id}/retention"
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "GOVERNANCE_STAGE_RETENTION_POLICY_CHANGE"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "durable command receipts",
+        "retention frame refresh"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "notes": "This route uses a normalized landmark order because the contract names the workspace more strongly than exact landmark sequencing."
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "route_or_scene_key": "governance_retention_legal_holds",
+      "route_or_scene_kind": "route",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "read_models": [
+        "RetentionGovernanceFrame"
+      ],
+      "read_surfaces": [
+        "GET /v1/governance/tenants/{tenant_id}/retention"
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "GOVERNANCE_OPEN_LEGAL_HOLD",
+        "GOVERNANCE_RELEASE_LEGAL_HOLD"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "durable command receipts",
+        "retention frame refresh"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "notes": "Legal holds remain explicitly distinct from broader retention policy edits."
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "route_or_scene_key": "governance_retention_erasure",
+      "route_or_scene_kind": "route",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "read_models": [
+        "RetentionGovernanceFrame"
+      ],
+      "read_surfaces": [
+        "GET /v1/governance/tenants/{tenant_id}/retention"
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "GOVERNANCE_STAGE_ERASURE_DECISION",
+        "GOVERNANCE_APPROVE_ERASURE"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "durable command receipts",
+        "retention frame refresh"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "notes": "This route is the clearest example of the governance stale-view hard stop on irreversible action."
+    },
+    {
+      "surface_family": "GOVERNANCE",
+      "route_or_scene_key": "governance_audit",
+      "route_or_scene_kind": "route",
+      "shell_family": "GOVERNANCE_DENSITY_SHELL",
+      "read_models": [
+        "AuditInvestigationFrame"
+      ],
+      "read_surfaces": [
+        "GET /v1/governance/tenants/{tenant_id}/audit-investigations"
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "GOVERNANCE_EXPORT_AUDIT_SLICE"
+      ],
+      "command_semantics": "NORMALIZED_ACTION_FAMILY",
+      "stream_sources": [
+        "append-only event refresh",
+        "durable command receipts"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "route",
+        "policy_snapshot_or_basis_hash"
+      ],
+      "notes": "This route is read-heavy and append-only, but still governed by the same return-target and support-region laws."
+    },
+    {
+      "surface_family": "NATIVE_OPERATOR",
+      "route_or_scene_key": "native_primary_manifest_scene",
+      "route_or_scene_kind": "scene",
+      "shell_family": "CALM_SHELL",
+      "read_models": [
+        "DecisionBundle",
+        "ExperienceCursor",
+        "WorkspaceSnapshot (linked focus when present)"
+      ],
+      "read_surfaces": [
+        "Manifest experience snapshot",
+        "Manifest experience stream",
+        "Local cache hydration envelope"
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "TOGGLE_SIDEBAR",
+        "TOGGLE_INSPECTOR",
+        "FOCUS_PRIMARY_CANVAS",
+        "OPEN_COMPARE_WINDOW",
+        "REFRESH_CURRENT_SCENE"
+      ],
+      "command_semantics": "LOCAL_NATIVE_COMMAND",
+      "stream_sources": [
+        "snapshot hydration",
+        "stream resume",
+        "manifest delta application"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "scene_identity",
+        "canonical_object_ref",
+        "preview_subject_ref_or_null"
+      ],
+      "notes": "Native primary scenes embody calm-shell law; they do not define a fourth shell family."
+    },
+    {
+      "surface_family": "NATIVE_OPERATOR",
+      "route_or_scene_key": "native_primary_work_item_scene",
+      "route_or_scene_kind": "scene",
+      "shell_family": "CALM_SHELL",
+      "read_models": [
+        "WorkspaceSnapshot",
+        "WorkspaceDelta",
+        "WorkspaceCursor"
+      ],
+      "read_surfaces": [
+        "Workspace snapshot",
+        "Workspace stream",
+        "Local cache hydration envelope"
+      ],
+      "command_transport": [
+        "POST /v1/commands",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "TOGGLE_SIDEBAR",
+        "TOGGLE_INSPECTOR",
+        "FOCUS_SIDEBAR",
+        "FOCUS_PRIMARY_CANVAS",
+        "OPEN_AUDIT_WINDOW",
+        "OPEN_AUTHORITY_REVIEW_WINDOW",
+        "REFRESH_CURRENT_SCENE"
+      ],
+      "command_semantics": "LOCAL_NATIVE_COMMAND",
+      "stream_sources": [
+        "snapshot hydration",
+        "stream resume",
+        "workspace delta application"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "scene_identity",
+        "canonical_object_ref",
+        "preview_subject_ref_or_null"
+      ],
+      "notes": "The work-item scene is the native mirror of the collaboration workspace, with native command affordances layered on top."
+    },
+    {
+      "surface_family": "NATIVE_OPERATOR",
+      "route_or_scene_key": "native_secondary_compare_window",
+      "route_or_scene_kind": "scene",
+      "shell_family": "CALM_SHELL",
+      "read_models": [
+        "DecisionBundle comparison slice",
+        "preview_subject_ref_or_null"
+      ],
+      "read_surfaces": [
+        "Parent scene export to detached compare window",
+        "Local cached compare payload"
+      ],
+      "command_transport": [
+        "LOCAL_NATIVE_COMMAND",
+        "POST /v1/commands when route-local actions are still legal",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "FOCUS_PRIMARY_CANVAS",
+        "CLOSE_SECONDARY_WINDOW",
+        "COPY_IDENTIFIERS"
+      ],
+      "command_semantics": "LOCAL_NATIVE_COMMAND",
+      "stream_sources": [
+        "parent scene refresh",
+        "detached window restore payload"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "scene_identity",
+        "canonical_object_ref",
+        "preview_subject_ref_or_null"
+      ],
+      "notes": "Secondary windows are deliberately support-only overlays, not new shell families."
+    },
+    {
+      "surface_family": "NATIVE_OPERATOR",
+      "route_or_scene_key": "native_secondary_audit_window",
+      "route_or_scene_kind": "scene",
+      "shell_family": "CALM_SHELL",
+      "read_models": [
+        "Audit slice",
+        "preview_subject_ref_or_null"
+      ],
+      "read_surfaces": [
+        "Parent scene audit export",
+        "Local cached audit payload"
+      ],
+      "command_transport": [
+        "LOCAL_NATIVE_COMMAND",
+        "POST /v1/commands when route-local actions are still legal",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "FOCUS_PRIMARY_CANVAS",
+        "CLOSE_SECONDARY_WINDOW",
+        "COPY_IDENTIFIERS"
+      ],
+      "command_semantics": "LOCAL_NATIVE_COMMAND",
+      "stream_sources": [
+        "parent scene refresh",
+        "detached window restore payload"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "scene_identity",
+        "canonical_object_ref",
+        "preview_subject_ref_or_null"
+      ],
+      "notes": "Audit windows inherit native support-only rules and masking-aware restore envelopes."
+    },
+    {
+      "surface_family": "NATIVE_OPERATOR",
+      "route_or_scene_key": "native_secondary_filing_packet_window",
+      "route_or_scene_kind": "scene",
+      "shell_family": "CALM_SHELL",
+      "read_models": [
+        "Packet preview slice",
+        "preview_subject_ref_or_null"
+      ],
+      "read_surfaces": [
+        "Parent scene packet export",
+        "Local cached packet payload"
+      ],
+      "command_transport": [
+        "LOCAL_NATIVE_COMMAND",
+        "POST /v1/commands when route-local actions are still legal",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "FOCUS_PRIMARY_CANVAS",
+        "CLOSE_SECONDARY_WINDOW",
+        "COPY_IDENTIFIERS"
+      ],
+      "command_semantics": "LOCAL_NATIVE_COMMAND",
+      "stream_sources": [
+        "parent scene refresh",
+        "detached window restore payload"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "scene_identity",
+        "canonical_object_ref",
+        "preview_subject_ref_or_null"
+      ],
+      "notes": "Packet review is explicitly support-only and inherits the parent scene legality envelope."
+    },
+    {
+      "surface_family": "NATIVE_OPERATOR",
+      "route_or_scene_key": "native_secondary_authority_review_window",
+      "route_or_scene_kind": "scene",
+      "shell_family": "CALM_SHELL",
+      "read_models": [
+        "Authority interaction slice",
+        "preview_subject_ref_or_null"
+      ],
+      "read_surfaces": [
+        "Parent scene authority review export",
+        "Local cached authority payload"
+      ],
+      "command_transport": [
+        "LOCAL_NATIVE_COMMAND",
+        "POST /v1/commands when route-local actions are still legal",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "FOCUS_PRIMARY_CANVAS",
+        "CLOSE_SECONDARY_WINDOW",
+        "COPY_IDENTIFIERS"
+      ],
+      "command_semantics": "LOCAL_NATIVE_COMMAND",
+      "stream_sources": [
+        "parent scene refresh",
+        "detached window restore payload"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "scene_identity",
+        "canonical_object_ref",
+        "preview_subject_ref_or_null"
+      ],
+      "notes": "Authority review is support-only and parent-bound like the other detached native windows."
+    },
+    {
+      "surface_family": "NATIVE_OPERATOR",
+      "route_or_scene_key": "native_auth_handoff_session",
+      "route_or_scene_kind": "scene",
+      "shell_family": "CALM_SHELL",
+      "read_models": [
+        "Return target envelope",
+        "pending authority task binding"
+      ],
+      "read_surfaces": [
+        "ASWebAuthenticationSession callback",
+        "Parent scene refresh after settlement"
+      ],
+      "command_transport": [
+        "LOCAL_NATIVE_COMMAND",
+        "POST /v1/commands when route-local actions are still legal",
+        "GET /v1/commands/{command_id}"
+      ],
+      "commands": [
+        "BEGIN_ASWEB_AUTH_SESSION",
+        "RESUME_PARENT_SCENE"
+      ],
+      "command_semantics": "LOCAL_NATIVE_AND_AUTH",
+      "stream_sources": [
+        "auth callback",
+        "parent scene refresh"
+      ],
+      "cache_partition_basis": [
+        "tenant",
+        "session",
+        "access_binding",
+        "masking",
+        "scene_identity",
+        "canonical_object_ref",
+        "preview_subject_ref_or_null"
+      ],
+      "notes": "External handoff is a temporary escape hatch, not a shell transition."
+    }
+  ]
+}

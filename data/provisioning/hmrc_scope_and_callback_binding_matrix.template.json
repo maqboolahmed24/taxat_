@@ -1,0 +1,260 @@
+{
+  "schema_version": "1.0",
+  "matrix_id": "hmrc-sandbox-app-wk-local-provisioning-sandbox-taxat-sandbox-income-tax-scope-and-callback-matrix",
+  "provider_id": "hmrc-developer-hub",
+  "provider_display_name": "HMRC Developer Hub",
+  "run_id": "run-template-hmrc-sandbox-app-oauth-001",
+  "workspace_id": "wk-local-provisioning-sandbox",
+  "flow_id": "sandbox-app-registration",
+  "application_record_ref": "./hmrc_sandbox_application_record.template.json",
+  "required_api_baseline_ref": "./hmrc_required_api_set_baseline.json",
+  "provider_environment_target": "sandbox",
+  "scope_sets": [
+    {
+      "scope_set_ref": "hmrc_income_tax_mtd_current_slice_interactive",
+      "scopes": [
+        "read:self-assessment",
+        "write:self-assessment"
+      ],
+      "rationale": "The current roadmap slice spans both read-side and write-side MTD Income Tax operations, so the interactive HMRC session requests only the two self-assessment scopes already published by the subscribed APIs and nothing wider.",
+      "source_refs": [
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints",
+          "rationale": "HMRC user-restricted guidance defines space-delimited scope requests and the sandbox authorisation/token endpoints."
+        },
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/business-details-api/2.0/oas/file",
+          "rationale": "The current Business Details OAS publishes the read/write self-assessment scope pair."
+        }
+      ]
+    }
+  ],
+  "callback_bindings": [
+    {
+      "callback_profile_ref": "cb_sandbox_web",
+      "connection_method": "WEB_APP_VIA_SERVER",
+      "environment_ref": "env_shared_sandbox_integration",
+      "redirect_uri": "https://auth.sandbox.taxat.example/oauth/hmrc/callback",
+      "owning_deployable_id": "deployable_northbound_api_session_gateway",
+      "token_exchange_owner": "deployable_northbound_api_session_gateway",
+      "raw_token_storage_boundary": "SECRETS_MANAGER_OR_TOKEN_VAULT",
+      "initiation_surface": "Browser shells start the HMRC journey, but the callback lands on the gateway-owned HTTPS redirect endpoint.",
+      "authorization_endpoint_runtime": "https://test-www.tax.service.gov.uk/oauth/authorize",
+      "token_endpoint_runtime": "https://test-api.service.hmrc.gov.uk/oauth/token",
+      "redirect_uri_reuse_rule": "EXACT_REDIRECT_URI_REUSED_AT_TOKEN_EXCHANGE",
+      "post_authorization_return_strategy": "Gateway completes token exchange, rehydrates the server session, and redirects back to the owning browser shell or object route.",
+      "source_refs": [
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/reference-guide",
+          "rationale": "HMRC redirect URI budget, HTTPS rule for web callbacks, and fragment/IP-address prohibitions."
+        }
+      ]
+    },
+    {
+      "callback_profile_ref": "cb_sandbox_desktop",
+      "connection_method": "DESKTOP_APP_VIA_SERVER",
+      "environment_ref": "env_shared_sandbox_integration",
+      "redirect_uri": "http://localhost:46080/oauth/hmrc/sandbox/native-callback",
+      "owning_deployable_id": "deployable_native_macos_operator_client",
+      "token_exchange_owner": "deployable_northbound_api_session_gateway",
+      "raw_token_storage_boundary": "SECRETS_MANAGER_OR_TOKEN_VAULT",
+      "initiation_surface": "Native macOS app opens the system browser and receives the return on the environment-bound loopback path.",
+      "authorization_endpoint_runtime": "https://test-www.tax.service.gov.uk/oauth/authorize",
+      "token_endpoint_runtime": "https://test-api.service.hmrc.gov.uk/oauth/token",
+      "redirect_uri_reuse_rule": "EXACT_REDIRECT_URI_REUSED_AT_TOKEN_EXCHANGE",
+      "post_authorization_return_strategy": "Local callback server hands the code and opaque return context back to the governed gateway, which completes token exchange before resuming the native scene.",
+      "source_refs": [
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints",
+          "rationale": "HMRC installed-application localhost callback pattern."
+        }
+      ]
+    },
+    {
+      "callback_profile_ref": "cb_preprod_web",
+      "connection_method": "WEB_APP_VIA_SERVER",
+      "environment_ref": "env_preproduction_verification",
+      "redirect_uri": "https://auth.preprod.taxat.example/oauth/hmrc/callback",
+      "owning_deployable_id": "deployable_northbound_api_session_gateway",
+      "token_exchange_owner": "deployable_northbound_api_session_gateway",
+      "raw_token_storage_boundary": "SECRETS_MANAGER_OR_TOKEN_VAULT",
+      "initiation_surface": "Browser shells start the HMRC journey, but the callback lands on the gateway-owned HTTPS redirect endpoint.",
+      "authorization_endpoint_runtime": "https://test-www.tax.service.gov.uk/oauth/authorize",
+      "token_endpoint_runtime": "https://test-api.service.hmrc.gov.uk/oauth/token",
+      "redirect_uri_reuse_rule": "EXACT_REDIRECT_URI_REUSED_AT_TOKEN_EXCHANGE",
+      "post_authorization_return_strategy": "Gateway completes token exchange, rehydrates the server session, and redirects back to the owning browser shell or object route.",
+      "source_refs": [
+        {
+          "source": "Algorithm/deployment_and_resilience_contract.md::L52[Promotion_pipeline]",
+          "rationale": "Pre-production must mirror production-like policy without sharing production provider trust."
+        }
+      ]
+    },
+    {
+      "callback_profile_ref": "cb_preprod_desktop",
+      "connection_method": "DESKTOP_APP_VIA_SERVER",
+      "environment_ref": "env_preproduction_verification",
+      "redirect_uri": "http://localhost:46180/oauth/hmrc/preprod/native-callback",
+      "owning_deployable_id": "deployable_native_macos_operator_client",
+      "token_exchange_owner": "deployable_northbound_api_session_gateway",
+      "raw_token_storage_boundary": "SECRETS_MANAGER_OR_TOKEN_VAULT",
+      "initiation_surface": "Native macOS app opens the system browser and receives the return on the environment-bound loopback path.",
+      "authorization_endpoint_runtime": "https://test-www.tax.service.gov.uk/oauth/authorize",
+      "token_endpoint_runtime": "https://test-api.service.hmrc.gov.uk/oauth/token",
+      "redirect_uri_reuse_rule": "EXACT_REDIRECT_URI_REUSED_AT_TOKEN_EXCHANGE",
+      "post_authorization_return_strategy": "Local callback server hands the code and opaque return context back to the governed gateway, which completes token exchange before resuming the native scene.",
+      "source_refs": [
+        {
+          "source": "Algorithm/macos_native_operator_workspace_blueprint.md::L372[7._Authentication_and_session_strategy]",
+          "rationale": "Native operator flows stay system-browser managed while server truth remains authoritative."
+        }
+      ]
+    }
+  ],
+  "operation_bindings": [
+    {
+      "operation_family_ref": "AUTH_READ_REFERENCE",
+      "required_api_keys": ["business_details"],
+      "scope_set_ref": "hmrc_income_tax_mtd_current_slice_interactive",
+      "allowed_callback_profile_refs": ["cb_sandbox_web", "cb_sandbox_desktop", "cb_preprod_web", "cb_preprod_desktop"],
+      "requested_by_default_for_current_slice": true,
+      "token_exchange_owner": "deployable_northbound_api_session_gateway_or_controlled_authority_gateway",
+      "raw_token_storage_boundary": "SECRETS_MANAGER_OR_TOKEN_VAULT",
+      "rationale": "Reference-data reads stay on the shared current-slice HMRC scope set so sessions are not widened beyond read/write self-assessment.",
+      "source_refs": [
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/business-details-api/2.0",
+          "rationale": "Business Details is the reference-data source for this operation family."
+        }
+      ]
+    },
+    {
+      "operation_family_ref": "AUTH_READ_OBLIGATIONS",
+      "required_api_keys": ["obligations"],
+      "scope_set_ref": "hmrc_income_tax_mtd_current_slice_interactive",
+      "allowed_callback_profile_refs": ["cb_sandbox_web", "cb_sandbox_desktop", "cb_preprod_web", "cb_preprod_desktop"],
+      "requested_by_default_for_current_slice": true,
+      "token_exchange_owner": "deployable_northbound_api_session_gateway_or_controlled_authority_gateway",
+      "raw_token_storage_boundary": "SECRETS_MANAGER_OR_TOKEN_VAULT",
+      "rationale": "Obligation retrieval remains within the same interactive scope set because the current slice also includes write-capable submission work.",
+      "source_refs": [
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/obligations-api/3.0",
+          "rationale": "Obligations is the source API for this operation family."
+        }
+      ]
+    },
+    {
+      "operation_family_ref": "AUTH_READ_CALCULATION",
+      "required_api_keys": ["individual_calculations"],
+      "scope_set_ref": "hmrc_income_tax_mtd_current_slice_interactive",
+      "allowed_callback_profile_refs": ["cb_sandbox_web", "cb_sandbox_desktop", "cb_preprod_web", "cb_preprod_desktop"],
+      "requested_by_default_for_current_slice": true,
+      "token_exchange_owner": "deployable_northbound_api_session_gateway_or_controlled_authority_gateway",
+      "raw_token_storage_boundary": "SECRETS_MANAGER_OR_TOKEN_VAULT",
+      "rationale": "Calculation retrieval shares the same two-scope set as the write-capable calculation journey for the current slice.",
+      "source_refs": [
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/individual-calculations-api/8.0",
+          "rationale": "Individual Calculations is the source API for this operation family."
+        }
+      ]
+    },
+    {
+      "operation_family_ref": "AUTH_TRIGGER_CALCULATION",
+      "required_api_keys": ["individual_calculations"],
+      "scope_set_ref": "hmrc_income_tax_mtd_current_slice_interactive",
+      "allowed_callback_profile_refs": ["cb_sandbox_web", "cb_sandbox_desktop", "cb_preprod_web", "cb_preprod_desktop"],
+      "requested_by_default_for_current_slice": true,
+      "token_exchange_owner": "deployable_northbound_api_session_gateway_or_controlled_authority_gateway",
+      "raw_token_storage_boundary": "SECRETS_MANAGER_OR_TOKEN_VAULT",
+      "rationale": "Triggering a calculation is a write-capable operation and therefore remains within the shared current-slice read/write set.",
+      "source_refs": [
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/individual-calculations-api/8.0",
+          "rationale": "Individual Calculations is the source API for this operation family."
+        }
+      ]
+    },
+    {
+      "operation_family_ref": "AUTH_SUBMIT_FINAL_DECLARATION",
+      "required_api_keys": ["individual_calculations"],
+      "scope_set_ref": "hmrc_income_tax_mtd_current_slice_interactive",
+      "allowed_callback_profile_refs": ["cb_sandbox_web", "cb_sandbox_desktop", "cb_preprod_web", "cb_preprod_desktop"],
+      "requested_by_default_for_current_slice": true,
+      "token_exchange_owner": "deployable_northbound_api_session_gateway_or_controlled_authority_gateway",
+      "raw_token_storage_boundary": "SECRETS_MANAGER_OR_TOKEN_VAULT",
+      "rationale": "Final declaration is a write-capable operation and remains bound to the same current-slice scope set.",
+      "source_refs": [
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/individual-calculations-api/8.0",
+          "rationale": "Individual Calculations is the source API for this operation family."
+        }
+      ]
+    },
+    {
+      "operation_family_ref": "AUTH_RECONCILE_STATUS",
+      "required_api_keys": ["individual_calculations"],
+      "scope_set_ref": "hmrc_income_tax_mtd_current_slice_interactive",
+      "allowed_callback_profile_refs": ["cb_sandbox_web", "cb_sandbox_desktop", "cb_preprod_web", "cb_preprod_desktop"],
+      "requested_by_default_for_current_slice": true,
+      "token_exchange_owner": "deployable_northbound_api_session_gateway_or_controlled_authority_gateway",
+      "raw_token_storage_boundary": "SECRETS_MANAGER_OR_TOKEN_VAULT",
+      "rationale": "Status reconciliation stays on the same current-slice scope set because it is inseparable from write-capable calculation and submission flows.",
+      "source_refs": [
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/individual-calculations-api/8.0",
+          "rationale": "Individual Calculations is the source API for this operation family."
+        }
+      ]
+    },
+    {
+      "operation_family_ref": "AUTH_SUBMIT_PERIODIC_UPDATE",
+      "required_api_keys": ["self_employment_business", "property_business"],
+      "scope_set_ref": "hmrc_income_tax_mtd_current_slice_interactive",
+      "allowed_callback_profile_refs": ["cb_sandbox_web", "cb_sandbox_desktop", "cb_preprod_web", "cb_preprod_desktop"],
+      "requested_by_default_for_current_slice": true,
+      "token_exchange_owner": "deployable_northbound_api_session_gateway_or_controlled_authority_gateway",
+      "raw_token_storage_boundary": "SECRETS_MANAGER_OR_TOKEN_VAULT",
+      "rationale": "Quarterly update submission spans both self-employment and property APIs and therefore stays on the shared two-scope set.",
+      "source_refs": [
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/self-employment-business-api/5.0",
+          "rationale": "Self Employment Business is a source API for periodic submissions."
+        },
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/property-business-api/6.0",
+          "rationale": "Property Business is a source API for periodic submissions."
+        }
+      ]
+    },
+    {
+      "operation_family_ref": "AUTH_SUBMIT_POST_FINALISATION_AMENDMENT",
+      "required_api_keys": ["self_employment_business", "property_business"],
+      "scope_set_ref": "hmrc_income_tax_mtd_current_slice_interactive",
+      "allowed_callback_profile_refs": ["cb_sandbox_web", "cb_sandbox_desktop", "cb_preprod_web", "cb_preprod_desktop"],
+      "requested_by_default_for_current_slice": true,
+      "token_exchange_owner": "deployable_northbound_api_session_gateway_or_controlled_authority_gateway",
+      "raw_token_storage_boundary": "SECRETS_MANAGER_OR_TOKEN_VAULT",
+      "rationale": "Post-finalisation amendments remain within the same current-slice read/write scope pair as the quarterly submission APIs.",
+      "source_refs": [
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/self-employment-business-api/5.0",
+          "rationale": "Self Employment Business is a source API for amendment submissions."
+        },
+        {
+          "source": "https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/property-business-api/6.0",
+          "rationale": "Property Business is a source API for amendment submissions."
+        }
+      ]
+    }
+  ],
+  "typed_gaps": [
+    "HMRC's user-restricted guidance currently documents sandbox authorisation at https://test-www.tax.service.gov.uk/oauth/authorize and token exchange at https://test-api.service.hmrc.gov.uk/oauth/token, while current API OAS files still publish https://api.service.hmrc.gov.uk/oauth/authorize and /oauth/token in their security schemes. Taxat follows the user-restricted guidance for sandbox runtime endpoint selection and keeps the discrepancy explicit."
+  ],
+  "notes": [
+    "Browser-originated HMRC requests always return through the gateway-owned HTTPS callback.",
+    "Native macOS flows may receive the code on localhost, but the browser and the device are never the long-term token custody boundary."
+  ],
+  "last_verified_at": "2026-04-18T16:00:00.000Z"
+}

@@ -1,0 +1,188 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "postgres_audit_append_only_enforcement",
+  "selection_status": "PROVIDER_SELECTION_REQUIRED",
+  "enforcement_mode": "TRIGGER_GUARDED_RANGE_PARTITIONED_APPEND_ONLY_LEDGER",
+  "audit_table_ref": "audit_ledger.audit_event_stream",
+  "stream_head_table_ref": "audit_admin.audit_stream_head",
+  "partitioning": {
+    "strategy": "RANGE_RECORDED_AT_MONTHLY_PLUS_DEFAULT",
+    "maintenance_path": "DETACH_AND_DROP_EXPIRED_PARTITION_ONLY_NO_ROW_MUTATION",
+    "ordering_index_ref": "audit_event_stream_order_lookup"
+  },
+  "grant_posture": {
+    "insert_allowed_role_refs": [
+      "role.pg.audit.append_writer"
+    ],
+    "select_allowed_role_refs": [
+      "role.pg.audit.append_writer",
+      "role.pg.audit.investigator_ro",
+      "role.pg.control.backup_restore",
+      "role.pg.break_glass.operator"
+    ],
+    "update_allowed_role_refs": [],
+    "delete_allowed_role_refs": []
+  },
+  "immutable_columns": [
+    "audit_event_id",
+    "event_type",
+    "event_time",
+    "recorded_at",
+    "audit_stream_ref",
+    "stream_sequence",
+    "tenant_id",
+    "client_id",
+    "manifest_id",
+    "actor_ref",
+    "service_ref",
+    "object_refs",
+    "reason_codes",
+    "correlation_context",
+    "event_payload_hash",
+    "prev_event_hash",
+    "visibility_class",
+    "retention_class",
+    "signature_ref",
+    "retention_limited_explainability_contract",
+    "retained_context"
+  ],
+  "stream_ordering": {
+    "canonical_merge_key": [
+      "audit_stream_ref",
+      "stream_sequence"
+    ],
+    "monotonic_insert_guard": "audit_admin.guard_audit_event_insert",
+    "prev_hash_guard": "audit_admin.guard_audit_event_insert",
+    "reasoning": "The partitioned ledger keeps a stream-head register so inserts stay monotonic within each stream while time-based partitions remain drop-friendly for retention."
+  },
+  "mutation_violation": {
+    "sqlstate": "P0001",
+    "reason_code": "AUDIT_APPEND_ONLY_VIOLATION",
+    "surfaced_as": [
+      "SQL trigger error",
+      "audit investigation blocker",
+      "restore verification blocker"
+    ]
+  },
+  "maintenance_exception_path": {
+    "allowed_path": "PARTITION_RETENTION_MAINTENANCE_AFTER_RETENTION_EXPIRY_ONLY",
+    "row_update_allowed": false,
+    "row_delete_allowed": false,
+    "source_refs": [
+      {
+        "source_file": "Algorithm/deployment_and_resilience_contract.md",
+        "source_heading_or_logical_block": "1. Reference runtime topology",
+        "source_ref": "Algorithm/deployment_and_resilience_contract.md::L22[1._Reference_runtime_topology]",
+        "rationale": "The reference runtime topology names the primary control store and append-only audit store as separate bounded components."
+      },
+      {
+        "source_file": "Algorithm/deployment_and_resilience_contract.md",
+        "source_heading_or_logical_block": "3. Schema and datastore migration rules",
+        "source_ref": "Algorithm/deployment_and_resilience_contract.md::L65[3._Schema_and_datastore_migration_rules]",
+        "rationale": "Expand, backfill, and contract rules must remain machine-readable in the bootstrap topology."
+      },
+      {
+        "source_file": "Algorithm/deployment_and_resilience_contract.md",
+        "source_heading_or_logical_block": "5. Backup, restore, and DR rules",
+        "source_ref": "Algorithm/deployment_and_resilience_contract.md::L140[5._Backup_restore_and_DR_rules]",
+        "rationale": "Checkpoint, restore, queue rebuild, privacy reconciliation, and authority rebuild gates are mandatory for Tier 0 truth."
+      },
+      {
+        "source_file": "Algorithm/observability_and_audit_contract.md",
+        "source_heading_or_logical_block": "14.5 Audit event contract",
+        "source_ref": "Algorithm/observability_and_audit_contract.md::L156[14.5_Audit_event_contract]",
+        "rationale": "Audit ordering, append-only posture, and stream/hash-chain fields are defined here."
+      },
+      {
+        "source_file": "Algorithm/observability_and_audit_contract.md",
+        "source_heading_or_logical_block": "Deterministic ordering rule",
+        "source_ref": "Algorithm/observability_and_audit_contract.md::L193[Deterministic_ordering_rule]",
+        "rationale": "Canonical audit order must derive from audit_stream_ref and stream_sequence rather than wall-clock time."
+      },
+      {
+        "source_file": "Algorithm/data_model.md",
+        "source_heading_or_logical_block": "RunManifest, AuthorityInteractionRecord, SubmissionRecord, AuditEvent",
+        "source_ref": "Algorithm/data_model.md::L1091[RunManifest] / Algorithm/data_model.md::L2509[AuthorityInteractionRecord] / Algorithm/data_model.md::L2893[SubmissionRecord] / Algorithm/data_model.md::L3023[AuditEvent]",
+        "rationale": "The control store has to leave room for manifest, authority, submission, and restore metadata while the audit store preserves append-only event evidence."
+      },
+      {
+        "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+        "source_heading_or_logical_block": "Decision",
+        "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+        "rationale": "ADR-002 already chose a relational-first control plane with an append-only audit store and left the exact product deferred."
+      },
+      {
+        "source_file": "data/analysis/dependency_register.json",
+        "source_heading_or_logical_block": "PRIMARY_TRANSACTIONAL_CONTROL_STORE dependency row",
+        "source_ref": "data/analysis/dependency_register.json::PRIMARY_TRANSACTIONAL_CONTROL_STORE",
+        "rationale": "The dependency register still marks PostgreSQL as a procurement or platform choice, so provider details must fail closed instead of being invented."
+      },
+      {
+        "source_file": "config/secrets/secret_alias_catalog.json",
+        "source_heading_or_logical_block": "postgresql control-store and audit-store aliases",
+        "source_ref": "config/secrets/secret_alias_catalog.json::alias.runtime.postgresql.control-store.password / alias.runtime.postgresql.audit-store.password",
+        "rationale": "Separate control and audit credentials already exist and the store topology must align with them."
+      }
+    ],
+    "rationale": "Retention acts by partition detach or drop after policy expiry; even maintenance operators do not mutate or delete individual evidence rows."
+  },
+  "source_refs": [
+    {
+      "source_file": "Algorithm/deployment_and_resilience_contract.md",
+      "source_heading_or_logical_block": "1. Reference runtime topology",
+      "source_ref": "Algorithm/deployment_and_resilience_contract.md::L22[1._Reference_runtime_topology]",
+      "rationale": "The reference runtime topology names the primary control store and append-only audit store as separate bounded components."
+    },
+    {
+      "source_file": "Algorithm/deployment_and_resilience_contract.md",
+      "source_heading_or_logical_block": "3. Schema and datastore migration rules",
+      "source_ref": "Algorithm/deployment_and_resilience_contract.md::L65[3._Schema_and_datastore_migration_rules]",
+      "rationale": "Expand, backfill, and contract rules must remain machine-readable in the bootstrap topology."
+    },
+    {
+      "source_file": "Algorithm/deployment_and_resilience_contract.md",
+      "source_heading_or_logical_block": "5. Backup, restore, and DR rules",
+      "source_ref": "Algorithm/deployment_and_resilience_contract.md::L140[5._Backup_restore_and_DR_rules]",
+      "rationale": "Checkpoint, restore, queue rebuild, privacy reconciliation, and authority rebuild gates are mandatory for Tier 0 truth."
+    },
+    {
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "14.5 Audit event contract",
+      "source_ref": "Algorithm/observability_and_audit_contract.md::L156[14.5_Audit_event_contract]",
+      "rationale": "Audit ordering, append-only posture, and stream/hash-chain fields are defined here."
+    },
+    {
+      "source_file": "Algorithm/observability_and_audit_contract.md",
+      "source_heading_or_logical_block": "Deterministic ordering rule",
+      "source_ref": "Algorithm/observability_and_audit_contract.md::L193[Deterministic_ordering_rule]",
+      "rationale": "Canonical audit order must derive from audit_stream_ref and stream_sequence rather than wall-clock time."
+    },
+    {
+      "source_file": "Algorithm/data_model.md",
+      "source_heading_or_logical_block": "RunManifest, AuthorityInteractionRecord, SubmissionRecord, AuditEvent",
+      "source_ref": "Algorithm/data_model.md::L1091[RunManifest] / Algorithm/data_model.md::L2509[AuthorityInteractionRecord] / Algorithm/data_model.md::L2893[SubmissionRecord] / Algorithm/data_model.md::L3023[AuditEvent]",
+      "rationale": "The control store has to leave room for manifest, authority, submission, and restore metadata while the audit store preserves append-only event evidence."
+    },
+    {
+      "source_file": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md",
+      "source_heading_or_logical_block": "Decision",
+      "source_ref": "docs/architecture/adr/ADR-002-storage-and-eventing-topology.md::Decision",
+      "rationale": "ADR-002 already chose a relational-first control plane with an append-only audit store and left the exact product deferred."
+    },
+    {
+      "source_file": "data/analysis/dependency_register.json",
+      "source_heading_or_logical_block": "PRIMARY_TRANSACTIONAL_CONTROL_STORE dependency row",
+      "source_ref": "data/analysis/dependency_register.json::PRIMARY_TRANSACTIONAL_CONTROL_STORE",
+      "rationale": "The dependency register still marks PostgreSQL as a procurement or platform choice, so provider details must fail closed instead of being invented."
+    },
+    {
+      "source_file": "config/secrets/secret_alias_catalog.json",
+      "source_heading_or_logical_block": "postgresql control-store and audit-store aliases",
+      "source_ref": "config/secrets/secret_alias_catalog.json::alias.runtime.postgresql.control-store.password / alias.runtime.postgresql.audit-store.password",
+      "rationale": "Separate control and audit credentials already exist and the store topology must align with them."
+    }
+  ],
+  "typed_gaps": [
+    "GLOBAL_UNIQUE_SEQUENCE_ENFORCEMENT_DEPENDS_ON_STREAM_HEAD_TRIGGER_NOT_PARTITION_KEY_UNIQUENESS"
+  ]
+}

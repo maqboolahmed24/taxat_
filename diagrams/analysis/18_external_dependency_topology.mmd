@@ -1,0 +1,104 @@
+flowchart TD
+  env["Environment / tenant / authority profile matrix"]
+  browser["Browser automation workspace"]
+  vault["Secrets manager / token vault"]
+  kms["KMS / HSM root of trust"]
+  db["Primary transactional control store"]
+  audit["Append-only audit store"]
+  object["Object storage / quarantine"]
+  queue["Queue / broker"]
+  cache["Cache / stream resume store"]
+  otel["OpenTelemetry backend"]
+  registry["Registry / signing / attestation"]
+  edge["DNS / TLS / WAF / edge"]
+  cicd["CI/CD runners / preview"]
+  authHub["Authority developer hub"]
+  authSandbox["Authority sandbox app"]
+  authProd["Authority production app"]
+  authConfig["Authority callbacks / scopes"]
+  fraud["Fraud-prevention bindings"]
+  authority["Authority API provider interface"]
+  idp["External identity provider"]
+  idpClients["IdP tenant / app clients"]
+  idpPolicies["IdP roles / MFA / sessions"]
+  email["Email provider"]
+  emailConfig["Email templates / callbacks"]
+  push["Push / device messaging"]
+  errorMon["Optional error monitoring"]
+  helpdesk["Optional helpdesk integration"]
+  ocr["Optional OCR capability"]
+  malware["Malware scanning / quarantine"]
+  macsign["macOS signing / notarization"]
+  updates["Desktop release / update channel"]
+  internalApi["Internal northbound command / session APIs"]
+  internalReads["Internal read models / streams / uploads"]
+  kms --> vault
+  kms --> db
+  kms --> audit
+  kms --> object
+  kms --> registry
+  kms --> macsign
+  env --> browser
+  env --> edge
+  env --> idp
+  env --> authHub
+  browser --> authHub
+  authHub --> authSandbox
+  authHub --> authProd
+  authSandbox --> authConfig
+  authProd --> authConfig
+  authConfig --> fraud
+  vault --> authSandbox
+  vault --> authProd
+  vault --> authority
+  fraud --> authority
+  authConfig --> authority
+  edge --> authority
+  vault --> idp
+  idp --> idpClients
+  browser --> idpClients
+  vault --> idpClients
+  idpClients --> idpPolicies
+  browser --> email
+  edge --> email
+  vault --> email
+  email --> emailConfig
+  edge --> emailConfig
+  vault --> emailConfig
+  browser --> push
+  vault --> push
+  otel --> errorMon
+  vault --> errorMon
+  browser --> helpdesk
+  vault --> helpdesk
+  object --> ocr
+  vault --> ocr
+  object --> malware
+  queue --> malware
+  vault --> malware
+  registry --> cicd
+  vault --> cicd
+  edge --> cicd
+  cicd --> macsign
+  macsign --> updates
+  object --> updates
+  edge --> updates
+  cicd --> updates
+  db --> queue
+  db --> cache
+  db --> internalApi
+  cache --> internalApi
+  idpPolicies --> internalApi
+  db --> internalReads
+  object --> internalReads
+  queue --> internalReads
+  cache --> internalReads
+  malware --> internalReads
+  classDef internal fill:#ECEFF4,stroke:#4C566A,color:#2E3440;
+  classDef optional fill:#FFF4D6,stroke:#B7791F,color:#744210;
+  classDef explicit fill:#E6FFFA,stroke:#2C7A7B,color:#234E52;
+  classDef implied fill:#EBF8FF,stroke:#3182CE,color:#2A4365;
+  class internalApi,internalReads internal;
+  class errorMon,helpdesk,ocr optional;
+  class authority,idp,malware,vault,kms,db,audit,object,queue,cache,otel,registry,macsign,updates explicit;
+  class env,browser,authHub,authSandbox,authProd,authConfig,fraud,idpClients,idpPolicies,email,emailConfig,push,edge,cicd implied;

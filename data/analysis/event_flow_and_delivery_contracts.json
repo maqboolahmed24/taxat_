@@ -1,0 +1,210 @@
+{
+  "delivery_semantics_enum": [
+    "AT_LEAST_ONCE_TRANSPORT_WITH_IDEMPOTENT_CONSUMERS",
+    "DURABLE_RECEIPT_PLUS_OUTBOX",
+    "REBASE_ON_COMPACTED_HISTORY",
+    "NO_BLIND_RESEND",
+    "APPEND_ONLY_EVIDENCE_WRITE"
+  ],
+  "event_flows": [
+    {
+      "canonical_truth_artifacts": [
+        "workflow_filing_and_submission_state",
+        "durable_command_receipts_and_outbox_inbox"
+      ],
+      "delivery_semantics": "DURABLE_RECEIPT_PLUS_OUTBOX",
+      "flow_id": "command_acceptance_to_outbox_and_projection",
+      "idempotency_basis": "command_id, idempotency_key, durable receipt, stale-view guards",
+      "ordering_scope": "manifest_id or item_id plus shell/frame generation",
+      "producer": "northbound command handler",
+      "rebuild_source": "receipts, outbox rows, and current control truth",
+      "retention_replay_posture": "Receipts remain durable recovery anchors; queue transport is disposable.",
+      "source_of_truth_store": "PRIMARY_CONTROL_STORE",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L295[3._Command_envelope]",
+        "Algorithm/northbound_api_and_session_contract.md::L456[4._Command_receipt]",
+        "Algorithm/deployment_and_resilience_contract.md::L41[outbox_inbox_queue_loss_recoverable]"
+      ],
+      "transport_channel": "transactional outbox -> queue/broker -> projector and workers",
+      "user_visible_surface_impact": "Supports durable rebase, duplicate-safe retries, and fresh snapshots after lost POST responses."
+    },
+    {
+      "canonical_truth_artifacts": [
+        "upload_session_metadata",
+        "immutable_upload_and_quarantine_bodies"
+      ],
+      "delivery_semantics": "AT_LEAST_ONCE_TRANSPORT_WITH_IDEMPOTENT_CONSUMERS",
+      "flow_id": "upload_staging_scan_and_publication",
+      "idempotency_basis": "upload_session_id plus frozen request/item visibility binding",
+      "ordering_scope": "tenant_id, client_id, request_version_ref or item_id, upload_session_id",
+      "producer": "upload session service and publish command handlers",
+      "rebuild_source": "upload session metadata plus immutable blob refs and scan outcomes",
+      "retention_replay_posture": "Rejected, quarantined, and superseded uploads remain explicit history rather than disappearing.",
+      "source_of_truth_store": "PRIMARY_CONTROL_STORE",
+      "source_refs": [
+        "Algorithm/customer_client_portal_experience_contract.md::L293[Secure_document-upload_flow]",
+        "Algorithm/collaboration_workspace_contract.md::L1673[8.2_Upload_staging]"
+      ],
+      "transport_channel": "upload staging API -> scan workers -> publish command -> projection refresh",
+      "user_visible_surface_impact": "Clients can resume, retry, or replace in the same governed request lane without rebinding older bytes silently."
+    },
+    {
+      "canonical_truth_artifacts": [
+        "authority_interaction_control",
+        "authority_request_and_response_evidence"
+      ],
+      "delivery_semantics": "NO_BLIND_RESEND",
+      "flow_id": "authority_request_dispatch",
+      "idempotency_basis": "request_hash, duplicate_meaning_key, idempotency_key, request_identity_contract",
+      "ordering_scope": "duplicate_meaning_key and binding_lineage_ref",
+      "producer": "authority gateway dispatch worker",
+      "rebuild_source": "AuthorityInteractionRecord plus sealed AuthorityRequestEnvelope, not broker replay",
+      "retention_replay_posture": "Request identity and exact sealed envelopes remain durable for audit, resend legality, and reconciliation.",
+      "source_of_truth_store": "PRIMARY_CONTROL_STORE",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L621[9.8_Request_hashing_and_idempotency]",
+        "Algorithm/authority_interaction_protocol.md::L363[AuthorityInteractionRecord]",
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L113[Queue_and_authority_recovery_law]"
+      ],
+      "transport_channel": "durable outbox -> queue/broker -> authority gateway -> provider API",
+      "user_visible_surface_impact": "Prevents duplicate legal mutations and keeps pending or unknown authority posture explainable after retries or recovery."
+    },
+    {
+      "canonical_truth_artifacts": [
+        "authority_ingress_receipts",
+        "authority_request_and_response_evidence",
+        "authority_interaction_control",
+        "workflow_filing_and_submission_state"
+      ],
+      "delivery_semantics": "AT_LEAST_ONCE_TRANSPORT_WITH_IDEMPOTENT_CONSUMERS",
+      "flow_id": "authority_ingress_checkpoint_and_normalization",
+      "idempotency_basis": "delivery_dedupe_key, canonical_ingress_receipt_ref, request-lineage correlation contract",
+      "ordering_scope": "delivery_dedupe_key and bound_interaction_ref",
+      "producer": "callback handlers, poll workers, and recovery readers",
+      "rebuild_source": "persisted ingress receipts, response envelopes, interaction records, and submission records",
+      "retention_replay_posture": "Async provider payloads remain durable ingress evidence before any legal-state mutation.",
+      "source_of_truth_store": "APPEND_ONLY_AUDIT_STORE",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L792[9.9A_Inbound_authority_ingress_protocol]",
+        "Algorithm/authority_interaction_protocol.md::L667[9.9_Response_classes]",
+        "Algorithm/authority_interaction_protocol.md::L854[9.10_Submission-state_write_rules]"
+      ],
+      "transport_channel": "provider callback or poll -> ingress checkpoint -> normalized response -> control-store mutation",
+      "user_visible_surface_impact": "Quarantines ambiguous or duplicate provider deliveries instead of mutating UI state from transport memory alone."
+    },
+    {
+      "canonical_truth_artifacts": [
+        "authority_interaction_control",
+        "authority_ingress_receipts",
+        "workflow_filing_and_submission_state"
+      ],
+      "delivery_semantics": "NO_BLIND_RESEND",
+      "flow_id": "authority_reconciliation_and_recovery",
+      "idempotency_basis": "resend_legality_state, reconciliation_control_contract, binding revalidation",
+      "ordering_scope": "interaction_id and duplicate_meaning_key",
+      "producer": "reconciliation workers and restore controllers",
+      "rebuild_source": "SubmissionRecord, AuthorityInteractionRecord, AuthorityIngressReceipt, and inbox truth",
+      "retention_replay_posture": "Outstanding authority work resumes from durable control packets, not worker memory or recent broker logs.",
+      "source_of_truth_store": "PRIMARY_CONTROL_STORE",
+      "source_refs": [
+        "Algorithm/authority_interaction_protocol.md::L952[9.12_Duplicate_and_pending-state_rules]",
+        "Algorithm/authority_interaction_protocol.md::L998[9.13_Reconciliation_protocol]",
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L113[Queue_and_authority_recovery_law]"
+      ],
+      "transport_channel": "scheduled queue work and manual investigation surfaces",
+      "user_visible_surface_impact": "Recovered environments reopen only after authority rebuild and binding revalidation are proven."
+    },
+    {
+      "canonical_truth_artifacts": [
+        "derived_read_models_and_snapshots",
+        "resume_tokens_and_route_cursors",
+        "live_stream_and_notification_fanout"
+      ],
+      "delivery_semantics": "REBASE_ON_COMPACTED_HISTORY",
+      "flow_id": "projection_rebuild_and_live_stream_fanout",
+      "idempotency_basis": "experience_sequence or workspace_sequence plus resume-token binding",
+      "ordering_scope": "manifest_id or item_id plus frame_epoch and sequence frontier",
+      "producer": "read-side projector and stream broker",
+      "rebuild_source": "primary control truth, append-only evidence, and latest immutable refs",
+      "retention_replay_posture": "Live deltas are disposable; snapshots and cursors can be regenerated or invalidated safely.",
+      "source_of_truth_store": "PROJECTION_STORE",
+      "source_refs": [
+        "Algorithm/northbound_api_and_session_contract.md::L646[7._Stream_and_reconnect_rules]",
+        "Algorithm/collaboration_workspace_contract.md::L1778[9._Stream_events_and_notifications]",
+        "Algorithm/deployment_and_resilience_contract.md::L156[read_side_rebuild_replays_persisted_truth]"
+      ],
+      "transport_channel": "projector -> projection store -> SSE or notification fanout",
+      "user_visible_surface_impact": "Preserves ordered live updates while letting clients rebase to fresh snapshots after compaction or visibility drift."
+    },
+    {
+      "canonical_truth_artifacts": [
+        "audit_event_ledger",
+        "provenance_graph_evidence"
+      ],
+      "delivery_semantics": "APPEND_ONLY_EVIDENCE_WRITE",
+      "flow_id": "audit_and_provenance_append",
+      "idempotency_basis": "event family identity, payload hash, originating activity ref",
+      "ordering_scope": "manifest_id plus event chronology and graph partition contract",
+      "producer": "all compliance-significant mutation paths",
+      "rebuild_source": "append-only evidence itself plus immutable blob refs when bodies are externalized",
+      "retention_replay_posture": "Audit and provenance survive payload limitation through explicit tombstones or lineage minimums.",
+      "source_of_truth_store": "APPEND_ONLY_AUDIT_STORE",
+      "source_refs": [
+        "Algorithm/observability_and_audit_contract.md::L154[14.5_Audit_event_contract]",
+        "Algorithm/provenance_graph_semantics.md::L253[gate_and_audit_anchoring_rule]",
+        "Algorithm/provenance_graph_semantics.md::L617[11.14D_Replay-safe_proof_reconstruction]"
+      ],
+      "transport_channel": "append-only evidence write plus query indexes or projections",
+      "user_visible_surface_impact": "Enquiry, audit, and replay views can explain legal decisions from one traversable evidence graph."
+    },
+    {
+      "canonical_truth_artifacts": [
+        "retention_control_objects",
+        "replay_attestations_and_erasure_proofs",
+        "immutable_upload_and_quarantine_bodies",
+        "generated_exports_and_proof_bundle_bodies"
+      ],
+      "delivery_semantics": "AT_LEAST_ONCE_TRANSPORT_WITH_IDEMPOTENT_CONSUMERS",
+      "flow_id": "retention_and_erasure_lifecycle",
+      "idempotency_basis": "retention_id, erasure_request_ref, erasure_action_ref",
+      "ordering_scope": "artifact_ref and retention_scope_class",
+      "producer": "retention engine and privacy workflows",
+      "rebuild_source": "RetentionTag, ArtifactRetention, ErasureProof, limitation notes, and surviving blob refs",
+      "retention_replay_posture": "Expired or erased evidence remains explicit as typed limitation posture instead of disappearing from proof and audit render paths.",
+      "source_of_truth_store": "PRIMARY_CONTROL_STORE",
+      "source_refs": [
+        "Algorithm/retention_and_privacy.md::L58[Artifact_retention_contract]",
+        "Algorithm/retention_and_privacy.md::L154[Erasure_and_legal-hold_workflow]",
+        "Algorithm/retention_limited_explainability_and_audit_sufficiency_contract.md::L52[Required_Outcomes]",
+        "Algorithm/retention_error_and_observability_contract.md::L172[15.5_Erasure_legal-hold_and_proof-preservation_invariants]"
+      ],
+      "transport_channel": "policy evaluation jobs -> control updates -> append-only proofs -> projection degradation",
+      "user_visible_surface_impact": "Surviving proof, audit, and customer-safe projections degrade deterministically under retention pressure."
+    },
+    {
+      "canonical_truth_artifacts": [
+        "manifest_and_execution_basis",
+        "release_migration_and_recovery_control",
+        "authority_interaction_control",
+        "authority_ingress_receipts",
+        "audit_event_ledger",
+        "provenance_graph_evidence"
+      ],
+      "delivery_semantics": "NO_BLIND_RESEND",
+      "flow_id": "restore_replay_and_rebuild",
+      "idempotency_basis": "checkpoint inventory, restore_verification_hash, execution_basis_hash",
+      "ordering_scope": "checkpoint_id, manifest_id, interaction_id",
+      "producer": "restore controller, replay orchestrator, and recovery operators",
+      "rebuild_source": "control store, append-only audit store, immutable object store, and durable outbox/inbox truth",
+      "retention_replay_posture": "Exact replay fails closed if basis is unreadable; restore fails closed until audit continuity, privacy reconciliation, queue rebuild, and authority revalidation pass.",
+      "source_of_truth_store": "PRIMARY_CONTROL_STORE",
+      "source_refs": [
+        "Algorithm/deployment_and_resilience_contract.md::L133[5._Backup_restore_and_DR_rules]",
+        "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L44[Recovery_checkpoint_law]",
+        "Algorithm/replay_and_reproducibility_contract.md::L227[Exact_replay_preconditions]"
+      ],
+      "transport_channel": "restore drill -> rebuild jobs -> projection/cursor refresh -> reopen gate",
+      "user_visible_surface_impact": "Reopened environments remain blocked until every typed restore gate is satisfied; clients rebase from reconstructed snapshots rather than stale caches."
+    }
+  ]
+}

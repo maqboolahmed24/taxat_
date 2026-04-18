@@ -1,0 +1,2119 @@
+{
+  "artifacts": [
+    {
+      "allowed_next_actions": [
+        "freeze_manifest",
+        "seal_manifest",
+        "start_claim_or_reuse",
+        "append_post_seal_outcomes"
+      ],
+      "artifact_name": "RunManifest",
+      "audit_events": [
+        "ManifestAllocated",
+        "ManifestFrozen",
+        "ManifestSealed",
+        "ManifestCompleted",
+        "ManifestSuperseded"
+      ],
+      "authority_safety_posture": "No authority mutation, replay, or continuation may bypass manifest lineage truth.",
+      "canonical_id": "artifact_run_manifest",
+      "frozen_inputs": [
+        "requested_scope[]",
+        "effective_scope[]",
+        "config_freeze_ref",
+        "input_freeze_ref",
+        "hash_set.execution_basis_hash"
+      ],
+      "idempotency_or_hash_fields": [
+        "idempotency_key",
+        "manifest_hash",
+        "execution_basis_hash",
+        "decision_bundle_hash",
+        "deterministic_outcome_hash"
+      ],
+      "identity_tuple": [
+        "manifest_id",
+        "root_manifest_id",
+        "parent_manifest_id_or_null",
+        "run_kind",
+        "mode"
+      ],
+      "notes": [
+        "Immutable after seal except append-only post-seal outcome fields."
+      ],
+      "operator_visible_effect": "Operators can reconstruct why a run was new, reused, replayed, or continued from one manifest spine.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Root artifact for same-manifest reuse, replay child allocation, and recovery child lineage.",
+      "schema_path": "Algorithm/schemas/run_manifest.schema.json",
+      "source_file": "Algorithm/manifest_and_config_freeze_contract.md",
+      "source_heading_or_logical_block": "5.3 RunManifest required field groups",
+      "source_ref": "Algorithm/manifest_and_config_freeze_contract.md::L78[5.3_RunManifest_required_field_groups]",
+      "state_or_outcome": "RunManifest is the canonical execution, lineage, and sealing truth for request-time control.",
+      "trigger_or_entry_condition": "A materially significant run allocates or reuses a manifest envelope."
+    },
+    {
+      "allowed_next_actions": [
+        "hash_config_surface",
+        "seal_manifest",
+        "inherit_exact_or_historical_explicit"
+      ],
+      "artifact_name": "ConfigFreeze",
+      "audit_events": [
+        "ManifestFrozen",
+        "ConfigInheritanceResolved"
+      ],
+      "authority_safety_posture": "Counterfactual analysis may vary config only under analysis posture and explicit declaration.",
+      "canonical_id": "artifact_config_freeze",
+      "frozen_inputs": [
+        "resolved_policy_snapshot",
+        "formula_bundle",
+        "provider_profile_set",
+        "mode_specific_controls"
+      ],
+      "idempotency_or_hash_fields": [
+        "config_freeze_hash",
+        "config_surface_hash",
+        "execution_basis_hash"
+      ],
+      "identity_tuple": [
+        "config_freeze_id",
+        "config_surface_hash",
+        "schema_bundle_hash"
+      ],
+      "notes": [
+        "Compliance-grade replay forbids non-deterministic allowlists for exact reuse."
+      ],
+      "operator_visible_effect": "Change reviews can point to one frozen config bundle instead of ambient runtime state.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Exact same-attempt recovery and exact replay require identical config freeze semantics.",
+      "schema_path": "Algorithm/schemas/config_freeze.schema.json",
+      "source_file": "Algorithm/manifest_and_config_freeze_contract.md",
+      "source_heading_or_logical_block": "5.4 ConfigFreeze contract",
+      "source_ref": "Algorithm/manifest_and_config_freeze_contract.md::L338[5.4_ConfigFreeze_contract]",
+      "state_or_outcome": "ConfigFreeze captures the lawful config basis for live, replay, nightly, and release flows.",
+      "trigger_or_entry_condition": "Freeze-before-decision and freeze-before-replay rules resolve stable config."
+    },
+    {
+      "allowed_next_actions": [
+        "seal_manifest",
+        "derive_execution_basis_hash",
+        "validate_basis_readability"
+      ],
+      "artifact_name": "InputFreeze",
+      "audit_events": [
+        "SourceCollectionCompleted",
+        "SnapshotBuilt"
+      ],
+      "authority_safety_posture": "Fresh live recollection is forbidden while still claiming exact replay.",
+      "canonical_id": "artifact_input_freeze",
+      "frozen_inputs": [
+        "ordered_input_artifacts",
+        "authoritative_intake_artifacts",
+        "retention_placeholders"
+      ],
+      "idempotency_or_hash_fields": [
+        "input_set_hash",
+        "execution_basis_hash"
+      ],
+      "identity_tuple": [
+        "input_freeze_id",
+        "input_set_hash",
+        "authoritative_intake_set_hash"
+      ],
+      "notes": [
+        "Retention-limited placeholders must surface explicitly instead of collapsing to not applicable."
+      ],
+      "operator_visible_effect": "Operators can distinguish lawful retained placeholders from missing or corrupted input basis.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Exact replay and same-attempt recovery require readable input freeze plus authoritative intake basis.",
+      "schema_path": "Algorithm/schemas/input_freeze.schema.json",
+      "source_file": "Algorithm/manifest_and_config_freeze_contract.md",
+      "source_heading_or_logical_block": "5.8 Input freeze contract",
+      "source_ref": "Algorithm/manifest_and_config_freeze_contract.md::L651[5.8_Input_freeze_contract]",
+      "state_or_outcome": "InputFreeze captures the exact input basis later used by replay, recovery, and audits.",
+      "trigger_or_entry_condition": "Intake and source collection complete before compute, submission, or replay."
+    },
+    {
+      "allowed_next_actions": [
+        "reuse_preseal_tape",
+        "compare_replay_basis",
+        "prove_idempotent_retry"
+      ],
+      "artifact_name": "HashSet",
+      "audit_events": [
+        "ManifestFrozen",
+        "ManifestSealed",
+        "ComputeCompleted"
+      ],
+      "authority_safety_posture": "Authority recovery and replay attestations read persisted hashes instead of inferring basis from side effects.",
+      "canonical_id": "artifact_hash_set",
+      "frozen_inputs": [
+        "config_freeze",
+        "input_freeze",
+        "scope_execution_binding",
+        "deterministic_seed"
+      ],
+      "idempotency_or_hash_fields": [
+        "config_freeze_hash",
+        "config_surface_hash",
+        "input_set_hash",
+        "execution_basis_hash",
+        "manifest_hash",
+        "decision_bundle_hash",
+        "deterministic_outcome_hash"
+      ],
+      "identity_tuple": [
+        "manifest_id",
+        "config_freeze_hash",
+        "input_set_hash",
+        "execution_basis_hash"
+      ],
+      "notes": [
+        "Decision and outcome hashes are append-only once published for a manifest version."
+      ],
+      "operator_visible_effect": "Investigations can explain exactly which hash changed between reuse, replay, continuation, and promotion.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Recovery children preserve `execution_basis_hash`; later lineage nodes must not rewrite it in place.",
+      "schema_path": "Algorithm/schemas/hash_set.schema.json",
+      "source_file": "Algorithm/manifest_and_config_freeze_contract.md",
+      "source_heading_or_logical_block": "5.9 Hash contract",
+      "source_ref": "Algorithm/manifest_and_config_freeze_contract.md::L744[5.9_Hash_contract]",
+      "state_or_outcome": "HashSet is the canonical replay, idempotency, and audit integrity spine.",
+      "trigger_or_entry_condition": "Manifest sealing derives the execution, manifest, decision, and outcome hashes."
+    },
+    {
+      "allowed_next_actions": [
+        "allocate_recovery_child",
+        "allocate_replay_child",
+        "allocate_continuation_child"
+      ],
+      "artifact_name": "ContinuationSet",
+      "audit_events": [
+        "ContinuationChildAllocated",
+        "ConfigInheritanceResolved"
+      ],
+      "authority_safety_posture": "Continuation metadata cannot impersonate transport resume tokens or read-side stability tokens.",
+      "canonical_id": "artifact_continuation_set",
+      "frozen_inputs": [
+        "config_inheritance_mode_or_null",
+        "input_inheritance_mode_or_null",
+        "lineage_refs"
+      ],
+      "idempotency_or_hash_fields": [
+        "continuation_basis",
+        "idempotency_key",
+        "request_identity_hash"
+      ],
+      "identity_tuple": [
+        "manifest_id",
+        "continuation_basis",
+        "selected_manifest_continuation_basis"
+      ],
+      "notes": [
+        "Continuation legality is part of branch proof, not a late-stage convenience flag."
+      ],
+      "operator_visible_effect": "Operator tooling can explain why a child reuses history without collapsing it into ordinary continuation.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Same-attempt recovery is exact; historically explicit continuation is limited and must stay explicitly marked.",
+      "schema_path": "Algorithm/schemas/continuation_set.schema.json",
+      "source_file": "Algorithm/manifest_and_config_freeze_contract.md",
+      "source_heading_or_logical_block": "5.7 Parent/child manifest semantics",
+      "source_ref": "Algorithm/manifest_and_config_freeze_contract.md::L505[5.7_Parent_child_manifest_semantics]",
+      "state_or_outcome": "ContinuationSet distinguishes exact recovery, replay, historically explicit continuation, and new-request children.",
+      "trigger_or_entry_condition": "A child manifest or replay chooses inherited versus freshly resolved basis."
+    },
+    {
+      "allowed_next_actions": [
+        "derive_manifest_idempotency_key",
+        "derive_authority_request_hashes",
+        "enforce_scope_and_masking"
+      ],
+      "artifact_name": "FrozenExecutionBinding",
+      "audit_events": [
+        "AccessScopeBound",
+        "AuthorityBindingMismatchDetected"
+      ],
+      "authority_safety_posture": "Access binding drift blocks silent replay or resend reuse.",
+      "canonical_id": "artifact_frozen_execution_binding",
+      "frozen_inputs": [
+        "effective_scope[]",
+        "masking_rules[]",
+        "required_approvals[]",
+        "delegation_and_authority_lineage"
+      ],
+      "idempotency_or_hash_fields": [
+        "access_binding_hash",
+        "idempotency_key",
+        "duplicate_meaning_key",
+        "request_hash"
+      ],
+      "identity_tuple": [
+        "manifest_id",
+        "access_binding_hash",
+        "access_decision",
+        "required_authn_level"
+      ],
+      "notes": [
+        "Executable identity includes access decision class, executable scope, masking, approvals, and authentication level."
+      ],
+      "operator_visible_effect": "Access and authority investigations can separate token drift from request-body drift.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Authority recovery may reuse request lineage only when binding lineage remains unchanged.",
+      "schema_path": "Algorithm/schemas/frozen_execution_binding.schema.json",
+      "source_file": "Algorithm/manifest_and_config_freeze_contract.md",
+      "source_heading_or_logical_block": "5.3 H. Frozen execution binding",
+      "source_ref": "Algorithm/manifest_and_config_freeze_contract.md::L229[H._Frozen_execution_binding]",
+      "state_or_outcome": "FrozenExecutionBinding extends request identity with executable scope and approval context.",
+      "trigger_or_entry_condition": "Access evaluation resolves the executable request boundary before sealing or authority mutation."
+    },
+    {
+      "allowed_next_actions": [
+        "seal_manifest",
+        "reuse_same_manifest_preseal_tape",
+        "block_prestart_execution"
+      ],
+      "artifact_name": "preseal_gate_evaluation",
+      "audit_events": [
+        "GateEvaluated",
+        "ManifestSealed"
+      ],
+      "authority_safety_posture": "Missing or mismatched pre-seal tape forces fail-closed replay posture.",
+      "canonical_id": "artifact_preseal_gate_evaluation",
+      "frozen_inputs": [
+        "MANIFEST_GATE",
+        "ARTIFACT_CONTRACT_GATE",
+        "INPUT_BOUNDARY_GATE",
+        "DATA_QUALITY_GATE"
+      ],
+      "idempotency_or_hash_fields": [
+        "execution_basis_hash",
+        "ordered_gate_decision_ids[]"
+      ],
+      "identity_tuple": [
+        "manifest_id",
+        "execution_basis_hash",
+        "ordered_gate_decision_ids[]"
+      ],
+      "notes": [
+        "The first four gate records remain an immutable prefix even when later gates append after seal."
+      ],
+      "operator_visible_effect": "Operators can see whether a run blocked before start or sealed with a complete pre-seal basis.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Exact replay and same-manifest reuse consume the persisted tape instead of recomputing on ambient state.",
+      "schema_path": "Algorithm/schemas/preseal_gate_evaluation_contract.schema.json",
+      "source_file": "Algorithm/manifest_and_config_freeze_contract.md",
+      "source_heading_or_logical_block": "5.11 Pre-seal gate evaluation contract",
+      "source_ref": "Algorithm/manifest_and_config_freeze_contract.md::L951[Pre-seal_gate_evaluation_contract]",
+      "state_or_outcome": "preseal_gate_evaluation captures the authoritative pre-start tape and durability boundary.",
+      "trigger_or_entry_condition": "A manifest approaches seal and must freeze the canonical pre-seal gate prefix."
+    },
+    {
+      "allowed_next_actions": [
+        "grant_claim",
+        "reject_duplicate_start",
+        "mark_stale_reclaim_required",
+        "publish_first_stage_or_outbox"
+      ],
+      "artifact_name": "manifest_start_claim",
+      "audit_events": [
+        "RunStarted",
+        "RunStartClaimRejected",
+        "NightlyBatchShardReclaimed"
+      ],
+      "authority_safety_posture": "No second live start is legal while an active lease still exists.",
+      "canonical_id": "artifact_manifest_start_claim",
+      "frozen_inputs": [
+        "claim_state",
+        "claim_status_code",
+        "claim_holder_ref_or_null",
+        "claim_token_or_null",
+        "publication_state"
+      ],
+      "idempotency_or_hash_fields": [
+        "manifest_hash",
+        "execution_basis_hash",
+        "access_binding_hash",
+        "attempt_lineage_ref"
+      ],
+      "identity_tuple": [
+        "manifest_id",
+        "execution_basis_hash",
+        "attempt_lineage_ref",
+        "claim_epoch"
+      ],
+      "notes": [
+        "Claim and first durable publication commit atomically."
+      ],
+      "operator_visible_effect": "Schedulers and operators can distinguish already-active, reclaim-required, and terminal-reuse outcomes without worker logs.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Nightly reclaim and recovery child allocation must read this control object instead of inferring from missing heartbeats.",
+      "schema_path": "Algorithm/schemas/manifest_start_claim_contract.schema.json",
+      "source_file": "Algorithm/manifest_start_claim_protocol.md",
+      "source_heading_or_logical_block": "1. Durable control object",
+      "source_ref": "Algorithm/manifest_start_claim_protocol.md::L8[1._Durable_control_object]",
+      "state_or_outcome": "manifest_start_claim is the single-writer start lease and first-publication truth for live execution.",
+      "trigger_or_entry_condition": "A sealed manifest is claimed for the first live post-seal execution or stale recovery successor flow."
+    },
+    {
+      "allowed_next_actions": [
+        "render_branch_narrative",
+        "bind_audit_and_trace_refs",
+        "explain_nightly_window_continuity"
+      ],
+      "artifact_name": "ManifestLineageTrace",
+      "audit_events": [
+        "ExistingDecisionBundleReturned",
+        "ManifestContextReused",
+        "ContinuationChildAllocated"
+      ],
+      "authority_safety_posture": "Lineage truth is explicit; nearby timestamps or read mirrors cannot substitute for branch proof.",
+      "canonical_id": "artifact_manifest_lineage_trace",
+      "frozen_inputs": [
+        "candidate_evaluations[]",
+        "mirror_consistency_state",
+        "prior_manifest_hash_at_decision_or_null",
+        "nightly_predecessor_context"
+      ],
+      "idempotency_or_hash_fields": [
+        "request_identity_hash",
+        "idempotency_key",
+        "prior_manifest_hash_at_decision_or_null"
+      ],
+      "identity_tuple": [
+        "manifest_lineage_trace_ref",
+        "selected_branch_action",
+        "selected_branch_reason_code"
+      ],
+      "notes": [
+        "The current corpus names ManifestLineageTrace in prose but does not provide a dedicated schema."
+      ],
+      "operator_visible_effect": "Explorers and audit tooling can show why one candidate won and others were rejected.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Recovery, replay, continuation, and same-manifest reuse remain explainable from one branch artifact.",
+      "schema_path": null,
+      "source_file": "Algorithm/manifest_branch_selection_contract.md",
+      "source_heading_or_logical_block": "Explorer Truth",
+      "source_ref": "Algorithm/manifest_branch_selection_contract.md::L84[Explorer_Truth]",
+      "state_or_outcome": "ManifestLineageTrace is the request-time branch explainer and candidate rejection ledger.",
+      "trigger_or_entry_condition": "Branch selection chooses reuse, replay, recovery, continuation, or fresh-child allocation."
+    },
+    {
+      "allowed_next_actions": [
+        "publish_replay_visible_outcome",
+        "answer_audit_queries",
+        "return_existing_replay_child_on_duplicate_request"
+      ],
+      "artifact_name": "ReplayAttestation",
+      "audit_events": [
+        "ReplayBasisCorruptionDetected",
+        "ExistingDecisionBundleReturned"
+      ],
+      "authority_safety_posture": "Counterfactual analysis remains analysis-only and may not mutate authority-facing state.",
+      "canonical_id": "artifact_replay_attestation",
+      "frozen_inputs": [
+        "comparison_mode",
+        "basis_validation_state",
+        "basis_identity_verdict",
+        "deterministic_equivalence_verdict",
+        "basis_dimension_results[]",
+        "outcome_component_results[]"
+      ],
+      "idempotency_or_hash_fields": [
+        "expected_execution_basis_hash",
+        "actual_execution_basis_hash",
+        "expected_deterministic_outcome_hash",
+        "actual_deterministic_outcome_hash"
+      ],
+      "identity_tuple": [
+        "replay_attestation_id",
+        "manifest_id",
+        "replay_of_manifest_id",
+        "replay_class"
+      ],
+      "notes": [
+        "No replay child may publish replay-visible truth without a linked durable attestation."
+      ],
+      "operator_visible_effect": "Operators see exact, expected-difference, limited, corrupt, or unexpected mismatch posture from a signed artifact.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Corrupt, incomplete, or retention-limited basis becomes explicit posture instead of silent substitution.",
+      "schema_path": "Algorithm/schemas/replay_attestation.schema.json",
+      "source_file": "Algorithm/replay_and_reproducibility_contract.md",
+      "source_heading_or_logical_block": "Replay attestation artifact",
+      "source_ref": "Algorithm/replay_and_reproducibility_contract.md::L564[Replay_attestation_artifact]",
+      "state_or_outcome": "ReplayAttestation is the durable replay-comparison and operator/auditor explanation artifact.",
+      "trigger_or_entry_condition": "A replay child reaches a persisted decision outcome and must publish durable comparison truth."
+    },
+    {
+      "allowed_next_actions": [
+        "allocate_or_reuse_batch",
+        "freeze_selection_universe",
+        "prove_same_window_duplicate_suppression"
+      ],
+      "artifact_name": "NightlyBatchIdentityContract",
+      "audit_events": [
+        "NightlyBatchAllocated"
+      ],
+      "authority_safety_posture": "Cross-window continuity requires a new nightly identity even if config and inputs are unchanged.",
+      "canonical_id": "artifact_nightly_batch_identity_contract",
+      "frozen_inputs": [
+        "schema_bundle_hash",
+        "code_build_id",
+        "environment_ref",
+        "selection_universe_hash",
+        "selection_universe_count",
+        "reclaimed_predecessor_batch_run_ref_or_null",
+        "recovery_resume_state"
+      ],
+      "idempotency_or_hash_fields": [
+        "identity_contract_hash",
+        "scheduler_dedupe_key"
+      ],
+      "identity_tuple": [
+        "tenant_id",
+        "nightly_window_key",
+        "trigger_class",
+        "release_verification_manifest_ref",
+        "policy_snapshot_hash",
+        "autopilot_policy_hash"
+      ],
+      "notes": [
+        "Same-window duplicates reuse batch identity; later windows remain separate control objects."
+      ],
+      "operator_visible_effect": "Operators can trace a batch back to its trigger class, release-verification basis, and policy snapshot.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Recovery reclaim windows link the predecessor explicitly and forbid silent second-batch allocation.",
+      "schema_path": "Algorithm/schemas/nightly_batch_identity_contract.schema.json",
+      "source_file": "Algorithm/nightly_selection_disposition_and_batch_isolation_contract.md",
+      "source_heading_or_logical_block": "Identity law",
+      "source_ref": "Algorithm/nightly_selection_disposition_and_batch_isolation_contract.md::L17[Identity_law]",
+      "state_or_outcome": "NightlyBatchIdentityContract is the scheduler dedupe and batch identity tuple.",
+      "trigger_or_entry_condition": "Nightly trigger allocation freezes same-window dedupe, cross-window continuity, and recovery lineage."
+    },
+    {
+      "allowed_next_actions": [
+        "select_portfolio",
+        "dispatch_client_execution",
+        "reclaim_stale_batch",
+        "publish_operator_digest"
+      ],
+      "artifact_name": "NightlyBatchRun",
+      "audit_events": [
+        "NightlyBatchAllocated",
+        "NightlyPortfolioSelected",
+        "NightlyBatchCompleted",
+        "OperatorMorningDigestPublished"
+      ],
+      "authority_safety_posture": "Nightly automation may not bypass manifest leases, authority ambiguity rules, or resend boundaries.",
+      "canonical_id": "artifact_nightly_batch_run",
+      "frozen_inputs": [
+        "identity_contract",
+        "global_concurrency_profile",
+        "selection_entries[]",
+        "shard_plan[]",
+        "operator_digest_publication_state"
+      ],
+      "idempotency_or_hash_fields": [
+        "scheduler_dedupe_key",
+        "identity_contract_hash",
+        "selection_universe_hash"
+      ],
+      "identity_tuple": [
+        "batch_run_id",
+        "tenant_id",
+        "nightly_window_key",
+        "trigger_class",
+        "release_verification_manifest_ref"
+      ],
+      "notes": [
+        "Per-client entries remain explicit even for reuse, defer, escalation, and skip outcomes."
+      ],
+      "operator_visible_effect": "Morning operations can read one batch artifact instead of reconstructing overnight behavior from queues.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Crash recovery reuses predecessor selection and shard truth or escalates if proof is incomplete.",
+      "schema_path": "Algorithm/schemas/nightly_batch_run.schema.json",
+      "source_file": "Algorithm/nightly_autopilot_contract.md",
+      "source_heading_or_logical_block": "2.3 Frozen batch envelope",
+      "source_ref": "Algorithm/nightly_autopilot_contract.md::L85[2.3_Frozen_batch_envelope]",
+      "state_or_outcome": "NightlyBatchRun is the authoritative overnight selection, shard, and quiescence control object.",
+      "trigger_or_entry_condition": "A nightly control-plane window has been allocated and frozen for one tenant."
+    },
+    {
+      "allowed_next_actions": [
+        "execute_new_manifest",
+        "execute_continuation_child",
+        "reuse_result",
+        "defer",
+        "escalate",
+        "skip"
+      ],
+      "artifact_name": "NightlySelectionEntry",
+      "audit_events": [
+        "NightlyClientExecutionDispatched",
+        "NightlyClientExecutionDeferred",
+        "NightlyClientExecutionSkipped",
+        "NightlyClientExecutionEscalated"
+      ],
+      "authority_safety_posture": "Same-window active attempts may defer or reclaim; they may not silently duplicate live execution.",
+      "canonical_id": "artifact_nightly_selection_entry",
+      "frozen_inputs": [
+        "terminal_result_reuse_state",
+        "active_attempt_resolution_state",
+        "priority_tuple",
+        "reason_codes[]",
+        "workflow_item_refs[]",
+        "next_checkpoint_at"
+      ],
+      "idempotency_or_hash_fields": [
+        "candidate_identity_hash",
+        "selection_basis_hash"
+      ],
+      "identity_tuple": [
+        "entry_id",
+        "candidate_identity_hash",
+        "client_id",
+        "period",
+        "selection_disposition"
+      ],
+      "notes": [
+        "Only execution-capable rows enter shard plans; reuse, defer, escalation, and skip remain off-shard."
+      ],
+      "operator_visible_effect": "Client-level overnight outcomes are visible even when no manifest is executed.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Selection rows survive reclaim and batch restarts; unrelated clients retain explicit outcomes despite shard failure.",
+      "schema_path": "Algorithm/schemas/nightly_batch_run.schema.json",
+      "source_file": "Algorithm/nightly_selection_disposition_and_batch_isolation_contract.md",
+      "source_heading_or_logical_block": "Selection law",
+      "source_ref": "Algorithm/nightly_selection_disposition_and_batch_isolation_contract.md::L35[Selection_law]",
+      "state_or_outcome": "Nightly selection entry is the per-candidate operating decision row for overnight execution.",
+      "trigger_or_entry_condition": "Nightly portfolio selection evaluates one candidate client-period tuple exactly once."
+    },
+    {
+      "allowed_next_actions": [
+        "publish_workflow_updates",
+        "publish_notifications",
+        "supersede_prior_digest"
+      ],
+      "artifact_name": "OperatorMorningDigest",
+      "audit_events": [
+        "OperatorMorningDigestPublished"
+      ],
+      "authority_safety_posture": "Customer-visible consequences remain bound to persisted workflow and audit evidence, not free-text summaries.",
+      "canonical_id": "artifact_operator_morning_digest",
+      "frozen_inputs": [
+        "covered_selection_entry_refs[]",
+        "summary_counts{...}",
+        "queue_summaries[]",
+        "highlighted_client_outcomes[]",
+        "published_workflow_item_refs[]",
+        "published_notification_refs[]"
+      ],
+      "idempotency_or_hash_fields": [
+        "derivation_contract_hash",
+        "coverage_date",
+        "source_batch_run_refs[]"
+      ],
+      "identity_tuple": [
+        "coverage_date",
+        "source_batch_run_refs[]",
+        "supersedes_digest_id"
+      ],
+      "notes": [
+        "Publication state and QA are explicit parts of the digest contract."
+      ],
+      "operator_visible_effect": "Operators receive a single coverage-date digest instead of reconstructing overnight posture manually.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Digest derivation remains pinned to live nightly compliance posture, not replay or analysis.",
+      "schema_path": "Algorithm/schemas/operator_morning_digest.schema.json",
+      "source_file": "Algorithm/nightly_autopilot_contract.md",
+      "source_heading_or_logical_block": "12.2 OperatorMorningDigest",
+      "source_ref": "Algorithm/nightly_autopilot_contract.md::L732[12.2_OperatorMorningDigest]",
+      "state_or_outcome": "OperatorMorningDigest is the deterministic next-morning handoff artifact for overnight control-plane behavior.",
+      "trigger_or_entry_condition": "Nightly quiescence succeeds far enough to publish one tenant coverage-date handoff summary."
+    },
+    {
+      "allowed_next_actions": [
+        "bind_checkpoint",
+        "bind_deployment_release",
+        "validate_reopen_and_fail_forward_boundaries"
+      ],
+      "artifact_name": "RecoveryGovernanceContract",
+      "audit_events": [
+        "BackupCreated",
+        "RestoreDrillExecuted",
+        "ReleasePromoted",
+        "ReleaseRolledBack"
+      ],
+      "authority_safety_posture": "Authority mutations require lineage and binding revalidation after restore or failover.",
+      "canonical_id": "artifact_recovery_governance_contract",
+      "frozen_inputs": [
+        "checkpoint_inventory_policy",
+        "privacy_reconciliation_policy",
+        "queue_recovery_policy",
+        "authority_recovery_policy",
+        "rollback_boundary_policy",
+        "fail_forward_policy"
+      ],
+      "idempotency_or_hash_fields": [
+        "contract_version",
+        "protected_workload_class",
+        "boundary_scope"
+      ],
+      "identity_tuple": [
+        "boundary_scope",
+        "protected_workload_class",
+        "recovery_tier_class",
+        "rpo_class",
+        "rto_class"
+      ],
+      "notes": [
+        "Control-plane legal truth may not serialize a weaker tier than TIER_0_CONTROL_PLANE."
+      ],
+      "operator_visible_effect": "SRE and release tooling can prove the tier, RPO/RTO, and reopen policy used by a checkpoint or release.",
+      "privacy_reconciliation_required": true,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Tier mappings and reopen policy remain explicit and fail closed when weaker classes appear.",
+      "schema_path": "Algorithm/schemas/recovery_governance_contract.schema.json",
+      "source_file": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md",
+      "source_heading_or_logical_block": "Shared recovery-governance boundary",
+      "source_ref": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L11[Shared_recovery-governance_boundary]",
+      "state_or_outcome": "RecoveryGovernanceContract is the shared checkpoint and release resilience policy object.",
+      "trigger_or_entry_condition": "Checkpoint and release artifacts bind one shared recovery governance boundary."
+    },
+    {
+      "allowed_next_actions": [
+        "verify_checkpoint",
+        "reopen_if_ready",
+        "quarantine_or_expire",
+        "bind_restore_drill_to_release"
+      ],
+      "artifact_name": "RecoveryCheckpoint",
+      "audit_events": [
+        "BackupCreated",
+        "RestoreDrillExecuted",
+        "DisasterRecoveryFailedOver",
+        "DisasterRecoveryFailedBack"
+      ],
+      "authority_safety_posture": "Restore of authority-integrated work must rebuild outstanding reconciliation from durable truth.",
+      "canonical_id": "artifact_recovery_checkpoint",
+      "frozen_inputs": [
+        "checkpoint_inventory_ref",
+        "restore_verification_hash",
+        "privacy_reconciliation_contract",
+        "audit_continuity_verified",
+        "queue_rebuild_verified",
+        "authority_binding_revalidation_verified",
+        "reopen_readiness_state"
+      ],
+      "idempotency_or_hash_fields": [
+        "restore_verification_hash",
+        "checkpoint_id"
+      ],
+      "identity_tuple": [
+        "checkpoint_id",
+        "datastore_ref",
+        "checkpoint_state",
+        "restore_drill_ref"
+      ],
+      "notes": [
+        "`READY_FOR_REOPEN` is lawful only after privacy, audit, queue, and authority checks all pass."
+      ],
+      "operator_visible_effect": "Restore readiness remains blocked by typed missing gates instead of silent reopen optimism.",
+      "privacy_reconciliation_required": true,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Verified posture requires restore evidence, privacy reconciliation, queue rebuild, and authority revalidation.",
+      "schema_path": "Algorithm/schemas/recovery_checkpoint.schema.json",
+      "source_file": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md",
+      "source_heading_or_logical_block": "Recovery checkpoint law",
+      "source_ref": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L44[Recovery_checkpoint_law]",
+      "state_or_outcome": "RecoveryCheckpoint is the authoritative restore evidence and reopen-gating artifact for a protected workload.",
+      "trigger_or_entry_condition": "Scheduled backup cadence or promotion/DR evidence binds a restore-capable checkpoint."
+    },
+    {
+      "allowed_next_actions": [
+        "reconcile_privacy",
+        "complete_compensating_re_erasure",
+        "block_reopen_pending_review"
+      ],
+      "artifact_name": "RestorePrivacyReconciliationContract",
+      "audit_events": [
+        "ErasureRequested",
+        "ErasureCompleted",
+        "LegalHoldApplied",
+        "LegalHoldReleased"
+      ],
+      "authority_safety_posture": "Authority ambiguity blocks reopen rather than being erased or hand-waved away.",
+      "canonical_id": "artifact_restore_privacy_reconciliation_contract",
+      "frozen_inputs": [
+        "resurrected_data_posture",
+        "compensating_re_erasure_state",
+        "legal_hold_ref_or_null",
+        "proof_preservation_basis_ref_or_null",
+        "authority_ambiguity_ref_or_null",
+        "audit_chain_continuity_state"
+      ],
+      "idempotency_or_hash_fields": [
+        "reconciliation_contract_hash",
+        "privacy_reconciliation_outcome_ref"
+      ],
+      "identity_tuple": [
+        "checkpoint_ref",
+        "restore_drill_ref",
+        "privacy_reconciliation_state",
+        "reopen_access_state"
+      ],
+      "notes": [
+        "Privacy reconciliation is a reopen blocker, not optional cleanup."
+      ],
+      "operator_visible_effect": "Operators can distinguish ready-for-reopen, limited, legal-hold-blocked, and proof-preservation-blocked restore posture.",
+      "privacy_reconciliation_required": true,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Restore remains blocked until privacy, limitation, and audit continuity become reopen-safe.",
+      "schema_path": "Algorithm/schemas/restore_privacy_reconciliation_contract.schema.json",
+      "source_file": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md",
+      "source_heading_or_logical_block": "Restore privacy reconciliation law",
+      "source_ref": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[Restore_privacy_reconciliation_law]",
+      "state_or_outcome": "RestorePrivacyReconciliationContract is the authoritative restore privacy blocker and compensating re-erasure record.",
+      "trigger_or_entry_condition": "A restore or drill may resurrect restricted data and must reconcile privacy before reopen."
+    },
+    {
+      "allowed_next_actions": [
+        "follow_up_read_only",
+        "exact_idempotent_recovery",
+        "escalate_reconciliation",
+        "bind_submission_projection"
+      ],
+      "artifact_name": "AuthorityInteractionRecord",
+      "audit_events": [
+        "AuthorityRequestSent",
+        "AuthorityResponseReceived",
+        "AuthorityReconciliationAttempted",
+        "AuthorityReconciliationResolved"
+      ],
+      "authority_safety_posture": "Fresh mutation resend is blocked after budget exhaustion or unresolved ambiguity.",
+      "canonical_id": "artifact_authority_interaction_record",
+      "frozen_inputs": [
+        "response_history_ids[]",
+        "reconciliation_budget_state",
+        "next_reconciliation_at",
+        "resend_legality_state",
+        "reconciliation_control_contract"
+      ],
+      "idempotency_or_hash_fields": [
+        "request_hash",
+        "duplicate_meaning_key",
+        "idempotency_key",
+        "binding_lineage_ref"
+      ],
+      "identity_tuple": [
+        "interaction_id",
+        "request_hash",
+        "idempotency_key",
+        "authority_operation_profile_ref"
+      ],
+      "notes": [
+        "The reconciliation control packet is copied onto unresolved SubmissionRecord and ObligationMirror surfaces."
+      ],
+      "operator_visible_effect": "Operations can see whether recovery is read-only, idempotent-only, or blocked pending escalation.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Restore, replay, or reclaim reuses the persisted reconciliation control packet rather than recomputing from retries.",
+      "schema_path": "Algorithm/schemas/authority_interaction_record.schema.json",
+      "source_file": "Algorithm/authority_interaction_protocol.md",
+      "source_heading_or_logical_block": "9.13A Reconciliation budget and escalation rule",
+      "source_ref": "Algorithm/authority_interaction_protocol.md::L1042[9.13A_Reconciliation_budget_and_escalation_rule]",
+      "state_or_outcome": "AuthorityInteractionRecord is the durable exchange and reconciliation truth for no-blind-resend safety.",
+      "trigger_or_entry_condition": "An authority-bound submission or reconciliation exchange exists or is awaiting clarification."
+    },
+    {
+      "allowed_next_actions": [
+        "bind_verification_suite_results",
+        "bind_release_verification_manifest",
+        "bind_deployment_release"
+      ],
+      "artifact_name": "ReleaseCandidateIdentityContract",
+      "audit_events": [
+        "BuildAttested",
+        "ReleaseCanaryStarted",
+        "ReleasePromoted"
+      ],
+      "authority_safety_posture": "Authority sandbox evidence may not drift across enabled provider-profile sets.",
+      "canonical_id": "artifact_release_candidate_identity_contract",
+      "frozen_inputs": [
+        "array_canonicalization_policy",
+        "suite_context_policy",
+        "admissibility_binding_policy"
+      ],
+      "idempotency_or_hash_fields": [
+        "candidate_identity_hash",
+        "artifact_digest",
+        "schema_bundle_hash",
+        "config_bundle_hash"
+      ],
+      "identity_tuple": [
+        "candidate_environment_ref",
+        "build_artifact_ref",
+        "artifact_digest",
+        "schema_bundle_hash",
+        "config_bundle_hash",
+        "migration_plan_ref_or_null",
+        "enabled_provider_profile_refs[]",
+        "supported_client_window_ref_or_null"
+      ],
+      "notes": [
+        "Ordered arrays are canonicalized before hashing so the same candidate cannot drift across workers."
+      ],
+      "operator_visible_effect": "Release reviewers can reject mixed-candidate evidence from one candidate hash.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Restore drills and client compatibility evidence must remain bound to the exact candidate tuple they verified.",
+      "schema_path": "Algorithm/schemas/release_candidate_identity_contract.schema.json",
+      "source_file": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md",
+      "source_heading_or_logical_block": "1. Governing candidate identity model",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L12[1._Governing_candidate_identity_model]",
+      "state_or_outcome": "ReleaseCandidateIdentityContract is the shared candidate tuple for release evidence and deployment records.",
+      "trigger_or_entry_condition": "A promotion candidate or restore drill binds one exact build, schema, config, provider-profile, and client-window tuple."
+    },
+    {
+      "allowed_next_actions": [
+        "admit_release_gate",
+        "block_destructive_contract",
+        "force_fail_forward_after_window_close"
+      ],
+      "artifact_name": "SchemaBundleCompatibilityGateContract",
+      "audit_events": [
+        "SchemaMigrationPlanned",
+        "SchemaMigrationApplied",
+        "SchemaMigrationVerified",
+        "ReleaseRolledBack"
+      ],
+      "authority_safety_posture": "Closed reader windows and blocked native windows become explicit fail-forward boundaries.",
+      "canonical_id": "artifact_schema_bundle_compatibility_gate_contract",
+      "frozen_inputs": [
+        "schema_reader_window_contract",
+        "migration_plan_ref_or_null",
+        "migration_ledger_refs[]",
+        "historical_manifest_guard_state",
+        "replay_restore_guard_state",
+        "native_client_window_state",
+        "destructive_contract_state",
+        "reason_codes[]"
+      ],
+      "idempotency_or_hash_fields": [
+        "compatibility_gate_hash",
+        "candidate_identity_hash",
+        "schema_bundle_hash"
+      ],
+      "identity_tuple": [
+        "candidate_identity_hash",
+        "compatibility_window_ref",
+        "reader_window_state",
+        "rollback_boundary_state"
+      ],
+      "notes": [
+        "Compatibility gate rows must bind the same candidate hash and compatibility hash across evidence artifacts."
+      ],
+      "operator_visible_effect": "Release tooling can show why rollback remained legal or became fail-forward-only.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Replay and restore require a compatible reader window or an explicitly blocked posture.",
+      "schema_path": "Algorithm/schemas/schema_bundle_compatibility_gate_contract.schema.json",
+      "source_file": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md",
+      "source_heading_or_logical_block": "2. Contract boundary",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]",
+      "state_or_outcome": "SchemaBundleCompatibilityGateContract is the mutable schema safety boundary around a fixed release candidate.",
+      "trigger_or_entry_condition": "Promotion or restore evidence claims schema safety for historical manifests, replay, restore, and native-client compatibility."
+    },
+    {
+      "allowed_next_actions": [
+        "approve_release",
+        "block_release",
+        "supersede_manifest",
+        "bind_deployment_release"
+      ],
+      "artifact_name": "ReleaseVerificationManifest",
+      "audit_events": [
+        "BuildAttested",
+        "ReleaseCanaryStarted",
+        "ReleasePromoted"
+      ],
+      "authority_safety_posture": "Authority sandbox coverage remains part of promotion admissibility when suite_family = AUTHORITY_SANDBOX.",
+      "canonical_id": "artifact_release_verification_manifest",
+      "frozen_inputs": [
+        "blocking_gates.*",
+        "manifest_assembly_contract",
+        "restore_drill_ref",
+        "client_compatibility_matrix_ref",
+        "canary_health_summary_ref"
+      ],
+      "idempotency_or_hash_fields": [
+        "candidate_identity_hash",
+        "compatibility_gate_hash",
+        "manifest_assembly_contract_hash"
+      ],
+      "identity_tuple": [
+        "release_verification_manifest_id",
+        "candidate_identity_hash",
+        "compatibility_gate_hash",
+        "decision_posture"
+      ],
+      "notes": [
+        "Promotion evidence is machine-assembled from first-class artifacts instead of reconstructed dashboards."
+      ],
+      "operator_visible_effect": "Operators can replay the exact gate order, evidence refs, and decision posture from one root object.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Restore drills used for promotion bind the exact checkpoint and candidate tuple into the promotion record.",
+      "schema_path": "Algorithm/schemas/release_verification_manifest.schema.json",
+      "source_file": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md",
+      "source_heading_or_logical_block": "2. Contract boundary",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]",
+      "state_or_outcome": "ReleaseVerificationManifest is the machine-assembled promotion-evidence root for one candidate.",
+      "trigger_or_entry_condition": "Promotion assembles blocking evidence, admissibility posture, and companion artifacts into one durable release root."
+    },
+    {
+      "allowed_next_actions": [
+        "promote",
+        "abort_canary",
+        "roll_back_if_allowed",
+        "fail_forward_with_compensating_release",
+        "supersede"
+      ],
+      "artifact_name": "DeploymentRelease",
+      "audit_events": [
+        "ReleaseCanaryStarted",
+        "ReleasePromoted",
+        "ReleaseRolledBack",
+        "DisasterRecoveryFailedOver",
+        "DisasterRecoveryFailedBack"
+      ],
+      "authority_safety_posture": "Release rollback is distinct from legal authority truth; evidence is never deleted to simulate rollback.",
+      "canonical_id": "artifact_deployment_release",
+      "frozen_inputs": [
+        "schema_bundle_compatibility_gate_contract",
+        "recovery_governance_contract",
+        "rollback_boundary_state",
+        "release_verification_manifest_ref",
+        "supported_client_window_ref",
+        "compensating_release_id_or_null",
+        "fail_forward_owner_ref_or_null"
+      ],
+      "idempotency_or_hash_fields": [
+        "candidate_identity_hash",
+        "schema_bundle_hash",
+        "config_bundle_hash",
+        "rollback_boundary_state"
+      ],
+      "identity_tuple": [
+        "release_id",
+        "environment_ref",
+        "candidate_identity_hash",
+        "rollout_strategy",
+        "rollout_state"
+      ],
+      "notes": [
+        "FAILED_FORWARD posture is unlawful without a compensating release and named owner."
+      ],
+      "operator_visible_effect": "Release operators can see whether a rollout remained rollback-safe or crossed into fail-forward-only posture.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Closed schema windows force FAIL_FORWARD_ONLY; rollback cannot obscure already-persisted legal evidence.",
+      "schema_path": "Algorithm/schemas/deployment_release.schema.json",
+      "source_file": "Algorithm/deployment_and_resilience_contract.md",
+      "source_heading_or_logical_block": "6. Rollout, rollback, and fail-forward posture",
+      "source_ref": "Algorithm/deployment_and_resilience_contract.md::L177[6._Rollout_rollback_and_fail-forward_posture]",
+      "state_or_outcome": "DeploymentRelease is the authoritative rollout, rollback, and fail-forward governance object.",
+      "trigger_or_entry_condition": "A candidate is deployed, rolled back, pinned, failed forward, or superseded in one environment."
+    }
+  ],
+  "explicit_gaps": [
+    {
+      "description": "ManifestLineageTrace is normatively required by prose but no dedicated schema artifact exists in the current corpus.",
+      "gap_id": "manifest_lineage_trace_schema_missing",
+      "severity": "medium",
+      "source_ref": "Algorithm/manifest_branch_selection_contract.md::L84[Explorer_Truth]"
+    },
+    {
+      "description": "Legal start-claim outcomes are prose-defined but are not mirrored as an enum on the manifest_start_claim schema.",
+      "gap_id": "legal_claim_outcomes_prose_only",
+      "severity": "medium",
+      "source_ref": "Algorithm/manifest_start_claim_protocol.md::L27[2._Legal_claim_outcomes]"
+    },
+    {
+      "description": "Branch reason codes are contractually required in prose but no dedicated schema-backed enum was found for manifest_branch_decision.",
+      "gap_id": "branch_reason_codes_prose_only",
+      "severity": "medium",
+      "source_ref": "Algorithm/manifest_branch_selection_contract.md::L63[Typed_Branch_Reasons]"
+    },
+    {
+      "description": "The corpus defines the unattended policy value domain and required stage families, but does not publish one canonical tenant-default stage/value assignment matrix.",
+      "gap_id": "tenant_specific_unattended_defaults_not_canonicalized",
+      "severity": "medium",
+      "source_ref": "Algorithm/nightly_autopilot_contract.md::L396[6.1_Matrix_requirement]"
+    },
+    {
+      "description": "pc_0015 references ../shared_operating_contract_0014_to_0021.md, but no such file exists under PROMPT/ at generation time.",
+      "gap_id": "shared_operating_contract_reference_missing_for_pc_0015",
+      "severity": "low",
+      "source_ref": "PROMPT/CARDS/pc_0015.md::L61[missing_shared_contract_reference]"
+    }
+  ],
+  "rows": [
+    {
+      "allowed_next_actions": [
+        "freeze_manifest",
+        "seal_manifest",
+        "start_claim_or_reuse",
+        "append_post_seal_outcomes"
+      ],
+      "artifact_name": "RunManifest",
+      "audit_events": [
+        "ManifestAllocated",
+        "ManifestFrozen",
+        "ManifestSealed",
+        "ManifestCompleted",
+        "ManifestSuperseded"
+      ],
+      "authority_safety_posture": "No authority mutation, replay, or continuation may bypass manifest lineage truth.",
+      "canonical_id": "artifact_run_manifest",
+      "frozen_inputs": [
+        "requested_scope[]",
+        "effective_scope[]",
+        "config_freeze_ref",
+        "input_freeze_ref",
+        "hash_set.execution_basis_hash"
+      ],
+      "idempotency_or_hash_fields": [
+        "idempotency_key",
+        "manifest_hash",
+        "execution_basis_hash",
+        "decision_bundle_hash",
+        "deterministic_outcome_hash"
+      ],
+      "identity_tuple": [
+        "manifest_id",
+        "root_manifest_id",
+        "parent_manifest_id_or_null",
+        "run_kind",
+        "mode"
+      ],
+      "notes": [
+        "Immutable after seal except append-only post-seal outcome fields."
+      ],
+      "operator_visible_effect": "Operators can reconstruct why a run was new, reused, replayed, or continued from one manifest spine.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Root artifact for same-manifest reuse, replay child allocation, and recovery child lineage.",
+      "schema_path": "Algorithm/schemas/run_manifest.schema.json",
+      "source_file": "Algorithm/manifest_and_config_freeze_contract.md",
+      "source_heading_or_logical_block": "5.3 RunManifest required field groups",
+      "source_ref": "Algorithm/manifest_and_config_freeze_contract.md::L78[5.3_RunManifest_required_field_groups]",
+      "state_or_outcome": "RunManifest is the canonical execution, lineage, and sealing truth for request-time control.",
+      "trigger_or_entry_condition": "A materially significant run allocates or reuses a manifest envelope."
+    },
+    {
+      "allowed_next_actions": [
+        "hash_config_surface",
+        "seal_manifest",
+        "inherit_exact_or_historical_explicit"
+      ],
+      "artifact_name": "ConfigFreeze",
+      "audit_events": [
+        "ManifestFrozen",
+        "ConfigInheritanceResolved"
+      ],
+      "authority_safety_posture": "Counterfactual analysis may vary config only under analysis posture and explicit declaration.",
+      "canonical_id": "artifact_config_freeze",
+      "frozen_inputs": [
+        "resolved_policy_snapshot",
+        "formula_bundle",
+        "provider_profile_set",
+        "mode_specific_controls"
+      ],
+      "idempotency_or_hash_fields": [
+        "config_freeze_hash",
+        "config_surface_hash",
+        "execution_basis_hash"
+      ],
+      "identity_tuple": [
+        "config_freeze_id",
+        "config_surface_hash",
+        "schema_bundle_hash"
+      ],
+      "notes": [
+        "Compliance-grade replay forbids non-deterministic allowlists for exact reuse."
+      ],
+      "operator_visible_effect": "Change reviews can point to one frozen config bundle instead of ambient runtime state.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Exact same-attempt recovery and exact replay require identical config freeze semantics.",
+      "schema_path": "Algorithm/schemas/config_freeze.schema.json",
+      "source_file": "Algorithm/manifest_and_config_freeze_contract.md",
+      "source_heading_or_logical_block": "5.4 ConfigFreeze contract",
+      "source_ref": "Algorithm/manifest_and_config_freeze_contract.md::L338[5.4_ConfigFreeze_contract]",
+      "state_or_outcome": "ConfigFreeze captures the lawful config basis for live, replay, nightly, and release flows.",
+      "trigger_or_entry_condition": "Freeze-before-decision and freeze-before-replay rules resolve stable config."
+    },
+    {
+      "allowed_next_actions": [
+        "seal_manifest",
+        "derive_execution_basis_hash",
+        "validate_basis_readability"
+      ],
+      "artifact_name": "InputFreeze",
+      "audit_events": [
+        "SourceCollectionCompleted",
+        "SnapshotBuilt"
+      ],
+      "authority_safety_posture": "Fresh live recollection is forbidden while still claiming exact replay.",
+      "canonical_id": "artifact_input_freeze",
+      "frozen_inputs": [
+        "ordered_input_artifacts",
+        "authoritative_intake_artifacts",
+        "retention_placeholders"
+      ],
+      "idempotency_or_hash_fields": [
+        "input_set_hash",
+        "execution_basis_hash"
+      ],
+      "identity_tuple": [
+        "input_freeze_id",
+        "input_set_hash",
+        "authoritative_intake_set_hash"
+      ],
+      "notes": [
+        "Retention-limited placeholders must surface explicitly instead of collapsing to not applicable."
+      ],
+      "operator_visible_effect": "Operators can distinguish lawful retained placeholders from missing or corrupted input basis.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Exact replay and same-attempt recovery require readable input freeze plus authoritative intake basis.",
+      "schema_path": "Algorithm/schemas/input_freeze.schema.json",
+      "source_file": "Algorithm/manifest_and_config_freeze_contract.md",
+      "source_heading_or_logical_block": "5.8 Input freeze contract",
+      "source_ref": "Algorithm/manifest_and_config_freeze_contract.md::L651[5.8_Input_freeze_contract]",
+      "state_or_outcome": "InputFreeze captures the exact input basis later used by replay, recovery, and audits.",
+      "trigger_or_entry_condition": "Intake and source collection complete before compute, submission, or replay."
+    },
+    {
+      "allowed_next_actions": [
+        "reuse_preseal_tape",
+        "compare_replay_basis",
+        "prove_idempotent_retry"
+      ],
+      "artifact_name": "HashSet",
+      "audit_events": [
+        "ManifestFrozen",
+        "ManifestSealed",
+        "ComputeCompleted"
+      ],
+      "authority_safety_posture": "Authority recovery and replay attestations read persisted hashes instead of inferring basis from side effects.",
+      "canonical_id": "artifact_hash_set",
+      "frozen_inputs": [
+        "config_freeze",
+        "input_freeze",
+        "scope_execution_binding",
+        "deterministic_seed"
+      ],
+      "idempotency_or_hash_fields": [
+        "config_freeze_hash",
+        "config_surface_hash",
+        "input_set_hash",
+        "execution_basis_hash",
+        "manifest_hash",
+        "decision_bundle_hash",
+        "deterministic_outcome_hash"
+      ],
+      "identity_tuple": [
+        "manifest_id",
+        "config_freeze_hash",
+        "input_set_hash",
+        "execution_basis_hash"
+      ],
+      "notes": [
+        "Decision and outcome hashes are append-only once published for a manifest version."
+      ],
+      "operator_visible_effect": "Investigations can explain exactly which hash changed between reuse, replay, continuation, and promotion.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Recovery children preserve `execution_basis_hash`; later lineage nodes must not rewrite it in place.",
+      "schema_path": "Algorithm/schemas/hash_set.schema.json",
+      "source_file": "Algorithm/manifest_and_config_freeze_contract.md",
+      "source_heading_or_logical_block": "5.9 Hash contract",
+      "source_ref": "Algorithm/manifest_and_config_freeze_contract.md::L744[5.9_Hash_contract]",
+      "state_or_outcome": "HashSet is the canonical replay, idempotency, and audit integrity spine.",
+      "trigger_or_entry_condition": "Manifest sealing derives the execution, manifest, decision, and outcome hashes."
+    },
+    {
+      "allowed_next_actions": [
+        "allocate_recovery_child",
+        "allocate_replay_child",
+        "allocate_continuation_child"
+      ],
+      "artifact_name": "ContinuationSet",
+      "audit_events": [
+        "ContinuationChildAllocated",
+        "ConfigInheritanceResolved"
+      ],
+      "authority_safety_posture": "Continuation metadata cannot impersonate transport resume tokens or read-side stability tokens.",
+      "canonical_id": "artifact_continuation_set",
+      "frozen_inputs": [
+        "config_inheritance_mode_or_null",
+        "input_inheritance_mode_or_null",
+        "lineage_refs"
+      ],
+      "idempotency_or_hash_fields": [
+        "continuation_basis",
+        "idempotency_key",
+        "request_identity_hash"
+      ],
+      "identity_tuple": [
+        "manifest_id",
+        "continuation_basis",
+        "selected_manifest_continuation_basis"
+      ],
+      "notes": [
+        "Continuation legality is part of branch proof, not a late-stage convenience flag."
+      ],
+      "operator_visible_effect": "Operator tooling can explain why a child reuses history without collapsing it into ordinary continuation.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Same-attempt recovery is exact; historically explicit continuation is limited and must stay explicitly marked.",
+      "schema_path": "Algorithm/schemas/continuation_set.schema.json",
+      "source_file": "Algorithm/manifest_and_config_freeze_contract.md",
+      "source_heading_or_logical_block": "5.7 Parent/child manifest semantics",
+      "source_ref": "Algorithm/manifest_and_config_freeze_contract.md::L505[5.7_Parent_child_manifest_semantics]",
+      "state_or_outcome": "ContinuationSet distinguishes exact recovery, replay, historically explicit continuation, and new-request children.",
+      "trigger_or_entry_condition": "A child manifest or replay chooses inherited versus freshly resolved basis."
+    },
+    {
+      "allowed_next_actions": [
+        "derive_manifest_idempotency_key",
+        "derive_authority_request_hashes",
+        "enforce_scope_and_masking"
+      ],
+      "artifact_name": "FrozenExecutionBinding",
+      "audit_events": [
+        "AccessScopeBound",
+        "AuthorityBindingMismatchDetected"
+      ],
+      "authority_safety_posture": "Access binding drift blocks silent replay or resend reuse.",
+      "canonical_id": "artifact_frozen_execution_binding",
+      "frozen_inputs": [
+        "effective_scope[]",
+        "masking_rules[]",
+        "required_approvals[]",
+        "delegation_and_authority_lineage"
+      ],
+      "idempotency_or_hash_fields": [
+        "access_binding_hash",
+        "idempotency_key",
+        "duplicate_meaning_key",
+        "request_hash"
+      ],
+      "identity_tuple": [
+        "manifest_id",
+        "access_binding_hash",
+        "access_decision",
+        "required_authn_level"
+      ],
+      "notes": [
+        "Executable identity includes access decision class, executable scope, masking, approvals, and authentication level."
+      ],
+      "operator_visible_effect": "Access and authority investigations can separate token drift from request-body drift.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Authority recovery may reuse request lineage only when binding lineage remains unchanged.",
+      "schema_path": "Algorithm/schemas/frozen_execution_binding.schema.json",
+      "source_file": "Algorithm/manifest_and_config_freeze_contract.md",
+      "source_heading_or_logical_block": "5.3 H. Frozen execution binding",
+      "source_ref": "Algorithm/manifest_and_config_freeze_contract.md::L229[H._Frozen_execution_binding]",
+      "state_or_outcome": "FrozenExecutionBinding extends request identity with executable scope and approval context.",
+      "trigger_or_entry_condition": "Access evaluation resolves the executable request boundary before sealing or authority mutation."
+    },
+    {
+      "allowed_next_actions": [
+        "seal_manifest",
+        "reuse_same_manifest_preseal_tape",
+        "block_prestart_execution"
+      ],
+      "artifact_name": "preseal_gate_evaluation",
+      "audit_events": [
+        "GateEvaluated",
+        "ManifestSealed"
+      ],
+      "authority_safety_posture": "Missing or mismatched pre-seal tape forces fail-closed replay posture.",
+      "canonical_id": "artifact_preseal_gate_evaluation",
+      "frozen_inputs": [
+        "MANIFEST_GATE",
+        "ARTIFACT_CONTRACT_GATE",
+        "INPUT_BOUNDARY_GATE",
+        "DATA_QUALITY_GATE"
+      ],
+      "idempotency_or_hash_fields": [
+        "execution_basis_hash",
+        "ordered_gate_decision_ids[]"
+      ],
+      "identity_tuple": [
+        "manifest_id",
+        "execution_basis_hash",
+        "ordered_gate_decision_ids[]"
+      ],
+      "notes": [
+        "The first four gate records remain an immutable prefix even when later gates append after seal."
+      ],
+      "operator_visible_effect": "Operators can see whether a run blocked before start or sealed with a complete pre-seal basis.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Exact replay and same-manifest reuse consume the persisted tape instead of recomputing on ambient state.",
+      "schema_path": "Algorithm/schemas/preseal_gate_evaluation_contract.schema.json",
+      "source_file": "Algorithm/manifest_and_config_freeze_contract.md",
+      "source_heading_or_logical_block": "5.11 Pre-seal gate evaluation contract",
+      "source_ref": "Algorithm/manifest_and_config_freeze_contract.md::L951[Pre-seal_gate_evaluation_contract]",
+      "state_or_outcome": "preseal_gate_evaluation captures the authoritative pre-start tape and durability boundary.",
+      "trigger_or_entry_condition": "A manifest approaches seal and must freeze the canonical pre-seal gate prefix."
+    },
+    {
+      "allowed_next_actions": [
+        "grant_claim",
+        "reject_duplicate_start",
+        "mark_stale_reclaim_required",
+        "publish_first_stage_or_outbox"
+      ],
+      "artifact_name": "manifest_start_claim",
+      "audit_events": [
+        "RunStarted",
+        "RunStartClaimRejected",
+        "NightlyBatchShardReclaimed"
+      ],
+      "authority_safety_posture": "No second live start is legal while an active lease still exists.",
+      "canonical_id": "artifact_manifest_start_claim",
+      "frozen_inputs": [
+        "claim_state",
+        "claim_status_code",
+        "claim_holder_ref_or_null",
+        "claim_token_or_null",
+        "publication_state"
+      ],
+      "idempotency_or_hash_fields": [
+        "manifest_hash",
+        "execution_basis_hash",
+        "access_binding_hash",
+        "attempt_lineage_ref"
+      ],
+      "identity_tuple": [
+        "manifest_id",
+        "execution_basis_hash",
+        "attempt_lineage_ref",
+        "claim_epoch"
+      ],
+      "notes": [
+        "Claim and first durable publication commit atomically."
+      ],
+      "operator_visible_effect": "Schedulers and operators can distinguish already-active, reclaim-required, and terminal-reuse outcomes without worker logs.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Nightly reclaim and recovery child allocation must read this control object instead of inferring from missing heartbeats.",
+      "schema_path": "Algorithm/schemas/manifest_start_claim_contract.schema.json",
+      "source_file": "Algorithm/manifest_start_claim_protocol.md",
+      "source_heading_or_logical_block": "1. Durable control object",
+      "source_ref": "Algorithm/manifest_start_claim_protocol.md::L8[1._Durable_control_object]",
+      "state_or_outcome": "manifest_start_claim is the single-writer start lease and first-publication truth for live execution.",
+      "trigger_or_entry_condition": "A sealed manifest is claimed for the first live post-seal execution or stale recovery successor flow."
+    },
+    {
+      "allowed_next_actions": [
+        "render_branch_narrative",
+        "bind_audit_and_trace_refs",
+        "explain_nightly_window_continuity"
+      ],
+      "artifact_name": "ManifestLineageTrace",
+      "audit_events": [
+        "ExistingDecisionBundleReturned",
+        "ManifestContextReused",
+        "ContinuationChildAllocated"
+      ],
+      "authority_safety_posture": "Lineage truth is explicit; nearby timestamps or read mirrors cannot substitute for branch proof.",
+      "canonical_id": "artifact_manifest_lineage_trace",
+      "frozen_inputs": [
+        "candidate_evaluations[]",
+        "mirror_consistency_state",
+        "prior_manifest_hash_at_decision_or_null",
+        "nightly_predecessor_context"
+      ],
+      "idempotency_or_hash_fields": [
+        "request_identity_hash",
+        "idempotency_key",
+        "prior_manifest_hash_at_decision_or_null"
+      ],
+      "identity_tuple": [
+        "manifest_lineage_trace_ref",
+        "selected_branch_action",
+        "selected_branch_reason_code"
+      ],
+      "notes": [
+        "The current corpus names ManifestLineageTrace in prose but does not provide a dedicated schema."
+      ],
+      "operator_visible_effect": "Explorers and audit tooling can show why one candidate won and others were rejected.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Recovery, replay, continuation, and same-manifest reuse remain explainable from one branch artifact.",
+      "schema_path": null,
+      "source_file": "Algorithm/manifest_branch_selection_contract.md",
+      "source_heading_or_logical_block": "Explorer Truth",
+      "source_ref": "Algorithm/manifest_branch_selection_contract.md::L84[Explorer_Truth]",
+      "state_or_outcome": "ManifestLineageTrace is the request-time branch explainer and candidate rejection ledger.",
+      "trigger_or_entry_condition": "Branch selection chooses reuse, replay, recovery, continuation, or fresh-child allocation."
+    },
+    {
+      "allowed_next_actions": [
+        "publish_replay_visible_outcome",
+        "answer_audit_queries",
+        "return_existing_replay_child_on_duplicate_request"
+      ],
+      "artifact_name": "ReplayAttestation",
+      "audit_events": [
+        "ReplayBasisCorruptionDetected",
+        "ExistingDecisionBundleReturned"
+      ],
+      "authority_safety_posture": "Counterfactual analysis remains analysis-only and may not mutate authority-facing state.",
+      "canonical_id": "artifact_replay_attestation",
+      "frozen_inputs": [
+        "comparison_mode",
+        "basis_validation_state",
+        "basis_identity_verdict",
+        "deterministic_equivalence_verdict",
+        "basis_dimension_results[]",
+        "outcome_component_results[]"
+      ],
+      "idempotency_or_hash_fields": [
+        "expected_execution_basis_hash",
+        "actual_execution_basis_hash",
+        "expected_deterministic_outcome_hash",
+        "actual_deterministic_outcome_hash"
+      ],
+      "identity_tuple": [
+        "replay_attestation_id",
+        "manifest_id",
+        "replay_of_manifest_id",
+        "replay_class"
+      ],
+      "notes": [
+        "No replay child may publish replay-visible truth without a linked durable attestation."
+      ],
+      "operator_visible_effect": "Operators see exact, expected-difference, limited, corrupt, or unexpected mismatch posture from a signed artifact.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Corrupt, incomplete, or retention-limited basis becomes explicit posture instead of silent substitution.",
+      "schema_path": "Algorithm/schemas/replay_attestation.schema.json",
+      "source_file": "Algorithm/replay_and_reproducibility_contract.md",
+      "source_heading_or_logical_block": "Replay attestation artifact",
+      "source_ref": "Algorithm/replay_and_reproducibility_contract.md::L564[Replay_attestation_artifact]",
+      "state_or_outcome": "ReplayAttestation is the durable replay-comparison and operator/auditor explanation artifact.",
+      "trigger_or_entry_condition": "A replay child reaches a persisted decision outcome and must publish durable comparison truth."
+    },
+    {
+      "allowed_next_actions": [
+        "allocate_or_reuse_batch",
+        "freeze_selection_universe",
+        "prove_same_window_duplicate_suppression"
+      ],
+      "artifact_name": "NightlyBatchIdentityContract",
+      "audit_events": [
+        "NightlyBatchAllocated"
+      ],
+      "authority_safety_posture": "Cross-window continuity requires a new nightly identity even if config and inputs are unchanged.",
+      "canonical_id": "artifact_nightly_batch_identity_contract",
+      "frozen_inputs": [
+        "schema_bundle_hash",
+        "code_build_id",
+        "environment_ref",
+        "selection_universe_hash",
+        "selection_universe_count",
+        "reclaimed_predecessor_batch_run_ref_or_null",
+        "recovery_resume_state"
+      ],
+      "idempotency_or_hash_fields": [
+        "identity_contract_hash",
+        "scheduler_dedupe_key"
+      ],
+      "identity_tuple": [
+        "tenant_id",
+        "nightly_window_key",
+        "trigger_class",
+        "release_verification_manifest_ref",
+        "policy_snapshot_hash",
+        "autopilot_policy_hash"
+      ],
+      "notes": [
+        "Same-window duplicates reuse batch identity; later windows remain separate control objects."
+      ],
+      "operator_visible_effect": "Operators can trace a batch back to its trigger class, release-verification basis, and policy snapshot.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Recovery reclaim windows link the predecessor explicitly and forbid silent second-batch allocation.",
+      "schema_path": "Algorithm/schemas/nightly_batch_identity_contract.schema.json",
+      "source_file": "Algorithm/nightly_selection_disposition_and_batch_isolation_contract.md",
+      "source_heading_or_logical_block": "Identity law",
+      "source_ref": "Algorithm/nightly_selection_disposition_and_batch_isolation_contract.md::L17[Identity_law]",
+      "state_or_outcome": "NightlyBatchIdentityContract is the scheduler dedupe and batch identity tuple.",
+      "trigger_or_entry_condition": "Nightly trigger allocation freezes same-window dedupe, cross-window continuity, and recovery lineage."
+    },
+    {
+      "allowed_next_actions": [
+        "select_portfolio",
+        "dispatch_client_execution",
+        "reclaim_stale_batch",
+        "publish_operator_digest"
+      ],
+      "artifact_name": "NightlyBatchRun",
+      "audit_events": [
+        "NightlyBatchAllocated",
+        "NightlyPortfolioSelected",
+        "NightlyBatchCompleted",
+        "OperatorMorningDigestPublished"
+      ],
+      "authority_safety_posture": "Nightly automation may not bypass manifest leases, authority ambiguity rules, or resend boundaries.",
+      "canonical_id": "artifact_nightly_batch_run",
+      "frozen_inputs": [
+        "identity_contract",
+        "global_concurrency_profile",
+        "selection_entries[]",
+        "shard_plan[]",
+        "operator_digest_publication_state"
+      ],
+      "idempotency_or_hash_fields": [
+        "scheduler_dedupe_key",
+        "identity_contract_hash",
+        "selection_universe_hash"
+      ],
+      "identity_tuple": [
+        "batch_run_id",
+        "tenant_id",
+        "nightly_window_key",
+        "trigger_class",
+        "release_verification_manifest_ref"
+      ],
+      "notes": [
+        "Per-client entries remain explicit even for reuse, defer, escalation, and skip outcomes."
+      ],
+      "operator_visible_effect": "Morning operations can read one batch artifact instead of reconstructing overnight behavior from queues.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Crash recovery reuses predecessor selection and shard truth or escalates if proof is incomplete.",
+      "schema_path": "Algorithm/schemas/nightly_batch_run.schema.json",
+      "source_file": "Algorithm/nightly_autopilot_contract.md",
+      "source_heading_or_logical_block": "2.3 Frozen batch envelope",
+      "source_ref": "Algorithm/nightly_autopilot_contract.md::L85[2.3_Frozen_batch_envelope]",
+      "state_or_outcome": "NightlyBatchRun is the authoritative overnight selection, shard, and quiescence control object.",
+      "trigger_or_entry_condition": "A nightly control-plane window has been allocated and frozen for one tenant."
+    },
+    {
+      "allowed_next_actions": [
+        "execute_new_manifest",
+        "execute_continuation_child",
+        "reuse_result",
+        "defer",
+        "escalate",
+        "skip"
+      ],
+      "artifact_name": "NightlySelectionEntry",
+      "audit_events": [
+        "NightlyClientExecutionDispatched",
+        "NightlyClientExecutionDeferred",
+        "NightlyClientExecutionSkipped",
+        "NightlyClientExecutionEscalated"
+      ],
+      "authority_safety_posture": "Same-window active attempts may defer or reclaim; they may not silently duplicate live execution.",
+      "canonical_id": "artifact_nightly_selection_entry",
+      "frozen_inputs": [
+        "terminal_result_reuse_state",
+        "active_attempt_resolution_state",
+        "priority_tuple",
+        "reason_codes[]",
+        "workflow_item_refs[]",
+        "next_checkpoint_at"
+      ],
+      "idempotency_or_hash_fields": [
+        "candidate_identity_hash",
+        "selection_basis_hash"
+      ],
+      "identity_tuple": [
+        "entry_id",
+        "candidate_identity_hash",
+        "client_id",
+        "period",
+        "selection_disposition"
+      ],
+      "notes": [
+        "Only execution-capable rows enter shard plans; reuse, defer, escalation, and skip remain off-shard."
+      ],
+      "operator_visible_effect": "Client-level overnight outcomes are visible even when no manifest is executed.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Selection rows survive reclaim and batch restarts; unrelated clients retain explicit outcomes despite shard failure.",
+      "schema_path": "Algorithm/schemas/nightly_batch_run.schema.json",
+      "source_file": "Algorithm/nightly_selection_disposition_and_batch_isolation_contract.md",
+      "source_heading_or_logical_block": "Selection law",
+      "source_ref": "Algorithm/nightly_selection_disposition_and_batch_isolation_contract.md::L35[Selection_law]",
+      "state_or_outcome": "Nightly selection entry is the per-candidate operating decision row for overnight execution.",
+      "trigger_or_entry_condition": "Nightly portfolio selection evaluates one candidate client-period tuple exactly once."
+    },
+    {
+      "allowed_next_actions": [
+        "publish_workflow_updates",
+        "publish_notifications",
+        "supersede_prior_digest"
+      ],
+      "artifact_name": "OperatorMorningDigest",
+      "audit_events": [
+        "OperatorMorningDigestPublished"
+      ],
+      "authority_safety_posture": "Customer-visible consequences remain bound to persisted workflow and audit evidence, not free-text summaries.",
+      "canonical_id": "artifact_operator_morning_digest",
+      "frozen_inputs": [
+        "covered_selection_entry_refs[]",
+        "summary_counts{...}",
+        "queue_summaries[]",
+        "highlighted_client_outcomes[]",
+        "published_workflow_item_refs[]",
+        "published_notification_refs[]"
+      ],
+      "idempotency_or_hash_fields": [
+        "derivation_contract_hash",
+        "coverage_date",
+        "source_batch_run_refs[]"
+      ],
+      "identity_tuple": [
+        "coverage_date",
+        "source_batch_run_refs[]",
+        "supersedes_digest_id"
+      ],
+      "notes": [
+        "Publication state and QA are explicit parts of the digest contract."
+      ],
+      "operator_visible_effect": "Operators receive a single coverage-date digest instead of reconstructing overnight posture manually.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Digest derivation remains pinned to live nightly compliance posture, not replay or analysis.",
+      "schema_path": "Algorithm/schemas/operator_morning_digest.schema.json",
+      "source_file": "Algorithm/nightly_autopilot_contract.md",
+      "source_heading_or_logical_block": "12.2 OperatorMorningDigest",
+      "source_ref": "Algorithm/nightly_autopilot_contract.md::L732[12.2_OperatorMorningDigest]",
+      "state_or_outcome": "OperatorMorningDigest is the deterministic next-morning handoff artifact for overnight control-plane behavior.",
+      "trigger_or_entry_condition": "Nightly quiescence succeeds far enough to publish one tenant coverage-date handoff summary."
+    },
+    {
+      "allowed_next_actions": [
+        "bind_checkpoint",
+        "bind_deployment_release",
+        "validate_reopen_and_fail_forward_boundaries"
+      ],
+      "artifact_name": "RecoveryGovernanceContract",
+      "audit_events": [
+        "BackupCreated",
+        "RestoreDrillExecuted",
+        "ReleasePromoted",
+        "ReleaseRolledBack"
+      ],
+      "authority_safety_posture": "Authority mutations require lineage and binding revalidation after restore or failover.",
+      "canonical_id": "artifact_recovery_governance_contract",
+      "frozen_inputs": [
+        "checkpoint_inventory_policy",
+        "privacy_reconciliation_policy",
+        "queue_recovery_policy",
+        "authority_recovery_policy",
+        "rollback_boundary_policy",
+        "fail_forward_policy"
+      ],
+      "idempotency_or_hash_fields": [
+        "contract_version",
+        "protected_workload_class",
+        "boundary_scope"
+      ],
+      "identity_tuple": [
+        "boundary_scope",
+        "protected_workload_class",
+        "recovery_tier_class",
+        "rpo_class",
+        "rto_class"
+      ],
+      "notes": [
+        "Control-plane legal truth may not serialize a weaker tier than TIER_0_CONTROL_PLANE."
+      ],
+      "operator_visible_effect": "SRE and release tooling can prove the tier, RPO/RTO, and reopen policy used by a checkpoint or release.",
+      "privacy_reconciliation_required": true,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Tier mappings and reopen policy remain explicit and fail closed when weaker classes appear.",
+      "schema_path": "Algorithm/schemas/recovery_governance_contract.schema.json",
+      "source_file": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md",
+      "source_heading_or_logical_block": "Shared recovery-governance boundary",
+      "source_ref": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L11[Shared_recovery-governance_boundary]",
+      "state_or_outcome": "RecoveryGovernanceContract is the shared checkpoint and release resilience policy object.",
+      "trigger_or_entry_condition": "Checkpoint and release artifacts bind one shared recovery governance boundary."
+    },
+    {
+      "allowed_next_actions": [
+        "verify_checkpoint",
+        "reopen_if_ready",
+        "quarantine_or_expire",
+        "bind_restore_drill_to_release"
+      ],
+      "artifact_name": "RecoveryCheckpoint",
+      "audit_events": [
+        "BackupCreated",
+        "RestoreDrillExecuted",
+        "DisasterRecoveryFailedOver",
+        "DisasterRecoveryFailedBack"
+      ],
+      "authority_safety_posture": "Restore of authority-integrated work must rebuild outstanding reconciliation from durable truth.",
+      "canonical_id": "artifact_recovery_checkpoint",
+      "frozen_inputs": [
+        "checkpoint_inventory_ref",
+        "restore_verification_hash",
+        "privacy_reconciliation_contract",
+        "audit_continuity_verified",
+        "queue_rebuild_verified",
+        "authority_binding_revalidation_verified",
+        "reopen_readiness_state"
+      ],
+      "idempotency_or_hash_fields": [
+        "restore_verification_hash",
+        "checkpoint_id"
+      ],
+      "identity_tuple": [
+        "checkpoint_id",
+        "datastore_ref",
+        "checkpoint_state",
+        "restore_drill_ref"
+      ],
+      "notes": [
+        "`READY_FOR_REOPEN` is lawful only after privacy, audit, queue, and authority checks all pass."
+      ],
+      "operator_visible_effect": "Restore readiness remains blocked by typed missing gates instead of silent reopen optimism.",
+      "privacy_reconciliation_required": true,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Verified posture requires restore evidence, privacy reconciliation, queue rebuild, and authority revalidation.",
+      "schema_path": "Algorithm/schemas/recovery_checkpoint.schema.json",
+      "source_file": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md",
+      "source_heading_or_logical_block": "Recovery checkpoint law",
+      "source_ref": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L44[Recovery_checkpoint_law]",
+      "state_or_outcome": "RecoveryCheckpoint is the authoritative restore evidence and reopen-gating artifact for a protected workload.",
+      "trigger_or_entry_condition": "Scheduled backup cadence or promotion/DR evidence binds a restore-capable checkpoint."
+    },
+    {
+      "allowed_next_actions": [
+        "reconcile_privacy",
+        "complete_compensating_re_erasure",
+        "block_reopen_pending_review"
+      ],
+      "artifact_name": "RestorePrivacyReconciliationContract",
+      "audit_events": [
+        "ErasureRequested",
+        "ErasureCompleted",
+        "LegalHoldApplied",
+        "LegalHoldReleased"
+      ],
+      "authority_safety_posture": "Authority ambiguity blocks reopen rather than being erased or hand-waved away.",
+      "canonical_id": "artifact_restore_privacy_reconciliation_contract",
+      "frozen_inputs": [
+        "resurrected_data_posture",
+        "compensating_re_erasure_state",
+        "legal_hold_ref_or_null",
+        "proof_preservation_basis_ref_or_null",
+        "authority_ambiguity_ref_or_null",
+        "audit_chain_continuity_state"
+      ],
+      "idempotency_or_hash_fields": [
+        "reconciliation_contract_hash",
+        "privacy_reconciliation_outcome_ref"
+      ],
+      "identity_tuple": [
+        "checkpoint_ref",
+        "restore_drill_ref",
+        "privacy_reconciliation_state",
+        "reopen_access_state"
+      ],
+      "notes": [
+        "Privacy reconciliation is a reopen blocker, not optional cleanup."
+      ],
+      "operator_visible_effect": "Operators can distinguish ready-for-reopen, limited, legal-hold-blocked, and proof-preservation-blocked restore posture.",
+      "privacy_reconciliation_required": true,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Restore remains blocked until privacy, limitation, and audit continuity become reopen-safe.",
+      "schema_path": "Algorithm/schemas/restore_privacy_reconciliation_contract.schema.json",
+      "source_file": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md",
+      "source_heading_or_logical_block": "Restore privacy reconciliation law",
+      "source_ref": "Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[Restore_privacy_reconciliation_law]",
+      "state_or_outcome": "RestorePrivacyReconciliationContract is the authoritative restore privacy blocker and compensating re-erasure record.",
+      "trigger_or_entry_condition": "A restore or drill may resurrect restricted data and must reconcile privacy before reopen."
+    },
+    {
+      "allowed_next_actions": [
+        "follow_up_read_only",
+        "exact_idempotent_recovery",
+        "escalate_reconciliation",
+        "bind_submission_projection"
+      ],
+      "artifact_name": "AuthorityInteractionRecord",
+      "audit_events": [
+        "AuthorityRequestSent",
+        "AuthorityResponseReceived",
+        "AuthorityReconciliationAttempted",
+        "AuthorityReconciliationResolved"
+      ],
+      "authority_safety_posture": "Fresh mutation resend is blocked after budget exhaustion or unresolved ambiguity.",
+      "canonical_id": "artifact_authority_interaction_record",
+      "frozen_inputs": [
+        "response_history_ids[]",
+        "reconciliation_budget_state",
+        "next_reconciliation_at",
+        "resend_legality_state",
+        "reconciliation_control_contract"
+      ],
+      "idempotency_or_hash_fields": [
+        "request_hash",
+        "duplicate_meaning_key",
+        "idempotency_key",
+        "binding_lineage_ref"
+      ],
+      "identity_tuple": [
+        "interaction_id",
+        "request_hash",
+        "idempotency_key",
+        "authority_operation_profile_ref"
+      ],
+      "notes": [
+        "The reconciliation control packet is copied onto unresolved SubmissionRecord and ObligationMirror surfaces."
+      ],
+      "operator_visible_effect": "Operations can see whether recovery is read-only, idempotent-only, or blocked pending escalation.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Restore, replay, or reclaim reuses the persisted reconciliation control packet rather than recomputing from retries.",
+      "schema_path": "Algorithm/schemas/authority_interaction_record.schema.json",
+      "source_file": "Algorithm/authority_interaction_protocol.md",
+      "source_heading_or_logical_block": "9.13A Reconciliation budget and escalation rule",
+      "source_ref": "Algorithm/authority_interaction_protocol.md::L1042[9.13A_Reconciliation_budget_and_escalation_rule]",
+      "state_or_outcome": "AuthorityInteractionRecord is the durable exchange and reconciliation truth for no-blind-resend safety.",
+      "trigger_or_entry_condition": "An authority-bound submission or reconciliation exchange exists or is awaiting clarification."
+    },
+    {
+      "allowed_next_actions": [
+        "bind_verification_suite_results",
+        "bind_release_verification_manifest",
+        "bind_deployment_release"
+      ],
+      "artifact_name": "ReleaseCandidateIdentityContract",
+      "audit_events": [
+        "BuildAttested",
+        "ReleaseCanaryStarted",
+        "ReleasePromoted"
+      ],
+      "authority_safety_posture": "Authority sandbox evidence may not drift across enabled provider-profile sets.",
+      "canonical_id": "artifact_release_candidate_identity_contract",
+      "frozen_inputs": [
+        "array_canonicalization_policy",
+        "suite_context_policy",
+        "admissibility_binding_policy"
+      ],
+      "idempotency_or_hash_fields": [
+        "candidate_identity_hash",
+        "artifact_digest",
+        "schema_bundle_hash",
+        "config_bundle_hash"
+      ],
+      "identity_tuple": [
+        "candidate_environment_ref",
+        "build_artifact_ref",
+        "artifact_digest",
+        "schema_bundle_hash",
+        "config_bundle_hash",
+        "migration_plan_ref_or_null",
+        "enabled_provider_profile_refs[]",
+        "supported_client_window_ref_or_null"
+      ],
+      "notes": [
+        "Ordered arrays are canonicalized before hashing so the same candidate cannot drift across workers."
+      ],
+      "operator_visible_effect": "Release reviewers can reject mixed-candidate evidence from one candidate hash.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Restore drills and client compatibility evidence must remain bound to the exact candidate tuple they verified.",
+      "schema_path": "Algorithm/schemas/release_candidate_identity_contract.schema.json",
+      "source_file": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md",
+      "source_heading_or_logical_block": "1. Governing candidate identity model",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L12[1._Governing_candidate_identity_model]",
+      "state_or_outcome": "ReleaseCandidateIdentityContract is the shared candidate tuple for release evidence and deployment records.",
+      "trigger_or_entry_condition": "A promotion candidate or restore drill binds one exact build, schema, config, provider-profile, and client-window tuple."
+    },
+    {
+      "allowed_next_actions": [
+        "admit_release_gate",
+        "block_destructive_contract",
+        "force_fail_forward_after_window_close"
+      ],
+      "artifact_name": "SchemaBundleCompatibilityGateContract",
+      "audit_events": [
+        "SchemaMigrationPlanned",
+        "SchemaMigrationApplied",
+        "SchemaMigrationVerified",
+        "ReleaseRolledBack"
+      ],
+      "authority_safety_posture": "Closed reader windows and blocked native windows become explicit fail-forward boundaries.",
+      "canonical_id": "artifact_schema_bundle_compatibility_gate_contract",
+      "frozen_inputs": [
+        "schema_reader_window_contract",
+        "migration_plan_ref_or_null",
+        "migration_ledger_refs[]",
+        "historical_manifest_guard_state",
+        "replay_restore_guard_state",
+        "native_client_window_state",
+        "destructive_contract_state",
+        "reason_codes[]"
+      ],
+      "idempotency_or_hash_fields": [
+        "compatibility_gate_hash",
+        "candidate_identity_hash",
+        "schema_bundle_hash"
+      ],
+      "identity_tuple": [
+        "candidate_identity_hash",
+        "compatibility_window_ref",
+        "reader_window_state",
+        "rollback_boundary_state"
+      ],
+      "notes": [
+        "Compatibility gate rows must bind the same candidate hash and compatibility hash across evidence artifacts."
+      ],
+      "operator_visible_effect": "Release tooling can show why rollback remained legal or became fail-forward-only.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Replay and restore require a compatible reader window or an explicitly blocked posture.",
+      "schema_path": "Algorithm/schemas/schema_bundle_compatibility_gate_contract.schema.json",
+      "source_file": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md",
+      "source_heading_or_logical_block": "2. Contract boundary",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]",
+      "state_or_outcome": "SchemaBundleCompatibilityGateContract is the mutable schema safety boundary around a fixed release candidate.",
+      "trigger_or_entry_condition": "Promotion or restore evidence claims schema safety for historical manifests, replay, restore, and native-client compatibility."
+    },
+    {
+      "allowed_next_actions": [
+        "approve_release",
+        "block_release",
+        "supersede_manifest",
+        "bind_deployment_release"
+      ],
+      "artifact_name": "ReleaseVerificationManifest",
+      "audit_events": [
+        "BuildAttested",
+        "ReleaseCanaryStarted",
+        "ReleasePromoted"
+      ],
+      "authority_safety_posture": "Authority sandbox coverage remains part of promotion admissibility when suite_family = AUTHORITY_SANDBOX.",
+      "canonical_id": "artifact_release_verification_manifest",
+      "frozen_inputs": [
+        "blocking_gates.*",
+        "manifest_assembly_contract",
+        "restore_drill_ref",
+        "client_compatibility_matrix_ref",
+        "canary_health_summary_ref"
+      ],
+      "idempotency_or_hash_fields": [
+        "candidate_identity_hash",
+        "compatibility_gate_hash",
+        "manifest_assembly_contract_hash"
+      ],
+      "identity_tuple": [
+        "release_verification_manifest_id",
+        "candidate_identity_hash",
+        "compatibility_gate_hash",
+        "decision_posture"
+      ],
+      "notes": [
+        "Promotion evidence is machine-assembled from first-class artifacts instead of reconstructed dashboards."
+      ],
+      "operator_visible_effect": "Operators can replay the exact gate order, evidence refs, and decision posture from one root object.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Restore drills used for promotion bind the exact checkpoint and candidate tuple into the promotion record.",
+      "schema_path": "Algorithm/schemas/release_verification_manifest.schema.json",
+      "source_file": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md",
+      "source_heading_or_logical_block": "2. Contract boundary",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::L30[2._Contract_boundary]",
+      "state_or_outcome": "ReleaseVerificationManifest is the machine-assembled promotion-evidence root for one candidate.",
+      "trigger_or_entry_condition": "Promotion assembles blocking evidence, admissibility posture, and companion artifacts into one durable release root."
+    },
+    {
+      "allowed_next_actions": [
+        "promote",
+        "abort_canary",
+        "roll_back_if_allowed",
+        "fail_forward_with_compensating_release",
+        "supersede"
+      ],
+      "artifact_name": "DeploymentRelease",
+      "audit_events": [
+        "ReleaseCanaryStarted",
+        "ReleasePromoted",
+        "ReleaseRolledBack",
+        "DisasterRecoveryFailedOver",
+        "DisasterRecoveryFailedBack"
+      ],
+      "authority_safety_posture": "Release rollback is distinct from legal authority truth; evidence is never deleted to simulate rollback.",
+      "canonical_id": "artifact_deployment_release",
+      "frozen_inputs": [
+        "schema_bundle_compatibility_gate_contract",
+        "recovery_governance_contract",
+        "rollback_boundary_state",
+        "release_verification_manifest_ref",
+        "supported_client_window_ref",
+        "compensating_release_id_or_null",
+        "fail_forward_owner_ref_or_null"
+      ],
+      "idempotency_or_hash_fields": [
+        "candidate_identity_hash",
+        "schema_bundle_hash",
+        "config_bundle_hash",
+        "rollback_boundary_state"
+      ],
+      "identity_tuple": [
+        "release_id",
+        "environment_ref",
+        "candidate_identity_hash",
+        "rollout_strategy",
+        "rollout_state"
+      ],
+      "notes": [
+        "FAILED_FORWARD posture is unlawful without a compensating release and named owner."
+      ],
+      "operator_visible_effect": "Release operators can see whether a rollout remained rollback-safe or crossed into fail-forward-only posture.",
+      "privacy_reconciliation_required": false,
+      "record_type": "control_plane_artifact",
+      "recovery_posture": "Closed schema windows force FAIL_FORWARD_ONLY; rollback cannot obscure already-persisted legal evidence.",
+      "schema_path": "Algorithm/schemas/deployment_release.schema.json",
+      "source_file": "Algorithm/deployment_and_resilience_contract.md",
+      "source_heading_or_logical_block": "6. Rollout, rollback, and fail-forward posture",
+      "source_ref": "Algorithm/deployment_and_resilience_contract.md::L177[6._Rollout_rollback_and_fail-forward_posture]",
+      "state_or_outcome": "DeploymentRelease is the authoritative rollout, rollback, and fail-forward governance object.",
+      "trigger_or_entry_condition": "A candidate is deployed, rolled back, pinned, failed forward, or superseded in one environment."
+    }
+  ],
+  "summary": {
+    "artifact_count": 22,
+    "explicit_gap_count": 5,
+    "row_count": 22
+  }
+}

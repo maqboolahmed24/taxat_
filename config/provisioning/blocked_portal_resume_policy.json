@@ -1,0 +1,182 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "blocked_portal_resume_policy",
+  "generated_on": "2026-04-18",
+  "truth_boundary_statement": "Blocked portals are lawful pause points, not bypass candidates. Human verification, session revalidation, route revalidation, and stale-step suppression remain explicit before any mutating browser action resumes.",
+  "policy_rows": [
+    {
+      "resume_policy_ref": "resume.same-route.after-human-verification",
+      "applies_to_reason_codes": [
+        "CAPTCHA",
+        "EMAIL_VERIFICATION_REQUIRED",
+        "HUMAN_CONFIRMATION_REQUIRED"
+      ],
+      "human_actor_role": "PROVIDER_VERIFIED_OPERATOR",
+      "expected_post_checkpoint_route_requirement": "SAME_ROUTE_OR_PROVIDER_SUCCESSOR_MUST_BE_VISIBLE",
+      "session_revalidation_requirement": "REQUIRED",
+      "selector_drift_check_requirement": "REQUIRED",
+      "safe_noop_verification_step": "Verify the current route fingerprint and challenge-complete banner before any new click.",
+      "timeout_posture": "FAIL_CLOSED_ON_EXPIRY",
+      "forbidden_actions": [
+        "REPLAY_PRE_CHECKPOINT_SUBMIT",
+        "REUSE_STALE_FORM_STATE",
+        "ENTER_ONE_TIME_CODE_IN_AUTOMATION_LOGS"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "PROMPT/shared_operating_contract_0046_to_0053.md::Manual checkpoints remain lawful pauses",
+          "rationale": "The shared operating contract requires manual checkpoints to persist durable artifacts, sanitized evidence, and explicit resume rules."
+        },
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::3.11 Non-delegable and step-up actions",
+          "rationale": "Step-up, CAPTCHA, and human-confirmation actions must fail closed and may not be bypassed by a machine actor."
+        },
+        {
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::step-up session rotation and reconnect rules",
+          "rationale": "Resume artifacts must be revalidated against route identity, session validity, and post-step-up continuity before mutation resumes."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::MFA and secret-handling rules",
+          "rationale": "Manual checkpoint evidence must stay sanitized and must not persist one-time codes or other sensitive materials."
+        },
+        {
+          "source_ref": "Algorithm/frontend_shell_and_interaction_law.md::stable route keys and reduced-motion selectors",
+          "rationale": "Checkpoint atlases and resume diagnostics must remain automation-verifiable, keyboard reachable, and stable under reduced motion."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::audit-vs-telemetry separation",
+          "rationale": "Checkpoint artifacts require durable audit-safe structure instead of being buried in ephemeral telemetry noise."
+        }
+      ],
+      "notes": [
+        "This policy fits challenges that often return to the same route once a human completes the provider-owned step."
+      ]
+    },
+    {
+      "resume_policy_ref": "resume.verify-session-and-route.before-mutation",
+      "applies_to_reason_codes": [
+        "MFA_REQUIRED",
+        "STEP_UP_REQUIRED",
+        "DEVICE_APPROVAL_REQUIRED",
+        "SUSPICIOUS_LOGIN_REVIEW"
+      ],
+      "human_actor_role": "PROVIDER_VERIFIED_OPERATOR",
+      "expected_post_checkpoint_route_requirement": "POST_CHECKPOINT_ROUTE_MUST_MATCH_EXPECTED_SUCCESSOR_OR_FAIL_CLOSED",
+      "session_revalidation_requirement": "REQUIRED_AND_FAIL_CLOSED_IF_SESSION_ROTATED",
+      "selector_drift_check_requirement": "REQUIRED",
+      "safe_noop_verification_step": "Re-read portal heading, route fingerprint, and signed-in session marker before any mutating action resumes.",
+      "timeout_posture": "FAIL_CLOSED_ON_ROUTE_OR_SESSION_MISMATCH",
+      "forbidden_actions": [
+        "REPLAY_MUTATING_CLICK_FROM_PRE_STEP_UP_STATE",
+        "REUSE_INVALIDATED_SESSION_TOKEN",
+        "SKIP_SELECTOR_DRIFT_REVALIDATION"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "PROMPT/shared_operating_contract_0046_to_0053.md::Manual checkpoints remain lawful pauses",
+          "rationale": "The shared operating contract requires manual checkpoints to persist durable artifacts, sanitized evidence, and explicit resume rules."
+        },
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::3.11 Non-delegable and step-up actions",
+          "rationale": "Step-up, CAPTCHA, and human-confirmation actions must fail closed and may not be bypassed by a machine actor."
+        },
+        {
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::step-up session rotation and reconnect rules",
+          "rationale": "Resume artifacts must be revalidated against route identity, session validity, and post-step-up continuity before mutation resumes."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::MFA and secret-handling rules",
+          "rationale": "Manual checkpoint evidence must stay sanitized and must not persist one-time codes or other sensitive materials."
+        },
+        {
+          "source_ref": "Algorithm/frontend_shell_and_interaction_law.md::stable route keys and reduced-motion selectors",
+          "rationale": "Checkpoint atlases and resume diagnostics must remain automation-verifiable, keyboard reachable, and stable under reduced motion."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::audit-vs-telemetry separation",
+          "rationale": "Checkpoint artifacts require durable audit-safe structure instead of being buried in ephemeral telemetry noise."
+        }
+      ],
+      "notes": [
+        "Step-up and suspicious-login challenges may rotate the session or relocate the browser to a different route."
+      ]
+    },
+    {
+      "resume_policy_ref": "resume.fail-closed.reopen-after-policy-change",
+      "applies_to_reason_codes": [
+        "PORTAL_POLICY_BLOCK",
+        "UNKNOWN_CHALLENGE_REVIEW_REQUIRED"
+      ],
+      "human_actor_role": "SECURITY_OR_PLATFORM_OPERATOR",
+      "expected_post_checkpoint_route_requirement": "REOPEN_FROM_KNOWN_ENTRY_ROUTE_ONLY_AFTER_POLICY_OR_REVIEW_CHANGE",
+      "session_revalidation_requirement": "REQUIRED_AND_FAIL_CLOSED_IF_SESSION_ROTATED",
+      "selector_drift_check_requirement": "REQUIRED",
+      "safe_noop_verification_step": "Restart from the entry route, verify the previous block is cleared, then adopt the current page state before any mutation.",
+      "timeout_posture": "FAIL_CLOSED_ON_EXPIRY",
+      "forbidden_actions": [
+        "BLIND_RETRY_ON_SAME_BLOCKED_ROUTE",
+        "ASSUME_UNKNOWN_CHALLENGE_IS_SAFE",
+        "PROMOTE_TELEMETRY_ONLY_SIGNAL_TO_RESUME_PERMISSION"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "PROMPT/shared_operating_contract_0046_to_0053.md::Manual checkpoints remain lawful pauses",
+          "rationale": "The shared operating contract requires manual checkpoints to persist durable artifacts, sanitized evidence, and explicit resume rules."
+        },
+        {
+          "source_ref": "Algorithm/actor_and_authority_model.md::3.11 Non-delegable and step-up actions",
+          "rationale": "Step-up, CAPTCHA, and human-confirmation actions must fail closed and may not be bypassed by a machine actor."
+        },
+        {
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::step-up session rotation and reconnect rules",
+          "rationale": "Resume artifacts must be revalidated against route identity, session validity, and post-step-up continuity before mutation resumes."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::MFA and secret-handling rules",
+          "rationale": "Manual checkpoint evidence must stay sanitized and must not persist one-time codes or other sensitive materials."
+        },
+        {
+          "source_ref": "Algorithm/frontend_shell_and_interaction_law.md::stable route keys and reduced-motion selectors",
+          "rationale": "Checkpoint atlases and resume diagnostics must remain automation-verifiable, keyboard reachable, and stable under reduced motion."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::audit-vs-telemetry separation",
+          "rationale": "Checkpoint artifacts require durable audit-safe structure instead of being buried in ephemeral telemetry noise."
+        }
+      ],
+      "notes": [
+        "Unknown or provider-policy blocks stay fail-closed until human review or provider posture changes."
+      ]
+    }
+  ],
+  "source_refs": [
+    {
+      "source_ref": "PROMPT/shared_operating_contract_0046_to_0053.md::Manual checkpoints remain lawful pauses",
+      "rationale": "The shared operating contract requires manual checkpoints to persist durable artifacts, sanitized evidence, and explicit resume rules."
+    },
+    {
+      "source_ref": "Algorithm/actor_and_authority_model.md::3.11 Non-delegable and step-up actions",
+      "rationale": "Step-up, CAPTCHA, and human-confirmation actions must fail closed and may not be bypassed by a machine actor."
+    },
+    {
+      "source_ref": "Algorithm/northbound_api_and_session_contract.md::step-up session rotation and reconnect rules",
+      "rationale": "Resume artifacts must be revalidated against route identity, session validity, and post-step-up continuity before mutation resumes."
+    },
+    {
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::MFA and secret-handling rules",
+      "rationale": "Manual checkpoint evidence must stay sanitized and must not persist one-time codes or other sensitive materials."
+    },
+    {
+      "source_ref": "Algorithm/frontend_shell_and_interaction_law.md::stable route keys and reduced-motion selectors",
+      "rationale": "Checkpoint atlases and resume diagnostics must remain automation-verifiable, keyboard reachable, and stable under reduced motion."
+    },
+    {
+      "source_ref": "Algorithm/observability_and_audit_contract.md::audit-vs-telemetry separation",
+      "rationale": "Checkpoint artifacts require durable audit-safe structure instead of being buried in ephemeral telemetry noise."
+    }
+  ],
+  "notes": [
+    "Every blocked-portal resume starts with idempotent verification reads before any mutating action resumes.",
+    "Replay of stale pre-step-up mutations is forbidden across all policies."
+  ]
+}

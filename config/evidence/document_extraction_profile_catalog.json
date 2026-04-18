@@ -1,0 +1,695 @@
+{
+  "schema_version": "1.0",
+  "catalog_id": "document_extraction_profile_catalog",
+  "selection_status": "SELF_HOST_DECISION_REQUIRED",
+  "truth_boundary_statement": "Document extraction may produce provider raw output, normalized extraction output, and candidate facts only. Canonical facts still require later normalization, validation, scoping, and promotion grounded in Taxat evidence law.",
+  "profiles": [
+    {
+      "profile_ref": "doc_profile_receipt_capture",
+      "document_class": "EXPENSE_RECEIPT",
+      "activation_state": "READY_ONCE_PROVIDER_SELECTED",
+      "accepted_mime_types": [
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "image/tiff"
+      ],
+      "page_count_limit": 4,
+      "file_size_limit_mb": 20,
+      "language_posture": "EN_PRIMARY_WITH_MIXED_LANGUAGE_REVIEW",
+      "handwriting_posture": "HANDWRITING_ALLOWED_WITH_REVIEW",
+      "extraction_family": "RECEIPT_FIELDS_AND_LAYOUT",
+      "provider_feature_flags": [
+        "text_ocr",
+        "selection_marks",
+        "line_item_candidates"
+      ],
+      "processor_version_pinning_posture": "FROZEN_PROCESSOR_VERSION_REQUIRED",
+      "candidate_fact_families": [
+        "RECEIPT_SUPPLIER_NAME_CANDIDATE",
+        "RECEIPT_TRANSACTION_DATE_CANDIDATE",
+        "RECEIPT_TOTAL_AMOUNT_CANDIDATE",
+        "RECEIPT_LINE_ITEM_CANDIDATE"
+      ],
+      "review_policy_ref": "document_extraction_review_thresholds",
+      "lineage_requirements": [
+        "source_object_ref",
+        "source_object_version_ref",
+        "upload_session_ref",
+        "extraction_run_ref",
+        "processor_version_ref",
+        "evidence_item_ref",
+        "candidate_fact_ref",
+        "review_outcome_ref"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "PROMPT/shared_operating_contract_0046_to_0053.md::OCR / document extraction",
+          "rationale": "The shared operating contract requires either a lawful managed workspace or an explicit self-host/not-selected decision with typed rationale."
+        },
+        {
+          "source_ref": "data/analysis/dependency_register.json::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+          "rationale": "The dependency register marks OCR/document extraction as optional vendor selection rather than a preselected runtime dependency."
+        },
+        {
+          "source_ref": "docs/analysis/18_external_services_apis_and_control_plane_dependencies.md::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+          "rationale": "The external dependency pack keeps OCR outside the core engine while still inside broader product scope."
+        },
+        {
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::Class E - DOCUMENTARY_EVIDENCE",
+          "rationale": "Documentary evidence must retain source lineage and extraction metadata before any candidate facts can exist."
+        },
+        {
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::Prohibited promotion rules",
+          "rationale": "Raw OCR text or extracted key-values may not jump directly to canonical truth."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::EvidenceItem",
+          "rationale": "EvidenceItem carries extraction method, confidence, lineage refs, retention tags, and erasure posture."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::CandidateFact",
+          "rationale": "CandidateFact remains the lawful intermediate layer between documentary evidence and any later canonical promotion."
+        },
+        {
+          "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::Frozen request lineage",
+          "rationale": "Extraction lineage must stay bound to the frozen upload session even when stale-request posture is detected."
+        },
+        {
+          "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::Scanner and validation separation",
+          "rationale": "Transfer completion, scan, validation, and attachment confirmation remain distinct before extraction is admissible."
+        },
+        {
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::Secure upload flow",
+          "rationale": "Portal upload posture must surface scan, validation, and attachment state distinctly instead of collapsing them into a generic uploaded state."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::Governed secret and worker boundary",
+          "rationale": "Provider credentials, raw outputs, and worker ingress remain scoped to the governed secret and egress boundary."
+        },
+        {
+          "source_ref": "Algorithm/retention_and_privacy.md::Evidence retention",
+          "rationale": "Evidence-bearing artifacts, normalized extraction output, and derived previews must remain retention-classified and distinguishable."
+        }
+      ],
+      "notes": [
+        "Receipt extraction remains queue-isolated and may not publish trust-ready totals directly into tax workflows.",
+        "Multi-photo stitching is out of scope for the initial profile set."
+      ]
+    },
+    {
+      "profile_ref": "doc_profile_invoice_pdf",
+      "document_class": "SUPPLIER_INVOICE",
+      "activation_state": "READY_ONCE_PROVIDER_SELECTED",
+      "accepted_mime_types": [
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "image/tiff"
+      ],
+      "page_count_limit": 30,
+      "file_size_limit_mb": 40,
+      "language_posture": "EN_PRIMARY_WITH_MIXED_LANGUAGE_REVIEW",
+      "handwriting_posture": "HANDWRITING_ESCALATES_REVIEW",
+      "extraction_family": "INVOICE_FIELDS_AND_LAYOUT",
+      "provider_feature_flags": [
+        "text_ocr",
+        "table_candidates",
+        "key_value_candidates"
+      ],
+      "processor_version_pinning_posture": "FROZEN_PROCESSOR_VERSION_REQUIRED",
+      "candidate_fact_families": [
+        "INVOICE_SUPPLIER_NAME_CANDIDATE",
+        "INVOICE_NUMBER_CANDIDATE",
+        "INVOICE_DATE_CANDIDATE",
+        "INVOICE_TOTAL_AMOUNT_CANDIDATE"
+      ],
+      "review_policy_ref": "document_extraction_review_thresholds",
+      "lineage_requirements": [
+        "source_object_ref",
+        "source_object_version_ref",
+        "upload_session_ref",
+        "extraction_run_ref",
+        "processor_version_ref",
+        "evidence_item_ref",
+        "candidate_fact_ref",
+        "review_outcome_ref"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "PROMPT/shared_operating_contract_0046_to_0053.md::OCR / document extraction",
+          "rationale": "The shared operating contract requires either a lawful managed workspace or an explicit self-host/not-selected decision with typed rationale."
+        },
+        {
+          "source_ref": "data/analysis/dependency_register.json::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+          "rationale": "The dependency register marks OCR/document extraction as optional vendor selection rather than a preselected runtime dependency."
+        },
+        {
+          "source_ref": "docs/analysis/18_external_services_apis_and_control_plane_dependencies.md::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+          "rationale": "The external dependency pack keeps OCR outside the core engine while still inside broader product scope."
+        },
+        {
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::Class E - DOCUMENTARY_EVIDENCE",
+          "rationale": "Documentary evidence must retain source lineage and extraction metadata before any candidate facts can exist."
+        },
+        {
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::Prohibited promotion rules",
+          "rationale": "Raw OCR text or extracted key-values may not jump directly to canonical truth."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::EvidenceItem",
+          "rationale": "EvidenceItem carries extraction method, confidence, lineage refs, retention tags, and erasure posture."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::CandidateFact",
+          "rationale": "CandidateFact remains the lawful intermediate layer between documentary evidence and any later canonical promotion."
+        },
+        {
+          "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::Frozen request lineage",
+          "rationale": "Extraction lineage must stay bound to the frozen upload session even when stale-request posture is detected."
+        },
+        {
+          "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::Scanner and validation separation",
+          "rationale": "Transfer completion, scan, validation, and attachment confirmation remain distinct before extraction is admissible."
+        },
+        {
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::Secure upload flow",
+          "rationale": "Portal upload posture must surface scan, validation, and attachment state distinctly instead of collapsing them into a generic uploaded state."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::Governed secret and worker boundary",
+          "rationale": "Provider credentials, raw outputs, and worker ingress remain scoped to the governed secret and egress boundary."
+        },
+        {
+          "source_ref": "Algorithm/retention_and_privacy.md::Evidence retention",
+          "rationale": "Evidence-bearing artifacts, normalized extraction output, and derived previews must remain retention-classified and distinguishable."
+        }
+      ],
+      "notes": [
+        "Invoice VAT/tax semantics remain candidate-only until later tax-specific normalization decides how to interpret them."
+      ]
+    },
+    {
+      "profile_ref": "doc_profile_bank_statement_pdf",
+      "document_class": "BANK_STATEMENT",
+      "activation_state": "READY_ONCE_PROVIDER_SELECTED",
+      "accepted_mime_types": [
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "image/tiff"
+      ],
+      "page_count_limit": 200,
+      "file_size_limit_mb": 100,
+      "language_posture": "EN_PRIMARY_WITH_MIXED_LANGUAGE_REVIEW",
+      "handwriting_posture": "HANDWRITING_ESCALATES_REVIEW",
+      "extraction_family": "STATEMENT_LAYOUT_AND_TABLES",
+      "provider_feature_flags": [
+        "text_ocr",
+        "table_row_candidates",
+        "page_order_analysis"
+      ],
+      "processor_version_pinning_posture": "FROZEN_PROCESSOR_VERSION_REQUIRED",
+      "candidate_fact_families": [
+        "BANK_STATEMENT_PROVIDER_NAME_CANDIDATE",
+        "BANK_STATEMENT_PERIOD_CANDIDATE",
+        "BANK_STATEMENT_TRANSACTION_ROW_CANDIDATE",
+        "BANK_STATEMENT_BALANCE_CANDIDATE"
+      ],
+      "review_policy_ref": "document_extraction_review_thresholds",
+      "lineage_requirements": [
+        "source_object_ref",
+        "source_object_version_ref",
+        "upload_session_ref",
+        "extraction_run_ref",
+        "processor_version_ref",
+        "evidence_item_ref",
+        "candidate_fact_ref",
+        "review_outcome_ref"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "PROMPT/shared_operating_contract_0046_to_0053.md::OCR / document extraction",
+          "rationale": "The shared operating contract requires either a lawful managed workspace or an explicit self-host/not-selected decision with typed rationale."
+        },
+        {
+          "source_ref": "data/analysis/dependency_register.json::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+          "rationale": "The dependency register marks OCR/document extraction as optional vendor selection rather than a preselected runtime dependency."
+        },
+        {
+          "source_ref": "docs/analysis/18_external_services_apis_and_control_plane_dependencies.md::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+          "rationale": "The external dependency pack keeps OCR outside the core engine while still inside broader product scope."
+        },
+        {
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::Class E - DOCUMENTARY_EVIDENCE",
+          "rationale": "Documentary evidence must retain source lineage and extraction metadata before any candidate facts can exist."
+        },
+        {
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::Prohibited promotion rules",
+          "rationale": "Raw OCR text or extracted key-values may not jump directly to canonical truth."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::EvidenceItem",
+          "rationale": "EvidenceItem carries extraction method, confidence, lineage refs, retention tags, and erasure posture."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::CandidateFact",
+          "rationale": "CandidateFact remains the lawful intermediate layer between documentary evidence and any later canonical promotion."
+        },
+        {
+          "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::Frozen request lineage",
+          "rationale": "Extraction lineage must stay bound to the frozen upload session even when stale-request posture is detected."
+        },
+        {
+          "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::Scanner and validation separation",
+          "rationale": "Transfer completion, scan, validation, and attachment confirmation remain distinct before extraction is admissible."
+        },
+        {
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::Secure upload flow",
+          "rationale": "Portal upload posture must surface scan, validation, and attachment state distinctly instead of collapsing them into a generic uploaded state."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::Governed secret and worker boundary",
+          "rationale": "Provider credentials, raw outputs, and worker ingress remain scoped to the governed secret and egress boundary."
+        },
+        {
+          "source_ref": "Algorithm/retention_and_privacy.md::Evidence retention",
+          "rationale": "Evidence-bearing artifacts, normalized extraction output, and derived previews must remain retention-classified and distinguishable."
+        }
+      ],
+      "notes": [
+        "Table-heavy statements remain review-heavy because silent transaction normalization would collapse evidence law and money-contract safeguards."
+      ]
+    },
+    {
+      "profile_ref": "doc_profile_authority_correspondence_pdf",
+      "document_class": "AUTHORITY_CORRESPONDENCE",
+      "activation_state": "READY_ONCE_PROVIDER_SELECTED",
+      "accepted_mime_types": [
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "image/tiff"
+      ],
+      "page_count_limit": 40,
+      "file_size_limit_mb": 50,
+      "language_posture": "EN_PRIMARY_WITH_MIXED_LANGUAGE_REVIEW",
+      "handwriting_posture": "HANDWRITING_ESCALATES_REVIEW",
+      "extraction_family": "CORRESPONDENCE_LAYOUT_AND_REFERENCE_EXTRACTION",
+      "provider_feature_flags": [
+        "text_ocr",
+        "reference_number_candidates",
+        "date_candidates"
+      ],
+      "processor_version_pinning_posture": "FROZEN_PROCESSOR_VERSION_REQUIRED",
+      "candidate_fact_families": [
+        "CORRESPONDENCE_REFERENCE_CANDIDATE",
+        "CORRESPONDENCE_DATE_CANDIDATE",
+        "CORRESPONDENCE_TEXT_BLOCK_CANDIDATE"
+      ],
+      "review_policy_ref": "document_extraction_review_thresholds",
+      "lineage_requirements": [
+        "source_object_ref",
+        "source_object_version_ref",
+        "upload_session_ref",
+        "extraction_run_ref",
+        "processor_version_ref",
+        "evidence_item_ref",
+        "candidate_fact_ref",
+        "review_outcome_ref"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "PROMPT/shared_operating_contract_0046_to_0053.md::OCR / document extraction",
+          "rationale": "The shared operating contract requires either a lawful managed workspace or an explicit self-host/not-selected decision with typed rationale."
+        },
+        {
+          "source_ref": "data/analysis/dependency_register.json::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+          "rationale": "The dependency register marks OCR/document extraction as optional vendor selection rather than a preselected runtime dependency."
+        },
+        {
+          "source_ref": "docs/analysis/18_external_services_apis_and_control_plane_dependencies.md::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+          "rationale": "The external dependency pack keeps OCR outside the core engine while still inside broader product scope."
+        },
+        {
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::Class E - DOCUMENTARY_EVIDENCE",
+          "rationale": "Documentary evidence must retain source lineage and extraction metadata before any candidate facts can exist."
+        },
+        {
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::Prohibited promotion rules",
+          "rationale": "Raw OCR text or extracted key-values may not jump directly to canonical truth."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::EvidenceItem",
+          "rationale": "EvidenceItem carries extraction method, confidence, lineage refs, retention tags, and erasure posture."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::CandidateFact",
+          "rationale": "CandidateFact remains the lawful intermediate layer between documentary evidence and any later canonical promotion."
+        },
+        {
+          "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::Frozen request lineage",
+          "rationale": "Extraction lineage must stay bound to the frozen upload session even when stale-request posture is detected."
+        },
+        {
+          "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::Scanner and validation separation",
+          "rationale": "Transfer completion, scan, validation, and attachment confirmation remain distinct before extraction is admissible."
+        },
+        {
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::Secure upload flow",
+          "rationale": "Portal upload posture must surface scan, validation, and attachment state distinctly instead of collapsing them into a generic uploaded state."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::Governed secret and worker boundary",
+          "rationale": "Provider credentials, raw outputs, and worker ingress remain scoped to the governed secret and egress boundary."
+        },
+        {
+          "source_ref": "Algorithm/retention_and_privacy.md::Evidence retention",
+          "rationale": "Evidence-bearing artifacts, normalized extraction output, and derived previews must remain retention-classified and distinguishable."
+        }
+      ],
+      "notes": [
+        "Correspondence extraction is for triage and review acceleration only; legal meaning remains downstream and explicit."
+      ]
+    },
+    {
+      "profile_ref": "doc_profile_screenshot_capture",
+      "document_class": "SCREENSHOT_OR_UPLOADED_IMAGE",
+      "activation_state": "READY_ONCE_PROVIDER_SELECTED",
+      "accepted_mime_types": [
+        "image/png",
+        "image/jpeg"
+      ],
+      "page_count_limit": 1,
+      "file_size_limit_mb": 10,
+      "language_posture": "EN_PRIMARY_WITH_MIXED_LANGUAGE_REVIEW",
+      "handwriting_posture": "HANDWRITING_ESCALATES_REVIEW",
+      "extraction_family": "SCREENSHOT_LAYOUT_TEXT_ONLY",
+      "provider_feature_flags": [
+        "text_ocr",
+        "layout_regions"
+      ],
+      "processor_version_pinning_posture": "FROZEN_PROCESSOR_VERSION_REQUIRED",
+      "candidate_fact_families": [
+        "SCREENSHOT_VISIBLE_TEXT_CANDIDATE",
+        "SCREENSHOT_REFERENCE_NUMBER_CANDIDATE"
+      ],
+      "review_policy_ref": "document_extraction_review_thresholds",
+      "lineage_requirements": [
+        "source_object_ref",
+        "source_object_version_ref",
+        "upload_session_ref",
+        "extraction_run_ref",
+        "processor_version_ref",
+        "evidence_item_ref",
+        "candidate_fact_ref",
+        "review_outcome_ref"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "PROMPT/shared_operating_contract_0046_to_0053.md::OCR / document extraction",
+          "rationale": "The shared operating contract requires either a lawful managed workspace or an explicit self-host/not-selected decision with typed rationale."
+        },
+        {
+          "source_ref": "data/analysis/dependency_register.json::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+          "rationale": "The dependency register marks OCR/document extraction as optional vendor selection rather than a preselected runtime dependency."
+        },
+        {
+          "source_ref": "docs/analysis/18_external_services_apis_and_control_plane_dependencies.md::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+          "rationale": "The external dependency pack keeps OCR outside the core engine while still inside broader product scope."
+        },
+        {
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::Class E - DOCUMENTARY_EVIDENCE",
+          "rationale": "Documentary evidence must retain source lineage and extraction metadata before any candidate facts can exist."
+        },
+        {
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::Prohibited promotion rules",
+          "rationale": "Raw OCR text or extracted key-values may not jump directly to canonical truth."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::EvidenceItem",
+          "rationale": "EvidenceItem carries extraction method, confidence, lineage refs, retention tags, and erasure posture."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::CandidateFact",
+          "rationale": "CandidateFact remains the lawful intermediate layer between documentary evidence and any later canonical promotion."
+        },
+        {
+          "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::Frozen request lineage",
+          "rationale": "Extraction lineage must stay bound to the frozen upload session even when stale-request posture is detected."
+        },
+        {
+          "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::Scanner and validation separation",
+          "rationale": "Transfer completion, scan, validation, and attachment confirmation remain distinct before extraction is admissible."
+        },
+        {
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::Secure upload flow",
+          "rationale": "Portal upload posture must surface scan, validation, and attachment state distinctly instead of collapsing them into a generic uploaded state."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::Governed secret and worker boundary",
+          "rationale": "Provider credentials, raw outputs, and worker ingress remain scoped to the governed secret and egress boundary."
+        },
+        {
+          "source_ref": "Algorithm/retention_and_privacy.md::Evidence retention",
+          "rationale": "Evidence-bearing artifacts, normalized extraction output, and derived previews must remain retention-classified and distinguishable."
+        }
+      ],
+      "notes": [
+        "Screenshot extraction defaults to layout/text retention rather than automatic candidate promotion for decision-bearing content."
+      ]
+    },
+    {
+      "profile_ref": "doc_profile_handwritten_note",
+      "document_class": "HANDWRITTEN_NOTE",
+      "activation_state": "READY_ONCE_PROVIDER_SELECTED",
+      "accepted_mime_types": [
+        "application/pdf",
+        "image/jpeg",
+        "image/png"
+      ],
+      "page_count_limit": 6,
+      "file_size_limit_mb": 20,
+      "language_posture": "EN_PRIMARY_WITH_MIXED_LANGUAGE_REVIEW",
+      "handwriting_posture": "HANDWRITING_ALLOWED_WITH_REVIEW",
+      "extraction_family": "HANDWRITING_LAYOUT_TEXT_ONLY",
+      "provider_feature_flags": [
+        "text_ocr",
+        "language_detection"
+      ],
+      "processor_version_pinning_posture": "FROZEN_PROCESSOR_VERSION_REQUIRED",
+      "candidate_fact_families": [
+        "HANDWRITTEN_NOTE_TEXT_CANDIDATE",
+        "HANDWRITTEN_NOTE_DATE_CANDIDATE"
+      ],
+      "review_policy_ref": "document_extraction_review_thresholds",
+      "lineage_requirements": [
+        "source_object_ref",
+        "source_object_version_ref",
+        "upload_session_ref",
+        "extraction_run_ref",
+        "processor_version_ref",
+        "evidence_item_ref",
+        "candidate_fact_ref",
+        "review_outcome_ref"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "PROMPT/shared_operating_contract_0046_to_0053.md::OCR / document extraction",
+          "rationale": "The shared operating contract requires either a lawful managed workspace or an explicit self-host/not-selected decision with typed rationale."
+        },
+        {
+          "source_ref": "data/analysis/dependency_register.json::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+          "rationale": "The dependency register marks OCR/document extraction as optional vendor selection rather than a preselected runtime dependency."
+        },
+        {
+          "source_ref": "docs/analysis/18_external_services_apis_and_control_plane_dependencies.md::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+          "rationale": "The external dependency pack keeps OCR outside the core engine while still inside broader product scope."
+        },
+        {
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::Class E - DOCUMENTARY_EVIDENCE",
+          "rationale": "Documentary evidence must retain source lineage and extraction metadata before any candidate facts can exist."
+        },
+        {
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::Prohibited promotion rules",
+          "rationale": "Raw OCR text or extracted key-values may not jump directly to canonical truth."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::EvidenceItem",
+          "rationale": "EvidenceItem carries extraction method, confidence, lineage refs, retention tags, and erasure posture."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::CandidateFact",
+          "rationale": "CandidateFact remains the lawful intermediate layer between documentary evidence and any later canonical promotion."
+        },
+        {
+          "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::Frozen request lineage",
+          "rationale": "Extraction lineage must stay bound to the frozen upload session even when stale-request posture is detected."
+        },
+        {
+          "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::Scanner and validation separation",
+          "rationale": "Transfer completion, scan, validation, and attachment confirmation remain distinct before extraction is admissible."
+        },
+        {
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::Secure upload flow",
+          "rationale": "Portal upload posture must surface scan, validation, and attachment state distinctly instead of collapsing them into a generic uploaded state."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::Governed secret and worker boundary",
+          "rationale": "Provider credentials, raw outputs, and worker ingress remain scoped to the governed secret and egress boundary."
+        },
+        {
+          "source_ref": "Algorithm/retention_and_privacy.md::Evidence retention",
+          "rationale": "Evidence-bearing artifacts, normalized extraction output, and derived previews must remain retention-classified and distinguishable."
+        }
+      ],
+      "notes": [
+        "Handwritten notes always remain review-centric because legibility drift and contextual ambiguity are expected."
+      ]
+    },
+    {
+      "profile_ref": "doc_profile_mixed_language_bundle",
+      "document_class": "MIXED_LANGUAGE_MULTI_DOCUMENT_BUNDLE",
+      "activation_state": "NOT_ENABLED_IN_INITIAL_SCOPE",
+      "accepted_mime_types": [
+        "application/pdf",
+        "image/tiff"
+      ],
+      "page_count_limit": 300,
+      "file_size_limit_mb": 150,
+      "language_posture": "NOT_ENABLED_IN_INITIAL_SCOPE",
+      "handwriting_posture": "NOT_ENABLED_IN_INITIAL_SCOPE",
+      "extraction_family": "HANDWRITING_LAYOUT_TEXT_ONLY",
+      "provider_feature_flags": [
+        "document_splitter",
+        "language_detection"
+      ],
+      "processor_version_pinning_posture": "PROVIDER_AND_MODEL_POLICY_NOT_FROZEN",
+      "candidate_fact_families": [
+        "MIXED_LANGUAGE_TEXT_BLOCK_CANDIDATE"
+      ],
+      "review_policy_ref": "document_extraction_review_thresholds",
+      "lineage_requirements": [
+        "source_object_ref",
+        "source_object_version_ref",
+        "upload_session_ref",
+        "extraction_run_ref",
+        "processor_version_ref",
+        "evidence_item_ref",
+        "candidate_fact_ref",
+        "review_outcome_ref"
+      ],
+      "source_refs": [
+        {
+          "source_ref": "PROMPT/shared_operating_contract_0046_to_0053.md::OCR / document extraction",
+          "rationale": "The shared operating contract requires either a lawful managed workspace or an explicit self-host/not-selected decision with typed rationale."
+        },
+        {
+          "source_ref": "data/analysis/dependency_register.json::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+          "rationale": "The dependency register marks OCR/document extraction as optional vendor selection rather than a preselected runtime dependency."
+        },
+        {
+          "source_ref": "docs/analysis/18_external_services_apis_and_control_plane_dependencies.md::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+          "rationale": "The external dependency pack keeps OCR outside the core engine while still inside broader product scope."
+        },
+        {
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::Class E - DOCUMENTARY_EVIDENCE",
+          "rationale": "Documentary evidence must retain source lineage and extraction metadata before any candidate facts can exist."
+        },
+        {
+          "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::Prohibited promotion rules",
+          "rationale": "Raw OCR text or extracted key-values may not jump directly to canonical truth."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::EvidenceItem",
+          "rationale": "EvidenceItem carries extraction method, confidence, lineage refs, retention tags, and erasure posture."
+        },
+        {
+          "source_ref": "Algorithm/data_model.md::CandidateFact",
+          "rationale": "CandidateFact remains the lawful intermediate layer between documentary evidence and any later canonical promotion."
+        },
+        {
+          "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::Frozen request lineage",
+          "rationale": "Extraction lineage must stay bound to the frozen upload session even when stale-request posture is detected."
+        },
+        {
+          "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::Scanner and validation separation",
+          "rationale": "Transfer completion, scan, validation, and attachment confirmation remain distinct before extraction is admissible."
+        },
+        {
+          "source_ref": "Algorithm/customer_client_portal_experience_contract.md::Secure upload flow",
+          "rationale": "Portal upload posture must surface scan, validation, and attachment state distinctly instead of collapsing them into a generic uploaded state."
+        },
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::Governed secret and worker boundary",
+          "rationale": "Provider credentials, raw outputs, and worker ingress remain scoped to the governed secret and egress boundary."
+        },
+        {
+          "source_ref": "Algorithm/retention_and_privacy.md::Evidence retention",
+          "rationale": "Evidence-bearing artifacts, normalized extraction output, and derived previews must remain retention-classified and distinguishable."
+        }
+      ],
+      "notes": [
+        "Mixed-language multi-document bundles remain intentionally blocked until a provider/runtime and splitter policy are selected explicitly."
+      ]
+    }
+  ],
+  "source_refs": [
+    {
+      "source_ref": "PROMPT/shared_operating_contract_0046_to_0053.md::OCR / document extraction",
+      "rationale": "The shared operating contract requires either a lawful managed workspace or an explicit self-host/not-selected decision with typed rationale."
+    },
+    {
+      "source_ref": "data/analysis/dependency_register.json::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+      "rationale": "The dependency register marks OCR/document extraction as optional vendor selection rather than a preselected runtime dependency."
+    },
+    {
+      "source_ref": "docs/analysis/18_external_services_apis_and_control_plane_dependencies.md::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+      "rationale": "The external dependency pack keeps OCR outside the core engine while still inside broader product scope."
+    },
+    {
+      "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::Class E - DOCUMENTARY_EVIDENCE",
+      "rationale": "Documentary evidence must retain source lineage and extraction metadata before any candidate facts can exist."
+    },
+    {
+      "source_ref": "Algorithm/canonical_source_and_evidence_taxonomy.md::Prohibited promotion rules",
+      "rationale": "Raw OCR text or extracted key-values may not jump directly to canonical truth."
+    },
+    {
+      "source_ref": "Algorithm/data_model.md::EvidenceItem",
+      "rationale": "EvidenceItem carries extraction method, confidence, lineage refs, retention tags, and erasure posture."
+    },
+    {
+      "source_ref": "Algorithm/data_model.md::CandidateFact",
+      "rationale": "CandidateFact remains the lawful intermediate layer between documentary evidence and any later canonical promotion."
+    },
+    {
+      "source_ref": "Algorithm/upload_session_request_binding_and_rebase_contract.md::Frozen request lineage",
+      "rationale": "Extraction lineage must stay bound to the frozen upload session even when stale-request posture is detected."
+    },
+    {
+      "source_ref": "Algorithm/upload_session_recovery_harness_contract.md::Scanner and validation separation",
+      "rationale": "Transfer completion, scan, validation, and attachment confirmation remain distinct before extraction is admissible."
+    },
+    {
+      "source_ref": "Algorithm/customer_client_portal_experience_contract.md::Secure upload flow",
+      "rationale": "Portal upload posture must surface scan, validation, and attachment state distinctly instead of collapsing them into a generic uploaded state."
+    },
+    {
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::Governed secret and worker boundary",
+      "rationale": "Provider credentials, raw outputs, and worker ingress remain scoped to the governed secret and egress boundary."
+    },
+    {
+      "source_ref": "Algorithm/retention_and_privacy.md::Evidence retention",
+      "rationale": "Evidence-bearing artifacts, normalized extraction output, and derived previews must remain retention-classified and distinguishable."
+    }
+  ],
+  "typed_gaps": [
+    "SELF_HOST_DECISION_REQUIRED: profiles are policy-complete but not yet executable because no provider/runtime is frozen.",
+    "NOT_ENABLED_IN_INITIAL_SCOPE: mixed-language multi-document bundle handling remains intentionally blocked."
+  ],
+  "notes": [
+    "Profiles freeze the product-side documentary-evidence contract independently from any later provider choice.",
+    "Every profile is async-only and upload-gate-aware."
+  ]
+}
