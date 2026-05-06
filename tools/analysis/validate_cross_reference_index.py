@@ -89,14 +89,30 @@ def main() -> int:
         if row["family_kind"] not in ALLOWED_FAMILY_KINDS:
             fail(f"Unexpected family_kind for {row['logical_family_id']}: {row['family_kind']}")
         if row["coverage_status"] not in ALLOWED_COVERAGE_STATUS:
-            fail(f"Unexpected coverage_status for {row['logical_family_id']}: {row['coverage_status']}")
-        if any(path_from_ref(ref) in builder.HISTORICAL_CONTEXT_PATHS for ref in row["authoritative_prose_refs"]):
-            fail(f"Historical closure doc leaked into authoritative_prose_refs for {row['logical_family_id']}.")
-        if any(path_from_ref(ref) not in builder.HISTORICAL_CONTEXT_PATHS for ref in row["historical_closure_refs"]):
-            fail(f"Non-historical path leaked into historical_closure_refs for {row['logical_family_id']}.")
+            fail(
+                f"Unexpected coverage_status for {row['logical_family_id']}: {row['coverage_status']}"
+            )
+        if any(
+            path_from_ref(ref) in builder.HISTORICAL_CONTEXT_PATHS
+            for ref in row["authoritative_prose_refs"]
+        ):
+            fail(
+                f"Historical closure doc leaked into authoritative_prose_refs for {row['logical_family_id']}."
+            )
+        if any(
+            path_from_ref(ref) not in builder.HISTORICAL_CONTEXT_PATHS
+            for ref in row["historical_closure_refs"]
+        ):
+            fail(
+                f"Non-historical path leaked into historical_closure_refs for {row['logical_family_id']}."
+            )
 
     graph_row_ids = extract_graph_row_ids(graph_text)
-    missing_graph_ids = sorted(builder.sanitize_id(row_id) for row_id in row_ids if builder.sanitize_id(row_id) not in graph_row_ids)
+    missing_graph_ids = sorted(
+        builder.sanitize_id(row_id)
+        for row_id in row_ids
+        if builder.sanitize_id(row_id) not in graph_row_ids
+    )
     if missing_graph_ids:
         fail(f"Mermaid graph is missing logical family nodes: {missing_graph_ids[:10]}")
 
@@ -126,42 +142,67 @@ def main() -> int:
 
     custom_validators, duplicate_validators, _function_symbols = builder.parse_validator_symbols()
     expected_validator_ids = {"VAL_" + builder.sanitize_id(kind) for kind in custom_validators}
-    actual_validator_ids = {row["logical_family_id"] for row in rows if row["family_kind"] == "validator_family"}
+    actual_validator_ids = {
+        row["logical_family_id"] for row in rows if row["family_kind"] == "validator_family"
+    }
     missing_validator_ids = sorted(expected_validator_ids - actual_validator_ids)
     if missing_validator_ids:
         fail(f"Custom-validator rows missing from the index: {missing_validator_ids[:10]}")
 
     guard_symbols, _guard_function_symbols = builder.parse_guard_symbols()
-    expected_guard_ids = {"GRD_" + builder.sanitize_id(symbol.name.removeprefix("check_")) for symbol in guard_symbols}
-    actual_guard_ids = {row["logical_family_id"] for row in rows if row["family_kind"] == "forensic_guard_family"}
+    expected_guard_ids = {
+        "GRD_" + builder.sanitize_id(symbol.name.removeprefix("check_")) for symbol in guard_symbols
+    }
+    actual_guard_ids = {
+        row["logical_family_id"] for row in rows if row["family_kind"] == "forensic_guard_family"
+    }
     missing_guard_ids = sorted(expected_guard_ids - actual_guard_ids)
     if missing_guard_ids:
         fail(f"Forensic-guard rows missing from the index: {missing_guard_ids[:10]}")
 
     for row in rows:
-        if row["family_kind"] == "validator_family" and row["logical_family_id"] in expected_validator_ids:
+        if (
+            row["family_kind"] == "validator_family"
+            and row["logical_family_id"] in expected_validator_ids
+        ):
             if not row["authoritative_prose_refs"] and not row["gap_notes"]:
-                fail(f"Custom validator lacks both prose ownership and explicit gap notes: {row['logical_family_id']}")
+                fail(
+                    f"Custom validator lacks both prose ownership and explicit gap notes: {row['logical_family_id']}"
+                )
         if row["family_kind"] == "forensic_guard_family":
-            if row["logical_family_id"] in expected_guard_ids and not row["authoritative_prose_refs"] and not row["gap_notes"]:
-                fail(f"Forensic guard lacks both prose ownership and explicit gap notes: {row['logical_family_id']}")
+            if (
+                row["logical_family_id"] in expected_guard_ids
+                and not row["authoritative_prose_refs"]
+                and not row["gap_notes"]
+            ):
+                fail(
+                    f"Forensic guard lacks both prose ownership and explicit gap notes: {row['logical_family_id']}"
+                )
 
     object_rows = [row for row in rows if row["family_kind"] == "object_family"]
     if len(object_payload["object_families"]) != len(object_rows):
-        fail("Object enforcement map row count does not match object-family rows in the main index.")
+        fail(
+            "Object enforcement map row count does not match object-family rows in the main index."
+        )
 
     if gap_payload["duplicate_custom_validator_keys"] != duplicate_validators:
-        fail("Gap register duplicate_custom_validator_keys drifted from live CUSTOM_VALIDATORS parsing.")
+        fail(
+            "Gap register duplicate_custom_validator_keys drifted from live CUSTOM_VALIDATORS parsing."
+        )
 
     validator_anchor_ids = set(gap_payload["validator_families_without_prose_anchor"])
     for row in rows:
         if row["logical_family_id"] in validator_anchor_ids and row["authoritative_prose_refs"]:
-            fail(f"Gap register still marks a validator as anchorless after it gained prose refs: {row['logical_family_id']}")
+            fail(
+                f"Gap register still marks a validator as anchorless after it gained prose refs: {row['logical_family_id']}"
+            )
 
     guard_anchor_ids = set(gap_payload["forensic_guard_families_without_prose_anchor"])
     for row in rows:
         if row["logical_family_id"] in guard_anchor_ids and row["authoritative_prose_refs"]:
-            fail(f"Gap register still marks a guard as anchorless after it gained prose refs: {row['logical_family_id']}")
+            fail(
+                f"Gap register still marks a guard as anchorless after it gained prose refs: {row['logical_family_id']}"
+            )
 
     summary = {
         "status": "PASS",

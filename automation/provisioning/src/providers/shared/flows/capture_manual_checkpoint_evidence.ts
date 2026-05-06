@@ -61,10 +61,7 @@ export type ManualCheckpointFamily =
   | "PORTAL_POLICY"
   | "UNKNOWN_REVIEW";
 
-export type CheckpointSeverity =
-  | "REVIEW_REQUIRED"
-  | "ACTION_REQUIRED"
-  | "BLOCKING";
+export type CheckpointSeverity = "REVIEW_REQUIRED" | "ACTION_REQUIRED" | "BLOCKING";
 
 export interface SourceRef {
   source_ref: string;
@@ -99,14 +96,10 @@ export interface BlockedPortalResumePolicyRow {
   applies_to_reason_codes: ManualPortalCheckpointReasonCode[];
   human_actor_role: string;
   expected_post_checkpoint_route_requirement: string;
-  session_revalidation_requirement:
-    | "REQUIRED"
-    | "REQUIRED_AND_FAIL_CLOSED_IF_SESSION_ROTATED";
+  session_revalidation_requirement: "REQUIRED" | "REQUIRED_AND_FAIL_CLOSED_IF_SESSION_ROTATED";
   selector_drift_check_requirement: "REQUIRED";
   safe_noop_verification_step: string;
-  timeout_posture:
-    | "FAIL_CLOSED_ON_EXPIRY"
-    | "FAIL_CLOSED_ON_ROUTE_OR_SESSION_MISMATCH";
+  timeout_posture: "FAIL_CLOSED_ON_EXPIRY" | "FAIL_CLOSED_ON_ROUTE_OR_SESSION_MISMATCH";
   forbidden_actions: string[];
   source_refs: SourceRef[];
   notes: string[];
@@ -161,14 +154,10 @@ export interface ManualPortalCheckpointResumeRequirements {
   resume_policy_ref: string;
   human_actor_role: string;
   expected_post_checkpoint_route_ref: string;
-  session_revalidation_requirement:
-    | "REQUIRED"
-    | "REQUIRED_AND_FAIL_CLOSED_IF_SESSION_ROTATED";
+  session_revalidation_requirement: "REQUIRED" | "REQUIRED_AND_FAIL_CLOSED_IF_SESSION_ROTATED";
   selector_drift_check_requirement: "REQUIRED";
   safe_noop_verification_step: string;
-  timeout_posture:
-    | "FAIL_CLOSED_ON_EXPIRY"
-    | "FAIL_CLOSED_ON_ROUTE_OR_SESSION_MISMATCH";
+  timeout_posture: "FAIL_CLOSED_ON_EXPIRY" | "FAIL_CLOSED_ON_ROUTE_OR_SESSION_MISMATCH";
   forbidden_actions: string[];
   resume_snapshot_ref_or_null: string | null;
 }
@@ -217,11 +206,7 @@ export interface ManualPortalCheckpointRecord {
 
 export interface ManualCheckpointEvidenceArtifactRow {
   artifact_ref: string;
-  artifact_kind:
-    | "MASKED_SCREENSHOT"
-    | "DOM_SIGNATURE"
-    | "TRACE_REFERENCE"
-    | "SAFE_COPY_SNAPSHOT";
+  artifact_kind: "MASKED_SCREENSHOT" | "DOM_SIGNATURE" | "TRACE_REFERENCE" | "SAFE_COPY_SNAPSHOT";
   capture_mode: "REDACTED" | "SUPPRESSED" | "HASH_ONLY";
   relative_path_or_null: string | null;
   summary: string;
@@ -357,8 +342,7 @@ function sharedSourceRefs(): SourceRef[] {
         "The shared operating contract requires manual checkpoints to persist durable artifacts, sanitized evidence, and explicit resume rules.",
     },
     {
-      source_ref:
-        "Algorithm/actor_and_authority_model.md::3.11 Non-delegable and step-up actions",
+      source_ref: "Algorithm/actor_and_authority_model.md::3.11 Non-delegable and step-up actions",
       rationale:
         "Step-up, CAPTCHA, and human-confirmation actions must fail closed and may not be bypassed by a machine actor.",
     },
@@ -381,8 +365,7 @@ function sharedSourceRefs(): SourceRef[] {
         "Checkpoint atlases and resume diagnostics must remain automation-verifiable, keyboard reachable, and stable under reduced motion.",
     },
     {
-      source_ref:
-        "Algorithm/observability_and_audit_contract.md::audit-vs-telemetry separation",
+      source_ref: "Algorithm/observability_and_audit_contract.md::audit-vs-telemetry separation",
       rationale:
         "Checkpoint artifacts require durable audit-safe structure instead of being buried in ephemeral telemetry noise.",
     },
@@ -402,20 +385,12 @@ function createReasonCodeRows(): ManualCheckpointReasonCodeRow[] {
       default_severity: "ACTION_REQUIRED",
       mapped_core_reason: "CAPTCHA",
       default_resume_policy_ref: "resume.same-route.after-human-verification",
-      portal_safe_summary:
-        "Human verification is required before the portal session can continue.",
+      portal_safe_summary: "Human verification is required before the portal session can continue.",
       operator_summary:
         "Anti-bot or auth-challenge screen detected; automation must stop and await human verification.",
-      detection_phrases: [
-        "captcha",
-        "verify you're human",
-        "auth challenge",
-        "security check",
-      ],
+      detection_phrases: ["captcha", "verify you're human", "auth challenge", "security check"],
       source_refs: sourceRefs,
-      notes: [
-        "CAPTCHA and Auth Challenge remain provider-controlled and non-bypassable.",
-      ],
+      notes: ["CAPTCHA and Auth Challenge remain provider-controlled and non-bypassable."],
     },
     {
       reason_code: "MFA_REQUIRED",
@@ -425,8 +400,7 @@ function createReasonCodeRows(): ManualCheckpointReasonCodeRow[] {
       default_resume_policy_ref: "resume.verify-session-and-route.before-mutation",
       portal_safe_summary:
         "A provider-controlled sign-in factor must be completed before the session can continue.",
-      operator_summary:
-        "A one-time code, authenticator prompt, or equivalent MFA gate is active.",
+      operator_summary: "A one-time code, authenticator prompt, or equivalent MFA gate is active.",
       detection_phrases: [
         "2-step verification",
         "authenticator app",
@@ -434,9 +408,7 @@ function createReasonCodeRows(): ManualCheckpointReasonCodeRow[] {
         "multi-factor authentication",
       ],
       source_refs: sourceRefs,
-      notes: [
-        "MFA completion does not authorize stale pre-step-up mutations to replay.",
-      ],
+      notes: ["MFA completion does not authorize stale pre-step-up mutations to replay."],
     },
     {
       reason_code: "STEP_UP_REQUIRED",
@@ -497,9 +469,7 @@ function createReasonCodeRows(): ManualCheckpointReasonCodeRow[] {
         "push notification",
       ],
       source_refs: sourceRefs,
-      notes: [
-        "Device approval may rotate the session or relocate the post-checkpoint route.",
-      ],
+      notes: ["Device approval may rotate the session or relocate the post-checkpoint route."],
     },
     {
       reason_code: "SUSPICIOUS_LOGIN_REVIEW",
@@ -553,12 +523,7 @@ function createReasonCodeRows(): ManualCheckpointReasonCodeRow[] {
         "The provider blocked the current attempt and requires policy review before retrying.",
       operator_summary:
         "Provider policy, rate limit, or account posture blocked the flow before human completion.",
-      detection_phrases: [
-        "too many attempts",
-        "policy block",
-        "cannot continue",
-        "rate limit",
-      ],
+      detection_phrases: ["too many attempts", "policy block", "cannot continue", "rate limit"],
       source_refs: sourceRefs,
       notes: [
         "Provider policy blocks may expire or require administrative changes before any safe retry.",
@@ -642,8 +607,7 @@ export function createBlockedPortalResumePolicy(): BlockedPortalResumePolicy {
         human_actor_role: "PROVIDER_VERIFIED_OPERATOR",
         expected_post_checkpoint_route_requirement:
           "POST_CHECKPOINT_ROUTE_MUST_MATCH_EXPECTED_SUCCESSOR_OR_FAIL_CLOSED",
-        session_revalidation_requirement:
-          "REQUIRED_AND_FAIL_CLOSED_IF_SESSION_ROTATED",
+        session_revalidation_requirement: "REQUIRED_AND_FAIL_CLOSED_IF_SESSION_ROTATED",
         selector_drift_check_requirement: "REQUIRED",
         safe_noop_verification_step:
           "Re-read portal heading, route fingerprint, and signed-in session marker before any mutating action resumes.",
@@ -660,15 +624,11 @@ export function createBlockedPortalResumePolicy(): BlockedPortalResumePolicy {
       },
       {
         resume_policy_ref: "resume.fail-closed.reopen-after-policy-change",
-        applies_to_reason_codes: [
-          "PORTAL_POLICY_BLOCK",
-          "UNKNOWN_CHALLENGE_REVIEW_REQUIRED",
-        ],
+        applies_to_reason_codes: ["PORTAL_POLICY_BLOCK", "UNKNOWN_CHALLENGE_REVIEW_REQUIRED"],
         human_actor_role: "SECURITY_OR_PLATFORM_OPERATOR",
         expected_post_checkpoint_route_requirement:
           "REOPEN_FROM_KNOWN_ENTRY_ROUTE_ONLY_AFTER_POLICY_OR_REVIEW_CHANGE",
-        session_revalidation_requirement:
-          "REQUIRED_AND_FAIL_CLOSED_IF_SESSION_ROTATED",
+        session_revalidation_requirement: "REQUIRED_AND_FAIL_CLOSED_IF_SESSION_ROTATED",
         selector_drift_check_requirement: "REQUIRED",
         safe_noop_verification_step:
           "Restart from the entry route, verify the previous block is cleared, then adopt the current page state before any mutation.",
@@ -722,11 +682,7 @@ export function createCheckpointRedactionPolicy(): CheckpointRedactionPolicy {
         capture_mode: "HASH_ONLY",
         applies_when:
           "A portal checkpoint is open and DOM structure is needed only for route/signature verification.",
-        omitted_or_masked_targets: [
-          "raw innerHTML",
-          "raw form values",
-          "challenge responses",
-        ],
+        omitted_or_masked_targets: ["raw innerHTML", "raw form values", "challenge responses"],
         source_refs: sourceRefs,
         notes: [
           "The governed posture stores DOM hashes, not raw blocked-portal DOM captures, by default.",
@@ -736,8 +692,7 @@ export function createCheckpointRedactionPolicy(): CheckpointRedactionPolicy {
         rule_ref: "trace.suppressed-by-default",
         artifact_kind: "TRACE_REFERENCE",
         capture_mode: "SUPPRESSED",
-        applies_when:
-          "Challenge screens are present or secret-entry suppression mode is active.",
+        applies_when: "Challenge screens are present or secret-entry suppression mode is active.",
         omitted_or_masked_targets: [
           "Playwright trace archive",
           "network payloads",
@@ -760,21 +715,14 @@ export function createCheckpointRedactionPolicy(): CheckpointRedactionPolicy {
           "device nicknames tagged as sensitive",
         ],
         source_refs: sourceRefs,
-        notes: [
-          "Safe copy snapshots are retained only after redaction and truncation.",
-        ],
+        notes: ["Safe copy snapshots are retained only after redaction and truncation."],
       },
       {
         rule_ref: "browser-storage.reference-only",
         artifact_kind: "BROWSER_STORAGE",
         capture_mode: "REFERENCE_ONLY",
-        applies_when:
-          "A resume snapshot references browser storage state or session materials.",
-        omitted_or_masked_targets: [
-          "cookies",
-          "local storage values",
-          "storage-state JSON bodies",
-        ],
+        applies_when: "A resume snapshot references browser storage state or session materials.",
+        omitted_or_masked_targets: ["cookies", "local storage values", "storage-state JSON bodies"],
         source_refs: sourceRefs,
         notes: [
           "Browser storage remains secret-boundary material and may only appear as a vault or resume ref.",
@@ -789,30 +737,19 @@ export function createCheckpointRedactionPolicy(): CheckpointRedactionPolicy {
   };
 }
 
-function reasonCodeMap(): Map<
-  ManualPortalCheckpointReasonCode,
-  ManualCheckpointReasonCodeRow
-> {
+function reasonCodeMap(): Map<ManualPortalCheckpointReasonCode, ManualCheckpointReasonCodeRow> {
   return new Map(
-    createManualCheckpointReasonCodes().reason_rows.map((row) => [
-      row.reason_code,
-      row,
-    ]),
+    createManualCheckpointReasonCodes().reason_rows.map((row) => [row.reason_code, row]),
   );
 }
 
 function resumePolicyMap(): Map<string, BlockedPortalResumePolicyRow> {
   return new Map(
-    createBlockedPortalResumePolicy().policy_rows.map((row) => [
-      row.resume_policy_ref,
-      row,
-    ]),
+    createBlockedPortalResumePolicy().policy_rows.map((row) => [row.resume_policy_ref, row]),
   );
 }
 
-export function detectCheckpointReasonCodeFromText(
-  text: string,
-): ManualPortalCheckpointReasonCode {
+export function detectCheckpointReasonCodeFromText(text: string): ManualPortalCheckpointReasonCode {
   const normalized = text.toLowerCase();
   for (const row of createManualCheckpointReasonCodes().reason_rows) {
     if (
@@ -821,20 +758,14 @@ export function detectCheckpointReasonCodeFromText(
     ) {
       continue;
     }
-    if (
-      row.detection_phrases.some((phrase) =>
-        normalized.includes(phrase.toLowerCase()),
-      )
-    ) {
+    if (row.detection_phrases.some((phrase) => normalized.includes(phrase.toLowerCase()))) {
       return row.reason_code;
     }
   }
   return "UNKNOWN_CHALLENGE_REVIEW_REQUIRED";
 }
 
-function createCheckpointRedactionRules(
-  additionalSensitiveValues: readonly string[],
-) {
+function createCheckpointRedactionRules(additionalSensitiveValues: readonly string[]) {
   return [
     ...createDefaultRedactionRules(
       additionalSensitiveValues.filter((value) => value.trim().length > 0),
@@ -850,8 +781,7 @@ function createCheckpointRedactionRules(
       id: "ipv4-address",
       category: "PII" as const,
       kind: "REGEX" as const,
-      pattern:
-        /\b(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\.(?:25[0-5]|2[0-4]\d|1?\d?\d)){3}\b/g,
+      pattern: /\b(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\.(?:25[0-5]|2[0-4]\d|1?\d?\d)){3}\b/g,
       replacement: "[REDACTED_IP]",
     },
   ];
@@ -871,10 +801,7 @@ async function persistJson(filePath: string, payload: unknown): Promise<void> {
 }
 
 function evidenceManifestPathFor(checkpointRecordPath: string): string {
-  return path.join(
-    path.dirname(checkpointRecordPath),
-    "manual_checkpoint_evidence_manifest.json",
-  );
+  return path.join(path.dirname(checkpointRecordPath), "manual_checkpoint_evidence_manifest.json");
 }
 
 function relativePathOrNull(baseDir: string, targetPath: string | null): string | null {
@@ -889,16 +816,12 @@ async function readPageSignals(page: Page) {
   const pageTitle = await page.title();
   const bodyText = await body.innerText();
   const pageHtml = await page.content();
-  const routeRefAttr =
-    (await body.getAttribute("data-route-ref")) ?? "provider.portal.blocked";
-  const pageIdentityAttr =
-    (await body.getAttribute("data-page-identity")) ?? "blocked-portal";
+  const routeRefAttr = (await body.getAttribute("data-route-ref")) ?? "provider.portal.blocked";
+  const pageIdentityAttr = (await body.getAttribute("data-page-identity")) ?? "blocked-portal";
   const reasonCodeAttr = await body.getAttribute("data-checkpoint-reason-code");
   const expectedPostRouteAttr =
-    (await body.getAttribute("data-post-checkpoint-route")) ??
-    "provider.portal.post-checkpoint";
-  const challengeHeadline =
-    (await body.getAttribute("data-challenge-headline")) ?? pageTitle;
+    (await body.getAttribute("data-post-checkpoint-route")) ?? "provider.portal.post-checkpoint";
+  const challengeHeadline = (await body.getAttribute("data-challenge-headline")) ?? pageTitle;
 
   return {
     pageTitle,
@@ -922,19 +845,14 @@ function resolveReasonCode(
   }
   if (
     explicit &&
-    REQUIRED_MANUAL_CHECKPOINT_REASON_CODES.includes(
-      explicit as ManualPortalCheckpointReasonCode,
-    )
+    REQUIRED_MANUAL_CHECKPOINT_REASON_CODES.includes(explicit as ManualPortalCheckpointReasonCode)
   ) {
     return explicit as ManualPortalCheckpointReasonCode;
   }
   return detectCheckpointReasonCodeFromText(bodyText);
 }
 
-function safeRouteFingerprint(
-  urlValue: string,
-  pageIdentityRef: string,
-): string {
+function safeRouteFingerprint(urlValue: string, pageIdentityRef: string): string {
   try {
     const parsed = new URL(urlValue);
     const queryKeys = [...parsed.searchParams.keys()].sort().join(",");
@@ -944,10 +862,9 @@ function safeRouteFingerprint(
   }
 }
 
-function checkpointSeverityLabel(severity: CheckpointSeverity):
-  | "Blocking"
-  | "Action required"
-  | "Review required" {
+function checkpointSeverityLabel(
+  severity: CheckpointSeverity,
+): "Blocking" | "Action required" | "Review required" {
   if (severity === "BLOCKING") {
     return "Blocking";
   }
@@ -964,10 +881,7 @@ function buildPortalCheckpointAtlasScenario(
   providerMonogram: "HMRC" | "IDP",
   environmentLabel: string,
   reasonCode: ManualPortalCheckpointReasonCode,
-  resumeReadinessLabel:
-    | "Awaiting human step"
-    | "Verify before continue"
-    | "Expired until reopened",
+  resumeReadinessLabel: "Awaiting human step" | "Verify before continue" | "Expired until reopened",
   summary: string,
   automationPath: string[],
   checkpointRows: string[],
@@ -985,9 +899,7 @@ function buildPortalCheckpointAtlasScenario(
   const toRows = (values: string[]): PortalCheckpointTimelineRow[] =>
     values.map((value, index) => ({
       label: `${index + 1}. ${value.split(":")[0]}`,
-      detail: value.includes(":")
-        ? value.slice(value.indexOf(":") + 1).trim()
-        : value,
+      detail: value.includes(":") ? value.slice(value.indexOf(":") + 1).trim() : value,
     }));
 
   return {
@@ -997,9 +909,7 @@ function buildPortalCheckpointAtlasScenario(
     provider_monogram: providerMonogram,
     environment_label: environmentLabel,
     checkpoint_reason_code: reasonCode,
-    checkpoint_severity_label: checkpointSeverityLabel(
-      reasonRow.default_severity,
-    ),
+    checkpoint_severity_label: checkpointSeverityLabel(reasonRow.default_severity),
     resume_readiness_label: resumeReadinessLabel,
     summary,
     automation_path_rows: toRows(automationPath),
@@ -1129,9 +1039,7 @@ export function createPortalCheckpointAtlasViewModel(): PortalCheckpointAtlasVie
           "Resume verification: Reload or re-read the current page and verify the challenge is cleared.",
           "Selector drift: Confirm semantic locator stability before continuing to tenant setup.",
         ],
-        [
-          "Outcome: Resume from an idempotent verification read, not from a replayed submit.",
-        ],
+        ["Outcome: Resume from an idempotent verification read, not from a replayed submit."],
         [
           "Masked screenshot: Challenge shell retained with sensitive fields and any one-time values masked.",
           "Safe route fingerprint: Only host, path, and query-key names survive into evidence.",
@@ -1252,9 +1160,7 @@ export function createPortalCheckpointAtlasViewModel(): PortalCheckpointAtlasVie
           "Resume verification: Reopen from a known entry route after the block is cleared.",
           "Fail-closed: Any unknown successor route or stale session forces a new checkpoint or review.",
         ],
-        [
-          "Outcome: Continue only after a fresh verification read proves the block is cleared.",
-        ],
+        ["Outcome: Continue only after a fresh verification read proves the block is cleared."],
         [
           "Evidence: Route fingerprint, redacted copy snapshot, and policy-block reason are retained.",
         ],
@@ -1296,9 +1202,7 @@ export function createPortalCheckpointAtlasViewModel(): PortalCheckpointAtlasVie
         [
           "Evidence: Masked screenshot, DOM hash, safe-copy snapshot, and route fingerprint are preserved.",
         ],
-        [
-          "Redaction posture: Safe-copy evidence strips OTPs, mailboxes, and IPs before storage.",
-        ],
+        ["Redaction posture: Safe-copy evidence strips OTPs, mailboxes, and IPs before storage."],
         [
           "Precondition: Unknown challenge has been classified or cleared.",
           "Precondition: Selector drift has been checked separately.",
@@ -1339,16 +1243,13 @@ function fixedTemplateRunContext(): RunContextSummary {
 export function createRecommendedManualCheckpointRecordTemplate(): ManualPortalCheckpointRecord {
   const reasonCatalog = reasonCodeMap();
   const reasonRow = reasonCatalog.get("MFA_REQUIRED");
-  const resumeRow =
-    resumePolicyMap().get("resume.verify-session-and-route.before-mutation");
+  const resumeRow = resumePolicyMap().get("resume.verify-session-and-route.before-mutation");
   if (!reasonRow || !resumeRow) {
     throw new Error("Manual checkpoint template dependencies are missing.");
   }
 
   const titleHash = sha256("HMRC Developer Hub - 2-step verification");
-  const urlHash = sha256(
-    "https://developer.service.hmrc.gov.uk/developer/login?screen=checkpoint",
-  );
+  const urlHash = sha256("https://developer.service.hmrc.gov.uk/developer/login?screen=checkpoint");
 
   return {
     schema_version: MANUAL_CHECKPOINT_POLICY_VERSION,
@@ -1395,17 +1296,13 @@ export function createRecommendedManualCheckpointRecordTemplate(): ManualPortalC
     resume_requirements: {
       resume_policy_ref: resumeRow.resume_policy_ref,
       human_actor_role: resumeRow.human_actor_role,
-      expected_post_checkpoint_route_ref:
-        "hmrc.developer_hub.applications_or_security_successor",
-      session_revalidation_requirement:
-        resumeRow.session_revalidation_requirement,
-      selector_drift_check_requirement:
-        resumeRow.selector_drift_check_requirement,
+      expected_post_checkpoint_route_ref: "hmrc.developer_hub.applications_or_security_successor",
+      session_revalidation_requirement: resumeRow.session_revalidation_requirement,
+      selector_drift_check_requirement: resumeRow.selector_drift_check_requirement,
       safe_noop_verification_step: resumeRow.safe_noop_verification_step,
       timeout_posture: resumeRow.timeout_posture,
       forbidden_actions: [...resumeRow.forbidden_actions],
-      resume_snapshot_ref_or_null:
-        "resume://run-manual-checkpoint-template-2026-04-18/latest",
+      resume_snapshot_ref_or_null: "resume://run-manual-checkpoint-template-2026-04-18/latest",
     },
     provider_docs_urls: providerDocsUrls(),
     source_refs: sharedSourceRefs(),
@@ -1417,9 +1314,7 @@ export function createRecommendedManualCheckpointRecordTemplate(): ManualPortalC
   };
 }
 
-export function validateManualCheckpointReasonCodes(
-  catalog: ManualCheckpointReasonCodes,
-): void {
+export function validateManualCheckpointReasonCodes(catalog: ManualCheckpointReasonCodes): void {
   REQUIRED_MANUAL_CHECKPOINT_REASON_CODES.forEach((reasonCode) => {
     if (!catalog.reason_rows.some((row) => row.reason_code === reasonCode)) {
       throw new Error(`Missing manual checkpoint reason code ${reasonCode}.`);
@@ -1427,18 +1322,10 @@ export function validateManualCheckpointReasonCodes(
   });
 }
 
-export function validateBlockedPortalResumePolicy(
-  policy: BlockedPortalResumePolicy,
-): void {
+export function validateBlockedPortalResumePolicy(policy: BlockedPortalResumePolicy): void {
   REQUIRED_MANUAL_CHECKPOINT_REASON_CODES.forEach((reasonCode) => {
-    if (
-      !policy.policy_rows.some((row) =>
-        row.applies_to_reason_codes.includes(reasonCode),
-      )
-    ) {
-      throw new Error(
-        `Resume policy is missing reason code coverage for ${reasonCode}.`,
-      );
+    if (!policy.policy_rows.some((row) => row.applies_to_reason_codes.includes(reasonCode))) {
+      throw new Error(`Resume policy is missing reason code coverage for ${reasonCode}.`);
     }
   });
   policy.policy_rows.forEach((row) => {
@@ -1450,9 +1337,7 @@ export function validateBlockedPortalResumePolicy(
   });
 }
 
-export function validateCheckpointRedactionPolicy(
-  policy: CheckpointRedactionPolicy,
-): void {
+export function validateCheckpointRedactionPolicy(policy: CheckpointRedactionPolicy): void {
   const requiredKinds = [
     "SCREENSHOT",
     "DOM_SNAPSHOT",
@@ -1467,9 +1352,7 @@ export function validateCheckpointRedactionPolicy(
   });
 }
 
-export function validateManualPortalCheckpointRecord(
-  record: ManualPortalCheckpointRecord,
-): void {
+export function validateManualPortalCheckpointRecord(record: ManualPortalCheckpointRecord): void {
   if (record.checkpoint_status !== "OPEN") {
     throw new Error("Checkpoint record must remain OPEN when first captured.");
   }
@@ -1502,7 +1385,7 @@ export function assertManualCheckpointArtifactsSanitized(
     "authorization:",
     "set-cookie:",
     "cookie=",
-    "\"password\":",
+    '"password":',
     "password=",
     ...forbiddenValues,
   ]
@@ -1510,9 +1393,7 @@ export function assertManualCheckpointArtifactsSanitized(
     .filter(Boolean)
     .forEach((value) => {
       if (serialized.includes(value)) {
-        throw new Error(
-          `Manual checkpoint artifacts must not persist sensitive value ${value}.`,
-        );
+        throw new Error(`Manual checkpoint artifacts must not persist sensitive value ${value}.`);
       }
     });
 }
@@ -1582,9 +1463,7 @@ export async function captureManualCheckpointEvidence(
   }
   const resumePolicy = resumePolicyMap().get(reasonRow.default_resume_policy_ref);
   if (!resumePolicy) {
-    throw new Error(
-      `No resume policy found for ${reasonRow.default_resume_policy_ref}.`,
-    );
+    throw new Error(`No resume policy found for ${reasonRow.default_resume_policy_ref}.`);
   }
 
   steps[openStepIndex] = transitionStep(
@@ -1640,10 +1519,7 @@ export async function captureManualCheckpointEvidence(
     reentryPolicy: "VERIFY_CURRENT_STATE_THEN_CONTINUE",
     capturePolicy: "REDACT",
   });
-  steps[checkpointStepIndex] = attachManualCheckpoint(
-    steps[checkpointStepIndex]!,
-    coreCheckpoint,
-  );
+  steps[checkpointStepIndex] = attachManualCheckpoint(steps[checkpointStepIndex]!, coreCheckpoint);
 
   const evidencePackRef = options.evidencePackPath;
   const checkpointExpiresAt = isoAfterMinutes(20);
@@ -1684,8 +1560,7 @@ export async function captureManualCheckpointEvidence(
       reentry_policy: coreCheckpoint.reentryPolicy,
       capture_policy: coreCheckpoint.capturePolicy,
     },
-    reason_code_policy_ref:
-      "config/provisioning/manual_checkpoint_reason_codes.json",
+    reason_code_policy_ref: "config/provisioning/manual_checkpoint_reason_codes.json",
     resume_policy_ref: "config/provisioning/blocked_portal_resume_policy.json",
     redaction_policy_ref: "config/provisioning/checkpoint_redaction_policy.json",
     evidence_pack_ref: evidencePackRef,
@@ -1694,10 +1569,8 @@ export async function captureManualCheckpointEvidence(
       human_actor_role: resumePolicy.human_actor_role,
       expected_post_checkpoint_route_ref:
         options.expectedPostCheckpointRouteRef || signals.expectedPostRouteAttr,
-      session_revalidation_requirement:
-        resumePolicy.session_revalidation_requirement,
-      selector_drift_check_requirement:
-        resumePolicy.selector_drift_check_requirement,
+      session_revalidation_requirement: resumePolicy.session_revalidation_requirement,
+      selector_drift_check_requirement: resumePolicy.selector_drift_check_requirement,
       safe_noop_verification_step: resumePolicy.safe_noop_verification_step,
       timeout_posture: resumePolicy.timeout_posture,
       forbidden_actions: [...resumePolicy.forbidden_actions],
@@ -1740,8 +1613,7 @@ export async function captureManualCheckpointEvidence(
           path.dirname(options.evidencePackPath),
           screenshotPath,
         ),
-        summary:
-          "Checkpoint screenshot retained with sensitive challenge fields masked.",
+        summary: "Checkpoint screenshot retained with sensitive challenge fields masked.",
         redaction_notes: ["mask:[data-sensitive='true']", "mask:[autocomplete='one-time-code']"],
       },
       {
@@ -1767,11 +1639,8 @@ export async function captureManualCheckpointEvidence(
         artifact_kind: "SAFE_COPY_SNAPSHOT",
         capture_mode: "REDACTED",
         relative_path_or_null: null,
-        summary:
-          "Provider wording retained as a redacted safe-copy snapshot for operator review.",
-        redaction_notes: redactedCopy.notes.map(
-          (note) => `${note.ruleId}:${note.matchCount}`,
-        ),
+        summary: "Provider wording retained as a redacted safe-copy snapshot for operator review.",
+        redaction_notes: redactedCopy.notes.map((note) => `${note.ruleId}:${note.matchCount}`),
       },
     ],
     provider_docs_urls: providerDocsUrls(),
@@ -1793,10 +1662,7 @@ export async function captureManualCheckpointEvidence(
     evidenceId: `${options.stepId}.checkpoint-screenshot`,
     stepId: options.stepId,
     kind: "SCREENSHOT",
-    relativePath: relativePathOrNull(
-      path.dirname(options.evidencePackPath),
-      screenshotPath,
-    ),
+    relativePath: relativePathOrNull(path.dirname(options.evidencePackPath), screenshotPath),
     captureMode: "REDACTED",
     summary:
       "Checkpoint screenshot retained with masking so operator review does not require raw challenge data.",
@@ -1807,8 +1673,7 @@ export async function captureManualCheckpointEvidence(
     kind: "DOM_SNAPSHOT",
     relativePath: null,
     captureMode: "SUPPRESSED",
-    summary:
-      "Checkpoint DOM retained as hash-only signature for route and selector verification.",
+    summary: "Checkpoint DOM retained as hash-only signature for route and selector verification.",
   });
   evidenceManifest = appendEvidenceRecord(evidenceManifest, {
     evidenceId: `${options.stepId}.checkpoint-copy-snapshot`,
@@ -1842,11 +1707,7 @@ export async function captureManualCheckpointEvidence(
       ],
       browserStorageStateRef: options.browserStorageStateRef ?? null,
     });
-    resumeSnapshotPath = path.join(
-      options.resumeRoot,
-      options.runContext.runId,
-      "latest.json",
-    );
+    resumeSnapshotPath = path.join(options.resumeRoot, options.runContext.runId, "latest.json");
   }
 
   const evidenceManifestPath = evidenceManifestPathFor(options.checkpointRecordPath);

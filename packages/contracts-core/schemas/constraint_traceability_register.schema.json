@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/constraint_traceability_register.schema.json",
+  "title": "ConstraintTraceabilityRegister",
+  "description": "Machine-checkable live constraint traceability register. This schema freezes the active named constraints, their architectural rationale, authoritative contract refs, machine-enforcement refs, downstream read-surface propagation refs, and example/vector anchors while keeping historical defect notes outside the live coverage model.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "register_scope",
+    "historical_note_boundary",
+    "coherence_update_policy",
+    "entries"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "CONSTRAINT_TRACEABILITY_REGISTER_V1"
+    },
+    "register_scope": {
+      "const": "LIVE_CONSTRAINTS_ONLY"
+    },
+    "historical_note_boundary": {
+      "const": "HISTORICAL_NOTES_LIVE_IN_FORENSIC_DOCS_ONLY"
+    },
+    "coherence_update_policy": {
+      "const": "AUTHORITATIVE_AND_DOWNSTREAM_REFS_MOVE_IN_SAME_CHANGESET"
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 8,
+      "items": {
+        "$ref": "#/$defs/constraintEntry"
+      }
+    }
+  },
+  "$defs": {
+    "traceabilityRef": {
+      "type": "object",
+      "required": [
+        "path",
+        "kind",
+        "required_terms"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_./-]+$",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "PROSE_CONTRACT",
+            "SHARED_GUARDRAIL",
+            "SCHEMA",
+            "READ_MODEL",
+            "VALIDATOR",
+            "FORENSIC_GUARD",
+            "DATA_MODEL",
+            "README",
+            "GLOSSARY",
+            "INDEX",
+            "REGISTER",
+            "EXAMPLE_OR_VECTOR",
+            "FORENSIC_HISTORY"
+          ]
+        },
+        "required_terms": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "constraintEntry": {
+      "type": "object",
+      "required": [
+        "constraint_id",
+        "constraint_name",
+        "constraint_family",
+        "status",
+        "architectural_rationale",
+        "prompt_stage_refs",
+        "authoritative_refs",
+        "enforcement_refs",
+        "downstream_refs",
+        "example_refs"
+      ],
+      "properties": {
+        "constraint_id": {
+          "type": "string",
+          "pattern": "^CC-[0-9]{2}$"
+        },
+        "constraint_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "constraint_family": {
+          "type": "string",
+          "enum": [
+            "FOUNDATION_SHARED_SPINE",
+            "INTERACTION_AND_PROJECTION_BOUNDARY",
+            "MANIFEST_REPLAY_AND_GATE_INTEGRITY",
+            "EVIDENCE_PROOF_AND_TWIN_COHERENCE",
+            "AUTHORITY_WORKFLOW_AND_AMENDMENT_CONTINUITY",
+            "GOVERNANCE_NIGHTLY_AND_EXTERNALIZATION_BOUNDARY",
+            "RELEASE_RECOVERY_AND_SCHEMA_EVOLUTION",
+            "CORPUS_TRACEABILITY_DISCIPLINE"
+          ]
+        },
+        "status": {
+          "const": "ACTIVE"
+        },
+        "architectural_rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "prompt_stage_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^(SYS|FE|BE)-[0-9]{2}$"
+          },
+          "uniqueItems": true
+        },
+        "authoritative_refs": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/traceabilityRef"
+          }
+        },
+        "enforcement_refs": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/traceabilityRef"
+          }
+        },
+        "downstream_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/traceabilityRef"
+          }
+        },
+        "example_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/traceabilityRef"
+          }
+        },
+        "historical_context_refs": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/traceabilityRef"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,361 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/verification_suite_result.schema.json",
+  "title": "VerificationSuiteResult",
+  "description": "Candidate-bound verification suite result. This schema freezes the exact release candidate identity, supporting test runs, and outcome for a blocking or supporting verification suite.",
+  "type": "object",
+  "required": [
+    "suite_result_id",
+    "suite_family",
+    "candidate_environment_ref",
+    "build_artifact_ref",
+    "artifact_digest",
+    "candidate_identity_hash",
+    "candidate_identity_contract",
+    "schema_bundle_hash",
+    "schema_reader_window_contract",
+    "schema_bundle_compatibility_gate_contract",
+    "config_bundle_hash",
+    "migration_plan_ref",
+    "enabled_provider_profile_refs",
+    "authority_sandbox_coverage_contract_or_null",
+    "supported_client_window_ref",
+    "restore_drill_ref",
+    "restore_checkpoint_ref",
+    "deterministic_golden_pack_ref",
+    "test_run_identifiers",
+    "result_state",
+    "result_summary_ref",
+    "executed_at"
+  ],
+  "properties": {
+    "suite_result_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "suite_family": {
+      "type": "string",
+      "enum": [
+        "SCHEMA_COMPATIBILITY",
+        "DETERMINISTIC_AND_STATE_MACHINE",
+        "NORTHBOUND_API",
+        "AUTHORITY_SANDBOX",
+        "OPERATOR_CLIENT",
+        "SECURITY",
+        "PERFORMANCE_AND_CANARY",
+        "RESTORE_DRILL",
+        "MIGRATION_VERIFICATION",
+        "SUPPLY_CHAIN",
+        "SUITE_ADMISSIBILITY"
+      ]
+    },
+    "candidate_environment_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "build_artifact_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_identity_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_identity_contract": {
+      "$ref": "https://taxat.dev/schemas/release_candidate_identity_contract.schema.json"
+    },
+    "schema_bundle_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema_reader_window_contract": {
+      "$ref": "https://taxat.dev/schemas/schema_reader_window_contract.schema.json"
+    },
+    "schema_bundle_compatibility_gate_contract": {
+      "$ref": "https://taxat.dev/schemas/schema_bundle_compatibility_gate_contract.schema.json"
+    },
+    "config_bundle_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "migration_plan_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "enabled_provider_profile_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "authority_sandbox_coverage_contract_or_null": {
+      "anyOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/authority_sandbox_coverage_contract.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "supported_client_window_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "restore_drill_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "restore_checkpoint_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "deterministic_golden_pack_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "test_run_identifiers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "result_state": {
+      "type": "string",
+      "enum": [
+        "PASSED",
+        "FAILED",
+        "ERROR"
+      ]
+    },
+    "result_summary_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "executed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "suite_family": {
+            "const": "DETERMINISTIC_AND_STATE_MACHINE"
+          }
+        },
+        "required": [
+          "suite_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "deterministic_golden_pack_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "deterministic_golden_pack_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "deterministic_golden_pack_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "suite_family": {
+            "const": "DETERMINISTIC_AND_STATE_MACHINE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "suite_family": {
+            "const": "AUTHORITY_SANDBOX"
+          }
+        },
+        "required": [
+          "suite_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "enabled_provider_profile_refs": {
+            "minItems": 1
+          },
+          "authority_sandbox_coverage_contract_or_null": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "authority_sandbox_coverage_contract_or_null": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "authority_sandbox_coverage_contract_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "suite_family": {
+            "const": "AUTHORITY_SANDBOX"
+          },
+          "enabled_provider_profile_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "suite_family": {
+            "const": "OPERATOR_CLIENT"
+          }
+        },
+        "required": [
+          "suite_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "supported_client_window_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "suite_family": {
+            "const": "RESTORE_DRILL"
+          }
+        },
+        "required": [
+          "suite_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "restore_drill_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "restore_checkpoint_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "restore_drill_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "restore_drill_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "suite_family": {
+            "const": "RESTORE_DRILL"
+          },
+          "restore_checkpoint_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "restore_checkpoint_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "restore_checkpoint_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "suite_family": {
+            "const": "RESTORE_DRILL"
+          },
+          "restore_drill_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "suite_family": {
+            "const": "MIGRATION_VERIFICATION"
+          }
+        },
+        "required": [
+          "suite_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "migration_plan_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ]
+}

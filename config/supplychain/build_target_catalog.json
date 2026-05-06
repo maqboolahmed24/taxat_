@@ -1,0 +1,770 @@
+{
+  "schema_version": "1.0",
+  "catalog_id": "build_target_catalog",
+  "selection_status": "PROVIDER_SELECTION_REQUIRED",
+  "selected_provider_stack_id_or_null": null,
+  "recommended_provider_stack_id": "GITHUB_ACTIONS_GHCR_SIGSTORE_KEYLESS_GITHUB_ATTESTATIONS",
+  "provider_stack_options": [
+    {
+      "stack_id": "GITHUB_ACTIONS_GHCR_SIGSTORE_KEYLESS_GITHUB_ATTESTATIONS",
+      "provider_label": "GitHub Actions OIDC + GHCR + Sigstore keyless + GitHub artifact attestations",
+      "selection_state": "RECOMMENDED_PORTABLE_DEFAULT_PENDING_APPROVAL",
+      "registry_summary": "OCI images, web bundles, native packages, and evidence bundles land in GHCR namespaces that treat tags as discovery only and digests as durable identity.",
+      "signing_summary": "Cosign keyless signing binds GitHub OIDC workload identity to every promotable artifact and evidence bundle.",
+      "attestation_summary": "GitHub artifact attestations and cosign-compatible OCI evidence storage carry provenance and SBOM references.",
+      "notarization_summary": "macOS artifacts use Apple Developer ID signing and notarization outside general CI secret storage.",
+      "docs_urls": [
+        "https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/about-security-hardening-with-openid-connect",
+        "https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry",
+        "https://docs.sigstore.dev/cosign/signing/overview/",
+        "https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations",
+        "https://developer.apple.com/developer-id/",
+        "https://cyclonedx.org/specification/overview/"
+      ],
+      "fit_notes": [
+        "Matches current repo GitHub posture and keeps long-lived signing secrets out of repo variables.",
+        "Provides the cleanest portable default while provider selection remains an explicit governance decision."
+      ],
+      "source_refs": [
+        {
+          "source_ref": "security_and_runtime_hardening_contract.md#release-integrity",
+          "rationale": "Release integrity requires digest, signature, provenance, and runtime verification instead of mutable CI dashboards."
+        },
+        {
+          "source_ref": "deployment_and_resilience_contract.md#promotion-pipeline",
+          "rationale": "Promotion copies exact tested digests forward and never redefines truth by mutable tag movement."
+        },
+        {
+          "source_ref": "verification_and_release_gates.md#supply-chain-evidence",
+          "rationale": "Release candidates require signature verification, provenance, SBOM, vulnerability posture, and notarization where applicable."
+        },
+        {
+          "source_ref": "release_candidate_identity_and_promotion_evidence_contract.md#candidate-tuple",
+          "rationale": "Mixed-candidate evidence must be rejected and candidate identity remains hash-based."
+        }
+      ]
+    },
+    {
+      "stack_id": "CLOUD_MANAGED_OCI_REGISTRY_WITH_KMS_SIGNER",
+      "provider_label": "Cloud-managed OCI registry + cloud KMS signer",
+      "selection_state": "PROVIDER_DECISION_REQUIRED",
+      "registry_summary": "Managed regional OCI registry with per-environment repositories and digest-copy promotion.",
+      "signing_summary": "Cloud KMS or HSM-backed signing keys issue signatures from workload identity without exporting private key material.",
+      "attestation_summary": "In-toto provenance and CycloneDX bundles publish into append-only evidence namespaces.",
+      "notarization_summary": "macOS notarization still depends on Apple Developer ID credentials and a dedicated notarization path.",
+      "docs_urls": [
+        "https://docs.sigstore.dev/cosign/system_config/registry_support/",
+        "https://developer.apple.com/developer-id/"
+      ],
+      "fit_notes": [
+        "Valid when procurement requires cloud-native registry and KMS ownership outside GitHub Packages."
+      ],
+      "source_refs": [
+        {
+          "source_ref": "security_and_runtime_hardening_contract.md#release-integrity",
+          "rationale": "Release integrity requires digest, signature, provenance, and runtime verification instead of mutable CI dashboards."
+        },
+        {
+          "source_ref": "deployment_and_resilience_contract.md#promotion-pipeline",
+          "rationale": "Promotion copies exact tested digests forward and never redefines truth by mutable tag movement."
+        },
+        {
+          "source_ref": "verification_and_release_gates.md#supply-chain-evidence",
+          "rationale": "Release candidates require signature verification, provenance, SBOM, vulnerability posture, and notarization where applicable."
+        },
+        {
+          "source_ref": "release_candidate_identity_and_promotion_evidence_contract.md#candidate-tuple",
+          "rationale": "Mixed-candidate evidence must be rejected and candidate identity remains hash-based."
+        }
+      ]
+    },
+    {
+      "stack_id": "SELF_HOSTED_OCI_SIGSTORE_STACK",
+      "provider_label": "Self-hosted OCI registry + self-hosted Sigstore stack",
+      "selection_state": "SELF_HOST_DECISION_REQUIRED",
+      "registry_summary": "Dedicated OCI registry and append-only transparency stack operated inside Taxat-controlled infrastructure.",
+      "signing_summary": "Private Fulcio/Rekor deployment or equivalent workload-identity signer with internally governed trust roots.",
+      "attestation_summary": "Evidence bundles remain first-party, but operational burden and transparency guarantees must be accepted explicitly.",
+      "notarization_summary": "Native macOS release still requires Apple Developer ID and notarization service interaction.",
+      "docs_urls": [
+        "https://docs.sigstore.dev/cosign/signing/overview/",
+        "https://docs.sigstore.dev/cosign/system_config/registry_support/"
+      ],
+      "fit_notes": [
+        "Only acceptable if platform ownership wants full supply-chain hosting responsibility and audit overhead."
+      ],
+      "source_refs": [
+        {
+          "source_ref": "security_and_runtime_hardening_contract.md#release-integrity",
+          "rationale": "Release integrity requires digest, signature, provenance, and runtime verification instead of mutable CI dashboards."
+        },
+        {
+          "source_ref": "deployment_and_resilience_contract.md#promotion-pipeline",
+          "rationale": "Promotion copies exact tested digests forward and never redefines truth by mutable tag movement."
+        },
+        {
+          "source_ref": "verification_and_release_gates.md#supply-chain-evidence",
+          "rationale": "Release candidates require signature verification, provenance, SBOM, vulnerability posture, and notarization where applicable."
+        },
+        {
+          "source_ref": "release_candidate_identity_and_promotion_evidence_contract.md#candidate-tuple",
+          "rationale": "Mixed-candidate evidence must be rejected and candidate identity remains hash-based."
+        }
+      ]
+    }
+  ],
+  "registry_namespaces": [
+    {
+      "namespace_ref": "registry.preview.server",
+      "package_coordinate_template": "ghcr.io/taxat/preview/server/<artifact>",
+      "environment_refs": [
+        "env_preview"
+      ],
+      "artifact_family_refs": [
+        "API",
+        "WORKER"
+      ],
+      "mutability_posture": "IMMUTABLE_DIGEST_DISCOVERY_TAGS_ONLY",
+      "promotion_mode": "NO_PROMOTION_FROM_PREVIEW",
+      "retention_class_ref": "PREVIEW_SHORT_LIVED",
+      "notes": [
+        "Preview server coordinates are disposable and never promoted into production by tag reuse."
+      ]
+    },
+    {
+      "namespace_ref": "registry.sandbox.server",
+      "package_coordinate_template": "ghcr.io/taxat/sandbox/server/<artifact>",
+      "environment_refs": [
+        "env_sandbox"
+      ],
+      "artifact_family_refs": [
+        "API",
+        "WORKER"
+      ],
+      "mutability_posture": "IMMUTABLE_DIGEST_DISCOVERY_TAGS_ONLY",
+      "promotion_mode": "COPY_BY_DIGEST_ONLY",
+      "retention_class_ref": "VERIFICATION_WINDOW",
+      "notes": [
+        "Sandbox server images rehearse admission evidence without becoming production truth."
+      ]
+    },
+    {
+      "namespace_ref": "registry.preproduction.server",
+      "package_coordinate_template": "ghcr.io/taxat/preprod/server/<artifact>",
+      "environment_refs": [
+        "env_preproduction"
+      ],
+      "artifact_family_refs": [
+        "API",
+        "WORKER"
+      ],
+      "mutability_posture": "IMMUTABLE_DIGEST_DISCOVERY_TAGS_ONLY",
+      "promotion_mode": "COPY_BY_DIGEST_ONLY",
+      "retention_class_ref": "RELEASE_LONG_TAIL",
+      "notes": [
+        "Preproduction server images are the source candidates for production promotion by digest copy only."
+      ]
+    },
+    {
+      "namespace_ref": "registry.production.server",
+      "package_coordinate_template": "ghcr.io/taxat/prod/server/<artifact>",
+      "environment_refs": [
+        "env_production"
+      ],
+      "artifact_family_refs": [
+        "API",
+        "WORKER"
+      ],
+      "mutability_posture": "IMMUTABLE_DIGEST_DISCOVERY_TAGS_ONLY",
+      "promotion_mode": "COPY_BY_DIGEST_ONLY",
+      "retention_class_ref": "RELEASE_LONG_TAIL",
+      "notes": [
+        "Production server coordinates receive only admitted digests."
+      ]
+    },
+    {
+      "namespace_ref": "registry.preview.web",
+      "package_coordinate_template": "ghcr.io/taxat/preview/web/<artifact>",
+      "environment_refs": [
+        "env_preview"
+      ],
+      "artifact_family_refs": [
+        "WEB_BUNDLE"
+      ],
+      "mutability_posture": "IMMUTABLE_DIGEST_DISCOVERY_TAGS_ONLY",
+      "promotion_mode": "NO_PROMOTION_FROM_PREVIEW",
+      "retention_class_ref": "PREVIEW_SHORT_LIVED",
+      "notes": [
+        "Preview web bundles stay isolated from candidate promotion lanes."
+      ]
+    },
+    {
+      "namespace_ref": "registry.sandbox.web",
+      "package_coordinate_template": "ghcr.io/taxat/sandbox/web/<artifact>",
+      "environment_refs": [
+        "env_sandbox"
+      ],
+      "artifact_family_refs": [
+        "WEB_BUNDLE"
+      ],
+      "mutability_posture": "IMMUTABLE_DIGEST_DISCOVERY_TAGS_ONLY",
+      "promotion_mode": "COPY_BY_DIGEST_ONLY",
+      "retention_class_ref": "VERIFICATION_WINDOW",
+      "notes": [
+        "Sandbox bundles exercise the same digest-first verification path as server artifacts."
+      ]
+    },
+    {
+      "namespace_ref": "registry.preproduction.web",
+      "package_coordinate_template": "ghcr.io/taxat/preprod/web/<artifact>",
+      "environment_refs": [
+        "env_preproduction"
+      ],
+      "artifact_family_refs": [
+        "WEB_BUNDLE"
+      ],
+      "mutability_posture": "IMMUTABLE_DIGEST_DISCOVERY_TAGS_ONLY",
+      "promotion_mode": "COPY_BY_DIGEST_ONLY",
+      "retention_class_ref": "RELEASE_LONG_TAIL",
+      "notes": [
+        "Preproduction bundles are candidate material for production web release."
+      ]
+    },
+    {
+      "namespace_ref": "registry.production.web",
+      "package_coordinate_template": "ghcr.io/taxat/prod/web/<artifact>",
+      "environment_refs": [
+        "env_production"
+      ],
+      "artifact_family_refs": [
+        "WEB_BUNDLE"
+      ],
+      "mutability_posture": "IMMUTABLE_DIGEST_DISCOVERY_TAGS_ONLY",
+      "promotion_mode": "COPY_BY_DIGEST_ONLY",
+      "retention_class_ref": "RELEASE_LONG_TAIL",
+      "notes": [
+        "Production web bundles must already be signed, provenance-linked, and vulnerability-cleared."
+      ]
+    },
+    {
+      "namespace_ref": "registry.preview.native",
+      "package_coordinate_template": "ghcr.io/taxat/preview/native/<artifact>",
+      "environment_refs": [
+        "env_preview"
+      ],
+      "artifact_family_refs": [
+        "NATIVE_DESKTOP"
+      ],
+      "mutability_posture": "IMMUTABLE_DIGEST_DISCOVERY_TAGS_ONLY",
+      "promotion_mode": "NO_PROMOTION_FROM_PREVIEW",
+      "retention_class_ref": "PREVIEW_SHORT_LIVED",
+      "notes": [
+        "Preview native artifacts never satisfy production admission."
+      ]
+    },
+    {
+      "namespace_ref": "registry.sandbox.native",
+      "package_coordinate_template": "ghcr.io/taxat/sandbox/native/<artifact>",
+      "environment_refs": [
+        "env_sandbox"
+      ],
+      "artifact_family_refs": [
+        "NATIVE_DESKTOP"
+      ],
+      "mutability_posture": "IMMUTABLE_DIGEST_DISCOVERY_TAGS_ONLY",
+      "promotion_mode": "COPY_BY_DIGEST_ONLY",
+      "retention_class_ref": "VERIFICATION_WINDOW",
+      "notes": [
+        "Sandbox native packages verify signing and notarization pathways without production release rights."
+      ]
+    },
+    {
+      "namespace_ref": "registry.preproduction.native",
+      "package_coordinate_template": "ghcr.io/taxat/preprod/native/<artifact>",
+      "environment_refs": [
+        "env_preproduction"
+      ],
+      "artifact_family_refs": [
+        "NATIVE_DESKTOP"
+      ],
+      "mutability_posture": "IMMUTABLE_DIGEST_DISCOVERY_TAGS_ONLY",
+      "promotion_mode": "COPY_BY_DIGEST_ONLY",
+      "retention_class_ref": "RELEASE_LONG_TAIL",
+      "notes": [
+        "Preproduction native packages carry the exact notarized candidate digest that may later be promoted."
+      ]
+    },
+    {
+      "namespace_ref": "registry.production.native",
+      "package_coordinate_template": "ghcr.io/taxat/prod/native/<artifact>",
+      "environment_refs": [
+        "env_production"
+      ],
+      "artifact_family_refs": [
+        "NATIVE_DESKTOP"
+      ],
+      "mutability_posture": "IMMUTABLE_DIGEST_DISCOVERY_TAGS_ONLY",
+      "promotion_mode": "COPY_BY_DIGEST_ONLY",
+      "retention_class_ref": "RELEASE_LONG_TAIL",
+      "notes": [
+        "Production native packages require signature, notarization, provenance, and release-admission evidence."
+      ]
+    },
+    {
+      "namespace_ref": "registry.evidence.sbom",
+      "package_coordinate_template": "ghcr.io/taxat/evidence/sbom/<artifact>",
+      "environment_refs": [
+        "env_preview",
+        "env_sandbox",
+        "env_preproduction",
+        "env_production"
+      ],
+      "artifact_family_refs": [
+        "SBOM"
+      ],
+      "mutability_posture": "APPEND_ONLY_EVIDENCE_COORDINATES",
+      "promotion_mode": "APPEND_ONLY_EVIDENCE",
+      "retention_class_ref": "EVIDENCE_APPEND_ONLY",
+      "notes": [
+        "CycloneDX bundles are stored separately from the build outputs they describe."
+      ]
+    },
+    {
+      "namespace_ref": "registry.evidence.provenance",
+      "package_coordinate_template": "ghcr.io/taxat/evidence/provenance/<artifact>",
+      "environment_refs": [
+        "env_preview",
+        "env_sandbox",
+        "env_preproduction",
+        "env_production"
+      ],
+      "artifact_family_refs": [
+        "PROVENANCE"
+      ],
+      "mutability_posture": "APPEND_ONLY_EVIDENCE_COORDINATES",
+      "promotion_mode": "APPEND_ONLY_EVIDENCE",
+      "retention_class_ref": "EVIDENCE_APPEND_ONLY",
+      "notes": [
+        "In-toto and SLSA provenance bundles remain append-only and independently addressable."
+      ]
+    },
+    {
+      "namespace_ref": "registry.evidence.release-admission",
+      "package_coordinate_template": "ghcr.io/taxat/evidence/release-admission/<artifact>",
+      "environment_refs": [
+        "env_preview",
+        "env_sandbox",
+        "env_preproduction",
+        "env_production"
+      ],
+      "artifact_family_refs": [
+        "MANIFEST_INPUTS"
+      ],
+      "mutability_posture": "APPEND_ONLY_EVIDENCE_COORDINATES",
+      "promotion_mode": "APPEND_ONLY_EVIDENCE",
+      "retention_class_ref": "EVIDENCE_APPEND_ONLY",
+      "notes": [
+        "Release-admission manifests persist the candidate tuple and promotion decision inputs."
+      ]
+    }
+  ],
+  "trust_roots": [
+    {
+      "trust_root_ref": "trust_root.sigstore.fulcio.github-oidc",
+      "label": "Sigstore Fulcio via GitHub OIDC",
+      "root_kind": "OIDC_IDENTITY",
+      "verification_summary": "Verifier accepts workload-identity leaf certificates chained to Fulcio and binds subject digest to the signature payload.",
+      "rotation_posture": "Leaf identities are short-lived and minted per workflow execution; no long-lived private key is stored in repo scope.",
+      "applies_to_families": [
+        "API",
+        "WORKER",
+        "WEB_BUNDLE",
+        "NATIVE_DESKTOP",
+        "SBOM",
+        "PROVENANCE",
+        "MANIFEST_INPUTS"
+      ],
+      "notes": [
+        "Preferred signing trust root for the recommended GitHub-hosted stack."
+      ]
+    },
+    {
+      "trust_root_ref": "trust_root.github.artifact-attestations",
+      "label": "GitHub artifact attestations",
+      "root_kind": "ATTESTATION_SERVICE",
+      "verification_summary": "Artifact attestations are verified against the build workflow identity and digest-bound subject.",
+      "rotation_posture": "Service-managed root and workload identity posture are governed by GitHub; only attestation references persist locally.",
+      "applies_to_families": [
+        "API",
+        "WORKER",
+        "WEB_BUNDLE",
+        "NATIVE_DESKTOP",
+        "SBOM",
+        "PROVENANCE",
+        "MANIFEST_INPUTS"
+      ],
+      "notes": [
+        "Provides first-party provenance verification when GitHub Actions is the builder."
+      ]
+    },
+    {
+      "trust_root_ref": "trust_root.apple.developer-id",
+      "label": "Apple Developer ID + notarization",
+      "root_kind": "APPLE_DEVELOPER_ID",
+      "verification_summary": "Native macOS packages must verify a Developer ID signature and a notarization ticket bound to the same package digest.",
+      "rotation_posture": "Certificate rotation stays inside the governed Apple Developer account boundary; notarization proof is stored as evidence ref only.",
+      "applies_to_families": [
+        "NATIVE_DESKTOP"
+      ],
+      "notes": [
+        "Mandatory for macOS release artifacts."
+      ]
+    },
+    {
+      "trust_root_ref": "trust_root.cloud.kms.signing",
+      "label": "Cloud KMS-backed signing root",
+      "root_kind": "KMS_SIGNING_KEY",
+      "verification_summary": "Alternative managed-key posture for environments that cannot use keyless OIDC signing.",
+      "rotation_posture": "Key versions rotate inside the governed KMS boundary and never export raw private material.",
+      "applies_to_families": [
+        "API",
+        "WORKER",
+        "WEB_BUNDLE",
+        "NATIVE_DESKTOP",
+        "SBOM",
+        "PROVENANCE",
+        "MANIFEST_INPUTS"
+      ],
+      "notes": [
+        "KMS-backed signing remains an alternative provider posture, not the default current recommendation."
+      ]
+    }
+  ],
+  "target_rows": [
+    {
+      "target_ref": "target.operator-web-app",
+      "label": "Operator web app",
+      "runtime_kind": "WEB_CLIENT",
+      "distribution_target": "WEB_BUNDLE",
+      "environment_refs": [
+        "env_preview",
+        "env_sandbox",
+        "env_preproduction",
+        "env_production"
+      ],
+      "artifact_family_refs": [
+        "WEB_BUNDLE",
+        "SBOM",
+        "PROVENANCE",
+        "MANIFEST_INPUTS"
+      ],
+      "registry_namespace_refs": [
+        "registry.preview.web",
+        "registry.sandbox.web",
+        "registry.preproduction.web",
+        "registry.production.web",
+        "registry.evidence.sbom",
+        "registry.evidence.provenance",
+        "registry.evidence.release-admission"
+      ],
+      "signature_requirement_ref": "signature.web-bundle",
+      "provenance_requirement_ref": "provenance.slsa-build-v1",
+      "sbom_requirement_ref": "sbom.cyclonedx-1.7-json",
+      "notarization_requirement_ref_or_null": null,
+      "retention_class_ref": "RELEASE_LONG_TAIL",
+      "admission_profile_ref": "admission.web-bundle",
+      "candidate_binding_required": true,
+      "preview_only": false,
+      "notes": [
+        "Static web bundle is retained as a signed, digest-addressed build output for replay-safe rollback."
+      ]
+    },
+    {
+      "target_ref": "target.client-portal-web-app",
+      "label": "Client portal web app",
+      "runtime_kind": "WEB_CLIENT",
+      "distribution_target": "WEB_BUNDLE",
+      "environment_refs": [
+        "env_preview",
+        "env_sandbox",
+        "env_preproduction",
+        "env_production"
+      ],
+      "artifact_family_refs": [
+        "WEB_BUNDLE",
+        "SBOM",
+        "PROVENANCE",
+        "MANIFEST_INPUTS"
+      ],
+      "registry_namespace_refs": [
+        "registry.preview.web",
+        "registry.sandbox.web",
+        "registry.preproduction.web",
+        "registry.production.web",
+        "registry.evidence.sbom",
+        "registry.evidence.provenance",
+        "registry.evidence.release-admission"
+      ],
+      "signature_requirement_ref": "signature.web-bundle",
+      "provenance_requirement_ref": "provenance.slsa-build-v1",
+      "sbom_requirement_ref": "sbom.cyclonedx-1.7-json",
+      "notarization_requirement_ref_or_null": null,
+      "retention_class_ref": "RELEASE_LONG_TAIL",
+      "admission_profile_ref": "admission.web-bundle",
+      "candidate_binding_required": true,
+      "preview_only": false,
+      "notes": [
+        "Client portal bundles keep the same digest-first posture as operator surfaces."
+      ]
+    },
+    {
+      "target_ref": "target.northbound-api-session-gateway",
+      "label": "Northbound API session gateway",
+      "runtime_kind": "SERVER_PROCESS",
+      "distribution_target": "CONTAINER_IMAGE",
+      "environment_refs": [
+        "env_preview",
+        "env_sandbox",
+        "env_preproduction",
+        "env_production"
+      ],
+      "artifact_family_refs": [
+        "API",
+        "SBOM",
+        "PROVENANCE",
+        "MANIFEST_INPUTS"
+      ],
+      "registry_namespace_refs": [
+        "registry.preview.server",
+        "registry.sandbox.server",
+        "registry.preproduction.server",
+        "registry.production.server",
+        "registry.evidence.sbom",
+        "registry.evidence.provenance",
+        "registry.evidence.release-admission"
+      ],
+      "signature_requirement_ref": "signature.api",
+      "provenance_requirement_ref": "provenance.slsa-build-v1",
+      "sbom_requirement_ref": "sbom.cyclonedx-1.7-json",
+      "notarization_requirement_ref_or_null": null,
+      "retention_class_ref": "RELEASE_LONG_TAIL",
+      "admission_profile_ref": "admission.container-service",
+      "candidate_binding_required": true,
+      "preview_only": false,
+      "notes": [
+        "Server OCI coordinates remain immutable by digest and promotion copies never reuse a mutable source tag as truth."
+      ]
+    },
+    {
+      "target_ref": "target.manifest-orchestrator",
+      "label": "Manifest orchestrator",
+      "runtime_kind": "SERVER_PROCESS",
+      "distribution_target": "CONTAINER_IMAGE",
+      "environment_refs": [
+        "env_preview",
+        "env_sandbox",
+        "env_preproduction",
+        "env_production"
+      ],
+      "artifact_family_refs": [
+        "API",
+        "SBOM",
+        "PROVENANCE",
+        "MANIFEST_INPUTS"
+      ],
+      "registry_namespace_refs": [
+        "registry.preview.server",
+        "registry.sandbox.server",
+        "registry.preproduction.server",
+        "registry.production.server",
+        "registry.evidence.sbom",
+        "registry.evidence.provenance",
+        "registry.evidence.release-admission"
+      ],
+      "signature_requirement_ref": "signature.api",
+      "provenance_requirement_ref": "provenance.slsa-build-v1",
+      "sbom_requirement_ref": "sbom.cyclonedx-1.7-json",
+      "notarization_requirement_ref_or_null": null,
+      "retention_class_ref": "RELEASE_LONG_TAIL",
+      "admission_profile_ref": "admission.container-service",
+      "candidate_binding_required": true,
+      "preview_only": false,
+      "notes": [
+        "Manifest orchestration artifacts feed later release binding and must never drift from the candidate tuple."
+      ]
+    },
+    {
+      "target_ref": "target.stage-workers",
+      "label": "Stage workers",
+      "runtime_kind": "WORKER_PROCESS",
+      "distribution_target": "CONTAINER_IMAGE",
+      "environment_refs": [
+        "env_preview",
+        "env_sandbox",
+        "env_preproduction",
+        "env_production"
+      ],
+      "artifact_family_refs": [
+        "WORKER",
+        "SBOM",
+        "PROVENANCE",
+        "MANIFEST_INPUTS"
+      ],
+      "registry_namespace_refs": [
+        "registry.preview.server",
+        "registry.sandbox.server",
+        "registry.preproduction.server",
+        "registry.production.server",
+        "registry.evidence.sbom",
+        "registry.evidence.provenance",
+        "registry.evidence.release-admission"
+      ],
+      "signature_requirement_ref": "signature.worker",
+      "provenance_requirement_ref": "provenance.slsa-build-v1",
+      "sbom_requirement_ref": "sbom.cyclonedx-1.7-json",
+      "notarization_requirement_ref_or_null": null,
+      "retention_class_ref": "VERIFICATION_WINDOW",
+      "admission_profile_ref": "admission.container-service",
+      "candidate_binding_required": true,
+      "preview_only": false,
+      "notes": [
+        "Worker images follow the same digest and provenance requirements as API images, with shorter rollback retention."
+      ]
+    },
+    {
+      "target_ref": "target.read-projector-stream-broker",
+      "label": "Read projector stream broker",
+      "runtime_kind": "WORKER_PROCESS",
+      "distribution_target": "CONTAINER_IMAGE",
+      "environment_refs": [
+        "env_preview",
+        "env_sandbox",
+        "env_preproduction",
+        "env_production"
+      ],
+      "artifact_family_refs": [
+        "WORKER",
+        "SBOM",
+        "PROVENANCE",
+        "MANIFEST_INPUTS"
+      ],
+      "registry_namespace_refs": [
+        "registry.preview.server",
+        "registry.sandbox.server",
+        "registry.preproduction.server",
+        "registry.production.server",
+        "registry.evidence.sbom",
+        "registry.evidence.provenance",
+        "registry.evidence.release-admission"
+      ],
+      "signature_requirement_ref": "signature.worker",
+      "provenance_requirement_ref": "provenance.slsa-build-v1",
+      "sbom_requirement_ref": "sbom.cyclonedx-1.7-json",
+      "notarization_requirement_ref_or_null": null,
+      "retention_class_ref": "VERIFICATION_WINDOW",
+      "admission_profile_ref": "admission.container-service",
+      "candidate_binding_required": true,
+      "preview_only": false,
+      "notes": [
+        "The stream broker shares worker-image posture and does not permit unsigned backfill or alias-only promotion."
+      ]
+    },
+    {
+      "target_ref": "target.desktop-release-channel",
+      "label": "Desktop release channel",
+      "runtime_kind": "RELEASE_CHANNEL_MANIFEST",
+      "distribution_target": "SUPPLY_CHAIN_EVIDENCE",
+      "environment_refs": [
+        "env_preview",
+        "env_sandbox",
+        "env_preproduction",
+        "env_production"
+      ],
+      "artifact_family_refs": [
+        "MANIFEST_INPUTS",
+        "SBOM",
+        "PROVENANCE"
+      ],
+      "registry_namespace_refs": [
+        "registry.evidence.sbom",
+        "registry.evidence.provenance",
+        "registry.evidence.release-admission"
+      ],
+      "signature_requirement_ref": "signature.release-manifest",
+      "provenance_requirement_ref": "provenance.release-input-bundle",
+      "sbom_requirement_ref": "sbom.cyclonedx-1.7-json",
+      "notarization_requirement_ref_or_null": null,
+      "retention_class_ref": "EVIDENCE_APPEND_ONLY",
+      "admission_profile_ref": "admission.release-manifest",
+      "candidate_binding_required": true,
+      "preview_only": false,
+      "notes": [
+        "The release channel package binds candidate hash, compatible provider profile set, and admitted digest set."
+      ]
+    },
+    {
+      "target_ref": "target.native-macos-operator-client",
+      "label": "Native macOS operator client",
+      "runtime_kind": "MACOS_DESKTOP_APP",
+      "distribution_target": "MACOS_DESKTOP",
+      "environment_refs": [
+        "env_preview",
+        "env_sandbox",
+        "env_preproduction",
+        "env_production"
+      ],
+      "artifact_family_refs": [
+        "NATIVE_DESKTOP",
+        "SBOM",
+        "PROVENANCE",
+        "MANIFEST_INPUTS"
+      ],
+      "registry_namespace_refs": [
+        "registry.preview.native",
+        "registry.sandbox.native",
+        "registry.preproduction.native",
+        "registry.production.native",
+        "registry.evidence.sbom",
+        "registry.evidence.provenance",
+        "registry.evidence.release-admission"
+      ],
+      "signature_requirement_ref": "signature.native-desktop",
+      "provenance_requirement_ref": "provenance.slsa-build-v1",
+      "sbom_requirement_ref": "sbom.cyclonedx-1.7-json",
+      "notarization_requirement_ref_or_null": "notarization.apple-developer-id",
+      "retention_class_ref": "RELEASE_LONG_TAIL",
+      "admission_profile_ref": "admission.macos-desktop",
+      "candidate_binding_required": true,
+      "preview_only": false,
+      "notes": [
+        "macOS delivery fails closed without Developer ID signing and a current notarization ticket bound to the exact package digest."
+      ]
+    }
+  ],
+  "typed_gaps": [
+    "PROVIDER_SELECTION_REQUIRED_FOR_LIVE_REGISTRY_AND_SIGNING_RESOURCE_ADOPTION"
+  ],
+  "notes": [
+    "Artifact truth is the immutable digest plus its independently stored signature, provenance, and SBOM references.",
+    "Tags remain convenience pointers only and never decide release admissibility.",
+    "Preview namespaces remain clearly separated from production-admissible lanes."
+  ],
+  "source_refs": [
+    {
+      "source_ref": "security_and_runtime_hardening_contract.md#release-integrity",
+      "rationale": "Release integrity requires digest, signature, provenance, and runtime verification instead of mutable CI dashboards."
+    },
+    {
+      "source_ref": "deployment_and_resilience_contract.md#promotion-pipeline",
+      "rationale": "Promotion copies exact tested digests forward and never redefines truth by mutable tag movement."
+    },
+    {
+      "source_ref": "verification_and_release_gates.md#supply-chain-evidence",
+      "rationale": "Release candidates require signature verification, provenance, SBOM, vulnerability posture, and notarization where applicable."
+    },
+    {
+      "source_ref": "release_candidate_identity_and_promotion_evidence_contract.md#candidate-tuple",
+      "rationale": "Mixed-candidate evidence must be rejected and candidate identity remains hash-based."
+    }
+  ]
+}

@@ -1,0 +1,383 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/metric_event.schema.json",
+  "title": "MetricEvent",
+  "description": "Structured metric sample contract for observability and privacy-safe runtime analytics. This contract freezes the minimum metric-family taxonomy and resource/correlation posture.",
+  "type": "object",
+  "required": [
+    "metric_event_id",
+    "metric_family",
+    "instrument_kind",
+    "resource_ref",
+    "observed_at",
+    "value",
+    "unit",
+    "dimensions",
+    "correlation_context"
+  ],
+  "properties": {
+    "metric_event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "metric_family": {
+      "type": "string",
+      "enum": [
+        "RUN_OUTCOME_RATE",
+        "NIGHTLY_BATCH_OUTCOME_RATE",
+        "AUTHORITY_REQUEST_OUTCOME_RATE",
+        "RECONCILIATION_RESOLUTION_RATE",
+        "AMENDMENT_OUTCOME_RATE",
+        "EXPERIENCE_STREAM_RESUME_REBASE_RATE",
+        "STALE_VIEW_CONFLICT_RATE",
+        "RELEASE_CANARY_ABORT_RATE",
+        "MIGRATION_OUTCOME_RATE",
+        "RESTORE_DRILL_SUCCESS_RATE",
+        "RESTORE_DRILL_AGE",
+        "COMPLETENESS_SCORE_DISTRIBUTION",
+        "DATA_QUALITY_SCORE_DISTRIBUTION",
+        "PARITY_CLASSIFICATION_DISTRIBUTION",
+        "TRUST_BAND_DISTRIBUTION",
+        "GRAPH_CRITICAL_PATH_COVERAGE_DISTRIBUTION",
+        "MODULE_LATENCY",
+        "QUEUE_DELAY",
+        "OPERATOR_DIGEST_PUBLISH_LATENCY",
+        "NIGHTLY_SELECTION_DISPOSITION_COUNT",
+        "RETRY_VOLUME",
+        "DUPLICATE_SUPPRESSION_VOLUME",
+        "RETENTION_LIMITATION_VOLUME",
+        "ERASURE_THROUGHPUT",
+        "STREAM_HEARTBEAT_LAG",
+        "OUTBOX_BACKLOG_AGE",
+        "INBOX_DEDUPE_HIT_RATE",
+        "SECRET_ROTATION_LAG",
+        "BACKUP_FRESHNESS_BY_RECOVERY_TIER",
+        "STEP_UP_EVENTS",
+        "ACCESS_DENIALS",
+        "MASKED_VS_FULL_SENSITIVE_VIEWS",
+        "EXPORT_ATTEMPTS",
+        "LEGAL_HOLD_BLOCKS",
+        "ERASURE_BLOCKS",
+        "CSRF_REJECTION_RATE",
+        "SESSION_REVOCATIONS",
+        "EGRESS_POLICY_VIOLATIONS",
+        "SIGNED_BUILD_VERIFICATION_FAILURES"
+      ]
+    },
+    "instrument_kind": {
+      "type": "string",
+      "enum": [
+        "COUNTER",
+        "GAUGE",
+        "HISTOGRAM"
+      ]
+    },
+    "resource_ref": {
+      "$ref": "./telemetry_resource.schema.json#/$defs/resourceRef"
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "value": {
+      "type": "number",
+      "minimum": 0
+    },
+    "unit": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "dimensions": {
+      "$ref": "./telemetry_resource.schema.json#/$defs/attributeMap"
+    },
+    "correlation_context": {
+      "$ref": "./telemetry_resource.schema.json#/$defs/correlationContext"
+    }
+  },
+  "allOf": [
+    {
+      "properties": {
+        "correlation_context": {
+          "type": "object",
+          "properties": {
+            "service_name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "environment_ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "service_name",
+            "environment_ref"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "metric_family": {
+            "enum": [
+              "COMPLETENESS_SCORE_DISTRIBUTION",
+              "DATA_QUALITY_SCORE_DISTRIBUTION",
+              "PARITY_CLASSIFICATION_DISTRIBUTION",
+              "TRUST_BAND_DISTRIBUTION",
+              "GRAPH_CRITICAL_PATH_COVERAGE_DISTRIBUTION"
+            ]
+          }
+        },
+        "required": [
+          "metric_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "instrument_kind": {
+            "const": "HISTOGRAM"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "metric_family": {
+            "enum": [
+              "MODULE_LATENCY",
+              "QUEUE_DELAY",
+              "STREAM_HEARTBEAT_LAG",
+              "OUTBOX_BACKLOG_AGE",
+              "SECRET_ROTATION_LAG",
+              "BACKUP_FRESHNESS_BY_RECOVERY_TIER",
+              "RESTORE_DRILL_AGE"
+            ]
+          }
+        },
+        "required": [
+          "metric_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "instrument_kind": {
+            "enum": [
+              "GAUGE",
+              "HISTOGRAM"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "metric_family": {
+            "const": "OPERATOR_DIGEST_PUBLISH_LATENCY"
+          }
+        },
+        "required": [
+          "metric_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "instrument_kind": {
+            "enum": [
+              "GAUGE",
+              "HISTOGRAM"
+            ]
+          },
+          "correlation_context": {
+            "type": "object",
+            "properties": {
+              "nightly_batch_run_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "nightly_window_key": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "nightly_batch_run_ref",
+              "nightly_window_key"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "metric_family": {
+            "enum": [
+              "NIGHTLY_SELECTION_DISPOSITION_COUNT",
+              "RETRY_VOLUME",
+              "DUPLICATE_SUPPRESSION_VOLUME",
+              "RETENTION_LIMITATION_VOLUME",
+              "STEP_UP_EVENTS",
+              "ACCESS_DENIALS",
+              "EXPORT_ATTEMPTS",
+              "LEGAL_HOLD_BLOCKS",
+              "ERASURE_BLOCKS",
+              "SESSION_REVOCATIONS",
+              "EGRESS_POLICY_VIOLATIONS",
+              "SIGNED_BUILD_VERIFICATION_FAILURES"
+            ]
+          }
+        },
+        "required": [
+          "metric_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "instrument_kind": {
+            "const": "COUNTER"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "metric_family": {
+            "const": "NIGHTLY_BATCH_OUTCOME_RATE"
+          }
+        },
+        "required": [
+          "metric_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "dimensions": {
+            "type": "object",
+            "properties": {
+              "outcome_bucket": {
+                "type": "string",
+                "enum": [
+                  "COMPLETED",
+                  "COMPLETED_WITH_FAILURES",
+                  "FAILED"
+                ]
+              }
+            },
+            "required": [
+              "outcome_bucket"
+            ]
+          },
+          "correlation_context": {
+            "type": "object",
+            "properties": {
+              "nightly_batch_run_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "nightly_window_key": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "nightly_batch_run_ref",
+              "nightly_window_key"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "metric_family": {
+            "const": "NIGHTLY_SELECTION_DISPOSITION_COUNT"
+          }
+        },
+        "required": [
+          "metric_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "dimensions": {
+            "type": "object",
+            "properties": {
+              "selection_disposition": {
+                "type": "string",
+                "enum": [
+                  "EXECUTE_NEW_MANIFEST",
+                  "EXECUTE_CONTINUATION_CHILD",
+                  "REUSE_EXISTING_TERMINAL_RESULT",
+                  "DEFER_ACTIVE_ATTEMPT",
+                  "DEFER_RETRY_WINDOW",
+                  "ESCALATE_ONLY",
+                  "SKIP_INELIGIBLE"
+                ]
+              }
+            },
+            "required": [
+              "selection_disposition"
+            ]
+          },
+          "correlation_context": {
+            "type": "object",
+            "properties": {
+              "nightly_batch_run_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "nightly_window_key": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "nightly_batch_run_ref",
+              "nightly_window_key"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "metric_family": {
+            "const": "MASKED_VS_FULL_SENSITIVE_VIEWS"
+          }
+        },
+        "required": [
+          "metric_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "dimensions": {
+            "type": "object",
+            "properties": {
+              "view_posture": {
+                "type": "string",
+                "enum": [
+                  "MASKED_ONLY",
+                  "FULL_ALLOWED"
+                ]
+              }
+            },
+            "required": [
+              "view_posture"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

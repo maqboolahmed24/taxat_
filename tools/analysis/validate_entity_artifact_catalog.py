@@ -233,7 +233,7 @@ def render_mermaid(object_rows: list[dict[str, Any]]) -> str:
         lines.append("")
     for row in sorted(object_rows, key=lambda item: item["object_name"]):
         for related_object_id in row["related_object_ids"][:12]:
-            lines.append(f'  {row["object_id"]} --> {related_object_id}')
+            lines.append(f"  {row['object_id']} --> {related_object_id}")
     return "\n".join(lines) + "\n"
 
 
@@ -283,11 +283,17 @@ def main() -> int:
         fail("unowned_or_ambiguous_schema_records.json drifted from the canonical builder output.")
 
     if builder.ENTITY_DOC_PATH.read_text() != expected_entity_doc:
-        fail("08_entity_artifact_and_schema_ownership.md drifted from the canonical builder render.")
+        fail(
+            "08_entity_artifact_and_schema_ownership.md drifted from the canonical builder render."
+        )
     if builder.BOUNDARY_DOC_PATH.read_text() != expected_boundary_doc:
-        fail("08_truth_projection_control_boundary_matrix.md drifted from the canonical builder render.")
+        fail(
+            "08_truth_projection_control_boundary_matrix.md drifted from the canonical builder render."
+        )
     if builder.LIFECYCLE_DOC_PATH.read_text() != expected_lifecycle_doc:
-        fail("08_mutability_and_lifecycle_ownership_notes.md drifted from the canonical builder render.")
+        fail(
+            "08_mutability_and_lifecycle_ownership_notes.md drifted from the canonical builder render."
+        )
     if builder.RELATIONSHIP_DIAGRAM_PATH.read_text() != expected_mermaid:
         fail("08_entity_artifact_relationships.mmd drifted from the canonical builder render.")
 
@@ -323,7 +329,9 @@ def main() -> int:
                 f"Entity `{row['object_name']}` has invalid visibility classes: {unexpected_visibility}"
             )
 
-    expected_data_model_names = sorted(entry.object_name for entry in builder.parse_data_model_entries()[0])
+    expected_data_model_names = sorted(
+        entry.object_name for entry in builder.parse_data_model_entries()[0]
+    )
     missing_data_model_names = sorted(set(expected_data_model_names) - set(object_names))
     if missing_data_model_names:
         fail(
@@ -367,7 +375,9 @@ def main() -> int:
     actual_projection_rows = actual_read_model_projection_index["rows"]
     projection_names = [row["object_name"] for row in actual_projection_rows]
     if projection_names != sorted(projection_names):
-        fail("read_model_projection_index.json rows are not sorted deterministically by object_name.")
+        fail(
+            "read_model_projection_index.json rows are not sorted deterministically by object_name."
+        )
     for row in actual_projection_rows:
         for field_name in PROJECTION_FIELDS:
             if field_name not in row:
@@ -415,7 +425,9 @@ def main() -> int:
     for object_name in sorted(state_machine_map):
         row = next(item for item in actual_lifecycle_rows if item["object_name"] == object_name)
         if row["coverage_class"] != "explicit":
-            fail(f"State-machine object `{object_name}` is not marked explicit in lifecycle coverage.")
+            fail(
+                f"State-machine object `{object_name}` is not marked explicit in lifecycle coverage."
+            )
         if not row["state_machine_refs"]:
             fail(f"State-machine object `{object_name}` has no state_machine_refs.")
 
@@ -428,9 +440,13 @@ def main() -> int:
             if field_name not in row:
                 fail(f"Boundary row `{row.get('object_name')}` is missing `{field_name}`.")
         if row["object_kind"] not in builder.OBJECT_KINDS:
-            fail(f"Boundary row `{row['object_name']}` has invalid object_kind `{row['object_kind']}`.")
+            fail(
+                f"Boundary row `{row['object_name']}` has invalid object_kind `{row['object_kind']}`."
+            )
         if row["truth_class"] not in builder.TRUTH_CLASSES:
-            fail(f"Boundary row `{row['object_name']}` has invalid truth_class `{row['truth_class']}`.")
+            fail(
+                f"Boundary row `{row['object_name']}` has invalid truth_class `{row['truth_class']}`."
+            )
 
     artifact_rows = actual_artifact_catalog["rows"]
     if any(row["object_kind"] == "mutable_entity" for row in artifact_rows):
@@ -441,9 +457,9 @@ def main() -> int:
         "object_count": len(entity_rows),
         "schema_count": len(actual_schema_rows),
         "projection_row_count": len(actual_projection_rows),
-        "lifecycle_explicit_count": Counter(
-            row["coverage_class"] for row in actual_lifecycle_rows
-        )["explicit"],
+        "lifecycle_explicit_count": Counter(row["coverage_class"] for row in actual_lifecycle_rows)[
+            "explicit"
+        ],
         "ambiguity_row_count": len(ambiguous_rows),
     }
     print(json.dumps(summary, indent=2, sort_keys=True))

@@ -1062,7 +1062,12 @@ CALL_LANE_MAP = {
 EVENT_CORRELATION_OVERRIDES = {
     "GateEvaluated": {"gate_code"},
     "WorkflowOpened": {"workflow_item_id"},
-    "SubmissionAttempted": {"submission_record_id", "authority_operation_id", "idempotency_key", "request_hash"},
+    "SubmissionAttempted": {
+        "submission_record_id",
+        "authority_operation_id",
+        "idempotency_key",
+        "request_hash",
+    },
     "SubmissionConfirmed": {"submission_record_id", "authority_operation_id"},
     "SubmissionRejected": {"submission_record_id", "authority_operation_id"},
     "SubmissionUnknown": {"submission_record_id", "authority_operation_id"},
@@ -1194,9 +1199,13 @@ def write_jsonl(path: Path, rows: Iterable[dict[str, Any]]) -> None:
 
 def load_run_engine_blocks() -> list[PhaseBlock]:
     lines = (ALGORITHM_DIR / "core_engine.md").read_text().splitlines()
-    start = next(index for index, line in enumerate(lines) if line.startswith("### Procedure: RUN_ENGINE"))
+    start = next(
+        index for index, line in enumerate(lines) if line.startswith("### Procedure: RUN_ENGINE")
+    )
     end = next(
-        index for index, line in enumerate(lines[start + 1 :], start + 1) if line.startswith("## Execution helper constraints used above")
+        index
+        for index, line in enumerate(lines[start + 1 :], start + 1)
+        if line.startswith("## Execution helper constraints used above")
     )
     headers: list[tuple[int, int, str]] = []
     for index in range(start + 1, end):
@@ -1316,7 +1325,11 @@ def helper_reason(call_name: str) -> str:
         return "Primitive orchestration helper used inline by the core pseudocode."
     if call_name.startswith("BUILD_") and call_name.endswith("_STATE"):
         return "Read-side projection builder used by live experience composition."
-    if call_name.startswith("BUILD_") or call_name.startswith("LOAD_") or call_name.startswith("SELECT_"):
+    if (
+        call_name.startswith("BUILD_")
+        or call_name.startswith("LOAD_")
+        or call_name.startswith("SELECT_")
+    ):
         return "Derived orchestration helper that is constrained by the surrounding core-engine contract."
     if call_name.startswith("SYNC_") or call_name.startswith("NORMALIZE_"):
         return "Command-to-read-side helper constrained by the low-noise experience contract."
@@ -1365,7 +1378,9 @@ def extract_manifest_mutations(call_names: Iterable[str]) -> list[str]:
 
 
 def extract_live_experience_modules(statement: str) -> list[str]:
-    return ordered_unique(match.group(1) for match in re.finditer(r'MODULE_UPDATE\(\s*"([^"]+)"', statement))
+    return ordered_unique(
+        match.group(1) for match in re.finditer(r'MODULE_UPDATE\(\s*"([^"]+)"', statement)
+    )
 
 
 def extract_return_path(statement: str) -> str | None:
@@ -1506,14 +1521,20 @@ def build_step_records(block: PhaseBlock, modules: set[str]) -> list[StepRecord]
     for statement in parse_statements(block):
         call_names = extract_call_names(statement.text)
         call_resolutions = [classify_call(call_name, modules) for call_name in call_names]
-        module_calls = [item["call_name"] for item in call_resolutions if item["classification"] == "module"]
+        module_calls = [
+            item["call_name"] for item in call_resolutions if item["classification"] == "module"
+        ]
         helper_calls = [item for item in call_resolutions if item["classification"] == "helper"]
         event_codes = extract_events(statement.text)
         artifact_writes = extract_artifacts(statement.text)
         gate_codes = extract_gates(call_names)
         live_modules = extract_live_experience_modules(statement.text)
-        kind = statement_kind(statement.text, event_codes, artifact_writes, gate_codes, live_modules)
-        lane_tags = derive_lane_tags(block.phase_number, kind, call_names, event_codes, artifact_writes, live_modules)
+        kind = statement_kind(
+            statement.text, event_codes, artifact_writes, gate_codes, live_modules
+        )
+        lane_tags = derive_lane_tags(
+            block.phase_number, kind, call_names, event_codes, artifact_writes, live_modules
+        )
         records.append(
             StepRecord(
                 row_id=f"{block.phase_id}-S{statement.order_in_phase:03d}",
@@ -1540,9 +1561,12 @@ def build_step_records(block: PhaseBlock, modules: set[str]) -> list[StepRecord]
                 notes=tuple(
                     note
                     for note in [
-                        "Read-side only `masking_context` prohibition." if "masking_context" in statement.text else "",
+                        "Read-side only `masking_context` prohibition."
+                        if "masking_context" in statement.text
+                        else "",
                         "Access branch preserves `raw_requested_scope[]` for audit while using `runtime_scope[]` downstream."
-                        if "raw_requested_scope" in statement.text or "runtime_scope" in statement.text
+                        if "raw_requested_scope" in statement.text
+                        or "runtime_scope" in statement.text
                         else "",
                     ]
                     if note
@@ -1632,7 +1656,9 @@ def build_phase_record(block: PhaseBlock, step_records: list[StepRecord]) -> dic
     artifact_writes = ordered_unique(
         artifact for record in step_records for artifact in record.artifact_writes
     )
-    gate_evaluations = ordered_unique(gate for record in step_records for gate in record.gate_evaluations)
+    gate_evaluations = ordered_unique(
+        gate for record in step_records for gate in record.gate_evaluations
+    )
     manifest_mutations = ordered_unique(
         mutation for record in step_records for mutation in record.manifest_mutations
     )
@@ -1644,7 +1670,9 @@ def build_phase_record(block: PhaseBlock, step_records: list[StepRecord]) -> dic
         "phase_id": block.phase_id,
         "phase_name": block.phase_name,
         "ordered_index": block.phase_number,
-        "source_heading_or_logical_block": line_ref(CORE_ENGINE_PATH, block.source_line_start, block.phase_name),
+        "source_heading_or_logical_block": line_ref(
+            CORE_ENGINE_PATH, block.source_line_start, block.phase_name
+        ),
         "source_line_start": block.source_line_start,
         "source_line_end": block.source_line_end,
         "entry_conditions": curation["entry_conditions"],
@@ -1705,7 +1733,9 @@ def event_correlation_keys(event_code: str) -> list[str]:
     return sorted(keys)
 
 
-def build_event_timeline(phase_records: list[dict[str, Any]], step_records: list[StepRecord]) -> list[dict[str, Any]]:
+def build_event_timeline(
+    phase_records: list[dict[str, Any]], step_records: list[StepRecord]
+) -> list[dict[str, Any]]:
     timeline: list[dict[str, Any]] = []
     phase_name_by_id = {phase["phase_id"]: phase["phase_name"] for phase in phase_records}
     for record in step_records:
@@ -1743,16 +1773,24 @@ def build_live_experience_map(phase_records: list[dict[str, Any]]) -> dict[str, 
                 ),
                 "composite_shell_surfaces": DEFAULT_COMPOSITE_SURFACES,
                 "posture_states": ordered_unique(
-                    entry["posture_state"] for entry in phase["live_experience_updates"] if entry["posture_state"]
+                    entry["posture_state"]
+                    for entry in phase["live_experience_updates"]
+                    if entry["posture_state"]
                 ),
                 "semantic_motions": ordered_unique(
-                    entry["semantic_motion"] for entry in phase["live_experience_updates"] if entry["semantic_motion"]
+                    entry["semantic_motion"]
+                    for entry in phase["live_experience_updates"]
+                    if entry["semantic_motion"]
                 ),
                 "cause_refs": ordered_unique(
-                    entry["cause_ref"] for entry in phase["live_experience_updates"] if entry["cause_ref"]
+                    entry["cause_ref"]
+                    for entry in phase["live_experience_updates"]
+                    if entry["cause_ref"]
                 ),
                 "phase_codes": ordered_unique(
-                    entry["phase_code"] for entry in phase["live_experience_updates"] if entry["phase_code"]
+                    entry["phase_code"]
+                    for entry in phase["live_experience_updates"]
+                    if entry["phase_code"]
                 ),
                 "command_vs_read_side_boundary": (
                     "Every `ExperienceDelta` remains read-side only; command truth and state transitions must already be durable."
@@ -1770,7 +1808,9 @@ def build_live_experience_map(phase_records: list[dict[str, Any]]) -> dict[str, 
     }
 
 
-def build_phase_index(phase_records: list[dict[str, Any]], step_records: list[StepRecord], modules: set[str]) -> dict[str, Any]:
+def build_phase_index(
+    phase_records: list[dict[str, Any]], step_records: list[StepRecord], modules: set[str]
+) -> dict[str, Any]:
     helper_catalog = ordered_unique(
         helper["call_name"] for record in step_records for helper in record.helper_calls
     )
@@ -1789,7 +1829,9 @@ def build_phase_index(phase_records: list[dict[str, Any]], step_records: list[St
             "transaction_primitive_count": sum(
                 1 for record in step_records if record.transaction_boundary_event is not None
             ),
-            "return_path_count": sum(1 for record in step_records if record.return_path is not None),
+            "return_path_count": sum(
+                1 for record in step_records if record.return_path is not None
+            ),
         },
         "mandatory_edge_cases": [
             "`raw_requested_scope[]` is preserved for audit while `runtime_scope[]` drives downstream semantics.",
@@ -1887,11 +1929,16 @@ def write_event_csv(rows: list[dict[str, Any]]) -> None:
 def short_phase_summary_row(phase: dict[str, Any]) -> str:
     gates = ", ".join(phase["gate_evaluations"]) if phase["gate_evaluations"] else "n/a"
     returns = ", ".join(phase["return_paths"]) if phase["return_paths"] else "nonterminal"
-    live = ", ".join(
-        ordered_unique(
-            module for entry in phase["live_experience_updates"] for module in entry["surface_modules"]
-        )[:3]
-    ) or "n/a"
+    live = (
+        ", ".join(
+            ordered_unique(
+                module
+                for entry in phase["live_experience_updates"]
+                for module in entry["surface_modules"]
+            )[:3]
+        )
+        or "n/a"
+    )
     return (
         f"| `{phase['phase_id']}` | {phase['phase_name']} | "
         f"{', '.join(phase['lane_focus'])} | {gates} | "
@@ -1899,7 +1946,9 @@ def short_phase_summary_row(phase: dict[str, Any]) -> str:
     )
 
 
-def write_swimlane_doc(phase_index: dict[str, Any], branch_conditions: dict[str, Any], live_map: dict[str, Any]) -> None:
+def write_swimlane_doc(
+    phase_index: dict[str, Any], branch_conditions: dict[str, Any], live_map: dict[str, Any]
+) -> None:
     summary = phase_index["summary"]
     lines = [
         "# Run Engine End-to-End Execution Swimlane",
@@ -2004,7 +2053,11 @@ def write_phase_contracts_doc(phase_index: dict[str, Any]) -> None:
             lines.append("- No phase-local `SYNC_LIVE_EXPERIENCE(...)` call is emitted here.")
         else:
             for update in live_updates:
-                surfaces = ", ".join(update["surface_modules"]) if update["surface_modules"] else "derived composite shell only"
+                surfaces = (
+                    ", ".join(update["surface_modules"])
+                    if update["surface_modules"]
+                    else "derived composite shell only"
+                )
                 detail = f"{surfaces}; posture={update['posture_state'] or 'n/a'}; motion={update['semantic_motion'] or 'n/a'}"
                 if update["cause_ref"]:
                     detail = f"{update['cause_ref']}: {detail}"
@@ -2046,13 +2099,13 @@ def write_mermaid(phase_index: dict[str, Any], branch_conditions: dict[str, Any]
     branch_by_id = {row["branch_id"]: row for row in branch_conditions["rows"]}
     lines = [
         "flowchart TB",
-        '  classDef phase fill:#121721,stroke:#5AA9FF,color:#F5F7FA,stroke-width:1px;',
-        '  classDef branch fill:#181E29,stroke:#E7B04B,color:#F5F7FA,stroke-width:1px;',
-        '  classDef terminal fill:#181E29,stroke:#E96B6B,color:#F5F7FA,stroke-width:1px;',
+        "  classDef phase fill:#121721,stroke:#5AA9FF,color:#F5F7FA,stroke-width:1px;",
+        "  classDef branch fill:#181E29,stroke:#E7B04B,color:#F5F7FA,stroke-width:1px;",
+        "  classDef terminal fill:#181E29,stroke:#E96B6B,color:#F5F7FA,stroke-width:1px;",
         "",
     ]
     for phase in phase_index["phases"]:
-        label = f'{phase["phase_id"]} {phase["phase_name"]}\\n{" / ".join(phase["lane_focus"][:2])}'
+        label = f"{phase['phase_id']} {phase['phase_name']}\\n{' / '.join(phase['lane_focus'][:2])}"
         lines.append(f'  {phase["phase_id"]}["{label}"]:::phase')
     lines.extend(
         [
@@ -2090,7 +2143,9 @@ def write_mermaid(phase_index: dict[str, Any], branch_conditions: dict[str, Any]
 
 
 def ensure_atlas_scaffold() -> None:
-    missing = [path for path in [ATLAS_INDEX_PATH, ATLAS_STYLES_PATH, ATLAS_APP_PATH] if not path.exists()]
+    missing = [
+        path for path in [ATLAS_INDEX_PATH, ATLAS_STYLES_PATH, ATLAS_APP_PATH] if not path.exists()
+    ]
     if missing:
         missing_list = ", ".join(repo_rel(path) for path in missing)
         raise SystemExit(f"Atlas scaffold missing required static file(s): {missing_list}")
@@ -2103,10 +2158,7 @@ def build_outputs() -> dict[str, Any]:
     phase_to_steps: dict[str, list[StepRecord]] = defaultdict(list)
     for record in step_records:
         phase_to_steps[record.phase_id].append(record)
-    phase_records = [
-        build_phase_record(block, phase_to_steps[block.phase_id])
-        for block in blocks
-    ]
+    phase_records = [build_phase_record(block, phase_to_steps[block.phase_id]) for block in blocks]
     branch_conditions = branch_conditions_payload()
     live_map = build_live_experience_map(phase_records)
     phase_index = build_phase_index(phase_records, step_records, modules)

@@ -18,10 +18,7 @@ import {
   transitionStep,
   type StepContract,
 } from "../../../core/step_contract.js";
-import {
-  rankSelectors,
-  type SelectorManifest,
-} from "../../../core/selector_contract.js";
+import { rankSelectors, type SelectorManifest } from "../../../core/selector_contract.js";
 
 export const IDP_PROVIDER_ID = "oidc-external-idp-control-plane";
 export const IDP_POLICY_FLOW_ID = "idp-role-scope-mfa-session-policy";
@@ -54,9 +51,7 @@ export type IdpSurfaceFamily =
   | "BROWSER_LIMITED_ENTRY"
   | "BROWSER_OR_MOBILE_TRANSFER";
 
-export type IdpPolicyFlowOutcome =
-  | "IDP_POLICIES_READY"
-  | "IDP_POLICY_DRIFT_REQUIRES_REVIEW";
+export type IdpPolicyFlowOutcome = "IDP_POLICIES_READY" | "IDP_POLICY_DRIFT_REQUIRES_REVIEW";
 
 export interface SourceRef {
   source_ref: string;
@@ -80,9 +75,7 @@ export interface IdpRoleRow {
   allowed_surface_families: IdpSurfaceFamily[];
   baseline_scope_refs: string[];
   requestable_scope_refs: string[];
-  assignment_posture:
-    | "HUMAN_MEMBERSHIP_ROLE"
-    | "SERVICE_CLIENT_GRANT_ROLE";
+  assignment_posture: "HUMAN_MEMBERSHIP_ROLE" | "SERVICE_CLIENT_GRANT_ROLE";
   engine_owned_dimensions: string[];
   source_refs: SourceRef[];
   notes: string[];
@@ -163,16 +156,8 @@ export interface IdpStepUpTriggerRow {
   step_up_cell: IdpDecisionCell;
   approval_cell: IdpDecisionCell;
   authn_level_on_success: "BASIC" | "MFA" | "STEP_UP";
-  step_up_state_on_entry:
-    | "NOT_REQUIRED"
-    | "REQUIRED_PENDING"
-    | "SATISFIED"
-    | "EXPIRED";
-  step_up_state_on_success:
-    | "NOT_REQUIRED"
-    | "REQUIRED_PENDING"
-    | "SATISFIED"
-    | "EXPIRED";
+  step_up_state_on_entry: "NOT_REQUIRED" | "REQUIRED_PENDING" | "SATISFIED" | "EXPIRED";
+  step_up_state_on_success: "NOT_REQUIRED" | "REQUIRED_PENDING" | "SATISFIED" | "EXPIRED";
   assurance_requirement: string;
   revalidation_requirements: string[];
   invalidation_events: string[];
@@ -215,18 +200,12 @@ export interface IdpSessionPolicyRow {
   allowed_surface_families: IdpSurfaceFamily[];
   session_carrier: string;
   auth0_application_types: string[];
-  auth0_cookie_mode:
-    | "NON_PERSISTENT"
-    | "PERSISTENT"
-    | "NOT_APPLICABLE_NON_BROWSER";
+  auth0_cookie_mode: "NON_PERSISTENT" | "PERSISTENT" | "NOT_APPLICABLE_NON_BROWSER";
   default_idle_timeout_hours: number | null;
   default_absolute_timeout_hours: number | null;
   action_idle_timeout_hours: number | null;
   action_absolute_timeout_hours: number | null;
-  refresh_token_rotation:
-    | "DISABLED"
-    | "ROTATING_EXPIRING"
-    | "NOT_APPLICABLE";
+  refresh_token_rotation: "DISABLED" | "ROTATING_EXPIRING" | "NOT_APPLICABLE";
   refresh_token_lifetime_seconds: number | null;
   refresh_token_leeway_seconds: number | null;
   offline_access_allowed: boolean;
@@ -389,14 +368,12 @@ function createProviderSelectionRecord(): ProviderSelectionRecord {
     ],
     source_refs: [
       {
-        source_ref:
-          "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
+        source_ref: "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
         rationale:
           "Taxat actor classes split client, tenant-human, service, and external boundaries before authorization is evaluated.",
       },
       {
-        source_ref:
-          "Algorithm/actor_and_authority_model.md::L326[3.9_Policy_decision_model]",
+        source_ref: "Algorithm/actor_and_authority_model.md::L326[3.9_Policy_decision_model]",
         rationale:
           "The IdP may bootstrap authentication posture, but the engine still owns the final ALLOW or REQUIRE_STEP_UP or REQUIRE_APPROVAL or DENY decision.",
       },
@@ -407,8 +384,7 @@ function createProviderSelectionRecord(): ProviderSelectionRecord {
           "Browser, native, machine, and limited-entry session channels must remain distinct and challenge rotation must invalidate stale pre-step-up state.",
       },
       {
-        source_ref:
-          "https://auth0.com/docs/manage-users/access-control/rbac",
+        source_ref: "https://auth0.com/docs/manage-users/access-control/rbac",
         rationale:
           "Current Auth0 RBAC guidance allows coarse role and permission assignment while keeping richer authorization in the application.",
       },
@@ -456,8 +432,7 @@ const ROLE_ROWS: IdpRoleRow[] = [
     engine_owned_dimensions: ENGINE_OWNED_DIMENSIONS,
     source_refs: [
       {
-        source_ref:
-          "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
+        source_ref: "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
         rationale:
           "Portal viewer and contributor are distinct actor classes, but both remain coarse client-portal entry postures at the IdP boundary.",
       },
@@ -468,9 +443,7 @@ const ROLE_ROWS: IdpRoleRow[] = [
           "Portal read and contribution capabilities are route-level affordances, not legal delegation truth.",
       },
     ],
-    notes: [
-      "This role never proves delegation to a specific client or authority scope.",
-    ],
+    notes: ["This role never proves delegation to a specific client or authority scope."],
   },
   {
     role_ref: "role_portal_signatory",
@@ -478,17 +451,13 @@ const ROLE_ROWS: IdpRoleRow[] = [
     label: "Portal signatory",
     actor_classes: ["CLIENT_SIGNATORY"],
     allowed_surface_families: ["PORTAL_BROWSER", "BROWSER_LIMITED_ENTRY"],
-    baseline_scope_refs: [
-      "scope.portal.read",
-      "scope.portal.signatory.base",
-    ],
+    baseline_scope_refs: ["scope.portal.read", "scope.portal.signatory.base"],
     requestable_scope_refs: ["scope.elevated.client_signoff"],
     assignment_posture: "HUMAN_MEMBERSHIP_ROLE",
     engine_owned_dimensions: ENGINE_OWNED_DIMENSIONS,
     source_refs: [
       {
-        source_ref:
-          "Algorithm/actor_and_authority_model.md::L251[client_signatory_step_up_rule]",
+        source_ref: "Algorithm/actor_and_authority_model.md::L251[client_signatory_step_up_rule]",
         rationale:
           "CLIENT_SIGNATORY remains separate because sign-off may require STEP_UP_VERIFIED assurance.",
       },
@@ -509,17 +478,13 @@ const ROLE_ROWS: IdpRoleRow[] = [
     label: "Operator workspace",
     actor_classes: ["PREPARER", "REVIEWER"],
     allowed_surface_families: ["OPERATOR_BROWSER", "NATIVE_MACOS_OPERATOR"],
-    baseline_scope_refs: [
-      "scope.operator.workspace",
-      "scope.audit.read.masked",
-    ],
+    baseline_scope_refs: ["scope.operator.workspace", "scope.audit.read.masked"],
     requestable_scope_refs: ["scope.elevated.authority_link"],
     assignment_posture: "HUMAN_MEMBERSHIP_ROLE",
     engine_owned_dimensions: ENGINE_OWNED_DIMENSIONS,
     source_refs: [
       {
-        source_ref:
-          "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
+        source_ref: "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
         rationale:
           "PREPARER and REVIEWER are tenant-side humans with shared operator-shell entry posture but different server-side legality later on.",
       },
@@ -540,10 +505,7 @@ const ROLE_ROWS: IdpRoleRow[] = [
     label: "Governance admin",
     actor_classes: ["TENANT_ADMIN", "APPROVER"],
     allowed_surface_families: ["OPERATOR_BROWSER", "NATIVE_MACOS_OPERATOR"],
-    baseline_scope_refs: [
-      "scope.operator.workspace",
-      "scope.governance.read",
-    ],
+    baseline_scope_refs: ["scope.operator.workspace", "scope.governance.read"],
     requestable_scope_refs: [
       "scope.elevated.authority_link",
       "scope.elevated.override_approval",
@@ -585,21 +547,17 @@ const ROLE_ROWS: IdpRoleRow[] = [
     engine_owned_dimensions: ENGINE_OWNED_DIMENSIONS,
     source_refs: [
       {
-        source_ref:
-          "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
+        source_ref: "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
         rationale:
           "AUDITOR is a distinct tenant-side human actor class and should not inherit governance mutation scopes by default.",
       },
       {
         source_ref:
           "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
-        rationale:
-          "Unmasked provenance export is elevated even for auditors.",
+        rationale: "Unmasked provenance export is elevated even for auditors.",
       },
     ],
-    notes: [
-      "Unmasked export remains elevated and request-scoped rather than baseline.",
-    ],
+    notes: ["Unmasked export remains elevated and request-scoped rather than baseline."],
   },
   {
     role_ref: "role_support_operator",
@@ -607,10 +565,7 @@ const ROLE_ROWS: IdpRoleRow[] = [
     label: "Support operator",
     actor_classes: ["SUPPORT_OPERATOR"],
     allowed_surface_families: ["OPERATOR_BROWSER", "NATIVE_MACOS_OPERATOR"],
-    baseline_scope_refs: [
-      "scope.support.workspace",
-      "scope.audit.read.masked",
-    ],
+    baseline_scope_refs: ["scope.support.workspace", "scope.audit.read.masked"],
     requestable_scope_refs: [
       "scope.elevated.out_of_band_annotation",
       "scope.elevated.unmasked_export",
@@ -619,21 +574,17 @@ const ROLE_ROWS: IdpRoleRow[] = [
     engine_owned_dimensions: ENGINE_OWNED_DIMENSIONS,
     source_refs: [
       {
-        source_ref:
-          "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
+        source_ref: "Algorithm/actor_and_authority_model.md::L62[3.3_Actor_classes]",
         rationale:
           "SUPPORT_OPERATOR is a separate human operator class and should not be collapsed into governance admin.",
       },
       {
-        source_ref:
-          "Algorithm/actor_and_authority_model.md::L539[3.12_Authority_precedence_rules]",
+        source_ref: "Algorithm/actor_and_authority_model.md::L539[3.12_Authority_precedence_rules]",
         rationale:
           "Out-of-band annotations stay distinct from authority truth and therefore require their own bounded elevated scope.",
       },
     ],
-    notes: [
-      "Support posture does not authorize silent truth rewrites or retention mutation.",
-    ],
+    notes: ["Support posture does not authorize silent truth rewrites or retention mutation."],
   },
   {
     role_ref: "role_service_runtime",
@@ -657,8 +608,7 @@ const ROLE_ROWS: IdpRoleRow[] = [
     engine_owned_dimensions: ENGINE_OWNED_DIMENSIONS,
     source_refs: [
       {
-        source_ref:
-          "Algorithm/actor_and_authority_model.md::L555[3.13_Machine-actor_rules]",
+        source_ref: "Algorithm/actor_and_authority_model.md::L555[3.13_Machine-actor_rules]",
         rationale:
           "Service principals remain first-class actors but never satisfy human step-up or approval paths.",
       },
@@ -669,9 +619,7 @@ const ROLE_ROWS: IdpRoleRow[] = [
           "Machine automation uses short-lived non-browser credentials and must not masquerade as an interactive session.",
       },
     ],
-    notes: [
-      "Runtime service roles never imply human delegation or signatory legality.",
-    ],
+    notes: ["Runtime service roles never imply human delegation or signatory legality."],
   },
   {
     role_ref: "role_provider_bootstrap_service",
@@ -685,16 +633,14 @@ const ROLE_ROWS: IdpRoleRow[] = [
     engine_owned_dimensions: ENGINE_OWNED_DIMENSIONS,
     source_refs: [
       {
-        source_ref:
-          "PROMPT/Checklist.md::L72[pc_0039]",
+        source_ref: "PROMPT/Checklist.md::L72[pc_0039]",
         rationale:
           "The provider bootstrap boundary already exists as a distinct machine client family and needs its own coarse management scope.",
       },
       {
         source_ref:
           "Algorithm/security_and_runtime_hardening_contract.md::L50[3._Secret_key_and_token_handling]",
-        rationale:
-          "IdP admin material must stay separated from general runtime application state.",
+        rationale: "IdP admin material must stay separated from general runtime application state.",
       },
     ],
     notes: [
@@ -709,11 +655,7 @@ const SCOPE_ROWS: IdpScopeRow[] = [
     provider_permission_name: "portal:read",
     label: "Portal read",
     scope_class: "BASELINE",
-    allowed_actor_classes: [
-      "CLIENT_VIEWER",
-      "CLIENT_CONTRIBUTOR",
-      "CLIENT_SIGNATORY",
-    ],
+    allowed_actor_classes: ["CLIENT_VIEWER", "CLIENT_CONTRIBUTOR", "CLIENT_SIGNATORY"],
     allowed_surface_families: ["PORTAL_BROWSER", "BROWSER_LIMITED_ENTRY"],
     idp_enforcement_meaning:
       "Allows the client portal shell to open after login; it does not prove delegation to any specific reporting subject.",
@@ -723,8 +665,7 @@ const SCOPE_ROWS: IdpScopeRow[] = [
       {
         source_ref:
           "Algorithm/customer_client_portal_experience_contract.md::L29[portal_actor_classes]",
-        rationale:
-          "Portal viewer-style access is a coarse client-facing posture.",
+        rationale: "Portal viewer-style access is a coarse client-facing posture.",
       },
     ],
     notes: [],
@@ -767,8 +708,7 @@ const SCOPE_ROWS: IdpScopeRow[] = [
       "The engine still decides if a particular approval pack is signable and whether fresh step-up proof is mandatory.",
     source_refs: [
       {
-        source_ref:
-          "Algorithm/actor_and_authority_model.md::L251[client_signatory_step_up_rule]",
+        source_ref: "Algorithm/actor_and_authority_model.md::L251[client_signatory_step_up_rule]",
         rationale:
           "CLIENT_SIGNATORY is distinct from viewer or contributor and may later need STEP_UP_VERIFIED assurance.",
       },
@@ -789,8 +729,7 @@ const SCOPE_ROWS: IdpScopeRow[] = [
       "SUPPORT_OPERATOR",
     ],
     allowed_surface_families: ["OPERATOR_BROWSER", "NATIVE_MACOS_OPERATOR"],
-    idp_enforcement_meaning:
-      "Allows the internal operator shell to open after sign-in.",
+    idp_enforcement_meaning: "Allows the internal operator shell to open after sign-in.",
     engine_authorization_boundary:
       "Per-client delegation, authority-link safety, and command legality remain server-authored.",
     source_refs: [
@@ -844,10 +783,8 @@ const SCOPE_ROWS: IdpScopeRow[] = [
       "Unmasked export still requires an elevated request plus server-side legality.",
     source_refs: [
       {
-        source_ref:
-          "Algorithm/actor_and_authority_model.md::L326[3.9_Policy_decision_model]",
-        rationale:
-          "ALLOW_MASKED is a first-class decision that must stay explicit.",
+        source_ref: "Algorithm/actor_and_authority_model.md::L326[3.9_Policy_decision_model]",
+        rationale: "ALLOW_MASKED is a first-class decision that must stay explicit.",
       },
     ],
     notes: [],
@@ -896,10 +833,8 @@ const SCOPE_ROWS: IdpScopeRow[] = [
       "The engine still checks per-command PrincipalContext, idempotency, and service scope.",
     source_refs: [
       {
-        source_ref:
-          "Algorithm/actor_and_authority_model.md::L555[3.13_Machine-actor_rules]",
-        rationale:
-          "Service principals stay first-class actors but never substitute for humans.",
+        source_ref: "Algorithm/actor_and_authority_model.md::L555[3.13_Machine-actor_rules]",
+        rationale: "Service principals stay first-class actors but never substitute for humans.",
       },
     ],
     notes: [],
@@ -917,8 +852,7 @@ const SCOPE_ROWS: IdpScopeRow[] = [
       "This scope is outside product-runtime authorization and remains limited to provisioning automation.",
     source_refs: [
       {
-        source_ref:
-          "PROMPT/CARDS/pc_0039.md",
+        source_ref: "PROMPT/CARDS/pc_0039.md",
         rationale:
           "The earlier IdP topology card established a separate provider-management bootstrap client family.",
       },
@@ -940,8 +874,7 @@ const SCOPE_ROWS: IdpScopeRow[] = [
       {
         source_ref:
           "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
-        rationale:
-          "Linking or re-linking software to the authority is explicitly elevated.",
+        rationale: "Linking or re-linking software to the authority is explicitly elevated.",
       },
       {
         source_ref:
@@ -967,8 +900,7 @@ const SCOPE_ROWS: IdpScopeRow[] = [
       {
         source_ref:
           "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
-        rationale:
-          "Override approval is explicitly elevated and bounded.",
+        rationale: "Override approval is explicitly elevated and bounded.",
       },
     ],
     notes: [],
@@ -986,8 +918,7 @@ const SCOPE_ROWS: IdpScopeRow[] = [
       "The engine still validates approval state, trust, authority link, packet readiness, and send-time identity.",
     source_refs: [
       {
-        source_ref:
-          "Algorithm/authority_interaction_protocol.md::L509[9.5_Preflight_sequence]",
+        source_ref: "Algorithm/authority_interaction_protocol.md::L509[9.5_Preflight_sequence]",
         rationale:
           "Submission requires a current preflight sequence, not just a coarse elevated scope.",
       },
@@ -1007,10 +938,8 @@ const SCOPE_ROWS: IdpScopeRow[] = [
       "The engine still keeps UNKNOWN and OUT_OF_BAND truth distinct from confirmed authority acknowledgement.",
     source_refs: [
       {
-        source_ref:
-          "Algorithm/actor_and_authority_model.md::L539[3.12_Authority_precedence_rules]",
-        rationale:
-          "Out-of-band truth cannot silently become confirmed authority truth.",
+        source_ref: "Algorithm/actor_and_authority_model.md::L539[3.12_Authority_precedence_rules]",
+        rationale: "Out-of-band truth cannot silently become confirmed authority truth.",
       },
     ],
     notes: [],
@@ -1020,12 +949,7 @@ const SCOPE_ROWS: IdpScopeRow[] = [
     provider_permission_name: "elevated:unmasked-export",
     label: "Elevated unmasked export",
     scope_class: "ELEVATED",
-    allowed_actor_classes: [
-      "TENANT_ADMIN",
-      "APPROVER",
-      "AUDITOR",
-      "SUPPORT_OPERATOR",
-    ],
+    allowed_actor_classes: ["TENANT_ADMIN", "APPROVER", "AUDITOR", "SUPPORT_OPERATOR"],
     allowed_surface_families: ["OPERATOR_BROWSER", "NATIVE_MACOS_OPERATOR"],
     idp_enforcement_meaning:
       "Requests fresh MFA-capable posture before full evidence or unmasked provenance export.",
@@ -1035,8 +959,7 @@ const SCOPE_ROWS: IdpScopeRow[] = [
       {
         source_ref:
           "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
-        rationale:
-          "Unmasked export is explicitly elevated.",
+        rationale: "Unmasked export is explicitly elevated.",
       },
     ],
     notes: [],
@@ -1054,8 +977,7 @@ const SCOPE_ROWS: IdpScopeRow[] = [
       "The engine still verifies dependency topology hash, simulation basis hash, and bounded_safe_mutation posture.",
     source_refs: [
       {
-        source_ref:
-          "Algorithm/actor_and_authority_model.md::L326[3.9_Policy_decision_model]",
+        source_ref: "Algorithm/actor_and_authority_model.md::L326[3.9_Policy_decision_model]",
         rationale:
           "Governance mutation-capable actions preserve extra hashes and approval requirements beyond IdP posture.",
       },
@@ -1077,8 +999,7 @@ const SCOPE_ROWS: IdpScopeRow[] = [
       {
         source_ref:
           "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
-        rationale:
-          "Retention exceptions are explicitly elevated and bounded.",
+        rationale: "Retention exceptions are explicitly elevated and bounded.",
       },
     ],
     notes: [],
@@ -1180,8 +1101,7 @@ const INVALIDATION_EVENTS: IdpInvalidationEventRow[] = [
       "Treat logout as explicit session revocation.",
       "Audit the revocation and clear interactive session material.",
     ],
-    effects_on_command_acceptance:
-      "Future interactive writes require a new authenticated session.",
+    effects_on_command_acceptance: "Future interactive writes require a new authenticated session.",
     effects_on_resume_and_upload:
       "Browser or native resumability remains invalid until the next session re-establishes lawful scope.",
     continuity_rule:
@@ -1287,8 +1207,7 @@ const SESSION_ROWS: IdpSessionPolicyRow[] = [
       "SUPPORT_OPERATOR",
     ],
     allowed_surface_families: ["OPERATOR_BROWSER"],
-    session_carrier:
-      "Secure HttpOnly same-site session cookie plus anti-CSRF binding.",
+    session_carrier: "Secure HttpOnly same-site session cookie plus anti-CSRF binding.",
     auth0_application_types: ["REGULAR_WEB_APPLICATION"],
     auth0_cookie_mode: "NON_PERSISTENT",
     default_idle_timeout_hours: 4,
@@ -1302,16 +1221,10 @@ const SESSION_ROWS: IdpSessionPolicyRow[] = [
     base_authn_level: "BASIC",
     escalated_authn_level: "STEP_UP",
     post_step_up_rotation: true,
-    invalidation_events: [
-      "STEP_UP_COMPLETED",
-      "SESSION_REVOKED",
-      "TENANT_SWITCH",
-      "LOGOUT",
-    ],
+    invalidation_events: ["STEP_UP_COMPLETED", "SESSION_REVOKED", "TENANT_SWITCH", "LOGOUT"],
     entry_posture:
       "OIDC/OAuth human sign-in through the external IdP, then server-mediated interactive session resolution.",
-    storage_boundary:
-      "Backend session store plus browser-safe derivable cache only.",
+    storage_boundary: "Backend session store plus browser-safe derivable cache only.",
     source_refs: [
       "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
       "Algorithm/security_and_runtime_hardening_contract.md::L30[2._Identity_session_and_command_trust]",
@@ -1326,11 +1239,7 @@ const SESSION_ROWS: IdpSessionPolicyRow[] = [
     flow_id: "browser_portal_user_interactive",
     label: "Browser portal session",
     channel: "BROWSER",
-    actor_classes: [
-      "CLIENT_VIEWER",
-      "CLIENT_CONTRIBUTOR",
-      "CLIENT_SIGNATORY",
-    ],
+    actor_classes: ["CLIENT_VIEWER", "CLIENT_CONTRIBUTOR", "CLIENT_SIGNATORY"],
     allowed_surface_families: ["PORTAL_BROWSER"],
     session_carrier:
       "Secure browser session cookie plus anti-CSRF binding after authenticated upgrade.",
@@ -1356,8 +1265,7 @@ const SESSION_ROWS: IdpSessionPolicyRow[] = [
     ],
     entry_posture:
       "Normal sign-in or post-invite upgrade into a fully authenticated portal session bound to one principal class and masking posture.",
-    storage_boundary:
-      "Server-authored session plus client-safe resumability only.",
+    storage_boundary: "Server-authored session plus client-safe resumability only.",
     source_refs: [
       "Algorithm/customer_client_portal_experience_contract.md::L340[Approval_and_sign-off_flow]",
       "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
@@ -1404,8 +1312,7 @@ const SESSION_ROWS: IdpSessionPolicyRow[] = [
     ],
     entry_posture:
       "System-browser or platform auth-session sign-in only; no embedded webview primary login.",
-    storage_boundary:
-      "Keychain and OS-protected tenant-bound cache only.",
+    storage_boundary: "Keychain and OS-protected tenant-bound cache only.",
     source_refs: [
       "Algorithm/macos_native_operator_workspace_blueprint.md::L372[7._Authentication_and_session_strategy]",
       "Algorithm/macos_native_operator_workspace_blueprint.md::L473[11._Security_and_runtime_posture_for_the_desktop_client]",
@@ -1432,8 +1339,7 @@ const SESSION_ROWS: IdpSessionPolicyRow[] = [
       "NOTIFICATION_SERVICE",
     ],
     allowed_surface_families: ["API_AUTOMATION"],
-    session_carrier:
-      "Short-lived machine credential plus explicit command_id and idempotency_key.",
+    session_carrier: "Short-lived machine credential plus explicit command_id and idempotency_key.",
     auth0_application_types: ["MACHINE_TO_MACHINE_APPLICATION"],
     auth0_cookie_mode: "NOT_APPLICABLE_NON_BROWSER",
     default_idle_timeout_hours: null,
@@ -1447,32 +1353,22 @@ const SESSION_ROWS: IdpSessionPolicyRow[] = [
     base_authn_level: "BASIC",
     escalated_authn_level: "BASIC",
     post_step_up_rotation: false,
-    invalidation_events: [
-      "SESSION_REVOKED",
-      "AUTHORITY_REBIND_OR_BINDING_DRIFT",
-    ],
+    invalidation_events: ["SESSION_REVOKED", "AUTHORITY_REBIND_OR_BINDING_DRIFT"],
     entry_posture:
       "Short-lived non-browser client credential with explicit service identity and scoped environment binding.",
-    storage_boundary:
-      "Managed runtime secret boundary or vault-backed credential retrieval only.",
+    storage_boundary: "Managed runtime secret boundary or vault-backed credential retrieval only.",
     source_refs: [
       "Algorithm/actor_and_authority_model.md::L555[3.13_Machine-actor_rules]",
       "https://auth0.com/docs/manage-users/sessions/manage-user-sessions-with-auth0-management-api",
     ],
-    notes: [
-      "Machine actors never satisfy REQUIRE_STEP_UP or REQUIRE_APPROVAL for humans.",
-    ],
+    notes: ["Machine actors never satisfy REQUIRE_STEP_UP or REQUIRE_APPROVAL for humans."],
   },
   {
     session_profile_ref: "session.browser.invite-pre-upgrade",
     flow_id: "invite_or_deep_link_pre_upgrade",
     label: "Invite or deep-link pre-upgrade",
     channel: "BROWSER_LIMITED_ENTRY",
-    actor_classes: [
-      "CLIENT_VIEWER",
-      "CLIENT_CONTRIBUTOR",
-      "CLIENT_SIGNATORY",
-    ],
+    actor_classes: ["CLIENT_VIEWER", "CLIENT_CONTRIBUTOR", "CLIENT_SIGNATORY"],
     allowed_surface_families: ["BROWSER_LIMITED_ENTRY"],
     session_carrier: "Contextual route and return-path state only.",
     auth0_application_types: ["REGULAR_WEB_APPLICATION"],
@@ -1488,15 +1384,10 @@ const SESSION_ROWS: IdpSessionPolicyRow[] = [
     base_authn_level: "BASIC",
     escalated_authn_level: "STEP_UP",
     post_step_up_rotation: false,
-    invalidation_events: [
-      "DEEP_LINK_OR_INVITE_EXPIRY",
-      "SESSION_REVOKED",
-      "STALE_VIEW_REBASE",
-    ],
+    invalidation_events: ["DEEP_LINK_OR_INVITE_EXPIRY", "SESSION_REVOKED", "STALE_VIEW_REBASE"],
     entry_posture:
       "Notification, email invite, or deep link opens focused route context before the normal authenticated session has been re-established.",
-    storage_boundary:
-      "Local route context only; no trust-sensitive mutation authority.",
+    storage_boundary: "Local route context only; no trust-sensitive mutation authority.",
     source_refs: [
       "Algorithm/customer_client_portal_experience_contract.md::L370[Onboarding_flow]",
       "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
@@ -1510,14 +1401,9 @@ const SESSION_ROWS: IdpSessionPolicyRow[] = [
     flow_id: "governed_upload_session",
     label: "Governed upload-session transfer",
     channel: "BROWSER_OR_MOBILE_TRANSFER",
-    actor_classes: [
-      "CLIENT_VIEWER",
-      "CLIENT_CONTRIBUTOR",
-      "CLIENT_SIGNATORY",
-    ],
+    actor_classes: ["CLIENT_VIEWER", "CLIENT_CONTRIBUTOR", "CLIENT_SIGNATORY"],
     allowed_surface_families: ["BROWSER_OR_MOBILE_TRANSFER"],
-    session_carrier:
-      "Normal authenticated session plus governed upload-session binding contract.",
+    session_carrier: "Normal authenticated session plus governed upload-session binding contract.",
     auth0_application_types: ["REGULAR_WEB_APPLICATION"],
     auth0_cookie_mode: "PERSISTENT",
     default_idle_timeout_hours: 8,
@@ -1540,9 +1426,7 @@ const SESSION_ROWS: IdpSessionPolicyRow[] = [
       "Algorithm/customer_client_portal_experience_contract.md::L293[Secure_document-upload_flow]",
       "Algorithm/northbound_api_and_session_contract.md::L184[2.2_Customer_Client_portal_and_upload-session_surfaces]",
     ],
-    notes: [
-      "Upload transfer is not a substitute for signatory or authority-sensitive step-up.",
-    ],
+    notes: ["Upload transfer is not a substitute for signatory or authority-sensitive step-up."],
   },
 ];
 
@@ -1567,14 +1451,9 @@ function surfaceFamiliesForActors(
     if (actorClass.startsWith("CLIENT_")) {
       families.add("PORTAL_BROWSER");
     } else if (
-      [
-        "TENANT_ADMIN",
-        "PREPARER",
-        "REVIEWER",
-        "APPROVER",
-        "AUDITOR",
-        "SUPPORT_OPERATOR",
-      ].includes(actorClass)
+      ["TENANT_ADMIN", "PREPARER", "REVIEWER", "APPROVER", "AUDITOR", "SUPPORT_OPERATOR"].includes(
+        actorClass,
+      )
     ) {
       families.add("OPERATOR_BROWSER");
       families.add("NATIVE_MACOS_OPERATOR");
@@ -1583,9 +1462,7 @@ function surfaceFamiliesForActors(
   return [...families];
 }
 
-function sessionProfilesForSurfaceFamilies(
-  surfaceFamilies: readonly IdpSurfaceFamily[],
-): string[] {
+function sessionProfilesForSurfaceFamilies(surfaceFamilies: readonly IdpSurfaceFamily[]): string[] {
   const refs = new Set<string>();
   for (const surfaceFamily of surfaceFamilies) {
     if (surfaceFamily === "OPERATOR_BROWSER") {
@@ -1623,8 +1500,7 @@ const STEP_UP_TRIGGER_ROWS: IdpStepUpTriggerRow[] = [
     authn_level_on_success: "STEP_UP",
     step_up_state_on_entry: "REQUIRED_PENDING",
     step_up_state_on_success: "SATISFIED",
-    assurance_requirement:
-      "Fresh human gate evidence; no machine substitution.",
+    assurance_requirement: "Fresh human gate evidence; no machine substitution.",
     revalidation_requirements: [
       "Resolve a fresh AuthorityBinding if subject, client, authority scope, or link lineage changed.",
       "Do not continue from stale deep-link or ambient route state alone.",
@@ -1657,17 +1533,12 @@ const STEP_UP_TRIGGER_ROWS: IdpStepUpTriggerRow[] = [
     authn_level_on_success: "STEP_UP",
     step_up_state_on_entry: "REQUIRED_PENDING",
     step_up_state_on_success: "SATISFIED",
-    assurance_requirement:
-      "Fresh approver identity with current view and policy basis.",
+    assurance_requirement: "Fresh approver identity with current view and policy basis.",
     revalidation_requirements: [
       "Refresh on stale-view rejection before resubmitting.",
       "Preserve rationale, scope, and expiry on any override approval.",
     ],
-    invalidation_events: [
-      "STEP_UP_COMPLETED",
-      "STALE_VIEW_REBASE",
-      "SESSION_REVOKED",
-    ],
+    invalidation_events: ["STEP_UP_COMPLETED", "STALE_VIEW_REBASE", "SESSION_REVOKED"],
     source_refs: [
       "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
       "Algorithm/actor_and_authority_model.md::L579[3.14_Actor_invariants]",
@@ -1680,22 +1551,14 @@ const STEP_UP_TRIGGER_ROWS: IdpStepUpTriggerRow[] = [
     trigger_kind: "STEP_UP_OR_APPROVAL_REQUIRED",
     action_family_refs: ["SUBMIT_TO_AUTHORITY", "SIGN_CLIENT_DECLARATION"],
     actor_classes: ["APPROVER", "CLIENT_SIGNATORY", "TENANT_ADMIN"],
-    role_refs: roleRefsForActors([
-      "APPROVER",
-      "CLIENT_SIGNATORY",
-      "TENANT_ADMIN",
-    ]),
+    role_refs: roleRefsForActors(["APPROVER", "CLIENT_SIGNATORY", "TENANT_ADMIN"]),
     scope_refs: ["scope.elevated.submit", "scope.elevated.client_signoff"],
     surface_families: surfaceFamiliesForActors(
       ["APPROVER", "CLIENT_SIGNATORY", "TENANT_ADMIN"],
       [],
     ),
     session_profile_refs: sessionProfilesForSurfaceFamilies(
-      surfaceFamiliesForActors([
-        "APPROVER",
-        "CLIENT_SIGNATORY",
-        "TENANT_ADMIN",
-      ]),
+      surfaceFamiliesForActors(["APPROVER", "CLIENT_SIGNATORY", "TENANT_ADMIN"]),
     ),
     step_up_cell: "REQUIRE_STEP_UP",
     approval_cell: "REQUIRE_APPROVAL",
@@ -1727,31 +1590,18 @@ const STEP_UP_TRIGGER_ROWS: IdpStepUpTriggerRow[] = [
     trigger_kind: "STEP_UP_OR_APPROVAL_REQUIRED",
     action_family_refs: ["ACKNOWLEDGE_OR_SUPPRESS_FLAG"],
     actor_classes: ["APPROVER", "TENANT_ADMIN", "SUPPORT_OPERATOR"],
-    role_refs: roleRefsForActors([
-      "APPROVER",
-      "TENANT_ADMIN",
-      "SUPPORT_OPERATOR",
-    ]),
+    role_refs: roleRefsForActors(["APPROVER", "TENANT_ADMIN", "SUPPORT_OPERATOR"]),
     scope_refs: ["scope.elevated.out_of_band_annotation"],
-    surface_families: surfaceFamiliesForActors([
-      "APPROVER",
-      "TENANT_ADMIN",
-      "SUPPORT_OPERATOR",
-    ]),
+    surface_families: surfaceFamiliesForActors(["APPROVER", "TENANT_ADMIN", "SUPPORT_OPERATOR"]),
     session_profile_refs: sessionProfilesForSurfaceFamilies(
-      surfaceFamiliesForActors([
-        "APPROVER",
-        "TENANT_ADMIN",
-        "SUPPORT_OPERATOR",
-      ]),
+      surfaceFamiliesForActors(["APPROVER", "TENANT_ADMIN", "SUPPORT_OPERATOR"]),
     ),
     step_up_cell: "REQUIRE_STEP_UP",
     approval_cell: "REQUIRE_APPROVAL",
     authn_level_on_success: "STEP_UP",
     step_up_state_on_entry: "REQUIRED_PENDING",
     step_up_state_on_success: "SATISFIED",
-    assurance_requirement:
-      "Fresh human-gated exception posture with bounded rationale.",
+    assurance_requirement: "Fresh human-gated exception posture with bounded rationale.",
     revalidation_requirements: [
       "Keep out-of-band truth distinct from confirmed authority truth.",
       "Do not convert unknown authority truth into confirmed truth via exception handling.",
@@ -1773,12 +1623,7 @@ const STEP_UP_TRIGGER_ROWS: IdpStepUpTriggerRow[] = [
     trigger_kind: "STEP_UP_OR_APPROVAL_REQUIRED",
     action_family_refs: ["EXPORT", "VIEW_FULL"],
     actor_classes: ["AUDITOR", "APPROVER", "TENANT_ADMIN", "SUPPORT_OPERATOR"],
-    role_refs: roleRefsForActors([
-      "AUDITOR",
-      "APPROVER",
-      "TENANT_ADMIN",
-      "SUPPORT_OPERATOR",
-    ]),
+    role_refs: roleRefsForActors(["AUDITOR", "APPROVER", "TENANT_ADMIN", "SUPPORT_OPERATOR"]),
     scope_refs: ["scope.elevated.unmasked_export"],
     surface_families: surfaceFamiliesForActors([
       "AUDITOR",
@@ -1787,20 +1632,14 @@ const STEP_UP_TRIGGER_ROWS: IdpStepUpTriggerRow[] = [
       "SUPPORT_OPERATOR",
     ]),
     session_profile_refs: sessionProfilesForSurfaceFamilies(
-      surfaceFamiliesForActors([
-        "AUDITOR",
-        "APPROVER",
-        "TENANT_ADMIN",
-        "SUPPORT_OPERATOR",
-      ]),
+      surfaceFamiliesForActors(["AUDITOR", "APPROVER", "TENANT_ADMIN", "SUPPORT_OPERATOR"]),
     ),
     step_up_cell: "REQUIRE_STEP_UP",
     approval_cell: "REQUIRE_APPROVAL",
     authn_level_on_success: "STEP_UP",
     step_up_state_on_entry: "REQUIRED_PENDING",
     step_up_state_on_success: "SATISFIED",
-    assurance_requirement:
-      "Fresh human gate and current masking or export posture.",
+    assurance_requirement: "Fresh human gate and current masking or export posture.",
     revalidation_requirements: [
       "Re-evaluate masking scope and export posture before materializing bytes.",
       "Do not rely on stale desktop caches or detached browser state for richer export posture.",
@@ -1836,11 +1675,7 @@ const STEP_UP_TRIGGER_ROWS: IdpStepUpTriggerRow[] = [
       "Treat config and compliance-mode mutation as exact-basis governance action.",
       "Rebase on stale policy or dependency topology drift before resubmission.",
     ],
-    invalidation_events: [
-      "STEP_UP_COMPLETED",
-      "STALE_VIEW_REBASE",
-      "SESSION_REVOKED",
-    ],
+    invalidation_events: ["STEP_UP_COMPLETED", "STALE_VIEW_REBASE", "SESSION_REVOKED"],
     source_refs: [
       "Algorithm/actor_and_authority_model.md::L490[3.11_Non-delegable_and_step-up_actions]",
       "Algorithm/actor_and_authority_model.md::L326[3.9_Policy_decision_model]",
@@ -1864,8 +1699,7 @@ const STEP_UP_TRIGGER_ROWS: IdpStepUpTriggerRow[] = [
     authn_level_on_success: "STEP_UP",
     step_up_state_on_entry: "REQUIRED_PENDING",
     step_up_state_on_success: "SATISFIED",
-    assurance_requirement:
-      "Fresh human gate and current retention or legal-hold basis.",
+    assurance_requirement: "Fresh human gate and current retention or legal-hold basis.",
     revalidation_requirements: [
       "Do not permit machine actors to satisfy the human gate.",
       "Invalidate cached export or restoration posture after policy change.",
@@ -1879,21 +1713,14 @@ const STEP_UP_TRIGGER_ROWS: IdpStepUpTriggerRow[] = [
   },
   {
     trigger_id: "client_signatory_signoff_when_pack_demands_step_up",
-    label:
-      "Client signatory declaration or sign-off when the approval pack demands step-up",
+    label: "Client signatory declaration or sign-off when the approval pack demands step-up",
     trigger_kind: "STEP_UP_REQUIRED",
-    action_family_refs: [
-      "ACKNOWLEDGE_CLIENT_DECLARATION",
-      "SIGN_CLIENT_DECLARATION",
-    ],
+    action_family_refs: ["ACKNOWLEDGE_CLIENT_DECLARATION", "SIGN_CLIENT_DECLARATION"],
     actor_classes: ["CLIENT_SIGNATORY"],
     role_refs: roleRefsForActors(["CLIENT_SIGNATORY"]),
     scope_refs: ["scope.elevated.client_signoff"],
     surface_families: ["PORTAL_BROWSER", "BROWSER_LIMITED_ENTRY"],
-    session_profile_refs: [
-      "session.browser.portal",
-      "session.browser.invite-pre-upgrade",
-    ],
+    session_profile_refs: ["session.browser.portal", "session.browser.invite-pre-upgrade"],
     step_up_cell: "REQUIRE_STEP_UP",
     approval_cell: "ALLOW",
     authn_level_on_success: "STEP_UP",
@@ -1973,17 +1800,10 @@ const STEP_UP_TRIGGER_ROWS: IdpStepUpTriggerRow[] = [
       "SIGN_CLIENT_DECLARATION",
     ],
     actor_classes: ["CLIENT_VIEWER", "CLIENT_CONTRIBUTOR", "CLIENT_SIGNATORY"],
-    role_refs: roleRefsForActors([
-      "CLIENT_VIEWER",
-      "CLIENT_CONTRIBUTOR",
-      "CLIENT_SIGNATORY",
-    ]),
+    role_refs: roleRefsForActors(["CLIENT_VIEWER", "CLIENT_CONTRIBUTOR", "CLIENT_SIGNATORY"]),
     scope_refs: ["scope.portal.read", "scope.portal.contribute"],
     surface_families: ["BROWSER_LIMITED_ENTRY", "PORTAL_BROWSER"],
-    session_profile_refs: [
-      "session.browser.invite-pre-upgrade",
-      "session.browser.portal",
-    ],
+    session_profile_refs: ["session.browser.invite-pre-upgrade", "session.browser.portal"],
     step_up_cell: "DENY",
     approval_cell: "DENY",
     authn_level_on_success: "BASIC",
@@ -1995,19 +1815,13 @@ const STEP_UP_TRIGGER_ROWS: IdpStepUpTriggerRow[] = [
       "Keep route focus and return target through the upgrade and any external auth handoff.",
       "Do not imply completion until the governed read model settles.",
     ],
-    invalidation_events: [
-      "DEEP_LINK_OR_INVITE_EXPIRY",
-      "SESSION_REVOKED",
-      "STALE_VIEW_REBASE",
-    ],
+    invalidation_events: ["DEEP_LINK_OR_INVITE_EXPIRY", "SESSION_REVOKED", "STALE_VIEW_REBASE"],
     source_refs: [
       "Algorithm/customer_client_portal_experience_contract.md::L370[Onboarding_flow]",
       "Algorithm/customer_client_portal_experience_contract.md::L399[Artifact_print_and_browser-handoff_rules]",
       "Algorithm/northbound_api_and_session_contract.md::L709[8._Session_browser_and_native-client_rules]",
     ],
-    notes: [
-      "This row is an authenticated upgrade gate, not a substitute for step-up.",
-    ],
+    notes: ["This row is an authenticated upgrade gate, not a substitute for step-up."],
   },
 ];
 
@@ -2016,8 +1830,7 @@ const MFA_POLICY_PROFILE: IdpMfaPolicyProfile = {
   enabled_independent_factors: ["webauthn_roaming", "otp"],
   enabled_dependent_factors: ["recovery_code"],
   adaptive_risk_assessment_logging: "ENABLED",
-  step_up_strategy:
-    "REQUEST_ELEVATED_SCOPE_THEN_CHALLENGE_IN_POST_LOGIN_ACTION",
+  step_up_strategy: "REQUEST_ELEVATED_SCOPE_THEN_CHALLENGE_IN_POST_LOGIN_ACTION",
   source_refs: [
     "https://auth0.com/docs/secure/multi-factor-authentication/enable-mfa",
     "https://auth0.com/docs/secure/multi-factor-authentication/step-up-authentication",
@@ -2068,12 +1881,8 @@ export function createRecommendedScopeCatalog(): IdpScopeCatalog {
     generated_on: IDP_POLICY_GENERATED_ON,
     summary: {
       scope_count: SCOPE_ROWS.length,
-      baseline_scope_count: SCOPE_ROWS.filter(
-        (scope) => scope.scope_class === "BASELINE",
-      ).length,
-      elevated_scope_count: SCOPE_ROWS.filter(
-        (scope) => scope.scope_class === "ELEVATED",
-      ).length,
+      baseline_scope_count: SCOPE_ROWS.filter((scope) => scope.scope_class === "BASELINE").length,
+      elevated_scope_count: SCOPE_ROWS.filter((scope) => scope.scope_class === "ELEVATED").length,
     },
     scopes: SCOPE_ROWS,
     typed_gaps: [],
@@ -2149,30 +1958,23 @@ export function validateRoleCatalog(
     if (!role.actor_classes.length) {
       throw new Error(`Role ${role.role_ref} must map to actor classes.`);
     }
-    for (const scopeRef of [
-      ...role.baseline_scope_refs,
-      ...role.requestable_scope_refs,
-    ]) {
+    for (const scopeRef of [...role.baseline_scope_refs, ...role.requestable_scope_refs]) {
       if (!scopeRefs.has(scopeRef)) {
         throw new Error(`Role ${role.role_ref} references unknown scope ${scopeRef}.`);
       }
     }
     if (
-      role.requestable_scope_refs.some((scopeRef) =>
-        scopeRef === "scope.elevated.client_signoff",
+      role.requestable_scope_refs.some(
+        (scopeRef) => scopeRef === "scope.elevated.client_signoff",
       ) &&
       !role.actor_classes.includes("CLIENT_SIGNATORY")
     ) {
-      throw new Error(
-        `Only signatory-capable roles may request scope.elevated.client_signoff.`,
-      );
+      throw new Error(`Only signatory-capable roles may request scope.elevated.client_signoff.`);
     }
   }
 }
 
-export function validateSessionPolicyMatrix(
-  sessionPolicyMatrix: IdpSessionPolicyMatrix,
-): void {
+export function validateSessionPolicyMatrix(sessionPolicyMatrix: IdpSessionPolicyMatrix): void {
   const requiredProfiles = new Set([
     "session.browser.operator",
     "session.browser.portal",
@@ -2235,10 +2037,7 @@ export function validateStepUpPolicyMatrix(
         );
       }
     }
-    if (
-      row.trigger_kind === "STEP_UP_REQUIRED" &&
-      row.step_up_cell !== "REQUIRE_STEP_UP"
-    ) {
+    if (row.trigger_kind === "STEP_UP_REQUIRED" && row.step_up_cell !== "REQUIRE_STEP_UP") {
       throw new Error(`Step-up-only row ${row.trigger_id} must require step-up.`);
     }
   }
@@ -2351,9 +2150,7 @@ function diffRefs(
   ];
 }
 
-export function detectIdpPolicyDrift(
-  observed: PolicyFixtureState,
-): IdpPolicyDriftRow[] {
+export function detectIdpPolicyDrift(observed: PolicyFixtureState): IdpPolicyDriftRow[] {
   return [
     ...diffRefs(
       "role_refs",
@@ -2378,8 +2175,7 @@ export function detectIdpPolicyDrift(
       SESSION_ROWS.map((row) => row.session_profile_ref),
       observed.sessionProfileRefs,
     ),
-    ...(observed.tenantDefaultMfaPolicy ===
-    MFA_POLICY_PROFILE.tenant_default_policy
+    ...(observed.tenantDefaultMfaPolicy === MFA_POLICY_PROFILE.tenant_default_policy
       ? []
       : [
           {
@@ -2408,14 +2204,8 @@ async function appendNote(
   });
 }
 
-async function getRequiredLocator(
-  page: Page,
-  manifest: SelectorManifest,
-  selectorId: string,
-) {
-  const selector = manifest.selectors.find(
-    (candidate) => candidate.selectorId === selectorId,
-  );
+async function getRequiredLocator(page: Page, manifest: SelectorManifest, selectorId: string) {
+  const selector = manifest.selectors.find((candidate) => candidate.selectorId === selectorId);
   if (!selector) {
     throw new Error(`Selector ${selectorId} missing from Auth0 policy manifest.`);
   }
@@ -2470,12 +2260,7 @@ export async function configureRolesScopesMfaSessions(
   const sessionPolicyMatrix = createRecommendedSessionPolicyMatrix();
   validateRoleCatalog(roleCatalog, scopeCatalog);
   validateSessionPolicyMatrix(sessionPolicyMatrix);
-  validateStepUpPolicyMatrix(
-    stepUpPolicyMatrix,
-    roleCatalog,
-    scopeCatalog,
-    sessionPolicyMatrix,
-  );
+  validateStepUpPolicyMatrix(stepUpPolicyMatrix, roleCatalog, scopeCatalog, sessionPolicyMatrix);
 
   const entryUrls = options.entryUrls ?? createDefaultIdpPolicyEntryUrls();
   const selectorManifest = await loadAuth0PolicySelectorManifest();
@@ -2490,29 +2275,17 @@ export async function configureRolesScopesMfaSessions(
     createPendingStep({
       stepId: IDP_POLICY_STEP_IDS.reconcileRolesAndScopes,
       title: "Reconcile coarse roles and scopes",
-      selectorRefs: [
-        "roles-and-scopes-heading",
-        "apply-roles-and-scopes",
-        "policy-row-fallback",
-      ],
+      selectorRefs: ["roles-and-scopes-heading", "apply-roles-and-scopes", "policy-row-fallback"],
     }),
     createPendingStep({
       stepId: IDP_POLICY_STEP_IDS.reconcileMfaAndStepUp,
       title: "Reconcile MFA and step-up posture",
-      selectorRefs: [
-        "mfa-step-up-heading",
-        "apply-mfa-and-step-up",
-        "policy-row-fallback",
-      ],
+      selectorRefs: ["mfa-step-up-heading", "apply-mfa-and-step-up", "policy-row-fallback"],
     }),
     createPendingStep({
       stepId: IDP_POLICY_STEP_IDS.reconcileSessions,
       title: "Reconcile session lifetime and refresh posture",
-      selectorRefs: [
-        "session-policies-heading",
-        "apply-session-policies",
-        "policy-row-fallback",
-      ],
+      selectorRefs: ["session-policies-heading", "apply-session-policies", "policy-row-fallback"],
     }),
     createPendingStep({
       stepId: IDP_POLICY_STEP_IDS.persistEvidence,
@@ -2528,11 +2301,7 @@ export async function configureRolesScopesMfaSessions(
   );
   await options.page.goto(entryUrls.controlPlane);
   await getRequiredLocator(options.page, selectorManifest, "policy-heading");
-  steps[0] = transitionStep(
-    steps[0]!,
-    "SUCCEEDED",
-    "Policy workspace opened.",
-  );
+  steps[0] = transitionStep(steps[0]!, "SUCCEEDED", "Policy workspace opened.");
   evidenceManifest = await appendNote(
     evidenceManifest,
     steps[0].stepId,
@@ -2543,30 +2312,26 @@ export async function configureRolesScopesMfaSessions(
   let currentState = await readFixturePolicyState(options.page);
   let driftRegister: IdpPolicyDriftRow[] = [];
 
-  steps[1] = transitionStep(
-    steps[1]!,
-    "RUNNING",
-    "Reconciling coarse IdP roles and scopes.",
-  );
+  steps[1] = transitionStep(steps[1]!, "RUNNING", "Reconciling coarse IdP roles and scopes.");
   await getRequiredLocator(options.page, selectorManifest, "roles-and-scopes-heading");
   if (!currentState.roleRefs.length || !currentState.scopeRefs.length) {
-    await (await getRequiredLocator(options.page, selectorManifest, "apply-roles-and-scopes")).click();
+    await (
+      await getRequiredLocator(options.page, selectorManifest, "apply-roles-and-scopes")
+    ).click();
     await clickFixtureAction(options.page, "applyRecommendedRolesAndScopes");
     currentState = await readFixturePolicyState(options.page);
   }
   driftRegister = detectIdpPolicyDrift(currentState);
-  if (driftRegister.some((row) => row.field_ref === "role_refs" || row.field_ref === "scope_refs")) {
+  if (
+    driftRegister.some((row) => row.field_ref === "role_refs" || row.field_ref === "scope_refs")
+  ) {
     steps[1] = transitionStep(
       steps[1]!,
       "BLOCKED_BY_POLICY",
       "Provider role or scope posture drifted from the source-backed pack.",
     );
   } else {
-    steps[1] = transitionStep(
-      steps[1]!,
-      "SUCCEEDED",
-      "Role and scope posture reconciled.",
-    );
+    steps[1] = transitionStep(steps[1]!, "SUCCEEDED", "Role and scope posture reconciled.");
     evidenceManifest = await appendNote(
       evidenceManifest,
       steps[1].stepId,
@@ -2581,19 +2346,11 @@ export async function configureRolesScopesMfaSessions(
       currentState,
       driftRegister,
     );
-    steps[4] = transitionStep(
-      steps[4]!,
-      "RUNNING",
-      "Persisting drift evidence.",
-    );
+    steps[4] = transitionStep(steps[4]!, "RUNNING", "Persisting drift evidence.");
     const evidenceManifestPath = `${options.policyEvidencePath}.evidence_manifest.json`;
     await persistJson(options.policyEvidencePath, policyEvidence);
     await persistJson(evidenceManifestPath, evidenceManifest);
-    steps[4] = transitionStep(
-      steps[4]!,
-      "SUCCEEDED",
-      "Drift evidence persisted.",
-    );
+    steps[4] = transitionStep(steps[4]!, "SUCCEEDED", "Drift evidence persisted.");
     return {
       outcome: "IDP_POLICY_DRIFT_REQUIRES_REVIEW",
       steps,
@@ -2607,26 +2364,19 @@ export async function configureRolesScopesMfaSessions(
     };
   }
 
-  steps[2] = transitionStep(
-    steps[2]!,
-    "RUNNING",
-    "Reconciling MFA and step-up posture.",
-  );
+  steps[2] = transitionStep(steps[2]!, "RUNNING", "Reconciling MFA and step-up posture.");
   await getRequiredLocator(options.page, selectorManifest, "mfa-step-up-heading");
-  if (
-    !currentState.enabledFactors.length ||
-    !currentState.tenantDefaultMfaPolicy
-  ) {
-    await (await getRequiredLocator(options.page, selectorManifest, "apply-mfa-and-step-up")).click();
+  if (!currentState.enabledFactors.length || !currentState.tenantDefaultMfaPolicy) {
+    await (
+      await getRequiredLocator(options.page, selectorManifest, "apply-mfa-and-step-up")
+    ).click();
     await clickFixtureAction(options.page, "applyRecommendedMfaAndStepUp");
     currentState = await readFixturePolicyState(options.page);
   }
   driftRegister = detectIdpPolicyDrift(currentState);
   if (
     driftRegister.some(
-      (row) =>
-        row.field_ref === "enabled_factors" ||
-        row.field_ref === "tenant_default_mfa_policy",
+      (row) => row.field_ref === "enabled_factors" || row.field_ref === "tenant_default_mfa_policy",
     )
   ) {
     steps[2] = transitionStep(
@@ -2635,11 +2385,7 @@ export async function configureRolesScopesMfaSessions(
       "Provider MFA or step-up posture drifted from the source-backed pack.",
     );
   } else {
-    steps[2] = transitionStep(
-      steps[2]!,
-      "SUCCEEDED",
-      "MFA and step-up posture reconciled.",
-    );
+    steps[2] = transitionStep(steps[2]!, "SUCCEEDED", "MFA and step-up posture reconciled.");
     evidenceManifest = await appendNote(
       evidenceManifest,
       steps[2].stepId,
@@ -2654,19 +2400,11 @@ export async function configureRolesScopesMfaSessions(
       currentState,
       driftRegister,
     );
-    steps[4] = transitionStep(
-      steps[4]!,
-      "RUNNING",
-      "Persisting drift evidence.",
-    );
+    steps[4] = transitionStep(steps[4]!, "RUNNING", "Persisting drift evidence.");
     const evidenceManifestPath = `${options.policyEvidencePath}.evidence_manifest.json`;
     await persistJson(options.policyEvidencePath, policyEvidence);
     await persistJson(evidenceManifestPath, evidenceManifest);
-    steps[4] = transitionStep(
-      steps[4]!,
-      "SUCCEEDED",
-      "Drift evidence persisted.",
-    );
+    steps[4] = transitionStep(steps[4]!, "SUCCEEDED", "Drift evidence persisted.");
     return {
       outcome: "IDP_POLICY_DRIFT_REQUIRES_REVIEW",
       steps,
@@ -2687,7 +2425,9 @@ export async function configureRolesScopesMfaSessions(
   );
   await getRequiredLocator(options.page, selectorManifest, "session-policies-heading");
   if (!currentState.sessionProfileRefs.length) {
-    await (await getRequiredLocator(options.page, selectorManifest, "apply-session-policies")).click();
+    await (
+      await getRequiredLocator(options.page, selectorManifest, "apply-session-policies")
+    ).click();
     await clickFixtureAction(options.page, "applyRecommendedSessionPolicies");
     currentState = await readFixturePolicyState(options.page);
   }
@@ -2699,11 +2439,7 @@ export async function configureRolesScopesMfaSessions(
       "Provider session posture drifted from the source-backed pack.",
     );
   } else {
-    steps[3] = transitionStep(
-      steps[3]!,
-      "SUCCEEDED",
-      "Session posture reconciled.",
-    );
+    steps[3] = transitionStep(steps[3]!, "SUCCEEDED", "Session posture reconciled.");
     evidenceManifest = await appendNote(
       evidenceManifest,
       steps[3].stepId,
@@ -2712,11 +2448,7 @@ export async function configureRolesScopesMfaSessions(
     );
   }
 
-  steps[4] = transitionStep(
-    steps[4]!,
-    "RUNNING",
-    "Persisting policy evidence.",
-  );
+  steps[4] = transitionStep(steps[4]!, "RUNNING", "Persisting policy evidence.");
   const policyEvidence = createTemplateIdpPolicyEvidence(
     options.runContext,
     currentState,
@@ -2725,11 +2457,7 @@ export async function configureRolesScopesMfaSessions(
   const evidenceManifestPath = `${options.policyEvidencePath}.evidence_manifest.json`;
   await persistJson(options.policyEvidencePath, policyEvidence);
   await persistJson(evidenceManifestPath, evidenceManifest);
-  steps[4] = transitionStep(
-    steps[4]!,
-    "SUCCEEDED",
-    "Policy evidence persisted.",
-  );
+  steps[4] = transitionStep(steps[4]!, "SUCCEEDED", "Policy evidence persisted.");
 
   return {
     outcome:

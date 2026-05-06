@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/source_record.schema.json",
+  "title": "SourceRecord",
+  "type": "object",
+  "required": [
+    "source_record_id",
+    "manifest_id",
+    "artifact_type",
+    "collection_boundary_ref",
+    "source_class",
+    "provider",
+    "provider_account_ref",
+    "capture_method",
+    "captured_at",
+    "effective_period",
+    "tenant_id",
+    "client_id",
+    "business_partition",
+    "raw_hash",
+    "raw_payload_ref",
+    "ingestion_run_ref",
+    "source_strength_tier",
+    "freshness_state",
+    "retention_tag",
+    "erasure_state",
+    "contract"
+  ],
+  "properties": {
+    "source_record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_type": {
+      "const": "SourceRecord"
+    },
+    "collection_boundary_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_class": {
+      "type": "string",
+      "enum": [
+        "AUTHORITY_ACKNOWLEDGEMENT",
+        "AUTHORITY_REFERENCE",
+        "INSTITUTIONAL_FEED",
+        "BOOKS_OF_ENTRY",
+        "DOCUMENTARY_EVIDENCE",
+        "DECLARED_ASSERTION",
+        "DETERMINISTIC_DERIVATION",
+        "PROBABILISTIC_INFERENCE",
+        "GOVERNANCE_ARTIFACT"
+      ]
+    },
+    "provider": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_account_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capture_method": {
+      "type": "string",
+      "minLength": 1
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "effective_period": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "client_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "business_partition": {
+      "type": "string",
+      "minLength": 1
+    },
+    "raw_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "raw_payload_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ingestion_run_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_strength_tier": {
+      "type": "string",
+      "enum": [
+        "TIER_1_AUTHORITY_FINAL",
+        "TIER_2_AUTHORITY_REFERENCE",
+        "TIER_3_STRUCTURED_EXTERNAL",
+        "TIER_4_STRUCTURED_INTERNAL",
+        "TIER_5_DOCUMENT_SUPPORT",
+        "TIER_6_DECLARED_ONLY",
+        "TIER_7_INFERRED",
+        "TIER_8_GOVERNANCE_ONLY"
+      ]
+    },
+    "freshness_state": {
+      "type": "string",
+      "enum": [
+        "CURRENT",
+        "STALE",
+        "EXPIRED",
+        "UNKNOWN",
+        "SUPERSEDED"
+      ]
+    },
+    "retention_tag": {
+      "$ref": "./retention_tag.schema.json"
+    },
+    "erasure_state": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "LIMITED",
+        "LEGAL_HOLD",
+        "ERASURE_PENDING",
+        "PSEUDONYMISED",
+        "ERASED"
+      ]
+    },
+    "contract": {
+      "$ref": "./schema_bundle.schema.json#/$defs/artifactContract"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "erasure_state": {
+            "const": "LEGAL_HOLD"
+          }
+        },
+        "required": [
+          "erasure_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retention_tag": {
+            "type": "object",
+            "properties": {
+              "legal_hold_state": {
+                "enum": [
+                  "ACTIVE",
+                  "RELEASE_ELIGIBLE"
+                ]
+              }
+            },
+            "required": [
+              "legal_hold_state"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "erasure_state": {
+            "const": "ERASURE_PENDING"
+          }
+        },
+        "required": [
+          "erasure_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retention_tag": {
+            "type": "object",
+            "properties": {
+              "erasure_eligibility": {
+                "const": "ELIGIBLE"
+              }
+            },
+            "required": [
+              "erasure_eligibility"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "erasure_state": {
+            "enum": [
+              "PSEUDONYMISED",
+              "ERASED"
+            ]
+          }
+        },
+        "required": [
+          "erasure_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retention_tag": {
+            "type": "object",
+            "properties": {
+              "erasure_eligibility": {
+                "const": "ELIGIBLE"
+              }
+            },
+            "required": [
+              "erasure_eligibility"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

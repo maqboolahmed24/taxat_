@@ -1,0 +1,787 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/authority_reconciliation_control_contract.schema.json",
+  "title": "AuthorityReconciliationControlContract",
+  "description": "Durable reconciliation-control contract for one authority interaction lineage. This schema freezes the persisted budget, resend posture, unresolved authority class, escalation handoff packet, and replay/resume policy so live workers, restore/replay flows, and downstream legal-state artifacts never recompute retry economics from transient runtime memory.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "binding_scope_class",
+    "control_contract_hash",
+    "interaction_ref_or_null",
+    "authority_operation_profile_ref_or_null",
+    "provider_environment_or_null",
+    "operation_family_or_null",
+    "duplicate_meaning_key_or_null",
+    "authority_truth_state",
+    "submission_lifecycle_state_or_null",
+    "reconciliation_method",
+    "max_auto_reconciliation_attempts",
+    "reconciliation_attempt_count",
+    "attempts_remaining_count",
+    "reconciliation_cadence_seconds_or_null",
+    "reconciliation_budget_state",
+    "reconciliation_deadline_at_or_null",
+    "next_reconciliation_at_or_null",
+    "unresolved_authority_posture",
+    "unresolved_reason_codes",
+    "resend_legality_state",
+    "resend_control_reason_codes",
+    "replay_resume_policy",
+    "blind_resend_policy",
+    "escalation_state",
+    "escalation_owner_ref_or_null",
+    "escalation_workflow_item_ref_or_null",
+    "escalation_reason_codes",
+    "escalation_evidence_refs",
+    "escalation_due_at_or_null",
+    "last_budget_event_at",
+    "outcome_class_for_analytics"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "AUTHORITY_RECONCILIATION_CONTROL_V1"
+    },
+    "binding_scope_class": {
+      "type": "string",
+      "enum": [
+        "AUTHORITY_INTERACTION_RECORD",
+        "SUBMISSION_RECORD",
+        "OBLIGATION_MIRROR"
+      ]
+    },
+    "control_contract_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "interaction_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "authority_operation_profile_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "provider_environment_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "operation_family_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "duplicate_meaning_key_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "authority_truth_state": {
+      "type": "string",
+      "enum": [
+        "NOT_APPLICABLE",
+        "NOT_REQUESTED",
+        "UNKNOWN",
+        "PENDING_ACK",
+        "PARTIAL_ACK",
+        "CONFIRMED",
+        "REJECTED",
+        "OUT_OF_BAND"
+      ]
+    },
+    "submission_lifecycle_state_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "INTENT_RECORDED",
+        "TRANSMIT_PENDING",
+        "TRANSMITTED",
+        "PENDING_ACK",
+        "CONFIRMED",
+        "REJECTED",
+        "UNKNOWN",
+        "OUT_OF_BAND",
+        "SUPERSEDED",
+        null
+      ]
+    },
+    "reconciliation_method": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "READ_AFTER_WRITE",
+        "POLL_STATUS",
+        "POLL_OBLIGATIONS",
+        "MANUAL_ONLY"
+      ]
+    },
+    "max_auto_reconciliation_attempts": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reconciliation_attempt_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "attempts_remaining_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reconciliation_cadence_seconds_or_null": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "reconciliation_budget_state": {
+      "type": "string",
+      "enum": [
+        "NOT_OPENED",
+        "ACTIVE",
+        "EXHAUSTED",
+        "ESCALATED",
+        "CLOSED"
+      ]
+    },
+    "reconciliation_deadline_at_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "next_reconciliation_at_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "unresolved_authority_posture": {
+      "type": "string",
+      "enum": [
+        "NO_UNRESOLVED_AUTHORITY",
+        "PENDING_ACK_UNRESOLVED",
+        "UNKNOWN_UNRESOLVED",
+        "CONTRADICTORY_EVIDENCE",
+        "OUT_OF_BAND_CONFLICT",
+        "MANUAL_REVIEW_REQUIRED"
+      ]
+    },
+    "unresolved_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "resend_legality_state": {
+      "type": "string",
+      "enum": [
+        "UNASSESSED",
+        "IDEMPOTENT_RECOVERY_ONLY",
+        "FOLLOW_UP_READ_ONLY",
+        "BLOCKED_BY_RECONCILIATION",
+        "BLOCKED_BY_ESCALATION",
+        "CLOSED_NO_RESEND"
+      ]
+    },
+    "resend_control_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "IN_FLIGHT_REQUEST_LINEAGE_EXISTS",
+          "QUEUE_REBUILD_REQUIRES_IDEMPOTENT_RECOVERY",
+          "PENDING_OR_UNKNOWN_REQUIRES_RECONCILIATION",
+          "TIMEOUT_PLACEHOLDER_REQUIRES_RECONCILIATION",
+          "AUTO_RECONCILIATION_BUDGET_EXHAUSTED",
+          "RECONCILIATION_DEADLINE_EXPIRED",
+          "CONTRADICTORY_AUTHORITY_EVIDENCE",
+          "OUT_OF_BAND_AUTHORITY_STATE_PRESENT",
+          "DUPLICATE_BUCKET_OCCUPIED",
+          "STRONGER_EXTERNAL_TRUTH_PRESENT",
+          "TERMINAL_AUTHORITY_STATE_RECORDED",
+          "INTERACTION_FINALIZED_NO_RESEND"
+        ]
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "replay_resume_policy": {
+      "const": "RESUME_PERSISTED_BUDGET_ONLY"
+    },
+    "blind_resend_policy": {
+      "const": "BLOCK_ON_AMBIGUITY_OR_EXHAUSTION"
+    },
+    "escalation_state": {
+      "type": "string",
+      "enum": [
+        "NOT_REQUIRED",
+        "READY_FOR_ESCALATION",
+        "ESCALATED"
+      ]
+    },
+    "escalation_owner_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "escalation_workflow_item_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "escalation_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "escalation_evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "escalation_due_at_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "last_budget_event_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "outcome_class_for_analytics": {
+      "type": "string",
+      "enum": [
+        "NO_RESPONSE_YET",
+        "PENDING_ACK",
+        "UNKNOWN",
+        "AMBIGUOUS",
+        "OUT_OF_BAND",
+        "CONFIRMED",
+        "REJECTED",
+        "ESCALATED"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "reconciliation_method": {
+            "enum": [
+              "NONE",
+              "MANUAL_ONLY"
+            ]
+          }
+        },
+        "required": [
+          "reconciliation_method"
+        ]
+      },
+      "then": {
+        "properties": {
+          "max_auto_reconciliation_attempts": {
+            "const": 0
+          },
+          "reconciliation_cadence_seconds_or_null": {
+            "type": "null"
+          },
+          "attempts_remaining_count": {
+            "const": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_method": {
+            "enum": [
+              "READ_AFTER_WRITE",
+              "POLL_STATUS",
+              "POLL_OBLIGATIONS"
+            ]
+          }
+        },
+        "required": [
+          "reconciliation_method"
+        ]
+      },
+      "then": {
+        "properties": {
+          "max_auto_reconciliation_attempts": {
+            "minimum": 1
+          },
+          "reconciliation_cadence_seconds_or_null": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_budget_state": {
+            "const": "NOT_OPENED"
+          }
+        },
+        "required": [
+          "reconciliation_budget_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reconciliation_attempt_count": {
+            "const": 0
+          },
+          "reconciliation_deadline_at_or_null": {
+            "type": "null"
+          },
+          "next_reconciliation_at_or_null": {
+            "type": "null"
+          },
+          "unresolved_authority_posture": {
+            "const": "NO_UNRESOLVED_AUTHORITY"
+          },
+          "unresolved_reason_codes": {
+            "maxItems": 0
+          },
+          "resend_legality_state": {
+            "const": "UNASSESSED"
+          },
+          "resend_control_reason_codes": {
+            "maxItems": 0
+          },
+          "escalation_state": {
+            "const": "NOT_REQUIRED"
+          },
+          "escalation_owner_ref_or_null": {
+            "type": "null"
+          },
+          "escalation_workflow_item_ref_or_null": {
+            "type": "null"
+          },
+          "escalation_reason_codes": {
+            "maxItems": 0
+          },
+          "escalation_evidence_refs": {
+            "maxItems": 0
+          },
+          "escalation_due_at_or_null": {
+            "type": "null"
+          },
+          "outcome_class_for_analytics": {
+            "const": "NO_RESPONSE_YET"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_budget_state": {
+            "const": "ACTIVE"
+          }
+        },
+        "required": [
+          "reconciliation_budget_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "next_reconciliation_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reconciliation_deadline_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "attempts_remaining_count": {
+            "minimum": 1
+          },
+          "unresolved_authority_posture": {
+            "enum": [
+              "PENDING_ACK_UNRESOLVED",
+              "UNKNOWN_UNRESOLVED",
+              "MANUAL_REVIEW_REQUIRED"
+            ]
+          },
+          "unresolved_reason_codes": {
+            "minItems": 1
+          },
+          "resend_legality_state": {
+            "const": "FOLLOW_UP_READ_ONLY"
+          },
+          "resend_control_reason_codes": {
+            "minItems": 1
+          },
+          "escalation_state": {
+            "const": "NOT_REQUIRED"
+          },
+          "escalation_owner_ref_or_null": {
+            "type": "null"
+          },
+          "escalation_workflow_item_ref_or_null": {
+            "type": "null"
+          },
+          "escalation_reason_codes": {
+            "maxItems": 0
+          },
+          "escalation_evidence_refs": {
+            "maxItems": 0
+          },
+          "escalation_due_at_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_budget_state": {
+            "const": "EXHAUSTED"
+          }
+        },
+        "required": [
+          "reconciliation_budget_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "attempts_remaining_count": {
+            "const": 0
+          },
+          "next_reconciliation_at_or_null": {
+            "type": "null"
+          },
+          "reconciliation_deadline_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "unresolved_authority_posture": {
+            "enum": [
+              "PENDING_ACK_UNRESOLVED",
+              "UNKNOWN_UNRESOLVED",
+              "CONTRADICTORY_EVIDENCE",
+              "OUT_OF_BAND_CONFLICT",
+              "MANUAL_REVIEW_REQUIRED"
+            ]
+          },
+          "unresolved_reason_codes": {
+            "minItems": 1
+          },
+          "resend_legality_state": {
+            "const": "BLOCKED_BY_RECONCILIATION"
+          },
+          "resend_control_reason_codes": {
+            "minItems": 1
+          },
+          "escalation_state": {
+            "const": "READY_FOR_ESCALATION"
+          },
+          "escalation_owner_ref_or_null": {
+            "type": "null"
+          },
+          "escalation_workflow_item_ref_or_null": {
+            "type": "null"
+          },
+          "escalation_reason_codes": {
+            "minItems": 1
+          },
+          "escalation_evidence_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_budget_state": {
+            "const": "ESCALATED"
+          }
+        },
+        "required": [
+          "reconciliation_budget_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "attempts_remaining_count": {
+            "const": 0
+          },
+          "next_reconciliation_at_or_null": {
+            "type": "null"
+          },
+          "reconciliation_deadline_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "unresolved_authority_posture": {
+            "enum": [
+              "PENDING_ACK_UNRESOLVED",
+              "UNKNOWN_UNRESOLVED",
+              "CONTRADICTORY_EVIDENCE",
+              "OUT_OF_BAND_CONFLICT",
+              "MANUAL_REVIEW_REQUIRED"
+            ]
+          },
+          "unresolved_reason_codes": {
+            "minItems": 1
+          },
+          "resend_legality_state": {
+            "const": "BLOCKED_BY_ESCALATION"
+          },
+          "resend_control_reason_codes": {
+            "minItems": 1
+          },
+          "escalation_state": {
+            "const": "ESCALATED"
+          },
+          "escalation_owner_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "escalation_workflow_item_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "escalation_reason_codes": {
+            "minItems": 1
+          },
+          "escalation_evidence_refs": {
+            "minItems": 1
+          },
+          "escalation_due_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "outcome_class_for_analytics": {
+            "const": "ESCALATED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_budget_state": {
+            "const": "CLOSED"
+          }
+        },
+        "required": [
+          "reconciliation_budget_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "next_reconciliation_at_or_null": {
+            "type": "null"
+          },
+          "unresolved_authority_posture": {
+            "const": "NO_UNRESOLVED_AUTHORITY"
+          },
+          "unresolved_reason_codes": {
+            "maxItems": 0
+          },
+          "resend_legality_state": {
+            "const": "CLOSED_NO_RESEND"
+          },
+          "resend_control_reason_codes": {
+            "minItems": 1
+          },
+          "escalation_state": {
+            "const": "NOT_REQUIRED"
+          },
+          "escalation_owner_ref_or_null": {
+            "type": "null"
+          },
+          "escalation_workflow_item_ref_or_null": {
+            "type": "null"
+          },
+          "escalation_reason_codes": {
+            "maxItems": 0
+          },
+          "escalation_evidence_refs": {
+            "maxItems": 0
+          },
+          "escalation_due_at_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "escalation_state": {
+            "const": "NOT_REQUIRED"
+          }
+        },
+        "required": [
+          "escalation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "escalation_owner_ref_or_null": {
+            "type": "null"
+          },
+          "escalation_workflow_item_ref_or_null": {
+            "type": "null"
+          },
+          "escalation_reason_codes": {
+            "maxItems": 0
+          },
+          "escalation_evidence_refs": {
+            "maxItems": 0
+          },
+          "escalation_due_at_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "escalation_state": {
+            "const": "READY_FOR_ESCALATION"
+          }
+        },
+        "required": [
+          "escalation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "escalation_owner_ref_or_null": {
+            "type": "null"
+          },
+          "escalation_workflow_item_ref_or_null": {
+            "type": "null"
+          },
+          "escalation_reason_codes": {
+            "minItems": 1
+          },
+          "escalation_evidence_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "escalation_state": {
+            "const": "ESCALATED"
+          }
+        },
+        "required": [
+          "escalation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "escalation_owner_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "escalation_workflow_item_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "escalation_reason_codes": {
+            "minItems": 1
+          },
+          "escalation_evidence_refs": {
+            "minItems": 1
+          },
+          "escalation_due_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "next_reconciliation_at_or_null": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "next_reconciliation_at_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reconciliation_budget_state": {
+            "const": "ACTIVE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "escalation_workflow_item_ref_or_null": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "escalation_workflow_item_ref_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "escalation_state": {
+            "const": "ESCALATED"
+          },
+          "reconciliation_budget_state": {
+            "const": "ESCALATED"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

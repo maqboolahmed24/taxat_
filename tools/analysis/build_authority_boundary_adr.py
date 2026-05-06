@@ -24,36 +24,20 @@ NORTHBOUND_PATH = ALGORITHM_DIR / "northbound_api_and_session_contract.md"
 MODULES_PATH = ALGORITHM_DIR / "modules.md"
 
 AUTHORITY_OPERATION_CATALOG_PATH = DATA_ANALYSIS_DIR / "authority_operation_catalog.json"
-REQUEST_IDENTITY_RULES_PATH = (
-    DATA_ANALYSIS_DIR / "request_identity_and_idempotency_rules.json"
-)
+REQUEST_IDENTITY_RULES_PATH = DATA_ANALYSIS_DIR / "request_identity_and_idempotency_rules.json"
 RESPONSE_CLASS_REGISTRY_PATH = DATA_ANALYSIS_DIR / "response_class_registry.json"
-AUTHORITY_TRUTH_MAP_PATH = (
-    DATA_ANALYSIS_DIR / "authority_truth_vs_internal_projection_map.json"
-)
+AUTHORITY_TRUTH_MAP_PATH = DATA_ANALYSIS_DIR / "authority_truth_vs_internal_projection_map.json"
 UNRESOLVED_PROTOCOL_GAPS_PATH = DATA_ANALYSIS_DIR / "unresolved_protocol_gaps.json"
 DEPENDENCY_REGISTER_PATH = DATA_ANALYSIS_DIR / "dependency_register.json"
 CREDENTIAL_INVENTORY_PATH = DATA_ANALYSIS_DIR / "credential_secret_inventory.json"
 
 ADR_PATH = DOCS_ARCH_ADR_DIR / "ADR-004-authority-integration-boundary.md"
-COMPARISON_PATH = (
-    DOCS_ARCH_ADR_DIR / "ADR-004-authority-integration-boundary-comparison.md"
-)
-SCORECARD_PATH = (
-    DOCS_ARCH_ADR_DIR / "ADR-004-authority-integration-boundary-scorecard.json"
-)
-RESPONSIBILITY_MATRIX_PATH = (
-    DATA_ANALYSIS_DIR / "authority_boundary_responsibility_matrix.json"
-)
-OPERATION_BOUNDARY_MAP_PATH = (
-    DATA_ANALYSIS_DIR / "authority_operation_to_boundary_map.json"
-)
-SEND_RECEIVE_FLOW_PATH = (
-    DATA_ANALYSIS_DIR / "authority_send_receive_reconciliation_flow.json"
-)
-CREDENTIAL_BOUNDARY_PATH = (
-    DATA_ANALYSIS_DIR / "authority_credential_and_token_boundary.json"
-)
+COMPARISON_PATH = DOCS_ARCH_ADR_DIR / "ADR-004-authority-integration-boundary-comparison.md"
+SCORECARD_PATH = DOCS_ARCH_ADR_DIR / "ADR-004-authority-integration-boundary-scorecard.json"
+RESPONSIBILITY_MATRIX_PATH = DATA_ANALYSIS_DIR / "authority_boundary_responsibility_matrix.json"
+OPERATION_BOUNDARY_MAP_PATH = DATA_ANALYSIS_DIR / "authority_operation_to_boundary_map.json"
+SEND_RECEIVE_FLOW_PATH = DATA_ANALYSIS_DIR / "authority_send_receive_reconciliation_flow.json"
+CREDENTIAL_BOUNDARY_PATH = DATA_ANALYSIS_DIR / "authority_credential_and_token_boundary.json"
 CALLBACK_QUARANTINE_PATH = (
     DATA_ANALYSIS_DIR / "authority_callback_ingress_and_quarantine_matrix.json"
 )
@@ -130,9 +114,7 @@ def md_escape(value: Any) -> str:
 def markdown_table(headers: list[str], rows: list[list[Any]]) -> str:
     header_line = "| " + " | ".join(headers) + " |"
     divider_line = "| " + " | ".join("---" for _ in headers) + " |"
-    body_lines = [
-        "| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows
-    ]
+    body_lines = ["| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows]
     return "\n".join([header_line, divider_line, *body_lines])
 
 
@@ -145,12 +127,9 @@ def build_supporting_context() -> dict[str, Any]:
     dependency_register = load_json(DEPENDENCY_REGISTER_PATH)
     credential_inventory = load_json(CREDENTIAL_INVENTORY_PATH)
 
-    dependency_rows = {
-        row["dependency_key"]: row for row in dependency_register["dependencies"]
-    }
+    dependency_rows = {row["dependency_key"]: row for row in dependency_register["dependencies"]}
     credential_rows = {
-        row["credential_key"]: row
-        for row in credential_inventory["credential_records"]
+        row["credential_key"]: row for row in credential_inventory["credential_records"]
     }
 
     return {
@@ -160,24 +139,16 @@ def build_supporting_context() -> dict[str, Any]:
         "gap_count": gaps["summary"]["gap_count"],
         "dependency_count": dependency_register["dependency_count"],
         "credential_record_count": credential_inventory["credential_record_count"],
-        "send_revalidation_check_count": request_rules["summary"][
-            "send_revalidation_check_count"
-        ],
-        "request_identity_field_count": request_rules["summary"][
-            "request_identity_field_count"
-        ],
-        "provider_interface_dependency": dependency_rows[
-            "AUTHORITY_API_PROVIDER_INTERFACE"
-        ],
+        "send_revalidation_check_count": request_rules["summary"]["send_revalidation_check_count"],
+        "request_identity_field_count": request_rules["summary"]["request_identity_field_count"],
+        "provider_interface_dependency": dependency_rows["AUTHORITY_API_PROVIDER_INTERFACE"],
         "profile_matrix_dependency": dependency_rows[
             "ENVIRONMENT_TENANT_AND_AUTHORITY_PROFILE_MATRIX"
         ],
         "callback_configuration_dependency": dependency_rows[
             "AUTHORITY_REDIRECT_URI_CALLBACK_AND_SCOPE_CONFIGURATION"
         ],
-        "fraud_profile_dependency": dependency_rows[
-            "AUTHORITY_FRAUD_PREVENTION_PROFILE_BINDINGS"
-        ],
+        "fraud_profile_dependency": dependency_rows["AUTHORITY_FRAUD_PREVENTION_PROFILE_BINDINGS"],
         "sandbox_client_record": credential_rows["hmrc-sandbox-client-credentials"],
         "production_client_record": credential_rows["hmrc-production-client-credentials"],
         "token_bundle_record": credential_rows["authority-oauth-token-bundle"],
@@ -263,9 +234,7 @@ def build_criteria() -> list[dict[str, Any]]:
             "rationale": "The boundary must keep reconciliation as a first-class control path with persisted budget, ambiguity posture, and reopening semantics so late authority truth or contradictory evidence can safely supersede internal projections.",
             "source_refs": [
                 heading_ref(AUTHORITY_PATH, "9.13 Reconciliation protocol"),
-                heading_ref(
-                    AUTHORITY_PATH, "9.13A Reconciliation budget and escalation rule"
-                ),
+                heading_ref(AUTHORITY_PATH, "9.13A Reconciliation budget and escalation rule"),
                 heading_ref(
                     AUTHORITY_PATH,
                     "9.13B Quantitative reconciliation confidence and ambiguity",
@@ -344,7 +313,9 @@ def build_criteria() -> list[dict[str, Any]]:
             "source_refs": [
                 heading_ref(ACTOR_MODEL_PATH, "3.4 Authority layers"),
                 heading_ref(ACTOR_MODEL_PATH, "3.13 Machine-actor rules"),
-                heading_ref(ACTOR_MODEL_PATH, "3.15 Frontend and governance-console rendering contract"),
+                heading_ref(
+                    ACTOR_MODEL_PATH, "3.15 Frontend and governance-console rendering contract"
+                ),
                 heading_ref(NORTHBOUND_PATH, "8. Session, browser, and native-client rules"),
                 text_ref(
                     MODULES_PATH,
@@ -393,7 +364,9 @@ def build_responsibility_matrix() -> dict[str, Any]:
                 "route_context and return-target metadata",
             ],
             "source_refs": [
-                heading_ref(ACTOR_MODEL_PATH, "3.15 Frontend and governance-console rendering contract"),
+                heading_ref(
+                    ACTOR_MODEL_PATH, "3.15 Frontend and governance-console rendering contract"
+                ),
                 heading_ref(NORTHBOUND_PATH, "8. Session, browser, and native-client rules"),
                 text_ref(MODULES_PATH, "never access providers directly from application code"),
             ],
@@ -420,7 +393,9 @@ def build_responsibility_matrix() -> dict[str, Any]:
             ],
             "source_refs": [
                 heading_ref(NORTHBOUND_PATH, "8. Session, browser, and native-client rules"),
-                heading_ref(SECURITY_PATH, "4. Browser, native-client, API, and transport hardening"),
+                heading_ref(
+                    SECURITY_PATH, "4. Browser, native-client, API, and transport hardening"
+                ),
                 text_ref(MODULES_PATH, "never access providers directly from application code"),
             ],
         },
@@ -1032,7 +1007,9 @@ def build_send_receive_reconciliation_flow() -> dict[str, Any]:
             "source_refs": [
                 heading_ref(AUTHORITY_PATH, "9.13 Reconciliation protocol"),
                 heading_ref(AUTHORITY_PATH, "9.13A Reconciliation budget and escalation rule"),
-                heading_ref(AUTHORITY_PATH, "9.13B Quantitative reconciliation confidence and ambiguity"),
+                heading_ref(
+                    AUTHORITY_PATH, "9.13B Quantitative reconciliation confidence and ambiguity"
+                ),
                 heading_ref(AUTHORITY_PATH, "9.14 Out-of-band and authority-correction semantics"),
             ],
         },
@@ -1683,24 +1660,20 @@ def build_scorecard_payload(
             "gap_count": supporting_context["gap_count"],
             "dependency_count": supporting_context["dependency_count"],
             "credential_record_count": supporting_context["credential_record_count"],
-            "request_identity_field_count": supporting_context[
-                "request_identity_field_count"
-            ],
-            "send_revalidation_check_count": supporting_context[
-                "send_revalidation_check_count"
-            ],
+            "request_identity_field_count": supporting_context["request_identity_field_count"],
+            "send_revalidation_check_count": supporting_context["send_revalidation_check_count"],
             "provider_interface_dependency_key": supporting_context[
                 "provider_interface_dependency"
             ]["dependency_key"],
-            "profile_matrix_dependency_key": supporting_context[
-                "profile_matrix_dependency"
-            ]["dependency_key"],
+            "profile_matrix_dependency_key": supporting_context["profile_matrix_dependency"][
+                "dependency_key"
+            ],
             "callback_configuration_dependency_key": supporting_context[
                 "callback_configuration_dependency"
             ]["dependency_key"],
-            "fraud_profile_dependency_key": supporting_context[
-                "fraud_profile_dependency"
-            ]["dependency_key"],
+            "fraud_profile_dependency_key": supporting_context["fraud_profile_dependency"][
+                "dependency_key"
+            ],
             "secret_storage_boundary": supporting_context["token_bundle_record"][
                 "storage_boundary"
             ],
@@ -1755,8 +1728,7 @@ def build_adr_markdown(
         for flow in flows["flows"]
     ]
     alternative_rows = [
-        [result["label"], result["weighted_total"], result["rank"]]
-        for result in results
+        [result["label"], result["weighted_total"], result["rank"]] for result in results
     ]
     truth_rows = [
         [
@@ -1768,9 +1740,7 @@ def build_adr_markdown(
         for surface in truth_surface_mapping["surfaces"]
     ]
 
-    deferred_items = [
-        f"{gap['gap_id']}: {gap['required_closure']}" for gap in gaps["gaps"]
-    ]
+    deferred_items = [f"{gap['gap_id']}: {gap['required_closure']}" for gap in gaps["gaps"]]
 
     lines = [
         "# ADR-004: Authority Integration Boundary",
@@ -1798,9 +1768,7 @@ def build_adr_markdown(
         "",
         "## Decision Drivers",
         "",
-        markdown_table(
-            ["Driver", "Priority", "Weight", "Why It Matters"], driver_rows
-        ),
+        markdown_table(["Driver", "Priority", "Weight", "Why It Matters"], driver_rows),
         "",
         "## Responsibility Split",
         "",
@@ -1944,9 +1912,7 @@ def build_comparison_markdown(
         "",
         "## Criteria and Weights",
         "",
-        markdown_table(
-            ["Criterion", "Priority", "Weight", "Source Grounding"], criteria_rows
-        ),
+        markdown_table(["Criterion", "Priority", "Weight", "Source Grounding"], criteria_rows),
         "",
         "## Coverage Summary",
         "",
@@ -2008,33 +1974,36 @@ def build_comparison_markdown(
 
 
 def build_mermaid() -> str:
-    return "\n".join(
-        [
-            "flowchart LR",
-            '  Browser["Browser and Portal Surfaces"] --> API["Northbound API / Session Gateway"]',
-            '  Native["Native Operator Workspace"] --> API',
-            '  Machine["Machine Automation Clients"] --> API',
-            '  API --> Control["Manifest and Workflow Control Plane"]',
-            '  Control --> Store["Primary Control Store"]',
-            '  Control --> Audit["Append-only Audit Store"]',
-            '  Control --> Broker["Queue and Broker"]',
-            '  Broker --> Workers["Stage or Recovery Workers"]',
-            '  Workers --> Control',
-            '  Control --> Gateway["Controlled Authority Gateway"]',
-            '  Gateway --> Vault["Token Vault + KMS/HSM"]',
-            '  Gateway --> Provider["Authority Provider"]',
-            '  Provider --> Gateway',
-            '  Gateway --> Ingress["AuthorityIngressReceipt (checkpoint only)"]',
-            '  Ingress --> Control',
-            '  Control --> Runtime["AuthorityInteractionRecord (runtime ledger)"]',
-            '  Control --> Submission["SubmissionRecord (settlement ledger)"]',
-            '  Submission --> Projector["Read-side Projector / Stream Broker"]',
-            '  Runtime --> Projector',
-            '  Projector --> Browser',
-            '  Projector --> Native',
-            '  Projector --> Timeline["ClientTimelineEvent / ObligationMirror"]',
-        ]
-    ) + "\n"
+    return (
+        "\n".join(
+            [
+                "flowchart LR",
+                '  Browser["Browser and Portal Surfaces"] --> API["Northbound API / Session Gateway"]',
+                '  Native["Native Operator Workspace"] --> API',
+                '  Machine["Machine Automation Clients"] --> API',
+                '  API --> Control["Manifest and Workflow Control Plane"]',
+                '  Control --> Store["Primary Control Store"]',
+                '  Control --> Audit["Append-only Audit Store"]',
+                '  Control --> Broker["Queue and Broker"]',
+                '  Broker --> Workers["Stage or Recovery Workers"]',
+                "  Workers --> Control",
+                '  Control --> Gateway["Controlled Authority Gateway"]',
+                '  Gateway --> Vault["Token Vault + KMS/HSM"]',
+                '  Gateway --> Provider["Authority Provider"]',
+                "  Provider --> Gateway",
+                '  Gateway --> Ingress["AuthorityIngressReceipt (checkpoint only)"]',
+                "  Ingress --> Control",
+                '  Control --> Runtime["AuthorityInteractionRecord (runtime ledger)"]',
+                '  Control --> Submission["SubmissionRecord (settlement ledger)"]',
+                '  Submission --> Projector["Read-side Projector / Stream Broker"]',
+                "  Runtime --> Projector",
+                "  Projector --> Browser",
+                "  Projector --> Native",
+                '  Projector --> Timeline["ClientTimelineEvent / ObligationMirror"]',
+            ]
+        )
+        + "\n"
+    )
 
 
 def main() -> None:
@@ -2078,9 +2047,7 @@ def main() -> None:
         gaps,
         supporting_context,
     )
-    comparison_markdown = build_comparison_markdown(
-        criteria, results, coverage_summary
-    )
+    comparison_markdown = build_comparison_markdown(criteria, results, coverage_summary)
     mermaid = build_mermaid()
 
     json_write(RESPONSIBILITY_MATRIX_PATH, responsibility_matrix)

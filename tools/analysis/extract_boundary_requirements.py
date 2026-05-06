@@ -143,7 +143,9 @@ CAP_TWIN = "TwinView and cross-source delta formation"
 CAP_WORKFLOW = "Workflow planning from trust, parity, risk, data quality, and drift"
 CAP_FILING_PACKET = "Filing packet formation and basis declaration"
 CAP_SUBMISSION_INTENT = "Submission intent, request identity, and SubmissionRecord persistence"
-CAP_INGRESS_NORMALIZATION = "Authenticated authority ingress normalization and acknowledgement-state interpretation"
+CAP_INGRESS_NORMALIZATION = (
+    "Authenticated authority ingress normalization and acknowledgement-state interpretation"
+)
 CAP_READ_SIDE_POSTURE = "Semantic read-side legal posture projection"
 CAP_DRIFT = "Drift classification and amendment recommendation"
 CAP_RETENTION = "Retention, expiry, erasure, and limitation propagation governance"
@@ -154,7 +156,9 @@ CAP_MODE_BOUNDARY = "Compliance-vs-analysis execution boundary enforcement"
 CAP_AUTH_GATEWAY = "Controlled authority gateway transport and callback channel"
 CAP_CONNECTOR_RUNTIME = "Connector worker execution and retry orchestration"
 CAP_OCR_RUNTIME = "OCR and document-extraction runtime"
-CAP_INGRESS_CHECKPOINT = "Transactional ingress checkpoint for callbacks, polls, and imported notices"
+CAP_INGRESS_CHECKPOINT = (
+    "Transactional ingress checkpoint for callbacks, polls, and imported notices"
+)
 CAP_FETCH_TRANSPORT = "Scoped external-data fetch transport"
 
 CAP_UI_RENDERING = "User-interface rendering, dashboards, and front-end layout"
@@ -166,7 +170,9 @@ CAP_SECRET_CUSTODY = "Token vault, OAuth session maintenance, and key or secret 
 CAP_NOTIFICATIONS = "Notification delivery"
 CAP_RUNTIME_TOPOLOGY = "Durable storage, object store, queue, cache, and observability runtime"
 CAP_RELEASE_CONTROL = "Schema migration, release admission, rollback, backup, restore, DR, and packaging control plane"
-CAP_STANDALONE_FORECASTING = "Standalone advisory forecasting disconnected from manifest, trust, and provenance governance"
+CAP_STANDALONE_FORECASTING = (
+    "Standalone advisory forecasting disconnected from manifest, trust, and provenance governance"
+)
 
 CAP_IDENTITY_ISSUANCE = "Identity issuance, HMRC sign-up, and agent authorisation setup"
 CAP_HMRC_ONLY_TASKS = "HMRC-online-services-only tasks and provider-hosted journeys"
@@ -262,7 +268,9 @@ class BoundaryRequirement:
             "security_privacy_implications": self.security_privacy_implications,
             "observability_implications": self.observability_implications,
             "degraded_or_failure_behavior": self.degraded_or_failure_behavior,
-            "forbidden_shortcuts_or_false_equivalences": list(self.forbidden_shortcuts_or_false_equivalences),
+            "forbidden_shortcuts_or_false_equivalences": list(
+                self.forbidden_shortcuts_or_false_equivalences
+            ),
             "downstream_phase_implications": list(self.downstream_phase_implications),
             "notes": self.notes,
         }
@@ -324,9 +332,22 @@ def build_rows() -> list[BoundaryRequirement]:
                 heading_ref(CORE_ENGINE_PATH, "Summary (technical solution)"),
                 heading_ref(ACTOR_MODEL_PATH, "Actor and authority model"),
             ],
-            ["RunManifest", "PrincipalContext", "AuthorizationDecision", "actor_and_authority_model.md"],
+            [
+                "RunManifest",
+                "PrincipalContext",
+                "AuthorizationDecision",
+                "actor_and_authority_model.md",
+            ],
             ["authenticated human principal", "service principal", "tenant policy engine"],
-            ["tenant_id", "client_id", "period", "requested_scope", "execution_mode", "run_kind", "principal context"],
+            [
+                "tenant_id",
+                "client_id",
+                "period",
+                "requested_scope",
+                "execution_mode",
+                "run_kind",
+                "principal context",
+            ],
             ["RunManifest", "AuthorizationDecision", "runtime_scope", "access_binding_hash"],
             [
                 "treating session presence as sufficient authority to act",
@@ -346,13 +367,27 @@ def build_rows() -> list[BoundaryRequirement]:
             "lineage_safe_replay_recovery_continuation",
             [
                 heading_ref(BOUNDARY_PATH, "1. Run initiation and authority to act"),
-                heading_ref(BOUNDARY_PATH, "Boundary Rule 5A - The engine owns lineage-safe replay, recovery, and continuation decisions"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "Boundary Rule 5A - The engine owns lineage-safe replay, recovery, and continuation decisions",
+                ),
                 heading_ref(REPLAY_PATH, "Core principles"),
                 heading_ref(REPLAY_PATH, "Exact replay preconditions"),
             ],
-            ["RunManifest", "ReplayAttestation", "continuation basis", "replay_and_reproducibility_contract.md"],
+            [
+                "RunManifest",
+                "ReplayAttestation",
+                "continuation basis",
+                "replay_and_reproducibility_contract.md",
+            ],
             ["authenticated human principal", "scheduler service", "replay service"],
-            ["prior_manifest", "requested_scope", "run_kind", "frozen basis refs", "access_binding_hash"],
+            [
+                "prior_manifest",
+                "requested_scope",
+                "run_kind",
+                "frozen basis refs",
+                "access_binding_hash",
+            ],
             ["manifest strategy", "child-manifest lineage", "ReplayAttestation"],
             [
                 "treating replay as generic retry or job restart",
@@ -378,7 +413,14 @@ def build_rows() -> list[BoundaryRequirement]:
             ],
             ["RunManifest", "ConfigFreeze", "execution_basis_hash", "ConfigVersion"],
             ["manifest orchestrator", "operator or scheduler principal"],
-            ["policy versions", "rule versions", "thresholds", "connector profile refs", "retention profile refs", "mode"],
+            [
+                "policy versions",
+                "rule versions",
+                "thresholds",
+                "connector profile refs",
+                "retention profile refs",
+                "mode",
+            ],
             ["ConfigFreeze", "execution_basis_hash", "frozen execution envelope"],
             [
                 "mutable config lookup during a live run",
@@ -423,7 +465,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "canonicalization_not_raw_source_truth",
             [
                 heading_ref(BOUNDARY_PATH, "4. Canonicalization and data-quality formation"),
-                heading_ref(BOUNDARY_PATH, "Boundary Rule 2 - The engine owns canonicalization, not raw-source truth"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "Boundary Rule 2 - The engine owns canonicalization, not raw-source truth",
+                ),
                 heading_ref(SOURCE_TAXONOMY_PATH, "Canonical source and evidence taxonomy"),
             ],
             ["SourceRecord", "EvidenceItem", "CandidateFact", "CanonicalFact", "Snapshot"],
@@ -499,7 +544,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "compliance_vs_analysis_segregation",
             [
                 heading_ref(BOUNDARY_PATH, "5. Outcome computation"),
-                heading_ref(BOUNDARY_PATH, "Boundary Rule 8 - The engine owns compliance-vs-analysis segregation"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "Boundary Rule 8 - The engine owns compliance-vs-analysis segregation",
+                ),
                 heading_ref(REPLAY_PATH, "COUNTERFACTUAL_ANALYSIS"),
             ],
             ["DecisionBundle", "Forecast artifacts", "execution_mode_boundary_contract"],
@@ -524,7 +572,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "parity_and_trust_not_authority_calculation",
             [
                 heading_ref(BOUNDARY_PATH, "6. Risk, parity, and trust"),
-                heading_ref(BOUNDARY_PATH, "Boundary Rule 4 - The engine owns parity and trust, not HMRC's own calculations"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "Boundary Rule 4 - The engine owns parity and trust, not HMRC's own calculations",
+                ),
                 heading_ref(AUTHORITY_PROTOCOL_PATH, "9.2 Protocol scope"),
             ],
             ["AuthorityReference", "SubmissionRecord", "parity result", "CanonicalFact"],
@@ -574,12 +625,21 @@ def build_rows() -> list[BoundaryRequirement]:
             "explainability_for_engine_created_states",
             [
                 heading_ref(BOUNDARY_PATH, "7. Provenance and twin formation"),
-                heading_ref(BOUNDARY_PATH, "Boundary Rule 7 - The engine owns evidence-linked explainability for all states it creates"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "Boundary Rule 7 - The engine owns evidence-linked explainability for all states it creates",
+                ),
                 heading_ref(CORE_ENGINE_PATH, "Summary (technical solution)"),
             ],
             ["EvidenceGraph", "ProofBundle", "DecisionBundle", "audit and provenance contract"],
             ["graph service", "compute service"],
-            ["canonical facts", "rule refs", "config refs", "override refs", "authority acknowledgement refs"],
+            [
+                "canonical facts",
+                "rule refs",
+                "config refs",
+                "override refs",
+                "authority acknowledgement refs",
+            ],
             ["EvidenceGraph", "ProofBundle", "traceable artifact bindings"],
             [
                 "opaque output with no evidence path",
@@ -648,7 +708,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "filing_intent_and_packet_not_authority_acceptance",
             [
                 heading_ref(BOUNDARY_PATH, "9. Filing packet formation"),
-                heading_ref(BOUNDARY_PATH, "Boundary Rule 3 - The engine owns filing intent and packet formation, not authority acceptance"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "Boundary Rule 3 - The engine owns filing intent and packet formation, not authority acceptance",
+                ),
                 heading_ref(AUTHORITY_PROTOCOL_PATH, "Authority interaction protocol"),
             ],
             ["FilingPacket", "RunManifest", "AuthorityOperation"],
@@ -676,10 +739,20 @@ def build_rows() -> list[BoundaryRequirement]:
                 heading_ref(AUTHORITY_PROTOCOL_PATH, "9.1 Boundary rule"),
                 heading_ref(AUTHORITY_PROTOCOL_PATH, "9.3 Core protocol objects"),
             ],
-            ["AuthorityOperation", "AuthorityBinding", "AuthorityRequestEnvelope", "SubmissionRecord"],
+            [
+                "AuthorityOperation",
+                "AuthorityBinding",
+                "AuthorityRequestEnvelope",
+                "SubmissionRecord",
+            ],
             ["filing service", "authority gateway"],
             ["FilingPacket", "authority binding", "token/client selection", "policy snapshot hash"],
-            ["request_hash", "idempotency_key", "SubmissionRecord", "authority interaction lineage"],
+            [
+                "request_hash",
+                "idempotency_key",
+                "SubmissionRecord",
+                "authority interaction lineage",
+            ],
             [
                 "deriving request identity from live transport state after the fact",
                 "treating queue resend as new legal intent without idempotency checks",
@@ -702,10 +775,24 @@ def build_rows() -> list[BoundaryRequirement]:
                 heading_ref(SECURITY_PATH, "5. Service-to-service and network hardening"),
                 heading_ref(AUTHORITY_PROTOCOL_PATH, "9.1 Boundary rule"),
             ],
-            ["AuthorityIngressReceipt", "AuthorityResponseEnvelope", "SubmissionRecord", "AuthorityInteractionRecord"],
+            [
+                "AuthorityIngressReceipt",
+                "AuthorityResponseEnvelope",
+                "SubmissionRecord",
+                "AuthorityInteractionRecord",
+            ],
             ["authority gateway", "ingress worker", "filing service"],
-            ["provider callback or poll payload", "request lineage", "dedupe key", "authority reference"],
-            ["normalized authority artifacts", "acknowledgement state", "legal-state mutation inputs"],
+            [
+                "provider callback or poll payload",
+                "request lineage",
+                "dedupe key",
+                "authority reference",
+            ],
+            [
+                "normalized authority artifacts",
+                "acknowledgement state",
+                "legal-state mutation inputs",
+            ],
             [
                 "treating a callback or imported notice as legal truth before authentication and correlation",
                 "equating transport success or silence with CONFIRMED acknowledgement",
@@ -724,7 +811,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "exact_scope_posture_not_client_flattening",
             [
                 heading_ref(BOUNDARY_PATH, "10A. Read-side legal posture projection"),
-                heading_ref(BOUNDARY_PATH, "Boundary Rule 5B - The engine owns exact-scope posture, not client-wide flattening"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "Boundary Rule 5B - The engine owns exact-scope posture, not client-wide flattening",
+                ),
                 heading_ref(NORTHBOUND_PATH, "1. Core principles"),
             ],
             [
@@ -756,7 +846,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "amendment_recommendation_not_unrestricted_amendment_right",
             [
                 heading_ref(BOUNDARY_PATH, "11. Drift and amendment recommendation"),
-                heading_ref(BOUNDARY_PATH, "Boundary Rule 5 - The engine owns amendment recommendation, not unrestricted amendment rights"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "Boundary Rule 5 - The engine owns amendment recommendation, not unrestricted amendment rights",
+                ),
                 heading_ref(AUTHORITY_PROTOCOL_PATH, "9.2 Protocol scope"),
             ],
             ["SubmissionRecord", "WorkflowItem", "DecisionBundle", "drift monitor"],
@@ -784,7 +877,13 @@ def build_rows() -> list[BoundaryRequirement]:
                 heading_ref(RETENTION_PATH, "Retention and privacy"),
                 heading_ref(RETENTION_PATH, "Expiry and limitation behavior"),
             ],
-            ["RetentionTag", "ArtifactRetention", "ErasureProof", "DecisionBundle", "EvidenceGraph"],
+            [
+                "RetentionTag",
+                "ArtifactRetention",
+                "ErasureProof",
+                "DecisionBundle",
+                "EvidenceGraph",
+            ],
             ["retention service", "privacy workflow", "audit investigator"],
             ["artifact refs", "retention basis", "legal hold state", "proof-preservation state"],
             ["RetentionTag", "ArtifactRetention", "erasure proofs", "limitation notes"],
@@ -806,12 +905,25 @@ def build_rows() -> list[BoundaryRequirement]:
             "lineage_safe_replay_recovery_continuation",
             [
                 heading_ref(BOUNDARY_PATH, "Positive boundary: what is inside the invention"),
-                heading_ref(BOUNDARY_PATH, "Boundary Rule 5A - The engine owns lineage-safe replay, recovery, and continuation decisions"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "Boundary Rule 5A - The engine owns lineage-safe replay, recovery, and continuation decisions",
+                ),
                 heading_ref(REPLAY_PATH, "Purpose"),
             ],
-            ["RunManifest", "ReplayAttestation", "continuation_set", "replay_and_reproducibility_contract.md"],
+            [
+                "RunManifest",
+                "ReplayAttestation",
+                "continuation_set",
+                "replay_and_reproducibility_contract.md",
+            ],
             ["manifest orchestrator", "replay service", "recovery worker"],
-            ["historical manifest", "execution basis hash", "post-seal basis", "continuation request"],
+            [
+                "historical manifest",
+                "execution basis hash",
+                "post-seal basis",
+                "continuation request",
+            ],
             ["ReplayAttestation", "continuation lineage", "recovery posture"],
             [
                 "treating lineage-safe continuation as generic queue retry",
@@ -830,7 +942,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "inside_core_engine",
             "explainability_for_engine_created_states",
             [
-                heading_ref(BOUNDARY_PATH, "Boundary Rule 7 - The engine owns evidence-linked explainability for all states it creates"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "Boundary Rule 7 - The engine owns evidence-linked explainability for all states it creates",
+                ),
                 heading_ref(CORE_ENGINE_PATH, "Practical technical effect"),
                 heading_ref(NORTHBOUND_PATH, "1. Core principles"),
             ],
@@ -855,14 +970,26 @@ def build_rows() -> list[BoundaryRequirement]:
             "inside_core_engine",
             "compliance_vs_analysis_segregation",
             [
-                heading_ref(BOUNDARY_PATH, "Boundary Rule 8 - The engine owns compliance-vs-analysis segregation"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "Boundary Rule 8 - The engine owns compliance-vs-analysis segregation",
+                ),
                 heading_ref(BOUNDARY_PATH, "Practical technical effect"),
                 heading_ref(REPLAY_PATH, "COUNTERFACTUAL_ANALYSIS"),
             ],
-            ["execution_mode_boundary_contract", "DecisionBundle", "ReplayAttestation", "FilingPacket"],
+            [
+                "execution_mode_boundary_contract",
+                "DecisionBundle",
+                "ReplayAttestation",
+                "FilingPacket",
+            ],
             ["compute service", "replay service", "filing service"],
             ["execution_mode", "analysis_only", "counterfactual_basis", "legal_effect_boundary"],
-            ["execution_mode_boundary_contract", "disclosure reason codes", "blocked legal-effect posture"],
+            [
+                "execution_mode_boundary_contract",
+                "disclosure reason codes",
+                "blocked legal-effect posture",
+            ],
             [
                 "analysis-only or replay-only outputs flowing onto live submit paths",
                 "inferring filing capability from successful compute alone",
@@ -905,7 +1032,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "controlled_edge",
             "controlled_connector_use_not_generic_etl",
             [
-                heading_ref(BOUNDARY_PATH, "B. What is outside the core engine but still inside the broader product"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "B. What is outside the core engine but still inside the broader product",
+                ),
                 heading_ref(BOUNDARY_PATH, "Negative boundary: what is not the invention"),
                 heading_ref(DEPLOYMENT_PATH, "1. Reference runtime topology"),
             ],
@@ -930,7 +1060,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "controlled_edge",
             "controlled_ocr_not_inventive_center",
             [
-                heading_ref(BOUNDARY_PATH, "B. What is outside the core engine but still inside the broader product"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "B. What is outside the core engine but still inside the broader product",
+                ),
                 heading_ref(BOUNDARY_PATH, "Negative boundary: what is not the invention"),
                 heading_ref(SOURCE_TAXONOMY_PATH, "Class E - DOCUMENTARY_EVIDENCE"),
             ],
@@ -961,7 +1094,12 @@ def build_rows() -> list[BoundaryRequirement]:
             ],
             ["AuthorityIngressReceipt", "transactional inbox", "quarantine queue"],
             ["authority gateway", "ingress worker"],
-            ["provider deliveries", "request lineage hints", "dedupe keys", "provider channel auth"],
+            [
+                "provider deliveries",
+                "request lineage hints",
+                "dedupe keys",
+                "provider channel auth",
+            ],
             ["AuthorityIngressReceipt", "quarantine posture", "canonical_ingress_receipt_ref"],
             [
                 "treating duplicate or weakly-bound ingress as safe legal truth",
@@ -981,7 +1119,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "controlled_fetch_transport_not_raw_truth",
             [
                 heading_ref(BOUNDARY_PATH, "3. Evidence acquisition as engine-controlled intake"),
-                heading_ref(BOUNDARY_PATH, "Boundary Rule 2 - The engine owns canonicalization, not raw-source truth"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "Boundary Rule 2 - The engine owns canonicalization, not raw-source truth",
+                ),
                 heading_ref(SECURITY_PATH, "5. Service-to-service and network hardening"),
             ],
             ["connector transport", "source fetch adapters", "SourceRecord"],
@@ -1005,7 +1146,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "broader_product_outside_core",
             "semantic_posture_not_renderer_layout",
             [
-                heading_ref(BOUNDARY_PATH, "B. What is outside the core engine but still inside the broader product"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "B. What is outside the core engine but still inside the broader product",
+                ),
                 heading_ref(BOUNDARY_PATH, "Negative boundary: what is not the invention"),
                 heading_ref(NORTHBOUND_PATH, "Purpose"),
             ],
@@ -1030,7 +1174,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "broader_product_outside_core",
             "product_surface_embodiment_not_engine",
             [
-                heading_ref(BOUNDARY_PATH, "B. What is outside the core engine but still inside the broader product"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "B. What is outside the core engine but still inside the broader product",
+                ),
                 heading_ref(BOUNDARY_PATH, "10A. Read-side legal posture projection"),
                 heading_ref(NORTHBOUND_PATH, "2. Required northbound surfaces"),
             ],
@@ -1055,7 +1202,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "broader_product_outside_core",
             "core_semantics_vs_northbound_transport",
             [
-                heading_ref(BOUNDARY_PATH, "B. What is outside the core engine but still inside the broader product"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "B. What is outside the core engine but still inside the broader product",
+                ),
                 heading_ref(NORTHBOUND_PATH, "Purpose"),
                 heading_ref(NORTHBOUND_PATH, "1. Core principles"),
             ],
@@ -1080,10 +1230,18 @@ def build_rows() -> list[BoundaryRequirement]:
             "broader_product_outside_core",
             "route_shell_choreography_not_engine_truth",
             [
-                heading_ref(BOUNDARY_PATH, "B. What is outside the core engine but still inside the broader product"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "B. What is outside the core engine but still inside the broader product",
+                ),
                 heading_ref(NORTHBOUND_PATH, "1. Core principles"),
             ],
-            ["route controller", "scene restoration", "window choreography", "shell continuity metadata"],
+            [
+                "route controller",
+                "scene restoration",
+                "window choreography",
+                "shell continuity metadata",
+            ],
             ["browser client", "native client"],
             ["shell_route_key", "object_anchor_ref", "shell_family", "restoration metadata"],
             ["route transitions", "restored windows", "focus anchors"],
@@ -1105,7 +1263,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "runtime_identity_and_secret_hardening_not_engine",
             [
                 heading_ref(SECURITY_PATH, "2. Identity, session, and command trust"),
-                heading_ref(BOUNDARY_PATH, "B. What is outside the core engine but still inside the broader product"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "B. What is outside the core engine but still inside the broader product",
+                ),
             ],
             ["ActorSession", "session gateway", "device binding", "CSRF protections"],
             ["identity provider", "browser client", "native client"],
@@ -1128,7 +1289,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "broader_product_outside_core",
             "runtime_identity_and_secret_hardening_not_engine",
             [
-                heading_ref(BOUNDARY_PATH, "B. What is outside the core engine but still inside the broader product"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "B. What is outside the core engine but still inside the broader product",
+                ),
                 heading_ref(SECURITY_PATH, "3. Secret, key, and token handling"),
             ],
             ["token vault", "SecretVersion", "KMS or HSM boundary", "OAuth session maintenance"],
@@ -1152,7 +1316,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "broader_product_outside_core",
             "notification_delivery_not_engine_decisioning",
             [
-                heading_ref(BOUNDARY_PATH, "B. What is outside the core engine but still inside the broader product"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "B. What is outside the core engine but still inside the broader product",
+                ),
                 heading_ref(ACTOR_MODEL_PATH, "C. Service principals"),
             ],
             ["notification service", "email provider", "push delivery channel"],
@@ -1176,11 +1343,21 @@ def build_rows() -> list[BoundaryRequirement]:
             "broader_product_outside_core",
             "runtime_topology_not_engine",
             [
-                heading_ref(BOUNDARY_PATH, "B. What is outside the core engine but still inside the broader product"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "B. What is outside the core engine but still inside the broader product",
+                ),
                 heading_ref(DEPLOYMENT_PATH, "1. Reference runtime topology"),
                 heading_ref(SECURITY_PATH, "6. Data protection, privacy, and cache safety"),
             ],
-            ["primary control store", "append-only audit store", "object store", "queue or broker", "cache", "observability stack"],
+            [
+                "primary control store",
+                "append-only audit store",
+                "object store",
+                "queue or broker",
+                "cache",
+                "observability stack",
+            ],
             ["platform runtime", "operators", "workers"],
             ["engine-authored artifacts", "outbox or inbox truth", "cache partition keys"],
             ["stored artifact bodies", "queue deliveries", "telemetry", "cache entries"],
@@ -1201,14 +1378,22 @@ def build_rows() -> list[BoundaryRequirement]:
             "broader_product_outside_core",
             "release_resilience_not_engine",
             [
-                heading_ref(BOUNDARY_PATH, "B. What is outside the core engine but still inside the broader product"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "B. What is outside the core engine but still inside the broader product",
+                ),
                 heading_ref(DEPLOYMENT_PATH, "Deployment and resilience contract"),
                 heading_ref(DEPLOYMENT_PATH, "6. Rollout, rollback, and fail-forward posture"),
             ],
             ["DeploymentRelease", "SchemaMigrationLedger", "RecoveryCheckpoint", "BuildArtifact"],
             ["release engineer", "operators", "platform runtime"],
             ["build artifacts", "schema bundle", "migration plan", "restore evidence"],
-            ["deployment releases", "restore drills", "compatibility gates", "rollback or fail-forward posture"],
+            [
+                "deployment releases",
+                "restore drills",
+                "compatibility gates",
+                "rollback or fail-forward posture",
+            ],
             [
                 "treating release automation as the inventive core",
                 "rolling back legal truth by deleting or obscuring persisted evidence",
@@ -1227,7 +1412,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "standalone_forecasting_outside_invention",
             [
                 heading_ref(BOUNDARY_PATH, "Negative boundary: what is not the invention"),
-                heading_ref(BOUNDARY_PATH, "Boundary Rule 8 - The engine owns compliance-vs-analysis segregation"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "Boundary Rule 8 - The engine owns compliance-vs-analysis segregation",
+                ),
             ],
             ["advisory model", "forecast UI", "analysis workspace"],
             ["operator", "analyst"],
@@ -1251,7 +1439,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "identity_issuance_outside_engine",
             [
                 heading_ref(BOUNDARY_PATH, "1. HMRC sign-up and agent authorisation setup"),
-                heading_ref(BOUNDARY_PATH, "Boundary Rule 1 - The engine owns decisions, not identity issuance"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "Boundary Rule 1 - The engine owns decisions, not identity issuance",
+                ),
                 heading_ref(AUTHORITY_PROTOCOL_PATH, "9.1 Boundary rule"),
             ],
             ["HMRC sign-up flow", "agent services account", "authority-issued identity"],
@@ -1276,7 +1467,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "guide_not_absorb_hmrc_online_services_only",
             [
                 heading_ref(BOUNDARY_PATH, "2. HMRC-online-services-only tasks"),
-                heading_ref(BOUNDARY_PATH, "Boundary Rule 6 - The engine may guide users to HMRC online services, but does not absorb HMRC-only tasks"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "Boundary Rule 6 - The engine may guide users to HMRC online services, but does not absorb HMRC-only tasks",
+                ),
             ],
             ["HMRC online services", "system browser handoff", "external session"],
             ["reporting subject", "agent", "HMRC online service"],
@@ -1300,7 +1494,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "authority_acceptance_and_legal_truth_external",
             [
                 heading_ref(BOUNDARY_PATH, "3. Authority-owned legal status"),
-                heading_ref(BOUNDARY_PATH, "Boundary Rule 3 - The engine owns filing intent and packet formation, not authority acceptance"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "Boundary Rule 3 - The engine owns filing intent and packet formation, not authority acceptance",
+                ),
                 heading_ref(ACTOR_MODEL_PATH, "Layer 5 - Authority-of-record precedence"),
             ],
             ["Authority of Record", "authority acknowledgement", "submission legal status"],
@@ -1325,7 +1522,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "parity_and_trust_not_authority_calculation",
             [
                 heading_ref(BOUNDARY_PATH, "4. HMRC's own calculation service"),
-                heading_ref(BOUNDARY_PATH, "Boundary Rule 4 - The engine owns parity and trust, not HMRC's own calculations"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "Boundary Rule 4 - The engine owns parity and trust, not HMRC's own calculations",
+                ),
                 heading_ref(AUTHORITY_PROTOCOL_PATH, "9.2 Protocol scope"),
             ],
             ["HMRC calculation service", "AuthorityReference"],
@@ -1400,7 +1600,10 @@ def build_rows() -> list[BoundaryRequirement]:
             "external_source_truth_outside_engine",
             [
                 heading_ref(SOURCE_TAXONOMY_PATH, "4.3 Source classes by origin"),
-                heading_ref(BOUNDARY_PATH, "Boundary Rule 2 - The engine owns canonicalization, not raw-source truth"),
+                heading_ref(
+                    BOUNDARY_PATH,
+                    "Boundary Rule 2 - The engine owns canonicalization, not raw-source truth",
+                ),
             ],
             ["bank feeds", "document sources", "bookkeeping systems", "declared assertions"],
             ["customer bank", "document source system", "client user", "external provider"],
@@ -1429,7 +1632,11 @@ def build_rows() -> list[BoundaryRequirement]:
             ["authority-side processing", "authority queues", "provider internal semantics"],
             ["HMRC", "authority system"],
             ["authority request", "provider-side internal processing"],
-            ["returned responses", "acknowledgement or rejection states", "unresolved external latency"],
+            [
+                "returned responses",
+                "acknowledgement or rejection states",
+                "unresolved external latency",
+            ],
             [
                 "pretending local retries know what the authority is doing internally",
                 "reconstructing authority processing semantics from timeout behaviour alone",
@@ -1458,8 +1665,12 @@ def build_summary(rows: list[BoundaryRequirement]) -> dict[str, Any]:
         "zone_counts": {zone: zone_counts.get(zone, 0) for zone in ZONE_ORDER},
         "rule_family_count": len(family_counts),
         "explicit_boundary_rule_coverage": explicit_rule_coverage,
-        "inside_core_capability_count": len([row for row in rows if row.zone == "inside_core_engine"]),
-        "outside_core_capability_count": len([row for row in rows if row.zone != "inside_core_engine"]),
+        "inside_core_capability_count": len(
+            [row for row in rows if row.zone == "inside_core_engine"]
+        ),
+        "outside_core_capability_count": len(
+            [row for row in rows if row.zone != "inside_core_engine"]
+        ),
     }
 
 
@@ -1483,7 +1694,9 @@ def build_out_of_scope_register(rows: list[BoundaryRequirement]) -> dict[str, An
             "why_out_of_scope": why_out_of_scope,
             "lawful_engine_relationship": row.lawful_engine_relationship,
             "authoritative_source_refs": list(row.authoritative_source_refs),
-            "forbidden_shortcuts_or_false_equivalences": list(row.forbidden_shortcuts_or_false_equivalences),
+            "forbidden_shortcuts_or_false_equivalences": list(
+                row.forbidden_shortcuts_or_false_equivalences
+            ),
             "downstream_phase_implications": list(row.downstream_phase_implications),
             "notes": row.notes,
         }
@@ -1493,7 +1706,11 @@ def build_out_of_scope_register(rows: list[BoundaryRequirement]) -> dict[str, An
         "generated_from_task": "pc_0005",
         "summary": {
             "entry_count": len(entries),
-            "zone_counts": {zone: len(grouped.get(zone, [])) for zone in ZONE_ORDER if zone != "inside_core_engine"},
+            "zone_counts": {
+                zone: len(grouped.get(zone, []))
+                for zone in ZONE_ORDER
+                if zone != "inside_core_engine"
+            },
         },
         "rows": entries,
     }
@@ -1508,7 +1725,9 @@ def write_matrix_csv(rows: list[BoundaryRequirement]) -> None:
             payload = row.to_dict()
             writer.writerow(
                 {
-                    key: " | ".join(payload[key]) if isinstance(payload[key], list) else payload[key]
+                    key: " | ".join(payload[key])
+                    if isinstance(payload[key], list)
+                    else payload[key]
                     for key in fieldnames
                 }
             )
@@ -1518,7 +1737,9 @@ def format_list(values: Iterable[str]) -> str:
     return "; ".join(values)
 
 
-def build_requirements_doc(rows: list[BoundaryRequirement], summary: dict[str, Any], register: dict[str, Any]) -> str:
+def build_requirements_doc(
+    rows: list[BoundaryRequirement], summary: dict[str, Any], register: dict[str, Any]
+) -> str:
     family_to_rows: dict[str, list[BoundaryRequirement]] = defaultdict(list)
     for row in rows:
         family_to_rows[row.boundary_rule_family].append(row)
@@ -1700,7 +1921,7 @@ def build_mermaid_diagram() -> str:
             '  USERS -->|"authenticated requests, signatory evidence"| MANIFEST',
             '  SOURCES -->|"raw records, documents, declarations"| CONNECTORS',
             '  CONNECTORS -->|"payload refs only"| SNAPSHOT',
-            '  MANIFEST --> SNAPSHOT --> DECISION --> LEGAL --> GOVERNANCE',
+            "  MANIFEST --> SNAPSHOT --> DECISION --> LEGAL --> GOVERNANCE",
             '  HMRC -->|"authority acknowledgements, status, calculations"| GATEWAY',
             '  GATEWAY -->|"authenticated receipts and normalized responses"| LEGAL',
             '  DECISION -->|"engine-authored posture and workflow"| NORTHBOUND',

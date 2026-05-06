@@ -1,0 +1,398 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/authority_ingress_investigation_snapshot.schema.json",
+  "title": "AuthorityIngressInvestigationSnapshot",
+  "description": "Integration-facing ingress investigation read model. This schema freezes the persisted ingress payload anchor, correlation explainability contract, duplicate lineage, quarantine ownership, and operator-safe next actions for ambiguous, unbound, duplicate, or quarantined authority ingress without depending on transport logs or permitting direct legal-state mutation.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "investigation_id",
+    "ingress_receipt_ref",
+    "provider_environment",
+    "provider_profile_ref",
+    "ingress_channel_class",
+    "receipt_state",
+    "correlation_status",
+    "authenticated_channel_state",
+    "response_body_ref",
+    "response_body_hash",
+    "delivery_dedupe_key",
+    "authority_reference_or_null",
+    "bound_interaction_ref_or_null",
+    "normalized_response_ref_or_null",
+    "authority_ingress_proof_contract",
+    "authority_ingress_correlation_contract",
+    "delivery_lineage",
+    "quarantine_explainability",
+    "safe_next_action_codes",
+    "investigation_source_policy",
+    "legal_mutation_policy",
+    "updated_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "AuthorityIngressInvestigationSnapshot"
+    },
+    "investigation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ingress_receipt_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_environment": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_profile_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ingress_channel_class": {
+      "type": "string",
+      "enum": [
+        "CALLBACK",
+        "POLL_RESULT",
+        "INBOX_DELIVERY",
+        "WORKER_OBSERVED",
+        "GATEWAY_RECOVERED"
+      ]
+    },
+    "receipt_state": {
+      "type": "string",
+      "enum": [
+        "QUARANTINED",
+        "DUPLICATE_SUPPRESSED"
+      ]
+    },
+    "correlation_status": {
+      "type": "string",
+      "enum": [
+        "BOUND",
+        "BOUND_WITH_AUTHORITY_REFERENCE_ONLY",
+        "AMBIGUOUS",
+        "UNBOUND"
+      ]
+    },
+    "authenticated_channel_state": {
+      "type": "string",
+      "enum": [
+        "AUTHENTICATED",
+        "FAILED"
+      ]
+    },
+    "response_body_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "response_body_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "delivery_dedupe_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority_reference_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "bound_interaction_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "normalized_response_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "authority_ingress_proof_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/authority_ingress_proof_contract.schema.json"
+        },
+        {
+          "properties": {
+            "binding_scope_class": {
+              "const": "AUTHORITY_INGRESS_RECEIPT"
+            }
+          }
+        }
+      ]
+    },
+    "authority_ingress_correlation_contract": {
+      "$ref": "https://taxat.dev/schemas/authority_ingress_correlation_contract.schema.json"
+    },
+    "delivery_lineage": {
+      "$ref": "#/$defs/deliveryLineage"
+    },
+    "quarantine_explainability": {
+      "$ref": "#/$defs/quarantineExplainability"
+    },
+    "safe_next_action_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "COMPARE_CANDIDATE_LINEAGES",
+          "ESCALATE_PROVIDER_PAYLOAD",
+          "OPEN_RECONCILIATION_WORKFLOW",
+          "REVIEW_AUTHENTICATION_EVIDENCE",
+          "REVIEW_CANONICAL_RECEIPT",
+          "WAIT_FOR_SEPARATE_BINDING_DECISION"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "investigation_source_policy": {
+      "const": "PERSISTED_RECEIPT_PAYLOAD_AUDIT_AND_LINEAGE_ONLY"
+    },
+    "legal_mutation_policy": {
+      "const": "NO_DIRECT_LEGAL_STATE_MUTATION_FROM_INVESTIGATION"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "deliveryLineage": {
+      "type": "object",
+      "required": [
+        "delivery_novelty_state",
+        "canonical_ingress_receipt_ref_or_self",
+        "related_duplicate_receipt_refs"
+      ],
+      "properties": {
+        "delivery_novelty_state": {
+          "type": "string",
+          "enum": [
+            "CANONICAL_FIRST_SEEN",
+            "DUPLICATE_SUPPRESSED"
+          ]
+        },
+        "canonical_ingress_receipt_ref_or_self": {
+          "type": "string",
+          "minLength": 1
+        },
+        "related_duplicate_receipt_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "quarantineExplainability": {
+      "type": "object",
+      "required": [
+        "reason_codes",
+        "comparison_candidate_refs",
+        "supporting_audit_event_refs",
+        "current_owner_ref_or_null",
+        "resolution_state",
+        "blocked_mutation_reason_codes"
+      ],
+      "properties": {
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "comparison_candidate_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "supporting_audit_event_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "current_owner_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "resolution_state": {
+          "type": "string",
+          "enum": [
+            "ESCALATED",
+            "OPEN_DUPLICATE_REVIEW",
+            "OPEN_QUARANTINE",
+            "READY_FOR_CANONICAL_DUPLICATE_CLOSE",
+            "READY_FOR_SEPARATE_RECONCILIATION"
+          ]
+        },
+        "blocked_mutation_reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "receipt_state": {
+            "const": "QUARANTINED"
+          }
+        },
+        "required": [
+          "receipt_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "delivery_lineage": {
+            "properties": {
+              "delivery_novelty_state": {
+                "const": "CANONICAL_FIRST_SEEN"
+              }
+            }
+          },
+          "quarantine_explainability": {
+            "properties": {
+              "reason_codes": {
+                "minItems": 1
+              },
+              "current_owner_ref_or_null": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "normalized_response_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "receipt_state": {
+            "const": "DUPLICATE_SUPPRESSED"
+          }
+        },
+        "required": [
+          "receipt_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "authenticated_channel_state": {
+            "const": "AUTHENTICATED"
+          },
+          "delivery_lineage": {
+            "properties": {
+              "delivery_novelty_state": {
+                "const": "DUPLICATE_SUPPRESSED"
+              }
+            }
+          },
+          "quarantine_explainability": {
+            "properties": {
+              "reason_codes": {
+                "maxItems": 0
+              },
+              "resolution_state": {
+                "enum": [
+                  "OPEN_DUPLICATE_REVIEW",
+                  "READY_FOR_CANONICAL_DUPLICATE_CLOSE"
+                ]
+              }
+            }
+          },
+          "bound_interaction_ref_or_null": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
+          },
+          "normalized_response_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "response_body_hash": {
+            "const": "<NONE>"
+          }
+        },
+        "required": [
+          "response_body_hash"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_body_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "response_body_ref": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "response_body_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_body_hash": {
+            "const": "<NONE>"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

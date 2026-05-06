@@ -8,12 +8,7 @@ export const signalGovernanceBoardRoute = {
     "signal-governance-canvas",
     "signal-governance-inspector",
   ],
-  sections: [
-    "Projects",
-    "Scrubbing",
-    "Inbound Filters",
-    "Alerts & Release Mapping",
-  ],
+  sections: ["Projects", "Scrubbing", "Inbound Filters", "Alerts & Release Mapping"],
   palette: {
     background: "#F5F6F4",
     surface: "#FFFFFF",

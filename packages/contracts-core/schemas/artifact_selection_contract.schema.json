@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/artifact_selection_contract.schema.json",
+  "title": "ArtifactSelectionContract",
+  "description": "Shared current-vs-history artifact selection contract. This schema freezes primary non-historical subjects, authoritative current subjects, explicit history, limited-history disclosure posture, and the default preview/download/print targets so refresh, reconnect, responsive collapse, and browser handoff do not infer artifact truth from list order or stale local state.",
+  "type": "object",
+  "required": [
+    "selection_scope",
+    "presentation_mode",
+    "primary_subject_refs",
+    "authoritative_subject_refs",
+    "historical_subject_refs",
+    "limited_history_state",
+    "limited_history_count_or_null",
+    "default_preview_target_ref_or_null",
+    "default_download_target_ref_or_null",
+    "default_print_target_ref_or_null"
+  ],
+  "properties": {
+    "selection_scope": {
+      "type": "string",
+      "enum": [
+        "CLIENT_DOCUMENT_REQUEST",
+        "CLIENT_APPROVAL_PACK",
+        "COLLABORATION_CUSTOMER_REQUEST",
+        "COLLABORATION_ATTACHMENT_SLICE"
+      ]
+    },
+    "presentation_mode": {
+      "const": "CURRENT_PRIMARY_HISTORY_SECONDARY"
+    },
+    "primary_subject_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "authoritative_subject_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "historical_subject_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "limited_history_state": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "LIMITED",
+        "MASKED_PRESENT"
+      ]
+    },
+    "limited_history_count_or_null": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "default_preview_target_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "default_download_target_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "default_print_target_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "limited_history_state": {
+            "const": "NONE"
+          }
+        },
+        "required": [
+          "limited_history_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "limited_history_count_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "limited_history_state": {
+            "enum": [
+              "LIMITED",
+              "MASKED_PRESENT"
+            ]
+          }
+        },
+        "required": [
+          "limited_history_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "limited_history_count_or_null": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "authoritative_subject_refs": {
+            "maxItems": 0
+          }
+        },
+        "required": [
+          "authoritative_subject_refs"
+        ]
+      },
+      "then": {
+        "properties": {
+          "default_preview_target_ref_or_null": {
+            "type": "null"
+          },
+          "default_download_target_ref_or_null": {
+            "type": "null"
+          },
+          "default_print_target_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ]
+}

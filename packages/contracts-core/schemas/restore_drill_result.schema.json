@@ -1,0 +1,346 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/restore_drill_result.schema.json",
+  "title": "RestoreDrillResult",
+  "description": "Restore-drill evidence contract. This schema freezes the exact checkpoint, drill scope, and recovery-verification posture used to satisfy a release-blocking restore gate.",
+  "type": "object",
+  "required": [
+    "restore_drill_id",
+    "checkpoint_ref",
+    "candidate_environment_ref",
+    "drill_scope",
+    "build_artifact_ref",
+    "artifact_digest",
+    "candidate_identity_hash",
+    "candidate_identity_contract",
+    "schema_bundle_hash",
+    "schema_reader_window_contract",
+    "config_bundle_hash",
+    "migration_plan_ref",
+    "enabled_provider_profile_refs",
+    "executed_at",
+    "outcome",
+    "audit_continuity_verified",
+    "privacy_reconciliation_verified",
+    "queue_rebuild_verified",
+    "authority_rebuild_verified",
+    "authority_binding_revalidation_verified",
+    "privacy_reconciliation_contract",
+    "drill_report_ref",
+    "failure_reason_codes"
+  ],
+  "properties": {
+    "restore_drill_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "checkpoint_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_environment_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "build_artifact_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_identity_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_identity_contract": {
+      "$ref": "https://taxat.dev/schemas/release_candidate_identity_contract.schema.json"
+    },
+    "schema_bundle_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema_reader_window_contract": {
+      "$ref": "https://taxat.dev/schemas/schema_reader_window_contract.schema.json"
+    },
+    "config_bundle_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "migration_plan_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "enabled_provider_profile_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "drill_scope": {
+      "type": "string",
+      "enum": [
+        "CURRENT_RELEASE_CANDIDATE",
+        "DR_FAILOVER_FAILBACK"
+      ]
+    },
+    "executed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "PASSED",
+        "FAILED",
+        "QUARANTINED"
+      ]
+    },
+    "audit_continuity_verified": {
+      "type": "boolean"
+    },
+    "privacy_reconciliation_verified": {
+      "type": "boolean"
+    },
+    "queue_rebuild_verified": {
+      "type": "boolean"
+    },
+    "authority_rebuild_verified": {
+      "type": "boolean"
+    },
+    "authority_binding_revalidation_verified": {
+      "type": "boolean"
+    },
+    "privacy_reconciliation_contract": {
+      "$ref": "https://taxat.dev/schemas/restore_privacy_reconciliation_contract.schema.json"
+    },
+    "drill_report_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "failure_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "PASSED"
+          }
+        },
+        "required": [
+          "outcome"
+        ]
+      },
+      "then": {
+        "properties": {
+          "audit_continuity_verified": {
+            "const": true
+          },
+          "privacy_reconciliation_verified": {
+            "const": true
+          },
+          "queue_rebuild_verified": {
+            "const": true
+          },
+          "authority_rebuild_verified": {
+            "const": true
+          },
+          "authority_binding_revalidation_verified": {
+            "const": true
+          },
+          "privacy_reconciliation_contract": {
+            "type": "object",
+            "properties": {
+              "privacy_reconciliation_state": {
+                "enum": [
+                  "RECONCILED_NO_COMPENSATION_REQUIRED",
+                  "RECONCILED_WITH_COMPENSATING_RE_ERASURE"
+                ]
+              },
+              "audit_chain_continuity_state": {
+                "const": "VERIFIED"
+              },
+              "replay_limitation_state": {
+                "const": "VERIFIED"
+              },
+              "enquiry_limitation_state": {
+                "const": "VERIFIED"
+              },
+              "reopen_access_state": {
+                "const": "READY_FOR_REOPEN"
+              }
+            }
+          },
+          "failure_reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "audit_continuity_verified": {
+            "const": true
+          },
+          "privacy_reconciliation_verified": {
+            "const": true
+          },
+          "queue_rebuild_verified": {
+            "const": true
+          },
+          "authority_rebuild_verified": {
+            "const": true
+          },
+          "authority_binding_revalidation_verified": {
+            "const": true
+          }
+        },
+        "required": [
+          "audit_continuity_verified",
+          "privacy_reconciliation_verified",
+          "queue_rebuild_verified",
+          "authority_rebuild_verified",
+          "authority_binding_revalidation_verified"
+        ]
+      },
+      "then": {
+        "properties": {
+          "outcome": {
+            "const": "PASSED"
+          },
+          "failure_reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "enum": [
+              "FAILED",
+              "QUARANTINED"
+            ]
+          }
+        },
+        "required": [
+          "outcome"
+        ]
+      },
+      "then": {
+        "properties": {
+          "failure_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "failure_reason_codes": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "failure_reason_codes"
+        ]
+      },
+      "then": {
+        "properties": {
+          "outcome": {
+            "enum": [
+              "FAILED",
+              "QUARANTINED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "anyOf": [
+          {
+            "properties": {
+              "audit_continuity_verified": {
+                "const": false
+              }
+            },
+            "required": [
+              "audit_continuity_verified"
+            ]
+          },
+          {
+            "properties": {
+              "privacy_reconciliation_verified": {
+                "const": false
+              }
+            },
+            "required": [
+              "privacy_reconciliation_verified"
+            ]
+          },
+          {
+            "properties": {
+              "queue_rebuild_verified": {
+                "const": false
+              }
+            },
+            "required": [
+              "queue_rebuild_verified"
+            ]
+          },
+          {
+            "properties": {
+              "authority_rebuild_verified": {
+                "const": false
+              }
+            },
+            "required": [
+              "authority_rebuild_verified"
+            ]
+          },
+          {
+            "properties": {
+              "authority_binding_revalidation_verified": {
+                "const": false
+              }
+            },
+            "required": [
+              "authority_binding_revalidation_verified"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "outcome": {
+            "enum": [
+              "FAILED",
+              "QUARANTINED"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

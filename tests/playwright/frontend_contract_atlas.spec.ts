@@ -34,16 +34,22 @@ test("shell tabs switch between calm, portal, and governance pages", async ({ pa
 
 test("overview screenshot baseline", async ({ page }) => {
   await gotoAtlas(page);
-  await expect(page.getByTestId("frontend-contract-atlas")).toHaveScreenshot("frontend-contract-atlas-overview.png", {
-    animations: "disabled",
-    fullPage: true,
-  });
+  await expect(page.getByTestId("frontend-contract-atlas")).toHaveScreenshot(
+    "frontend-contract-atlas-overview.png",
+    {
+      animations: "disabled",
+      fullPage: true,
+    },
+  );
 });
 
 test("continuity lab screenshot baseline", async ({ page }) => {
   await gotoAtlas(page, "#page=continuity&scenario=publication_or_epoch_rebase");
-  await expect(page.getByTestId("frontend-contract-atlas")).toHaveScreenshot("frontend-contract-atlas-continuity.png", {
-    animations: "disabled",
-    fullPage: true,
-  });
+  await expect(page.getByTestId("frontend-contract-atlas")).toHaveScreenshot(
+    "frontend-contract-atlas-continuity.png",
+    {
+      animations: "disabled",
+      fullPage: true,
+    },
+  );
 });

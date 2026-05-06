@@ -1,0 +1,511 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/authority_sandbox_coverage_contract.schema.json",
+  "title": "AuthoritySandboxCoverageContract",
+  "description": "Candidate-bound authority sandbox coverage contract. This schema freezes the exact enabled provider-profile set, exercised operation-family coverage, request-identity namespace isolation, fraud-header binding, controlled-edge negative coverage, and release-admissibility scope that authority sandbox evidence must prove before a release candidate may claim green authority readiness.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "coverage_hash",
+    "candidate_identity_hash",
+    "schema_bundle_hash",
+    "compatibility_gate_hash",
+    "migration_plan_ref_or_null",
+    "supported_client_window_ref_or_null",
+    "reader_window_state",
+    "coverage_profile",
+    "request_identity_binding_policy",
+    "namespace_isolation_policy",
+    "fraud_header_binding_policy",
+    "ingress_quarantine_policy",
+    "reconciliation_budget_policy",
+    "release_admissibility_scope_policy",
+    "evidence_replay_policy",
+    "sandbox_identity_namespace_hash",
+    "sandbox_duplicate_bucket_hash",
+    "enabled_provider_profile_refs",
+    "required_operation_families",
+    "exercised_provider_profile_refs",
+    "exercised_operation_families",
+    "operation_coverage",
+    "negative_path_coverage",
+    "provider_profile_coverage_state",
+    "operation_family_coverage_state",
+    "negative_path_coverage_state"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "AUTHORITY_SANDBOX_COVERAGE_V1"
+    },
+    "coverage_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_identity_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema_bundle_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "compatibility_gate_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "migration_plan_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "supported_client_window_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "reader_window_state": {
+      "type": "string",
+      "enum": [
+        "EXPAND_ONLY_PREVIOUS_READERS_SUPPORTED",
+        "BACKFILL_IN_PROGRESS_PREVIOUS_READERS_SUPPORTED",
+        "VERIFIED_PREVIOUS_READERS_SUPPORTED",
+        "CONTRACT_ELIGIBLE_WINDOW_CLOSED"
+      ]
+    },
+    "coverage_profile": {
+      "const": "EXACT_ENABLED_PROVIDER_AND_OPERATION_FAMILY_MATRIX_V1"
+    },
+    "request_identity_binding_policy": {
+      "const": "REQUEST_IDENTITY_AND_FRAUD_HEADERS_BIND_TO_EXERCISED_AUTHORITY_REQUESTS"
+    },
+    "namespace_isolation_policy": {
+      "const": "SANDBOX_REQUEST_AND_DUPLICATE_NAMESPACES_MUST_NOT_MATCH_LIVE"
+    },
+    "fraud_header_binding_policy": {
+      "const": "FRAUD_HEADER_VALIDATION_OR_EXEMPTION_MUST_BE_PROVED_ON_EXERCISED_REQUEST_IDENTITY"
+    },
+    "ingress_quarantine_policy": {
+      "const": "AMBIGUOUS_OR_WEAK_INGRESS_MUST_REMAIN_QUARANTINE_OWNED"
+    },
+    "reconciliation_budget_policy": {
+      "const": "BUDGET_EXHAUSTION_MUST_BLOCK_BLIND_RESEND_AND_FORCE_REVIEW"
+    },
+    "release_admissibility_scope_policy": {
+      "const": "CANDIDATE_SCHEMA_MIGRATION_AND_CLIENT_WINDOW_BOUND"
+    },
+    "evidence_replay_policy": {
+      "const": "REPLAY_ONLY_REQUEST_BINDING_INTERACTION_AND_INGRESS_REFS"
+    },
+    "sandbox_identity_namespace_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sandbox_duplicate_bucket_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "enabled_provider_profile_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "required_operation_families": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/operationFamily"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "exercised_provider_profile_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "exercised_operation_families": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/operationFamily"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "operation_coverage": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/operationCoverageEntry"
+      },
+      "minItems": 1
+    },
+    "negative_path_coverage": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/negativePathCoverageEntry"
+      },
+      "minItems": 6
+    },
+    "provider_profile_coverage_state": {
+      "const": "COMPLETE_EXACT_MATCH"
+    },
+    "operation_family_coverage_state": {
+      "const": "COMPLETE_EXACT_MATCH"
+    },
+    "negative_path_coverage_state": {
+      "const": "REQUIRED_CONTROLLED_EDGE_MATRIX_COMPLETE"
+    }
+  },
+  "$defs": {
+    "operationFamily": {
+      "type": "string",
+      "enum": [
+        "AUTH_READ_REFERENCE",
+        "AUTH_READ_OBLIGATIONS",
+        "AUTH_READ_CALCULATION",
+        "AUTH_CREATE_OR_AMEND_DATA",
+        "AUTH_DELETE_DATA",
+        "AUTH_TRIGGER_CALCULATION",
+        "AUTH_SUBMIT_FINAL_DECLARATION",
+        "AUTH_SUBMIT_PERIODIC_UPDATE",
+        "AUTH_SUBMIT_POST_FINALISATION_AMENDMENT",
+        "AUTH_RECONCILE_STATUS"
+      ]
+    },
+    "operationCoverageEntry": {
+      "type": "object",
+      "required": [
+        "provider_profile_ref",
+        "provider_environment",
+        "operation_family",
+        "operation_profile_ref",
+        "authority_binding_ref",
+        "request_envelope_ref",
+        "interaction_record_ref",
+        "request_identity_namespace_hash",
+        "duplicate_bucket_hash",
+        "fraud_header_validation_ref_or_null",
+        "coverage_outcome"
+      ],
+      "properties": {
+        "provider_profile_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider_environment": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operation_family": {
+          "$ref": "#/$defs/operationFamily"
+        },
+        "operation_profile_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authority_binding_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "request_envelope_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "interaction_record_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "request_identity_namespace_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "duplicate_bucket_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fraud_header_validation_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "coverage_outcome": {
+          "const": "CANDIDATE_BOUND_EXERCISED"
+        }
+      },
+      "additionalProperties": false
+    },
+    "negativePathCoverageEntry": {
+      "type": "object",
+      "required": [
+        "case_code",
+        "provider_profile_ref",
+        "operation_family",
+        "operation_profile_ref",
+        "request_identity_namespace_hash_or_null",
+        "duplicate_bucket_hash_or_null",
+        "authority_binding_ref_or_null",
+        "request_envelope_ref_or_null",
+        "interaction_record_ref_or_null",
+        "ingress_receipt_ref_or_null",
+        "expected_fail_closed_posture"
+      ],
+      "properties": {
+        "case_code": {
+          "type": "string",
+          "enum": [
+            "TOKEN_ROTATION",
+            "BINDING_LINEAGE_INVALIDATION",
+            "AMBIGUOUS_INGRESS_QUARANTINE",
+            "DUPLICATE_BUCKET_CHANGE",
+            "FRAUD_HEADER_VALIDATION",
+            "RECONCILIATION_BUDGET_EXHAUSTION"
+          ]
+        },
+        "provider_profile_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operation_family": {
+          "$ref": "#/$defs/operationFamily"
+        },
+        "operation_profile_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "request_identity_namespace_hash_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "duplicate_bucket_hash_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "authority_binding_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "request_envelope_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "interaction_record_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "ingress_receipt_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "expected_fail_closed_posture": {
+          "type": "string",
+          "enum": [
+            "SEND_BLOCKED",
+            "INGRESS_QUARANTINED",
+            "DUPLICATE_SUPPRESSED",
+            "REVIEW_ESCALATED"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "case_code": {
+                "const": "TOKEN_ROTATION"
+              }
+            },
+            "required": [
+              "case_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "authority_binding_ref_or_null": {
+                "type": "string",
+                "minLength": 1
+              },
+              "request_envelope_ref_or_null": {
+                "type": "string",
+                "minLength": 1
+              },
+              "request_identity_namespace_hash_or_null": {
+                "type": "string",
+                "minLength": 1
+              },
+              "expected_fail_closed_posture": {
+                "const": "SEND_BLOCKED"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "case_code": {
+                "const": "BINDING_LINEAGE_INVALIDATION"
+              }
+            },
+            "required": [
+              "case_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "authority_binding_ref_or_null": {
+                "type": "string",
+                "minLength": 1
+              },
+              "interaction_record_ref_or_null": {
+                "type": "string",
+                "minLength": 1
+              },
+              "expected_fail_closed_posture": {
+                "const": "SEND_BLOCKED"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "case_code": {
+                "const": "AMBIGUOUS_INGRESS_QUARANTINE"
+              }
+            },
+            "required": [
+              "case_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "interaction_record_ref_or_null": {
+                "type": "string",
+                "minLength": 1
+              },
+              "ingress_receipt_ref_or_null": {
+                "type": "string",
+                "minLength": 1
+              },
+              "expected_fail_closed_posture": {
+                "const": "INGRESS_QUARANTINED"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "case_code": {
+                "const": "DUPLICATE_BUCKET_CHANGE"
+              }
+            },
+            "required": [
+              "case_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "request_envelope_ref_or_null": {
+                "type": "string",
+                "minLength": 1
+              },
+              "ingress_receipt_ref_or_null": {
+                "type": "string",
+                "minLength": 1
+              },
+              "duplicate_bucket_hash_or_null": {
+                "type": "string",
+                "minLength": 1
+              },
+              "expected_fail_closed_posture": {
+                "const": "DUPLICATE_SUPPRESSED"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "case_code": {
+                "const": "FRAUD_HEADER_VALIDATION"
+              }
+            },
+            "required": [
+              "case_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "request_envelope_ref_or_null": {
+                "type": "string",
+                "minLength": 1
+              },
+              "request_identity_namespace_hash_or_null": {
+                "type": "string",
+                "minLength": 1
+              },
+              "expected_fail_closed_posture": {
+                "const": "SEND_BLOCKED"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "case_code": {
+                "const": "RECONCILIATION_BUDGET_EXHAUSTION"
+              }
+            },
+            "required": [
+              "case_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "interaction_record_ref_or_null": {
+                "type": "string",
+                "minLength": 1
+              },
+              "expected_fail_closed_posture": {
+                "const": "REVIEW_ESCALATED"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

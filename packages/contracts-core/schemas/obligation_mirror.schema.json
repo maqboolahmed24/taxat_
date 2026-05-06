@@ -1,0 +1,613 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/obligation_mirror.schema.json",
+  "title": "ObligationMirror",
+  "description": "Normalized obligation-state mirror. This schema freezes the engine's internal projection of authority obligation truth, filing readiness, late posture, submission linkage, grouped reconciliation-control posture, and explicit authority-truth posture without letting pre-submit readiness collapse into legal completion.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "obligation_mirror_id",
+    "tenant_id",
+    "client_id",
+    "income_source_partition",
+    "period",
+    "authority_truth_contract",
+    "authority_ingress_proof_contract",
+    "authority_truth_state",
+    "lifecycle_state",
+    "authority_refs",
+    "due_at",
+    "current_submission_ref",
+    "last_confirmed_submission_ref",
+    "ready_manifest_ref",
+    "blocked_reason_codes",
+    "last_authority_sync_at",
+    "reconciliation_control_contract_or_null",
+    "authority_status_ref"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "ObligationMirror"
+    },
+    "obligation_mirror_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "client_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "income_source_partition": {
+      "type": "string",
+      "minLength": 1
+    },
+    "period": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority_truth_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/authority_truth_contract.schema.json"
+        },
+        {
+          "properties": {
+            "boundary_scope": {
+              "const": "OBLIGATION_MIRROR"
+            },
+            "truth_surface_role": {
+              "const": "INTERNAL_OBLIGATION_MIRROR"
+            },
+            "surface_specific_binding_policy": {
+              "const": "MIRROR_IS_INTERNAL_VIEW_WITH_EXPLICIT_AUTHORITY_STATE"
+            }
+          }
+        }
+      ]
+    },
+    "authority_ingress_proof_contract": {
+      "anyOf": [
+        {
+          "allOf": [
+            {
+              "$ref": "https://taxat.dev/schemas/authority_ingress_proof_contract.schema.json"
+            },
+            {
+              "properties": {
+                "binding_scope_class": {
+                  "const": "OBLIGATION_MIRROR"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "authority_truth_state": {
+      "type": "string",
+      "enum": [
+        "NOT_APPLICABLE",
+        "NOT_REQUESTED",
+        "UNKNOWN",
+        "PENDING_ACK",
+        "PARTIAL_ACK",
+        "CONFIRMED",
+        "REJECTED",
+        "OUT_OF_BAND"
+      ]
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "NOT_YET_OPEN",
+        "OPEN",
+        "DUE_SOON",
+        "READY_TO_FILE",
+        "SUBMITTED_PENDING",
+        "MET_CONFIRMED",
+        "LATE_UNMET",
+        "NO_LONGER_RELEVANT"
+      ]
+    },
+    "authority_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "due_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "current_submission_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "last_confirmed_submission_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "ready_manifest_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "blocked_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "last_authority_sync_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "reconciliation_control_contract_or_null": {
+      "anyOf": [
+        {
+          "allOf": [
+            {
+              "$ref": "https://taxat.dev/schemas/authority_reconciliation_control_contract.schema.json"
+            },
+            {
+              "properties": {
+                "binding_scope_class": {
+                  "const": "OBLIGATION_MIRROR"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "authority_status_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "current_submission_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "current_submission_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "SUBMITTED_PENDING"
+          },
+          "authority_truth_state": {
+            "const": "PENDING_ACK"
+          },
+          "reconciliation_control_contract_or_null": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "last_confirmed_submission_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "last_confirmed_submission_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "MET_CONFIRMED"
+          },
+          "authority_truth_state": {
+            "const": "CONFIRMED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "ready_manifest_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "ready_manifest_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "READY_TO_FILE"
+          },
+          "authority_truth_state": {
+            "const": "NOT_REQUESTED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "authority_truth_state": {
+            "const": "PENDING_ACK"
+          }
+        },
+        "required": [
+          "authority_truth_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "SUBMITTED_PENDING"
+          },
+          "current_submission_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reconciliation_control_contract_or_null": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "authority_truth_state": {
+            "const": "CONFIRMED"
+          }
+        },
+        "required": [
+          "authority_truth_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "MET_CONFIRMED"
+          },
+          "last_confirmed_submission_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "authority_status_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "authority_truth_state": {
+            "const": "UNKNOWN"
+          }
+        },
+        "required": [
+          "authority_truth_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reconciliation_control_contract_or_null": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "authority_truth_state": {
+            "const": "OUT_OF_BAND"
+          }
+        },
+        "required": [
+          "authority_truth_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reconciliation_control_contract_or_null": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "OPEN",
+              "DUE_SOON",
+              "READY_TO_FILE",
+              "SUBMITTED_PENDING",
+              "MET_CONFIRMED",
+              "LATE_UNMET"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "authority_refs": {
+            "minItems": 1
+          },
+          "due_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "OPEN",
+              "DUE_SOON"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "ready_manifest_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "NOT_YET_OPEN",
+              "OPEN",
+              "DUE_SOON",
+              "READY_TO_FILE",
+              "SUBMITTED_PENDING",
+              "LATE_UNMET",
+              "NO_LONGER_RELEVANT"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "last_confirmed_submission_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "NOT_YET_OPEN"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "current_submission_ref": {
+            "type": "null"
+          },
+          "last_confirmed_submission_ref": {
+            "type": "null"
+          },
+          "ready_manifest_ref": {
+            "type": "null"
+          },
+          "blocked_reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "READY_TO_FILE"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "ready_manifest_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "blocked_reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "SUBMITTED_PENDING"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "current_submission_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "last_confirmed_submission_ref": {
+            "type": "null"
+          },
+          "ready_manifest_ref": {
+            "type": "null"
+          },
+          "blocked_reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "MET_CONFIRMED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "blocked_reason_codes": {
+            "maxItems": 0
+          },
+          "current_submission_ref": {
+            "type": "null"
+          },
+          "last_confirmed_submission_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ready_manifest_ref": {
+            "type": "null"
+          },
+          "last_authority_sync_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "authority_status_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "LATE_UNMET"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "blocked_reason_codes": {
+            "minItems": 1
+          },
+          "ready_manifest_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "NO_LONGER_RELEVANT"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "last_confirmed_submission_ref": {
+            "type": "null"
+          },
+          "current_submission_ref": {
+            "type": "null"
+          },
+          "ready_manifest_ref": {
+            "type": "null"
+          },
+          "blocked_reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

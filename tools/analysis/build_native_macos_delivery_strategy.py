@@ -17,8 +17,7 @@ DIAGRAMS_ANALYSIS_DIR = ROOT / "diagrams" / "analysis"
 MACOS_BLUEPRINT_PATH = ALGORITHM_DIR / "macos_native_operator_workspace_blueprint.md"
 FRONTEND_SHELL_PATH = ALGORITHM_DIR / "frontend_shell_and_interaction_law.md"
 FOUNDATION_PATH = (
-    ALGORITHM_DIR
-    / "cross_shell_design_token_and_interaction_layer_foundation_contract.md"
+    ALGORITHM_DIR / "cross_shell_design_token_and_interaction_layer_foundation_contract.md"
 )
 LOW_NOISE_PATH = ALGORITHM_DIR / "low_noise_experience_contract.md"
 COLLABORATION_PATH = ALGORITHM_DIR / "collaboration_workspace_contract.md"
@@ -30,26 +29,18 @@ CACHE_ISOLATION_PATH = ALGORITHM_DIR / "cache_isolation_and_secure_reuse_contrac
 UIUX_PATH = ALGORITHM_DIR / "UIUX_DESIGN_SKILL.md"
 
 EXISTING_NATIVE_TOPOLOGY_PATH = DATA_ANALYSIS_DIR / "native_scene_window_topology.json"
-IDENTITY_BOUNDARY_PATH = (
-    DATA_ANALYSIS_DIR / "browser_native_automation_identity_boundary.json"
-)
+IDENTITY_BOUNDARY_PATH = DATA_ANALYSIS_DIR / "browser_native_automation_identity_boundary.json"
 DEEP_LINK_RULES_PATH = DATA_ANALYSIS_DIR / "deep_link_invite_and_resume_rules.json"
 SESSION_FLOW_PATH = DATA_ANALYSIS_DIR / "session_flow_matrix.json"
 READ_MODEL_ROUTE_MAP_PATH = DATA_ANALYSIS_DIR / "read_model_to_route_and_shell_map.json"
 WEB_TOPOLOGY_PATH = DATA_ANALYSIS_DIR / "web_surface_topology_and_deployable_map.json"
 
 ADR_PATH = DOCS_ARCH_ADR_DIR / "ADR-007-native-macos-delivery-strategy.md"
-COMPARISON_PATH = (
-    DOCS_ARCH_ADR_DIR / "ADR-007-native-macos-delivery-strategy-comparison.md"
-)
-SCORECARD_PATH = (
-    DOCS_ARCH_ADR_DIR / "ADR-007-native-macos-delivery-strategy-scorecard.json"
-)
+COMPARISON_PATH = DOCS_ARCH_ADR_DIR / "ADR-007-native-macos-delivery-strategy-comparison.md"
+SCORECARD_PATH = DOCS_ARCH_ADR_DIR / "ADR-007-native-macos-delivery-strategy-scorecard.json"
 SCENE_TOPOLOGY_PATH = DATA_ANALYSIS_DIR / "native_scene_and_window_topology.json"
 TRANSLATION_MAP_PATH = DATA_ANALYSIS_DIR / "native_platform_translation_map.json"
-CACHE_SECURITY_PATH = (
-    DATA_ANALYSIS_DIR / "native_cache_session_and_security_boundary.json"
-)
+CACHE_SECURITY_PATH = DATA_ANALYSIS_DIR / "native_cache_session_and_security_boundary.json"
 ROLLOUT_PATH = DATA_ANALYSIS_DIR / "native_feature_rollout_sequence.json"
 HANDOFF_TEST_PATH = DATA_ANALYSIS_DIR / "native_handoff_and_test_strategy.json"
 MERMAID_PATH = DIAGRAMS_ANALYSIS_DIR / "ADR-007-native-macos-delivery-strategy.mmd"
@@ -127,9 +118,7 @@ def md_escape(value: Any) -> str:
 def markdown_table(headers: list[str], rows: list[list[Any]]) -> str:
     header_line = "| " + " | ".join(headers) + " |"
     divider_line = "| " + " | ".join("---" for _ in headers) + " |"
-    body_lines = [
-        "| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows
-    ]
+    body_lines = ["| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows]
     return "\n".join([header_line, divider_line, *body_lines])
 
 
@@ -142,9 +131,7 @@ def normalize_source_refs(source_refs: Iterable[Any]) -> list[str]:
         if isinstance(ref, dict):
             source_file = ref.get("source_file", "unknown")
             logical_block = (
-                ref.get("source_heading_or_logical_block")
-                or ref.get("source_heading")
-                or "source"
+                ref.get("source_heading_or_logical_block") or ref.get("source_heading") or "source"
             )
             rationale = ref.get("rationale")
             text = f"{source_file}::{logical_block}"
@@ -164,9 +151,7 @@ def build_supporting_context() -> dict[str, Any]:
     route_map = load_json(READ_MODEL_ROUTE_MAP_PATH)
     web_topology = load_json(WEB_TOPOLOGY_PATH)
 
-    native_routes = [
-        row for row in route_map["routes"] if row["embodiment"].startswith("NATIVE")
-    ]
+    native_routes = [row for row in route_map["routes"] if row["embodiment"].startswith("NATIVE")]
     return {
         "xcode_package_count": len(native_topology["xcode_workspace_topology"]),
         "existing_scene_count": len(native_routes),
@@ -215,9 +200,7 @@ def build_native_scene_and_window_topology() -> dict[str, Any]:
             "restoration_class": "SESSION_MASKING_AND_ROUTE_GUARD",
             "browser_handoff_return_rule": "System-browser auth, help, or authority checkpoint returns to the same manifest object and focus anchor.",
             "source_refs": [
-                heading_ref(
-                    MACOS_BLUEPRINT_PATH, "5. Preferred window and scene architecture"
-                ),
+                heading_ref(MACOS_BLUEPRINT_PATH, "5. Preferred window and scene architecture"),
                 heading_ref(MACOS_BLUEPRINT_PATH, "9. SwiftUI versus AppKit decision matrix"),
                 heading_ref(LOW_NOISE_PATH, "Default visible shell"),
             ],
@@ -255,12 +238,8 @@ def build_native_scene_and_window_topology() -> dict[str, Any]:
             "browser_handoff_return_rule": "Browser-owned checkpoint or reconnect recovery returns to the same work item, module anchor, and inspector posture.",
             "source_refs": [
                 heading_ref(MACOS_BLUEPRINT_PATH, "6. Data flow and synchronization model"),
-                heading_ref(
-                    COLLABORATION_PATH, "11. Accessibility and responsive rules"
-                ),
-                heading_ref(
-                    COLLABORATION_PATH, "12. Playwright scenarios"
-                ),
+                heading_ref(COLLABORATION_PATH, "11. Accessibility and responsive rules"),
+                heading_ref(COLLABORATION_PATH, "12. Playwright scenarios"),
             ],
         },
         {
@@ -335,7 +314,12 @@ def build_native_scene_and_window_topology() -> dict[str, Any]:
             "source_refs": normalize_source_refs(
                 existing_topology["secondary_windows"][2]["source_refs"]
             )
-            + [heading_ref(MACOS_BLUEPRINT_PATH, "10. Native UX opportunities that should replace browser habits")],
+            + [
+                heading_ref(
+                    MACOS_BLUEPRINT_PATH,
+                    "10. Native UX opportunities that should replace browser habits",
+                )
+            ],
         },
         {
             "scene_id": "native_secondary_authority_review_window",
@@ -457,18 +441,10 @@ def build_native_scene_and_window_topology() -> dict[str, Any]:
                 [scene for scene in scenes if scene["scene_kind"] == "PRIMARY_WORKSPACE"]
             ),
             "secondary_window_count": len(
-                [
-                    scene
-                    for scene in scenes
-                    if scene["scene_kind"] == "SECONDARY_SUPPORT_WINDOW"
-                ]
+                [scene for scene in scenes if scene["scene_kind"] == "SECONDARY_SUPPORT_WINDOW"]
             ),
             "utility_scene_count": len(
-                [
-                    scene
-                    for scene in scenes
-                    if scene["scene_kind"] == "UTILITY_SUPPORT_SCENE"
-                ]
+                [scene for scene in scenes if scene["scene_kind"] == "UTILITY_SUPPORT_SCENE"]
             ),
             "package_count": len(existing_topology["xcode_workspace_topology"]),
             "command_surface_count": len(existing_topology["command_surfaces"]),
@@ -484,9 +460,7 @@ def build_native_scene_and_window_topology() -> dict[str, Any]:
     }
 
 
-def build_native_platform_translation_map(
-    scene_topology: dict[str, Any]
-) -> dict[str, Any]:
+def build_native_platform_translation_map(scene_topology: dict[str, Any]) -> dict[str, Any]:
     shell_coverage = [
         {
             "shell_family": "CALM_SHELL",
@@ -565,7 +539,9 @@ def build_native_platform_translation_map(
             "why": "System-browser ownership keeps sign-in, step-up, and authority-only tasks out of unrestricted embedded web shells.",
             "source_refs": [
                 heading_ref(MACOS_BLUEPRINT_PATH, "7. Authentication and session strategy"),
-                heading_ref(SECURITY_PATH, "4. Browser, native-client, API, and transport hardening"),
+                heading_ref(
+                    SECURITY_PATH, "4. Browser, native-client, API, and transport hardening"
+                ),
             ],
         },
         {
@@ -590,7 +566,12 @@ def build_native_platform_translation_map(
             "browser_primitive": "hover-first browser affordance",
             "native_translation": "menu commands, keyboard shortcuts, Quick Look, print, and drag-out",
             "why": "Native ergonomics should replace browser habits without changing algorithmic meaning.",
-            "source_refs": [heading_ref(MACOS_BLUEPRINT_PATH, "10. Native UX opportunities that should replace browser habits")],
+            "source_refs": [
+                heading_ref(
+                    MACOS_BLUEPRINT_PATH,
+                    "10. Native UX opportunities that should replace browser habits",
+                )
+            ],
         },
         {
             "browser_primitive": "browser cache identity",
@@ -753,7 +734,9 @@ def build_native_cache_session_and_security_boundary() -> dict[str, Any]:
             ],
             "live_session_requirement": "Restore proceeds only when local cache, resume metadata, and server session remain valid together.",
             "source_refs": [
-                heading_ref(MACOS_BLUEPRINT_PATH, "11. Security and runtime posture for the desktop client"),
+                heading_ref(
+                    MACOS_BLUEPRINT_PATH, "11. Security and runtime posture for the desktop client"
+                ),
                 "data/analysis/deep_link_invite_and_resume_rules.json::native_restore_requires_valid_server_session[ADR-003 exported native restore rule]",
             ],
         },
@@ -772,7 +755,10 @@ def build_native_cache_session_and_security_boundary() -> dict[str, Any]:
             ],
             "live_session_requirement": "Materialization remains bound to current masking, export posture, and selected preview subject.",
             "source_refs": [
-                heading_ref(MACOS_BLUEPRINT_PATH, "10. Native UX opportunities that should replace browser habits"),
+                heading_ref(
+                    MACOS_BLUEPRINT_PATH,
+                    "10. Native UX opportunities that should replace browser habits",
+                ),
                 heading_ref(CACHE_ISOLATION_PATH, "FE-75 Native Hydration Composition"),
             ],
         },
@@ -956,9 +942,7 @@ def build_native_feature_rollout_sequence() -> dict[str, Any]:
     }
 
 
-def build_native_handoff_and_test_strategy(
-    scene_topology: dict[str, Any]
-) -> dict[str, Any]:
+def build_native_handoff_and_test_strategy(scene_topology: dict[str, Any]) -> dict[str, Any]:
     deep_link_rules = load_json(DEEP_LINK_RULES_PATH)
 
     browser_handoff_rules = [
@@ -1172,7 +1156,10 @@ def build_criteria() -> list[dict[str, Any]]:
             "priority": "HARD_REQUIREMENT",
             "rationale": "A macOS product should use menu commands, keyboard-first flows, Quick Look, state restoration, and multi-window deep work instead of mimicking browser habits.",
             "source_refs": [
-                heading_ref(MACOS_BLUEPRINT_PATH, "10. Native UX opportunities that should replace browser habits"),
+                heading_ref(
+                    MACOS_BLUEPRINT_PATH,
+                    "10. Native UX opportunities that should replace browser habits",
+                ),
                 heading_ref(UIUX_PATH, "Core design language"),
             ],
         },
@@ -1183,7 +1170,9 @@ def build_criteria() -> list[dict[str, Any]]:
             "priority": "STRONG_PREFERENCE",
             "rationale": "Native delivery needs a sane operational model for signing, hardened runtime, kill switches, compatibility windows, and browser fallback.",
             "source_refs": [
-                heading_ref(MACOS_BLUEPRINT_PATH, "11. Security and runtime posture for the desktop client"),
+                heading_ref(
+                    MACOS_BLUEPRINT_PATH, "11. Security and runtime posture for the desktop client"
+                ),
                 heading_ref(MACOS_BLUEPRINT_PATH, "13. Delivery sequencing"),
             ],
         },
@@ -1504,12 +1493,10 @@ def build_adr_markdown(
         for row in cache_security["boundaries"]
     ]
     rollout_rows = [
-        [row["label"], row["rollout_class"], row["objective"]]
-        for row in rollout["stages"]
+        [row["label"], row["rollout_class"], row["objective"]] for row in rollout["stages"]
     ]
     ranking_rows = [
-        [row["rank"], row["label"], row["weighted_total"]]
-        for row in scorecard["alternatives"]
+        [row["rank"], row["label"], row["weighted_total"]] for row in scorecard["alternatives"]
     ]
     criteria_rows = [
         [row["label"], row["priority"], row["weight"], row["rationale"]]
@@ -1684,9 +1671,7 @@ def build_comparison_markdown(
         "",
         "## Criteria and Weights",
         "",
-        markdown_table(
-            ["Criterion", "Priority", "Weight", "Source Grounding"], criteria_rows
-        ),
+        markdown_table(["Criterion", "Priority", "Weight", "Source Grounding"], criteria_rows),
         "",
         "## Coverage Summary",
         "",
@@ -1801,9 +1786,9 @@ This atlas turns ADR-007 into concrete scene and window law for later native imp
 
 ## Browser Handoff Boundary
 
-- System surface: `{scene_topology['browser_handoff_boundary']['system_surface']}`
-- Return rule: {scene_topology['browser_handoff_boundary']['return_rule']}
-- Owned use cases: {", ".join(scene_topology['browser_handoff_boundary']['owned_use_cases'])}
+- System surface: `{scene_topology["browser_handoff_boundary"]["system_surface"]}`
+- Return rule: {scene_topology["browser_handoff_boundary"]["return_rule"]}
+- Owned use cases: {", ".join(scene_topology["browser_handoff_boundary"]["owned_use_cases"])}
 
 ## Restoration Identity Envelope
 

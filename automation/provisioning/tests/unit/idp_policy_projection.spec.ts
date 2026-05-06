@@ -20,13 +20,7 @@ import {
   type IdpPolicyEvidenceTemplate,
 } from "../../src/providers/idp/flows/configure_roles_scopes_mfa_sessions.js";
 
-const repoRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "..",
-  "..",
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
 
 async function readJson<T>(segments: string[]): Promise<T> {
   const filePath = path.join(repoRoot, ...segments);
@@ -48,16 +42,8 @@ function templateRunContext() {
 }
 
 test("checked-in role, scope, session, evidence, and viewer artifacts stay aligned with the policy builders", async () => {
-  const persistedRoleCatalog = await readJson([
-    "config",
-    "identity",
-    "idp_role_catalog.json",
-  ]);
-  const persistedScopeCatalog = await readJson([
-    "config",
-    "identity",
-    "idp_scope_catalog.json",
-  ]);
+  const persistedRoleCatalog = await readJson(["config", "identity", "idp_role_catalog.json"]);
+  const persistedScopeCatalog = await readJson(["config", "identity", "idp_scope_catalog.json"]);
   const persistedStepUpMatrix = await readJson([
     "config",
     "identity",
@@ -75,13 +61,7 @@ test("checked-in role, scope, session, evidence, and viewer artifacts stay align
   ]);
   const sampleRun = await readJson<{
     accessStepupMatrix: ReturnType<typeof createAccessStepupMatrixViewModel>;
-  }>([
-    "automation",
-    "provisioning",
-    "report_viewer",
-    "data",
-    "sample_run.json",
-  ]);
+  }>(["automation", "provisioning", "report_viewer", "data", "sample_run.json"]);
 
   expect(persistedRoleCatalog).toEqual(createRecommendedRoleCatalog());
   expect(persistedScopeCatalog).toEqual(createRecommendedScopeCatalog());
@@ -92,9 +72,7 @@ test("checked-in role, scope, session, evidence, and viewer artifacts stay align
   const expectedEvidence = createTemplateIdpPolicyEvidence(templateRunContext());
   expectedEvidence.last_verified_at = persistedEvidence.last_verified_at;
   expect(persistedEvidence).toEqual(expectedEvidence);
-  expect(persistedEvidence.last_verified_at).toMatch(
-    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
-  );
+  expect(persistedEvidence.last_verified_at).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
 });
 
 test("configured roles and scopes remain coarse, source-grounded, and engine-bounded", () => {
@@ -139,17 +117,10 @@ test("session coverage and step-up consequences stay explicit across every suppo
   const stepUpPolicyMatrix = createRecommendedStepUpPolicyMatrix();
 
   validateSessionPolicyMatrix(sessionPolicyMatrix);
-  validateStepUpPolicyMatrix(
-    stepUpPolicyMatrix,
-    roleCatalog,
-    scopeCatalog,
-    sessionPolicyMatrix,
-  );
+  validateStepUpPolicyMatrix(stepUpPolicyMatrix, roleCatalog, scopeCatalog, sessionPolicyMatrix);
 
   expect(sessionPolicyMatrix.summary.session_profile_count).toBe(6);
-  expect(
-    new Set(sessionPolicyMatrix.session_profiles.map((profile) => profile.channel)),
-  ).toEqual(
+  expect(new Set(sessionPolicyMatrix.session_profiles.map((profile) => profile.channel))).toEqual(
     new Set([
       "BROWSER",
       "NATIVE_MACOS",
@@ -174,13 +145,7 @@ test("session coverage and step-up consequences stay explicit across every suppo
         row.approval_cell === "REQUIRE_APPROVAL",
     ),
   ).toBe(true);
-  expect(
-    stepUpPolicyMatrix.invalidation_events.map((event) => event.event_id),
-  ).toEqual(
-    expect.arrayContaining([
-      "STEP_UP_COMPLETED",
-      "TENANT_SWITCH",
-      "SESSION_REVOKED",
-    ]),
+  expect(stepUpPolicyMatrix.invalidation_events.map((event) => event.event_id)).toEqual(
+    expect.arrayContaining(["STEP_UP_COMPLETED", "TENANT_SWITCH", "SESSION_REVOKED"]),
   );
 });

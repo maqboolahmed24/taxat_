@@ -55,9 +55,7 @@ export type PushProviderEnvironmentTag =
   | "PREPRODUCTION"
   | "PRODUCTION";
 
-export type PushSourceDisposition =
-  | "CREATED_DURING_RUN"
-  | "ADOPTED_EXISTING";
+export type PushSourceDisposition = "CREATED_DURING_RUN" | "ADOPTED_EXISTING";
 
 export type WorkItemNotificationType =
   | "NEW_ASSIGNMENT"
@@ -96,15 +94,9 @@ export type PushClientSurface =
   | "OPERATOR_WEB"
   | "CLIENT_PORTAL_WEB";
 
-export type PushUrgencyClass =
-  | "ACTION_REQUIRED"
-  | "HIGH_URGENCY"
-  | "BACKGROUND_AWARENESS";
+export type PushUrgencyClass = "ACTION_REQUIRED" | "HIGH_URGENCY" | "BACKGROUND_AWARENESS";
 
-export type PushDeliveryState =
-  | "ACTIVE"
-  | "DEFERRED_NOT_PROVISIONED"
-  | "FIXTURE_ONLY";
+export type PushDeliveryState = "ACTIVE" | "DEFERRED_NOT_PROVISIONED" | "FIXTURE_ONLY";
 
 export type PushFlowOutcome =
   | "DEVICE_MESSAGING_TOPOLOGY_READY"
@@ -134,14 +126,10 @@ export interface PushProviderWorkspaceRow {
   project_number_alias: string;
   fcm_sender_id_alias: string;
   source_disposition: PushSourceDisposition;
-  delivery_scope:
-    | "FIXTURE_ONLY"
-    | "NATIVE_MACOS_INTERNAL_ONLY";
+  delivery_scope: "FIXTURE_ONLY" | "NATIVE_MACOS_INTERNAL_ONLY";
   channel_refs: string[];
   cloud_messaging_api_state: "ENABLED";
-  registration_api_state:
-    | "NOT_REQUIRED_AT_THIS_STAGE"
-    | "FIXTURE_ONLY";
+  registration_api_state: "NOT_REQUIRED_AT_THIS_STAGE" | "FIXTURE_ONLY";
   bundle_identifier_or_null: string | null;
   service_account_metadata_ref_or_null: string | null;
   apns_binding_state:
@@ -155,10 +143,7 @@ export interface PushProviderWorkspaceRow {
 
 export interface PushCredentialRecord {
   credential_ref: string;
-  product_environment_id: Exclude<
-    PushProductEnvironmentId,
-    "env_local_provisioning_workstation"
-  >;
+  product_environment_id: Exclude<PushProductEnvironmentId, "env_local_provisioning_workstation">;
   credential_kind: "FCM_SERVICE_ACCOUNT" | "APNS_AUTH_KEY";
   source_disposition: PushSourceDisposition;
   vault_secret_ref: string;
@@ -220,10 +205,7 @@ export interface PushChannelRecord {
   eligible_notification_families: PushEligibleNotificationFamily[];
   excluded_notification_families: WorkItemNotificationType[];
   provider_binding: {
-    binding_mode:
-      | "FCM_APNS_BRIDGE"
-      | "NONE_DEFERRED"
-      | "FIXTURE_SINK_ONLY";
+    binding_mode: "FCM_APNS_BRIDGE" | "NONE_DEFERRED" | "FIXTURE_SINK_ONLY";
     workspace_ref_or_null: string | null;
     credential_refs: string[];
     bundle_identifier_or_null: string | null;
@@ -263,21 +245,14 @@ export interface NotificationOpenContinuityRow {
   client_surface: "NATIVE_MACOS_OPERATOR";
   shell_family: "CALM_SHELL";
   target_surface_ref: "native_primary_work_item_scene";
-  target_module_code:
-    | "INTERNAL_ACTIVITY"
-    | "DETAIL_DRAWER"
-    | "DECISION_SUMMARY";
+  target_module_code: "INTERNAL_ACTIVITY" | "DETAIL_DRAWER" | "DECISION_SUMMARY";
   canonical_object_ref_template: string;
   focus_anchor_ref_template: string;
   return_surface_ref: "native_primary_manifest_scene";
   return_focus_anchor_ref_template: string;
-  fallback_surface_ref:
-    | "collaboration_staff_inbox"
-    | "native_primary_manifest_scene";
+  fallback_surface_ref: "collaboration_staff_inbox" | "native_primary_manifest_scene";
   fallback_focus_anchor_ref_template: string;
-  parent_bound_support_reopen:
-    | "ALLOWED_FOR_AUTHORITY_SUPPORT_ONLY"
-    | "NOT_REQUIRED";
+  parent_bound_support_reopen: "ALLOWED_FOR_AUTHORITY_SUPPORT_ONLY" | "NOT_REQUIRED";
   urgency_class: PushUrgencyClass;
   source_refs: SourceRef[];
   notes: string[];
@@ -408,11 +383,10 @@ const PUSH_ELIGIBLE_FAMILIES: PushEligibleNotificationFamily[] = [
   "SLA_BREACHED",
 ];
 
-const PUSH_EXCLUDED_FAMILIES: PushExcludedNotificationFamily[] =
-  PUSH_NOTIFICATION_TYPES.filter(
-    (family): family is PushExcludedNotificationFamily =>
-      !PUSH_ELIGIBLE_FAMILIES.includes(family as PushEligibleNotificationFamily),
-  );
+const PUSH_EXCLUDED_FAMILIES: PushExcludedNotificationFamily[] = PUSH_NOTIFICATION_TYPES.filter(
+  (family): family is PushExcludedNotificationFamily =>
+    !PUSH_ELIGIBLE_FAMILIES.includes(family as PushEligibleNotificationFamily),
+);
 
 const PUSH_SELECTORS: SelectorManifest = {
   manifestId: "firebase-compatible-device-messaging-control-plane",
@@ -510,8 +484,7 @@ function sourceRefs(): SourceRef[] {
     {
       source_ref:
         "Algorithm/collaboration_workspace_contract.md::L1861[notification_dedupe_and_recheck]",
-      rationale:
-        "Notifications remain visibility-bound and deduplicated before delivery.",
+      rationale: "Notifications remain visibility-bound and deduplicated before delivery.",
     },
     {
       source_ref:
@@ -544,8 +517,7 @@ function sourceRefs(): SourceRef[] {
         "The native operator embodiment explicitly expects redaction-safe system notifications for operator work.",
     },
     {
-      source_ref:
-        "Algorithm/data_model.md::L195[WorkItemNotification]",
+      source_ref: "Algorithm/data_model.md::L195[WorkItemNotification]",
       rationale:
         "WorkItemNotification carries delivery channel, shell ownership, and cross-device continuity.",
     },
@@ -610,8 +582,7 @@ function commonExcludedFamilyRows() {
     },
     {
       notification_family: "REQUEST_INFO_OPENED" as const,
-      exclusion_reason:
-        "Request-for-info opening remains customer-visible and browser-only.",
+      exclusion_reason: "Request-for-info opening remains customer-visible and browser-only.",
       source_refs: refs,
     },
     {
@@ -644,9 +615,7 @@ function createWorkspaceRows(): PushProviderWorkspaceRow[] {
       service_account_metadata_ref_or_null: null,
       apns_binding_state: "FIXTURE_ONLY",
       source_refs: refs,
-      notes: [
-        "Local provisioning uses a fixture sink only and never emits to live device tokens.",
-      ],
+      notes: ["Local provisioning uses a fixture sink only and never emits to live device tokens."],
     },
     {
       workspace_ref: "push_workspace_sandbox",
@@ -663,8 +632,7 @@ function createWorkspaceRows(): PushProviderWorkspaceRow[] {
       cloud_messaging_api_state: "ENABLED",
       registration_api_state: "NOT_REQUIRED_AT_THIS_STAGE",
       bundle_identifier_or_null: "dev.taxat.InternalOperatorWorkspaceMac",
-      service_account_metadata_ref_or_null:
-        "vault://push/fcm/sandbox/service-account",
+      service_account_metadata_ref_or_null: "vault://push/fcm/sandbox/service-account",
       apns_binding_state: "BOUND",
       source_refs: refs,
       notes: [
@@ -686,8 +654,7 @@ function createWorkspaceRows(): PushProviderWorkspaceRow[] {
       cloud_messaging_api_state: "ENABLED",
       registration_api_state: "NOT_REQUIRED_AT_THIS_STAGE",
       bundle_identifier_or_null: "dev.taxat.InternalOperatorWorkspaceMac",
-      service_account_metadata_ref_or_null:
-        "vault://push/fcm/preprod/service-account",
+      service_account_metadata_ref_or_null: "vault://push/fcm/preprod/service-account",
       apns_binding_state: "BOUND",
       source_refs: refs,
       notes: [
@@ -709,8 +676,7 @@ function createWorkspaceRows(): PushProviderWorkspaceRow[] {
       cloud_messaging_api_state: "ENABLED",
       registration_api_state: "NOT_REQUIRED_AT_THIS_STAGE",
       bundle_identifier_or_null: "dev.taxat.InternalOperatorWorkspaceMac",
-      service_account_metadata_ref_or_null:
-        "vault://push/fcm/production/service-account",
+      service_account_metadata_ref_or_null: "vault://push/fcm/production/service-account",
       apns_binding_state: "BOUND",
       source_refs: refs,
       notes: [
@@ -735,8 +701,7 @@ export function createRecommendedPushProjectInventory(
     provider_selection: providerSelection(),
     workspace_rows: createWorkspaceRows(),
     channel_catalog_ref: "config/notifications/push_channel_catalog.json",
-    continuity_matrix_ref:
-      "config/notifications/notification_open_continuity_matrix.json",
+    continuity_matrix_ref: "config/notifications/notification_open_continuity_matrix.json",
     key_lineage_ref: "data/provisioning/push_key_lineage.template.json",
     typed_gaps: [
       "Web push stays intentionally deferred until a later surface decision proves it is required.",
@@ -767,9 +732,7 @@ function createCredentialRecords(): PushCredentialRecord[] {
         "Rotate on Firebase project rollover or whenever runtime trust requires a new service-account binding.",
       secret_material_state: "VAULT_ONLY",
       source_refs: refs,
-      notes: [
-        "The service account authorizes server-side send and project inspection only.",
-      ],
+      notes: ["The service account authorizes server-side send and project inspection only."],
     },
     {
       credential_ref: "push_credential_apns_auth_key_sandbox",
@@ -805,9 +768,7 @@ function createCredentialRecords(): PushCredentialRecord[] {
         "Rotate on Firebase project rollover or whenever runtime trust requires a new service-account binding.",
       secret_material_state: "VAULT_ONLY",
       source_refs: refs,
-      notes: [
-        "Pre-production credentials mirror production topology but remain rollout-gated.",
-      ],
+      notes: ["Pre-production credentials mirror production topology but remain rollout-gated."],
     },
     {
       credential_ref: "push_credential_apns_auth_key_preprod",
@@ -869,9 +830,7 @@ function createCredentialRecords(): PushCredentialRecord[] {
   ];
 }
 
-export function createRecommendedPushKeyLineage(
-  runContext: RunContext,
-): PushKeyLineage {
+export function createRecommendedPushKeyLineage(runContext: RunContext): PushKeyLineage {
   return {
     schema_version: "1.0",
     lineage_id: "push_key_lineage",
@@ -886,9 +845,7 @@ export function createRecommendedPushKeyLineage(
     typed_gaps: [
       "No web-push VAPID key is provisioned because browser push is not selected for current surfaces.",
     ],
-    notes: [
-      "Credential lineage is explicit and vault-bound for every live environment.",
-    ],
+    notes: ["Credential lineage is explicit and vault-bound for every live environment."],
     last_verified_at: `${PUSH_POLICY_GENERATED_ON}T00:00:00.000Z`,
   };
 }
@@ -956,9 +913,7 @@ export function createRecommendedPushChannelCatalog(): PushChannelCatalog {
           apns_required: true,
         },
         source_refs: refs,
-        notes: [
-          "Sandbox device messaging remains internal-only and allowlist-bound.",
-        ],
+        notes: ["Sandbox device messaging remains internal-only and allowlist-bound."],
       },
       {
         channel_ref: "push_channel_macos_preprod",
@@ -983,9 +938,7 @@ export function createRecommendedPushChannelCatalog(): PushChannelCatalog {
           apns_required: true,
         },
         source_refs: refs,
-        notes: [
-          "Pre-production validates the live topology before production promotion.",
-        ],
+        notes: ["Pre-production validates the live topology before production promotion."],
       },
       {
         channel_ref: "push_channel_macos_production",
@@ -1010,9 +963,7 @@ export function createRecommendedPushChannelCatalog(): PushChannelCatalog {
           apns_required: true,
         },
         source_refs: refs,
-        notes: [
-          "Production device messaging remains native-macOS-only and internal-only.",
-        ],
+        notes: ["Production device messaging remains native-macOS-only and internal-only."],
       },
       {
         channel_ref: "push_channel_operator_web_deferred",
@@ -1115,8 +1066,7 @@ export function createRecommendedNotificationOpenContinuityMatrix(): Notificatio
         target_surface_ref: "native_primary_work_item_scene",
         target_module_code: "INTERNAL_ACTIVITY",
         canonical_object_ref_template: "work-item:{item_id}",
-        focus_anchor_ref_template:
-          "focus.customer-activity.latest-reply:{item_id}",
+        focus_anchor_ref_template: "focus.customer-activity.latest-reply:{item_id}",
         return_surface_ref: "native_primary_manifest_scene",
         return_focus_anchor_ref_template: "queue-row:{item_id}",
         fallback_surface_ref: "native_primary_manifest_scene",
@@ -1191,9 +1141,7 @@ function buildCredentialView(record: PushCredentialRecord): DeviceMessagingCrede
         : `${environmentLabel} APNs auth key`,
     environment_label: environmentLabel,
     kind_label:
-      record.credential_kind === "FCM_SERVICE_ACCOUNT"
-        ? "FCM service account"
-        : "APNs auth key",
+      record.credential_kind === "FCM_SERVICE_ACCOUNT" ? "FCM service account" : "APNs auth key",
     vault_ref: record.vault_secret_ref,
     binding_summary:
       record.bundle_identifier_or_null ?? record.bound_web_origin_or_null ?? "Vault only",
@@ -1205,9 +1153,7 @@ function activeContinuityRows(
   matrix: NotificationOpenContinuityMatrix,
   family: PushEligibleNotificationFamily,
 ) {
-  return matrix.continuity_rows.filter(
-    (row) => row.notification_family === family,
-  );
+  return matrix.continuity_rows.filter((row) => row.notification_family === family);
 }
 
 export function createDeviceMessagingTopologyBoardViewModel(): DeviceMessagingTopologyBoardViewModel {
@@ -1318,9 +1264,7 @@ export function createDeviceMessagingTopologyBoardViewModel(): DeviceMessagingTo
               "Notification-open must stay same-object and same-shell.",
               "Fallback returns to the queue row or manifest scene, never a generic root.",
             ]
-          : [
-              "No remote notification-open continuity is published for this surface.",
-            ],
+          : ["No remote notification-open continuity is published for this surface."],
       inspector_notes: channel.notes,
     };
   });
@@ -1352,8 +1296,7 @@ export function validatePushProjectInventory(
   if (
     activeRows.some(
       (row) =>
-        row.service_account_metadata_ref_or_null == null ||
-        row.apns_binding_state !== "BOUND",
+        row.service_account_metadata_ref_or_null == null || row.apns_binding_state !== "BOUND",
     )
   ) {
     throw new Error(
@@ -1392,8 +1335,7 @@ export function validatePushKeyLineage(lineage: PushKeyLineage): void {
   if (
     lineage.credential_records.some(
       (record) =>
-        record.vault_secret_ref.includes("PRIVATE KEY") ||
-        record.vault_secret_ref.endsWith(".p8"),
+        record.vault_secret_ref.includes("PRIVATE KEY") || record.vault_secret_ref.endsWith(".p8"),
     )
   ) {
     throw new Error("Push key lineage must not persist raw APNs key material.");
@@ -1401,14 +1343,11 @@ export function validatePushKeyLineage(lineage: PushKeyLineage): void {
 }
 
 export function validatePushChannelCatalog(catalog: PushChannelCatalog): void {
-  const activeChannels = catalog.channel_records.filter(
-    (row) => row.delivery_state === "ACTIVE",
-  );
+  const activeChannels = catalog.channel_records.filter((row) => row.delivery_state === "ACTIVE");
   if (
     activeChannels.some(
       (row) =>
-        row.visibility_class !== "INTERNAL_ONLY" ||
-        row.client_surface !== "NATIVE_MACOS_OPERATOR",
+        row.visibility_class !== "INTERNAL_ONLY" || row.client_surface !== "NATIVE_MACOS_OPERATOR",
     )
   ) {
     throw new Error(
@@ -1435,9 +1374,7 @@ export function validateNotificationOpenContinuityMatrix(
   const eligibleFamilies = new Set<PushEligibleNotificationFamily>();
   matrix.continuity_rows.forEach((row) => {
     if (eligibleFamilies.has(row.notification_family)) {
-      throw new Error(
-        `Continuity mapping for ${row.notification_family} must be unique.`,
-      );
+      throw new Error(`Continuity mapping for ${row.notification_family} must be unique.`);
     }
     eligibleFamilies.add(row.notification_family);
     if (
@@ -1470,12 +1407,7 @@ export function assertPushArtifactsSanitized(
   lineage: PushKeyLineage,
 ): void {
   const serialized = JSON.stringify({ inventory, lineage });
-  const forbiddenMarkers = [
-    "-----BEGIN PRIVATE KEY-----",
-    ".p8",
-    "\"private_key\"",
-    "AIza",
-  ];
+  const forbiddenMarkers = ["-----BEGIN PRIVATE KEY-----", ".p8", '"private_key"', "AIza"];
   forbiddenMarkers.forEach((marker) => {
     if (serialized.includes(marker)) {
       throw new Error(`Push artifacts must not persist raw secret material (${marker}).`);
@@ -1508,9 +1440,7 @@ function locateSelector(page: Page, descriptor: SelectorDescriptor): Locator {
     case "ROLE":
       return page.getByRole(
         descriptor.value as Parameters<Page["getByRole"]>[0],
-        descriptor.accessibleName
-          ? { name: descriptor.accessibleName, exact: true }
-          : undefined,
+        descriptor.accessibleName ? { name: descriptor.accessibleName, exact: true } : undefined,
       );
     case "LABEL":
       return page.getByLabel(descriptor.value, { exact: true });
@@ -1554,9 +1484,7 @@ async function captureNoteEvidence(
   });
 }
 
-function fixtureStateFromScenario(
-  scenario: string | null,
-): PushFixtureState {
+function fixtureStateFromScenario(scenario: string | null): PushFixtureState {
   switch (scenario) {
     case "fresh":
       return {
@@ -1633,11 +1561,7 @@ export async function createDeviceMessagingProjectAndKeys(
 
   let evidenceManifest = createEvidenceManifest(options.runContext);
 
-  steps[0] = transitionStep(
-    steps[0]!,
-    "RUNNING",
-    "Opening the device messaging control plane.",
-  );
+  steps[0] = transitionStep(steps[0]!, "RUNNING", "Opening the device messaging control plane.");
   await options.page.goto(entryUrls.controlPlane);
   await requireVisible(options.page, manifest, "workspace-heading");
   await requireVisible(options.page, manifest, "project-action");
@@ -1692,11 +1616,7 @@ export async function createDeviceMessagingProjectAndKeys(
     "The project inventory now freezes the native-only delivery topology and keeps browser push deferred.",
   );
 
-  steps[2] = transitionStep(
-    steps[2]!,
-    "RUNNING",
-    "Binding APNs and vault-safe credentials.",
-  );
+  steps[2] = transitionStep(steps[2]!, "RUNNING", "Binding APNs and vault-safe credentials.");
 
   let outcome: PushFlowOutcome = "DEVICE_MESSAGING_TOPOLOGY_READY";
   const notes: string[] = [];

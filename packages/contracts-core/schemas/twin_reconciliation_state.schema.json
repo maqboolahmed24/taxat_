@@ -1,0 +1,458 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/twin_reconciliation_state.schema.json",
+  "title": "TwinReconciliationState",
+  "description": "Twin reconciliation-state contract. This schema freezes the active reconciliation posture for a twin so deadline, budget, escalation, and terminal resolution are deterministic across refresh, continuation, and replay-safe read models.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "twin_reconciliation_state_id",
+    "twin_id",
+    "lifecycle_state",
+    "resolution_state",
+    "target_mismatch_refs",
+    "blocking_mismatch_refs",
+    "recommended_action_code",
+    "reconciliation_budget_state",
+    "workflow_item_refs",
+    "primary_workflow_item_ref_or_null",
+    "auto_attempt_count",
+    "max_auto_attempts",
+    "reconciliation_deadline_at",
+    "next_action_owner",
+    "next_action_due_at",
+    "last_attempted_at",
+    "resolved_at",
+    "reason_codes",
+    "generated_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "TwinReconciliationState"
+    },
+    "twin_reconciliation_state_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "twin_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "NOT_REQUIRED",
+        "QUEUED",
+        "IN_PROGRESS",
+        "WAITING_ON_AUTHORITY",
+        "WAITING_ON_OPERATOR",
+        "RESOLVED",
+        "SUPERSEDED"
+      ]
+    },
+    "resolution_state": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "UNRESOLVED",
+        "PARTIALLY_RESOLVED",
+        "RESOLVED_MATCH",
+        "RESOLVED_OUT_OF_BAND",
+        "RESOLVED_REJECTED",
+        "RESOLVED_AMENDED_BASELINE"
+      ]
+    },
+    "target_mismatch_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "blocking_mismatch_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "recommended_action_code": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "RETRY_AUTHORITY_SYNC",
+        "AWAIT_AUTHORITY",
+        "OPEN_OPERATOR_WORKFLOW",
+        "RUN_MANUAL_RECONCILIATION",
+        "PREPARE_AMENDMENT_REVIEW",
+        "RECORD_OUT_OF_BAND_RESOLUTION",
+        "RESOLVED",
+        "SUPERSEDED"
+      ]
+    },
+    "reconciliation_budget_state": {
+      "type": "string",
+      "enum": [
+        "NOT_APPLICABLE",
+        "WITHIN_BUDGET",
+        "EXHAUSTED",
+        "MANUAL_ESCALATION"
+      ]
+    },
+    "workflow_item_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "primary_workflow_item_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "auto_attempt_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "max_auto_attempts": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reconciliation_deadline_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "next_action_owner": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "SYSTEM",
+        "AUTHORITY",
+        "OPERATOR"
+      ]
+    },
+    "next_action_due_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "last_attempted_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "resolved_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "NOT_REQUIRED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resolution_state": {
+            "const": "NONE"
+          },
+          "target_mismatch_refs": {
+            "maxItems": 0
+          },
+          "blocking_mismatch_refs": {
+            "maxItems": 0
+          },
+          "recommended_action_code": {
+            "const": "NONE"
+          },
+          "reconciliation_budget_state": {
+            "const": "NOT_APPLICABLE"
+          },
+          "workflow_item_refs": {
+            "maxItems": 0
+          },
+          "primary_workflow_item_ref_or_null": {
+            "type": "null"
+          },
+          "auto_attempt_count": {
+            "const": 0
+          },
+          "reconciliation_deadline_at": {
+            "type": "null"
+          },
+          "next_action_owner": {
+            "const": "NONE"
+          },
+          "next_action_due_at": {
+            "type": "null"
+          },
+          "last_attempted_at": {
+            "type": "null"
+          },
+          "resolved_at": {
+            "type": "null"
+          },
+          "reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "QUEUED",
+              "IN_PROGRESS",
+              "WAITING_ON_AUTHORITY",
+              "WAITING_ON_OPERATOR",
+              "RESOLVED",
+              "SUPERSEDED"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "target_mismatch_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "WAITING_ON_AUTHORITY"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resolution_state": {
+            "enum": [
+              "UNRESOLVED",
+              "PARTIALLY_RESOLVED"
+            ]
+          },
+          "recommended_action_code": {
+            "enum": [
+              "RETRY_AUTHORITY_SYNC",
+              "AWAIT_AUTHORITY"
+            ]
+          },
+          "next_action_owner": {
+            "const": "AUTHORITY"
+          },
+          "next_action_due_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reconciliation_deadline_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "WAITING_ON_OPERATOR"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "workflow_item_refs": {
+            "minItems": 1
+          },
+          "primary_workflow_item_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resolution_state": {
+            "enum": [
+              "UNRESOLVED",
+              "PARTIALLY_RESOLVED"
+            ]
+          },
+          "recommended_action_code": {
+            "enum": [
+              "OPEN_OPERATOR_WORKFLOW",
+              "RUN_MANUAL_RECONCILIATION",
+              "PREPARE_AMENDMENT_REVIEW",
+              "RECORD_OUT_OF_BAND_RESOLUTION"
+            ]
+          },
+          "reconciliation_budget_state": {
+            "enum": [
+              "EXHAUSTED",
+              "MANUAL_ESCALATION"
+            ]
+          },
+          "next_action_owner": {
+            "const": "OPERATOR"
+          },
+          "next_action_due_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "next_action_owner": {
+            "const": "NONE"
+          }
+        },
+        "required": [
+          "next_action_owner"
+        ]
+      },
+      "then": {
+        "properties": {
+          "next_action_due_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "primary_workflow_item_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "primary_workflow_item_ref_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "workflow_item_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "RESOLVED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resolved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recommended_action_code": {
+            "const": "RESOLVED"
+          },
+          "next_action_owner": {
+            "const": "NONE"
+          },
+          "next_action_due_at": {
+            "type": "null"
+          },
+          "resolution_state": {
+            "enum": [
+              "RESOLVED_MATCH",
+              "RESOLVED_OUT_OF_BAND",
+              "RESOLVED_REJECTED",
+              "RESOLVED_AMENDED_BASELINE"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "SUPERSEDED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "recommended_action_code": {
+            "const": "SUPERSEDED"
+          },
+          "next_action_owner": {
+            "const": "NONE"
+          },
+          "next_action_due_at": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

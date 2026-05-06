@@ -1,0 +1,54 @@
+{
+  "contract_version": "STREAM_CURSOR_STATE_POLICY_V1",
+  "policy_id": "stream-cursor-state-policy",
+  "basis_statement": "Cursor state is durable recovery posture. LIVE cursors may touch or acknowledge; rebased, revoked, expired, and closed cursors never silently reopen.",
+  "state_rows": [
+    {
+      "cursor_state": "LIVE",
+      "allowed_next_states": ["REBASED", "REVOKED", "EXPIRED", "CLOSED"],
+      "heartbeat_posture": "TOUCH_LAST_SEEN_ONLY",
+      "mutable_fields": ["last_ack_sequence", "last_published_sequence", "last_seen_at", "expires_at"],
+      "terminal_state": false,
+      "notes": ["Resume legality exists only while the cursor remains LIVE."]
+    },
+    {
+      "cursor_state": "REBASED",
+      "allowed_next_states": ["REVOKED", "EXPIRED", "CLOSED"],
+      "heartbeat_posture": "IGNORE",
+      "mutable_fields": ["replacement_snapshot_ref", "replacement_stability_contract_or_null"],
+      "terminal_state": false,
+      "notes": ["Rebased cursors may point at replacement material but cannot resume live delivery."]
+    },
+    {
+      "cursor_state": "REVOKED",
+      "allowed_next_states": [],
+      "heartbeat_posture": "IGNORE",
+      "mutable_fields": [],
+      "terminal_state": true,
+      "notes": ["Revoked cursors require a fresh bind."]
+    },
+    {
+      "cursor_state": "EXPIRED",
+      "allowed_next_states": [],
+      "heartbeat_posture": "IGNORE",
+      "mutable_fields": [],
+      "terminal_state": true,
+      "notes": ["Expired cursors remain closed after TTL."]
+    },
+    {
+      "cursor_state": "CLOSED",
+      "allowed_next_states": [],
+      "heartbeat_posture": "IGNORE",
+      "mutable_fields": [],
+      "terminal_state": true,
+      "notes": ["Client-closed cursors never reopen in place."]
+    }
+  ],
+  "source_lineage": [
+    {
+      "rationale": "Captures the cursor lifecycle states required by the experience and workspace cursor contracts.",
+      "source_file": "Algorithm/schemas/workspace_cursor.schema.json",
+      "source_heading_or_logical_block": "cursor_state, invalidation_reason_code, last_seen_at, expires_at"
+    }
+  ]
+}

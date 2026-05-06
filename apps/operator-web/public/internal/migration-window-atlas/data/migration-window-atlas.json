@@ -1,0 +1,176 @@
+{
+  "basisStatement": "Tie the imported contracts-core schema bundle hash to the immutable PostgreSQL control-store target version so release evidence and datastore evolution cannot drift apart.",
+  "currentDatastoreBadge": "PRIMARY_CONTROL_STORE / POSTGRESQL",
+  "currentSchemaBundleBadge": "000001 / 95b977085cc4",
+  "phaseColumns": [
+    "EXPAND",
+    "BACKFILL",
+    "VERIFY",
+    "CONTRACT"
+  ],
+  "railStates": [
+    {
+      "active": false,
+      "count": 1,
+      "label": "PLANNED",
+      "tone": "slate"
+    },
+    {
+      "active": false,
+      "count": 1,
+      "label": "APPLYING",
+      "tone": "slate"
+    },
+    {
+      "active": false,
+      "count": 1,
+      "label": "VERIFYING",
+      "tone": "slate"
+    },
+    {
+      "active": false,
+      "count": 1,
+      "label": "CONTRACTING",
+      "tone": "fern"
+    },
+    {
+      "active": true,
+      "count": 1,
+      "label": "HALTED",
+      "tone": "rust"
+    },
+    {
+      "active": false,
+      "count": 1,
+      "label": "FAILED",
+      "tone": "danger"
+    }
+  ],
+  "routeId": "migration-window-atlas",
+  "selectedMigrationId": "000006_resume_customer_safe_backfill",
+  "subtitle": "Immutable migration numbering, PostgreSQL singleton locking, reader-window governance, and resumable backfill posture in one observatory.",
+  "timelineRows": [
+    {
+      "accessibleLabel": "migration 000002 planned rollback safe",
+      "backfillSummary": "Backfill policy seeded but not yet started.",
+      "compatibilityBandLabel": "Window remains open while the new reader shape is only planned.",
+      "evidenceRefs": [
+        "plan.migration.000002"
+      ],
+      "lockPosture": "pg_advisory_xact_lock / transaction scope",
+      "migrationId": "000002_expand_request_index",
+      "phaseColumn": "EXPAND",
+      "phaseState": "PLANNED",
+      "readerWindowState": "EXPAND_ONLY_PREVIOUS_READERS_SUPPORTED",
+      "rollbackClass": "ROLLBACK_SAFE",
+      "schemaBundleHash": "f8534b47882a8ac871a9eb678907d58f788c0a565b46570e6d46a7567b0efede",
+      "summary": "Next expand-only change is staged behind the singleton lock and release-candidate binding.",
+      "targetVersion": "000002"
+    },
+    {
+      "accessibleLabel": "migration 000003 applying rollback safe",
+      "backfillSummary": "DDL in progress under a transaction-scoped advisory lock.",
+      "compatibilityBandLabel": "Previous readers remain supported while structural writes are still applying.",
+      "evidenceRefs": [
+        "audit.meta_migration.000003.start_apply"
+      ],
+      "lockPosture": "pg_advisory_xact_lock / transaction scope",
+      "migrationId": "000003_apply_projection_table",
+      "phaseColumn": "EXPAND",
+      "phaseState": "APPLYING",
+      "readerWindowState": "EXPAND_ONLY_PREVIOUS_READERS_SUPPORTED",
+      "rollbackClass": "ROLLBACK_SAFE",
+      "schemaBundleHash": "337f524fb3c8550eadd4385d13bfa783c8a7feee4b6d7105dd331f02ab4195bb",
+      "summary": "Structural change is underway but not yet verified, so release admission remains blocked.",
+      "targetVersion": "000003"
+    },
+    {
+      "accessibleLabel": "migration 000004 verifying rollback safe",
+      "backfillSummary": "Backfill complete and waiting on verification evidence.",
+      "compatibilityBandLabel": "Compatibility window stays open until replay and restore verification turn green.",
+      "evidenceRefs": [
+        "verification.release-manifest.000004"
+      ],
+      "lockPosture": "pg_advisory_xact_lock / transaction scope",
+      "migrationId": "000004_verify_replay_window",
+      "phaseColumn": "VERIFY",
+      "phaseState": "VERIFYING",
+      "readerWindowState": "BACKFILL_IN_PROGRESS_PREVIOUS_READERS_SUPPORTED",
+      "rollbackClass": "ROLLBACK_SAFE",
+      "schemaBundleHash": "4fc2995c5d13a66944fce3ce6795607c5f6157c3e30da564e65c745245fbce26",
+      "summary": "Verification is active and the platform is still within the rollback-safe reader window.",
+      "targetVersion": "000004"
+    },
+    {
+      "accessibleLabel": "migration 000005 contracting fail forward only",
+      "backfillSummary": "Backfill complete; destructive cleanup is now allowed.",
+      "compatibilityBandLabel": "Compatibility band closed after verification, so fail-forward posture is mandatory.",
+      "evidenceRefs": [
+        "verification.release-manifest.000005",
+        "audit.meta_migration.000005.start_contract"
+      ],
+      "lockPosture": "pg_advisory_xact_lock / transaction scope",
+      "migrationId": "000005_contract_legacy_columns",
+      "phaseColumn": "CONTRACT",
+      "phaseState": "CONTRACTING",
+      "readerWindowState": "CONTRACT_ELIGIBLE_WINDOW_CLOSED",
+      "rollbackClass": "FAIL_FORWARD_ONLY",
+      "schemaBundleHash": "244d7f669b29a5c6d9c7817d82302af6e78d326033183cfdf6c9c20c93021f7b",
+      "summary": "Legacy shape removal began only after the compatibility window closed and fail-forward posture became explicit.",
+      "targetVersion": "000005"
+    },
+    {
+      "accessibleLabel": "migration 000006 halted rollback safe",
+      "backfillSummary": "Resumable backfill halted after partial progress; no destructive cleanup started.",
+      "compatibilityBandLabel": "Compatibility window remains open because historical readers still depend on the prior shape.",
+      "evidenceRefs": [
+        "audit.meta_migration.backfill.000006.halt.ops-run-2",
+        "failure.ref.partial-backfill"
+      ],
+      "lockPosture": "pg_advisory_xact_lock / transaction scope",
+      "migrationId": "000006_resume_customer_safe_backfill",
+      "phaseColumn": "BACKFILL",
+      "phaseState": "HALTED",
+      "readerWindowState": "BACKFILL_IN_PROGRESS_PREVIOUS_READERS_SUPPORTED",
+      "rollbackClass": "ROLLBACK_SAFE",
+      "schemaBundleHash": "d680c67d2897a3611fca521c26805148e7013574123ba21ce3ff74aee3756986",
+      "summary": "The framework records halted posture explicitly so backfill can resume without mutating prior evidence.",
+      "targetVersion": "000006"
+    },
+    {
+      "accessibleLabel": "migration 000007 failed fail forward only",
+      "backfillSummary": "Backfill failed after the compatibility window closed.",
+      "compatibilityBandLabel": "Compatibility window already closed, so compensating release lineage is required.",
+      "evidenceRefs": [
+        "failure.ref.contract-phase-cleanup"
+      ],
+      "lockPosture": "pg_advisory_xact_lock / transaction scope",
+      "migrationId": "000007_failed_contract_cleanup",
+      "phaseColumn": "CONTRACT",
+      "phaseState": "FAILED",
+      "readerWindowState": "CONTRACT_ELIGIBLE_WINDOW_CLOSED",
+      "rollbackClass": "FAIL_FORWARD_ONLY",
+      "schemaBundleHash": "28b4fe9885595cd6a848f082390b6a39b90594f0330664b5ed88c377f8256768",
+      "summary": "Failure is queryable truth, and fail-forward ownership is no longer optional once the window closes.",
+      "targetVersion": "000007"
+    },
+    {
+      "accessibleLabel": "migration 000001 verified rollback safe",
+      "backfillSummary": "Baseline migration carries no backfill requirement.",
+      "compatibilityBandLabel": "The current baseline still exposes a compatible reader window for protected history.",
+      "evidenceRefs": [
+        "verification.release-manifest.000001"
+      ],
+      "lockPosture": "pg_advisory_xact_lock / transaction scope",
+      "migrationId": "000001_baseline",
+      "phaseColumn": "VERIFY",
+      "phaseState": "VERIFIED",
+      "readerWindowState": "VERIFIED_PREVIOUS_READERS_SUPPORTED",
+      "rollbackClass": "ROLLBACK_SAFE",
+      "schemaBundleHash": "95b977085cc49325a17ae82e81d2e151f57d228682a538b3e3191e9c2d218b7d",
+      "summary": "The imported contracts-core bundle is pinned to the current baseline target version.",
+      "targetVersion": "000001"
+    }
+  ],
+  "title": "Taxat Migration Window Atlas"
+}

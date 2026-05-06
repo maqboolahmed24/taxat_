@@ -272,7 +272,9 @@ def load_headings() -> dict[str, list[HeadingInfo]]:
     return {path: rows for path, rows in sorted(headings_by_path.items())}
 
 
-def load_inventory() -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]], dict[str, DocInfo], dict[str, DocInfo]]:
+def load_inventory() -> tuple[
+    list[dict[str, Any]], dict[str, dict[str, Any]], dict[str, DocInfo], dict[str, DocInfo]
+]:
     manifest_rows = json_load(FILE_INVENTORY_JSON_PATH)["rows"]
     rows_by_path = {row["path"]: row for row in manifest_rows}
     headings_by_path = load_headings()
@@ -356,7 +358,9 @@ def extract_data_model_objects() -> dict[str, dict[str, Any]]:
     return dict(sorted(objects.items()))
 
 
-def extract_state_machine_families(headings_by_path: dict[str, list[HeadingInfo]]) -> tuple[list[StateMachineFamily], dict[str, list[str]]]:
+def extract_state_machine_families(
+    headings_by_path: dict[str, list[HeadingInfo]],
+) -> tuple[list[StateMachineFamily], dict[str, list[str]]]:
     families: list[StateMachineFamily] = []
     refs_by_object_key: dict[str, list[str]] = defaultdict(list)
     for heading in headings_by_path.get(STATE_MACHINES_PATH, []):
@@ -383,10 +387,14 @@ def extract_state_machine_families(headings_by_path: dict[str, list[HeadingInfo]
         )
         for key in object_keys:
             refs_by_object_key[key].append(ref)
-    return families, {key: dedupe_sorted(values) for key, values in sorted(refs_by_object_key.items())}
+    return families, {
+        key: dedupe_sorted(values) for key, values in sorted(refs_by_object_key.items())
+    }
 
 
-def parse_validator_symbols() -> tuple[dict[str, SymbolInfo], dict[str, list[str]], dict[str, SymbolInfo]]:
+def parse_validator_symbols() -> tuple[
+    dict[str, SymbolInfo], dict[str, list[str]], dict[str, SymbolInfo]
+]:
     path = ROOT / VALIDATOR_PATH
     text = path.read_text()
     module = ast.parse(text)
@@ -404,10 +412,17 @@ def parse_validator_symbols() -> tuple[dict[str, SymbolInfo], dict[str, list[str
     duplicates: dict[str, list[str]] = defaultdict(list)
     for node in module.body:
         dict_node: ast.Dict | None = None
-        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.target.id == "CUSTOM_VALIDATORS":
+        if (
+            isinstance(node, ast.AnnAssign)
+            and isinstance(node.target, ast.Name)
+            and node.target.id == "CUSTOM_VALIDATORS"
+        ):
             dict_node = node.value if isinstance(node.value, ast.Dict) else None
         elif isinstance(node, ast.Assign):
-            if any(isinstance(target, ast.Name) and target.id == "CUSTOM_VALIDATORS" for target in node.targets):
+            if any(
+                isinstance(target, ast.Name) and target.id == "CUSTOM_VALIDATORS"
+                for target in node.targets
+            ):
                 dict_node = node.value if isinstance(node.value, ast.Dict) else None
         if dict_node is None:
             continue
@@ -436,7 +451,11 @@ def parse_validator_symbols() -> tuple[dict[str, SymbolInfo], dict[str, list[str
                 duplicates[key].append(info.ref)
             custom_validators[key] = info
         break
-    return custom_validators, {key: sorted(value) for key, value in sorted(duplicates.items())}, function_symbols
+    return (
+        custom_validators,
+        {key: sorted(value) for key, value in sorted(duplicates.items())},
+        function_symbols,
+    )
 
 
 def infer_callable_name(node: ast.AST) -> str | None:
@@ -579,7 +598,9 @@ def build_object_rows(
         guard_refs_by_key[normalize_key(base_name)].append(guard.ref)
 
     rows: dict[str, FamilyRow] = {}
-    all_keys = sorted(set(data_model_objects) | set(schemas_by_key) | set(state_machine_refs_by_key))
+    all_keys = sorted(
+        set(data_model_objects) | set(schemas_by_key) | set(state_machine_refs_by_key)
+    )
     for key in all_keys:
         schema_infos = schemas_by_key.get(key, [])
         data_model_info = data_model_objects.get(key)
@@ -594,7 +615,13 @@ def build_object_rows(
             family_kind="object_family",
             normalized_key=key,
         )
-        row.aliases.update(make_aliases(display_name, *(schema.schema_stem for schema in schema_infos), *(schema.schema_title for schema in schema_infos)))
+        row.aliases.update(
+            make_aliases(
+                display_name,
+                *(schema.schema_stem for schema in schema_infos),
+                *(schema.schema_title for schema in schema_infos),
+            )
+        )
 
         if data_model_info:
             row.authoritative_prose_refs.update(data_model_info["refs"])
@@ -615,7 +642,9 @@ def build_object_rows(
             row.sample_refs.update(schema.related_sample_files)
             row.source_paths.add(schema.schema_path)
 
-        validator_symbol = custom_validators.get(schema_infos[0].schema_stem if schema_infos else "")
+        validator_symbol = custom_validators.get(
+            schema_infos[0].schema_stem if schema_infos else ""
+        )
         if validator_symbol:
             row.validator_refs.add(validator_symbol.ref)
         elif key in {normalize_key(kind) for kind in custom_validators}:
@@ -626,7 +655,11 @@ def build_object_rows(
         row.forensic_guard_refs.update(guard_refs_by_key.get(key, []))
 
         if should_use_broad_doc_search(display_name, schema_infos):
-            doc_aliases = make_aliases(display_name, *(schema.schema_stem for schema in schema_infos), *(schema.schema_title for schema in schema_infos))
+            doc_aliases = make_aliases(
+                display_name,
+                *(schema.schema_stem for schema in schema_infos),
+                *(schema.schema_title for schema in schema_infos),
+            )
             row.authoritative_prose_refs.update(search_docs(semantic_docs, doc_aliases))
 
         if not row.authoritative_prose_refs:
@@ -634,7 +667,9 @@ def build_object_rows(
         if not row.schema_refs:
             row.gap_notes.add("No schema artifact was found for this prose object family.")
         if not row.validator_refs and not row.forensic_guard_refs:
-            row.gap_notes.add("No direct custom validator or forensic guard was found for this family.")
+            row.gap_notes.add(
+                "No direct custom validator or forensic guard was found for this family."
+            )
 
         linked_constraints = find_constraints_for_row(row, constraints)
         row.constraint_register_refs.update(linked_constraints)
@@ -648,8 +683,14 @@ def find_constraints_for_row(row: FamilyRow, constraints: list[dict[str, Any]]) 
     linked: list[str] = []
     for entry in constraints:
         entry_paths = {
-            *[qualify_algorithm_ref(value) for value in extract_ref_paths(entry.get("authoritative_refs", []))],
-            *[qualify_algorithm_ref(value) for value in extract_ref_paths(entry.get("downstream_refs", []))],
+            *[
+                qualify_algorithm_ref(value)
+                for value in extract_ref_paths(entry.get("authoritative_refs", []))
+            ],
+            *[
+                qualify_algorithm_ref(value)
+                for value in extract_ref_paths(entry.get("downstream_refs", []))
+            ],
         }
         if schema_paths & entry_paths or prose_paths & entry_paths:
             linked.append(f"{CONSTRAINT_REGISTER_PATH}#{entry['constraint_id']}")
@@ -675,7 +716,9 @@ def qualify_algorithm_ref(value: str) -> str:
     return f"Algorithm/{stripped}"
 
 
-def historical_refs_for_aliases(historical_docs: dict[str, DocInfo], aliases: Iterable[str], *, minimum_score: int = 10) -> list[str]:
+def historical_refs_for_aliases(
+    historical_docs: dict[str, DocInfo], aliases: Iterable[str], *, minimum_score: int = 10
+) -> list[str]:
     return search_docs(historical_docs, aliases, max_results=3, minimum_score=minimum_score)
 
 
@@ -704,15 +747,26 @@ def build_constraint_rows(
             family_kind="constraint_family",
             normalized_key=normalize_key(entry["constraint_id"]),
         )
-        row.authoritative_prose_refs.update(qualify_algorithm_ref(value) for value in extract_ref_paths(entry.get("authoritative_refs", [])))
-        downstream_paths = [qualify_algorithm_ref(value) for value in extract_ref_paths(entry.get("downstream_refs", []))]
+        row.authoritative_prose_refs.update(
+            qualify_algorithm_ref(value)
+            for value in extract_ref_paths(entry.get("authoritative_refs", []))
+        )
+        downstream_paths = [
+            qualify_algorithm_ref(value)
+            for value in extract_ref_paths(entry.get("downstream_refs", []))
+        ]
         row.schema_refs.update(path for path in downstream_paths if path.endswith(".schema.json"))
-        row.sample_refs.update(qualify_algorithm_ref(value) for value in extract_ref_paths(entry.get("example_refs", [])))
+        row.sample_refs.update(
+            qualify_algorithm_ref(value)
+            for value in extract_ref_paths(entry.get("example_refs", []))
+        )
         row.validator_refs.update(live_constraint_validator_refs)
         row.validator_refs.add(symbol_ref(VALIDATOR_PATH, "run_repo_coherence_checks"))
         row.forensic_guard_refs.update(live_constraint_guard_refs)
         row.constraint_register_refs.add(f"{CONSTRAINT_REGISTER_PATH}#{entry['constraint_id']}")
-        row.constraint_register_refs.add(f"{CONSTRAINT_COVERAGE_PATH}#active-named-constraint-register")
+        row.constraint_register_refs.add(
+            f"{CONSTRAINT_COVERAGE_PATH}#active-named-constraint-register"
+        )
 
         aliases = make_aliases(
             entry["constraint_id"],
@@ -723,7 +777,9 @@ def build_constraint_rows(
             *(Path(path).stem for path in row.schema_refs),
         )
         row.aliases.update(aliases)
-        row.historical_closure_refs.update(historical_refs_for_aliases(historical_docs, aliases, minimum_score=6))
+        row.historical_closure_refs.update(
+            historical_refs_for_aliases(historical_docs, aliases, minimum_score=6)
+        )
 
         for schema_path in row.schema_refs:
             object_row = object_rows_by_schema_path.get(ref_path(schema_path))
@@ -732,7 +788,9 @@ def build_constraint_rows(
             row.validator_refs.update(object_row.validator_refs)
             row.forensic_guard_refs.update(object_row.forensic_guard_refs)
         if not row.historical_closure_refs:
-            row.gap_notes.add("No historical closure document matched this live constraint family directly.")
+            row.gap_notes.add(
+                "No historical closure document matched this live constraint family directly."
+            )
         rows.append(row)
     return sorted(rows, key=lambda row: row.logical_family_id)
 
@@ -772,10 +830,14 @@ def build_validator_rows(
             row.gap_notes.add("No object-family bridge was found for this custom validator.")
 
         if kind in duplicate_validators:
-            row.gap_notes.add("CUSTOM_VALIDATORS contains duplicate key definitions; the last mapping wins at runtime.")
+            row.gap_notes.add(
+                "CUSTOM_VALIDATORS contains duplicate key definitions; the last mapping wins at runtime."
+            )
         if not row.authoritative_prose_refs:
             row.gap_notes.add("No clear prose anchor was found for this custom validator.")
-            row.historical_closure_refs.update(historical_refs_for_aliases(historical_docs, row.aliases, minimum_score=8))
+            row.historical_closure_refs.update(
+                historical_refs_for_aliases(historical_docs, row.aliases, minimum_score=8)
+            )
         rows.append(row)
 
     pipeline_rows: list[tuple[str, str, list[str], list[str], list[str]]] = [
@@ -784,14 +846,18 @@ def build_validator_rows(
             "Schema validation pipeline",
             [],
             [],
-            ["Generic orchestration stage; it validates every schema but is not itself a domain-semantic owner."],
+            [
+                "Generic orchestration stage; it validates every schema but is not itself a domain-semantic owner."
+            ],
         ),
         (
             "run_schema_shape_validation",
             "Schema shape validation pipeline",
             [],
             [],
-            ["Generic schema-shape guard stage; it checks validator assumptions across the corpus."],
+            [
+                "Generic schema-shape guard stage; it checks validator assumptions across the corpus."
+            ],
         ),
         (
             "run_repo_coherence_checks",
@@ -802,7 +868,10 @@ def build_validator_rows(
                 "Algorithm/architecture_coherence_guardrails.md",
                 "Algorithm/constraint_coverage_index.md",
             ],
-            [symbol_ref(GUARD_PATH, "check_constraint_traceability_register"), symbol_ref(GUARD_PATH, "check_corpus_reference_docs")],
+            [
+                symbol_ref(GUARD_PATH, "check_constraint_traceability_register"),
+                symbol_ref(GUARD_PATH, "check_corpus_reference_docs"),
+            ],
             [],
         ),
         (
@@ -900,10 +969,14 @@ def build_guard_rows(
         if guard.name in special_guard_historical:
             row.historical_closure_refs.update(special_guard_historical[guard.name])
         if not row.authoritative_prose_refs:
-            row.authoritative_prose_refs.update(search_docs(semantic_docs, row.aliases, minimum_score=10))
+            row.authoritative_prose_refs.update(
+                search_docs(semantic_docs, row.aliases, minimum_score=10)
+            )
         if not row.authoritative_prose_refs:
             row.gap_notes.add("No clear prose anchor was found for this forensic guard theme.")
-        row.historical_closure_refs.update(historical_refs_for_aliases(historical_docs, row.aliases, minimum_score=10))
+        row.historical_closure_refs.update(
+            historical_refs_for_aliases(historical_docs, row.aliases, minimum_score=10)
+        )
         rows.append(row)
     return sorted(rows, key=lambda row: row.logical_family_id)
 
@@ -925,7 +998,9 @@ def build_state_machine_rows(
         for key in family.object_keys:
             object_row = object_rows.get(key)
             if object_row is None:
-                row.gap_notes.add(f"Object family `{key}` is referenced by state machines but missing from the object map.")
+                row.gap_notes.add(
+                    f"Object family `{key}` is referenced by state machines but missing from the object map."
+                )
                 continue
             row.authoritative_prose_refs.update(object_row.authoritative_prose_refs)
             row.schema_refs.update(object_row.schema_refs)
@@ -960,7 +1035,10 @@ def build_contract_rows(
     special_doc_links: dict[str, dict[str, list[str]]] = {
         "Algorithm/README.md": {
             "validator_refs": [symbol_ref(VALIDATOR_PATH, "run_repo_coherence_checks")],
-            "forensic_guard_refs": [symbol_ref(GUARD_PATH, "check_corpus_reference_docs"), symbol_ref(GUARD_PATH, "check_constraint_traceability_register")],
+            "forensic_guard_refs": [
+                symbol_ref(GUARD_PATH, "check_corpus_reference_docs"),
+                symbol_ref(GUARD_PATH, "check_constraint_traceability_register"),
+            ],
         },
         "Algorithm/implementation_conventions.md": {
             "validator_refs": [symbol_ref(VALIDATOR_PATH, "run_repo_coherence_checks")],
@@ -968,11 +1046,18 @@ def build_contract_rows(
         },
         "Algorithm/architecture_coherence_guardrails.md": {
             "validator_refs": [symbol_ref(VALIDATOR_PATH, "run_repo_coherence_checks")],
-            "forensic_guard_refs": [symbol_ref(GUARD_PATH, "check_corpus_reference_docs"), symbol_ref(GUARD_PATH, "check_constraint_traceability_register")],
+            "forensic_guard_refs": [
+                symbol_ref(GUARD_PATH, "check_corpus_reference_docs"),
+                symbol_ref(GUARD_PATH, "check_constraint_traceability_register"),
+            ],
         },
         "Algorithm/constraint_coverage_index.md": {
-            "validator_refs": [symbol_ref(VALIDATOR_PATH, "validate_live_constraint_traceability_register")],
-            "forensic_guard_refs": [symbol_ref(GUARD_PATH, "check_constraint_traceability_register")],
+            "validator_refs": [
+                symbol_ref(VALIDATOR_PATH, "validate_live_constraint_traceability_register")
+            ],
+            "forensic_guard_refs": [
+                symbol_ref(GUARD_PATH, "check_constraint_traceability_register")
+            ],
         },
     }
 
@@ -1006,7 +1091,9 @@ def build_contract_rows(
             row.validator_refs.update(special_doc_links[path].get("validator_refs", []))
             row.forensic_guard_refs.update(special_doc_links[path].get("forensic_guard_refs", []))
 
-        row.historical_closure_refs.update(historical_refs_for_aliases(historical_docs, [doc.stem], minimum_score=10))
+        row.historical_closure_refs.update(
+            historical_refs_for_aliases(historical_docs, [doc.stem], minimum_score=10)
+        )
         rows.append(row)
     return sorted(rows, key=lambda row: row.logical_family_id)
 
@@ -1014,7 +1101,11 @@ def build_contract_rows(
 def inherit_constraint_prose(rows: Iterable[FamilyRow], constraint_rows: list[FamilyRow]) -> None:
     constraint_rows_by_ref = {
         next(
-            (constraint_ref for constraint_ref in row.constraint_register_refs if constraint_ref.startswith(f"{CONSTRAINT_REGISTER_PATH}#")),
+            (
+                constraint_ref
+                for constraint_ref in row.constraint_register_refs
+                if constraint_ref.startswith(f"{CONSTRAINT_REGISTER_PATH}#")
+            ),
             row.logical_family_id,
         ): row
         for row in constraint_rows
@@ -1034,13 +1125,19 @@ def inherit_constraint_prose(rows: Iterable[FamilyRow], constraint_rows: list[Fa
             )
         if inherited_refs:
             row.authoritative_prose_refs.update(inherited_refs)
-            row.gap_notes.discard("No clear semantic prose anchor was found for this object family.")
+            row.gap_notes.discard(
+                "No clear semantic prose anchor was found for this object family."
+            )
 
 
-def enrich_rows_with_historical_context(rows: Iterable[FamilyRow], historical_docs: dict[str, DocInfo]) -> None:
+def enrich_rows_with_historical_context(
+    rows: Iterable[FamilyRow], historical_docs: dict[str, DocInfo]
+) -> None:
     for row in rows:
         aliases = row.aliases or {row.logical_family_name}
-        row.historical_closure_refs.update(historical_refs_for_aliases(historical_docs, aliases, minimum_score=10))
+        row.historical_closure_refs.update(
+            historical_refs_for_aliases(historical_docs, aliases, minimum_score=10)
+        )
 
 
 def mermaid_node_id(row_id: str) -> str:
@@ -1056,12 +1153,12 @@ def build_mermaid_graph(rows: list[FamilyRow]) -> str:
         '  VALIDATOR --> GUARD["Forensic Guard"]',
         '  GUARD --> CONSTRAINT["Constraint Register"]',
         '  CONSTRAINT --> HISTORY["Historical Closure"]',
-        '  classDef obj fill:#e8f1fb,stroke:#315d8a,color:#10263f;',
-        '  classDef doc fill:#f7ead9,stroke:#8f6220,color:#3b2608;',
-        '  classDef stm fill:#efe7fb,stroke:#6c4aa4,color:#2d1454;',
-        '  classDef val fill:#e6f8ea,stroke:#2d7d46,color:#12341c;',
-        '  classDef grd fill:#ffe9ef,stroke:#a24563,color:#4f1023;',
-        '  classDef cst fill:#fcefc6,stroke:#85640a,color:#443202;',
+        "  classDef obj fill:#e8f1fb,stroke:#315d8a,color:#10263f;",
+        "  classDef doc fill:#f7ead9,stroke:#8f6220,color:#3b2608;",
+        "  classDef stm fill:#efe7fb,stroke:#6c4aa4,color:#2d1454;",
+        "  classDef val fill:#e6f8ea,stroke:#2d7d46,color:#12341c;",
+        "  classDef grd fill:#ffe9ef,stroke:#a24563,color:#4f1023;",
+        "  classDef cst fill:#fcefc6,stroke:#85640a,color:#443202;",
     ]
 
     class_names = {
@@ -1122,13 +1219,17 @@ def build_mermaid_graph(rows: list[FamilyRow]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def build_gap_register(rows: list[FamilyRow], duplicate_validators: dict[str, list[str]]) -> dict[str, Any]:
+def build_gap_register(
+    rows: list[FamilyRow], duplicate_validators: dict[str, list[str]]
+) -> dict[str, Any]:
     schema_owned_paths = {ref_path(schema_ref) for row in rows for schema_ref in row.schema_refs}
     schemas_by_path, _ = load_schemas()
     schema_without_prose = sorted(
         ref_path(schema_ref)
         for row in rows
-        if row.family_kind == "object_family" and row.schema_refs and not row.authoritative_prose_refs
+        if row.family_kind == "object_family"
+        and row.schema_refs
+        and not row.authoritative_prose_refs
         for schema_ref in row.schema_refs
     )
     data_model_without_schema = sorted(
@@ -1149,9 +1250,7 @@ def build_gap_register(rows: list[FamilyRow], duplicate_validators: dict[str, li
         if row.family_kind == "forensic_guard_family" and not row.authoritative_prose_refs
     )
     partially_or_unmapped = [
-        row.to_dict()
-        for row in rows
-        if row.coverage_status() != "fully_mapped"
+        row.to_dict() for row in rows if row.coverage_status() != "fully_mapped"
     ]
     return {
         "generated_from_task": "pc_0003",
@@ -1167,12 +1266,12 @@ def build_gap_register(rows: list[FamilyRow], duplicate_validators: dict[str, li
     }
 
 
-def build_index_doc(summary: dict[str, Any], rows: list[FamilyRow], gap_register: dict[str, Any]) -> str:
+def build_index_doc(
+    summary: dict[str, Any], rows: list[FamilyRow], gap_register: dict[str, Any]
+) -> str:
     counts_by_kind = Counter(row.family_kind for row in rows)
     counts_by_status = Counter(row.coverage_status() for row in rows)
-    top_gap_rows = [
-        row for row in rows if row.coverage_status() != "fully_mapped"
-    ][:12]
+    top_gap_rows = [row for row in rows if row.coverage_status() != "fully_mapped"][:12]
 
     lines = [
         "# Contract, Schema, Script Cross-Reference Index",
@@ -1239,9 +1338,13 @@ def build_index_doc(summary: dict[str, Any], rows: list[FamilyRow], gap_register
     return "\n".join(lines) + "\n"
 
 
-def build_coverage_doc(rows: list[FamilyRow], constraints: list[dict[str, Any]], gap_register: dict[str, Any]) -> str:
+def build_coverage_doc(
+    rows: list[FamilyRow], constraints: list[dict[str, Any]], gap_register: dict[str, Any]
+) -> str:
     counts_by_signature = Counter(row.coverage_signature() for row in rows)
-    counts_by_kind_and_status: Counter[tuple[str, str]] = Counter((row.family_kind, row.coverage_status()) for row in rows)
+    counts_by_kind_and_status: Counter[tuple[str, str]] = Counter(
+        (row.family_kind, row.coverage_status()) for row in rows
+    )
 
     lines = [
         "# Enforcement Coverage Report",
@@ -1253,7 +1356,9 @@ def build_coverage_doc(rows: list[FamilyRow], constraints: list[dict[str, Any]],
         "| Coverage signature | Row count |",
         "| --- | ---: |",
     ]
-    for signature, count in sorted(counts_by_signature.items(), key=lambda item: (-item[1], item[0])):
+    for signature, count in sorted(
+        counts_by_signature.items(), key=lambda item: (-item[1], item[0])
+    ):
         lines.append(f"| `{signature}` | `{count}` |")
 
     lines.extend(
@@ -1340,7 +1445,9 @@ def write_csv(rows: list[FamilyRow]) -> None:
             payload = row.to_dict()
             writer.writerow(
                 {
-                    key: " | ".join(payload[key]) if isinstance(payload[key], list) else payload[key]
+                    key: " | ".join(payload[key])
+                    if isinstance(payload[key], list)
+                    else payload[key]
                     for key in fieldnames
                 }
             )
@@ -1351,7 +1458,9 @@ def main() -> int:
     headings_by_path = load_headings()
     schemas_by_path, schemas_by_key = load_schemas()
     data_model_objects = extract_data_model_objects()
-    state_machine_families, state_machine_refs_by_key = extract_state_machine_families(headings_by_path)
+    state_machine_families, state_machine_refs_by_key = extract_state_machine_families(
+        headings_by_path
+    )
     custom_validators, duplicate_validators, function_symbols = parse_validator_symbols()
     guard_symbols, guard_function_symbols = parse_guard_symbols()
     constraints = load_constraints()
@@ -1375,13 +1484,34 @@ def main() -> int:
     constraint_rows = build_constraint_rows(constraints, historical_docs, object_rows_by_key)
     inherit_constraint_prose(object_rows_by_key.values(), constraint_rows)
     enrich_rows_with_historical_context(object_rows_by_key.values(), historical_docs)
-    validator_rows = build_validator_rows(custom_validators, duplicate_validators, function_symbols, object_rows_by_key, constraints, historical_docs)
+    validator_rows = build_validator_rows(
+        custom_validators,
+        duplicate_validators,
+        function_symbols,
+        object_rows_by_key,
+        constraints,
+        historical_docs,
+    )
     guard_rows = build_guard_rows(guard_symbols, object_rows_by_key, semantic_docs, historical_docs)
     state_machine_rows = build_state_machine_rows(state_machine_families, object_rows_by_key)
-    contract_rows = build_contract_rows(contract_docs, object_rows_by_key, constraint_rows, validator_rows, guard_rows, historical_docs)
+    contract_rows = build_contract_rows(
+        contract_docs,
+        object_rows_by_key,
+        constraint_rows,
+        validator_rows,
+        guard_rows,
+        historical_docs,
+    )
 
     all_rows = sorted(
-        [*object_rows_by_key.values(), *contract_rows, *state_machine_rows, *validator_rows, *guard_rows, *constraint_rows],
+        [
+            *object_rows_by_key.values(),
+            *contract_rows,
+            *state_machine_rows,
+            *validator_rows,
+            *guard_rows,
+            *constraint_rows,
+        ],
         key=lambda row: row.logical_family_id,
     )
 
@@ -1409,7 +1539,9 @@ def main() -> int:
         OBJECT_ENFORCEMENT_MAP_PATH,
         {
             "generated_from_task": "pc_0003",
-            "object_families": [row.to_dict() for row in all_rows if row.family_kind == "object_family"],
+            "object_families": [
+                row.to_dict() for row in all_rows if row.family_kind == "object_family"
+            ],
         },
     )
     json_write(ENFORCEMENT_GAP_REGISTER_PATH, gap_register)
@@ -1427,7 +1559,9 @@ def main() -> int:
                 "validator_family_count": len(validator_rows),
                 "forensic_guard_family_count": len(guard_rows),
                 "constraint_family_count": len(constraint_rows),
-                "gap_family_count": len([row for row in all_rows if row.coverage_status() == "gap"]),
+                "gap_family_count": len(
+                    [row for row in all_rows if row.coverage_status() == "gap"]
+                ),
             },
             indent=2,
             sort_keys=True,

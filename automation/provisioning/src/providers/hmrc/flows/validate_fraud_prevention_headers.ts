@@ -6,10 +6,7 @@ import {
   createEvidenceManifest,
   type EvidenceManifest,
 } from "../../../core/evidence_manifest.js";
-import {
-  assertLiveProviderGate,
-  type RunContext,
-} from "../../../core/run_context.js";
+import { assertLiveProviderGate, type RunContext } from "../../../core/run_context.js";
 import {
   createPendingStep,
   transitionStep,
@@ -28,8 +25,7 @@ import {
   type HmrcFphValidatorClient,
 } from "../clients/fph_validator_client.js";
 
-export const HMRC_FPH_VALIDATION_FLOW_ID =
-  "sandbox-fraud-prevention-validation";
+export const HMRC_FPH_VALIDATION_FLOW_ID = "sandbox-fraud-prevention-validation";
 
 export const HMRC_FPH_VALIDATION_STEP_IDS = {
   loadProfiles: "hmrc.fph.load-profiles",
@@ -54,8 +50,7 @@ export const FRAUD_HEADER_ENCODING_STRATEGIES = [
 ] as const;
 
 export type FraudHeaderValueKind = (typeof FRAUD_HEADER_VALUE_KINDS)[number];
-export type FraudHeaderEncodingStrategy =
-  (typeof FRAUD_HEADER_ENCODING_STRATEGIES)[number];
+export type FraudHeaderEncodingStrategy = (typeof FRAUD_HEADER_ENCODING_STRATEGIES)[number];
 
 type Primitive = string | number | boolean;
 type HeaderScalarInput = Primitive;
@@ -100,9 +95,7 @@ export interface FraudHeaderFieldProfile {
     | "STABLE_PER_RELEASE"
     | "REFRESH_PER_REQUEST"
     | "REFRESH_PER_INTERACTION";
-  sensitive_value_policy:
-    | "SUMMARY_ONLY_REPO_SAFE"
-    | "SUPPRESS_RAW_VALUE_IN_REPO_ARTIFACTS";
+  sensitive_value_policy: "SUMMARY_ONLY_REPO_SAFE" | "SUPPRESS_RAW_VALUE_IN_REPO_ARTIFACTS";
   missing_data_posture: FraudHeaderMissingDataPosture;
   notes: string[];
 }
@@ -190,10 +183,7 @@ export interface FraudHeaderValidationRecord {
   validator_message: string;
   error_count: number;
   warning_count: number;
-  validation_feedback_status:
-    | "NOT_REQUESTED"
-    | "RETRIEVED"
-    | "DEFERRED_UNTIL_SANDBOX_TRAFFIC";
+  validation_feedback_status: "NOT_REQUESTED" | "RETRIEVED" | "DEFERRED_UNTIL_SANDBOX_TRAFFIC";
   validation_feedback_api_or_null: string | null;
   binding_row_refs: string[];
   header_name_refs: string[];
@@ -268,9 +258,7 @@ export interface AuthoritySandboxSeedRow {
   validator_evidence_refs: string[];
   validated_now_edge_cases: string[];
   required_later_edge_cases: string[];
-  readiness_posture:
-    | "SEEDED_WITH_FRAUD_VALIDATION"
-    | "DEFERRED_FOR_LATER_CARDS";
+  readiness_posture: "SEEDED_WITH_FRAUD_VALIDATION" | "DEFERRED_FOR_LATER_CARDS";
   notes: string[];
 }
 
@@ -383,8 +371,7 @@ function hasMeaningfulValue(value: FraudHeaderInput): boolean {
   }
   return Object.values(value).some(
     (candidate) =>
-      candidate != null &&
-      (typeof candidate !== "string" || candidate.trim().length > 0),
+      candidate != null && (typeof candidate !== "string" || candidate.trim().length > 0),
   );
 }
 
@@ -392,42 +379,22 @@ export function percentEncodeFraudHeaderComponent(value: Primitive): string {
   return encodeURIComponent(String(value));
 }
 
-function assertScalarValue(
-  field: FraudHeaderFieldProfile,
-  input: FraudHeaderInput,
-): Primitive {
-  if (
-    typeof input === "string" ||
-    typeof input === "number" ||
-    typeof input === "boolean"
-  ) {
+function assertScalarValue(field: FraudHeaderFieldProfile, input: FraudHeaderInput): Primitive {
+  if (typeof input === "string" || typeof input === "number" || typeof input === "boolean") {
     return input;
   }
-  throw new Error(
-    `Field ${field.field_id} expects a scalar value but received ${typeof input}.`,
-  );
+  throw new Error(`Field ${field.field_id} expects a scalar value but received ${typeof input}.`);
 }
 
-function assertListValue(
-  field: FraudHeaderFieldProfile,
-  input: FraudHeaderInput,
-): Primitive[] {
+function assertListValue(field: FraudHeaderFieldProfile, input: FraudHeaderInput): Primitive[] {
   if (!Array.isArray(input)) {
-    throw new Error(
-      `Field ${field.field_id} expects a list value but received ${typeof input}.`,
-    );
+    throw new Error(`Field ${field.field_id} expects a list value but received ${typeof input}.`);
   }
   return input.map((item) => {
-    if (
-      typeof item === "string" ||
-      typeof item === "number" ||
-      typeof item === "boolean"
-    ) {
+    if (typeof item === "string" || typeof item === "number" || typeof item === "boolean") {
       return item;
     }
-    throw new Error(
-      `Field ${field.field_id} expects primitive list items for HMRC serialization.`,
-    );
+    throw new Error(`Field ${field.field_id} expects primitive list items for HMRC serialization.`);
   });
 }
 
@@ -448,24 +415,17 @@ function assertListOfKeyValueValue(
   input: FraudHeaderInput,
 ): HeaderListOfKeyValueInput {
   if (!Array.isArray(input)) {
-    throw new Error(
-      `Field ${field.field_id} expects a list of key/value inputs.`,
-    );
+    throw new Error(`Field ${field.field_id} expects a list of key/value inputs.`);
   }
   return input.map((item) => assertKeyValueValue(field, item));
 }
 
-function serializeKeyValuePairs(
-  input: HeaderKeyValueInput,
-  encodeComponents: boolean,
-): string {
+function serializeKeyValuePairs(input: HeaderKeyValueInput, encodeComponents: boolean): string {
   return Object.entries(input)
     .filter(([, value]) => value != null && String(value).length > 0)
     .sort(([left], [right]) => left.localeCompare(right))
     .map(([key, value]) => {
-      const normalizedKey = encodeComponents
-        ? percentEncodeFraudHeaderComponent(key)
-        : key;
+      const normalizedKey = encodeComponents ? percentEncodeFraudHeaderComponent(key) : key;
       const normalizedValue = encodeComponents
         ? percentEncodeFraudHeaderComponent(value as Primitive)
         : String(value);
@@ -586,9 +546,7 @@ function assertFraudHeaderProfile(profile: FraudHeaderProfile): void {
 
   const requiredHeaderNames = new Set(profile.fields.map((field) => field.header_name));
   if (!requiredHeaderNames.has("Gov-Client-Connection-Method")) {
-    throw new Error(
-      `Profile ${profile.profile_id} must include Gov-Client-Connection-Method.`,
-    );
+    throw new Error(`Profile ${profile.profile_id} must include Gov-Client-Connection-Method.`);
   }
 
   if (
@@ -604,15 +562,11 @@ function assertFraudHeaderProfile(profile: FraudHeaderProfile): void {
     profile.connection_method === "DESKTOP_APP_VIA_SERVER" &&
     !requiredHeaderNames.has("Gov-Client-User-Agent")
   ) {
-    throw new Error(
-      `Desktop profile ${profile.profile_id} must include Gov-Client-User-Agent.`,
-    );
+    throw new Error(`Desktop profile ${profile.profile_id} must include Gov-Client-User-Agent.`);
   }
 }
 
-function buildSyntheticCaptureForProfile(
-  profile: FraudHeaderProfile,
-): FraudHeaderCaptureInput {
+function buildSyntheticCaptureForProfile(profile: FraudHeaderProfile): FraudHeaderCaptureInput {
   const baseCommonValues: Record<string, FraudHeaderInput> = {
     gov_client_connection_method: profile.connection_method,
     gov_client_device_id:
@@ -630,12 +584,9 @@ function buildSyntheticCaptureForProfile(
       },
     ],
     gov_client_public_ip:
-      profile.connection_method === "WEB_APP_VIA_SERVER"
-        ? "198.51.100.23"
-        : "198.51.100.41",
+      profile.connection_method === "WEB_APP_VIA_SERVER" ? "198.51.100.23" : "198.51.100.41",
     gov_client_public_ip_timestamp: DEFAULT_CAPTURED_AT,
-    gov_client_public_port:
-      profile.connection_method === "WEB_APP_VIA_SERVER" ? "51000" : "51040",
+    gov_client_public_port: profile.connection_method === "WEB_APP_VIA_SERVER" ? "51000" : "51040",
     gov_client_screens: [
       {
         width: 2880,
@@ -658,14 +609,8 @@ function buildSyntheticCaptureForProfile(
     gov_client_window_size: { width: 1440, height: 1024 },
     gov_vendor_forwarded: [
       {
-        by:
-          profile.connection_method === "WEB_APP_VIA_SERVER"
-            ? "203.0.113.10"
-            : "203.0.113.20",
-        for:
-          profile.connection_method === "WEB_APP_VIA_SERVER"
-            ? "198.51.100.23"
-            : "198.51.100.41",
+        by: profile.connection_method === "WEB_APP_VIA_SERVER" ? "203.0.113.10" : "203.0.113.20",
+        for: profile.connection_method === "WEB_APP_VIA_SERVER" ? "198.51.100.23" : "198.51.100.41",
       },
     ],
     gov_vendor_license_ids:
@@ -683,9 +628,7 @@ function buildSyntheticCaptureForProfile(
         ? "Taxat Operator Web"
         : "Taxat Operator macOS",
     gov_vendor_public_ip:
-      profile.connection_method === "WEB_APP_VIA_SERVER"
-        ? "203.0.113.10"
-        : "203.0.113.20",
+      profile.connection_method === "WEB_APP_VIA_SERVER" ? "203.0.113.10" : "203.0.113.20",
     gov_vendor_version:
       profile.connection_method === "WEB_APP_VIA_SERVER"
         ? {
@@ -706,10 +649,7 @@ function buildSyntheticCaptureForProfile(
   if (profile.connection_method === "DESKTOP_APP_VIA_SERVER") {
     baseCommonValues.gov_client_local_ips = ["10.1.2.3", "10.3.4.2"];
     baseCommonValues.gov_client_local_ips_timestamp = DEFAULT_CAPTURED_AT;
-    baseCommonValues.gov_client_mac_addresses = [
-      "01:23:45:67:89:ab",
-      "ab:89:67:45:23:01",
-    ];
+    baseCommonValues.gov_client_mac_addresses = ["01:23:45:67:89:ab", "ab:89:67:45:23:01"];
     baseCommonValues.gov_client_user_agent = {
       "os-family": "macOS",
       "os-version": "14.4",
@@ -745,10 +685,7 @@ function buildBindingRows(
   profileMap: Map<string, FraudHeaderProfile>,
 ): FraudHeaderBindingRow[] {
   const callbackProfileMap = new Map(
-    authorityCatalog.callback_profiles.map((entry) => [
-      entry.callback_profile_ref,
-      entry,
-    ]),
+    authorityCatalog.callback_profiles.map((entry) => [entry.callback_profile_ref, entry]),
   );
 
   const relevantEnvironments = new Set([
@@ -792,11 +729,9 @@ function buildBindingRows(
       operation_family_refs: [...profile.allowed_operation_family_refs],
       oauth_scopes: [...profile.oauth_scopes],
       capture_owner:
-        config?.capture_boundary.device_context_capture_owner ??
-        "DEFERRED_TO_LATER_PROFILE",
+        config?.capture_boundary.device_context_capture_owner ?? "DEFERRED_TO_LATER_PROFILE",
       serialization_owner:
-        config?.capture_boundary.header_serialization_owner ??
-        "CONTROLLED_AUTHORITY_GATEWAY",
+        config?.capture_boundary.header_serialization_owner ?? "CONTROLLED_AUTHORITY_GATEWAY",
       callback_redirect_uri_pattern: callback?.oauth_redirect_uri_pattern ?? null,
       provider_ingress_uri_pattern: callback?.provider_ingress_uri_pattern ?? null,
     });
@@ -829,12 +764,8 @@ function buildProfileMatrix(
     flow_id: HMRC_FPH_VALIDATION_FLOW_ID,
     provider_environment_target: "sandbox",
     oauth_profile_ref: "config/authority/hmrc/oauth/hmrc_sandbox_oauth_profile.json",
-    profile_refs: uniqueSorted(
-      bindingRows.map((row) => row.fraud_header_profile_ref),
-    ),
-    registered_callback_profile_refs: uniqueSorted(
-      oauthProfile.registered_callback_profile_refs,
-    ),
+    profile_refs: uniqueSorted(bindingRows.map((row) => row.fraud_header_profile_ref)),
+    registered_callback_profile_refs: uniqueSorted(oauthProfile.registered_callback_profile_refs),
     binding_rows: bindingRows,
     typed_gaps: uniqueSorted([
       ...authorityCatalog.typed_gaps,
@@ -848,23 +779,20 @@ function buildProfileMatrix(
   };
 }
 
-function buildValidationRecord(
-  validation: {
-    profile: FraudHeaderProfile;
-    validateResponse: HmrcFphValidateResponse;
-    feedbackResponse: HmrcFphValidationFeedbackResponse | null;
-    capture: FraudHeaderCaptureInput;
-    serializedHeaderCount: number;
-    omittedHeaderNames: string[];
-    bindingRows: FraudHeaderBindingRow[];
-    evidenceRefs: string[];
-  },
-): FraudHeaderValidationRecord {
+function buildValidationRecord(validation: {
+  profile: FraudHeaderProfile;
+  validateResponse: HmrcFphValidateResponse;
+  feedbackResponse: HmrcFphValidationFeedbackResponse | null;
+  capture: FraudHeaderCaptureInput;
+  serializedHeaderCount: number;
+  omittedHeaderNames: string[];
+  bindingRows: FraudHeaderBindingRow[];
+  evidenceRefs: string[];
+}): FraudHeaderValidationRecord {
   return {
     fraud_header_profile_ref: validation.profile.fraud_header_profile_ref,
     connection_method: validation.profile.connection_method,
-    execution_mode:
-      validation.capture.provenance === "LIVE_CAPTURE" ? "LIVE_SANDBOX" : "FIXTURE",
+    execution_mode: validation.capture.provenance === "LIVE_CAPTURE" ? "LIVE_SANDBOX" : "FIXTURE",
     capture_provenance: validation.capture.provenance,
     validated_at: nowIso(),
     validator_validate_code: validation.validateResponse.code,
@@ -874,9 +802,7 @@ function buildValidationRecord(
     validation_feedback_status: validation.feedbackResponse
       ? "RETRIEVED"
       : "DEFERRED_UNTIL_SANDBOX_TRAFFIC",
-    validation_feedback_api_or_null: validation.feedbackResponse
-      ? "requested-during-run"
-      : null,
+    validation_feedback_api_or_null: validation.feedbackResponse ? "requested-during-run" : null,
     binding_row_refs: validation.bindingRows.map((row) => row.row_id),
     header_name_refs: validation.profile.fields.map((field) => field.header_name),
     serialized_header_count: validation.serializedHeaderCount,
@@ -913,9 +839,7 @@ function buildBindingEvidence(
     validator_validate_path: HMRC_FPH_VALIDATE_PATH,
     validator_feedback_path: HMRC_FPH_VALIDATION_FEEDBACK_PATH,
     profile_validations: validations,
-    typed_gaps: uniqueSorted(
-      validations.flatMap((validation) => validation.typed_gaps),
-    ),
+    typed_gaps: uniqueSorted(validations.flatMap((validation) => validation.typed_gaps)),
     notes: [
       "This evidence contract is a seed for later authority-sandbox coverage, not a claim that TV-91 or TV-91A is complete.",
       "Only the fraud-header validation controlled edge is exercised now.",
@@ -930,10 +854,7 @@ function buildSeedMatrix(
   validations: FraudHeaderValidationRecord[],
 ): HmrcAuthoritySandboxSeedMatrix {
   const validationByProfileRef = new Map(
-    validations.map((validation) => [
-      validation.fraud_header_profile_ref,
-      validation,
-    ]),
+    validations.map((validation) => [validation.fraud_header_profile_ref, validation]),
   );
 
   const rows: AuthoritySandboxSeedRow[] = bindingRows.map((row) => {
@@ -955,9 +876,7 @@ function buildSeedMatrix(
       required_later_edge_cases: CONTROLLED_EDGE_CASES.filter(
         (edgeCase) => edgeCase !== "FRAUD_HEADER_VALIDATION" || !validatedNow,
       ),
-      readiness_posture: validatedNow
-        ? "SEEDED_WITH_FRAUD_VALIDATION"
-        : "DEFERRED_FOR_LATER_CARDS",
+      readiness_posture: validatedNow ? "SEEDED_WITH_FRAUD_VALIDATION" : "DEFERRED_FOR_LATER_CARDS",
       notes:
         row.profile_config_ref_or_null === null
           ? [
@@ -978,9 +897,7 @@ function buildSeedMatrix(
     workspace_id: runContext.workspaceId,
     flow_id: HMRC_FPH_VALIDATION_FLOW_ID,
     provider_environment_target: "sandbox",
-    enabled_provider_profile_refs: uniqueSorted(
-      rows.flatMap((row) => row.provider_profile_ids),
-    ),
+    enabled_provider_profile_refs: uniqueSorted(rows.flatMap((row) => row.provider_profile_ids)),
     exercised_operation_family_refs: uniqueSorted(
       rows.flatMap((row) => row.exercised_operation_family_refs),
     ),
@@ -1057,15 +974,11 @@ export async function validateFraudPreventionHeaders(
       : await readJsonFile<SandboxOAuthProfile>(options.oauthProfilePath);
   const webProfile =
     options.webProfilePath == null
-      ? await readJsonUrl<FraudHeaderProfile>(
-          repoDefaultUrl(REPO_RELATIVE_WEB_PROFILE),
-        )
+      ? await readJsonUrl<FraudHeaderProfile>(repoDefaultUrl(REPO_RELATIVE_WEB_PROFILE))
       : await readJsonFile<FraudHeaderProfile>(options.webProfilePath);
   const desktopProfile =
     options.desktopProfilePath == null
-      ? await readJsonUrl<FraudHeaderProfile>(
-          repoDefaultUrl(REPO_RELATIVE_DESKTOP_PROFILE),
-        )
+      ? await readJsonUrl<FraudHeaderProfile>(repoDefaultUrl(REPO_RELATIVE_DESKTOP_PROFILE))
       : await readJsonFile<FraudHeaderProfile>(options.desktopProfilePath);
 
   assertFraudHeaderProfile(webProfile);
@@ -1130,8 +1043,7 @@ export async function validateFraudPreventionHeaders(
   });
 
   const profileValidations: FraudHeaderValidationRecord[] = [];
-  let overallOutcome: ValidateFraudPreventionHeadersResult["outcome"] =
-    "FRAUD_HEADERS_READY";
+  let overallOutcome: ValidateFraudPreventionHeadersResult["outcome"] = "FRAUD_HEADERS_READY";
 
   for (const [stepId, profile] of [
     [HMRC_FPH_VALIDATION_STEP_IDS.validateWebProfile, webProfile],
@@ -1215,10 +1127,7 @@ export async function validateFraudPreventionHeaders(
   );
   steps.push(persistArtifactsStep);
 
-  const bindingEvidence = buildBindingEvidence(
-    options.runContext,
-    profileValidations,
-  );
+  const bindingEvidence = buildBindingEvidence(options.runContext, profileValidations);
   const authoritySandboxSeedMatrix = buildSeedMatrix(
     options.runContext,
     bindingRows,
@@ -1231,10 +1140,7 @@ export async function validateFraudPreventionHeaders(
 
   await persistJson(options.profileMatrixPath, profileMatrix);
   await persistJson(options.bindingEvidencePath, bindingEvidence);
-  await persistJson(
-    options.authoritySandboxSeedMatrixPath,
-    authoritySandboxSeedMatrix,
-  );
+  await persistJson(options.authoritySandboxSeedMatrixPath, authoritySandboxSeedMatrix);
   await persistJson(evidenceManifestPath, evidenceManifest);
 
   persistArtifactsStep = transitionStep(

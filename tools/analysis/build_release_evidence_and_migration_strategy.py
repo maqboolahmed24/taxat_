@@ -17,9 +17,7 @@ RELEASE_EVIDENCE_PATH = (
     ALGORITHM_DIR / "release_candidate_identity_and_promotion_evidence_contract.md"
 )
 DEPLOYMENT_PATH = ALGORITHM_DIR / "deployment_and_resilience_contract.md"
-RECOVERY_PATH = (
-    ALGORITHM_DIR / "recovery_tier_checkpoint_and_fail_forward_governance_contract.md"
-)
+RECOVERY_PATH = ALGORITHM_DIR / "recovery_tier_checkpoint_and_fail_forward_governance_contract.md"
 VERIFY_GATES_PATH = ALGORITHM_DIR / "verification_and_release_gates.md"
 MANIFEST_FREEZE_PATH = ALGORITHM_DIR / "manifest_and_config_freeze_contract.md"
 REPLAY_PATH = ALGORITHM_DIR / "replay_and_reproducibility_contract.md"
@@ -33,54 +31,32 @@ MACOS_BLUEPRINT_PATH = ALGORITHM_DIR / "macos_native_operator_workspace_blueprin
 RELEASE_GATE_MATRIX_PATH = (
     DATA_ANALYSIS_DIR / "release_candidate_and_compatibility_gate_matrix.json"
 )
-RELEASE_TEST_BINDING_PATH = (
-    DATA_ANALYSIS_DIR / "release_candidate_test_evidence_binding.json"
-)
-ROLLBACK_BOUNDARY_PATH = (
-    DATA_ANALYSIS_DIR / "rollback_fail_forward_boundary_matrix.json"
-)
+RELEASE_TEST_BINDING_PATH = DATA_ANALYSIS_DIR / "release_candidate_test_evidence_binding.json"
+ROLLBACK_BOUNDARY_PATH = DATA_ANALYSIS_DIR / "rollback_fail_forward_boundary_matrix.json"
 RECOVERY_MATRIX_PATH = DATA_ANALYSIS_DIR / "recovery_checkpoint_reopen_matrix.json"
 RESTORE_PRIVACY_PATH = DATA_ANALYSIS_DIR / "restore_privacy_reconciliation_matrix.json"
 SECURITY_GATE_MATRIX_PATH = DATA_ANALYSIS_DIR / "security_release_gate_matrix.json"
 REBUILD_RESTORE_PATH = DATA_ANALYSIS_DIR / "rebuild_restore_and_replay_topology.json"
-MANIFEST_CLAIM_PATH = (
-    DATA_ANALYSIS_DIR / "manifest_start_claim_and_branch_selection_matrix.json"
-)
-NIGHTLY_SELECTION_MATRIX_PATH = (
-    DATA_ANALYSIS_DIR / "nightly_selection_disposition_matrix.json"
-)
+MANIFEST_CLAIM_PATH = DATA_ANALYSIS_DIR / "manifest_start_claim_and_branch_selection_matrix.json"
+NIGHTLY_SELECTION_MATRIX_PATH = DATA_ANALYSIS_DIR / "nightly_selection_disposition_matrix.json"
 NIGHTLY_UNATTENDED_PATH = DATA_ANALYSIS_DIR / "nightly_unattended_policy_matrix.json"
 
 ADR_PATH = DOCS_ARCH_ADR_DIR / "ADR-009-release-evidence-and-migration-strategy.md"
 COMPARISON_PATH = (
-    DOCS_ARCH_ADR_DIR
-    / "ADR-009-release-evidence-and-migration-strategy-comparison.md"
+    DOCS_ARCH_ADR_DIR / "ADR-009-release-evidence-and-migration-strategy-comparison.md"
 )
 SCORECARD_PATH = (
-    DOCS_ARCH_ADR_DIR
-    / "ADR-009-release-evidence-and-migration-strategy-scorecard.json"
+    DOCS_ARCH_ADR_DIR / "ADR-009-release-evidence-and-migration-strategy-scorecard.json"
 )
-RELEASE_EVIDENCE_MATRIX_PATH = (
-    DATA_ANALYSIS_DIR / "release_evidence_artifact_matrix.json"
-)
-MIGRATION_STRATEGY_PATH = (
-    DATA_ANALYSIS_DIR / "schema_migration_and_reader_window_strategy.json"
-)
-ROLLBACK_DECISION_MATRIX_PATH = (
-    DATA_ANALYSIS_DIR / "rollback_fail_forward_decision_matrix.json"
-)
+RELEASE_EVIDENCE_MATRIX_PATH = DATA_ANALYSIS_DIR / "release_evidence_artifact_matrix.json"
+MIGRATION_STRATEGY_PATH = DATA_ANALYSIS_DIR / "schema_migration_and_reader_window_strategy.json"
+ROLLBACK_DECISION_MATRIX_PATH = DATA_ANALYSIS_DIR / "rollback_fail_forward_decision_matrix.json"
 CLIENT_WINDOW_STRATEGY_PATH = (
     DATA_ANALYSIS_DIR / "client_compatibility_and_supported_window_strategy.json"
 )
-RESTORE_BINDING_RULES_PATH = (
-    DATA_ANALYSIS_DIR / "restore_drill_and_promotion_binding_rules.json"
-)
-CANDIDATE_GATE_BINDING_MAP_PATH = (
-    DATA_ANALYSIS_DIR / "candidate_identity_and_gate_binding_map.json"
-)
-MERMAID_PATH = (
-    DIAGRAMS_ANALYSIS_DIR / "ADR-009-release-evidence-migration-strategy.mmd"
-)
+RESTORE_BINDING_RULES_PATH = DATA_ANALYSIS_DIR / "restore_drill_and_promotion_binding_rules.json"
+CANDIDATE_GATE_BINDING_MAP_PATH = DATA_ANALYSIS_DIR / "candidate_identity_and_gate_binding_map.json"
+MERMAID_PATH = DIAGRAMS_ANALYSIS_DIR / "ADR-009-release-evidence-migration-strategy.mmd"
 
 HEADING_RE = re.compile(r"^(#{2,4})\s+(.*)$")
 TODAY = "2026-04-18"
@@ -154,9 +130,7 @@ def md_escape(value: Any) -> str:
 def markdown_table(headers: list[str], rows: list[list[Any]]) -> str:
     header_line = "| " + " | ".join(headers) + " |"
     divider_line = "| " + " | ".join("---" for _ in headers) + " |"
-    body_lines = [
-        "| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows
-    ]
+    body_lines = ["| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows]
     return "\n".join([header_line, divider_line, *body_lines])
 
 
@@ -169,9 +143,7 @@ def normalize_source_refs(source_refs: Iterable[Any]) -> list[str]:
         if isinstance(ref, dict):
             source_file = ref.get("source_file", "unknown")
             logical_block = (
-                ref.get("source_heading_or_logical_block")
-                or ref.get("source_heading")
-                or "source"
+                ref.get("source_heading_or_logical_block") or ref.get("source_heading") or "source"
             )
             rationale = ref.get("rationale")
             text = f"{source_file}::{logical_block}"
@@ -205,12 +177,8 @@ def build_supporting_context() -> dict[str, Any]:
         "admissibility_requirement_count": release_matrix["summary"][
             "admissibility_requirement_count"
         ],
-        "release_evidence_binding_count": release_matrix["summary"][
-            "evidence_binding_count"
-        ],
-        "blocking_gate_binding_count": release_binding["summary"][
-            "blocking_gate_binding_count"
-        ],
+        "release_evidence_binding_count": release_matrix["summary"]["evidence_binding_count"],
+        "blocking_gate_binding_count": release_binding["summary"]["blocking_gate_binding_count"],
         "rollback_boundary_state_count": rollback_boundary["summary"][
             "rollback_boundary_state_count"
         ],
@@ -219,21 +187,13 @@ def build_supporting_context() -> dict[str, Any]:
         ],
         "recovery_tier_count": recovery_matrix["summary"]["recovery_tier_count"],
         "checkpoint_gate_count": recovery_matrix["summary"]["checkpoint_gate_count"],
-        "privacy_reconciliation_state_count": restore_privacy["summary"][
-            "restore_state_count"
-        ],
-        "security_release_gate_count": security_gate_matrix["summary"][
-            "release_gate_count"
-        ],
+        "privacy_reconciliation_state_count": restore_privacy["summary"]["restore_state_count"],
+        "security_release_gate_count": security_gate_matrix["summary"]["release_gate_count"],
         "store_role_count": len(rebuild_restore["store_roles"]),
         "rebuild_path_count": len(rebuild_restore["rebuild_paths"]),
         "claim_invariant_count": manifest_claim["summary"]["claim_invariant_count"],
-        "selection_disposition_count": nightly_selection["summary"][
-            "selection_disposition_count"
-        ],
-        "global_stop_condition_count": nightly_unattended["summary"][
-            "global_stop_condition_count"
-        ],
+        "selection_disposition_count": nightly_selection["summary"]["selection_disposition_count"],
+        "global_stop_condition_count": nightly_unattended["summary"]["global_stop_condition_count"],
     }
 
 
@@ -363,8 +323,13 @@ def build_criteria() -> list[dict[str, Any]]:
             "rationale": "The strategy should keep promotion reasonably fast, but must reject any shortcut that trades replay safety, migration clarity, or recoverability for nominal delivery speed.",
             "source_refs": [
                 heading_ref(DEPLOYMENT_PATH, "2. Promotion pipeline"),
-                heading_ref(NIGHTLY_AUTOPILOT_PATH, "10. Crash recovery and stale-checkpoint resolution"),
-                heading_ref(NIGHTLY_AUTOPILOT_PATH, "11. Global stop conditions and partial-failure handling"),
+                heading_ref(
+                    NIGHTLY_AUTOPILOT_PATH, "10. Crash recovery and stale-checkpoint resolution"
+                ),
+                heading_ref(
+                    NIGHTLY_AUTOPILOT_PATH,
+                    "11. Global stop conditions and partial-failure handling",
+                ),
             ],
         },
     ]
@@ -627,15 +592,21 @@ def build_candidate_identity_and_gate_binding_map() -> dict[str, Any]:
             "rule_id": "frozen_batch_envelope_prevents_candidate_drift",
             "rule": "Nightly selection freezes a batch envelope before execution so duplicate suppression and later evidence reuse do not silently widen the judged candidate or operating window.",
             "source_refs": [
-                heading_ref(NIGHTLY_AUTOPILOT_PATH, "2. Trigger contract and frozen operating window"),
-                heading_ref(NIGHTLY_AUTOPILOT_PATH, "4. Portfolio selection and eligibility contract"),
+                heading_ref(
+                    NIGHTLY_AUTOPILOT_PATH, "2. Trigger contract and frozen operating window"
+                ),
+                heading_ref(
+                    NIGHTLY_AUTOPILOT_PATH, "4. Portfolio selection and eligibility contract"
+                ),
             ],
         },
         {
             "rule_id": "stale_batch_reclaim_must_not_reuse_incompatible_attempts",
             "rule": "Stale-batch reclaim may recover ownership, but it may not treat a reclaimed attempt as valid release evidence if schema, migration, or client-window identity drifted.",
             "source_refs": [
-                heading_ref(NIGHTLY_AUTOPILOT_PATH, "10. Crash recovery and stale-checkpoint resolution"),
+                heading_ref(
+                    NIGHTLY_AUTOPILOT_PATH, "10. Crash recovery and stale-checkpoint resolution"
+                ),
                 heading_ref(NIGHTLY_SELECTION_PATH, "Recovery-reclaim law"),
             ],
         },
@@ -669,9 +640,7 @@ def build_candidate_identity_and_gate_binding_map() -> dict[str, Any]:
         "summary": {
             "candidate_identity_field_count": len(candidate_fields),
             "compatibility_gate_field_count": len(compatibility_fields),
-            "blocking_gate_binding_count": len(
-                release_binding["blocking_gate_bindings"]
-            ),
+            "blocking_gate_binding_count": len(release_binding["blocking_gate_bindings"]),
             "admissibility_requirement_count": len(admissibility_rules),
             "batch_identity_rule_count": len(batch_rules),
         },
@@ -1095,15 +1064,21 @@ def build_schema_migration_and_reader_window_strategy() -> dict[str, Any]:
             "rule_id": "nightly_duplicate_suppression_respects_frozen_envelope",
             "rule": "Nightly duplicate suppression and batch allocation operate on a frozen envelope so migration or client-window drift does not silently reuse stale attempt identity.",
             "source_refs": [
-                heading_ref(NIGHTLY_AUTOPILOT_PATH, "2. Trigger contract and frozen operating window"),
-                heading_ref(NIGHTLY_AUTOPILOT_PATH, "4. Portfolio selection and eligibility contract"),
+                heading_ref(
+                    NIGHTLY_AUTOPILOT_PATH, "2. Trigger contract and frozen operating window"
+                ),
+                heading_ref(
+                    NIGHTLY_AUTOPILOT_PATH, "4. Portfolio selection and eligibility contract"
+                ),
             ],
         },
         {
             "rule_id": "reclaim_never_collapses_recovery_into_fresh_execution",
             "rule": "Crash recovery and reclaim may transfer ownership but may not collapse recovery into a fresh run with different basis, schema, or client-window assumptions.",
             "source_refs": [
-                heading_ref(NIGHTLY_AUTOPILOT_PATH, "10. Crash recovery and stale-checkpoint resolution"),
+                heading_ref(
+                    NIGHTLY_AUTOPILOT_PATH, "10. Crash recovery and stale-checkpoint resolution"
+                ),
                 heading_ref(NIGHTLY_SELECTION_PATH, "Recovery-reclaim law"),
             ],
         },
@@ -1119,8 +1094,13 @@ def build_schema_migration_and_reader_window_strategy() -> dict[str, Any]:
             "rule_id": "batch_global_stop_conditions_prevent_invalid_promotion_inputs",
             "rule": "Nightly global stop conditions may halt batch progression before new control-plane work begins when release admissibility or authority safety is compromised.",
             "source_refs": [
-                heading_ref(NIGHTLY_AUTOPILOT_PATH, "11. Global stop conditions and partial-failure handling"),
-                heading_ref(NIGHTLY_AUTOPILOT_PATH, "6. Per-client and per-stage unattended policy matrix"),
+                heading_ref(
+                    NIGHTLY_AUTOPILOT_PATH,
+                    "11. Global stop conditions and partial-failure handling",
+                ),
+                heading_ref(
+                    NIGHTLY_AUTOPILOT_PATH, "6. Per-client and per-stage unattended policy matrix"
+                ),
             ],
         },
     ]
@@ -1364,7 +1344,9 @@ def build_client_compatibility_and_supported_window_strategy() -> dict[str, Any]
         {
             "artifact_id": "release_candidate_identity_contract",
             "role": "declares the supported client window as part of the candidate tuple",
-            "source_refs": [heading_ref(RELEASE_EVIDENCE_PATH, "1. Governing candidate identity model")],
+            "source_refs": [
+                heading_ref(RELEASE_EVIDENCE_PATH, "1. Governing candidate identity model")
+            ],
         },
         {
             "artifact_id": "schema_bundle_compatibility_gate_contract",
@@ -1397,7 +1379,9 @@ def build_client_compatibility_and_supported_window_strategy() -> dict[str, Any]
         {
             "artifact_id": "DeploymentRelease",
             "role": "preserves the resulting rollout, rollback boundary, and supported-window promise",
-            "source_refs": [heading_ref(DEPLOYMENT_PATH, "6. Rollout, rollback, and fail-forward posture")],
+            "source_refs": [
+                heading_ref(DEPLOYMENT_PATH, "6. Rollout, rollback, and fail-forward posture")
+            ],
         },
     ]
     promotion_blockers = [
@@ -1430,7 +1414,9 @@ def build_client_compatibility_and_supported_window_strategy() -> dict[str, Any]
             "rule": "A shipped macOS target blocks promotion if signature, notarization, hardened runtime, or entitlement policy evidence is missing or failing.",
             "source_refs": [
                 heading_ref(SECURITY_PATH, "8. Operational security release gates"),
-                heading_ref(MACOS_BLUEPRINT_PATH, "11. Security and runtime posture for the desktop client"),
+                heading_ref(
+                    MACOS_BLUEPRINT_PATH, "11. Security and runtime posture for the desktop client"
+                ),
             ],
         },
         {
@@ -1682,8 +1668,7 @@ def build_adr_markdown(
         )
     ]
     ranking_rows = [
-        [item["rank"], item["label"], item["weighted_total"]]
-        for item in scorecard["alternatives"]
+        [item["rank"], item["label"], item["weighted_total"]] for item in scorecard["alternatives"]
     ]
     return f"""# ADR-009: Release Evidence and Migration Strategy
 
@@ -1814,15 +1799,11 @@ def build_comparison_markdown(
         "",
         "## Weighted Criteria",
         "",
-        markdown_table(
-            ["Criterion", "Weight", "Priority", "Rationale"], criteria_rows
-        ),
+        markdown_table(["Criterion", "Weight", "Priority", "Rationale"], criteria_rows),
         "",
         "## Alternative Totals",
         "",
-        markdown_table(
-            ["Rank", "Alternative", "Weighted Total", "Summary"], alternative_rows
-        ),
+        markdown_table(["Rank", "Alternative", "Weighted Total", "Summary"], alternative_rows),
         "",
         "## Evidence Context",
         "",
@@ -1890,9 +1871,7 @@ def main() -> None:
     alternatives = build_alternatives()
     scorecard = build_scorecard(criteria, alternatives)
     candidate_gate_binding_map = build_candidate_identity_and_gate_binding_map()
-    release_evidence_matrix = build_release_evidence_artifact_matrix(
-        candidate_gate_binding_map
-    )
+    release_evidence_matrix = build_release_evidence_artifact_matrix(candidate_gate_binding_map)
     migration_strategy = build_schema_migration_and_reader_window_strategy()
     rollback_decision_matrix = build_rollback_fail_forward_decision_matrix()
     client_strategy = build_client_compatibility_and_supported_window_strategy()

@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/work_item_participant.schema.json",
+  "title": "WorkItemParticipant",
+  "description": "Participant/watch contract for one collaboration item. This schema freezes role, watch posture, per-lane read cursors, and notification-preference binding so customer and staff communication state stays scope-correct.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "participant_ref",
+    "item_id",
+    "participant_role",
+    "watch_state",
+    "last_read_customer_sequence",
+    "last_read_internal_sequence",
+    "notification_preferences_ref"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "WorkItemParticipant"
+    },
+    "participant_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "item_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "participant_role": {
+      "type": "string",
+      "enum": [
+        "PREPARER",
+        "REVIEWER",
+        "APPROVER",
+        "SUPPORT_OPERATOR",
+        "TENANT_ADMIN",
+        "AUDITOR",
+        "CLIENT_VIEWER",
+        "CLIENT_CONTRIBUTOR",
+        "CLIENT_SIGNATORY",
+        "SUBJECT_SELF",
+        "SUBJECT_REPRESENTATIVE"
+      ]
+    },
+    "watch_state": {
+      "type": "string",
+      "enum": [
+        "PRIMARY_OWNER",
+        "WATCHER",
+        "CUSTOMER_PARTICIPANT"
+      ]
+    },
+    "last_read_customer_sequence": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "last_read_internal_sequence": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "notification_preferences_ref": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "participant_role": {
+            "enum": [
+              "CLIENT_VIEWER",
+              "CLIENT_CONTRIBUTOR",
+              "CLIENT_SIGNATORY",
+              "SUBJECT_SELF",
+              "SUBJECT_REPRESENTATIVE"
+            ]
+          }
+        },
+        "required": [
+          "participant_role"
+        ]
+      },
+      "then": {
+        "properties": {
+          "watch_state": {
+            "const": "CUSTOMER_PARTICIPANT"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "watch_state": {
+            "const": "CUSTOMER_PARTICIPANT"
+          }
+        },
+        "required": [
+          "watch_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "participant_role": {
+            "enum": [
+              "CLIENT_VIEWER",
+              "CLIENT_CONTRIBUTOR",
+              "CLIENT_SIGNATORY",
+              "SUBJECT_SELF",
+              "SUBJECT_REPRESENTATIVE"
+            ]
+          },
+          "last_read_internal_sequence": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "watch_state": {
+            "const": "PRIMARY_OWNER"
+          }
+        },
+        "required": [
+          "watch_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "participant_role": {
+            "enum": [
+              "PREPARER",
+              "REVIEWER",
+              "APPROVER",
+              "SUPPORT_OPERATOR",
+              "TENANT_ADMIN"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

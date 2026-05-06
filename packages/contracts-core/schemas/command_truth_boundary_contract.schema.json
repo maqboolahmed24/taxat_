@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/command_truth_boundary_contract.schema.json",
+  "title": "CommandTruthBoundaryContract",
+  "description": "Shared command-side truth versus read-side projection boundary contract. This schema freezes whether an artifact is a command request, authoritative command-side record, boundary receipt, or read-side projection; the boundary_role of that artifact; which durable record families may decide legality or recovery; which projection families may appear only as observational stale guards or UX mirrors; the projection_disposability_policy for read-side rebuilds; and whether projector rebuilds may ever write back durable legal state.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "artifact_role",
+    "authoritative_source_policy",
+    "projection_input_policy",
+    "durable_writeback_policy",
+    "recovery_basis_policy",
+    "authoritative_record_families",
+    "observable_projection_families"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "COMMAND_TRUTH_BOUNDARY_V1"
+    },
+    "artifact_role": {
+      "type": "string",
+      "enum": [
+        "COMMAND_REQUEST",
+        "COMMAND_SIDE_AUTHORITY",
+        "BOUNDARY_RECEIPT",
+        "READ_SIDE_PROJECTION"
+      ]
+    },
+    "authoritative_source_policy": {
+      "type": "string",
+      "enum": [
+        "TARGET_DURABLE_IDS_ONLY",
+        "DURABLE_COMMAND_RECORDS_ONLY",
+        "DURABLE_COMMAND_RESULTS_ONLY",
+        "MIRROR_DURABLE_COMMAND_RECORDS_ONLY"
+      ]
+    },
+    "projection_input_policy": {
+      "type": "string",
+      "enum": [
+        "STALE_GUARDS_ONLY",
+        "FORBIDDEN_AS_AUTHORITY",
+        "STALE_GUARDS_AND_RECOVERY_MIRRORS_ONLY",
+        "NO_PROJECTION_INPUTS"
+      ]
+    },
+    "durable_writeback_policy": {
+      "type": "string",
+      "enum": [
+        "NO_DIRECT_STATE_WRITEBACK",
+        "AUTHORITATIVE_STATE_TRANSITIONS_ALLOWED",
+        "APPEND_ONLY_BOUNDARY_EVIDENCE",
+        "NO_DURABLE_STATE_WRITEBACK"
+      ]
+    },
+    "recovery_basis_policy": {
+      "type": "string",
+      "enum": [
+        "DURABLE_IDS_AND_RECEIPTS_ONLY",
+        "MANIFEST_AND_DURABLE_RECORDS_ONLY",
+        "RECEIPT_PLUS_DURABLE_RESULTS_ONLY",
+        "REBUILD_FROM_DURABLE_RECORDS_ONLY"
+      ]
+    },
+    "authoritative_record_families": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/authoritativeRecordFamily"
+      },
+      "uniqueItems": true
+    },
+    "observable_projection_families": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/observableProjectionFamily"
+      },
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "authoritativeRecordFamily": {
+      "type": "string",
+      "enum": [
+        "RUN_MANIFEST",
+        "WORKFLOW_ITEM",
+        "GATE_DECISION_RECORD",
+        "AUTHORITY_INTERACTION_RECORD",
+        "GOVERNANCE_DOMAIN_OBJECT",
+        "AUDIT_EVENT",
+        "API_COMMAND_RECEIPT"
+      ]
+    },
+    "observableProjectionFamily": {
+      "type": "string",
+      "enum": [
+        "DECISION_BUNDLE",
+        "EXPERIENCE_DELTA",
+        "LOW_NOISE_EXPERIENCE_FRAME",
+        "EXPERIENCE_CURSOR",
+        "WORKSPACE_SNAPSHOT",
+        "CLIENT_PORTAL_WORKSPACE",
+        "CLIENT_APPROVAL_PACK",
+        "CLIENT_UPLOAD_SESSION",
+        "GOVERNANCE_POLICY_SNAPSHOT"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "artifact_role": {
+            "const": "COMMAND_REQUEST"
+          }
+        },
+        "required": [
+          "artifact_role"
+        ]
+      },
+      "then": {
+        "properties": {
+          "authoritative_source_policy": {
+            "const": "TARGET_DURABLE_IDS_ONLY"
+          },
+          "projection_input_policy": {
+            "const": "STALE_GUARDS_ONLY"
+          },
+          "durable_writeback_policy": {
+            "const": "NO_DIRECT_STATE_WRITEBACK"
+          },
+          "recovery_basis_policy": {
+            "const": "DURABLE_IDS_AND_RECEIPTS_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "artifact_role": {
+            "const": "COMMAND_SIDE_AUTHORITY"
+          }
+        },
+        "required": [
+          "artifact_role"
+        ]
+      },
+      "then": {
+        "properties": {
+          "authoritative_source_policy": {
+            "const": "DURABLE_COMMAND_RECORDS_ONLY"
+          },
+          "projection_input_policy": {
+            "const": "FORBIDDEN_AS_AUTHORITY"
+          },
+          "durable_writeback_policy": {
+            "const": "AUTHORITATIVE_STATE_TRANSITIONS_ALLOWED"
+          },
+          "recovery_basis_policy": {
+            "const": "MANIFEST_AND_DURABLE_RECORDS_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "artifact_role": {
+            "const": "BOUNDARY_RECEIPT"
+          }
+        },
+        "required": [
+          "artifact_role"
+        ]
+      },
+      "then": {
+        "properties": {
+          "authoritative_source_policy": {
+            "const": "DURABLE_COMMAND_RESULTS_ONLY"
+          },
+          "projection_input_policy": {
+            "const": "STALE_GUARDS_AND_RECOVERY_MIRRORS_ONLY"
+          },
+          "durable_writeback_policy": {
+            "const": "APPEND_ONLY_BOUNDARY_EVIDENCE"
+          },
+          "recovery_basis_policy": {
+            "const": "RECEIPT_PLUS_DURABLE_RESULTS_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "artifact_role": {
+            "const": "READ_SIDE_PROJECTION"
+          }
+        },
+        "required": [
+          "artifact_role"
+        ]
+      },
+      "then": {
+        "properties": {
+          "authoritative_source_policy": {
+            "const": "MIRROR_DURABLE_COMMAND_RECORDS_ONLY"
+          },
+          "projection_input_policy": {
+            "const": "NO_PROJECTION_INPUTS"
+          },
+          "durable_writeback_policy": {
+            "const": "NO_DURABLE_STATE_WRITEBACK"
+          },
+          "recovery_basis_policy": {
+            "const": "REBUILD_FROM_DURABLE_RECORDS_ONLY"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

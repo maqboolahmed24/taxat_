@@ -1,0 +1,606 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/invariant_enforcement_contract.schema.json",
+  "title": "InvariantEnforcementContract",
+  "description": "Shared invariant-enforcement and fail-closed contract. This schema freezes whether a manifest or error artifact is carrying a material invariant failure, the invariant class, the family-specific fault code, the pre-start versus post-start terminal mapping, the required terminal audit event type, and the policy that assertions or generic exceptions must collapse into typed durable failure semantics.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "boundary_scope",
+    "boundary_specific_binding_policy",
+    "invariant_failure_state",
+    "invariant_class_or_null",
+    "error_family_or_null",
+    "error_code_or_null",
+    "failure_stage_or_null",
+    "terminal_manifest_state_or_null",
+    "transition_event_code_or_null",
+    "terminal_audit_event_type_or_null",
+    "error_record_ref_or_null",
+    "typed_error_policy",
+    "partial_write_policy",
+    "audit_evidence_policy",
+    "lifecycle_mapping_policy",
+    "assertion_conversion_policy",
+    "normalization_rejection_policy"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "INVARIANT_ENFORCEMENT_V1"
+    },
+    "boundary_scope": {
+      "type": "string",
+      "enum": [
+        "RUN_MANIFEST",
+        "ERROR_RECORD"
+      ]
+    },
+    "boundary_specific_binding_policy": {
+      "type": "string",
+      "enum": [
+        "MANIFEST_RETAINS_FAIL_CLOSED_STAGE_AND_PRIMARY_ERROR_LINK",
+        "ERROR_RETAINS_INVARIANT_CLASS_FAULT_CODE_AND_TERMINAL_BINDING"
+      ]
+    },
+    "invariant_failure_state": {
+      "type": "string",
+      "enum": [
+        "NOT_TRIGGERED",
+        "TRIGGERED"
+      ]
+    },
+    "invariant_class_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "SCOPE_BINDING",
+        "MANIFEST_REUSE",
+        "LIFECYCLE_TRANSITION",
+        "PRESEAL_GATE_CHAIN",
+        "INPUT_POLICY",
+        "CANONICAL_PROMOTION",
+        "GRAPH_PROVENANCE",
+        "AMENDMENT_SUBMISSION",
+        "FILING_READINESS",
+        "REPLAY_BASIS",
+        "AUTHORITY_PREFLIGHT",
+        null
+      ]
+    },
+    "error_family_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "MANIFEST_ERROR",
+        "INPUT_BOUNDARY_ERROR",
+        "CANONICALIZATION_ERROR",
+        "PROVENANCE_ERROR",
+        "AMENDMENT_ERROR",
+        "WORKFLOW_ERROR",
+        "AUTHORITY_PROTOCOL_ERROR",
+        "SYSTEM_FAULT",
+        null
+      ]
+    },
+    "error_code_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "failure_stage_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "PRESTART",
+        "POSTSTART",
+        null
+      ]
+    },
+    "terminal_manifest_state_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "BLOCKED",
+        "FAILED",
+        null
+      ]
+    },
+    "transition_event_code_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "system_fault",
+        null
+      ]
+    },
+    "terminal_audit_event_type_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "ManifestBlocked",
+        "ManifestFailed",
+        null
+      ]
+    },
+    "error_record_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "typed_error_policy": {
+      "const": "INVARIANTS_MUST_PERSIST_FAMILY_SPECIFIC_ERROR_RECORDS"
+    },
+    "partial_write_policy": {
+      "const": "NO_PARTIAL_MUTATION_OR_SIDE_EFFECT_AFTER_INVARIANT_FAILURE"
+    },
+    "audit_evidence_policy": {
+      "const": "INVARIANTS_REQUIRE_ERROR_AND_TERMINAL_AUDIT_EVIDENCE"
+    },
+    "lifecycle_mapping_policy": {
+      "const": "PRESTART_INVARIANTS_BLOCK_POSTSTART_INVARIANTS_FAIL"
+    },
+    "assertion_conversion_policy": {
+      "const": "ASSERTIONS_AND_GENERIC_EXCEPTIONS_MUST_COLLAPSE_TO_TYPED_FAIL_CLOSED_OUTCOMES"
+    },
+    "normalization_rejection_policy": {
+      "const": "IMPOSSIBLE_STATES_REJECTED_NEVER_NORMALIZED"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "boundary_scope": {
+            "const": "RUN_MANIFEST"
+          }
+        },
+        "required": [
+          "boundary_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "boundary_specific_binding_policy": {
+            "const": "MANIFEST_RETAINS_FAIL_CLOSED_STAGE_AND_PRIMARY_ERROR_LINK"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "boundary_scope": {
+            "const": "ERROR_RECORD"
+          }
+        },
+        "required": [
+          "boundary_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "boundary_specific_binding_policy": {
+            "const": "ERROR_RETAINS_INVARIANT_CLASS_FAULT_CODE_AND_TERMINAL_BINDING"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "invariant_failure_state": {
+            "const": "NOT_TRIGGERED"
+          }
+        },
+        "required": [
+          "invariant_failure_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "invariant_class_or_null": {
+            "type": "null"
+          },
+          "error_family_or_null": {
+            "type": "null"
+          },
+          "error_code_or_null": {
+            "type": "null"
+          },
+          "failure_stage_or_null": {
+            "type": "null"
+          },
+          "terminal_manifest_state_or_null": {
+            "type": "null"
+          },
+          "transition_event_code_or_null": {
+            "type": "null"
+          },
+          "terminal_audit_event_type_or_null": {
+            "type": "null"
+          },
+          "error_record_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "invariant_failure_state": {
+            "const": "TRIGGERED"
+          }
+        },
+        "required": [
+          "invariant_failure_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "invariant_class_or_null": {
+            "type": "string"
+          },
+          "error_family_or_null": {
+            "type": "string"
+          },
+          "error_code_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "failure_stage_or_null": {
+            "type": "string"
+          },
+          "terminal_manifest_state_or_null": {
+            "type": "string"
+          },
+          "transition_event_code_or_null": {
+            "const": "system_fault"
+          },
+          "terminal_audit_event_type_or_null": {
+            "type": "string"
+          },
+          "error_record_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "failure_stage_or_null": {
+            "const": "PRESTART"
+          }
+        },
+        "required": [
+          "failure_stage_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "terminal_manifest_state_or_null": {
+            "const": "BLOCKED"
+          },
+          "transition_event_code_or_null": {
+            "const": "system_fault"
+          },
+          "terminal_audit_event_type_or_null": {
+            "const": "ManifestBlocked"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "failure_stage_or_null": {
+            "const": "POSTSTART"
+          }
+        },
+        "required": [
+          "failure_stage_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "terminal_manifest_state_or_null": {
+            "const": "FAILED"
+          },
+          "transition_event_code_or_null": {
+            "const": "system_fault"
+          },
+          "terminal_audit_event_type_or_null": {
+            "const": "ManifestFailed"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "invariant_class_or_null": {
+            "const": "SCOPE_BINDING"
+          }
+        },
+        "required": [
+          "invariant_class_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "error_family_or_null": {
+            "const": "MANIFEST_ERROR"
+          },
+          "error_code_or_null": {
+            "enum": [
+              "RUNTIME_SCOPE_EMPTY",
+              "RUNTIME_SCOPE_NOT_SUBSET_OF_REQUEST"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "invariant_class_or_null": {
+            "const": "MANIFEST_REUSE"
+          }
+        },
+        "required": [
+          "invariant_class_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "error_family_or_null": {
+            "const": "MANIFEST_ERROR"
+          },
+          "error_code_or_null": {
+            "enum": [
+              "REUSED_SEALED_CONTEXT_MUTATED",
+              "MANIFEST_NOT_SEALED_FOR_REUSE"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "invariant_class_or_null": {
+            "const": "LIFECYCLE_TRANSITION"
+          }
+        },
+        "required": [
+          "invariant_class_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "error_family_or_null": {
+            "const": "MANIFEST_ERROR"
+          },
+          "error_code_or_null": {
+            "enum": [
+              "MANIFEST_SEAL_TRANSITION_INVALID",
+              "MANIFEST_START_CLAIM_INVALID"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "invariant_class_or_null": {
+            "const": "PRESEAL_GATE_CHAIN"
+          }
+        },
+        "required": [
+          "invariant_class_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "error_family_or_null": {
+            "const": "MANIFEST_ERROR"
+          },
+          "error_code_or_null": {
+            "const": "PRESEAL_GATE_CHAIN_MISMATCH"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "invariant_class_or_null": {
+            "const": "INPUT_POLICY"
+          }
+        },
+        "required": [
+          "invariant_class_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "error_family_or_null": {
+            "const": "INPUT_BOUNDARY_ERROR"
+          },
+          "error_code_or_null": {
+            "const": "LATE_DATA_POLICY_UNKNOWN"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "invariant_class_or_null": {
+            "const": "CANONICAL_PROMOTION"
+          }
+        },
+        "required": [
+          "invariant_class_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "error_family_or_null": {
+            "const": "CANONICALIZATION_ERROR"
+          },
+          "error_code_or_null": {
+            "const": "CROSS_PARTITION_PROMOTION_DETECTED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "invariant_class_or_null": {
+            "const": "GRAPH_PROVENANCE"
+          }
+        },
+        "required": [
+          "invariant_class_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "error_family_or_null": {
+            "const": "PROVENANCE_ERROR"
+          },
+          "error_code_or_null": {
+            "const": "GRAPH_QUALITY_MISSING"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "invariant_class_or_null": {
+            "const": "AMENDMENT_SUBMISSION"
+          }
+        },
+        "required": [
+          "invariant_class_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "error_family_or_null": {
+            "const": "AMENDMENT_ERROR"
+          },
+          "error_code_or_null": {
+            "enum": [
+              "AMENDMENT_CASE_NOT_FOUND",
+              "AMENDMENT_CASE_NOT_READY_TO_SUBMIT"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "invariant_class_or_null": {
+            "const": "FILING_READINESS"
+          }
+        },
+        "required": [
+          "invariant_class_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "error_family_or_null": {
+            "const": "WORKFLOW_ERROR"
+          },
+          "error_code_or_null": {
+            "enum": [
+              "FILING_PACKET_MANIFEST_BINDING_MISMATCH",
+              "FILING_NOTICE_RESOLUTION_INCOMPLETE",
+              "FILING_APPROVAL_UNRESOLVED_AFTER_NOTICE",
+              "FILING_DECLARED_BASIS_ACK_UNRESOLVED_AFTER_NOTICE"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "invariant_class_or_null": {
+            "const": "REPLAY_BASIS"
+          }
+        },
+        "required": [
+          "invariant_class_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "error_family_or_null": {
+            "const": "SYSTEM_FAULT"
+          },
+          "error_code_or_null": {
+            "enum": [
+              "MANIFEST_EXECUTION_BASIS_HASH_MISSING",
+              "REPLAY_CONFIG_FREEZE_MISSING",
+              "REPLAY_INPUT_FREEZE_MISSING",
+              "REPLAY_POST_SEAL_BASIS_MISSING",
+              "REPLAY_BASIS_CORRUPT",
+              "REPLAY_SCHEMA_READER_INCOMPATIBLE",
+              "REPLAY_RETENTION_LIMITED",
+              "REPLAY_UNEXPECTED_MISMATCH"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "invariant_class_or_null": {
+            "const": "AUTHORITY_PREFLIGHT"
+          }
+        },
+        "required": [
+          "invariant_class_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "error_family_or_null": {
+            "const": "AUTHORITY_PROTOCOL_ERROR"
+          },
+          "error_code_or_null": {
+            "const": "MANIFEST_NOT_READY_FOR_AUTHORITY_PREFLIGHT"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

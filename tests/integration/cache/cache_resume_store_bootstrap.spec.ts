@@ -24,14 +24,10 @@ test("dry-run cache bootstrap freezes a sanitized provider-unresolved topology a
 
   const persisted = JSON.parse(await readFile(inventoryPath, "utf8"));
 
-  expect(result.outcome).toBe(
-    "CACHE_RESUME_TOPOLOGY_DECLARED_PROVIDER_SELECTION_REQUIRED",
-  );
+  expect(result.outcome).toBe("CACHE_RESUME_TOPOLOGY_DECLARED_PROVIDER_SELECTION_REQUIRED");
   expect(result.selection_status).toBe("PROVIDER_SELECTION_REQUIRED");
   expect(result.steps[0]?.status).toBe("BLOCKED_BY_POLICY");
-  expect(result.steps.slice(1).every((step) => step.status === "SUCCEEDED")).toBe(
-    true,
-  );
+  expect(result.steps.slice(1).every((step) => step.status === "SUCCEEDED")).toBe(true);
   expect(result.notes).toEqual(
     expect.arrayContaining([
       "No live provider mutation occurred.",
@@ -58,8 +54,6 @@ test("dry-run cache bootstrap freezes a sanitized provider-unresolved topology a
     existingInventoryPath: inventoryPath,
   });
 
-  expect(adopted.outcome).toBe(
-    "CACHE_RESUME_TOPOLOGY_DECLARED_PROVIDER_SELECTION_REQUIRED",
-  );
+  expect(adopted.outcome).toBe("CACHE_RESUME_TOPOLOGY_DECLARED_PROVIDER_SELECTION_REQUIRED");
   expect(adopted.steps[5]?.status).toBe("SKIPPED_AS_ALREADY_PRESENT");
 });

@@ -4,20 +4,14 @@ import path from "node:path";
 
 import { expect, test, type Page } from "@playwright/test";
 
-import {
-  configureRedirectUrisAndScopes,
-} from "../../../../automation/provisioning/src/providers/hmrc/flows/configure_redirect_uris_and_scopes.js";
+import { configureRedirectUrisAndScopes } from "../../../../automation/provisioning/src/providers/hmrc/flows/configure_redirect_uris_and_scopes.js";
 import {
   HMRC_SANDBOX_APP_FLOW_ID,
   registerSandboxApplication,
   type SandboxApplicationEntryUrls,
 } from "../../../../automation/provisioning/src/providers/hmrc/flows/register_sandbox_application.js";
-import {
-  DEVELOPER_HUB_PROVIDER_ID,
-} from "../../../../automation/provisioning/src/providers/hmrc/flows/developer_hub_shared.js";
-import {
-  createRunContext,
-} from "../../../../automation/provisioning/src/core/run_context.js";
+import { DEVELOPER_HUB_PROVIDER_ID } from "../../../../automation/provisioning/src/providers/hmrc/flows/developer_hub_shared.js";
+import { createRunContext } from "../../../../automation/provisioning/src/core/run_context.js";
 
 const CANONICAL_APPLICATION_NAME = "Taxat Sandbox Income Tax";
 const CANONICAL_REDIRECT_URIS = [
@@ -61,11 +55,7 @@ function blockedLiveRunContext() {
   });
 }
 
-async function bootstrapApplication(
-  page: Page,
-  scenario: string,
-  rootDir: string,
-) {
+async function bootstrapApplication(page: Page, scenario: string, rootDir: string) {
   const applicationRecordPath = path.join(rootDir, "sandbox_application_record.json");
   await registerSandboxApplication({
     page,
@@ -85,9 +75,7 @@ async function bootstrapApplication(
   };
 }
 
-test("stale redirect URIs are reconciled, saved, and re-read after refresh", async ({
-  page,
-}) => {
+test("stale redirect URIs are reconciled, saved, and re-read after refresh", async ({ page }) => {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), "taxat-hmrc-oauth-settings-stale-"));
   const paths = await bootstrapApplication(page, "app-oauth-stale", rootDir);
 
@@ -136,9 +124,7 @@ test("clean redirect settings still persist the canonical four-slot inventory", 
   });
 
   expect(result.redirectInventory.configured_rows).toHaveLength(4);
-  expect(
-    result.redirectInventory.disallowed_rows.map((row) => row.callback_profile_ref),
-  ).toEqual(
+  expect(result.redirectInventory.disallowed_rows.map((row) => row.callback_profile_ref)).toEqual(
     expect.arrayContaining([
       "cb_local_browser_loopback_sandbox",
       "cb_local_native_loopback_sandbox",

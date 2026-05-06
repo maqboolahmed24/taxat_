@@ -1,0 +1,896 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/detail_drawer_state.schema.json",
+  "title": "DetailDrawerState",
+  "description": "Low-noise expert drawer contract. This schema freezes bounded module entry points, normalized empty or limited states, one-expanded-module posture, focus anchor continuity, and deterministic fallback handling for the default shell.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "surface_code",
+    "entry_points",
+    "expanded_module_code",
+    "expanded_content_state",
+    "focus_anchor_ref",
+    "fallback_reason_code",
+    "compare_mode_explicit",
+    "audit_mode_explicit",
+    "full_text_ref"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "DetailDrawerState"
+    },
+    "surface_code": {
+      "const": "DETAIL_DRAWER"
+    },
+    "entry_points": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/detailEntry"
+      },
+      "minItems": 1,
+      "maxItems": 5,
+      "uniqueItems": true
+    },
+    "expanded_module_code": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/detailModuleCode"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "expanded_content_state": {
+      "type": "string",
+      "enum": [
+        "COLLAPSED",
+        "POPULATED",
+        "NOT_REQUESTED",
+        "NOT_YET_MATERIALIZED",
+        "LIMITED",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "focus_anchor_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "fallback_reason_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "compare_mode_explicit": {
+      "type": "boolean"
+    },
+    "audit_mode_explicit": {
+      "type": "boolean"
+    },
+    "full_text_ref": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "detailModuleCode": {
+      "type": "string",
+      "enum": [
+        "EVIDENCE_TIDE",
+        "PACKET_FORGE",
+        "AUTHORITY_TUNNEL",
+        "DRIFT_FIELD",
+        "FOCUS_LENS",
+        "TWIN_PANEL"
+      ]
+    },
+    "detailEntry": {
+      "type": "object",
+      "required": [
+        "module_code",
+        "entry_label",
+        "semantic_view_kind",
+        "plain_language_summary",
+        "entry_reason",
+        "content_state",
+        "state_reason_code_or_null",
+        "limitation_reason_codes",
+        "anchorable_object_refs"
+      ],
+      "properties": {
+        "module_code": {
+          "$ref": "#/$defs/detailModuleCode"
+        },
+        "entry_label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48
+        },
+        "semantic_view_kind": {
+          "type": "string",
+          "enum": [
+            "CAUSAL_EVIDENCE_TRACE",
+            "FILING_PACKET_BINDING",
+            "AUTHORITY_SEQUENCE_STATUS",
+            "BASELINE_CHANGE_INTERPRETATION",
+            "AUDIT_NEIGHBORHOOD_TRACE",
+            "COMPUTED_VS_AUTHORITY_COMPARISON"
+          ]
+        },
+        "plain_language_summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "entry_reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "content_state": {
+          "type": "string",
+          "enum": [
+            "POPULATED",
+            "NOT_REQUESTED",
+            "NOT_YET_MATERIALIZED",
+            "LIMITED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "state_reason_code_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "REQUEST_NOT_TRIGGERED",
+            "MATERIALIZATION_PENDING",
+            "NOT_APPLICABLE_TO_CONTEXT",
+            null
+          ]
+        },
+        "limitation_reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "anchorable_object_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "content_state": {
+                "const": "POPULATED"
+              }
+            },
+            "required": [
+              "content_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "entry_reason": {
+                "type": "null"
+              },
+              "state_reason_code_or_null": {
+                "type": "null"
+              },
+              "anchorable_object_refs": {
+                "minItems": 1
+              },
+              "limitation_reason_codes": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "content_state": {
+                "not": {
+                  "const": "POPULATED"
+                }
+              }
+            },
+            "required": [
+              "content_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "entry_reason": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "content_state": {
+                "const": "LIMITED"
+              }
+            },
+            "required": [
+              "content_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "limitation_reason_codes": {
+                "minItems": 1
+              },
+              "state_reason_code_or_null": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "content_state": {
+                "const": "NOT_REQUESTED"
+              }
+            },
+            "required": [
+              "content_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "state_reason_code_or_null": {
+                "const": "REQUEST_NOT_TRIGGERED"
+              },
+              "limitation_reason_codes": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "content_state": {
+                "const": "NOT_YET_MATERIALIZED"
+              }
+            },
+            "required": [
+              "content_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "state_reason_code_or_null": {
+                "const": "MATERIALIZATION_PENDING"
+              },
+              "limitation_reason_codes": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "content_state": {
+                "const": "NOT_APPLICABLE"
+              }
+            },
+            "required": [
+              "content_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "state_reason_code_or_null": {
+                "const": "NOT_APPLICABLE_TO_CONTEXT"
+              },
+              "limitation_reason_codes": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "properties": {
+        "entry_points": {
+          "items": {
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "module_code": {
+                      "const": "EVIDENCE_TIDE"
+                    }
+                  },
+                  "required": [
+                    "module_code"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "entry_label": {
+                      "const": "Evidence Prism"
+                    },
+                    "semantic_view_kind": {
+                      "const": "CAUSAL_EVIDENCE_TRACE"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "module_code": {
+                      "const": "PACKET_FORGE"
+                    }
+                  },
+                  "required": [
+                    "module_code"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "entry_label": {
+                      "const": "Packet Forge"
+                    },
+                    "semantic_view_kind": {
+                      "const": "FILING_PACKET_BINDING"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "module_code": {
+                      "const": "AUTHORITY_TUNNEL"
+                    }
+                  },
+                  "required": [
+                    "module_code"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "entry_label": {
+                      "const": "Authority Handshake Tunnel"
+                    },
+                    "semantic_view_kind": {
+                      "const": "AUTHORITY_SEQUENCE_STATUS"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "module_code": {
+                      "const": "DRIFT_FIELD"
+                    }
+                  },
+                  "required": [
+                    "module_code"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "entry_label": {
+                      "const": "Drift Ripple Field"
+                    },
+                    "semantic_view_kind": {
+                      "const": "BASELINE_CHANGE_INTERPRETATION"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "module_code": {
+                      "const": "FOCUS_LENS"
+                    }
+                  },
+                  "required": [
+                    "module_code"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "entry_label": {
+                      "const": "Audit Echo Panel"
+                    },
+                    "semantic_view_kind": {
+                      "const": "AUDIT_NEIGHBORHOOD_TRACE"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "module_code": {
+                      "const": "TWIN_PANEL"
+                    }
+                  },
+                  "required": [
+                    "module_code"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "entry_label": {
+                      "const": "Twin Lens"
+                    },
+                    "semantic_view_kind": {
+                      "const": "COMPUTED_VS_AUTHORITY_COMPARISON"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "entry_points": {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "module_code": {
+                "const": "EVIDENCE_TIDE"
+              }
+            },
+            "required": [
+              "module_code"
+            ]
+          },
+          "minContains": 0,
+          "maxContains": 1
+        }
+      }
+    },
+    {
+      "properties": {
+        "entry_points": {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "module_code": {
+                "const": "PACKET_FORGE"
+              }
+            },
+            "required": [
+              "module_code"
+            ]
+          },
+          "minContains": 0,
+          "maxContains": 1
+        }
+      }
+    },
+    {
+      "properties": {
+        "entry_points": {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "module_code": {
+                "const": "AUTHORITY_TUNNEL"
+              }
+            },
+            "required": [
+              "module_code"
+            ]
+          },
+          "minContains": 0,
+          "maxContains": 1
+        }
+      }
+    },
+    {
+      "properties": {
+        "entry_points": {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "module_code": {
+                "const": "DRIFT_FIELD"
+              }
+            },
+            "required": [
+              "module_code"
+            ]
+          },
+          "minContains": 0,
+          "maxContains": 1
+        }
+      }
+    },
+    {
+      "properties": {
+        "entry_points": {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "module_code": {
+                "const": "FOCUS_LENS"
+              }
+            },
+            "required": [
+              "module_code"
+            ]
+          },
+          "minContains": 0,
+          "maxContains": 1
+        }
+      }
+    },
+    {
+      "properties": {
+        "entry_points": {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "module_code": {
+                "const": "TWIN_PANEL"
+              }
+            },
+            "required": [
+              "module_code"
+            ]
+          },
+          "minContains": 0,
+          "maxContains": 1
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "expanded_module_code": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "expanded_module_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "expanded_content_state": {
+            "const": "COLLAPSED"
+          },
+          "focus_anchor_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "expanded_module_code": {
+            "$ref": "#/$defs/detailModuleCode"
+          }
+        },
+        "required": [
+          "expanded_module_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "focus_anchor_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "expanded_module_code": {
+            "$ref": "#/$defs/detailModuleCode"
+          }
+        },
+        "required": [
+          "expanded_module_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "expanded_content_state": {
+            "enum": [
+              "POPULATED",
+              "NOT_REQUESTED",
+              "NOT_YET_MATERIALIZED",
+              "LIMITED",
+              "NOT_APPLICABLE"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "expanded_module_code": {
+            "const": "EVIDENCE_TIDE"
+          }
+        },
+        "required": [
+          "expanded_module_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "entry_points": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "module_code": {
+                  "const": "EVIDENCE_TIDE"
+                }
+              },
+              "required": [
+                "module_code"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "expanded_module_code": {
+            "const": "PACKET_FORGE"
+          }
+        },
+        "required": [
+          "expanded_module_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "entry_points": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "module_code": {
+                  "const": "PACKET_FORGE"
+                }
+              },
+              "required": [
+                "module_code"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "expanded_module_code": {
+            "const": "AUTHORITY_TUNNEL"
+          }
+        },
+        "required": [
+          "expanded_module_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "entry_points": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "module_code": {
+                  "const": "AUTHORITY_TUNNEL"
+                }
+              },
+              "required": [
+                "module_code"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "expanded_module_code": {
+            "const": "DRIFT_FIELD"
+          }
+        },
+        "required": [
+          "expanded_module_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "entry_points": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "module_code": {
+                  "const": "DRIFT_FIELD"
+                }
+              },
+              "required": [
+                "module_code"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "expanded_module_code": {
+            "const": "FOCUS_LENS"
+          }
+        },
+        "required": [
+          "expanded_module_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "entry_points": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "module_code": {
+                  "const": "FOCUS_LENS"
+                }
+              },
+              "required": [
+                "module_code"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "expanded_module_code": {
+            "const": "TWIN_PANEL"
+          }
+        },
+        "required": [
+          "expanded_module_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "entry_points": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "module_code": {
+                  "const": "TWIN_PANEL"
+                }
+              },
+              "required": [
+                "module_code"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "expanded_content_state": {
+            "enum": [
+              "NOT_REQUESTED",
+              "NOT_YET_MATERIALIZED",
+              "LIMITED",
+              "NOT_APPLICABLE"
+            ]
+          }
+        },
+        "required": [
+          "expanded_content_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "fallback_reason_code": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "compare_mode_explicit": {
+            "const": true
+          }
+        },
+        "required": [
+          "compare_mode_explicit"
+        ]
+      },
+      "then": {
+        "properties": {
+          "audit_mode_explicit": {
+            "const": false
+          },
+          "expanded_module_code": {
+            "enum": [
+              "DRIFT_FIELD",
+              "TWIN_PANEL"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "audit_mode_explicit": {
+            "const": true
+          }
+        },
+        "required": [
+          "audit_mode_explicit"
+        ]
+      },
+      "then": {
+        "properties": {
+          "compare_mode_explicit": {
+            "const": false
+          },
+          "expanded_module_code": {
+            "const": "FOCUS_LENS"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

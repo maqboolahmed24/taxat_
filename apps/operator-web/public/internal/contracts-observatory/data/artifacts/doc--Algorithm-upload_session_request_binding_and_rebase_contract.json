@@ -1,0 +1,285 @@
+{
+  "artifactVersion": "CONTRACT_OBSERVATORY_ARTIFACT_V1",
+  "artifactSlug": "doc--Algorithm-upload_session_request_binding_and_rebase_contract",
+  "artifactKind": "MARKDOWN",
+  "sectionRef": "RUNTIME_CONTRACTS",
+  "authorityLevel": "AUTHORITATIVE",
+  "sourceTruthBadge": "Authoritative Algorithm Corpus",
+  "tone": "navy",
+  "title": "Upload Session Request Binding and Rebase Contract",
+  "subtitle": "Algorithm/upload_session_request_binding_and_rebase_contract.md",
+  "summary": "",
+  "canonicalPath": "Algorithm/upload_session_request_binding_and_rebase_contract.md",
+  "sourceLineage": [
+    "Algorithm/upload_session_request_binding_and_rebase_contract.md"
+  ],
+  "headingCount": 6,
+  "headings": [
+    {
+      "level": 1,
+      "text": "Upload Session Request Binding and Rebase Contract",
+      "slug": "upload-session-request-binding-and-rebase-contract"
+    },
+    {
+      "level": 2,
+      "text": "Purpose",
+      "slug": "purpose"
+    },
+    {
+      "level": 2,
+      "text": "Contract boundary",
+      "slug": "contract-boundary"
+    },
+    {
+      "level": 2,
+      "text": "Required rules",
+      "slug": "required-rules"
+    },
+    {
+      "level": 2,
+      "text": "Surface consequences",
+      "slug": "surface-consequences"
+    },
+    {
+      "level": 2,
+      "text": "Failure modes closed",
+      "slug": "failure-modes-closed"
+    }
+  ],
+  "proseSections": [
+    {
+      "headingSlug": "upload-session-request-binding-and-rebase-contract",
+      "headingText": "Upload Session Request Binding and Rebase Contract",
+      "level": 1,
+      "lines": [
+        ""
+      ],
+      "plainText": "",
+      "excerpt": "",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "purpose",
+      "headingText": "Purpose",
+      "level": 2,
+      "lines": [
+        "This contract freezes upload-session identity to the allocated request and request version while",
+        "making any later request rebase explicit. It prevents reconnect, replay, or customer-safe",
+        "projection layers from silently treating old bytes as if they belonged to the current request.",
+        ""
+      ],
+      "plainText": "This contract freezes upload session identity to the allocated request and request version while making any later request rebase explicit. It prevents reconnect, replay, or customer safe projection layers from silently treating old bytes as if they belonged to the current request.",
+      "excerpt": "This contract freezes upload session identity to the allocated request and request version while making any later request rebase explicit. It prevents reconnect, replay, or custom…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "contract-boundary",
+      "headingText": "Contract boundary",
+      "level": 2,
+      "lines": [
+        "Every governed `ClientUploadSession` and every portal upload-row projection SHALL publish one",
+        "`upload_request_binding_contract` validated by",
+        "`schemas/upload_request_binding_contract.schema.json`.",
+        "",
+        "That contract is authoritative for:",
+        "",
+        "- the frozen tenant, client, and request tuple the session was allocated against",
+        "- the request identity the session was allocated against",
+        "- the frozen request version at allocation time",
+        "- the currently live request version for the same request lane",
+        "- whether the session is still current, requires reconfirmation, or has been superseded",
+        "- the fail-closed policies for reconnect resume, duplicate-session prevention, duplicate-file reuse,",
+        "  in-flight rebase continuity, stale completion, next-action authority, cross-device continuation,",
+        "  and attachment authority",
+        "- the canonical frozen scope hash that proves the session never drifted across tenant/client/request",
+        "  boundaries",
+        "- the timestamp when a request rebase was first detected",
+        ""
+      ],
+      "plainText": "Every governed ClientUploadSession and every portal upload row projection SHALL publish one upload request binding contract validated by schemas/upload request binding contract.schema.json. That contract is authoritative for: the frozen tenant, client, and request tuple the session was allocated against the request identity the session was allocated against the frozen request version at allocation time the currently live request version for the same request lane whether the session is still current, requires reconfirmation, or has been superseded the fail closed policies for reconnect resume, duplicate session prevention, duplicate file reuse, in flight rebase continuity, stale completion, next action authority, cross device continuation, and attachment authority the canonical frozen scope hash that proves the session never drifted across tenant/client/request boundaries the timestamp when a request rebase was first detected",
+      "excerpt": "Every governed ClientUploadSession and every portal upload row projection SHALL publish one upload request binding contract validated by schemas/upload request binding contract.sc…",
+      "mentionedSchemaTokens": [
+        "upload_request_binding_contract.schema.json"
+      ],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "required-rules",
+      "headingText": "Required rules",
+      "level": 2,
+      "lines": [
+        "- Upload-session allocation freezes the request lane. Reconnect or replay SHALL resume the existing",
+        "  governed session rather than minting a second session for the same bytes and frozen request",
+        "  identity.",
+        "- Reconnect, retry, browser reload, and cross-device continuation SHALL reuse the same governed",
+        "  `upload_session_id` and `storage_ref` whenever the session remains lawful to resume.",
+        "- `frozen_request_version_ref` is immutable session lineage. `live_request_version_ref` is the",
+        "  current request version seen by the read side. A difference between them is a rebase fact, not a",
+        "  reason to mutate the session in place.",
+        "- `frozen_tenant_id`, `frozen_client_id`, `frozen_request_id`, and `frozen_binding_scope_hash`",
+        "  SHALL remain stable for the lifetime of the upload session.",
+        "- `request_binding_state = ORIGINAL_CURRENT` means the frozen and live request versions still match.",
+        "- `request_binding_state = RECONFIRMED_CURRENT` means bytes allocated against an older request",
+        "  version were explicitly reconfirmed for the current live request version.",
+        "- `request_binding_state = RECONFIRMATION_REQUIRED` means the request rebased and the client must",
+        "  explicitly review and reconfirm before the bytes can satisfy the current request.",
+        "- `request_binding_state = SUPERSEDED` means the prior bytes are no longer a lawful candidate for",
+        "  the current request and may remain only as explicit history or stale carry-forward context.",
+        "- Stale bytes SHALL never satisfy the current request silently. Attachment confirmation remains",
+        "  lawful only when the session is still current or explicitly reconfirmed.",
+        "- If a request rebases while transfer is still in flight, the upload SHALL remain on the same",
+        "  governed session and storage lineage with `attachment_state = STAGED`; only an accepted stale",
+        "  upload may surface `attachment_state = REBIND_REQUIRED` and `next_action_code = RECONFIRM_REQUEST`.",
+        ""
+      ],
+      "plainText": "Upload session allocation freezes the request lane. Reconnect or replay SHALL resume the existing governed session rather than minting a second session for the same bytes and frozen request identity. Reconnect, retry, browser reload, and cross device continuation SHALL reuse the same governed upload session id and storage ref whenever the session remains lawful to resume. frozen request version ref is immutable session lineage. live request version ref is the current request version seen by the read side. A difference between them is a rebase fact, not a reason to mutate the session in place. frozen tenant id, frozen client id, frozen request id, and frozen binding scope hash SHALL remain stable for the lifetime of the upload session. request binding state = ORIGINAL CURRENT means the frozen and live request versions still match. request binding state = RECONFIRMED CURRENT means bytes allocated against an older request version were explicitly reconfirmed for the current live request version. request binding state = RECONFIRMATION REQUIRED means the request rebased and the client must explicitly review and reconfirm before the bytes can satisfy the current request. request binding state = SUPERSEDED means the prior bytes are no longer a lawful candidate for the current request and may remain only as explicit history or stale carry forward context. Stale bytes SHALL never satisfy the current request silently. Attachment confirmation remains lawful only when the session is still current or explicitly reconfirmed. If a request rebases while transfer is still in flight, the upload SHALL remain on the same governed session and storage lineage with attachment state = STAGED; only an accepted stale upload may surface attachment state = REBIND REQUIRED and next action code = RECONFIRM REQUEST.",
+      "excerpt": "Upload session allocation freezes the request lane. Reconnect or replay SHALL resume the existing governed session rather than minting a second session for the same bytes and froz…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "surface-consequences",
+      "headingText": "Surface consequences",
+      "level": 2,
+      "lines": [
+        "- `ClientUploadSession` SHALL mirror the contract exactly so API reads and recovery handlers do not",
+        "  infer request binding from transfer status alone.",
+        "- `ClientDocumentRequest` SHALL separate the latest upload lineage from the upload that actually",
+        "  satisfies the current request version.",
+        "- Portal upload rows SHALL mirror the same grouped contract so browser, mobile, and desktop",
+        "  recoveries describe the same rebase posture without depending on hidden staff-only fields.",
+        "- `upload_session_recovery_harness` SHALL serialize deterministic reconnect, reload, stale-rebase,",
+        "  duplicate-retry, scanner-delay, attachment-confirmation, and cross-device continuation cases so",
+        "  the validator and forensic guard can reject silent rebinding or duplicate storage creation.",
+        ""
+      ],
+      "plainText": "ClientUploadSession SHALL mirror the contract exactly so API reads and recovery handlers do not infer request binding from transfer status alone. ClientDocumentRequest SHALL separate the latest upload lineage from the upload that actually satisfies the current request version. Portal upload rows SHALL mirror the same grouped contract so browser, mobile, and desktop recoveries describe the same rebase posture without depending on hidden staff only fields. upload session recovery harness SHALL serialize deterministic reconnect, reload, stale rebase, duplicate retry, scanner delay, attachment confirmation, and cross device continuation cases so the validator and forensic guard can reject silent rebinding or duplicate storage creation.",
+      "excerpt": "ClientUploadSession SHALL mirror the contract exactly so API reads and recovery handlers do not infer request binding from transfer status alone. ClientDocumentRequest SHALL separ…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "failure-modes-closed",
+      "headingText": "Failure modes closed",
+      "level": 2,
+      "lines": [
+        "- active upload sessions silently rebinding to a newer request version",
+        "- old bytes finalizing as if they satisfy the current request after rebase",
+        "- duplicate upload sessions appearing after reconnect instead of resuming the governed session",
+        "- request cards implying current-request satisfaction when only stale upload history exists",
+        "- customer-safe projections inferring currentness from transfer success alone",
+        ""
+      ],
+      "plainText": "active upload sessions silently rebinding to a newer request version old bytes finalizing as if they satisfy the current request after rebase duplicate upload sessions appearing after reconnect instead of resuming the governed session request cards implying current request satisfaction when only stale upload history exists customer safe projections inferring currentness from transfer success alone",
+      "excerpt": "active upload sessions silently rebinding to a newer request version old bytes finalizing as if they satisfy the current request after rebase duplicate upload sessions appearing a…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    }
+  ],
+  "schemaIdentityOrNull": null,
+  "schemaFields": [],
+  "samplePointers": [],
+  "sampleIdentityOrNull": null,
+  "bindingIdentityOrNull": null,
+  "validatorIdentityOrNull": null,
+  "driftIdentityOrNull": null,
+  "headerStrip": {
+    "kind": "PROSE",
+    "badgeLabel": "Authoritative Algorithm Corpus",
+    "metricPairs": [
+      {
+        "label": "Headings",
+        "value": "6"
+      },
+      {
+        "label": "Schemas",
+        "value": "1"
+      },
+      {
+        "label": "Tasks",
+        "value": "0"
+      }
+    ]
+  },
+  "relationships": {
+    "schemas": [
+      {
+        "artifactSlug": "schema--upload_request_binding_contract",
+        "title": "Upload Request Binding Contract",
+        "kind": "SCHEMA",
+        "authorityLevel": "AUTHORITATIVE",
+        "sectionRef": "SCHEMAS",
+        "headingSlugOrNull": null,
+        "reason": "source truth stack includes this schema"
+      }
+    ],
+    "samples": [],
+    "bindings": [
+      {
+        "artifactSlug": "binding--typescript--domain_workflow_and_filing",
+        "title": "TYPESCRIPT · Domain Workflow & Filing",
+        "kind": "BINDING",
+        "authorityLevel": "GENERATED_COMPANION",
+        "sectionRef": "SUPPORT_DOCS",
+        "headingSlugOrNull": null,
+        "reason": "source truth stack includes this binding family"
+      },
+      {
+        "artifactSlug": "binding--python--domain_workflow_and_filing",
+        "title": "PYTHON · Domain Workflow & Filing",
+        "kind": "BINDING",
+        "authorityLevel": "GENERATED_COMPANION",
+        "sectionRef": "SUPPORT_DOCS",
+        "headingSlugOrNull": null,
+        "reason": "source truth stack includes this binding family"
+      },
+      {
+        "artifactSlug": "binding--swift--domain_workflow_and_filing",
+        "title": "SWIFT · Domain Workflow & Filing",
+        "kind": "BINDING",
+        "authorityLevel": "GENERATED_COMPANION",
+        "sectionRef": "SUPPORT_DOCS",
+        "headingSlugOrNull": null,
+        "reason": "source truth stack includes this binding family"
+      }
+    ],
+    "validators": [],
+    "docs": [],
+    "tasks": []
+  },
+  "sourceTruthStack": {
+    "file": [
+      "Algorithm/upload_session_request_binding_and_rebase_contract.md"
+    ],
+    "headings": [
+      "Upload Session Request Binding and Rebase Contract",
+      "Purpose",
+      "Contract boundary",
+      "Required rules",
+      "Surface consequences",
+      "Failure modes closed"
+    ],
+    "schemaRefs": [
+      "upload_request_binding_contract.schema.json"
+    ],
+    "sampleRefs": [],
+    "bindingRefs": [
+      "TYPESCRIPT:DOMAIN_WORKFLOW_AND_FILING",
+      "PYTHON:DOMAIN_WORKFLOW_AND_FILING",
+      "SWIFT:DOMAIN_WORKFLOW_AND_FILING"
+    ],
+    "validatorRefs": [],
+    "driftRefs": [],
+    "taskRefs": []
+  },
+  "fieldCrosslinks": [],
+  "taskRefs": []
+}

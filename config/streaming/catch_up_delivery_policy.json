@@ -1,0 +1,46 @@
+{
+  "contract_version": "STREAM_CATCH_UP_DELIVERY_POLICY_V1",
+  "policy_id": "stream-catch-up-delivery-policy",
+  "basis_statement": "Snapshot establishes one baseline, catch-up closes the replay gap, live begins only after replay reaches the published frontier, and heartbeats never behave like business events.",
+  "delivery_rows": [
+    {
+      "phase_ref": "SNAPSHOT",
+      "delivery_rule": "BASELINE_MUST_PRECEDE_DELTA_REPLAY",
+      "sequence_rule": "STRICT_NEXT_SEQUENCE_ONLY",
+      "cursor_effect": "ESTABLISHES_LOCAL_FRAME_BASELINE",
+      "transition_gate": "CATCH_UP_REQUIRED_WHEN_LAST_ACK_IS_BEHIND_FRONTIER",
+      "notes": ["Snapshot refs remain authoritative and never inline privileged payloads."]
+    },
+    {
+      "phase_ref": "CATCH_UP",
+      "delivery_rule": "REPLAY_GAP_FREE_TO_PUBLISHED_FRONTIER",
+      "sequence_rule": "STRICT_NEXT_SEQUENCE_ONLY",
+      "cursor_effect": "ADVANCES_ACK_FRONTIER",
+      "transition_gate": "LIVE_ALLOWED_ONLY_AFTER_TARGET_FRONTIER_REACHED",
+      "notes": ["Replay remains idempotent by scope, epoch, and sequence."]
+    },
+    {
+      "phase_ref": "LIVE",
+      "delivery_rule": "CURRENT_EPOCH_DELIVERY_AFTER_REPLAY",
+      "sequence_rule": "STRICT_NEXT_SEQUENCE_ONLY",
+      "cursor_effect": "ADVANCES_ACK_FRONTIER",
+      "transition_gate": "REBASE_OR_ACCESS_REBIND_ON_ANY_CONTEXT_DRIFT",
+      "notes": ["Live packets stay subordinate to the same recovery tuple as catch-up."]
+    },
+    {
+      "phase_ref": "HEARTBEAT",
+      "delivery_rule": "LIVENESS_ONLY",
+      "sequence_rule": "NO_SEQUENCE_ADVANCE",
+      "cursor_effect": "TOUCH_LAST_SEEN_ONLY",
+      "transition_gate": "NO_GATE_CHANGE",
+      "notes": ["Heartbeats preserve liveness without acting as pseudo business mutations."]
+    }
+  ],
+  "source_lineage": [
+    {
+      "rationale": "Encodes catch-up-before-live and heartbeat posture into one reusable delivery policy.",
+      "source_file": "Algorithm/northbound_api_and_session_contract.md",
+      "source_heading_or_logical_block": "catch-up delivery and duplicate-delivery semantics"
+    }
+  ]
+}

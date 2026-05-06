@@ -18,7 +18,9 @@ DIAGRAMS_ANALYSIS_DIR = ROOT / "diagrams" / "analysis"
 
 EXACT_GATE_PATH = ALGORITHM_DIR / "exact_gate_logic_and_decision_tables.md"
 INVARIANTS_PATH = ALGORITHM_DIR / "invariants_and_gates.md"
-EXPLAINABILITY_PATH = ALGORITHM_DIR / "gate_decision_explainability_and_reason_code_compression_contract.md"
+EXPLAINABILITY_PATH = (
+    ALGORITHM_DIR / "gate_decision_explainability_and_reason_code_compression_contract.md"
+)
 ACTOR_AUTHORITY_PATH = ALGORITHM_DIR / "actor_and_authority_model.md"
 MODULES_PATH = ALGORITHM_DIR / "modules.md"
 GATE_DECISION_SCHEMA_PATH = ALGORITHM_DIR / "schemas" / "gate_decision_record.schema.json"
@@ -47,9 +49,20 @@ DECISION_HEADER_RE = re.compile(r"^Return `?([A-Z_]+)`?(?:\s+.*)?$")
 CODE_SPAN_RE = re.compile(r"`([^`]+)`")
 
 ACCESS_DECISIONS = ["ALLOW", "ALLOW_MASKED", "REQUIRE_STEP_UP", "REQUIRE_APPROVAL", "DENY"]
-NON_ACCESS_DECISIONS = ["PASS", "PASS_WITH_NOTICE", "MANUAL_REVIEW", "OVERRIDABLE_BLOCK", "HARD_BLOCK"]
+NON_ACCESS_DECISIONS = [
+    "PASS",
+    "PASS_WITH_NOTICE",
+    "MANUAL_REVIEW",
+    "OVERRIDABLE_BLOCK",
+    "HARD_BLOCK",
+]
 NON_ACCESS_SEVERITY_ENUM = ["INFO", "NOTICE", "WARNING", "ERROR", "CRITICAL"]
-OVERRIDEABILITY_ENUM = ["NONE", "SCOPED_OVERRIDE_ALLOWED", "SCOPED_OVERRIDE_REQUIRED", "NON_OVERRIDEABLE"]
+OVERRIDEABILITY_ENUM = [
+    "NONE",
+    "SCOPED_OVERRIDE_ALLOWED",
+    "SCOPED_OVERRIDE_REQUIRED",
+    "NON_OVERRIDEABLE",
+]
 
 NON_ACCESS_SEVERITY_MAPPING = {
     "PASS": "INFO",
@@ -157,7 +170,13 @@ GATE_SPECS = [
         conditional_runtime_scope_tokens=(),
         overrideability="SCOPED_OVERRIDE_ALLOWED",
         upstream_gate_dependencies=(),
-        downstream_consumers=("EMIT_ORDERED_GATES", "BUILD_PRESEAL_GATE_EVALUATION", "SEAL_MANIFEST", "TRUST_GATE", "FILING_GATE"),
+        downstream_consumers=(
+            "EMIT_ORDERED_GATES",
+            "BUILD_PRESEAL_GATE_EVALUATION",
+            "SEAL_MANIFEST",
+            "TRUST_GATE",
+            "FILING_GATE",
+        ),
         notes=(
             "Same-manifest retry reuses persisted pre-seal gate records after seal.",
             "Pre-seal PASS_WITH_NOTICE posture remains binding after seal.",
@@ -174,7 +193,13 @@ GATE_SPECS = [
         conditional_runtime_scope_tokens=(),
         overrideability="NON_OVERRIDEABLE",
         upstream_gate_dependencies=("MANIFEST_GATE",),
-        downstream_consumers=("EMIT_ORDERED_GATES", "BUILD_PRESEAL_GATE_EVALUATION", "SEAL_MANIFEST", "TRUST_GATE", "FILING_GATE"),
+        downstream_consumers=(
+            "EMIT_ORDERED_GATES",
+            "BUILD_PRESEAL_GATE_EVALUATION",
+            "SEAL_MANIFEST",
+            "TRUST_GATE",
+            "FILING_GATE",
+        ),
         notes=("Pre-seal PASS_WITH_NOTICE posture remains binding after seal.",),
     ),
     GateSpec(
@@ -188,7 +213,13 @@ GATE_SPECS = [
         conditional_runtime_scope_tokens=(),
         overrideability="NON_OVERRIDEABLE",
         upstream_gate_dependencies=("MANIFEST_GATE", "ARTIFACT_CONTRACT_GATE"),
-        downstream_consumers=("EMIT_ORDERED_GATES", "BUILD_PRESEAL_GATE_EVALUATION", "SEAL_MANIFEST", "TRUST_GATE", "FILING_GATE"),
+        downstream_consumers=(
+            "EMIT_ORDERED_GATES",
+            "BUILD_PRESEAL_GATE_EVALUATION",
+            "SEAL_MANIFEST",
+            "TRUST_GATE",
+            "FILING_GATE",
+        ),
         notes=(
             "Post-seal late data is judged by FILING_GATE via LateDataMonitorResult, not re-evaluated here.",
             "Pre-seal MANUAL_REVIEW or PASS_WITH_NOTICE posture remains binding after seal.",
@@ -204,8 +235,18 @@ GATE_SPECS = [
         evaluation_scope_condition="Ordered pre-seal gate; runs last in the canonical pre-seal tape before seal.",
         conditional_runtime_scope_tokens=(),
         overrideability="SCOPED_OVERRIDE_ALLOWED",
-        upstream_gate_dependencies=("MANIFEST_GATE", "ARTIFACT_CONTRACT_GATE", "INPUT_BOUNDARY_GATE"),
-        downstream_consumers=("EMIT_ORDERED_GATES", "BUILD_PRESEAL_GATE_EVALUATION", "SEAL_MANIFEST", "TRUST_GATE", "FILING_GATE"),
+        upstream_gate_dependencies=(
+            "MANIFEST_GATE",
+            "ARTIFACT_CONTRACT_GATE",
+            "INPUT_BOUNDARY_GATE",
+        ),
+        downstream_consumers=(
+            "EMIT_ORDERED_GATES",
+            "BUILD_PRESEAL_GATE_EVALUATION",
+            "SEAL_MANIFEST",
+            "TRUST_GATE",
+            "FILING_GATE",
+        ),
         notes=(
             "Pre-seal MANUAL_REVIEW or PASS_WITH_NOTICE posture remains binding after seal.",
             "OVERRIDABLE_BLOCK is explicitly available for bounded low-quality or stale-critical posture.",
@@ -222,8 +263,15 @@ GATE_SPECS = [
         conditional_runtime_scope_tokens=(),
         overrideability="SCOPED_OVERRIDE_ALLOWED",
         upstream_gate_dependencies=("DATA_QUALITY_GATE",),
-        downstream_consumers=("APPEND_MANIFEST_GATES", "TRUST_GATE", "FILING_GATE", "DecisionBundle"),
-        notes=("Retention limitations remain explicit reason-coded posture rather than hidden score discounting.",),
+        downstream_consumers=(
+            "APPEND_MANIFEST_GATES",
+            "TRUST_GATE",
+            "FILING_GATE",
+            "DecisionBundle",
+        ),
+        notes=(
+            "Retention limitations remain explicit reason-coded posture rather than hidden score discounting.",
+        ),
     ),
     GateSpec(
         gate_code="PARITY_GATE",
@@ -236,7 +284,12 @@ GATE_SPECS = [
         conditional_runtime_scope_tokens=(),
         overrideability="SCOPED_OVERRIDE_ALLOWED",
         upstream_gate_dependencies=("RETENTION_EVIDENCE_GATE",),
-        downstream_consumers=("APPEND_MANIFEST_GATES", "TRUST_GATE", "FILING_GATE", "SYNC_LIVE_EXPERIENCE_FROM_GATES"),
+        downstream_consumers=(
+            "APPEND_MANIFEST_GATES",
+            "TRUST_GATE",
+            "FILING_GATE",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES",
+        ),
         notes=("Comparison-set invalidity must remain fail-closed as NOT_COMPARABLE.",),
     ),
     GateSpec(
@@ -249,8 +302,21 @@ GATE_SPECS = [
         evaluation_scope_condition="Runs after parity and upstream non-access gate posture are available.",
         conditional_runtime_scope_tokens=(),
         overrideability="SCOPED_OVERRIDE_REQUIRED",
-        upstream_gate_dependencies=("PARITY_GATE", "RETENTION_EVIDENCE_GATE", "DATA_QUALITY_GATE", "INPUT_BOUNDARY_GATE", "ARTIFACT_CONTRACT_GATE", "MANIFEST_GATE"),
-        downstream_consumers=("APPEND_MANIFEST_GATES", "AMENDMENT_GATE", "FILING_GATE", "DecisionBundle", "SYNC_LIVE_EXPERIENCE_FROM_GATES"),
+        upstream_gate_dependencies=(
+            "PARITY_GATE",
+            "RETENTION_EVIDENCE_GATE",
+            "DATA_QUALITY_GATE",
+            "INPUT_BOUNDARY_GATE",
+            "ARTIFACT_CONTRACT_GATE",
+            "MANIFEST_GATE",
+        ),
+        downstream_consumers=(
+            "APPEND_MANIFEST_GATES",
+            "AMENDMENT_GATE",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES",
+        ),
         notes=(
             "TRUST_GATE may surface override-missing posture only when an already-documented upstream gate remains unresolved.",
             "Trust-derived red posture is not a new discretionary override family.",
@@ -267,7 +333,12 @@ GATE_SPECS = [
         conditional_runtime_scope_tokens=("amendment_intent", "amendment_submit"),
         overrideability="SCOPED_OVERRIDE_REQUIRED",
         upstream_gate_dependencies=("TRUST_GATE",),
-        downstream_consumers=("APPEND_MANIFEST_GATES", "FILING_GATE", "DecisionBundle", "SYNC_LIVE_EXPERIENCE_FROM_GATES"),
+        downstream_consumers=(
+            "APPEND_MANIFEST_GATES",
+            "FILING_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES",
+        ),
         notes=(
             "AMENDMENT_GATE is deliberately not evaluated during drift preparation.",
             "The gate is the only family allowed to speak for intent-to-amend readiness failure.",
@@ -284,7 +355,12 @@ GATE_SPECS = [
         conditional_runtime_scope_tokens=("prepare_submission", "submit", "amendment_submit"),
         overrideability="SCOPED_OVERRIDE_REQUIRED",
         upstream_gate_dependencies=("TRUST_GATE", "PARITY_GATE", "AMENDMENT_GATE"),
-        downstream_consumers=("APPEND_MANIFEST_GATES", "SUBMISSION_GATE", "DecisionBundle", "SYNC_LIVE_EXPERIENCE_FROM_GATES"),
+        downstream_consumers=(
+            "APPEND_MANIFEST_GATES",
+            "SUBMISSION_GATE",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES",
+        ),
         notes=(
             "FILING_GATE is monotone narrowing and SHALL NOT upgrade inherited legal progression.",
             "A valid approved override may unblock a scoped prerequisite but SHALL NOT upgrade the filing decision above PASS_WITH_NOTICE.",
@@ -301,8 +377,14 @@ GATE_SPECS = [
         conditional_runtime_scope_tokens=("submit", "amendment_submit"),
         overrideability="NON_OVERRIDEABLE",
         upstream_gate_dependencies=("FILING_GATE",),
-        downstream_consumers=("APPEND_MANIFEST_GATES", "DecisionBundle", "SYNC_LIVE_EXPERIENCE_FROM_GATES"),
-        notes=("Submission preflight re-runs authorization and authority-binding validity immediately before transmit.",),
+        downstream_consumers=(
+            "APPEND_MANIFEST_GATES",
+            "DecisionBundle",
+            "SYNC_LIVE_EXPERIENCE_FROM_GATES",
+        ),
+        notes=(
+            "Submission preflight re-runs authorization and authority-binding validity immediately before transmit.",
+        ),
     ),
 ]
 
@@ -358,7 +440,9 @@ def parse_document_blocks(path: Path) -> dict[str, Block]:
             key = section_match.group(1) if section_match else title
         else:
             key = title
-        block = Block(key=key, title=title, level=level, start_line=index, end_line=index, lines=[line])
+        block = Block(
+            key=key, title=title, level=level, start_line=index, end_line=index, lines=[line]
+        )
         while stack and stack[-1][0] >= level:
             _, finished = stack.pop()
             finished.end_line = index - 1
@@ -375,14 +459,14 @@ def parse_document_blocks(path: Path) -> dict[str, Block]:
         finished.end_line = last_line
 
     for block in h2_blocks.values():
-        block.lines = lines[block.start_line - 1:block.end_line]
+        block.lines = lines[block.start_line - 1 : block.end_line]
         populate_child_lines(block, lines)
     return h2_blocks
 
 
 def populate_child_lines(block: Block, all_lines: list[str]) -> None:
     for child in block.children:
-        child.lines = all_lines[child.start_line - 1:child.end_line]
+        child.lines = all_lines[child.start_line - 1 : child.end_line]
         populate_child_lines(child, all_lines)
 
 
@@ -502,7 +586,9 @@ def parse_mapping_block(block: Block, pattern: str) -> dict[str, Any]:
     for item in collect_list_items(block):
         match = compiled.match(item["text"])
         if match:
-            rows[match.group(1)] = int(match.group(2)) if match.group(2).isdigit() else match.group(2)
+            rows[match.group(1)] = (
+                int(match.group(2)) if match.group(2).isdigit() else match.group(2)
+            )
     return rows
 
 
@@ -536,7 +622,9 @@ def parse_decision_table(block: Block) -> dict[str, Any]:
             continue
         bullet_match = re.match(r"^-\s+(.*)$", stripped)
         if bullet_match:
-            target = notes if in_notes else (current["conditions"] if current is not None else prelude)
+            target = (
+                notes if in_notes else (current["conditions"] if current is not None else prelude)
+            )
             target.append({"line_number": index, "text": bullet_match.group(1).strip()})
             continue
         target = notes if in_notes else (current["conditions"] if current is not None else prelude)
@@ -573,12 +661,29 @@ def parse_reason_codes(block: Block) -> list[dict[str, Any]]:
     return rows
 
 
-def parse_shared_contract(section_7_1: Block, explainability_sections: dict[str, Block], schemas: dict[str, Any]) -> dict[str, Any]:
+def parse_shared_contract(
+    section_7_1: Block, explainability_sections: dict[str, Block], schemas: dict[str, Any]
+) -> dict[str, Any]:
     field_rows = parse_field_list_from_section_preamble(section_7_1)
-    invariants = [item["text"] for item in collect_list_items(get_child_block(section_7_1, "Gate-record invariants"))]
-    non_access_decisions = [codes[0] for item in collect_list_items(get_child_block(section_7_1, "Decision enum")) if (codes := extract_code_spans(item["text"]))]
-    severity_enum = [codes[0] for item in collect_list_items(get_child_block(section_7_1, "Severity enum")) if (codes := extract_code_spans(item["text"]))]
-    overrideability_enum = [codes[0] for item in collect_list_items(get_child_block(section_7_1, "Overrideability enum")) if (codes := extract_code_spans(item["text"]))]
+    invariants = [
+        item["text"]
+        for item in collect_list_items(get_child_block(section_7_1, "Gate-record invariants"))
+    ]
+    non_access_decisions = [
+        codes[0]
+        for item in collect_list_items(get_child_block(section_7_1, "Decision enum"))
+        if (codes := extract_code_spans(item["text"]))
+    ]
+    severity_enum = [
+        codes[0]
+        for item in collect_list_items(get_child_block(section_7_1, "Severity enum"))
+        if (codes := extract_code_spans(item["text"]))
+    ]
+    overrideability_enum = [
+        codes[0]
+        for item in collect_list_items(get_child_block(section_7_1, "Overrideability enum"))
+        if (codes := extract_code_spans(item["text"]))
+    ]
     severity_mapping = parse_mapping_block(
         get_child_block(section_7_1, "Severity mapping rule"),
         r"^`([A-Z_]+) -> ([A-Z]+)`$",
@@ -595,18 +700,37 @@ def parse_shared_contract(section_7_1: Block, explainability_sections: dict[str,
         get_child_block(section_7_1, "Monotone legal-progression rank"),
         r"^`readiness_rank\(([A-Z_]+)\) = ([0-9]+)`$",
     )
-    monotone_lines = block_text_without_children(get_child_block(section_7_1, "Monotone legal-progression rank"))
-    monotone_formula = next((row["text"] for row in monotone_lines if row["text"].startswith("`final_legal_progression_rank =")), "")
+    monotone_lines = block_text_without_children(
+        get_child_block(section_7_1, "Monotone legal-progression rank")
+    )
+    monotone_formula = next(
+        (
+            row["text"]
+            for row in monotone_lines
+            if row["text"].startswith("`final_legal_progression_rank =")
+        ),
+        "",
+    )
 
-    explainability_policy_items = collect_list_items(explainability_sections["1. Governing explainability model"])
+    explainability_policy_items = collect_list_items(
+        explainability_sections["1. Governing explainability model"]
+    )
     compression_items = collect_list_items(explainability_sections["2. Compression boundary"])
-    reason_policy_row = next(item["text"] for item in explainability_policy_items if "reason_order_policy" in item["text"])
-    compression_cap_row = next(item["text"] for item in compression_items if "compression_reason_cap = 3" in item["text"])
+    reason_policy_row = next(
+        item["text"]
+        for item in explainability_policy_items
+        if "reason_order_policy" in item["text"]
+    )
+    compression_cap_row = next(
+        item["text"] for item in compression_items if "compression_reason_cap = 3" in item["text"]
+    )
     qualifier_rows = ordered_unique(
         [
-        codes[0]
-        for item in collect_list_items(explainability_sections["3. Semantic qualifier disclosure"])
-        if (codes := extract_code_spans(item["text"]))
+            codes[0]
+            for item in collect_list_items(
+                explainability_sections["3. Semantic qualifier disclosure"]
+            )
+            if (codes := extract_code_spans(item["text"]))
         ]
     )
 
@@ -620,7 +744,9 @@ def parse_shared_contract(section_7_1: Block, explainability_sections: dict[str,
         "progression_rank_mapping": progression_rank_mapping,
         "readiness_rank_mapping": readiness_rank_mapping,
         "overrideability_enum": overrideability_enum,
-        "override_resolution_rule": block_text_without_children(get_child_block(section_7_1, "Override resolution rule")),
+        "override_resolution_rule": block_text_without_children(
+            get_child_block(section_7_1, "Override resolution rule")
+        ),
         "monotone_progression_formula": monotone_formula,
         "explainability_contract": {
             "reason_order_policy_summary": reason_policy_row,
@@ -656,7 +782,9 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
 def classify_reason_code_family(gate_code: str, reason_code: str) -> str:
     prefix = REASON_CODE_FAMILY_PREFIXES[gate_code]
     if not reason_code.startswith(f"{prefix}_"):
-        raise ValueError(f"Reason code `{reason_code}` does not match expected family prefix `{prefix}_`.")
+        raise ValueError(
+            f"Reason code `{reason_code}` does not match expected family prefix `{prefix}_`."
+        )
     return f"{prefix}_*"
 
 
@@ -671,7 +799,11 @@ def infer_reason_decision_applicability(reason_code: str) -> list[str]:
         return ["MANUAL_REVIEW"]
     if "UNSATISFIABLE" in reason_code or "MISSING" in reason_code or "BLOCK" in reason_code:
         return ["HARD_BLOCK", "OVERRIDABLE_BLOCK"]
-    if reason_code.endswith("_MATCH") or reason_code.endswith("_GREEN") or reason_code.endswith("_ELIGIBLE"):
+    if (
+        reason_code.endswith("_MATCH")
+        or reason_code.endswith("_GREEN")
+        or reason_code.endswith("_ELIGIBLE")
+    ):
         return ["PASS"]
     return []
 
@@ -698,19 +830,32 @@ def build_phase_binding_rows(
                         "row_id": row["row_id"],
                         "binding_class": "evaluation",
                         "module_name": "AUTHORIZE",
-                        "source_ref": line_ref(repo_rel(ALGORITHM_DIR / "core_engine.md"), row["source_line_start"], gate_code),
+                        "source_ref": line_ref(
+                            repo_rel(ALGORITHM_DIR / "core_engine.md"),
+                            row["source_line_start"],
+                            gate_code,
+                        ),
                         "statement": row["statement"],
                     }
                 )
-            elif "ACCESS_BLOCKED_RESPONSE" in row.get("module_calls", []) or "ALLOW_MASKED" in row["statement"]:
+            elif (
+                "ACCESS_BLOCKED_RESPONSE" in row.get("module_calls", [])
+                or "ALLOW_MASKED" in row["statement"]
+            ):
                 consumer_refs.append(
                     {
                         "phase_id": row["phase_id"],
                         "phase_name": row["phase_name"],
                         "row_id": row["row_id"],
                         "binding_class": "consumer",
-                        "module_name": "ACCESS_BLOCKED_RESPONSE" if "ACCESS_BLOCKED_RESPONSE" in row.get("module_calls", []) else "ENFORCE_ACCESS_SCOPE_AND_MASKING",
-                        "source_ref": line_ref(repo_rel(ALGORITHM_DIR / "core_engine.md"), row["source_line_start"], gate_code),
+                        "module_name": "ACCESS_BLOCKED_RESPONSE"
+                        if "ACCESS_BLOCKED_RESPONSE" in row.get("module_calls", [])
+                        else "ENFORCE_ACCESS_SCOPE_AND_MASKING",
+                        "source_ref": line_ref(
+                            repo_rel(ALGORITHM_DIR / "core_engine.md"),
+                            row["source_line_start"],
+                            gate_code,
+                        ),
                         "statement": row["statement"],
                     }
                 )
@@ -718,10 +863,14 @@ def build_phase_binding_rows(
             "gate_code": gate_code,
             "evaluation_phase_refs": evaluation_refs,
             "consumer_phase_refs": consumer_refs,
-            "module_bindings": ordered_unique(ref["module_name"] for ref in evaluation_refs + consumer_refs),
+            "module_bindings": ordered_unique(
+                ref["module_name"] for ref in evaluation_refs + consumer_refs
+            ),
         }
 
-    module_row = next((row for row in module_catalog["modules"] if row["module_name"] == gate_code), None)
+    module_row = next(
+        (row for row in module_catalog["modules"] if row["module_name"] == gate_code), None
+    )
     if module_row is not None:
         for binding in module_row.get("run_phase_bindings", []):
             evaluation_refs.append(
@@ -731,7 +880,11 @@ def build_phase_binding_rows(
                     "row_id": binding["step_id"],
                     "binding_class": "evaluation",
                     "module_name": gate_code,
-                    "source_ref": line_ref(repo_rel(ALGORITHM_DIR / "core_engine.md"), binding["source_line_start"], gate_code),
+                    "source_ref": line_ref(
+                        repo_rel(ALGORITHM_DIR / "core_engine.md"),
+                        binding["source_line_start"],
+                        gate_code,
+                    ),
                     "statement": next(
                         (
                             row["statement"]
@@ -754,8 +907,12 @@ def build_phase_binding_rows(
                 "phase_name": row["phase_name"],
                 "row_id": row["row_id"],
                 "binding_class": "consumer",
-                "module_name": row["module_calls"][0] if row.get("module_calls") else "inline_consumer",
-                "source_ref": line_ref(repo_rel(ALGORITHM_DIR / "core_engine.md"), row["source_line_start"], gate_code),
+                "module_name": row["module_calls"][0]
+                if row.get("module_calls")
+                else "inline_consumer",
+                "source_ref": line_ref(
+                    repo_rel(ALGORITHM_DIR / "core_engine.md"), row["source_line_start"], gate_code
+                ),
                 "statement": row["statement"],
             }
         )
@@ -768,7 +925,9 @@ def build_phase_binding_rows(
         "gate_code": gate_code,
         "evaluation_phase_refs": evaluation_refs,
         "consumer_phase_refs": consumer_refs,
-        "module_bindings": ordered_unique(ref["module_name"] for ref in evaluation_refs + consumer_refs),
+        "module_bindings": ordered_unique(
+            ref["module_name"] for ref in evaluation_refs + consumer_refs
+        ),
     }
 
 
@@ -827,7 +986,12 @@ def gate_decision_effect_rows(spec: GateSpec, emitted_decisions: list[str]) -> l
                     "effect_summary": "Pre-manifest hard denial; execution stops before any manifest allocation.",
                 },
             }[decision]
-        elif spec.gate_code in {"MANIFEST_GATE", "ARTIFACT_CONTRACT_GATE", "INPUT_BOUNDARY_GATE", "DATA_QUALITY_GATE"}:
+        elif spec.gate_code in {
+            "MANIFEST_GATE",
+            "ARTIFACT_CONTRACT_GATE",
+            "INPUT_BOUNDARY_GATE",
+            "DATA_QUALITY_GATE",
+        }:
             effect = {
                 "HARD_BLOCK": {
                     "blocks_seal": True,
@@ -979,7 +1143,11 @@ def build_outputs() -> dict[str, Any]:
         reason_codes = [row["reason_code"] for row in reason_code_items]
 
         if spec.gate_class == "access":
-            decision_enum = [codes[0] for item in collect_list_items(get_child_block(section, "Output enum")) if (codes := extract_code_spans(item["text"]))]
+            decision_enum = [
+                codes[0]
+                for item in collect_list_items(get_child_block(section, "Output enum"))
+                if (codes := extract_code_spans(item["text"]))
+            ]
             severity_model = {
                 "profile_code": "ACCESS_GATE_SPECIAL_DECISION_ENUM",
                 "severity_enum": [],
@@ -1006,7 +1174,9 @@ def build_outputs() -> dict[str, Any]:
             {
                 **phase_binding,
                 "source_file": repo_rel(EXACT_GATE_PATH),
-                "source_heading_or_logical_block": line_ref(repo_rel(EXACT_GATE_PATH), section.start_line, spec.gate_code),
+                "source_heading_or_logical_block": line_ref(
+                    repo_rel(EXACT_GATE_PATH), section.start_line, spec.gate_code
+                ),
                 "rationale": f"Phase and module bindings for `{spec.gate_code}` normalized from the run-engine step ledger and module catalog.",
             }
         )
@@ -1017,11 +1187,25 @@ def build_outputs() -> dict[str, Any]:
         source_refs = ordered_unique(
             [
                 line_ref(repo_rel(EXACT_GATE_PATH), section.start_line, spec.gate_code),
-                line_ref(repo_rel(EXACT_GATE_PATH), get_child_block(section, "Inputs").start_line, f"{spec.gate_code}.inputs"),
-                line_ref(repo_rel(EXACT_GATE_PATH), get_child_block(section, "Decision table").start_line, f"{spec.gate_code}.decision_table"),
+                line_ref(
+                    repo_rel(EXACT_GATE_PATH),
+                    get_child_block(section, "Inputs").start_line,
+                    f"{spec.gate_code}.inputs",
+                ),
+                line_ref(
+                    repo_rel(EXACT_GATE_PATH),
+                    get_child_block(section, "Decision table").start_line,
+                    f"{spec.gate_code}.decision_table",
+                ),
             ]
             + (
-                [line_ref(repo_rel(EXACT_GATE_PATH), get_child_block(section, "Reason codes").start_line, f"{spec.gate_code}.reason_codes")]
+                [
+                    line_ref(
+                        repo_rel(EXACT_GATE_PATH),
+                        get_child_block(section, "Reason codes").start_line,
+                        f"{spec.gate_code}.reason_codes",
+                    )
+                ]
                 if reason_code_items
                 else []
             )
@@ -1029,11 +1213,17 @@ def build_outputs() -> dict[str, Any]:
 
         notes = list(spec.notes)
         if spec.gate_code == "TRUST_GATE":
-            notes.append("TRUST_GATE may only mirror unresolved upstream override posture, never invent a synthetic trust override family.")
+            notes.append(
+                "TRUST_GATE may only mirror unresolved upstream override posture, never invent a synthetic trust override family."
+            )
         if spec.gate_code == "FILING_GATE":
-            notes.append("FILING_GATE may appear on early filing-readiness failure branches before full trust synthesis completes.")
+            notes.append(
+                "FILING_GATE may appear on early filing-readiness failure branches before full trust synthesis completes."
+            )
         if spec.gate_code == "AMENDMENT_GATE":
-            notes.append("A narrow early-failure amendment-basis exception may emit AMENDMENT_GATE before the ordinary parity/trust sequence.")
+            notes.append(
+                "A narrow early-failure amendment-basis exception may emit AMENDMENT_GATE before the ordinary parity/trust sequence."
+            )
 
         registry_rows.append(
             {
@@ -1072,7 +1262,9 @@ def build_outputs() -> dict[str, Any]:
                     if row["gate_code"] == spec.gate_code
                 ],
                 "decision_table": decision_payload,
-                "purpose_or_intro": intro_rows[0]["text"] if intro_rows else (purpose_rows[0]["text"] if purpose_rows else ""),
+                "purpose_or_intro": intro_rows[0]["text"]
+                if intro_rows
+                else (purpose_rows[0]["text"] if purpose_rows else ""),
                 "source_refs": source_refs,
                 "notes": ordered_unique(notes),
                 "source_file": repo_rel(EXACT_GATE_PATH),
@@ -1102,8 +1294,13 @@ def build_outputs() -> dict[str, Any]:
                 "override_prerequisites": list(spec.upstream_gate_dependencies),
                 "max_progression_with_valid_override": (
                     None
-                    if spec.gate_code == "ACCESS_GATE" or spec.overrideability in {"NONE", "NON_OVERRIDEABLE"}
-                    else ("PASS_WITH_NOTICE" if spec.gate_code == "FILING_GATE" else "PASS_WITH_NOTICE_OR_PASS")
+                    if spec.gate_code == "ACCESS_GATE"
+                    or spec.overrideability in {"NONE", "NON_OVERRIDEABLE"}
+                    else (
+                        "PASS_WITH_NOTICE"
+                        if spec.gate_code == "FILING_GATE"
+                        else "PASS_WITH_NOTICE_OR_PASS"
+                    )
                 ),
                 "override_forbidden_effects": [
                     "May not legalize missing prerequisites.",
@@ -1111,7 +1308,9 @@ def build_outputs() -> dict[str, Any]:
                     "May not convert HARD_BLOCK into progress.",
                     "May not fabricate authority truth.",
                     "May not widen runtime scope.",
-                ] if spec.gate_code != "ACCESS_GATE" else [
+                ]
+                if spec.gate_code != "ACCESS_GATE"
+                else [
                     "Access escalation is distinct from exceptional override and cannot be treated as a filing override.",
                 ],
                 "source_refs": source_refs,
@@ -1127,23 +1326,50 @@ def build_outputs() -> dict[str, Any]:
                     "reason_code_id": f"{spec.gate_code}::{row['reason_code']}",
                     "reason_code": row["reason_code"],
                     "gate_code": spec.gate_code,
-                    "reason_code_family": classify_reason_code_family(spec.gate_code, row["reason_code"]),
-                    "decision_applicability": infer_reason_decision_applicability(row["reason_code"]),
+                    "reason_code_family": classify_reason_code_family(
+                        spec.gate_code, row["reason_code"]
+                    ),
+                    "decision_applicability": infer_reason_decision_applicability(
+                        row["reason_code"]
+                    ),
                     "is_override_related": "OVERRIDE" in row["reason_code"],
                     "source_file": repo_rel(EXACT_GATE_PATH),
-                    "source_heading_or_logical_block": line_ref(repo_rel(EXACT_GATE_PATH), row["line_number"], row["reason_code"]),
+                    "source_heading_or_logical_block": line_ref(
+                        repo_rel(EXACT_GATE_PATH), row["line_number"], row["reason_code"]
+                    ),
                     "rationale": f"`{row['reason_code']}` is an explicitly enumerated reason code for `{spec.gate_code}`.",
                 }
             )
 
     registry_rows.sort(key=lambda row: row["evaluation_order_index"])
-    override_rows.sort(key=lambda row: next(spec.evaluation_order_index for spec in GATE_SPECS if spec.gate_code == row["gate_code"]))
-    phase_binding_rows.sort(key=lambda row: next(spec.evaluation_order_index for spec in GATE_SPECS if spec.gate_code == row["gate_code"]))
-    terminalization_rows.sort(key=lambda row: (next(spec.evaluation_order_index for spec in GATE_SPECS if spec.gate_code == row["gate_code"]), row["decision"]))
+    override_rows.sort(
+        key=lambda row: next(
+            spec.evaluation_order_index for spec in GATE_SPECS if spec.gate_code == row["gate_code"]
+        )
+    )
+    phase_binding_rows.sort(
+        key=lambda row: next(
+            spec.evaluation_order_index for spec in GATE_SPECS if spec.gate_code == row["gate_code"]
+        )
+    )
+    terminalization_rows.sort(
+        key=lambda row: (
+            next(
+                spec.evaluation_order_index
+                for spec in GATE_SPECS
+                if spec.gate_code == row["gate_code"]
+            ),
+            row["decision"],
+        )
+    )
 
     declared_reason_families = [row["reason_code_family"] for row in reason_code_families]
-    instantiated_reason_families = ordered_unique(row["reason_code_family"] for row in reason_code_rows)
-    missing_reason_families = [family for family in declared_reason_families if family not in instantiated_reason_families]
+    instantiated_reason_families = ordered_unique(
+        row["reason_code_family"] for row in reason_code_rows
+    )
+    missing_reason_families = [
+        family for family in declared_reason_families if family not in instantiated_reason_families
+    ]
 
     gate_order_rows = []
     for row in registry_rows:
@@ -1152,10 +1378,14 @@ def build_outputs() -> dict[str, Any]:
                 "evaluation_order_index": row["evaluation_order_index"],
                 "gate_code": row["gate_code"],
                 "gate_class": row["gate_class"],
-                "non_access_stage_index_or_null": "" if row["non_access_stage_index_or_null"] is None else row["non_access_stage_index_or_null"],
+                "non_access_stage_index_or_null": ""
+                if row["non_access_stage_index_or_null"] is None
+                else row["non_access_stage_index_or_null"],
                 "gate_family": row["gate_family"],
                 "evaluation_scope_condition": row["evaluation_scope_condition"],
-                "conditional_runtime_scope_tokens": "; ".join(row["conditional_runtime_scope_tokens"]),
+                "conditional_runtime_scope_tokens": "; ".join(
+                    row["conditional_runtime_scope_tokens"]
+                ),
                 "upstream_gate_dependencies": "; ".join(row["upstream_gate_dependencies"]),
                 "source_file": row["source_file"],
                 "source_heading_or_logical_block": row["source_heading_or_logical_block"],
@@ -1165,13 +1395,19 @@ def build_outputs() -> dict[str, Any]:
     registry_payload = {
         "summary": {
             "gate_count": len(registry_rows),
-            "access_gate_count": len([row for row in registry_rows if row["gate_class"] == "access"]),
-            "non_access_gate_count": len([row for row in registry_rows if row["gate_class"] == "non_access"]),
+            "access_gate_count": len(
+                [row for row in registry_rows if row["gate_class"] == "access"]
+            ),
+            "non_access_gate_count": len(
+                [row for row in registry_rows if row["gate_class"] == "non_access"]
+            ),
             "reason_code_count": len(reason_code_rows),
             "declared_reason_code_family_count": len(declared_reason_families),
             "instantiated_reason_code_family_count": len(instantiated_reason_families),
             "missing_reason_code_families": missing_reason_families,
-            "gate_family_counts": dict(sorted(Counter(row["gate_family"] for row in registry_rows).items())),
+            "gate_family_counts": dict(
+                sorted(Counter(row["gate_family"] for row in registry_rows).items())
+            ),
         },
         "shared_contract": shared_contract,
         "reason_code_family_declarations": declared_reason_families,
@@ -1181,22 +1417,30 @@ def build_outputs() -> dict[str, Any]:
     override_payload = {
         "summary": {
             "row_count": len(override_rows),
-            "overrideability_counts": dict(sorted(Counter(row["overrideability"] for row in override_rows).items())),
+            "overrideability_counts": dict(
+                sorted(Counter(row["overrideability"] for row in override_rows).items())
+            ),
         },
         "rows": override_rows,
     }
     phase_binding_payload = {
         "summary": {
             "row_count": len(phase_binding_rows),
-            "evaluation_ref_count": sum(len(row["evaluation_phase_refs"]) for row in phase_binding_rows),
-            "consumer_ref_count": sum(len(row["consumer_phase_refs"]) for row in phase_binding_rows),
+            "evaluation_ref_count": sum(
+                len(row["evaluation_phase_refs"]) for row in phase_binding_rows
+            ),
+            "consumer_ref_count": sum(
+                len(row["consumer_phase_refs"]) for row in phase_binding_rows
+            ),
         },
         "rows": phase_binding_rows,
     }
     terminalization_payload = {
         "summary": {
             "row_count": len(terminalization_rows),
-            "decision_counts": dict(sorted(Counter(row["decision"] for row in terminalization_rows).items())),
+            "decision_counts": dict(
+                sorted(Counter(row["decision"] for row in terminalization_rows).items())
+            ),
         },
         "rows": terminalization_rows,
     }
@@ -1247,7 +1491,9 @@ def render_mermaid(rows: list[dict[str, Any]]) -> str:
         lines.append(f'    {node_id}["{label}"]')
         lines.append(f"    {previous} --> {node_id}")
         previous = node_id
-    lines.append('    note1["Pre-seal prefix: MANIFEST, ARTIFACT_CONTRACT, INPUT_BOUNDARY, DATA_QUALITY"]')
+    lines.append(
+        '    note1["Pre-seal prefix: MANIFEST, ARTIFACT_CONTRACT, INPUT_BOUNDARY, DATA_QUALITY"]'
+    )
     lines.append("    A2 -.-> note1")
     lines.append('    note2["Late gates append post-seal without rewriting earlier records"]')
     lines.append("    A6 -.-> note2")
@@ -1313,7 +1559,13 @@ def render_docs(outputs: dict[str, Any]) -> tuple[str, str, str]:
             ]
         )
         for branch in row["decision_table"]["branches"]:
-            main_lines.append(f"- `{branch['decision']}`: " + ("; ".join(item["text"] for item in branch["conditions"]) or "no extra branch bullets"))
+            main_lines.append(
+                f"- `{branch['decision']}`: "
+                + (
+                    "; ".join(item["text"] for item in branch["conditions"])
+                    or "no extra branch bullets"
+                )
+            )
         if row["decision_table"]["notes"]:
             main_lines.extend(["", "### Section Notes", ""])
             for note in row["decision_table"]["notes"]:
@@ -1338,7 +1590,9 @@ def render_docs(outputs: dict[str, Any]) -> tuple[str, str, str]:
         )
     progression_lines.extend(["", "## Effect Summaries", ""])
     for row in terminal_rows:
-        progression_lines.append(f"- `{row['gate_code']}` / `{row['decision']}`: {row['effect_summary']}")
+        progression_lines.append(
+            f"- `{row['gate_code']}` / `{row['decision']}`: {row['effect_summary']}"
+        )
 
     explain_lines = [
         "# Gate Explainability and Reason-Code Usage",
@@ -1357,7 +1611,11 @@ def render_docs(outputs: dict[str, Any]) -> tuple[str, str, str]:
     family_counts = Counter(row["reason_code_family"] for row in outputs["reason_codes"])
     declared_families = registry["reason_code_family_declarations"]
     for family in declared_families:
-        note = "No explicit gate-level codes were enumerated in the primary source." if family not in family_counts else "Explicitly enumerated."
+        note = (
+            "No explicit gate-level codes were enumerated in the primary source."
+            if family not in family_counts
+            else "Explicitly enumerated."
+        )
         explain_lines.append(f"| `{family}` | `{family_counts.get(family, 0)}` | {note} |")
 
     explain_lines.extend(["", "## Per-Gate Reason Codes", ""])
@@ -1365,13 +1623,21 @@ def render_docs(outputs: dict[str, Any]) -> tuple[str, str, str]:
         explain_lines.append(f"### {gate['gate_code']}")
         if not reason_rows_by_gate[gate["gate_code"]]:
             explain_lines.append("")
-            explain_lines.append("- No explicit reason-code list was enumerated in the gate section.")
+            explain_lines.append(
+                "- No explicit reason-code list was enumerated in the gate section."
+            )
             explain_lines.append("")
             continue
         explain_lines.append("")
         for row in reason_rows_by_gate[gate["gate_code"]]:
-            applicability = ", ".join(row["decision_applicability"]) if row["decision_applicability"] else "context-dependent"
-            explain_lines.append(f"- `{row['reason_code']}`: family `{row['reason_code_family']}`, decision applicability `{applicability}`")
+            applicability = (
+                ", ".join(row["decision_applicability"])
+                if row["decision_applicability"]
+                else "context-dependent"
+            )
+            explain_lines.append(
+                f"- `{row['reason_code']}`: family `{row['reason_code_family']}`, decision applicability `{applicability}`"
+            )
         explain_lines.append("")
 
     return (

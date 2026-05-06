@@ -1,0 +1,611 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/recovery_checkpoint.schema.json",
+  "title": "RecoveryCheckpoint",
+  "description": "Recovery checkpoint contract. This schema freezes workload-tier governance, backup inventory linkage, restore-drill evidence, audit continuity, durable queue rebuild verification, authority-mutation revalidation, privacy reconciliation posture, reopen readiness, and quarantine state for restore-capable checkpoints.",
+  "type": "object",
+  "required": [
+    "checkpoint_id",
+    "datastore_ref",
+    "recovery_governance_contract",
+    "backup_ref",
+    "checkpoint_inventory_ref",
+    "snapshot_time",
+    "restore_tested_at",
+    "restore_verification_hash",
+    "rpo_class",
+    "rto_class",
+    "checkpoint_state",
+    "state_transition_contract",
+    "restore_drill_ref",
+    "privacy_reconciliation_contract",
+    "audit_continuity_verified",
+    "queue_rebuild_verified",
+    "authority_rebuild_verified",
+    "authority_binding_revalidation_verified",
+    "privacy_reconciliation_outcome_ref",
+    "reopen_readiness_state",
+    "quarantine_reason_code"
+  ],
+  "properties": {
+    "checkpoint_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "datastore_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recovery_governance_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/recovery_governance_contract.schema.json"
+        },
+        {
+          "properties": {
+            "boundary_scope": {
+              "const": "RECOVERY_CHECKPOINT"
+            }
+          }
+        }
+      ]
+    },
+    "backup_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "checkpoint_inventory_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "snapshot_time": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "restore_tested_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "restore_verification_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "rpo_class": {
+      "type": "string",
+      "enum": [
+        "RPO_15M",
+        "RPO_4H",
+        "RPO_BEST_EFFORT"
+      ]
+    },
+    "rto_class": {
+      "type": "string",
+      "enum": [
+        "RTO_60M",
+        "RTO_4H",
+        "RTO_24H"
+      ]
+    },
+    "checkpoint_state": {
+      "type": "string",
+      "enum": [
+        "REQUESTED",
+        "CREATED",
+        "VERIFIED",
+        "QUARANTINED",
+        "EXPIRED"
+      ]
+    },
+    "state_transition_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/state_transition_contract.schema.json"
+        },
+        {
+          "properties": {
+            "object_family": {
+              "const": "RECOVERY_CHECKPOINT"
+            },
+            "machine_code": {
+              "const": "RECOVERY_CHECKPOINT_LIFECYCLE_V1"
+            },
+            "state_field_name": {
+              "const": "checkpoint_state"
+            }
+          }
+        }
+      ]
+    },
+    "restore_drill_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "privacy_reconciliation_contract": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "https://taxat.dev/schemas/restore_privacy_reconciliation_contract.schema.json"
+        }
+      ]
+    },
+    "audit_continuity_verified": {
+      "type": "boolean"
+    },
+    "queue_rebuild_verified": {
+      "type": "boolean"
+    },
+    "authority_rebuild_verified": {
+      "type": "boolean"
+    },
+    "authority_binding_revalidation_verified": {
+      "type": "boolean"
+    },
+    "privacy_reconciliation_outcome_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "reopen_readiness_state": {
+      "type": "string",
+      "enum": [
+        "BLOCKED_PENDING_CHECKPOINT_CREATION",
+        "BLOCKED_PENDING_RESTORE_DRILL",
+        "BLOCKED_PENDING_PRIVACY_RECONCILIATION",
+        "BLOCKED_PENDING_COMPENSATING_RE_ERASURE",
+        "BLOCKED_PENDING_LIMITATION_RECONCILIATION",
+        "BLOCKED_LEGAL_HOLD_REVIEW",
+        "BLOCKED_PROOF_PRESERVATION_REVIEW",
+        "BLOCKED_AUTHORITY_AMBIGUITY_REVIEW",
+        "BLOCKED_PENDING_AUDIT_CONTINUITY",
+        "BLOCKED_PENDING_QUEUE_REBUILD",
+        "BLOCKED_PENDING_AUTHORITY_REVALIDATION",
+        "READY_FOR_REOPEN",
+        "QUARANTINED",
+        "EXPIRED"
+      ]
+    },
+    "quarantine_reason_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "backup_ref": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "backup_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "REQUESTED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "snapshot_time": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "snapshot_time"
+        ]
+      },
+      "then": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "REQUESTED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "checkpoint_inventory_ref": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "checkpoint_inventory_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "REQUESTED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "REQUESTED"
+          }
+        },
+        "required": [
+          "checkpoint_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "backup_ref": {
+            "type": "null"
+          },
+          "checkpoint_inventory_ref": {
+            "type": "null"
+          },
+          "snapshot_time": {
+            "type": "null"
+          },
+          "restore_tested_at": {
+            "type": "null"
+          },
+          "restore_verification_hash": {
+            "type": "null"
+          },
+          "restore_drill_ref": {
+            "type": "null"
+          },
+          "privacy_reconciliation_contract": {
+            "type": "null"
+          },
+          "audit_continuity_verified": {
+            "const": false
+          },
+          "queue_rebuild_verified": {
+            "const": false
+          },
+          "authority_rebuild_verified": {
+            "const": false
+          },
+          "authority_binding_revalidation_verified": {
+            "const": false
+          },
+          "privacy_reconciliation_outcome_ref": {
+            "type": "null"
+          },
+          "reopen_readiness_state": {
+            "const": "BLOCKED_PENDING_CHECKPOINT_CREATION"
+          },
+          "quarantine_reason_code": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "checkpoint_state": {
+            "enum": [
+              "CREATED",
+              "VERIFIED",
+              "QUARANTINED",
+              "EXPIRED"
+            ]
+          }
+        },
+        "required": [
+          "checkpoint_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "backup_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "checkpoint_inventory_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "snapshot_time": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "restore_drill_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "restore_drill_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "restore_tested_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "restore_verification_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "privacy_reconciliation_contract": {
+            "$ref": "https://taxat.dev/schemas/restore_privacy_reconciliation_contract.schema.json"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "restore_verification_hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "restore_verification_hash"
+        ]
+      },
+      "then": {
+        "properties": {
+          "restore_tested_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "restore_drill_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "privacy_reconciliation_contract": {
+            "$ref": "https://taxat.dev/schemas/restore_privacy_reconciliation_contract.schema.json"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "privacy_reconciliation_outcome_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "privacy_reconciliation_outcome_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "restore_tested_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "privacy_reconciliation_contract": {
+            "$ref": "https://taxat.dev/schemas/restore_privacy_reconciliation_contract.schema.json"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "CREATED"
+          }
+        },
+        "required": [
+          "checkpoint_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "quarantine_reason_code": {
+            "type": "null"
+          },
+          "reopen_readiness_state": {
+            "enum": [
+              "BLOCKED_PENDING_RESTORE_DRILL",
+              "BLOCKED_PENDING_PRIVACY_RECONCILIATION",
+              "BLOCKED_PENDING_COMPENSATING_RE_ERASURE",
+              "BLOCKED_PENDING_LIMITATION_RECONCILIATION",
+              "BLOCKED_LEGAL_HOLD_REVIEW",
+              "BLOCKED_PROOF_PRESERVATION_REVIEW",
+              "BLOCKED_AUTHORITY_AMBIGUITY_REVIEW",
+              "BLOCKED_PENDING_AUDIT_CONTINUITY",
+              "BLOCKED_PENDING_QUEUE_REBUILD",
+              "BLOCKED_PENDING_AUTHORITY_REVALIDATION"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "VERIFIED"
+          }
+        },
+        "required": [
+          "checkpoint_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "restore_tested_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "restore_verification_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "restore_drill_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audit_continuity_verified": {
+            "const": true
+          },
+          "queue_rebuild_verified": {
+            "const": true
+          },
+          "authority_rebuild_verified": {
+            "const": true
+          },
+          "authority_binding_revalidation_verified": {
+            "const": true
+          },
+          "privacy_reconciliation_outcome_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "privacy_reconciliation_contract": {
+            "type": "object",
+            "properties": {
+              "privacy_reconciliation_state": {
+                "enum": [
+                  "RECONCILED_NO_COMPENSATION_REQUIRED",
+                  "RECONCILED_WITH_COMPENSATING_RE_ERASURE"
+                ]
+              },
+              "audit_chain_continuity_state": {
+                "const": "VERIFIED"
+              },
+              "replay_limitation_state": {
+                "const": "VERIFIED"
+              },
+              "enquiry_limitation_state": {
+                "const": "VERIFIED"
+              },
+              "reopen_access_state": {
+                "const": "READY_FOR_REOPEN"
+              }
+            }
+          },
+          "reopen_readiness_state": {
+            "const": "READY_FOR_REOPEN"
+          },
+          "quarantine_reason_code": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "quarantine_reason_code": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "quarantine_reason_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "QUARANTINED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "QUARANTINED"
+          }
+        },
+        "required": [
+          "checkpoint_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "restore_tested_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "restore_verification_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "restore_drill_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "privacy_reconciliation_contract": {
+            "type": "object"
+          },
+          "reopen_readiness_state": {
+            "const": "QUARANTINED"
+          },
+          "quarantine_reason_code": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "EXPIRED"
+          }
+        },
+        "required": [
+          "checkpoint_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reopen_readiness_state": {
+            "const": "EXPIRED"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

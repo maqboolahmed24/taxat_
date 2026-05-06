@@ -1,0 +1,114 @@
+{
+  "contract_version": "1.0",
+  "catalog_id": "event_envelope_catalog",
+  "basis_statement": "Packets remain transport-only evidence derived from durable source truth. Duplicate meaning, request hash, idempotency, retry posture, and quarantine posture live on persisted outbox and inbox records rather than on broker-local delivery history.",
+  "message_family_rows": [
+    {
+      "family_ref": "NORTHBOUND_COMMAND",
+      "rail_label": "COMMAND",
+      "display_name": "Northbound command packet",
+      "channel_refs": ["channel.api.command.accepted"],
+      "source_record_family": "ApiCommandReceipt",
+      "durable_truth_anchor": "ApiCommandReceipt plus append-only command log",
+      "duplicate_scope_ref": "NORTHBOUND_COMMAND",
+      "transport_boundary": "HTTP acceptance may emit a packet, but request identity remains bound to the receipt and command journal.",
+      "required_identity_fields": ["duplicate_meaning_key", "request_hash", "idempotency_key"],
+      "required_packet_fields": ["packet_id", "source_record_ref", "source_record_version_hash", "payload_ref_or_null", "payload_hash"],
+      "allowed_payload_fields": ["opaque_command_ref", "manifest_ref", "basis_hash", "requested_scope_ref"],
+      "forbidden_payload_fields": ["raw_session_cookie", "raw_access_token", "plaintext_customer_payload"],
+      "notes": [
+        "Safe retries with the same sealed command meaning must reuse duplicate meaning and idempotency even if a fresh packet id is issued.",
+        "Command packets may not become the durable legal source of operator intent."
+      ]
+    },
+    {
+      "family_ref": "STAGE_TASK",
+      "rail_label": "STAGE",
+      "display_name": "Manifest stage task packet",
+      "channel_refs": ["channel.manifest.stage.dispatch"],
+      "source_record_family": "ManifestStageDispatchReceipt",
+      "durable_truth_anchor": "Manifest stage receipt and durable execution claim ledger",
+      "duplicate_scope_ref": "STAGE_TASK",
+      "transport_boundary": "Workers claim stage work from durable receipts; broker redelivery only replays the same stage claim.",
+      "required_identity_fields": ["duplicate_meaning_key", "request_hash", "idempotency_key"],
+      "required_packet_fields": ["packet_id", "order_domain_key", "source_record_ref", "payload_hash"],
+      "allowed_payload_fields": ["manifest_ref", "stage_code", "command_receipt_ref", "precondition_hash"],
+      "forbidden_payload_fields": ["inline_manifest_json", "mutable_worker_memory", "ambient_runtime_secret"],
+      "notes": [
+        "A duplicate stage packet may only reuse the same durable execution claim or surface a finished result.",
+        "Balanced reduction and frozen inputs still bind the worker after publication."
+      ]
+    },
+    {
+      "family_ref": "ARTIFACT_EVENT",
+      "rail_label": "ARTIFACT",
+      "display_name": "Artifact processing packet",
+      "channel_refs": ["channel.upload.scan.request", "channel.preview.registration"],
+      "source_record_family": "ImmutableObjectVersionEventReceipt",
+      "durable_truth_anchor": "Object-version receipt plus artifact processing ledger",
+      "duplicate_scope_ref": "ARTIFACT_EVENT",
+      "transport_boundary": "Object-store notifications are at-least-once transport hints and must collapse onto one immutable object-version ledger row.",
+      "required_identity_fields": ["duplicate_meaning_key", "request_hash", "idempotency_key"],
+      "required_packet_fields": ["packet_id", "source_record_ref", "source_record_version_hash", "payload_hash"],
+      "allowed_payload_fields": ["object_version_ref", "event_id_or_sequencer", "artifact_ref", "scan_policy_hash"],
+      "forbidden_payload_fields": ["raw_blob_bytes", "signed_download_url", "customer_safe_projection_html"],
+      "notes": [
+        "Packet redelivery never licenses a second scan, preview, or evidence-binding mutation for the same immutable object version.",
+        "If the broker disappears, restore replays durable object-version and inbox truth rather than provider event history."
+      ]
+    },
+    {
+      "family_ref": "AUTHORITY_REQUEST",
+      "rail_label": "AUTHORITY",
+      "display_name": "Authority request packet",
+      "channel_refs": ["channel.authority.transmit.dispatch", "channel.authority.reconciliation.poll"],
+      "source_record_family": "AuthorityRequestEnvelope",
+      "durable_truth_anchor": "AuthorityRequestEnvelope and AuthorityInteractionRecord",
+      "duplicate_scope_ref": "AUTHORITY_REQUEST",
+      "transport_boundary": "Transport retries reuse duplicate meaning from the sealed request identity; request hash still proves the exact send basis.",
+      "required_identity_fields": ["duplicate_meaning_key", "request_hash", "idempotency_key", "identity_namespace_hash", "access_binding_hash"],
+      "required_packet_fields": ["packet_id", "source_record_ref", "payload_ref_or_null", "payload_hash", "order_domain_key"],
+      "allowed_payload_fields": ["authority_request_envelope_ref", "request_hash", "idempotency_key", "token_binding_ref", "policy_snapshot_hash"],
+      "forbidden_payload_fields": ["raw_oauth_token", "plaintext_authority_payload", "live_provider_secret"],
+      "notes": [
+        "Lawful token rotation within the same frozen binding lineage preserves duplicate meaning and idempotency while changing request hash.",
+        "A namespace collision is a hard block even when payload bytes match."
+      ]
+    },
+    {
+      "family_ref": "AUTHORITY_INGRESS",
+      "rail_label": "INGRESS",
+      "display_name": "Authority ingress packet",
+      "channel_refs": ["channel.authority.callback.ingress"],
+      "source_record_family": "AuthorityIngressReceipt",
+      "durable_truth_anchor": "AuthorityIngressReceipt plus normalized response ledger",
+      "duplicate_scope_ref": "AUTHORITY_INGRESS",
+      "transport_boundary": "Callbacks and recovery observations enter through authenticated ingress receipts before they can influence settlement truth.",
+      "required_identity_fields": ["duplicate_meaning_key", "request_hash", "idempotency_key", "delivery_dedupe_key"],
+      "required_packet_fields": ["packet_id", "source_record_ref", "payload_hash", "order_domain_key"],
+      "allowed_payload_fields": ["ingress_receipt_ref", "authority_reference", "request_hash", "idempotency_key"],
+      "forbidden_payload_fields": ["unsigned_callback_body_as_truth", "raw_delivery_secret", "heuristic_recent_request_lookup"],
+      "notes": [
+        "Missing or stale source-record continuity on inbox arrival must quarantine before any mutation.",
+        "Authenticated ingress proof and canonical ingress receipt refs survive restore and duplicate delivery."
+      ]
+    }
+  ],
+  "source_lineage": [
+    {
+      "source_file": "Algorithm/core_engine.md",
+      "source_heading_or_logical_block": "Concurrency and modernization rules",
+      "rationale": "The engine requires a transactional outbox for publication and a transactional inbox or dedupe gate before any mutation."
+    },
+    {
+      "source_file": "Algorithm/deployment_and_resilience_contract.md",
+      "source_heading_or_logical_block": "Backup, restore, and DR rules",
+      "rationale": "Queue rebuild comes from durable outbox, inbox, interaction, and receipt truth rather than broker backlog."
+    },
+    {
+      "source_file": "Algorithm/authority_interaction_protocol.md",
+      "source_heading_or_logical_block": "Request hashing and idempotency",
+      "rationale": "Authority duplicate meaning, request hash, and idempotency derive from the sealed request identity rather than packet-local metadata."
+    }
+  ]
+}

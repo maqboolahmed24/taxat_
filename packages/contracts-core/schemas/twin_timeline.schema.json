@@ -1,0 +1,405 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/twin_timeline.schema.json",
+  "title": "TwinTimeline",
+  "description": "Paired-timeline contract for Twin Lens rendering. This schema freezes the two comparative lanes, weighted alignment score, comparable window, anchor-count summary, and any coverage or visibility limitations that affect comparison meaning.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "twin_timeline_id",
+    "twin_id",
+    "lifecycle_state",
+    "temporal_alignment_state",
+    "alignment_score",
+    "primary_anchor_ref",
+    "window_start_at",
+    "window_end_at",
+    "aligned_anchor_count",
+    "contradictory_anchor_count",
+    "unpaired_anchor_count",
+    "alignment_reason_codes",
+    "lanes"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "TwinTimeline"
+    },
+    "twin_timeline_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "twin_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "BUILT",
+        "STALE",
+        "SUPERSEDED"
+      ]
+    },
+    "temporal_alignment_state": {
+      "type": "string",
+      "enum": [
+        "LOCKED",
+        "DRIFTING",
+        "DIVERGED"
+      ]
+    },
+    "alignment_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "primary_anchor_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "window_start_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "window_end_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "aligned_anchor_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "contradictory_anchor_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "unpaired_anchor_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "alignment_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "lanes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "required": [
+          "lane_code",
+          "interpretation_space",
+          "coverage_state",
+          "event_refs",
+          "as_of",
+          "freshness_state",
+          "confidence_state",
+          "limited_by"
+        ],
+        "properties": {
+          "lane_code": {
+            "type": "string",
+            "enum": [
+              "INTERNAL_COMPUTED",
+              "AUTHORITY"
+            ]
+          },
+          "interpretation_space": {
+            "type": "string",
+            "enum": [
+              "SOURCE_SPACE",
+              "COMPUTATION_SPACE",
+              "AUTHORITY_SPACE"
+            ]
+          },
+          "coverage_state": {
+            "type": "string",
+            "enum": [
+              "COMPLETE",
+              "PARTIAL",
+              "LIMITED",
+              "UNAVAILABLE"
+            ]
+          },
+          "event_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "default": [],
+            "uniqueItems": true
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "freshness_state": {
+            "type": "string",
+            "enum": [
+              "LIVE",
+              "RECENT",
+              "STALE",
+              "LIMITED"
+            ]
+          },
+          "confidence_state": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "MEDIUM",
+              "LOW",
+              "LIMITED"
+            ]
+          },
+          "limited_by": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "default": [],
+            "uniqueItems": true
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "lane_code": {
+                  "const": "AUTHORITY"
+                }
+              },
+              "required": [
+                "lane_code"
+              ]
+            },
+            "then": {
+              "properties": {
+                "interpretation_space": {
+                  "const": "AUTHORITY_SPACE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "lane_code": {
+                  "const": "INTERNAL_COMPUTED"
+                }
+              },
+              "required": [
+                "lane_code"
+              ]
+            },
+            "then": {
+              "properties": {
+                "interpretation_space": {
+                  "enum": [
+                    "SOURCE_SPACE",
+                    "COMPUTATION_SPACE"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "coverage_state": {
+                  "const": "COMPLETE"
+                }
+              },
+              "required": [
+                "coverage_state"
+              ]
+            },
+            "then": {
+              "properties": {
+                "event_refs": {
+                  "minItems": 1
+                },
+                "limited_by": {
+                  "maxItems": 0
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "anyOf": [
+                {
+                  "properties": {
+                    "coverage_state": {
+                      "enum": [
+                        "PARTIAL",
+                        "LIMITED",
+                        "UNAVAILABLE"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "coverage_state"
+                  ]
+                },
+                {
+                  "properties": {
+                    "freshness_state": {
+                      "const": "LIMITED"
+                    }
+                  },
+                  "required": [
+                    "freshness_state"
+                  ]
+                },
+                {
+                  "properties": {
+                    "confidence_state": {
+                      "const": "LIMITED"
+                    }
+                  },
+                  "required": [
+                    "confidence_state"
+                  ]
+                }
+              ]
+            },
+            "then": {
+              "properties": {
+                "limited_by": {
+                  "minItems": 1
+                }
+              }
+            }
+          }
+        ],
+        "additionalProperties": false
+      },
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "lane_code": {
+                "const": "INTERNAL_COMPUTED"
+              }
+            },
+            "required": [
+              "lane_code"
+            ]
+          },
+          "minContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "lane_code": {
+                "const": "AUTHORITY"
+              }
+            },
+            "required": [
+              "lane_code"
+            ]
+          },
+          "minContains": 1
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "temporal_alignment_state": {
+            "const": "LOCKED"
+          }
+        },
+        "required": [
+          "temporal_alignment_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "alignment_score": {
+            "minimum": 0.9
+          },
+          "primary_anchor_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "contradictory_anchor_count": {
+            "const": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "temporal_alignment_state": {
+            "const": "DRIFTING"
+          }
+        },
+        "required": [
+          "temporal_alignment_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "alignment_score": {
+            "minimum": 0.6,
+            "exclusiveMaximum": 0.9
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "temporal_alignment_state": {
+            "const": "DIVERGED"
+          }
+        },
+        "required": [
+          "temporal_alignment_state"
+        ]
+      },
+      "then": {
+        "anyOf": [
+          {
+            "properties": {
+              "alignment_score": {
+                "exclusiveMaximum": 0.6
+              }
+            }
+          },
+          {
+            "properties": {
+              "contradictory_anchor_count": {
+                "minimum": 1
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "additionalProperties": false
+}

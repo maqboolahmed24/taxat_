@@ -9,15 +9,9 @@ import {
   registerSandboxApplication,
   type SandboxApplicationEntryUrls,
 } from "../../../../automation/provisioning/src/providers/hmrc/flows/register_sandbox_application.js";
-import {
-  subscribeRequiredMtdApis,
-} from "../../../../automation/provisioning/src/providers/hmrc/flows/subscribe_required_mtd_apis.js";
-import {
-  DEVELOPER_HUB_PROVIDER_ID,
-} from "../../../../automation/provisioning/src/providers/hmrc/flows/developer_hub_shared.js";
-import {
-  createRunContext,
-} from "../../../../automation/provisioning/src/core/run_context.js";
+import { subscribeRequiredMtdApis } from "../../../../automation/provisioning/src/providers/hmrc/flows/subscribe_required_mtd_apis.js";
+import { DEVELOPER_HUB_PROVIDER_ID } from "../../../../automation/provisioning/src/providers/hmrc/flows/developer_hub_shared.js";
+import { createRunContext } from "../../../../automation/provisioning/src/core/run_context.js";
 
 const CANONICAL_APPLICATION_NAME = "Taxat Sandbox Income Tax";
 
@@ -41,11 +35,7 @@ function fixtureRunContext() {
   });
 }
 
-async function bootstrapApplication(
-  page: Page,
-  scenario: string,
-  rootDir: string,
-) {
+async function bootstrapApplication(page: Page, scenario: string, rootDir: string) {
   const applicationRecordPath = path.join(rootDir, "sandbox_application_record.json");
   const subscriptionMatrixPath = path.join(rootDir, "sandbox_subscription_matrix.json");
 
@@ -64,9 +54,7 @@ async function bootstrapApplication(
   };
 }
 
-test("partial-subscription remediation subscribes every required-now API", async ({
-  page,
-}) => {
+test("partial-subscription remediation subscribes every required-now API", async ({ page }) => {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), "taxat-hmrc-subscriptions-partial-"));
   const paths = await bootstrapApplication(page, "app-partial", rootDir);
 
@@ -82,9 +70,7 @@ test("partial-subscription remediation subscribes every required-now API", async
   expect(result.subscriptionMatrix.required_now_complete).toBe(true);
   expect(
     result.subscriptionMatrix.rows.filter(
-      (row) =>
-        row.scope_bucket === "REQUIRED_NOW" &&
-        row.action_taken === "SUBSCRIBED_DURING_RUN",
+      (row) => row.scope_bucket === "REQUIRED_NOW" && row.action_taken === "SUBSCRIBED_DURING_RUN",
     ),
   ).toEqual(
     expect.arrayContaining([
@@ -128,8 +114,7 @@ test("API-label drift is resolved through alias matching and captured in the mat
   expect(result.subscriptionMatrix.required_now_complete).toBe(true);
   expect(
     result.subscriptionMatrix.rows.filter(
-      (row) =>
-        row.scope_bucket === "REQUIRED_NOW" && row.label_resolution === "ALIAS_MATCH",
+      (row) => row.scope_bucket === "REQUIRED_NOW" && row.label_resolution === "ALIAS_MATCH",
     ).length,
   ).toBeGreaterThan(0);
   expect(result.subscriptionMatrix.typed_gaps.join(" ")).toContain("Portal label drift resolved");

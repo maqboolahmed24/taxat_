@@ -1,0 +1,403 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/scope_execution_binding.schema.json",
+  "title": "ScopeExecutionBinding",
+  "description": "Authoritative raw-versus-executable scope contract. This schema freezes requested scope grammar, executable runtime scope, explicit scope-family interpretation, partition coverage, masking and approval posture, and mutation atomicity so orchestration, gates, workers, and authority artifacts all reuse one authorized scope meaning.",
+  "type": "object",
+  "required": [
+    "binding_scope_class",
+    "execution_mode_or_null",
+    "requested_scope_family",
+    "executable_scope_family",
+    "requested_scope",
+    "executable_scope",
+    "executable_partition_scope_refs",
+    "access_decision",
+    "reduction_posture",
+    "mutation_atomicity",
+    "masking_rules",
+    "required_approvals",
+    "required_authn_level",
+    "access_binding_hash",
+    "reason_codes"
+  ],
+  "properties": {
+    "binding_scope_class": {
+      "type": "string",
+      "enum": [
+        "RUN_MANIFEST",
+        "FROZEN_EXECUTION_BINDING",
+        "AUTHORITY_OPERATION",
+        "AUTHORITY_CALCULATION_REQUEST"
+      ]
+    },
+    "execution_mode_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "COMPLIANCE",
+        "ANALYSIS",
+        null
+      ]
+    },
+    "requested_scope_family": {
+      "type": "string",
+      "enum": [
+        "READ_ONLY",
+        "PREPARE_ONLY",
+        "PREPARE_AND_SUBMIT",
+        "AMENDMENT_INTENT",
+        "AMENDMENT_SUBMIT"
+      ]
+    },
+    "executable_scope_family": {
+      "type": "string",
+      "enum": [
+        "READ_ONLY",
+        "PREPARE_ONLY",
+        "PREPARE_AND_SUBMIT",
+        "AMENDMENT_INTENT",
+        "AMENDMENT_SUBMIT"
+      ]
+    },
+    "requested_scope": {
+      "$ref": "#/$defs/scopeArray"
+    },
+    "executable_scope": {
+      "$ref": "#/$defs/scopeArray"
+    },
+    "executable_partition_scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "access_decision": {
+      "type": "string",
+      "enum": [
+        "ALLOW",
+        "ALLOW_MASKED"
+      ]
+    },
+    "reduction_posture": {
+      "type": "string",
+      "enum": [
+        "UNCHANGED",
+        "REDUCED_BY_AUTHORIZATION"
+      ]
+    },
+    "mutation_atomicity": {
+      "type": "string",
+      "enum": [
+        "ATOMIC_REQUIRED",
+        "NARROWING_ALLOWED"
+      ]
+    },
+    "masking_rules": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "required_approvals": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "required_authn_level": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "BASIC",
+        "MFA",
+        "STEP_UP",
+        null
+      ]
+    },
+    "access_binding_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "scopeArray": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "enum": [
+            "year_end",
+            "quarterly_update",
+            "estimate_only"
+          ]
+        }
+      ],
+      "items": {
+        "type": "string",
+        "enum": [
+          "year_end",
+          "quarterly_update",
+          "estimate_only",
+          "prepare_submission",
+          "submit",
+          "amendment_intent",
+          "amendment_submit"
+        ]
+      },
+      "contains": {
+        "enum": [
+          "year_end",
+          "quarterly_update",
+          "estimate_only"
+        ]
+      },
+      "minContains": 1,
+      "maxContains": 1,
+      "minItems": 1,
+      "uniqueItems": true,
+      "allOf": [
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "amendment_intent"
+                }
+              },
+              {
+                "contains": {
+                  "const": "amendment_submit"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "estimate_only"
+                }
+              },
+              {
+                "contains": {
+                  "enum": [
+                    "prepare_submission",
+                    "submit",
+                    "amendment_intent",
+                    "amendment_submit"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "amendment_intent"
+                }
+              },
+              {
+                "contains": {
+                  "enum": [
+                    "prepare_submission",
+                    "submit"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "amendment_submit"
+                }
+              },
+              {
+                "contains": {
+                  "enum": [
+                    "prepare_submission",
+                    "submit"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "amendment_intent"
+                }
+              },
+              {
+                "not": {
+                  "contains": {
+                    "const": "year_end"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "amendment_submit"
+                }
+              },
+              {
+                "not": {
+                  "contains": {
+                    "const": "year_end"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "submit"
+                }
+              },
+              {
+                "not": {
+                  "contains": {
+                    "const": "prepare_submission"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "access_decision": {
+            "const": "ALLOW"
+          }
+        },
+        "required": [
+          "access_decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "masking_rules": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "access_decision": {
+            "const": "ALLOW_MASKED"
+          }
+        },
+        "required": [
+          "access_decision"
+        ]
+      },
+      "then": {
+        "properties": {
+          "masking_rules": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "execution_mode_or_null": {
+            "const": "ANALYSIS"
+          }
+        },
+        "required": [
+          "execution_mode_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "requested_scope": {
+            "not": {
+              "contains": {
+                "enum": [
+                  "prepare_submission",
+                  "submit",
+                  "amendment_intent",
+                  "amendment_submit"
+                ]
+              }
+            }
+          },
+          "executable_scope": {
+            "not": {
+              "contains": {
+                "enum": [
+                  "prepare_submission",
+                  "submit",
+                  "amendment_intent",
+                  "amendment_submit"
+                ]
+              }
+            }
+          },
+          "requested_scope_family": {
+            "const": "READ_ONLY"
+          },
+          "executable_scope_family": {
+            "const": "READ_ONLY"
+          },
+          "mutation_atomicity": {
+            "const": "NARROWING_ALLOWED"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

@@ -14,18 +14,10 @@ import {
   type ResumeIsolationAtlasViewModel,
 } from "../../../../infra/cache/bootstrap/provision_cache_and_stream_resume_store.js";
 
-const repoRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "..",
-  "..",
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
 
 async function readJson<T>(segments: string[]): Promise<T> {
-  return JSON.parse(
-    await readFile(path.join(repoRoot, ...segments), "utf8"),
-  ) as T;
+  return JSON.parse(await readFile(path.join(repoRoot, ...segments), "utf8")) as T;
 }
 
 test("checked-in partition contract, inventory, and atlas payload match the builder", async () => {
@@ -41,19 +33,11 @@ test("checked-in partition contract, inventory, and atlas payload match the buil
   ]);
   const sampleRun = await readJson<{
     resumeIsolationAtlas: ResumeIsolationAtlasViewModel;
-  }>([
-    "automation",
-    "provisioning",
-    "report_viewer",
-    "data",
-    "sample_run.json",
-  ]);
+  }>(["automation", "provisioning", "report_viewer", "data", "sample_run.json"]);
 
   expect(persistedContract).toEqual(createCachePartitionKeyContract());
   expect(persistedInventory).toEqual(createCacheInventoryTemplate());
-  expect(sampleRun.resumeIsolationAtlas).toEqual(
-    createResumeIsolationAtlasViewModel(),
-  );
+  expect(sampleRun.resumeIsolationAtlas).toEqual(createResumeIsolationAtlasViewModel());
 });
 
 test("partition keys stay identity-rich and preserve visibility or native legality dimensions", () => {
@@ -82,9 +66,7 @@ test("partition keys stay identity-rich and preserve visibility or native legali
     (row) => row.partition_ref === "partition.client_portal_workspace",
   );
   expect(portalRow?.key_template).toContain("customer_safe_projection_ref");
-  expect(portalRow?.local_persistence_policy).toBe(
-    "BROWSER_SESSION_EPHEMERAL_ONLY",
-  );
+  expect(portalRow?.local_persistence_policy).toBe("BROWSER_SESSION_EPHEMERAL_ONLY");
 
   const nativeRow = contract.key_rows.find(
     (row) => row.partition_ref === "partition.native_operator_hydration",
@@ -98,7 +80,5 @@ test("partition keys stay identity-rich and preserve visibility or native legali
       "canonical_object_ref",
     ]),
   );
-  expect(nativeRow?.local_persistence_policy).toBe(
-    "NATIVE_DISK_WITH_PURGE_ONLY",
-  );
+  expect(nativeRow?.local_persistence_policy).toBe("NATIVE_DISK_WITH_PURGE_ONLY");
 });

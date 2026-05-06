@@ -1,0 +1,593 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/twin_state_snapshot.schema.json",
+  "title": "TwinStateSnapshot",
+  "description": "Mirrored lane-snapshot contract for Twin Lens rendering. This schema freezes one assembled comparison lane, including the basis, baseline posture, component lineage, freshness/confidence posture, and authoritativeness semantics that must exist before cross-lane comparison begins.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "twin_state_snapshot_id",
+    "twin_id",
+    "lane_code",
+    "assembly_state",
+    "snapshot_role",
+    "comparison_key_profile_code",
+    "comparison_basis_ref",
+    "baseline_ref",
+    "component_refs",
+    "subject_count",
+    "comparable_subject_count",
+    "non_comparable_subject_count",
+    "subject_key_collision_refs",
+    "contradictory_component_refs",
+    "freshness_state",
+    "confidence_state",
+    "limitation_codes",
+    "authority_truth_state",
+    "baseline_state",
+    "amendment_position",
+    "replay_authoritativeness",
+    "as_of",
+    "stale_after",
+    "generated_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "TwinStateSnapshot"
+    },
+    "twin_state_snapshot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "twin_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lane_code": {
+      "type": "string",
+      "enum": [
+        "INTERNAL_COMPUTED",
+        "AUTHORITY"
+      ]
+    },
+    "assembly_state": {
+      "type": "string",
+      "enum": [
+        "ASSEMBLED",
+        "PARTIAL",
+        "LIMITED",
+        "STALE",
+        "CONTRADICTORY",
+        "UNAVAILABLE",
+        "SUPERSEDED"
+      ]
+    },
+    "snapshot_role": {
+      "type": "string",
+      "enum": [
+        "WORKING_STATE",
+        "AUTHORITY_OBSERVED"
+      ]
+    },
+    "comparison_key_profile_code": {
+      "const": "TWIN_KEY_V1_SHA256"
+    },
+    "comparison_basis_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "baseline_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "component_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "subject_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "comparable_subject_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "non_comparable_subject_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "subject_key_collision_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "contradictory_component_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "freshness_state": {
+      "type": "string",
+      "enum": [
+        "LIVE",
+        "RECENT",
+        "STALE",
+        "LIMITED"
+      ]
+    },
+    "confidence_state": {
+      "type": "string",
+      "enum": [
+        "HIGH",
+        "MEDIUM",
+        "LOW",
+        "LIMITED"
+      ]
+    },
+    "limitation_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "authority_truth_state": {
+      "type": "string",
+      "enum": [
+        "NOT_APPLICABLE",
+        "NOT_REQUESTED",
+        "UNKNOWN",
+        "PENDING_ACK",
+        "PARTIAL_ACK",
+        "CONFIRMED",
+        "REJECTED",
+        "OUT_OF_BAND"
+      ]
+    },
+    "baseline_state": {
+      "type": "string",
+      "enum": [
+        "NOT_APPLICABLE",
+        "PROVED",
+        "PARTIAL",
+        "MISSING",
+        "STALE",
+        "SUPERSEDED"
+      ]
+    },
+    "amendment_position": {
+      "type": "string",
+      "enum": [
+        "NOT_APPLICABLE",
+        "PRE_BASELINE",
+        "FILED_BASELINE",
+        "AMENDED_BASELINE",
+        "AUTHORITY_CORRECTED_BASELINE"
+      ]
+    },
+    "replay_authoritativeness": {
+      "type": "string",
+      "enum": [
+        "LIVE",
+        "REPLAY",
+        "ANALYSIS_ONLY"
+      ]
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "stale_after": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "lane_code": {
+            "const": "AUTHORITY"
+          }
+        },
+        "required": [
+          "lane_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "snapshot_role": {
+            "const": "AUTHORITY_OBSERVED"
+          },
+          "replay_authoritativeness": {
+            "enum": [
+              "LIVE",
+              "REPLAY"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lane_code": {
+            "const": "INTERNAL_COMPUTED"
+          }
+        },
+        "required": [
+          "lane_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "snapshot_role": {
+            "const": "WORKING_STATE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "assembly_state": {
+            "enum": [
+              "ASSEMBLED",
+              "PARTIAL",
+              "LIMITED",
+              "STALE",
+              "CONTRADICTORY"
+            ]
+          }
+        },
+        "required": [
+          "assembly_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "comparison_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "component_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "assembly_state": {
+            "const": "ASSEMBLED"
+          }
+        },
+        "required": [
+          "assembly_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "component_refs": {
+            "minItems": 1
+          },
+          "non_comparable_subject_count": {
+            "const": 0
+          },
+          "subject_key_collision_refs": {
+            "maxItems": 0
+          },
+          "contradictory_component_refs": {
+            "maxItems": 0
+          },
+          "limitation_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "assembly_state": {
+            "const": "UNAVAILABLE"
+          }
+        },
+        "required": [
+          "assembly_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "comparison_basis_ref": {
+            "type": "null"
+          },
+          "component_refs": {
+            "maxItems": 0
+          },
+          "non_comparable_subject_count": {
+            "const": 0
+          },
+          "subject_key_collision_refs": {
+            "maxItems": 0
+          },
+          "contradictory_component_refs": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "assembly_state": {
+            "enum": [
+              "PARTIAL",
+              "LIMITED",
+              "STALE",
+              "UNAVAILABLE"
+            ]
+          }
+        },
+        "required": [
+          "assembly_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "limitation_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "assembly_state": {
+            "enum": [
+              "LIMITED",
+              "STALE",
+              "CONTRADICTORY"
+            ]
+          }
+        },
+        "required": [
+          "assembly_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "non_comparable_subject_count": {
+            "minimum": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "assembly_state": {
+            "const": "CONTRADICTORY"
+          }
+        },
+        "required": [
+          "assembly_state"
+        ]
+      },
+      "then": {
+        "anyOf": [
+          {
+            "properties": {
+              "contradictory_component_refs": {
+                "minItems": 1
+              }
+            }
+          },
+          {
+            "properties": {
+              "subject_key_collision_refs": {
+                "minItems": 1
+              }
+            }
+          }
+        ],
+        "properties": {
+          "non_comparable_subject_count": {
+            "minimum": 1
+          },
+          "limitation_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "subject_key_collision_refs": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "subject_key_collision_refs"
+        ]
+      },
+      "then": {
+        "properties": {
+          "assembly_state": {
+            "const": "CONTRADICTORY"
+          },
+          "non_comparable_subject_count": {
+            "minimum": 1
+          },
+          "limitation_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "contradictory_component_refs": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "contradictory_component_refs"
+        ]
+      },
+      "then": {
+        "properties": {
+          "assembly_state": {
+            "const": "CONTRADICTORY"
+          },
+          "non_comparable_subject_count": {
+            "minimum": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "authority_truth_state": {
+            "const": "PARTIAL_ACK"
+          }
+        },
+        "required": [
+          "authority_truth_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lane_code": {
+            "const": "AUTHORITY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "baseline_state": {
+            "enum": [
+              "NOT_APPLICABLE",
+              "MISSING"
+            ]
+          }
+        },
+        "required": [
+          "baseline_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "baseline_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "baseline_state": {
+            "enum": [
+              "PROVED",
+              "PARTIAL",
+              "STALE",
+              "SUPERSEDED"
+            ]
+          }
+        },
+        "required": [
+          "baseline_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "baseline_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "baseline_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "baseline_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "baseline_state": {
+            "enum": [
+              "PROVED",
+              "PARTIAL",
+              "STALE",
+              "SUPERSEDED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "replay_authoritativeness": {
+            "const": "ANALYSIS_ONLY"
+          }
+        },
+        "required": [
+          "replay_authoritativeness"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lane_code": {
+            "const": "INTERNAL_COMPUTED"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

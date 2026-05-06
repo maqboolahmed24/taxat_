@@ -1,0 +1,403 @@
+{
+  "artifactVersion": "CONTRACT_OBSERVATORY_ARTIFACT_V1",
+  "artifactSlug": "doc--docs-testing-ephemeral_environment_and_reset_workflows",
+  "artifactKind": "MARKDOWN",
+  "sectionRef": "SUPPORT_DOCS",
+  "authorityLevel": "SUPPORTING_REFERENCE",
+  "sourceTruthBadge": "Support Documentation",
+  "tone": "slate",
+  "title": "Ephemeral Environment And Reset Workflows",
+  "subtitle": "docs/testing/ephemeral_environment_and_reset_workflows.md",
+  "summary": "",
+  "canonicalPath": "docs/testing/ephemeral_environment_and_reset_workflows.md",
+  "sourceLineage": [
+    "docs/testing/ephemeral_environment_and_reset_workflows.md"
+  ],
+  "headingCount": 12,
+  "headings": [
+    {
+      "level": 1,
+      "text": "Ephemeral Environment And Reset Workflows",
+      "slug": "ephemeral-environment-and-reset-workflows"
+    },
+    {
+      "level": 2,
+      "text": "Purpose",
+      "slug": "purpose"
+    },
+    {
+      "level": 2,
+      "text": "Identity And Namespace Rules",
+      "slug": "identity-and-namespace-rules"
+    },
+    {
+      "level": 2,
+      "text": "Seed And Fixture Basis",
+      "slug": "seed-and-fixture-basis"
+    },
+    {
+      "level": 2,
+      "text": "Lifecycle Commands",
+      "slug": "lifecycle-commands"
+    },
+    {
+      "level": 3,
+      "text": "Bootstrap",
+      "slug": "bootstrap"
+    },
+    {
+      "level": 3,
+      "text": "Load Seed Material",
+      "slug": "load-seed-material"
+    },
+    {
+      "level": 3,
+      "text": "Cleanliness Verification",
+      "slug": "cleanliness-verification"
+    },
+    {
+      "level": 3,
+      "text": "Reset",
+      "slug": "reset"
+    },
+    {
+      "level": 3,
+      "text": "Destroy",
+      "slug": "destroy"
+    },
+    {
+      "level": 2,
+      "text": "Browser And Playwright Attachment",
+      "slug": "browser-and-playwright-attachment"
+    },
+    {
+      "level": 2,
+      "text": "Evidence Layout",
+      "slug": "evidence-layout"
+    }
+  ],
+  "proseSections": [
+    {
+      "headingSlug": "ephemeral-environment-and-reset-workflows",
+      "headingText": "Ephemeral Environment And Reset Workflows",
+      "level": 1,
+      "lines": [
+        ""
+      ],
+      "plainText": "",
+      "excerpt": "",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "purpose",
+      "headingText": "Purpose",
+      "level": 2,
+      "lines": [
+        "",
+        "Ephemeral environments are the governed test-shard runtime for CI, preview review, and local",
+        "high-fidelity suites. They reuse the same local runtime substrate from",
+        "`infra/local/local_runtime_topology.json`, but every lifecycle command requires an explicit",
+        "environment identity and derives isolated namespaces for control-store state, audit streams,",
+        "object prefixes, queues, caches, projections, upload sessions, and worker leases.",
+        "",
+        "The unit of ephemerality is one `TEST_SHARD_INSTANCE`. A pull request or CI run may own multiple",
+        "ephemeral environments, but each shard must still receive its own identity hash and namespace hash.",
+        ""
+      ],
+      "plainText": "Ephemeral environments are the governed test shard runtime for CI, preview review, and local high fidelity suites. They reuse the same local runtime substrate from infra/local/local runtime topology.json, but every lifecycle command requires an explicit environment identity and derives isolated namespaces for control store state, audit streams, object prefixes, queues, caches, projections, upload sessions, and worker leases. The unit of ephemerality is one TEST SHARD INSTANCE. A pull request or CI run may own multiple ephemeral environments, but each shard must still receive its own identity hash and namespace hash.",
+      "excerpt": "Ephemeral environments are the governed test shard runtime for CI, preview review, and local high fidelity suites. They reuse the same local runtime substrate from infra/local/loc…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "identity-and-namespace-rules",
+      "headingText": "Identity And Namespace Rules",
+      "level": 2,
+      "lines": [
+        "",
+        "- Environment ids must match `^env-ephemeral-[a-z0-9]+(?:-[a-z0-9]+)*$`.",
+        "- Scope classes are `CI_RUN_SHARD`, `PREVIEW_REVIEW_SHARD`, and `LOCAL_HIGH_FIDELITY_SHARD`.",
+        "- The namespace hash is the first 12 hex characters of the stable environment identity hash.",
+        "- Namespaces derive only from the explicit `environment_id` and `namespace_hash`; they are never",
+        "  inferred from broad defaults or ambient host state.",
+        "- Reset and destroy commands reject manifests whose `environment_ref` is not one of the approved",
+        "  ephemeral environment references from `infra/test/ephemeral_environment_catalog.json`.",
+        ""
+      ],
+      "plainText": "Environment ids must match ^env ephemeral [a z0 9]+(?: [a z0 9]+) $. Scope classes are CI RUN SHARD, PREVIEW REVIEW SHARD, and LOCAL HIGH FIDELITY SHARD. The namespace hash is the first 12 hex characters of the stable environment identity hash. Namespaces derive only from the explicit environment id and namespace hash; they are never inferred from broad defaults or ambient host state. Reset and destroy commands reject manifests whose environment ref is not one of the approved ephemeral environment references from infra/test/ephemeral environment catalog.json.",
+      "excerpt": "Environment ids must match ^env ephemeral [a z0 9]+(?: [a z0 9]+) $. Scope classes are CI RUN SHARD, PREVIEW REVIEW SHARD, and LOCAL HIGH FIDELITY SHARD. The namespace hash is the…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "seed-and-fixture-basis",
+      "headingText": "Seed And Fixture Basis",
+      "level": 2,
+      "lines": [
+        "",
+        "- `PROFILE_GOLDEN_PACK_ONLY` is the default seed profile for CI and preview review shards.",
+        "- `PROFILE_DETERMINISTIC_BASELINE` is the default seed profile for local high-fidelity shards.",
+        "- Seed material is written as `seed_material.json` and hashed into the environment manifest.",
+        "- Cleanliness verification compares the manifest seed-profile hash against the current reviewed seed",
+        "  profile contract. A changed seed profile after bootstrap is a hard failure, not a warning.",
+        ""
+      ],
+      "plainText": "PROFILE GOLDEN PACK ONLY is the default seed profile for CI and preview review shards. PROFILE DETERMINISTIC BASELINE is the default seed profile for local high fidelity shards. Seed material is written as seed material.json and hashed into the environment manifest. Cleanliness verification compares the manifest seed profile hash against the current reviewed seed profile contract. A changed seed profile after bootstrap is a hard failure, not a warning.",
+      "excerpt": "PROFILE GOLDEN PACK ONLY is the default seed profile for CI and preview review shards. PROFILE DETERMINISTIC BASELINE is the default seed profile for local high fidelity shards. S…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "lifecycle-commands",
+      "headingText": "Lifecycle Commands",
+      "level": 2,
+      "lines": [
+        ""
+      ],
+      "plainText": "",
+      "excerpt": "",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "bootstrap",
+      "headingText": "Bootstrap",
+      "level": 3,
+      "lines": [
+        "",
+        "`scripts/test/bootstrap_ephemeral_environment.py` provisions the manifest, records the schema",
+        "bundle basis, writes seed material, and verifies cleanliness before marking the environment",
+        "`READY`.",
+        "",
+        "Bootstrap is resumable. If it halts after `MIGRATION_BASIS` or `SEED_LOAD`, rerun the same command",
+        "with the same explicit identity and seed inputs.",
+        "",
+        "Example:",
+        "",
+        "```bash",
+        "python3 ./scripts/test/bootstrap_ephemeral_environment.py \\",
+        "  --environment-id env-ephemeral-ci-validate-001 \\",
+        "  --scope-class CI_RUN_SHARD \\",
+        "  --owner-ref ci.run.20260423.001 \\",
+        "  --shard-ref shard-a \\",
+        "  --runtime-profile local \\",
+        "  --state-dir ./.tmp/ephemeral",
+        "```",
+        ""
+      ],
+      "plainText": "scripts/test/bootstrap ephemeral environment.py provisions the manifest, records the schema bundle basis, writes seed material, and verifies cleanliness before marking the environment READY. Bootstrap is resumable. If it halts after MIGRATION BASIS or SEED LOAD, rerun the same command with the same explicit identity and seed inputs. Example:",
+      "excerpt": "scripts/test/bootstrap ephemeral environment.py provisions the manifest, records the schema bundle basis, writes seed material, and verifies cleanliness before marking the environ…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "load-seed-material",
+      "headingText": "Load Seed Material",
+      "level": 3,
+      "lines": [
+        "",
+        "`scripts/test/load_ephemeral_seed_profile.py` regenerates deterministic seed material for a",
+        "previously declared environment identity. When a manifest already exists, it reuses that manifest's",
+        "locked identity rather than accepting partial overrides.",
+        ""
+      ],
+      "plainText": "scripts/test/load ephemeral seed profile.py regenerates deterministic seed material for a previously declared environment identity. When a manifest already exists, it reuses that manifest's locked identity rather than accepting partial overrides.",
+      "excerpt": "scripts/test/load ephemeral seed profile.py regenerates deterministic seed material for a previously declared environment identity. When a manifest already exists, it reuses that…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "cleanliness-verification",
+      "headingText": "Cleanliness Verification",
+      "level": 3,
+      "lines": [
+        "",
+        "`scripts/test/verify_ephemeral_cleanliness.py` proves the environment matches the declared basis.",
+        "It checks:",
+        "",
+        "- lifecycle posture when `READY` is required",
+        "- queue, cache, upload-session, projection, and cursor emptiness",
+        "- object-prefix emptiness across staging, quarantine, and derived prefixes",
+        "- service availability for queue, cache, and object storage",
+        "- seed-profile-hash continuity",
+        ""
+      ],
+      "plainText": "scripts/test/verify ephemeral cleanliness.py proves the environment matches the declared basis. It checks: lifecycle posture when READY is required queue, cache, upload session, projection, and cursor emptiness object prefix emptiness across staging, quarantine, and derived prefixes service availability for queue, cache, and object storage seed profile hash continuity",
+      "excerpt": "scripts/test/verify ephemeral cleanliness.py proves the environment matches the declared basis. It checks: lifecycle posture when READY is required queue, cache, upload session, p…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "reset",
+      "headingText": "Reset",
+      "level": 3,
+      "lines": [
+        "",
+        "`scripts/test/reset_ephemeral_environment.py` always begins with an explicit identity recheck.",
+        "It then applies one of two governed reset scopes:",
+        "",
+        "- `FAST_DISPOSABLE_REUSE`",
+        "  Clears disposable acceleration only: queue, DLQ, cache, projections, stream cursors, and worker",
+        "  leases.",
+        "- `FULL_TEST_ISOLATION`",
+        "  Recreates deterministic truth rails as well: control schema, audit schema, object prefixes,",
+        "  upload sessions, and audit streams, then reloads the deterministic seed profile.",
+        "",
+        "Reset halts rather than masking risk when:",
+        "",
+        "- workers still hold live leases and `--force-fence-workers` is not supplied",
+        "- queue or cache service availability is false",
+        "- post-reset cleanliness verification detects residual drift",
+        "",
+        "Every reset writes typed evidence under `evidence/`.",
+        ""
+      ],
+      "plainText": "scripts/test/reset ephemeral environment.py always begins with an explicit identity recheck. It then applies one of two governed reset scopes: FAST DISPOSABLE REUSE Clears disposable acceleration only: queue, DLQ, cache, projections, stream cursors, and worker leases. FULL TEST ISOLATION Recreates deterministic truth rails as well: control schema, audit schema, object prefixes, upload sessions, and audit streams, then reloads the deterministic seed profile. Reset halts rather than masking risk when: workers still hold live leases and force fence workers is not supplied queue or cache service availability is false post reset cleanliness verification detects residual drift Every reset writes typed evidence under evidence/.",
+      "excerpt": "scripts/test/reset ephemeral environment.py always begins with an explicit identity recheck. It then applies one of two governed reset scopes: FAST DISPOSABLE REUSE Clears disposa…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "destroy",
+      "headingText": "Destroy",
+      "level": 3,
+      "lines": [
+        "",
+        "`scripts/test/destroy_ephemeral_environment.py` tears down the approved environment namespaces,",
+        "removes seed and cleanliness artifacts, and preserves only evidence files.",
+        "",
+        "Destroy is blocked while `debug_retention_active` is true unless",
+        "`--override-debug-retention` is supplied. This keeps debugging posture explicit instead of letting a",
+        "cleanup command silently discard retained state.",
+        ""
+      ],
+      "plainText": "scripts/test/destroy ephemeral environment.py tears down the approved environment namespaces, removes seed and cleanliness artifacts, and preserves only evidence files. Destroy is blocked while debug retention active is true unless override debug retention is supplied. This keeps debugging posture explicit instead of letting a cleanup command silently discard retained state.",
+      "excerpt": "scripts/test/destroy ephemeral environment.py tears down the approved environment namespaces, removes seed and cleanliness artifacts, and preserves only evidence files. Destroy is…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "browser-and-playwright-attachment",
+      "headingText": "Browser And Playwright Attachment",
+      "level": 2,
+      "lines": [
+        "",
+        "Browser suites should attach through the environment manifest and its seed material, not through",
+        "hard-coded ids. The manifest exposes a `browser_attachment` block that includes:",
+        "",
+        "- `environment_identity_chip`",
+        "- `session_fixture_alias`",
+        "- `route_identity_ref`",
+        "- `queue_flow_ref`",
+        "- `upload_object_ref`",
+        "- `cache_partition_ref`",
+        "- `retry_rebase_token`",
+        "",
+        "Playwright suites must assert that the browser-visible journey uses those manifest-derived values.",
+        "Retry and rebase checks must fail closed when a token from another ephemeral environment is used.",
+        ""
+      ],
+      "plainText": "Browser suites should attach through the environment manifest and its seed material, not through hard coded ids. The manifest exposes a browser attachment block that includes: environment identity chip session fixture alias route identity ref queue flow ref upload object ref cache partition ref retry rebase token Playwright suites must assert that the browser visible journey uses those manifest derived values. Retry and rebase checks must fail closed when a token from another ephemeral environment is used.",
+      "excerpt": "Browser suites should attach through the environment manifest and its seed material, not through hard coded ids. The manifest exposes a browser attachment block that includes: env…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "evidence-layout",
+      "headingText": "Evidence Layout",
+      "level": 2,
+      "lines": [
+        "",
+        "Each environment state directory stores:",
+        "",
+        "- `environment_manifest.json`",
+        "- `seed_material.json`",
+        "- `cleanliness_report.json`",
+        "- `evidence/reset-*.json`",
+        "- `evidence/destroy-*.json`",
+        "",
+        "Reset and destroy evidence stays redaction-safe. It captures chronology, resource counts, scope,",
+        "seed-profile hash, approved target pattern, outcome, and source lineage, but never raw customer or",
+        "secret payloads.",
+        ""
+      ],
+      "plainText": "Each environment state directory stores: environment manifest.json seed material.json cleanliness report.json evidence/reset .json evidence/destroy .json Reset and destroy evidence stays redaction safe. It captures chronology, resource counts, scope, seed profile hash, approved target pattern, outcome, and source lineage, but never raw customer or secret payloads.",
+      "excerpt": "Each environment state directory stores: environment manifest.json seed material.json cleanliness report.json evidence/reset .json evidence/destroy .json Reset and destroy evidenc…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    }
+  ],
+  "schemaIdentityOrNull": null,
+  "schemaFields": [],
+  "samplePointers": [],
+  "sampleIdentityOrNull": null,
+  "bindingIdentityOrNull": null,
+  "validatorIdentityOrNull": null,
+  "driftIdentityOrNull": null,
+  "headerStrip": {
+    "kind": "PROSE",
+    "badgeLabel": "Support Documentation",
+    "metricPairs": [
+      {
+        "label": "Headings",
+        "value": "12"
+      },
+      {
+        "label": "Schemas",
+        "value": "0"
+      },
+      {
+        "label": "Tasks",
+        "value": "0"
+      }
+    ]
+  },
+  "relationships": {
+    "schemas": [],
+    "samples": [],
+    "bindings": [],
+    "validators": [],
+    "docs": [],
+    "tasks": []
+  },
+  "sourceTruthStack": {
+    "file": [
+      "docs/testing/ephemeral_environment_and_reset_workflows.md"
+    ],
+    "headings": [
+      "Ephemeral Environment And Reset Workflows",
+      "Purpose",
+      "Identity And Namespace Rules",
+      "Seed And Fixture Basis",
+      "Lifecycle Commands",
+      "Bootstrap",
+      "Load Seed Material",
+      "Cleanliness Verification",
+      "Reset",
+      "Destroy",
+      "Browser And Playwright Attachment",
+      "Evidence Layout"
+    ],
+    "schemaRefs": [],
+    "sampleRefs": [],
+    "bindingRefs": [],
+    "validatorRefs": [],
+    "driftRefs": [],
+    "taskRefs": []
+  },
+  "fieldCrosslinks": [],
+  "taskRefs": []
+}

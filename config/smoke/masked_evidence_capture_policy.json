@@ -1,0 +1,214 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "masked_evidence_capture_policy",
+  "evidence_root": "artifacts/smoke/external-credential-evidence",
+  "retained_safe_fields": [
+    "safe_credential_ref",
+    "vault_metadata_ref",
+    "credential_fingerprint_or_alias",
+    "principal_identity",
+    "scope_or_role_identity",
+    "endpoint_identifier",
+    "masked_http_status",
+    "masked_http_body_excerpt",
+    "checkpoint_reason_code",
+    "evidence_ref"
+  ],
+  "forbidden_persisted_fields": [
+    "raw_secret",
+    "raw_bearer_token",
+    "raw_refresh_token",
+    "raw_session_cookie",
+    "raw_authorization_header",
+    "raw_provider_page_html",
+    "raw_browser_storage",
+    "unredacted_screenshot"
+  ],
+  "rule_rows": [
+    {
+      "rule_ref": "safe-credential-ref.reference-only",
+      "artifact_kind": "SAFE_CREDENTIAL_REF",
+      "capture_mode": "REFERENCE_ONLY",
+      "allowed_fields": [
+        "safe_credential_ref",
+        "vault_metadata_ref"
+      ],
+      "forbidden_fields": [
+        "raw_secret",
+        "vault://secret/*"
+      ],
+      "redaction_strategy": "Reference metadata and aliases only.",
+      "retention_location": "typed-json-ledger",
+      "notes": [
+        "Credential refs must point to safe aliases or metadata only."
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::no-secret-leakage-to-logs-traces-or-caches",
+          "rationale": "Evidence capture must never persist raw credentials, session cookies, or bearer tokens outside the governed boundary."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::durable-evidence-versus-telemetry",
+          "rationale": "Smoke evidence belongs in a durable, typed ledger instead of noisy telemetry or free-form screenshots."
+        }
+      ]
+    },
+    {
+      "rule_ref": "principal-scope.masked",
+      "artifact_kind": "PRINCIPAL_ASSERTION",
+      "capture_mode": "MASKED",
+      "allowed_fields": [
+        "principal_identity",
+        "scope_or_role_identity"
+      ],
+      "forbidden_fields": [
+        "raw_access_token",
+        "raw_private_key"
+      ],
+      "redaction_strategy": "Normalize to exact principal or scope identifiers without embedding any credential material.",
+      "retention_location": "typed-json-ledger",
+      "notes": [
+        "Principal and scope evidence remains copy-safe."
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::no-secret-leakage-to-logs-traces-or-caches",
+          "rationale": "Evidence capture must never persist raw credentials, session cookies, or bearer tokens outside the governed boundary."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::durable-evidence-versus-telemetry",
+          "rationale": "Smoke evidence belongs in a durable, typed ledger instead of noisy telemetry or free-form screenshots."
+        }
+      ]
+    },
+    {
+      "rule_ref": "http-metadata.masked",
+      "artifact_kind": "HTTP_METADATA",
+      "capture_mode": "MASKED",
+      "allowed_fields": [
+        "masked_http_status",
+        "masked_http_body_excerpt",
+        "endpoint_identifier"
+      ],
+      "forbidden_fields": [
+        "raw_authorization_header",
+        "set-cookie",
+        "raw_response_body"
+      ],
+      "redaction_strategy": "Capture status and short body fragments only after explicit masking and truncation.",
+      "retention_location": "typed-json-ledger",
+      "notes": [
+        "HTTP evidence stays metadata-only and short-form."
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::no-secret-leakage-to-logs-traces-or-caches",
+          "rationale": "Evidence capture must never persist raw credentials, session cookies, or bearer tokens outside the governed boundary."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::durable-evidence-versus-telemetry",
+          "rationale": "Smoke evidence belongs in a durable, typed ledger instead of noisy telemetry or free-form screenshots."
+        }
+      ]
+    },
+    {
+      "rule_ref": "checkpoint-screenshot.masked",
+      "artifact_kind": "MASKED_SCREENSHOT",
+      "capture_mode": "MASKED",
+      "allowed_fields": [
+        "masked_screenshot_path",
+        "checkpoint_reason_code"
+      ],
+      "forbidden_fields": [
+        "unredacted_screenshot",
+        "visible_secret_field",
+        "mailbox_or_otp"
+      ],
+      "redaction_strategy": "Mask inputs, mailbox hints, one-time codes, and challenge prompts.",
+      "retention_location": "masked-artifact-store",
+      "notes": [
+        "Screenshots are allowed only for manual checkpoints and only after masking."
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::no-secret-leakage-to-logs-traces-or-caches",
+          "rationale": "Evidence capture must never persist raw credentials, session cookies, or bearer tokens outside the governed boundary."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::durable-evidence-versus-telemetry",
+          "rationale": "Smoke evidence belongs in a durable, typed ledger instead of noisy telemetry or free-form screenshots."
+        }
+      ]
+    },
+    {
+      "rule_ref": "dom-signature.hash-only",
+      "artifact_kind": "DOM_SIGNATURE",
+      "capture_mode": "HASH_ONLY",
+      "allowed_fields": [
+        "title_hash",
+        "url_hash",
+        "dom_hash"
+      ],
+      "forbidden_fields": [
+        "raw_provider_page_html",
+        "raw_form_values"
+      ],
+      "redaction_strategy": "Store page signatures only, never a raw DOM dump.",
+      "retention_location": "typed-json-ledger",
+      "notes": [
+        "DOM capture is hash-only by default."
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::no-secret-leakage-to-logs-traces-or-caches",
+          "rationale": "Evidence capture must never persist raw credentials, session cookies, or bearer tokens outside the governed boundary."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::durable-evidence-versus-telemetry",
+          "rationale": "Smoke evidence belongs in a durable, typed ledger instead of noisy telemetry or free-form screenshots."
+        }
+      ]
+    },
+    {
+      "rule_ref": "browser-storage.suppressed",
+      "artifact_kind": "CHECKPOINT_RECORD",
+      "capture_mode": "REFERENCE_ONLY",
+      "allowed_fields": [
+        "checkpoint_record_ref"
+      ],
+      "forbidden_fields": [
+        "raw_browser_storage",
+        "raw_session_cookie"
+      ],
+      "redaction_strategy": "Persist a checkpoint ref only; browser state never leaves the boundary.",
+      "retention_location": "typed-json-ledger",
+      "notes": [
+        "Browser storage is never exported into repo-tracked evidence."
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::no-secret-leakage-to-logs-traces-or-caches",
+          "rationale": "Evidence capture must never persist raw credentials, session cookies, or bearer tokens outside the governed boundary."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::durable-evidence-versus-telemetry",
+          "rationale": "Smoke evidence belongs in a durable, typed ledger instead of noisy telemetry or free-form screenshots."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Raw credential material, raw cookies, and raw provider pages are always forbidden.",
+    "Screenshots and DOM evidence are limited to masked or hash-only checkpoint capture."
+  ],
+  "source_refs": [
+    {
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::no-secret-leakage-to-logs-traces-or-caches",
+      "rationale": "Evidence capture must never persist raw credentials, session cookies, or bearer tokens outside the governed boundary."
+    },
+    {
+      "source_ref": "Algorithm/observability_and_audit_contract.md::durable-evidence-versus-telemetry",
+      "rationale": "Smoke evidence belongs in a durable, typed ledger instead of noisy telemetry or free-form screenshots."
+    }
+  ]
+}

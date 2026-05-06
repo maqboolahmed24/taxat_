@@ -10,15 +10,11 @@ test("renders the secret root topology ledger with semantic sections and safe re
   await page.goto(secretRootLedgerUrl);
 
   await expect(page.locator("html")).toHaveAttribute("data-motion", "reduce");
-  await expect(
-    page.getByRole("navigation", { name: "Secret alias families" }),
-  ).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Secret alias families" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Alias Catalog" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Key Hierarchy" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Access Matrix" })).toBeVisible();
-  await expect(page.locator("#drawer-title")).toHaveText(
-    "hmrc/client-secret/web-app-via-server",
-  );
+  await expect(page.locator("#drawer-title")).toHaveText("hmrc/client-secret/web-app-via-server");
   await expect(page.getByText("BEGIN PRIVATE KEY")).toHaveCount(0);
 });
 
@@ -36,16 +32,10 @@ test("supports keyboard selection across alias families and updates the persiste
   await aliasButton.focus();
   await page.keyboard.press("Enter");
 
-  await expect(page.locator("#main-title")).toHaveText(
-    "monitoring/sentry/ingest-dsn",
-  );
-  await expect(page.locator("#drawer-title")).toHaveText(
-    "monitoring/sentry/ingest-dsn",
-  );
+  await expect(page.locator("#main-title")).toHaveText("monitoring/sentry/ingest-dsn");
+  await expect(page.locator("#drawer-title")).toHaveText("monitoring/sentry/ingest-dsn");
 
-  const grantButton = page
-    .locator(".secret-access-row")
-    .filter({ hasText: "Observability agent" });
+  const grantButton = page.locator(".secret-access-row").filter({ hasText: "Observability agent" });
   await grantButton.focus();
   await page.keyboard.press("Enter");
 
@@ -54,8 +44,6 @@ test("supports keyboard selection across alias families and updates the persiste
     page
       .locator("#step-list .field-row")
       .filter({ hasText: "Store ref preview" })
-      .getByText(
-        "vault://secret/sec_preprod_runtime/monitoring/sentry/ingest-dsn/current",
-      ),
+      .getByText("vault://secret/sec_preprod_runtime/monitoring/sentry/ingest-dsn/current"),
   ).toBeVisible();
 });

@@ -1,0 +1,129 @@
+{
+  "contract_version": "NORTHBOUND_PROBLEM_CODE_CATALOG_V1",
+  "catalog_id": "northbound-problem-code-catalog",
+  "basis_statement": "Problem codes are explicit northbound recovery contracts rather than ad hoc HTTP strings so browser, native, automation, and future endpoints can rebase or stop from one typed envelope.",
+  "problem_rows": [
+    {
+      "problem_code": "INVALID_COMMAND_ENVELOPE",
+      "title": "Command envelope is invalid",
+      "detail_template": "The northbound command envelope did not match the required command-family shape, target scope, or truth-boundary contract.",
+      "http_status": 422,
+      "retryable": false,
+      "rebase_required": false,
+      "actionability_state": "NO_SAFE_ACTION",
+      "suggested_detail_surface_code": "FOCUS_LENS",
+      "default_reason_codes": ["COMMAND_SCHEMA_INVALID"],
+      "notes": [
+        "Use when the envelope shape, precondition profile, or family mapping is malformed before any durable work is accepted."
+      ]
+    },
+    {
+      "problem_code": "COMMAND_SCOPE_TARGET_MISMATCH",
+      "title": "Command target does not match the declared scope",
+      "detail_template": "The command targeted the wrong manifest, work-item, or governance reference for its declared command family.",
+      "http_status": 422,
+      "retryable": false,
+      "rebase_required": false,
+      "actionability_state": "NO_SAFE_ACTION",
+      "suggested_detail_surface_code": "FOCUS_LENS",
+      "default_reason_codes": ["TARGET_SCOPE_MISMATCH"],
+      "notes": [
+        "Use when nullable and required target references are inconsistent with the command family."
+      ]
+    },
+    {
+      "problem_code": "GOVERNANCE_SIMULATION_BASIS_REQUIRED",
+      "title": "Governance simulation basis is required",
+      "detail_template": "This governance command must carry the reviewed policy snapshot, dependency topology, simulation basis, and mutation basis contract before it can be admitted.",
+      "http_status": 409,
+      "retryable": true,
+      "rebase_required": false,
+      "actionability_state": "NO_SAFE_ACTION",
+      "suggested_detail_surface_code": "AUDIT_TRAIL",
+      "default_reason_codes": ["SIMULATION_BASIS_REQUIRED"],
+      "notes": [
+        "Use when a simulation-backed governance family omitted one of the reviewed basis inputs."
+      ]
+    },
+    {
+      "problem_code": "GOVERNANCE_PREVIEW_ONLY_COMMIT_BLOCKED",
+      "title": "Preview-only governance simulation cannot be committed",
+      "detail_template": "The reviewed governance mutation basis still carries PREVIEW_ONLY authority and cannot become a durable write.",
+      "http_status": 409,
+      "retryable": false,
+      "rebase_required": false,
+      "actionability_state": "NO_SAFE_ACTION",
+      "suggested_detail_surface_code": "AUDIT_TRAIL",
+      "default_reason_codes": ["MUTATION_BASIS_PREVIEW_ONLY"],
+      "notes": [
+        "Use when the backend would otherwise let preview styling outrun legal governance approval posture."
+      ]
+    },
+    {
+      "problem_code": "VIEW_STALE",
+      "title": "The current view is stale",
+      "detail_template": "The action was formed from stale command-side view state and must be rebased against the latest authoritative guard value before retry.",
+      "http_status": 409,
+      "retryable": true,
+      "rebase_required": true,
+      "actionability_state": "NO_SAFE_ACTION",
+      "suggested_detail_surface_code": "FOCUS_LENS",
+      "default_reason_codes": ["STALE_GUARD_MISMATCH"],
+      "notes": [
+        "Use for true stale-view conflicts such as decision-bundle, approval-pack, request-state, policy-snapshot, or topology drift."
+      ]
+    },
+    {
+      "problem_code": "REBASE_REQUIRED",
+      "title": "Route continuity changed and the action must be rebased",
+      "detail_template": "The route-stability token, render frame, or live route continuity changed, so the action must move onto the latest grouped marker generation before retry.",
+      "http_status": 409,
+      "retryable": true,
+      "rebase_required": true,
+      "actionability_state": "NO_SAFE_ACTION",
+      "suggested_detail_surface_code": "FOCUS_LENS",
+      "default_reason_codes": ["ROUTE_STABILITY_MISMATCH"],
+      "notes": [
+        "Use for shell token, frame epoch, or other route-continuity drifts where the client must mount the current route generation first."
+      ]
+    },
+    {
+      "problem_code": "IDEMPOTENCY_COLLISION",
+      "title": "The idempotency key was reused for a different command meaning",
+      "detail_template": "The supplied idempotency key already belongs to a different payload or namespace tuple, so the boundary refused to guess user intent.",
+      "http_status": 409,
+      "retryable": false,
+      "rebase_required": false,
+      "actionability_state": "ACTION_AVAILABLE",
+      "suggested_detail_surface_code": null,
+      "default_reason_codes": ["IDEMPOTENCY_COLLISION"],
+      "notes": [
+        "Use when the same client key is reused with a different payload body or semantic target."
+      ]
+    },
+    {
+      "problem_code": "POLICY_REJECTED",
+      "title": "Policy rejected the command",
+      "detail_template": "The command reached the northbound boundary but failed an explicit policy gate and was not accepted for execution.",
+      "http_status": 403,
+      "retryable": false,
+      "rebase_required": false,
+      "actionability_state": "NO_SAFE_ACTION",
+      "suggested_detail_surface_code": "AUDIT_TRAIL",
+      "default_reason_codes": ["COMMAND_POLICY_REJECTED"],
+      "notes": [
+        "Use for typed policy denials that are not stale-view or shape failures."
+      ]
+    }
+  ],
+  "source_lineage": [
+    {
+      "source_file": "Algorithm/northbound_api_and_session_contract.md",
+      "source_ref": "sections_5_and_6"
+    },
+    {
+      "source_file": "Algorithm/error_model_and_remediation_model.md",
+      "source_ref": "error_families_and_idempotency_collision"
+    }
+  ]
+}

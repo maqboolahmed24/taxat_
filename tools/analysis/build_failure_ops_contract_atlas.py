@@ -266,7 +266,7 @@ def render_table(headers: list[str], rows: list[dict[str, Any]]) -> str:
 def normalize_markdown(text: str) -> str:
     prefix = " " * 8
     return "\n".join(
-        line[len(prefix):] if line.startswith(prefix) else line
+        line[len(prefix) :] if line.startswith(prefix) else line
         for line in dedent(text).strip().splitlines()
     )
 
@@ -275,34 +275,54 @@ AUDIT_EVENT_ENUM = schema_enum(AUDIT_EVENT_SCHEMA_PATH, "properties", "event_typ
 TRACE_SPAN_ENUM = schema_enum(TRACE_SPAN_SCHEMA_PATH, "properties", "span_code", "enum")
 TRACE_SAMPLING_ENUM = schema_enum(TRACE_SPAN_SCHEMA_PATH, "properties", "sampling_class", "enum")
 METRIC_FAMILY_ENUM = schema_enum(METRIC_EVENT_SCHEMA_PATH, "properties", "metric_family", "enum")
-METRIC_INSTRUMENT_ENUM = schema_enum(METRIC_EVENT_SCHEMA_PATH, "properties", "instrument_kind", "enum")
+METRIC_INSTRUMENT_ENUM = schema_enum(
+    METRIC_EVENT_SCHEMA_PATH, "properties", "instrument_kind", "enum"
+)
 LOG_FAMILY_ENUM = schema_enum(LOG_RECORD_SCHEMA_PATH, "properties", "log_family", "enum")
 LOG_ACCESS_TIER_ENUM = schema_enum(LOG_RECORD_SCHEMA_PATH, "properties", "access_tier", "enum")
 ERROR_FAMILY_ENUM = schema_enum(ERROR_RECORD_SCHEMA_PATH, "properties", "error_family", "enum")
 ERROR_SEVERITY_ENUM = schema_enum(ERROR_RECORD_SCHEMA_PATH, "properties", "severity", "enum")
 BLOCKING_CLASS_ENUM = schema_enum(ERROR_RECORD_SCHEMA_PATH, "properties", "blocking_class", "enum")
 RETRY_CLASS_ENUM = schema_enum(ERROR_RECORD_SCHEMA_PATH, "properties", "retry_class", "enum")
-RETRY_BUDGET_ENUM = schema_enum(ERROR_RECORD_SCHEMA_PATH, "properties", "retry_budget_class", "enum")
-REMEDIATION_CLASS_ENUM = schema_enum(ERROR_RECORD_SCHEMA_PATH, "properties", "remediation_class", "enum")
-REMEDIATION_OWNER_ENUM = schema_enum(ERROR_RECORD_SCHEMA_PATH, "properties", "remediation_owner_type", "enum")
-RESOLUTION_STATE_ENUM = schema_enum(ERROR_RECORD_SCHEMA_PATH, "properties", "resolution_state", "enum")
-REMEDIATION_TASK_TYPE_ENUM = schema_enum(REMEDIATION_TASK_SCHEMA_PATH, "properties", "task_type", "enum")
+RETRY_BUDGET_ENUM = schema_enum(
+    ERROR_RECORD_SCHEMA_PATH, "properties", "retry_budget_class", "enum"
+)
+REMEDIATION_CLASS_ENUM = schema_enum(
+    ERROR_RECORD_SCHEMA_PATH, "properties", "remediation_class", "enum"
+)
+REMEDIATION_OWNER_ENUM = schema_enum(
+    ERROR_RECORD_SCHEMA_PATH, "properties", "remediation_owner_type", "enum"
+)
+RESOLUTION_STATE_ENUM = schema_enum(
+    ERROR_RECORD_SCHEMA_PATH, "properties", "resolution_state", "enum"
+)
+REMEDIATION_TASK_TYPE_ENUM = schema_enum(
+    REMEDIATION_TASK_SCHEMA_PATH, "properties", "task_type", "enum"
+)
 REMEDIATION_EFFECT_ENUM = schema_enum(
     REMEDIATION_TASK_SCHEMA_PATH, "properties", "error_resolution_effect", "enum"
 )
 INVESTIGATION_CLASS_ENUM = schema_enum(
     FAILURE_INVESTIGATION_SCHEMA_PATH, "properties", "investigation_class", "enum"
 )
-COMPENSATION_MODE_ENUM = schema_enum(COMPENSATION_RECORD_SCHEMA_PATH, "properties", "compensation_mode", "enum")
+COMPENSATION_MODE_ENUM = schema_enum(
+    COMPENSATION_RECORD_SCHEMA_PATH, "properties", "compensation_mode", "enum"
+)
 APPROVAL_STATE_ENUM = schema_enum(ACCEPTED_RISK_SCHEMA_PATH, "properties", "approval_state", "enum")
 APPROVER_TYPE_ENUM = schema_enum(ACCEPTED_RISK_SCHEMA_PATH, "properties", "approver_type", "enum")
-DASHBOARD_STATE_ENUM = schema_enum(FAILURE_DASHBOARD_SCHEMA_PATH, "properties", "current_lineage_state", "enum")
+DASHBOARD_STATE_ENUM = schema_enum(
+    FAILURE_DASHBOARD_SCHEMA_PATH, "properties", "current_lineage_state", "enum"
+)
 DASHBOARD_SOURCE_ARTIFACT_ENUM = schema_enum(
     FAILURE_DASHBOARD_SCHEMA_PATH, "$defs", "sourceArtifactType", "enum"
 )
 DASHBOARD_OWNER_ENUM = schema_enum(FAILURE_DASHBOARD_SCHEMA_PATH, "$defs", "ownerType", "enum")
-QUERY_CODE_ENUM = schema_enum(AUDIT_INVESTIGATION_SCHEMA_PATH, "properties", "query_contract_code", "enum")
-QUERY_ORDERING_ENUM = schema_enum(AUDIT_INVESTIGATION_SCHEMA_PATH, "properties", "ordering_basis", "enum")
+QUERY_CODE_ENUM = schema_enum(
+    AUDIT_INVESTIGATION_SCHEMA_PATH, "properties", "query_contract_code", "enum"
+)
+QUERY_ORDERING_ENUM = schema_enum(
+    AUDIT_INVESTIGATION_SCHEMA_PATH, "properties", "ordering_basis", "enum"
+)
 INTEGRITY_POSTURE_ENUM = schema_enum(
     AUDIT_INVESTIGATION_SCHEMA_PATH, "properties", "integrity_chain_posture", "enum"
 )
@@ -310,14 +330,36 @@ INTEGRITY_POSTURE_ENUM = schema_enum(
 # The telemetry resource schema exposes the correlation context under $defs.
 TELEMETRY_RESOURCE = load_json(TELEMETRY_RESOURCE_SCHEMA_PATH)
 CORRELATION_CONTEXT_PROPS = TELEMETRY_RESOURCE["$defs"]["correlationContext"]["properties"]
-SELECTION_DISPOSITION_ENUM = [value for value in CORRELATION_CONTEXT_PROPS["selection_disposition"]["enum"] if value is not None]
-RUN_KIND_ENUM = [value for value in CORRELATION_CONTEXT_PROPS["run_kind"]["enum"] if value is not None]
+SELECTION_DISPOSITION_ENUM = [
+    value
+    for value in CORRELATION_CONTEXT_PROPS["selection_disposition"]["enum"]
+    if value is not None
+]
+RUN_KIND_ENUM = [
+    value for value in CORRELATION_CONTEXT_PROPS["run_kind"]["enum"] if value is not None
+]
 MODE_ENUM = [value for value in CORRELATION_CONTEXT_PROPS["mode"]["enum"] if value is not None]
-REPLAY_CLASS_ENUM = [value for value in CORRELATION_CONTEXT_PROPS["replay_class"]["enum"] if value is not None]
-COMPARISON_MODE_ENUM = [value for value in CORRELATION_CONTEXT_PROPS["comparison_mode"]["enum"] if value is not None]
-BASIS_VALIDATION_ENUM = [value for value in CORRELATION_CONTEXT_PROPS["basis_validation_state"]["enum"] if value is not None]
-INPUT_INHERITANCE_ENUM = [value for value in CORRELATION_CONTEXT_PROPS["input_inheritance_mode"]["enum"] if value is not None]
-CONFIG_INHERITANCE_ENUM = [value for value in CORRELATION_CONTEXT_PROPS["config_inheritance_mode"]["enum"] if value is not None]
+REPLAY_CLASS_ENUM = [
+    value for value in CORRELATION_CONTEXT_PROPS["replay_class"]["enum"] if value is not None
+]
+COMPARISON_MODE_ENUM = [
+    value for value in CORRELATION_CONTEXT_PROPS["comparison_mode"]["enum"] if value is not None
+]
+BASIS_VALIDATION_ENUM = [
+    value
+    for value in CORRELATION_CONTEXT_PROPS["basis_validation_state"]["enum"]
+    if value is not None
+]
+INPUT_INHERITANCE_ENUM = [
+    value
+    for value in CORRELATION_CONTEXT_PROPS["input_inheritance_mode"]["enum"]
+    if value is not None
+]
+CONFIG_INHERITANCE_ENUM = [
+    value
+    for value in CORRELATION_CONTEXT_PROPS["config_inheritance_mode"]["enum"]
+    if value is not None
+]
 
 
 CORE_KEYS = ["tenant_id", "client_id", "manifest_id", "trace_id", "service_name", "environment_ref"]
@@ -346,7 +388,14 @@ AUTHORITY_KEYS = [
     "authority_operation_id",
 ]
 NIGHTLY_KEYS = ["nightly_batch_run_ref", "nightly_window_key", "selection_disposition"]
-FAILURE_KEYS = ["error_id", "workflow_item_id", "task_id", "investigation_id", "compensation_id", "accepted_risk_approval_id"]
+FAILURE_KEYS = [
+    "error_id",
+    "workflow_item_id",
+    "task_id",
+    "investigation_id",
+    "compensation_id",
+    "accepted_risk_approval_id",
+]
 RETENTION_KEYS = ["retention_class"]
 REPLAY_KEYS = [
     "run_kind",
@@ -377,7 +426,9 @@ AUDIT_EVENT_GROUPS: list[dict[str, Any]] = [
             "AuthorityRelinked",
             "AuthorityBindingMismatchDetected",
         ],
-        "correlation_keys": CORE_KEYS + AUTHORITY_KEYS + ["access_binding_hash", "policy_snapshot_hash"],
+        "correlation_keys": CORE_KEYS
+        + AUTHORITY_KEYS
+        + ["access_binding_hash", "policy_snapshot_hash"],
         "owner": "Identity boundary, authority-linking workflow, and security decision surfaces",
         "query": "get_audit_trail(root_ref, options)",
         "notes": [
@@ -396,7 +447,10 @@ AUDIT_EVENT_GROUPS: list[dict[str, Any]] = [
             "ContinuationChildAllocated",
             "ConfigInheritanceResolved",
         ],
-        "correlation_keys": CORE_KEYS + LINEAGE_KEYS + BRANCH_KEYS + ["input_inheritance_mode", "config_inheritance_mode", "config_freeze_id"],
+        "correlation_keys": CORE_KEYS
+        + LINEAGE_KEYS
+        + BRANCH_KEYS
+        + ["input_inheritance_mode", "config_inheritance_mode", "config_freeze_id"],
         "owner": "Manifest branch-selection logic and decision-bundle reuse boundary",
         "query": "get_run_timeline(manifest_id)",
         "notes": [
@@ -530,7 +584,10 @@ AUDIT_EVENT_GROUPS: list[dict[str, Any]] = [
             "SubmissionUnknown",
             "OutOfBandStateObserved",
         ],
-        "correlation_keys": CORE_KEYS + AUTHORITY_KEYS + FAILURE_KEYS + ["request_hash", "idempotency_key"],
+        "correlation_keys": CORE_KEYS
+        + AUTHORITY_KEYS
+        + FAILURE_KEYS
+        + ["request_hash", "idempotency_key"],
         "owner": "Authority transport, response normalization, and reconciliation surfaces",
         "query": "get_filing_evidence_ledger(submission_record_id)",
         "notes": [
@@ -1163,21 +1220,31 @@ FAILURE_DASHBOARD_RULES = [
             "First lineage entry equals root_error_ref and last entry equals current_error_ref.",
             "Supersession and reopen flows keep the root-to-current chain visible.",
         ],
-        "required_projection_fields": ["root_error_ref", "current_error_ref", "lineage_error_refs_in_order"],
+        "required_projection_fields": [
+            "root_error_ref",
+            "current_error_ref",
+            "lineage_error_refs_in_order",
+        ],
     },
     {
         "canonical_name": "CurrentStateSource",
         "notes": [
             "If remediation, compensation, investigation, risk approval, or workflow is active, the source must point at that typed child object.",
         ],
-        "required_projection_fields": ["current_state_source.source_artifact_type", "current_state_source.source_ref"],
+        "required_projection_fields": [
+            "current_state_source.source_artifact_type",
+            "current_state_source.source_ref",
+        ],
     },
     {
         "canonical_name": "CurrentOwner",
         "notes": [
             "Accepted-risk posture still carries a current accountable owner.",
         ],
-        "required_projection_fields": ["current_owner.owner_type", "current_owner.owner_ref_or_null"],
+        "required_projection_fields": [
+            "current_owner.owner_type",
+            "current_owner.owner_ref_or_null",
+        ],
     },
     {
         "canonical_name": "NextLegalAction",
@@ -1185,14 +1252,21 @@ FAILURE_DASHBOARD_RULES = [
             "Terminal dashboards force NO_FURTHER_ACTION.",
             "Non-terminal dashboards need a concrete action code or explicit waiting posture.",
         ],
-        "required_projection_fields": ["next_legal_action.action_state", "next_legal_action.action_code"],
+        "required_projection_fields": [
+            "next_legal_action.action_state",
+            "next_legal_action.action_code",
+        ],
     },
     {
         "canonical_name": "CompensationVisibility",
         "notes": [
             "Compensation posture never replaces the underlying failure chain.",
         ],
-        "required_projection_fields": ["compensation_posture", "root_error_ref", "current_error_ref"],
+        "required_projection_fields": [
+            "compensation_posture",
+            "root_error_ref",
+            "current_error_ref",
+        ],
     },
     {
         "canonical_name": "AcceptedRiskVisibility",
@@ -1206,7 +1280,11 @@ FAILURE_DASHBOARD_RULES = [
         "notes": [
             "Closure evidence, audit refs, and provenance refs stay visible even when compensation or supersession appears.",
         ],
-        "required_projection_fields": ["closure_posture", "lineage_refs.audit_refs", "lineage_refs.provenance_refs"],
+        "required_projection_fields": [
+            "closure_posture",
+            "lineage_refs.audit_refs",
+            "lineage_refs.provenance_refs",
+        ],
     },
     {
         "canonical_name": "DataSourcePolicy",
@@ -1276,7 +1354,10 @@ RETENTION_VISIBILITY_ROWS = [
         "visibility_boundary": "Operator, reviewer, compliance, and audit investigation surfaces; customer-safe derivatives only through dedicated projection.",
         "retention_boundary": "Append-only durable stream; payload may degrade to HASH_ONLY or ERASED while object refs, hashes, and lineage survive.",
         "query": "get_audit_trail(root_ref, options); get_filing_evidence_ledger(submission_record_id)",
-        "notes": ["Audit is never sampled away.", "Deterministic ordering uses stream sequence, not event_time."],
+        "notes": [
+            "Audit is never sampled away.",
+            "Deterministic ordering uses stream sequence, not event_time.",
+        ],
     },
     {
         "canonical_name": "TRACES",
@@ -1284,7 +1365,10 @@ RETENTION_VISIBILITY_ROWS = [
         "visibility_boundary": "Operational and reliability investigation surfaces only.",
         "retention_boundary": "Potentially sampled operational telemetry; filing- and retention-critical spans are deterministic-retain or mandatory-forensic.",
         "query": "get_run_timeline(manifest_id)",
-        "notes": ["Error spans require typed failure detail.", "Sampling may not remove mandatory audit history."],
+        "notes": [
+            "Error spans require typed failure detail.",
+            "Sampling may not remove mandatory audit history.",
+        ],
     },
     {
         "canonical_name": "METRICS",
@@ -1332,7 +1416,10 @@ RETENTION_VISIBILITY_ROWS = [
         "visibility_boundary": "Operator-facing inspection surface with filtered customer-safe derivations.",
         "retention_boundary": "Persists as an authoritative read-side projection until lineage closure and retention policy allow archival.",
         "query": "Failure lifecycle dashboard projection",
-        "notes": ["No log-only reconstruction.", "Underlying error remains visible through compensation and accepted risk."],
+        "notes": [
+            "No log-only reconstruction.",
+            "Underlying error remains visible through compensation and accepted risk.",
+        ],
     },
     {
         "canonical_name": "ACCEPTED_RISK_APPROVAL",
@@ -1352,7 +1439,11 @@ def build_signal_catalog() -> dict[str, Any]:
             domain="AUDIT",
             canonical_name="AUDIT_EVENTS",
             producer_or_owner="Compliance-significant decision and lifecycle boundaries",
-            correlation_keys=CORE_KEYS + LINEAGE_KEYS + AUTHORITY_KEYS + FAILURE_KEYS + RETENTION_KEYS,
+            correlation_keys=CORE_KEYS
+            + LINEAGE_KEYS
+            + AUTHORITY_KEYS
+            + FAILURE_KEYS
+            + RETENTION_KEYS,
             visibility_boundary="Append-only audit and investigation surfaces; customer-safe derivatives require explicit masking or separate projections.",
             retention_boundary="Durable append-only retention with explicit payload_availability_state and audit_sufficiency_state when payload bodies age out.",
             query_contract_or_projection="get_audit_trail(root_ref, options); get_filing_evidence_ledger(submission_record_id); get_privacy_action_ledger(client_id, options); get_replay_attestation(manifest_id)",
@@ -1439,7 +1530,10 @@ def build_signal_catalog() -> dict[str, Any]:
             domain="SECURITY",
             canonical_name="SECURITY_TELEMETRY",
             producer_or_owner="Access control, session security, and authority-binding anomaly surfaces",
-            correlation_keys=CORE_KEYS + AUTHORITY_KEYS + FAILURE_KEYS + ["access_binding_hash", "policy_snapshot_hash"],
+            correlation_keys=CORE_KEYS
+            + AUTHORITY_KEYS
+            + FAILURE_KEYS
+            + ["access_binding_hash", "policy_snapshot_hash"],
             visibility_boundary="Security-restricted operational surfaces with explicit customer-safe redaction.",
             retention_boundary="Durable enough for investigation, but still distinct from append-only audit proof.",
             query_contract_or_projection="Correlated through get_audit_trail(root_ref, options) and security investigations",
@@ -1451,7 +1545,9 @@ def build_signal_catalog() -> dict[str, Any]:
             ],
             source_path=OBSERVABILITY_PATH,
             source_heading_or_logical_block="14.2 Separation of concerns / C. Security telemetry",
-            notes=["Security telemetry focuses on access decisions, privilege changes, step-up, export attempts, and session anomalies."],
+            notes=[
+                "Security telemetry focuses on access decisions, privilege changes, step-up, export attempts, and session anomalies."
+            ],
         ),
         record(
             record_type="SIGNAL_FAMILY",
@@ -1462,7 +1558,11 @@ def build_signal_catalog() -> dict[str, Any]:
             visibility_boundary="Privacy-restricted surfaces and dedicated customer-safe explanations only.",
             retention_boundary="Retention-limited but explicit; lawful absence must remain distinguishable from corruption.",
             query_contract_or_projection="get_privacy_action_ledger(client_id, options); get_retention_limitation_path(object_id)",
-            linked_failure_or_provenance_edges=["ED_AUDITED_BY", "ED_LIMITED_BY_RETENTION", "ED_ERASED_UNDER"],
+            linked_failure_or_provenance_edges=[
+                "ED_AUDITED_BY",
+                "ED_LIMITED_BY_RETENTION",
+                "ED_ERASED_UNDER",
+            ],
             retry_or_resolution_posture="Privacy issues open typed errors, remediation, or accepted-risk branches rather than quiet omission.",
             closure_requirements=[
                 "Keep limitation posture explicit when data is minimized or erased.",
@@ -1470,14 +1570,20 @@ def build_signal_catalog() -> dict[str, Any]:
             ],
             source_path=OBSERVABILITY_PATH,
             source_heading_or_logical_block="14.2 Separation of concerns / D. Privacy telemetry and 14.10 Audit versus telemetry retention",
-            notes=["Privacy telemetry focuses on masking, legal hold, erasure, and sensitive-view access."],
+            notes=[
+                "Privacy telemetry focuses on masking, legal hold, erasure, and sensitive-view access."
+            ],
         ),
         record(
             record_type="FAILURE_OBJECT",
             domain="FAILURE",
             canonical_name="ErrorRecord",
             producer_or_owner="Structured failure boundary",
-            correlation_keys=CORE_KEYS + LINEAGE_KEYS + FAILURE_KEYS + AUTHORITY_KEYS + RETENTION_KEYS,
+            correlation_keys=CORE_KEYS
+            + LINEAGE_KEYS
+            + FAILURE_KEYS
+            + AUTHORITY_KEYS
+            + RETENTION_KEYS,
             visibility_boundary="Operator-visible typed failure detail with customer and operator visibility classes.",
             retention_boundary="Governed by error retention class and companion artifact_retention_ref when retention/privacy is causal.",
             query_contract_or_projection="Failure lifecycle dashboard projection; get_run_timeline(manifest_id)",
@@ -1518,7 +1624,11 @@ def build_signal_catalog() -> dict[str, Any]:
             domain="REMEDIATION",
             canonical_name="FailureInvestigation",
             producer_or_owner="Durable forensic branch for unresolved ambiguity",
-            correlation_keys=CORE_KEYS + LINEAGE_KEYS + FAILURE_KEYS + AUTHORITY_KEYS + RETENTION_KEYS,
+            correlation_keys=CORE_KEYS
+            + LINEAGE_KEYS
+            + FAILURE_KEYS
+            + AUTHORITY_KEYS
+            + RETENTION_KEYS,
             visibility_boundary="Restricted operator and investigation surfaces.",
             retention_boundary="Persists through ambiguity, accepted risk, or supersession resolution.",
             query_contract_or_projection="Failure lifecycle dashboard projection; get_provenance(object_type, object_id, options)",
@@ -1578,11 +1688,19 @@ def build_signal_catalog() -> dict[str, Any]:
             domain="FAILURE",
             canonical_name="FailureLifecycleDashboard",
             producer_or_owner="Authoritative persisted read-side projection",
-            correlation_keys=CORE_KEYS + LINEAGE_KEYS + FAILURE_KEYS + AUTHORITY_KEYS + RETENTION_KEYS,
+            correlation_keys=CORE_KEYS
+            + LINEAGE_KEYS
+            + FAILURE_KEYS
+            + AUTHORITY_KEYS
+            + RETENTION_KEYS,
             visibility_boundary="Operator-facing failure inspection and downstream surface projections only.",
             retention_boundary="Persists as the read-side truth for one governed lineage until archival policy says otherwise.",
             query_contract_or_projection="BUILD_FAILURE_LIFECYCLE_DASHBOARD(...)",
-            linked_failure_or_provenance_edges=["ED_CAUSED_BY_ERROR", "ED_COMPENSATED_BY", "ED_AUDITED_BY"],
+            linked_failure_or_provenance_edges=[
+                "ED_CAUSED_BY_ERROR",
+                "ED_COMPENSATED_BY",
+                "ED_AUDITED_BY",
+            ],
             retry_or_resolution_posture="Projects current lineage state, owner, next legal action, and compensation/investigation/risk posture from typed objects only.",
             closure_requirements=[
                 "No log-only or free-text status reconstruction.",
@@ -1670,7 +1788,11 @@ def build_correlation_topology_and_queries() -> dict[str, Any]:
             visibility_boundary="Query surface visibility follows the underlying signal domain and never widens beyond the most restrictive contributing record.",
             retention_boundary="Query results surface explicit limitation posture when underlying payloads are minimized, sampled, hash-only, tombstoned, or erased.",
             query_contract_or_projection=query["name"],
-            linked_failure_or_provenance_edges=["ED_AUDITED_BY", "ED_CAUSED_BY_ERROR", "ED_COMPENSATED_BY"],
+            linked_failure_or_provenance_edges=[
+                "ED_AUDITED_BY",
+                "ED_CAUSED_BY_ERROR",
+                "ED_COMPENSATED_BY",
+            ],
             retry_or_resolution_posture="Query surfaces explain current truth and lineage; they do not mutate or resolve the lifecycle by themselves.",
             closure_requirements=[
                 "Ordering basis and integrity posture must remain explicit in the response contract.",
@@ -1767,7 +1889,16 @@ def build_correlation_topology_and_queries() -> dict[str, Any]:
             "query_contract_count": len(query_rows),
             "topology_edge_count": len(topology_edges),
             "mandatory_correlation_key_count": len(
-                ordered_unique(CORE_KEYS + LINEAGE_KEYS + BRANCH_KEYS + AUTHORITY_KEYS + NIGHTLY_KEYS + FAILURE_KEYS + RETENTION_KEYS + REPLAY_KEYS)
+                ordered_unique(
+                    CORE_KEYS
+                    + LINEAGE_KEYS
+                    + BRANCH_KEYS
+                    + AUTHORITY_KEYS
+                    + NIGHTLY_KEYS
+                    + FAILURE_KEYS
+                    + RETENTION_KEYS
+                    + REPLAY_KEYS
+                )
             ),
         },
         "mandatory_correlation_keys": {
@@ -1804,10 +1935,16 @@ def build_error_matrix() -> dict[str, Any]:
         rows.append(
             record(
                 record_type="ERROR_FAMILY",
-                domain="FAILURE" if config["error_family"] not in {"RETENTION_ERROR", "PRIVACY_ERROR"} else ("PRIVACY" if config["error_family"] == "PRIVACY_ERROR" else "FAILURE"),
+                domain="FAILURE"
+                if config["error_family"] not in {"RETENTION_ERROR", "PRIVACY_ERROR"}
+                else ("PRIVACY" if config["error_family"] == "PRIVACY_ERROR" else "FAILURE"),
                 canonical_name=config["error_family"],
                 producer_or_owner="Structured failure model",
-                correlation_keys=CORE_KEYS + LINEAGE_KEYS + FAILURE_KEYS + AUTHORITY_KEYS + RETENTION_KEYS,
+                correlation_keys=CORE_KEYS
+                + LINEAGE_KEYS
+                + FAILURE_KEYS
+                + AUTHORITY_KEYS
+                + RETENTION_KEYS,
                 visibility_boundary="Operator-visible typed failure detail; customer-safe projections must be explicitly narrowed by visibility class.",
                 retention_boundary="Carries retention_class and artifact_retention_ref when retention/privacy control state is causal; otherwise follows governed failure retention policy.",
                 query_contract_or_projection="Failure lifecycle dashboard projection; get_run_timeline(manifest_id)",
@@ -1826,7 +1963,9 @@ def build_error_matrix() -> dict[str, Any]:
                 compensation_modes=config["compensation_modes"],
                 accepted_risk_allowed=config["accepted_risk_allowed"],
                 example_codes=config["example_codes"],
-                retry_scheduling_formula=retry_formula if config["retry_class"] not in {"NO_RETRY", "MANUAL_INTERVENTION_REQUIRED"} else "NOT_APPLICABLE",
+                retry_scheduling_formula=retry_formula
+                if config["retry_class"] not in {"NO_RETRY", "MANUAL_INTERVENTION_REQUIRED"}
+                else "NOT_APPLICABLE",
             )
         )
     assert_required_record_fields(rows)
@@ -1855,7 +1994,11 @@ def build_dashboard_rules() -> dict[str, Any]:
             visibility_boundary="Operator-facing lineage inspection only; downstream surfaces derive from the persisted projection and explicit visibility classes.",
             retention_boundary="Persists until the governed lineage ages out under policy; never reconstructed from log history.",
             query_contract_or_projection="BUILD_FAILURE_LIFECYCLE_DASHBOARD(...)",
-            linked_failure_or_provenance_edges=["ED_CAUSED_BY_ERROR", "ED_COMPENSATED_BY", "ED_AUDITED_BY"],
+            linked_failure_or_provenance_edges=[
+                "ED_CAUSED_BY_ERROR",
+                "ED_COMPENSATED_BY",
+                "ED_AUDITED_BY",
+            ],
             retry_or_resolution_posture="Projection reads typed lifecycle state; it does not infer resolution from logs, notes, or message copy.",
             closure_requirements=rule["required_projection_fields"],
             source_path=FAILURE_DASHBOARD_PATH,
@@ -1893,7 +2036,11 @@ def build_owner_closure_matrix() -> dict[str, Any]:
             visibility_boundary="Operator-facing lifecycle law; customer-safe surfaces use derived messages only.",
             retention_boundary="Owner and closure rules persist as typed lifecycle basis until the lineage is terminal and archived.",
             query_contract_or_projection="Failure lifecycle dashboard projection",
-            linked_failure_or_provenance_edges=["ED_CAUSED_BY_ERROR", "ED_COMPENSATED_BY", "ED_AUDITED_BY"],
+            linked_failure_or_provenance_edges=[
+                "ED_CAUSED_BY_ERROR",
+                "ED_COMPENSATED_BY",
+                "ED_AUDITED_BY",
+            ],
             retry_or_resolution_posture=item["risk_requirement"],
             closure_requirements=[item["owner_requirement"], item["closure_requirement"]],
             source_path=FAILURE_OWNERSHIP_PATH,
@@ -1909,7 +2056,9 @@ def build_owner_closure_matrix() -> dict[str, Any]:
     return {
         "summary": {
             "row_count": len(rows),
-            "lifecycle_roles": schema_enum(FAILURE_RESOLUTION_SCHEMA_PATH, "properties", "lifecycle_role", "enum"),
+            "lifecycle_roles": schema_enum(
+                FAILURE_RESOLUTION_SCHEMA_PATH, "properties", "lifecycle_role", "enum"
+            ),
             "binding_policies": schema_enum(
                 FAILURE_RESOLUTION_SCHEMA_PATH, "properties", "role_specific_binding_policy", "enum"
             ),
@@ -1925,11 +2074,19 @@ def build_retention_visibility_matrix() -> dict[str, Any]:
             domain=item["domain"],
             canonical_name=item["canonical_name"],
             producer_or_owner="Observability, privacy, and failure integration boundary",
-            correlation_keys=CORE_KEYS + LINEAGE_KEYS + FAILURE_KEYS + AUTHORITY_KEYS + RETENTION_KEYS,
+            correlation_keys=CORE_KEYS
+            + LINEAGE_KEYS
+            + FAILURE_KEYS
+            + AUTHORITY_KEYS
+            + RETENTION_KEYS,
             visibility_boundary=item["visibility_boundary"],
             retention_boundary=item["retention_boundary"],
             query_contract_or_projection=item["query"],
-            linked_failure_or_provenance_edges=["ED_AUDITED_BY", "ED_LIMITED_BY_RETENTION", "ED_CAUSED_BY_ERROR"],
+            linked_failure_or_provenance_edges=[
+                "ED_AUDITED_BY",
+                "ED_LIMITED_BY_RETENTION",
+                "ED_CAUSED_BY_ERROR",
+            ],
             retry_or_resolution_posture="Visibility and limitation posture stay explicit; missing rows never imply safe closure or lawful deletion.",
             closure_requirements=[
                 "State limitation posture explicitly rather than inferring from missing payload.",
@@ -1949,10 +2106,20 @@ def build_retention_visibility_matrix() -> dict[str, Any]:
         },
         "rows": rows,
         "payload_availability_states": schema_enum(
-            AUDIT_EVENT_SCHEMA_PATH, "properties", "retained_context", "properties", "payload_availability_state", "enum"
+            AUDIT_EVENT_SCHEMA_PATH,
+            "properties",
+            "retained_context",
+            "properties",
+            "payload_availability_state",
+            "enum",
         ),
         "audit_sufficiency_states": schema_enum(
-            AUDIT_EVENT_SCHEMA_PATH, "properties", "retained_context", "properties", "audit_sufficiency_state", "enum"
+            AUDIT_EVENT_SCHEMA_PATH,
+            "properties",
+            "retained_context",
+            "properties",
+            "audit_sufficiency_state",
+            "enum",
         ),
     }
 
@@ -2109,7 +2276,11 @@ def render_overview_doc(
     )
 
 
-def render_signal_doc(signal_catalog: dict[str, Any], correlation_pack: dict[str, Any], retention_visibility: dict[str, Any]) -> str:
+def render_signal_doc(
+    signal_catalog: dict[str, Any],
+    correlation_pack: dict[str, Any],
+    retention_visibility: dict[str, Any],
+) -> str:
     signal_rows = signal_catalog["rows"]
     query_rows = correlation_pack["query_contracts"]
     retention_rows = retention_visibility["rows"]
@@ -2182,7 +2353,9 @@ def render_signal_doc(signal_catalog: dict[str, Any], correlation_pack: dict[str
     )
 
 
-def render_dashboard_doc(error_matrix: dict[str, Any], dashboard_rules: dict[str, Any], owner_closure: dict[str, Any]) -> str:
+def render_dashboard_doc(
+    error_matrix: dict[str, Any], dashboard_rules: dict[str, Any], owner_closure: dict[str, Any]
+) -> str:
     error_rows = error_matrix["rows"]
     dashboard_rows = dashboard_rules["rows"]
     owner_rows = owner_closure["rows"]
@@ -2402,7 +2575,16 @@ def build_atlas_data(
         },
         "pages": domain_pages,
         "signal_lanes": signal_lanes,
-        "shared_correlation_ribbon": ordered_unique(CORE_KEYS + ["root_manifest_id", "authority_operation_id", "error_id", "retention_class", "code_build_id"]),
+        "shared_correlation_ribbon": ordered_unique(
+            CORE_KEYS
+            + [
+                "root_manifest_id",
+                "authority_operation_id",
+                "error_id",
+                "retention_class",
+                "code_build_id",
+            ]
+        ),
         "signal_laws": [
             "Audit exists to prove what happened.",
             "Telemetry exists to explain runtime behavior.",

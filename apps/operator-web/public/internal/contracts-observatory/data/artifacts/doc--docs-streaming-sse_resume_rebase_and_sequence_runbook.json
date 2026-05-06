@@ -1,0 +1,246 @@
+{
+  "artifactVersion": "CONTRACT_OBSERVATORY_ARTIFACT_V1",
+  "artifactSlug": "doc--docs-streaming-sse_resume_rebase_and_sequence_runbook",
+  "artifactKind": "MARKDOWN",
+  "sectionRef": "SUPPORT_DOCS",
+  "authorityLevel": "SUPPORTING_REFERENCE",
+  "sourceTruthBadge": "Support Documentation",
+  "tone": "slate",
+  "title": "SSE Resume, Rebase, And Sequence Runbook",
+  "subtitle": "docs/streaming/sse_resume_rebase_and_sequence_runbook.md",
+  "summary": "",
+  "canonicalPath": "docs/streaming/sse_resume_rebase_and_sequence_runbook.md",
+  "sourceLineage": [
+    "docs/streaming/sse_resume_rebase_and_sequence_runbook.md"
+  ],
+  "headingCount": 7,
+  "headings": [
+    {
+      "level": 1,
+      "text": "SSE Resume, Rebase, And Sequence Runbook",
+      "slug": "sse-resume-rebase-and-sequence-runbook"
+    },
+    {
+      "level": 2,
+      "text": "Purpose",
+      "slug": "purpose"
+    },
+    {
+      "level": 2,
+      "text": "Operating rules",
+      "slug": "operating-rules"
+    },
+    {
+      "level": 2,
+      "text": "Compose a northbound stream",
+      "slug": "compose-a-northbound-stream"
+    },
+    {
+      "level": 2,
+      "text": "Cursor handling",
+      "slug": "cursor-handling"
+    },
+    {
+      "level": 2,
+      "text": "Browser and native shells",
+      "slug": "browser-and-native-shells"
+    },
+    {
+      "level": 2,
+      "text": "Observability",
+      "slug": "observability"
+    }
+  ],
+  "proseSections": [
+    {
+      "headingSlug": "sse-resume-rebase-and-sequence-runbook",
+      "headingText": "SSE Resume, Rebase, And Sequence Runbook",
+      "level": 1,
+      "lines": [
+        ""
+      ],
+      "plainText": "",
+      "excerpt": "",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "purpose",
+      "headingText": "Purpose",
+      "level": 2,
+      "lines": [
+        "",
+        "The streaming substrate under `packages/domain-kernel/src/streaming` is the only lawful place to",
+        "compose resumable SSE behavior for experience and workspace endpoints.",
+        "Later northbound handlers should publish typed events and recovery contracts through this layer",
+        "instead of hand-rolling cursor, heartbeat, or rebase logic.",
+        ""
+      ],
+      "plainText": "The streaming substrate under packages/domain kernel/src/streaming is the only lawful place to compose resumable SSE behavior for experience and workspace endpoints. Later northbound handlers should publish typed events and recovery contracts through this layer instead of hand rolling cursor, heartbeat, or rebase logic.",
+      "excerpt": "The streaming substrate under packages/domain kernel/src/streaming is the only lawful place to compose resumable SSE behavior for experience and workspace endpoints. Later northbo…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "operating-rules",
+      "headingText": "Operating rules",
+      "level": 2,
+      "lines": [
+        "",
+        "1. Treat `stream_recovery_contract` as the authoritative continuity object.",
+        "   Raw `resume_token` is transport material only.",
+        "2. Keep sequence application strictly monotonic and gap-free within one `frame_epoch`.",
+        "3. Finish catch-up before treating live delivery as current.",
+        "4. Fail closed into `REBASE_REQUIRED` on epoch advance, compaction, shell drift, or route drift.",
+        "5. Fail closed into `ACCESS_REBIND_REQUIRED` on session, access, masking, or schema drift.",
+        "6. Use SSE comments for heartbeats so liveness does not masquerade as a business event.",
+        "7. Persist cursor state explicitly as `LIVE`, `REBASED`, `REVOKED`, `EXPIRED`, or `CLOSED`.",
+        ""
+      ],
+      "plainText": "1. Treat stream recovery contract as the authoritative continuity object. Raw resume token is transport material only. 2. Keep sequence application strictly monotonic and gap free within one frame epoch. 3. Finish catch up before treating live delivery as current. 4. Fail closed into REBASE REQUIRED on epoch advance, compaction, shell drift, or route drift. 5. Fail closed into ACCESS REBIND REQUIRED on session, access, masking, or schema drift. 6. Use SSE comments for heartbeats so liveness does not masquerade as a business event. 7. Persist cursor state explicitly as LIVE, REBASED, REVOKED, EXPIRED, or CLOSED.",
+      "excerpt": "1. Treat stream recovery contract as the authoritative continuity object. Raw resume token is transport material only. 2. Keep sequence application strictly monotonic and gap free…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "compose-a-northbound-stream",
+      "headingText": "Compose a northbound stream",
+      "level": 2,
+      "lines": [
+        "",
+        "1. Load `stream_scope_catalog.json` and `event_type_catalog.json` through",
+        "   `loadStreamingCatalogBundle()`.",
+        "2. Build the authoritative `stream_recovery_contract` with `createStreamRecoveryContract()`.",
+        "3. Open a `SequenceWindowState` with `openSequenceWindow()` from the caller's last acknowledged",
+        "   sequence.",
+        "4. On reconnect, evaluate resume legality with `assessStreamResume()` before sending any event.",
+        "5. When the decision is resumable, emit typed events with `encodeSseFrame()` and update cursor",
+        "   state through `acknowledgeStreamCursor()`.",
+        "6. When the decision is `REBASE_REQUIRED` or `ACCESS_REBIND_REQUIRED`, transition the cursor with",
+        "   `transitionStreamCursor()` and return the replacement snapshot or recovery contract without",
+        "   attempting partial replay.",
+        ""
+      ],
+      "plainText": "1. Load stream scope catalog.json and event type catalog.json through loadStreamingCatalogBundle(). 2. Build the authoritative stream recovery contract with createStreamRecoveryContract(). 3. Open a SequenceWindowState with openSequenceWindow() from the caller's last acknowledged sequence. 4. On reconnect, evaluate resume legality with assessStreamResume() before sending any event. 5. When the decision is resumable, emit typed events with encodeSseFrame() and update cursor state through acknowledgeStreamCursor(). 6. When the decision is REBASE REQUIRED or ACCESS REBIND REQUIRED, transition the cursor with transitionStreamCursor() and return the replacement snapshot or recovery contract without attempting partial replay.",
+      "excerpt": "1. Load stream scope catalog.json and event type catalog.json through loadStreamingCatalogBundle(). 2. Build the authoritative stream recovery contract with createStreamRecoveryCo…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "cursor-handling",
+      "headingText": "Cursor handling",
+      "level": 2,
+      "lines": [
+        "",
+        "- Cursor ids must derive from principal, session, and recovery contract lineage.",
+        "- `resume_token_hash` is persisted, not raw token material.",
+        "- Heartbeats may update `last_seen_at` on LIVE cursors only.",
+        "- TTL expiry moves cursors to `EXPIRED`; clients never silently resume from expired state.",
+        "- Client-initiated close moves cursors to `CLOSED`; rebased cursors remain non-resumable until a",
+        "  new bind is created.",
+        ""
+      ],
+      "plainText": "Cursor ids must derive from principal, session, and recovery contract lineage. resume token hash is persisted, not raw token material. Heartbeats may update last seen at on LIVE cursors only. TTL expiry moves cursors to EXPIRED; clients never silently resume from expired state. Client initiated close moves cursors to CLOSED; rebased cursors remain non resumable until a new bind is created.",
+      "excerpt": "Cursor ids must derive from principal, session, and recovery contract lineage. resume token hash is persisted, not raw token material. Heartbeats may update last seen at on LIVE c…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "browser-and-native-shells",
+      "headingText": "Browser and native shells",
+      "level": 2,
+      "lines": [
+        "",
+        "- Browser and native consumers must apply the same `scope / epoch / sequence` idempotency rule.",
+        "- Reconnect logic must compare the full recovery contract, not only the raw token.",
+        "- A rebase selection must replace the old epoch dataset entirely.",
+        "- Access or masking drift must trigger fresh bind or snapshot flow rather than stale-cache reuse.",
+        ""
+      ],
+      "plainText": "Browser and native consumers must apply the same scope / epoch / sequence idempotency rule. Reconnect logic must compare the full recovery contract, not only the raw token. A rebase selection must replace the old epoch dataset entirely. Access or masking drift must trigger fresh bind or snapshot flow rather than stale cache reuse.",
+      "excerpt": "Browser and native consumers must apply the same scope / epoch / sequence idempotency rule. Reconnect logic must compare the full recovery contract, not only the raw token. A reba…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "observability",
+      "headingText": "Observability",
+      "level": 2,
+      "lines": [
+        "",
+        "- Correlate stream events with `scope / subject / frame_epoch / sequence`.",
+        "- Keep transport frames ref-oriented; do not embed declaration text, tokens, or broad privileged",
+        "  payloads into SSE data.",
+        "- Use the internal `stream-recovery-atlas` to explain epoch seams, compaction, and access-rebind",
+        "  posture to operators without exposing raw secrets.",
+        ""
+      ],
+      "plainText": "Correlate stream events with scope / subject / frame epoch / sequence. Keep transport frames ref oriented; do not embed declaration text, tokens, or broad privileged payloads into SSE data. Use the internal stream recovery atlas to explain epoch seams, compaction, and access rebind posture to operators without exposing raw secrets.",
+      "excerpt": "Correlate stream events with scope / subject / frame epoch / sequence. Keep transport frames ref oriented; do not embed declaration text, tokens, or broad privileged payloads into…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    }
+  ],
+  "schemaIdentityOrNull": null,
+  "schemaFields": [],
+  "samplePointers": [],
+  "sampleIdentityOrNull": null,
+  "bindingIdentityOrNull": null,
+  "validatorIdentityOrNull": null,
+  "driftIdentityOrNull": null,
+  "headerStrip": {
+    "kind": "PROSE",
+    "badgeLabel": "Support Documentation",
+    "metricPairs": [
+      {
+        "label": "Headings",
+        "value": "7"
+      },
+      {
+        "label": "Schemas",
+        "value": "0"
+      },
+      {
+        "label": "Tasks",
+        "value": "0"
+      }
+    ]
+  },
+  "relationships": {
+    "schemas": [],
+    "samples": [],
+    "bindings": [],
+    "validators": [],
+    "docs": [],
+    "tasks": []
+  },
+  "sourceTruthStack": {
+    "file": [
+      "docs/streaming/sse_resume_rebase_and_sequence_runbook.md"
+    ],
+    "headings": [
+      "SSE Resume, Rebase, And Sequence Runbook",
+      "Purpose",
+      "Operating rules",
+      "Compose a northbound stream",
+      "Cursor handling",
+      "Browser and native shells",
+      "Observability"
+    ],
+    "schemaRefs": [],
+    "sampleRefs": [],
+    "bindingRefs": [],
+    "validatorRefs": [],
+    "driftRefs": [],
+    "taskRefs": []
+  },
+  "fieldCrosslinks": [],
+  "taskRefs": []
+}

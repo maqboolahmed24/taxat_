@@ -1,0 +1,235 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/action_authority_contract.schema.json",
+  "title": "ActionAuthorityContract",
+  "description": "Authoritative low-noise action legality contract. This schema freezes the route-bound actionability basis, customer-safe projection posture where applicable, the visible and blocked action inventories, and the explicit recovery path required when no safe action is available.",
+  "type": "object",
+  "required": [
+    "projection_scope",
+    "source_module_code",
+    "basis_hash",
+    "projection_route_key",
+    "projection_version",
+    "access_binding_hash",
+    "visibility_cache_partition_key",
+    "customer_safe_projection",
+    "actionability_state",
+    "primary_action_code_or_null",
+    "secondary_action_codes",
+    "available_action_codes",
+    "blocked_action_codes",
+    "blocking_reason_code_or_null",
+    "machine_reason_codes",
+    "suggested_module_code_or_null",
+    "recovery_route_ref_or_null",
+    "recovery_focus_anchor_ref_or_null"
+  ],
+  "properties": {
+    "projection_scope": {
+      "type": "string",
+      "enum": [
+        "WORKSPACE_ACTION_STRIP",
+        "WORK_INBOX_ROW_ACTIONS",
+        "CUSTOMER_REQUEST_DETAIL",
+        "CUSTOMER_REQUEST_ROW"
+      ]
+    },
+    "source_module_code": {
+      "const": "WORKFLOW_CHOREOGRAPHER"
+    },
+    "basis_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "projection_route_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "projection_version": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "access_binding_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "visibility_cache_partition_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "customer_safe_projection": {
+      "type": "boolean"
+    },
+    "actionability_state": {
+      "type": "string",
+      "enum": [
+        "ACTION_AVAILABLE",
+        "NO_SAFE_ACTION"
+      ]
+    },
+    "primary_action_code_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[A-Z][A-Z0-9_]*$",
+      "minLength": 1
+    },
+    "secondary_action_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9_]*$",
+        "minLength": 1
+      },
+      "default": [],
+      "maxItems": 2,
+      "uniqueItems": true
+    },
+    "available_action_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9_]*$",
+        "minLength": 1
+      },
+      "default": [],
+      "maxItems": 4,
+      "uniqueItems": true
+    },
+    "blocked_action_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9_]*$",
+        "minLength": 1
+      },
+      "default": [],
+      "maxItems": 8,
+      "uniqueItems": true
+    },
+    "blocking_reason_code_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "machine_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "maxItems": 6,
+      "uniqueItems": true
+    },
+    "suggested_module_code_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "CUSTOMER_ACTIVITY",
+        "INTERNAL_ACTIVITY",
+        "FILES",
+        "LINKED_CONTEXT",
+        "AUDIT_TRAIL",
+        null
+      ]
+    },
+    "recovery_route_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "recovery_focus_anchor_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "actionability_state": {
+            "const": "ACTION_AVAILABLE"
+          }
+        },
+        "required": [
+          "actionability_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "primary_action_code_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "available_action_codes": {
+            "minItems": 1
+          },
+          "blocking_reason_code_or_null": {
+            "type": "null"
+          },
+          "suggested_module_code_or_null": {
+            "type": "null"
+          },
+          "recovery_route_ref_or_null": {
+            "type": "null"
+          },
+          "recovery_focus_anchor_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "actionability_state": {
+            "const": "NO_SAFE_ACTION"
+          }
+        },
+        "required": [
+          "actionability_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "primary_action_code_or_null": {
+            "type": "null"
+          },
+          "secondary_action_codes": {
+            "maxItems": 0
+          },
+          "available_action_codes": {
+            "maxItems": 0
+          },
+          "blocked_action_codes": {
+            "minItems": 1
+          },
+          "blocking_reason_code_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "recovery_route_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "recovery_focus_anchor_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

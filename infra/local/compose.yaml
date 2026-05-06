@@ -1,0 +1,132 @@
+name: taxat-local-runtime
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: taxat-local-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres-local-only
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  postgres-bootstrap:
+    image: postgres:17-alpine
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    entrypoint: ["/bin/sh", "-lc"]
+    command: >
+      export PGPASSWORD=postgres-local-only &&
+      psql -h postgres -U postgres -d postgres -v ON_ERROR_STOP=1 -c "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'taxat_runtime') THEN CREATE ROLE taxat_runtime LOGIN PASSWORD 'taxat-local-runtime'; END IF; IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'taxat_audit_writer') THEN CREATE ROLE taxat_audit_writer LOGIN PASSWORD 'taxat-local-audit'; END IF; END $$;" &&
+      psql -h postgres -U postgres -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='taxat_control'" | grep -q 1 || psql -h postgres -U postgres -d postgres -c "CREATE DATABASE taxat_control OWNER taxat_runtime" &&
+      psql -h postgres -U postgres -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='taxat_audit'" | grep -q 1 || psql -h postgres -U postgres -d postgres -c "CREATE DATABASE taxat_audit OWNER taxat_audit_writer" &&
+      psql -h postgres -U postgres -d taxat_control -v ON_ERROR_STOP=1 -f /workspace/packages/control-plane-db/src/migrations/000001_baseline.sql &&
+      psql -h postgres -U postgres -d taxat_control -v ON_ERROR_STOP=1 -f /workspace/packages/control-plane-db/src/migrations/schema_migration_ledger.sql &&
+      psql -h postgres -U postgres -d taxat_audit -v ON_ERROR_STOP=1 -c "CREATE TABLE IF NOT EXISTS audit_append_probe (probe_id text PRIMARY KEY, appended_at timestamptz NOT NULL, notes text NOT NULL);" &&
+      psql -h postgres -U postgres -d taxat_audit -v ON_ERROR_STOP=1 -c "INSERT INTO audit_append_probe (probe_id, appended_at, notes) VALUES ('local-bootstrap-probe', '2026-04-23T00:00:00Z', 'local runtime bootstrap appendability probe') ON CONFLICT (probe_id) DO NOTHING;"
+    volumes:
+      - ../../:/workspace:ro
+
+  minio:
+    image: minio/minio:RELEASE.2025-02-28T09-55-16Z
+    container_name: taxat-local-minio
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ROOT_USER: taxatlocal
+      MINIO_ROOT_PASSWORD: taxatlocalminio
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9000/minio/health/live >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  minio-bootstrap:
+    image: minio/mc:RELEASE.2025-02-21T16-00-46Z
+    depends_on:
+      minio:
+        condition: service_healthy
+    restart: "no"
+    entrypoint: ["/bin/sh", "-lc"]
+    command: >
+      mc alias set local http://minio:9000 taxatlocal taxatlocalminio &&
+      for bucket in taxat-local-upload-staging taxat-local-retained-evidence taxat-local-authority-payloads taxat-local-quarantine taxat-local-derived-previews taxat-local-masked-exports taxat-local-restricted-exports taxat-local-restore-archive; do
+        mc mb --ignore-existing local/$$bucket &&
+        mc version enable local/$$bucket || true;
+      done
+
+  rabbitmq:
+    image: rabbitmq:4.1-management
+    container_name: taxat-local-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: taxat_local
+      RABBITMQ_DEFAULT_PASS: local-dev-only
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  rabbitmq-bootstrap:
+    image: rabbitmq:4.1-management
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: "no"
+    entrypoint: ["/bin/sh", "-lc"]
+    command: >
+      rabbitmqadmin --host rabbitmq --port 15672 --username taxat_local --password local-dev-only declare vhost name=taxat-local || true &&
+      rabbitmqctl -n rabbit@rabbitmq set_permissions -p taxat-local taxat_local ".*" ".*" ".*" &&
+      for queue in queue.stage-work queue.authority-transmit queue.reconciliation-follow-up queue.projection-refresh queue.recovery-job dlq.stage-work dlq.authority-transmit dlq.reconciliation-follow-up dlq.projection-refresh dlq.recovery-job; do
+        rabbitmqadmin --host rabbitmq --port 15672 --username taxat_local --password local-dev-only --vhost taxat-local declare queue name=$$queue durable=true arguments='{"x-queue-type":"quorum"}';
+      done
+
+  redis:
+    image: redis:8-alpine
+    container_name: taxat-local-redis
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "1"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "PING"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis-bootstrap:
+    image: redis:8-alpine
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: "no"
+    entrypoint: ["/bin/sh", "-lc"]
+    command: >
+      redis-cli -h redis SET taxat:local:shared-cache:namespace READY &&
+      redis-cli -h redis SET taxat:local:resume-envelope:namespace READY &&
+      redis-cli -h redis SET taxat:local:native-hydration:namespace READY
+
+volumes:
+  postgres-data:
+  minio-data:
+  rabbitmq-data:
+  redis-data:

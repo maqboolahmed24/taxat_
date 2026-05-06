@@ -9,9 +9,7 @@ import {
   createEvidenceManifest,
   type EvidenceManifest,
 } from "../../../core/evidence_manifest.js";
-import {
-  createManualCheckpoint,
-} from "../../../core/manual_checkpoint.js";
+import { createManualCheckpoint } from "../../../core/manual_checkpoint.js";
 import {
   assertProviderFlowAllowed,
   createDefaultProviderRegistry,
@@ -32,10 +30,8 @@ import {
 
 export const EMAIL_PROVIDER_ID = "transactional-email-delivery-control-plane";
 export const EMAIL_FLOW_ID = "email-workspace-and-sender-domain-bootstrap";
-export const EMAIL_PROVIDER_DISPLAY_NAME =
-  "Transactional Email Delivery Control Plane";
-export const EMAIL_PROVIDER_VENDOR_ADAPTER =
-  "POSTMARK_COMPATIBLE_CONTROL_PLANE";
+export const EMAIL_PROVIDER_DISPLAY_NAME = "Transactional Email Delivery Control Plane";
+export const EMAIL_PROVIDER_VENDOR_ADAPTER = "POSTMARK_COMPATIBLE_CONTROL_PLANE";
 export const EMAIL_PROVIDER_VENDOR_SELECTION = "PROVIDER_DEFAULT_APPLIED";
 export const EMAIL_POLICY_VERSION = "1.0";
 export const EMAIL_POLICY_GENERATED_ON = "2026-04-18";
@@ -60,9 +56,7 @@ export type EmailProviderEnvironmentTag =
   | "PREPRODUCTION"
   | "PRODUCTION";
 
-export type EmailSourceDisposition =
-  | "CREATED_DURING_RUN"
-  | "ADOPTED_EXISTING";
+export type EmailSourceDisposition = "CREATED_DURING_RUN" | "ADOPTED_EXISTING";
 
 export type SenderDomainVerificationState =
   | "VERIFIED"
@@ -78,9 +72,7 @@ export type EmailMessageStreamKind =
   | "OPERATOR_SECURITY"
   | "SANDBOX_TEST_SINK";
 
-export type EmailFlowOutcome =
-  | "EMAIL_DOMAIN_READY"
-  | "EMAIL_DNS_VERIFICATION_PENDING";
+export type EmailFlowOutcome = "EMAIL_DOMAIN_READY" | "EMAIL_DNS_VERIFICATION_PENDING";
 
 export interface SourceRef {
   source_ref: string;
@@ -109,9 +101,7 @@ export interface EmailProviderWorkspaceRow {
   account_token_metadata_ref: string;
   server_token_metadata_ref: string;
   server_token_fingerprint: string;
-  webhook_configuration_state:
-    | "DEFERRED_TO_PC_0042"
-    | "NOT_APPLICABLE_ON_BOOTSTRAP";
+  webhook_configuration_state: "DEFERRED_TO_PC_0042" | "NOT_APPLICABLE_ON_BOOTSTRAP";
   message_stream_refs: string[];
   suppression_posture_ref: string;
   source_refs: SourceRef[];
@@ -139,17 +129,12 @@ export interface SenderIdentityRow {
   label: string;
   from_address: string;
   reply_to_address: string;
-  sender_signature_mode:
-    | "DOMAIN_VERIFIED_ANY_MAILBOX_ALLOWED"
-    | "OPTIONAL_REPLY_TO_SIGNATURE_ONLY";
+  sender_signature_mode: "DOMAIN_VERIFIED_ANY_MAILBOX_ALLOWED" | "OPTIONAL_REPLY_TO_SIGNATURE_ONLY";
 }
 
 export interface SenderDomainRow {
   domain_ref: string;
-  product_environment_id: Exclude<
-    EmailProductEnvironmentId,
-    "env_local_provisioning_workstation"
-  >;
+  product_environment_id: Exclude<EmailProductEnvironmentId, "env_local_provisioning_workstation">;
   provider_environment_tag: Exclude<EmailProviderEnvironmentTag, "LOCAL_BOOTSTRAP">;
   workspace_ref: string;
   sender_domain: string;
@@ -192,15 +177,8 @@ export interface EmailDnsRecordRow {
   host: string;
   expected_value: string;
   ttl_seconds: number;
-  purpose:
-    | "DOMAIN_VERIFICATION"
-    | "DKIM_SIGNING"
-    | "RETURN_PATH"
-    | "DMARC_POLICY";
-  readiness_state:
-    | "VERIFIED"
-    | "PENDING_DNS"
-    | "PENDING_PROVIDER_CONFIRMATION";
+  purpose: "DOMAIN_VERIFICATION" | "DKIM_SIGNING" | "RETURN_PATH" | "DMARC_POLICY";
+  readiness_state: "VERIFIED" | "PENDING_DNS" | "PENDING_PROVIDER_CONFIRMATION";
   evidence_capture_policy: "REDACTED_METADATA_ONLY";
   source_refs: SourceRef[];
   notes: string[];
@@ -235,14 +213,9 @@ export interface EmailMessageStreamRow {
   server_token_binding_ref: string;
   smtp_token_metadata_ref: string | null;
   suppression_scope: "PER_STREAM_WITH_MANUAL_REACTIVATION";
-  bounce_handling_posture:
-    | "DEFERRED_CALLBACK_BINDING_PC_0042"
-    | "SANDBOX_FAKE_BOUNCE_ONLY";
-  complaint_handling_posture:
-    | "DEFERRED_CALLBACK_BINDING_PC_0042"
-    | "NOT_EXPECTED_FOR_TEST_SINK";
-  truth_boundary:
-    "DELIVERY_EVENTS_NEVER_DECIDE_WORKFLOW_OR_AUTHORITY_TRUTH";
+  bounce_handling_posture: "DEFERRED_CALLBACK_BINDING_PC_0042" | "SANDBOX_FAKE_BOUNCE_ONLY";
+  complaint_handling_posture: "DEFERRED_CALLBACK_BINDING_PC_0042" | "NOT_EXPECTED_FOR_TEST_SINK";
+  truth_boundary: "DELIVERY_EVENTS_NEVER_DECIDE_WORKFLOW_OR_AUTHORITY_TRUTH";
   source_refs: SourceRef[];
   notes: string[];
 }
@@ -290,8 +263,7 @@ export interface CreateEmailAccountAndSenderDomainOptions {
   notes?: string[];
 }
 
-export interface CreateEmailAccountAndSenderDomainResult
-  extends BuildEmailArtifactsResult {
+export interface CreateEmailAccountAndSenderDomainResult extends BuildEmailArtifactsResult {
   outcome: EmailFlowOutcome;
   steps: StepContract[];
   evidenceManifestPath: string;
@@ -444,13 +416,8 @@ async function persistJson(filePath: string, value: unknown): Promise<void> {
   await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
-function selectorById(
-  manifest: SelectorManifest,
-  selectorId: string,
-): SelectorDescriptor {
-  const selector = manifest.selectors.find(
-    (candidate) => candidate.selectorId === selectorId,
-  );
+function selectorById(manifest: SelectorManifest, selectorId: string): SelectorDescriptor {
+  const selector = manifest.selectors.find((candidate) => candidate.selectorId === selectorId);
   if (!selector) {
     throw new Error(`Selector ${selectorId} is missing from ${manifest.manifestId}`);
   }
@@ -497,14 +464,12 @@ function createProviderSelectionRecord(): ProviderSelectionRecord {
     docs_urls: [...EMAIL_PROVIDER_DOCS],
     source_refs: [
       {
-        source_ref:
-          "Algorithm/collaboration_workspace_contract.md::L1844[Customer_notifications]",
+        source_ref: "Algorithm/collaboration_workspace_contract.md::L1844[Customer_notifications]",
         rationale:
           "Customer email is optional product delivery for governed notification events rather than a separate source of workflow truth.",
       },
       {
-        source_ref:
-          "Algorithm/data_model.md::L195[WorkItemNotification]",
+        source_ref: "Algorithm/data_model.md::L195[WorkItemNotification]",
         rationale:
           "Notification delivery channel is modeled explicitly, but workflow legality remains engine-owned.",
       },
@@ -515,20 +480,17 @@ function createProviderSelectionRecord(): ProviderSelectionRecord {
           "Provider account tokens and server tokens must remain vault-bound and never be persisted raw in repo artifacts.",
       },
       {
-        source_ref:
-          "https://postmarkapp.com/developer/api/servers-api",
+        source_ref: "https://postmarkapp.com/developer/api/servers-api",
         rationale:
           "Current Postmark-compatible control planes distinguish account-level server management from server-level sending posture.",
       },
       {
-        source_ref:
-          "https://postmarkapp.com/developer/api/domains-api",
+        source_ref: "https://postmarkapp.com/developer/api/domains-api",
         rationale:
           "Domain verification, DKIM, and Return-Path posture are current provider-level requirements for sender-domain readiness.",
       },
       {
-        source_ref:
-          "https://postmarkapp.com/developer/api/message-streams-api",
+        source_ref: "https://postmarkapp.com/developer/api/message-streams-api",
         rationale:
           "Current provider documentation supports explicit message-stream partitioning instead of one undifferentiated outbound surface.",
       },
@@ -536,9 +498,7 @@ function createProviderSelectionRecord(): ProviderSelectionRecord {
   };
 }
 
-function localBootstrapWorkspaceRow(
-  state: EmailFixtureState,
-): EmailProviderWorkspaceRow {
+function localBootstrapWorkspaceRow(state: EmailFixtureState): EmailProviderWorkspaceRow {
   return {
     workspace_ref: "email_ws_local_bootstrap",
     product_environment_id: "env_local_provisioning_workstation",
@@ -553,16 +513,13 @@ function localBootstrapWorkspaceRow(
       "vault://metadata/sec_local_provisioning_sandbox/email/account-token",
     server_token_metadata_ref:
       "vault://metadata/sec_local_provisioning_sandbox/email/server-token/bootstrap",
-    server_token_fingerprint: stableHash(
-      "taxat-local-provisioning-email-server-token",
-    ),
+    server_token_fingerprint: stableHash("taxat-local-provisioning-email-server-token"),
     webhook_configuration_state: "NOT_APPLICABLE_ON_BOOTSTRAP",
     message_stream_refs: ["email_stream_local_bootstrap_sink"],
     suppression_posture_ref: "email_suppression_posture_sandbox_test_only",
     source_refs: [
       {
-        source_ref:
-          "data/analysis/environment_catalog.json::env_local_provisioning_workstation",
+        source_ref: "data/analysis/environment_catalog.json::env_local_provisioning_workstation",
         rationale:
           "Local provisioning is bootstrap-only and must never receive a production-trusted outbound sender identity of its own.",
       },
@@ -574,9 +531,7 @@ function localBootstrapWorkspaceRow(
   };
 }
 
-function buildWorkspaceRows(
-  state: EmailFixtureState,
-): EmailProviderWorkspaceRow[] {
+function buildWorkspaceRows(state: EmailFixtureState): EmailProviderWorkspaceRow[] {
   return [
     localBootstrapWorkspaceRow(state),
     ...ENVIRONMENT_BLUEPRINTS.map((blueprint) => ({
@@ -589,8 +544,7 @@ function buildWorkspaceRows(
       sender_domain_ref: blueprint.senderDomainRef,
       source_disposition: state.workspaceSourceDisposition,
       allows_live_recipients: blueprint.allowsLiveRecipients,
-      account_token_metadata_ref:
-        "vault://metadata/sec_delivery_platform/email/account-token",
+      account_token_metadata_ref: "vault://metadata/sec_delivery_platform/email/account-token",
       server_token_metadata_ref: `vault://metadata/${blueprint.secretNamespaceRef}/email/${blueprint.serverAlias}/server-token`,
       server_token_fingerprint: stableHash(
         `${blueprint.serverAlias}-server-token-${EMAIL_POLICY_GENERATED_ON}`,
@@ -609,14 +563,12 @@ function buildWorkspaceRows(
           : "email_suppression_posture_non_production_allowlist",
       source_refs: [
         {
-          source_ref:
-            "data/analysis/environment_catalog.json::environment_records",
+          source_ref: "data/analysis/environment_catalog.json::environment_records",
           rationale:
             "Environment separation and provider posture must stay explicit across sandbox, preproduction, and production.",
         },
         {
-          source_ref:
-            "https://postmarkapp.com/developer/api/servers-api",
+          source_ref: "https://postmarkapp.com/developer/api/servers-api",
           rationale:
             "Current provider guidance models delivery posture at the server boundary, including sandbox versus live type.",
         },
@@ -654,9 +606,7 @@ function buildSenderDomainRows(
   refs: EmailArtifactRefs,
 ): SenderDomainRow[] {
   return ENVIRONMENT_BLUEPRINTS.map((blueprint) => {
-    const verificationState = state.dnsPendingDomainRefs.includes(
-      blueprint.senderDomainRef,
-    )
+    const verificationState = state.dnsPendingDomainRefs.includes(blueprint.senderDomainRef)
       ? "PENDING_DNS"
       : "VERIFIED";
     return {
@@ -679,14 +629,12 @@ function buildSenderDomainRows(
       sender_identities: senderIdentitiesForDomain(blueprint.senderDomain),
       source_refs: [
         {
-          source_ref:
-            "data/analysis/environment_domain_dns_callback_matrix.json::domain_rows",
+          source_ref: "data/analysis/environment_domain_dns_callback_matrix.json::domain_rows",
           rationale:
             "Environment DNS grammar already uses environment-specific hostnames and must stay separated here as well.",
         },
         {
-          source_ref:
-            "https://postmarkapp.com/developer/api/domains-api",
+          source_ref: "https://postmarkapp.com/developer/api/domains-api",
           rationale:
             "Domain verification and custom Return-Path posture are current provider-level readiness requirements.",
         },
@@ -724,8 +672,7 @@ function dnsRow(
     evidence_capture_policy: "REDACTED_METADATA_ONLY",
     source_refs: [
       {
-        source_ref:
-          "https://postmarkapp.com/developer/api/domains-api",
+        source_ref: "https://postmarkapp.com/developer/api/domains-api",
         rationale:
           "Current Postmark-compatible domain docs enumerate pending DKIM values and custom Return-Path CNAME requirements.",
       },
@@ -738,12 +685,9 @@ function dnsRow(
   };
 }
 
-function buildDnsInventory(
-  senderDomains: SenderDomainRow[],
-): EmailDnsRecordRow[] {
+function buildDnsInventory(senderDomains: SenderDomainRow[]): EmailDnsRecordRow[] {
   return senderDomains.flatMap((domain) => {
-    const readinessState =
-      domain.verification_state === "VERIFIED" ? "VERIFIED" : "PENDING_DNS";
+    const readinessState = domain.verification_state === "VERIFIED" ? "VERIFIED" : "PENDING_DNS";
     const domainHost = domain.sender_domain;
     const dkimHost = `20260418.pm._domainkey.${domain.sender_domain}`;
     return [
@@ -808,12 +752,10 @@ function buildMessageStreamRows(
           suppression_scope: "PER_STREAM_WITH_MANUAL_REACTIVATION",
           bounce_handling_posture: "SANDBOX_FAKE_BOUNCE_ONLY",
           complaint_handling_posture: "NOT_EXPECTED_FOR_TEST_SINK",
-          truth_boundary:
-            "DELIVERY_EVENTS_NEVER_DECIDE_WORKFLOW_OR_AUTHORITY_TRUTH",
+          truth_boundary: "DELIVERY_EVENTS_NEVER_DECIDE_WORKFLOW_OR_AUTHORITY_TRUTH",
           source_refs: [
             {
-              source_ref:
-                "https://postmarkapp.com/developer/user-guide/sandbox-mode",
+              source_ref: "https://postmarkapp.com/developer/user-guide/sandbox-mode",
               rationale:
                 "Current sandbox-mode guidance supports safe non-live testing without implying production deliverability.",
             },
@@ -837,13 +779,11 @@ function buildMessageStreamRows(
         allowed_recipient_posture: "CUSTOMER_VISIBLE_TRANSACTIONAL_ONLY",
         allows_live_recipients: workspace.allows_live_recipients,
         server_token_binding_ref: workspace.server_token_metadata_ref,
-        smtp_token_metadata_ref:
-          `vault://metadata/${workspace.server_token_metadata_ref.split("/")[3]}/email/${workspace.server_alias}/smtp-customer-transactional`,
+        smtp_token_metadata_ref: `vault://metadata/${workspace.server_token_metadata_ref.split("/")[3]}/email/${workspace.server_alias}/smtp-customer-transactional`,
         suppression_scope: "PER_STREAM_WITH_MANUAL_REACTIVATION",
         bounce_handling_posture: "DEFERRED_CALLBACK_BINDING_PC_0042",
         complaint_handling_posture: "DEFERRED_CALLBACK_BINDING_PC_0042",
-        truth_boundary:
-          "DELIVERY_EVENTS_NEVER_DECIDE_WORKFLOW_OR_AUTHORITY_TRUTH",
+        truth_boundary: "DELIVERY_EVENTS_NEVER_DECIDE_WORKFLOW_OR_AUTHORITY_TRUTH",
         source_refs: [
           {
             source_ref:
@@ -852,8 +792,7 @@ function buildMessageStreamRows(
               "Customer-visible notification mail must stay distinct from internal-only activity and support the product's dedupe rules.",
           },
           {
-            source_ref:
-              "https://postmarkapp.com/developer/api/message-streams-api",
+            source_ref: "https://postmarkapp.com/developer/api/message-streams-api",
             rationale:
               "Current provider guidance supports message streams as the partitioning boundary for different mail classes.",
           },
@@ -872,17 +811,14 @@ function buildMessageStreamRows(
         allowed_recipient_posture: "INTERNAL_OPERATOR_SECURITY_ONLY",
         allows_live_recipients: false,
         server_token_binding_ref: workspace.server_token_metadata_ref,
-        smtp_token_metadata_ref:
-          `vault://metadata/${workspace.server_token_metadata_ref.split("/")[3]}/email/${workspace.server_alias}/smtp-operator-security`,
+        smtp_token_metadata_ref: `vault://metadata/${workspace.server_token_metadata_ref.split("/")[3]}/email/${workspace.server_alias}/smtp-operator-security`,
         suppression_scope: "PER_STREAM_WITH_MANUAL_REACTIVATION",
         bounce_handling_posture: "DEFERRED_CALLBACK_BINDING_PC_0042",
         complaint_handling_posture: "DEFERRED_CALLBACK_BINDING_PC_0042",
-        truth_boundary:
-          "DELIVERY_EVENTS_NEVER_DECIDE_WORKFLOW_OR_AUTHORITY_TRUTH",
+        truth_boundary: "DELIVERY_EVENTS_NEVER_DECIDE_WORKFLOW_OR_AUTHORITY_TRUTH",
         source_refs: [
           {
-            source_ref:
-              "Algorithm/retention_error_and_observability_contract.md::L1",
+            source_ref: "Algorithm/retention_error_and_observability_contract.md::L1",
             rationale:
               "Operational delivery data belongs in observability and support posture, not business workflow truth.",
           },
@@ -907,17 +843,14 @@ function buildMessageStreamRows(
         allowed_recipient_posture: "ALLOWLIST_OR_BLACKHOLE_TEST_ONLY",
         allows_live_recipients: false,
         server_token_binding_ref: workspace.server_token_metadata_ref,
-        smtp_token_metadata_ref:
-          `vault://metadata/${workspace.server_token_metadata_ref.split("/")[3]}/email/${workspace.server_alias}/smtp-test-sink`,
+        smtp_token_metadata_ref: `vault://metadata/${workspace.server_token_metadata_ref.split("/")[3]}/email/${workspace.server_alias}/smtp-test-sink`,
         suppression_scope: "PER_STREAM_WITH_MANUAL_REACTIVATION",
         bounce_handling_posture: "SANDBOX_FAKE_BOUNCE_ONLY",
         complaint_handling_posture: "NOT_EXPECTED_FOR_TEST_SINK",
-        truth_boundary:
-          "DELIVERY_EVENTS_NEVER_DECIDE_WORKFLOW_OR_AUTHORITY_TRUTH",
+        truth_boundary: "DELIVERY_EVENTS_NEVER_DECIDE_WORKFLOW_OR_AUTHORITY_TRUTH",
         source_refs: [
           {
-            source_ref:
-              "https://postmarkapp.com/developer/user-guide/sandbox-mode",
+            source_ref: "https://postmarkapp.com/developer/user-guide/sandbox-mode",
             rationale:
               "Non-production mail must stay safe for rehearsals and fake-bounce testing rather than uncontrolled live delivery.",
           },
@@ -966,9 +899,7 @@ export function createRecommendedFixtureState(
     workspaceSourceDisposition: "ADOPTED_EXISTING",
     senderDomainSourceDisposition: "ADOPTED_EXISTING",
     dnsPendingDomainRefs: [],
-    notes: [
-      "Fixture simulates an adopted provider workspace with domains already verified.",
-    ],
+    notes: ["Fixture simulates an adopted provider workspace with domains already verified."],
   };
 }
 
@@ -1024,9 +955,7 @@ export function buildTemplateEmailArtifacts(
     sender_domains: senderDomains,
     truth_boundary_statement:
       "Email delivery status, bounce state, complaint state, and suppression state are observability or transport projections only. They never decide workflow, authority, or customer-notification legality on their own.",
-    typed_gaps: [
-      "Later callback, template, and signed-event work remains for pc_0042.",
-    ],
+    typed_gaps: ["Later callback, template, and signed-event work remains for pc_0042."],
     notes: [
       "Sender-domain readiness is explicit per environment and fails closed when DNS or stream posture drifts.",
     ],
@@ -1108,17 +1037,13 @@ export function validateEmailDnsInventory(
   }
 }
 
-export function validateMessageStreamCatalog(
-  catalog: EmailMessageStreamCatalog,
-): void {
+export function validateMessageStreamCatalog(catalog: EmailMessageStreamCatalog): void {
   for (const stream of catalog.streams) {
     if (
       stream.product_environment_id === "env_production" &&
       stream.stream_kind === "SANDBOX_TEST_SINK"
     ) {
-      throw new Error(
-        `Production stream ${stream.stream_ref} must not be a sandbox test sink.`,
-      );
+      throw new Error(`Production stream ${stream.stream_ref} must not be a sandbox test sink.`);
     }
     if (
       stream.stream_kind === "CUSTOMER_TRANSACTIONAL" &&
@@ -1223,11 +1148,7 @@ export async function createEmailAccountAndSenderDomain(
 
   let evidenceManifest = createEvidenceManifest(options.runContext);
 
-  steps[0] = transitionStep(
-    steps[0]!,
-    "RUNNING",
-    "Opening transactional email control plane.",
-  );
+  steps[0] = transitionStep(steps[0]!, "RUNNING", "Opening transactional email control plane.");
   await options.page.goto(entryUrls.controlPlane);
   await requireVisible(options.page, manifest, "workspace-heading");
   await requireVisible(options.page, manifest, "workspace-action");
@@ -1245,11 +1166,7 @@ export async function createEmailAccountAndSenderDomain(
   );
 
   const fixtureState = await detectFixtureScenario(options.page);
-  const artifacts = buildTemplateEmailArtifacts(
-    options.runContext,
-    fixtureState,
-    refs,
-  );
+  const artifacts = buildTemplateEmailArtifacts(options.runContext, fixtureState, refs);
 
   steps[1] = transitionStep(
     steps[1]!,

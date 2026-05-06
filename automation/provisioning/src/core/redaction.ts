@@ -28,16 +28,12 @@ function escapeRegExp(value: string): string {
 
 function normalizeRegExp(pattern: string | RegExp): RegExp {
   if (pattern instanceof RegExp) {
-    return pattern.flags.includes("g")
-      ? pattern
-      : new RegExp(pattern.source, `${pattern.flags}g`);
+    return pattern.flags.includes("g") ? pattern : new RegExp(pattern.source, `${pattern.flags}g`);
   }
   return new RegExp(escapeRegExp(pattern), "g");
 }
 
-export function createDefaultRedactionRules(
-  secretValues: string[],
-): RedactionRule[] {
+export function createDefaultRedactionRules(secretValues: string[]): RedactionRule[] {
   return [
     ...secretValues.map((value, index) => ({
       id: `exact-secret-${index + 1}`,
@@ -63,10 +59,7 @@ export function createDefaultRedactionRules(
   ];
 }
 
-export function redactText(
-  input: string,
-  rules: readonly RedactionRule[],
-): RedactionResult {
+export function redactText(input: string, rules: readonly RedactionRule[]): RedactionResult {
   let value = input;
   const notes: RedactionNote[] = [];
 

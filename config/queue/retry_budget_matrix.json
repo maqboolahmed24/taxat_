@@ -1,0 +1,127 @@
+{
+  "contract_version": "QUEUE_RETRY_BUDGET_MATRIX_V1",
+  "matrix_id": "queue_retry_budget_matrix",
+  "basis_statement": "Retry cadence, budget, and positive-expected-gain gating for worker dispatch are deterministic policy artifacts rather than broker defaults or random jitter knobs.",
+  "retry_budget_rows": [
+    {
+      "retry_budget_class": "STAGE_WORK_BOUNDED_EXPONENTIAL",
+      "display_name": "Stage work bounded exponential",
+      "queue_family_refs": ["STAGE_WORK"],
+      "retry_class": "SAFE_RETRY",
+      "budget_limit": 4,
+      "base_delay_seconds": 30,
+      "backoff_cap_seconds": 900,
+      "phase_window_seconds": 17,
+      "hard_deadline_seconds": 7200,
+      "anchor_mode": "OPENED_AT",
+      "required_precondition_refs": [],
+      "success_prior": 0.92,
+      "decay_lambda": 0.18,
+      "positive_expected_gain_required": true,
+      "external_mutation_guard": "NOT_APPLICABLE",
+      "notes": [
+        "Stage work can retry autonomously only while manifest-bound inputs remain unchanged.",
+        "Deterministic phase offset spreads retries without sacrificing replayability."
+      ]
+    },
+    {
+      "retry_budget_class": "AUTHORITY_TRANSMIT_IDEMPOTENT_RECOVERY",
+      "display_name": "Authority transmit with legality gate",
+      "queue_family_refs": ["AUTHORITY_TRANSMIT"],
+      "retry_class": "SAFE_RETRY",
+      "budget_limit": 3,
+      "base_delay_seconds": 60,
+      "backoff_cap_seconds": 1200,
+      "phase_window_seconds": 23,
+      "hard_deadline_seconds": 5400,
+      "anchor_mode": "LAST_FAILED_AT",
+      "required_precondition_refs": [
+        "authority.binding-lineage.current",
+        "authority.duplicate-bucket.clear"
+      ],
+      "success_prior": 0.78,
+      "decay_lambda": 0.24,
+      "positive_expected_gain_required": true,
+      "external_mutation_guard": "AUTHORITY_SEND_LEGALITY_REQUIRED",
+      "notes": [
+        "Automatic retry remains illegal once send-time revalidation blocks or stronger external truth appears.",
+        "This class covers queued send and exact idempotent recovery only; it never authorizes blind fresh resend."
+      ]
+    },
+    {
+      "retry_budget_class": "RECONCILIATION_FOLLOW_UP_GATED",
+      "display_name": "Reconciliation follow-up gated",
+      "queue_family_refs": ["RECONCILIATION_FOLLOW_UP"],
+      "retry_class": "SAFE_RETRY",
+      "budget_limit": 4,
+      "base_delay_seconds": 300,
+      "backoff_cap_seconds": 1800,
+      "phase_window_seconds": 29,
+      "hard_deadline_seconds": 21600,
+      "anchor_mode": "LAST_FAILED_AT",
+      "required_precondition_refs": ["authority.reconciliation.deadline.open"],
+      "success_prior": 0.74,
+      "decay_lambda": 0.15,
+      "positive_expected_gain_required": true,
+      "external_mutation_guard": "NOT_APPLICABLE",
+      "notes": [
+        "Reconciliation follow-up remains read-only and bounded by the persisted reconciliation deadline.",
+        "If the deadline or economic gate closes, work escalates instead of looping silently."
+      ]
+    },
+    {
+      "retry_budget_class": "PROJECTION_REFRESH_REBUILDABLE",
+      "display_name": "Projection refresh rebuildable",
+      "queue_family_refs": ["PROJECTION_REFRESH"],
+      "retry_class": "REBUILD_THEN_RETRY",
+      "budget_limit": 5,
+      "base_delay_seconds": 15,
+      "backoff_cap_seconds": 300,
+      "phase_window_seconds": 11,
+      "hard_deadline_seconds": 3600,
+      "anchor_mode": "LAST_FAILED_AT",
+      "required_precondition_refs": ["projection.snapshot-basis.current"],
+      "success_prior": 0.96,
+      "decay_lambda": 0.12,
+      "positive_expected_gain_required": true,
+      "external_mutation_guard": "NOT_APPLICABLE",
+      "notes": [
+        "Projection refresh retries require rebuildable upstream truth and never depend on retained broker memory.",
+        "Low cost and high success prior keep projection repair fast while still deterministic."
+      ]
+    },
+    {
+      "retry_budget_class": "RECOVERY_JOB_REBUILDABLE",
+      "display_name": "Recovery job rebuildable",
+      "queue_family_refs": ["RECOVERY_JOB"],
+      "retry_class": "REBUILD_THEN_RETRY",
+      "budget_limit": 4,
+      "base_delay_seconds": 120,
+      "backoff_cap_seconds": 1800,
+      "phase_window_seconds": 31,
+      "hard_deadline_seconds": 14400,
+      "anchor_mode": "LAST_FAILED_AT",
+      "required_precondition_refs": ["recovery.checkpoint.current"],
+      "success_prior": 0.81,
+      "decay_lambda": 0.2,
+      "positive_expected_gain_required": true,
+      "external_mutation_guard": "NOT_APPLICABLE",
+      "notes": [
+        "Recovery jobs rebuild the fabric from checkpoint, outbox, inbox, and audit truth.",
+        "The hard deadline exists to force operator review before recovery work livelocks."
+      ]
+    }
+  ],
+  "source_lineage": [
+    {
+      "rationale": "Deterministic backoff, phase offset, and positive-expected-gain gating.",
+      "source_file": "Algorithm/error_model_and_remediation_model.md",
+      "source_heading_or_logical_block": "### Deterministic retry backoff and economic gate"
+    },
+    {
+      "rationale": "Automatic retry guardrails for externally visible mutations.",
+      "source_file": "Algorithm/error_model_and_remediation_model.md",
+      "source_heading_or_logical_block": "### Quantitative retry-budget rule"
+    }
+  ]
+}

@@ -1,0 +1,316 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/exceptional_authority_grant.schema.json",
+  "title": "ExceptionalAuthorityGrant",
+  "description": "Bounded exceptional-authority contract for break-glass or incident-driven control exceptions. This schema freezes who requested and approved the exception, the exact action and partition scope, step-up evidence, usage budget, and the explicit prohibitions that prevent exceptional authority from fabricating legal truth.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "exceptional_grant_id",
+    "incident_ref",
+    "target_action_family",
+    "tenant_id",
+    "client_id",
+    "partition_scope_refs",
+    "requesting_principal_ref",
+    "requesting_principal_class",
+    "approving_principal_ref",
+    "approving_principal_class",
+    "activated_at",
+    "expires_at",
+    "revoked_at",
+    "usage_limit",
+    "remaining_uses",
+    "rationale",
+    "compensating_control_refs",
+    "lifecycle_state",
+    "approval_step_up_state",
+    "approval_step_up_evidence_ref",
+    "self_approved",
+    "authority_acknowledgement_override_permitted",
+    "delegation_substitution_permitted",
+    "silent_client_widening_permitted",
+    "declaration_sign_without_signatory_basis_permitted",
+    "truth_confirmation_override_permitted",
+    "silent_partition_widening_permitted"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "ExceptionalAuthorityGrant"
+    },
+    "exceptional_grant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "incident_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_action_family": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "client_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "partition_scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "requesting_principal_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requesting_principal_class": {
+      "type": "string",
+      "enum": [
+        "HUMAN",
+        "EXTERNAL"
+      ]
+    },
+    "approving_principal_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approving_principal_class": {
+      "const": "HUMAN"
+    },
+    "activated_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revoked_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "usage_limit": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "remaining_uses": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "compensating_control_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "PENDING_APPROVAL",
+        "ACTIVE",
+        "EXHAUSTED",
+        "EXPIRED",
+        "REVOKED"
+      ]
+    },
+    "approval_step_up_state": {
+      "const": "SATISFIED"
+    },
+    "approval_step_up_evidence_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "self_approved": {
+      "const": false
+    },
+    "authority_acknowledgement_override_permitted": {
+      "const": false
+    },
+    "delegation_substitution_permitted": {
+      "const": false
+    },
+    "silent_client_widening_permitted": {
+      "const": false
+    },
+    "declaration_sign_without_signatory_basis_permitted": {
+      "const": false
+    },
+    "truth_confirmation_override_permitted": {
+      "const": false
+    },
+    "silent_partition_widening_permitted": {
+      "const": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "PENDING_APPROVAL"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "activated_at": {
+            "type": "null"
+          },
+          "revoked_at": {
+            "type": "null"
+          },
+          "remaining_uses": {
+            "const": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "ACTIVE"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "activated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "remaining_uses": {
+            "minimum": 1
+          },
+          "revoked_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "EXHAUSTED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "activated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "remaining_uses": {
+            "const": 0
+          },
+          "revoked_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "REVOKED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "activated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revoked_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "revoked_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "revoked_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "REVOKED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "ACTIVE",
+              "EXHAUSTED",
+              "EXPIRED"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "activated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revoked_at": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

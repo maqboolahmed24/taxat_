@@ -4,21 +4,14 @@ import path from "node:path";
 
 import { test, expect } from "@playwright/test";
 
-import {
-  createEvidenceManifest,
-  appendEvidenceRecord,
-} from "../../src/core/evidence_manifest.js";
-import {
-  createManualCheckpoint,
-} from "../../src/core/manual_checkpoint.js";
+import { createEvidenceManifest, appendEvidenceRecord } from "../../src/core/evidence_manifest.js";
+import { createManualCheckpoint } from "../../src/core/manual_checkpoint.js";
 import {
   createDefaultProviderRegistry,
   assertProviderFlowAllowed,
 } from "../../src/core/provider_registry.js";
 import { redactText } from "../../src/core/redaction.js";
-import {
-  createRunContext,
-} from "../../src/core/run_context.js";
+import { createRunContext } from "../../src/core/run_context.js";
 import { FileResumeStore } from "../../src/core/resume_store.js";
 import { rankSelectors } from "../../src/core/selector_contract.js";
 import {
@@ -28,9 +21,7 @@ import {
   transitionStep,
 } from "../../src/core/step_contract.js";
 
-test("boots the provisioning workspace against a local fixture portal", async ({
-  page,
-}) => {
+test("boots the provisioning workspace against a local fixture portal", async ({ page }) => {
   const registry = createDefaultProviderRegistry();
   const provider = registry.getRequired("fixture-sandbox-console");
   const flow = provider.flows[0];
@@ -55,9 +46,7 @@ test("boots the provisioning workspace against a local fixture portal", async ({
   ]);
 
   await page.goto("/tests/fixtures/mock_provider_portal.html");
-  await expect(
-    page.getByRole("heading", { name: "HMRC Developer Hub Sandbox" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "HMRC Developer Hub Sandbox" })).toBeVisible();
 
   const existingResourceButton = page.getByRole("button", {
     name: "Check for existing sandbox application",
@@ -97,19 +86,16 @@ test("boots the provisioning workspace against a local fixture portal", async ({
     `${await portalStatus.textContent()} https://staging.taxat.test/callback/hmrc`,
     rules,
   );
-  const evidenceManifest = appendEvidenceRecord(
-    createEvidenceManifest(runContext),
-    {
-      evidenceId: "evidence-existing-resource",
-      stepId: existingStep.stepId,
-      kind: "STRUCTURED_LOG",
-      relativePath: "step-001/existing-resource.json",
-      captureMode: "REDACTED",
-      summary: redacted.value,
-      locatorRefs: ["existing-resource-button"],
-      redactionNotes: redacted.notes,
-    },
-  );
+  const evidenceManifest = appendEvidenceRecord(createEvidenceManifest(runContext), {
+    evidenceId: "evidence-existing-resource",
+    stepId: existingStep.stepId,
+    kind: "STRUCTURED_LOG",
+    relativePath: "step-001/existing-resource.json",
+    captureMode: "REDACTED",
+    summary: redacted.value,
+    locatorRefs: ["existing-resource-button"],
+    redactionNotes: redacted.notes,
+  });
 
   expect(evidenceManifest.entries[0].summary).not.toContain(
     "https://staging.taxat.test/callback/hmrc",
@@ -117,9 +103,7 @@ test("boots the provisioning workspace against a local fixture portal", async ({
 
   await page.getByRole("button", { name: "Pause for MFA review" }).click();
   await expect(page.locator("body")).toHaveAttribute("data-manual-checkpoint", "true");
-  await expect(
-    page.getByRole("heading", { name: "Manual checkpoint required" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Manual checkpoint required" })).toBeVisible();
 
   const checkpoint = createManualCheckpoint({
     checkpointId: "checkpoint-fixture-mfa",
@@ -143,9 +127,7 @@ test("boots the provisioning workspace against a local fixture portal", async ({
     checkpoint,
   );
 
-  const resumeRoot = await mkdtemp(
-    path.join(os.tmpdir(), "taxat-provisioning-smoke-"),
-  );
+  const resumeRoot = await mkdtemp(path.join(os.tmpdir(), "taxat-provisioning-smoke-"));
   const store = new FileResumeStore(resumeRoot);
   const snapshot = await store.saveSnapshot({
     runContext: {

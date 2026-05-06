@@ -1,0 +1,695 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/authority_calculation_readiness_context.schema.json",
+  "title": "AuthorityCalculationReadinessContext",
+  "description": "Authority-calculation readiness context contract. This schema freezes the calculation refs, validation outcome, reason codes, and persistence target used by filing-preparation and amendment-intent gates.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "calculation_readiness_context_id",
+    "context_scope",
+    "manifest_id",
+    "owner_artifact_type",
+    "owner_artifact_ref",
+    "calculation_request_ref",
+    "calculation_id",
+    "calculation_type",
+    "request_state",
+    "result_state",
+    "calculation_hash",
+    "calculation_basis_ref",
+    "basis_status",
+    "basis_hash",
+    "user_confirmation_ref",
+    "confirmation_state",
+    "parity_reusable",
+    "filing_reusable",
+    "validation_outcome",
+    "reason_codes",
+    "live_authority_call_executed",
+    "persisted_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "AuthorityCalculationReadinessContext"
+    },
+    "calculation_readiness_context_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "context_scope": {
+      "type": "string",
+      "enum": [
+        "FILING_PREPARATION",
+        "AMENDMENT_INTENT"
+      ]
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner_artifact_type": {
+      "type": "string",
+      "enum": [
+        "FilingCase",
+        "AmendmentCase"
+      ]
+    },
+    "owner_artifact_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "calculation_request_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "calculation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "calculation_type": {
+      "type": "string",
+      "enum": [
+        "in-year",
+        "intent-to-finalise",
+        "intent-to-amend",
+        "final-declaration"
+      ]
+    },
+    "request_state": {
+      "type": "string",
+      "enum": [
+        "MODELED_ONLY",
+        "TRIGGERED",
+        "RETRIEVE_PENDING",
+        "RETRIEVED"
+      ]
+    },
+    "result_state": {
+      "type": "string",
+      "enum": [
+        "MODELED",
+        "RETRIEVED"
+      ]
+    },
+    "calculation_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "calculation_basis_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "basis_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "PROVISIONAL",
+        "CONFIRMED",
+        "REJECTED",
+        null
+      ]
+    },
+    "basis_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "user_confirmation_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "confirmation_state": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "PENDING",
+        "CONFIRMED",
+        "DECLINED",
+        null
+      ]
+    },
+    "parity_reusable": {
+      "type": "boolean"
+    },
+    "filing_reusable": {
+      "type": "boolean"
+    },
+    "validation_outcome": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "PASS_WITH_NOTICE",
+        "MANUAL_REVIEW",
+        "OVERRIDABLE_BLOCK",
+        "HARD_BLOCK"
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "live_authority_call_executed": {
+      "type": "boolean"
+    },
+    "persisted_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "context_scope": {
+            "const": "FILING_PREPARATION"
+          }
+        },
+        "required": [
+          "context_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "owner_artifact_type": {
+            "const": "FilingCase"
+          },
+          "calculation_type": {
+            "enum": [
+              "in-year",
+              "intent-to-finalise",
+              "final-declaration"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "context_scope": {
+            "const": "AMENDMENT_INTENT"
+          }
+        },
+        "required": [
+          "context_scope"
+        ]
+      },
+      "then": {
+        "properties": {
+          "owner_artifact_type": {
+            "const": "AmendmentCase"
+          },
+          "calculation_type": {
+            "const": "intent-to-amend"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "owner_artifact_type": {
+            "const": "FilingCase"
+          }
+        },
+        "required": [
+          "owner_artifact_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "context_scope": {
+            "const": "FILING_PREPARATION"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "owner_artifact_type": {
+            "const": "AmendmentCase"
+          }
+        },
+        "required": [
+          "owner_artifact_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "context_scope": {
+            "const": "AMENDMENT_INTENT"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "calculation_type": {
+            "const": "intent-to-amend"
+          }
+        },
+        "required": [
+          "calculation_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "context_scope": {
+            "const": "AMENDMENT_INTENT"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "calculation_type": {
+            "enum": [
+              "in-year",
+              "intent-to-finalise",
+              "final-declaration"
+            ]
+          }
+        },
+        "required": [
+          "calculation_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "context_scope": {
+            "const": "FILING_PREPARATION"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "validation_outcome": {
+            "const": "PASS"
+          }
+        },
+        "required": [
+          "validation_outcome"
+        ]
+      },
+      "then": {
+        "properties": {
+          "calculation_request_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "calculation_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request_state": {
+            "const": "RETRIEVED"
+          },
+          "result_state": {
+            "const": "RETRIEVED"
+          },
+          "calculation_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "calculation_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "basis_status": {
+            "const": "CONFIRMED"
+          },
+          "basis_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "user_confirmation_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "confirmation_state": {
+            "const": "CONFIRMED"
+          },
+          "live_authority_call_executed": {
+            "const": true
+          },
+          "reason_codes": {
+            "maxItems": 0
+          }
+        },
+        "anyOf": [
+          {
+            "properties": {
+              "parity_reusable": {
+                "const": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "filing_reusable": {
+                "const": true
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "validation_outcome": {
+            "const": "PASS_WITH_NOTICE"
+          }
+        },
+        "required": [
+          "validation_outcome"
+        ]
+      },
+      "then": {
+        "properties": {
+          "request_state": {
+            "const": "RETRIEVED"
+          },
+          "result_state": {
+            "const": "RETRIEVED"
+          },
+          "calculation_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "calculation_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "basis_status": {
+            "const": "CONFIRMED"
+          },
+          "basis_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "user_confirmation_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "confirmation_state": {
+            "const": "CONFIRMED"
+          },
+          "live_authority_call_executed": {
+            "const": true
+          }
+        },
+        "anyOf": [
+          {
+            "properties": {
+              "parity_reusable": {
+                "const": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "filing_reusable": {
+                "const": true
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "live_authority_call_executed": {
+            "const": false
+          }
+        },
+        "required": [
+          "live_authority_call_executed"
+        ]
+      },
+      "then": {
+        "properties": {
+          "request_state": {
+            "const": "MODELED_ONLY"
+          },
+          "result_state": {
+            "const": "MODELED"
+          },
+          "calculation_hash": {
+            "type": "null"
+          },
+          "calculation_basis_ref": {
+            "type": "null"
+          },
+          "basis_status": {
+            "type": "null"
+          },
+          "basis_hash": {
+            "type": "null"
+          },
+          "user_confirmation_ref": {
+            "type": "null"
+          },
+          "confirmation_state": {
+            "type": "null"
+          },
+          "parity_reusable": {
+            "const": false
+          },
+          "filing_reusable": {
+            "const": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "calculation_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "calculation_basis_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "basis_status": {
+            "type": "string",
+            "enum": [
+              "PROVISIONAL",
+              "CONFIRMED",
+              "REJECTED"
+            ]
+          },
+          "basis_hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "user_confirmation_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "user_confirmation_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "calculation_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "confirmation_state": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "CONFIRMED",
+              "DECLINED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "confirmation_state": {
+            "const": "CONFIRMED"
+          }
+        },
+        "required": [
+          "confirmation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "basis_status": {
+            "const": "CONFIRMED"
+          },
+          "user_confirmation_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "anyOf": [
+          {
+            "properties": {
+              "parity_reusable": {
+                "const": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "filing_reusable": {
+                "const": true
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reason_codes": {
+            "maxItems": 0
+          }
+        },
+        "required": [
+          "reason_codes"
+        ]
+      },
+      "then": {
+        "properties": {
+          "validation_outcome": {
+            "const": "PASS"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "validation_outcome": {
+            "enum": [
+              "PASS_WITH_NOTICE",
+              "MANUAL_REVIEW",
+              "OVERRIDABLE_BLOCK",
+              "HARD_BLOCK"
+            ]
+          }
+        },
+        "required": [
+          "validation_outcome"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "anyOf": [
+          {
+            "properties": {
+              "parity_reusable": {
+                "const": true
+              }
+            },
+            "required": [
+              "parity_reusable"
+            ]
+          },
+          {
+            "properties": {
+              "filing_reusable": {
+                "const": true
+              }
+            },
+            "required": [
+              "filing_reusable"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "basis_status": {
+            "const": "CONFIRMED"
+          },
+          "confirmation_state": {
+            "const": "CONFIRMED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "user_confirmation_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "user_confirmation_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "calculation_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "basis_hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

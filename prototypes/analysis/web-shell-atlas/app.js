@@ -103,7 +103,9 @@ function resolveScenario(scenarioId) {
 }
 
 function setMotionMode() {
-  const mode = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "reduce" : "standard";
+  const mode = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ? "reduce"
+    : "standard";
   document.documentElement.dataset.motion = mode;
   motionMode.textContent = mode;
 }
@@ -335,7 +337,11 @@ function shellLayoutClass(shellId) {
 }
 
 function shellAccentLabel(shellId) {
-  return shellId === "calm" ? "restrained indigo" : shellId === "portal" ? "restrained teal" : "restrained plum";
+  return shellId === "calm"
+    ? "restrained indigo"
+    : shellId === "portal"
+      ? "restrained teal"
+      : "restrained plum";
 }
 
 function announceShellEvent(message, tone = "warning") {
@@ -425,7 +431,11 @@ function buildShellPage(shellId) {
     banner.dataset.tone = state.liveTone;
     banner.append(
       createElement("p", "section-label", "Continuity notice"),
-      createElement("h3", "banner-title", state.liveTone === "danger" ? "Unsafe remount avoided" : "Shell continuity preserved"),
+      createElement(
+        "h3",
+        "banner-title",
+        state.liveTone === "danger" ? "Unsafe remount avoided" : "Shell continuity preserved",
+      ),
     );
     const live = createElement("p", "body-copy", state.liveMessage);
     live.dataset.testid = "shell-continuity-live-region";
@@ -437,10 +447,7 @@ function buildShellPage(shellId) {
   const stage = createElement("section", "shell-stage");
   stage.dataset.shell = shellId;
   stage.dataset.testid = `${shellId}-shell-stage`;
-  stage.append(
-    buildShellHeader(shell, variant),
-    buildShellColumns(shellId, shell, variant),
-  );
+  stage.append(buildShellHeader(shell, variant), buildShellColumns(shellId, shell, variant));
   fragment.append(stage);
 
   return fragment;
@@ -501,7 +508,11 @@ function buildShellColumns(shellId, shell, variant) {
         `Accent discipline: ${shellAccentLabel(shellId)}`,
         `Landmarks: ${variant.landmarks.join(", ") || "derived from route contract"}`,
       ],
-      shellId === "portal" ? "portal-customer-safe-boundary" : shellId === "governance" ? "governance-density-nav" : "calm-context-column",
+      shellId === "portal"
+        ? "portal-customer-safe-boundary"
+        : shellId === "governance"
+          ? "governance-density-nav"
+          : "calm-context-column",
     ),
   );
 
@@ -691,7 +702,9 @@ function renderLab() {
   selectorPanel.append(list);
   labGrid.append(selectorPanel);
 
-  const current = atlasData.verificationLab.scenarios.find((scenario) => scenario.id === state.scenarioId);
+  const current = atlasData.verificationLab.scenarios.find(
+    (scenario) => scenario.id === state.scenarioId,
+  );
   const detailPanel = createElement("article", "lab-card stack");
   detailPanel.append(
     createElement("p", "section-label", "Active scenario"),

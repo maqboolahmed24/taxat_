@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/route_stability_contract.schema.json",
+  "title": "RouteStabilityContract",
+  "description": "Shared route-stability publication contract. This schema freezes one authoritative publication generation, one guard-vector hash, the exact component markers that formed that hash, and the current resume capability so snapshots, stream events, stale failures, and native restoration cannot mix markers from different route generations.",
+  "type": "object",
+  "required": [
+    "route_scope_class",
+    "publication_generation",
+    "guard_vector_hash",
+    "guard_vector_components",
+    "last_published_sequence_or_null",
+    "resume_token_or_null",
+    "resume_capability"
+  ],
+  "properties": {
+    "route_scope_class": {
+      "type": "string",
+      "enum": [
+        "MANIFEST_EXPERIENCE",
+        "WORKSPACE",
+        "CLIENT_PORTAL_ROUTE",
+        "GOVERNANCE_ROUTE"
+      ]
+    },
+    "publication_generation": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "guard_vector_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "guard_vector_components": {
+      "$ref": "#/$defs/guardVectorComponents"
+    },
+    "last_published_sequence_or_null": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "resume_token_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "resume_capability": {
+      "type": "string",
+      "enum": [
+        "STREAM_RESUMABLE",
+        "SNAPSHOT_ONLY",
+        "ACCESS_REBIND_REQUIRED"
+      ]
+    }
+  },
+  "$defs": {
+    "guardVectorComponents": {
+      "type": "object",
+      "required": [
+        "decision_bundle_hash_or_null",
+        "shell_stability_token_or_null",
+        "frame_epoch_or_null",
+        "work_item_version_or_null",
+        "customer_thread_head_or_null",
+        "internal_thread_head_or_null",
+        "request_state_version_or_null",
+        "client_portal_workspace_version_or_null",
+        "view_guard_ref_or_null",
+        "policy_snapshot_hash_or_null",
+        "dependency_topology_hash_or_null",
+        "simulation_basis_hash_or_null"
+      ],
+      "properties": {
+        "decision_bundle_hash_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "shell_stability_token_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "frame_epoch_or_null": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "work_item_version_or_null": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "customer_thread_head_or_null": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "internal_thread_head_or_null": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "request_state_version_or_null": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "client_portal_workspace_version_or_null": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "view_guard_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "policy_snapshot_hash_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "dependency_topology_hash_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "simulation_basis_hash_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "mutation_basis_contract_hash_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "resume_capability": {
+            "const": "STREAM_RESUMABLE"
+          }
+        },
+        "required": [
+          "resume_capability"
+        ]
+      },
+      "then": {
+        "properties": {
+          "last_published_sequence_or_null": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "resume_token_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resume_capability": {
+            "const": "SNAPSHOT_ONLY"
+          }
+        },
+        "required": [
+          "resume_capability"
+        ]
+      },
+      "then": {
+        "properties": {
+          "last_published_sequence_or_null": {
+            "type": "null"
+          },
+          "resume_token_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

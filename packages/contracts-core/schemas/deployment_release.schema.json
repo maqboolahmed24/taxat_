@@ -1,0 +1,712 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/deployment_release.schema.json",
+  "title": "DeploymentRelease",
+  "description": "Deployment promotion contract. This schema freezes release identity, recovery-governance posture, rollout strategy, canary posture, health gating, verification evidence, rollback boundary, and fail-forward ownership for a release candidate.",
+  "type": "object",
+  "required": [
+    "release_id",
+    "environment_ref",
+    "build_id",
+    "candidate_identity_hash",
+    "candidate_identity_contract",
+    "recovery_governance_contract",
+    "schema_bundle_hash",
+    "schema_reader_window_contract",
+    "schema_bundle_compatibility_gate_contract",
+    "config_bundle_hash",
+    "rollout_strategy",
+    "rollout_state",
+    "state_transition_contract",
+    "rollback_boundary_state",
+    "canary_fraction",
+    "health_gate_state",
+    "release_verification_manifest_ref",
+    "supported_client_window_ref",
+    "deployed_at",
+    "rollback_of_release_id",
+    "compensating_release_id_or_null",
+    "rollback_runbook_ref",
+    "fail_forward_runbook_ref",
+    "fail_forward_owner_ref_or_null",
+    "emergency_override_ref",
+    "emergency_override_expires_at"
+  ],
+  "properties": {
+    "release_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "build_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_identity_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_identity_contract": {
+      "$ref": "https://taxat.dev/schemas/release_candidate_identity_contract.schema.json"
+    },
+    "recovery_governance_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/recovery_governance_contract.schema.json"
+        },
+        {
+          "properties": {
+            "boundary_scope": {
+              "const": "DEPLOYMENT_RELEASE"
+            },
+            "protected_workload_class": {
+              "const": "CONTROL_PLANE_LEGAL_TRUTH"
+            },
+            "recovery_tier_class": {
+              "const": "TIER_0_CONTROL_PLANE"
+            },
+            "rpo_class": {
+              "const": "RPO_15M"
+            },
+            "rto_class": {
+              "const": "RTO_60M"
+            },
+            "boundary_specific_binding_policy": {
+              "const": "RELEASE_RETAINS_ROLLBACK_BOUNDARY_AND_FAIL_FORWARD_GOVERNANCE"
+            }
+          }
+        }
+      ]
+    },
+    "schema_bundle_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema_reader_window_contract": {
+      "$ref": "https://taxat.dev/schemas/schema_reader_window_contract.schema.json"
+    },
+    "schema_bundle_compatibility_gate_contract": {
+      "$ref": "https://taxat.dev/schemas/schema_bundle_compatibility_gate_contract.schema.json"
+    },
+    "config_bundle_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rollout_strategy": {
+      "type": "string",
+      "enum": [
+        "STANDARD_CANARY",
+        "EMERGENCY_PROMOTE",
+        "PIN_BASELINE",
+        "FAIL_FORWARD_COMPENSATING"
+      ]
+    },
+    "rollout_state": {
+      "type": "string",
+      "enum": [
+        "PLANNED",
+        "CANARY",
+        "PROMOTED",
+        "FAILED_FORWARD",
+        "PINNED",
+        "ABORTED",
+        "ROLLED_BACK",
+        "SUPERSEDED"
+      ]
+    },
+    "state_transition_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/state_transition_contract.schema.json"
+        },
+        {
+          "properties": {
+            "object_family": {
+              "const": "DEPLOYMENT_RELEASE"
+            },
+            "machine_code": {
+              "const": "DEPLOYMENT_RELEASE_ROLLOUT_V1"
+            },
+            "state_field_name": {
+              "const": "rollout_state"
+            }
+          }
+        }
+      ]
+    },
+    "rollback_boundary_state": {
+      "type": "string",
+      "enum": [
+        "ROLLBACK_ALLOWED",
+        "FAIL_FORWARD_ONLY"
+      ]
+    },
+    "canary_fraction": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0,
+      "exclusiveMaximum": 1
+    },
+    "health_gate_state": {
+      "type": "string",
+      "enum": [
+        "GREEN",
+        "AMBER",
+        "RED"
+      ]
+    },
+    "release_verification_manifest_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "supported_client_window_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deployed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "rollback_of_release_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "compensating_release_id_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "rollback_runbook_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fail_forward_runbook_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fail_forward_owner_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "emergency_override_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "emergency_override_expires_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "rollout_strategy": {
+            "const": "STANDARD_CANARY"
+          }
+        },
+        "required": [
+          "rollout_strategy"
+        ]
+      },
+      "then": {
+        "properties": {
+          "canary_fraction": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "exclusiveMaximum": 1
+          },
+          "emergency_override_ref": {
+            "type": "null"
+          },
+          "emergency_override_expires_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "rollout_strategy": {
+            "const": "EMERGENCY_PROMOTE"
+          }
+        },
+        "required": [
+          "rollout_strategy"
+        ]
+      },
+      "then": {
+        "properties": {
+          "canary_fraction": {
+            "type": "null"
+          },
+          "emergency_override_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "emergency_override_expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "rollout_strategy": {
+            "const": "PIN_BASELINE"
+          }
+        },
+        "required": [
+          "rollout_strategy"
+        ]
+      },
+      "then": {
+        "properties": {
+          "rollout_state": {
+            "const": "PINNED"
+          },
+          "canary_fraction": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "rollout_strategy": {
+            "const": "FAIL_FORWARD_COMPENSATING"
+          }
+        },
+        "required": [
+          "rollout_strategy"
+        ]
+      },
+      "then": {
+        "properties": {
+          "rollout_state": {
+            "const": "FAILED_FORWARD"
+          },
+          "rollback_boundary_state": {
+            "const": "FAIL_FORWARD_ONLY"
+          },
+          "canary_fraction": {
+            "type": "null"
+          },
+          "rollback_of_release_id": {
+            "type": "null"
+          },
+          "compensating_release_id_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "fail_forward_owner_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "rollout_state": {
+            "const": "CANARY"
+          }
+        },
+        "required": [
+          "rollout_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "deployed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "canary_fraction": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "exclusiveMaximum": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "rollout_state": {
+            "const": "ABORTED"
+          }
+        },
+        "required": [
+          "rollout_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "rollout_strategy": {
+            "const": "STANDARD_CANARY"
+          },
+          "deployed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rollback_boundary_state": {
+            "const": "ROLLBACK_ALLOWED"
+          },
+          "schema_bundle_compatibility_gate_contract": {
+            "properties": {
+              "rollback_boundary_state": {
+                "const": "ROLLBACK_ALLOWED"
+              }
+            },
+            "required": [
+              "rollback_boundary_state"
+            ]
+          },
+          "canary_fraction": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "exclusiveMaximum": 1
+          },
+          "health_gate_state": {
+            "const": "RED"
+          },
+          "rollback_of_release_id": {
+            "type": "null"
+          },
+          "compensating_release_id_or_null": {
+            "type": "null"
+          },
+          "fail_forward_owner_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "rollout_state": {
+            "const": "PROMOTED"
+          }
+        },
+        "required": [
+          "rollout_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "deployed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "health_gate_state": {
+            "const": "GREEN"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "rollout_state": {
+            "const": "PINNED"
+          }
+        },
+        "required": [
+          "rollout_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "rollout_strategy": {
+            "const": "PIN_BASELINE"
+          },
+          "deployed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "canary_fraction": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "rollout_state": {
+            "const": "FAILED_FORWARD"
+          }
+        },
+        "required": [
+          "rollout_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "deployed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rollback_boundary_state": {
+            "const": "FAIL_FORWARD_ONLY"
+          },
+          "schema_bundle_compatibility_gate_contract": {
+            "properties": {
+              "rollback_boundary_state": {
+                "const": "FAIL_FORWARD_ONLY"
+              }
+            },
+            "required": [
+              "rollback_boundary_state"
+            ]
+          },
+          "rollback_of_release_id": {
+            "type": "null"
+          },
+          "compensating_release_id_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "fail_forward_owner_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "rollout_state": {
+            "const": "ROLLED_BACK"
+          }
+        },
+        "required": [
+          "rollout_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "rollback_of_release_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "rollback_boundary_state": {
+            "const": "ROLLBACK_ALLOWED"
+          },
+          "compensating_release_id_or_null": {
+            "type": "null"
+          },
+          "fail_forward_owner_ref_or_null": {
+            "type": "null"
+          },
+          "schema_reader_window_contract": {
+            "properties": {
+              "window_state": {
+                "enum": [
+                  "EXPAND_ONLY_PREVIOUS_READERS_SUPPORTED",
+                  "BACKFILL_IN_PROGRESS_PREVIOUS_READERS_SUPPORTED",
+                  "VERIFIED_PREVIOUS_READERS_SUPPORTED"
+                ]
+              }
+            },
+            "required": [
+              "window_state"
+            ]
+          },
+          "schema_bundle_compatibility_gate_contract": {
+            "properties": {
+              "rollback_boundary_state": {
+                "const": "ROLLBACK_ALLOWED"
+              }
+            },
+            "required": [
+              "rollback_boundary_state"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "compensating_release_id_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "compensating_release_id_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "rollout_state": {
+            "const": "FAILED_FORWARD"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "fail_forward_owner_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "fail_forward_owner_ref_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "rollout_state": {
+            "const": "FAILED_FORWARD"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "emergency_override_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "emergency_override_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "rollout_strategy": {
+            "const": "EMERGENCY_PROMOTE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "emergency_override_expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "emergency_override_expires_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "rollout_strategy": {
+            "const": "EMERGENCY_PROMOTE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "rollout_state": {
+            "const": "PLANNED"
+          }
+        },
+        "required": [
+          "rollout_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "deployed_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "schema_reader_window_contract": {
+            "properties": {
+              "window_state": {
+                "const": "CONTRACT_ELIGIBLE_WINDOW_CLOSED"
+              }
+            },
+            "required": [
+              "window_state"
+            ]
+          }
+        },
+        "required": [
+          "schema_reader_window_contract"
+        ]
+      },
+      "then": {
+        "properties": {
+          "rollback_boundary_state": {
+            "const": "FAIL_FORWARD_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "schema_bundle_compatibility_gate_contract": {
+            "properties": {
+              "rollback_boundary_state": {
+                "const": "FAIL_FORWARD_ONLY"
+              }
+            },
+            "required": [
+              "rollback_boundary_state"
+            ]
+          }
+        },
+        "required": [
+          "schema_bundle_compatibility_gate_contract"
+        ]
+      },
+      "then": {
+        "properties": {
+          "rollback_boundary_state": {
+            "const": "FAIL_FORWARD_ONLY"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

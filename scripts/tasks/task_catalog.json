@@ -1,0 +1,937 @@
+{
+  "catalogVersion": "TASK_CATALOG_V1",
+  "catalogId": "repository_task_catalog",
+  "basisStatement": "Make is the authoritative public task surface for humans and CI, while task_graph.py and the agent entrypoint scripts remain the machine-readable execution substrate for deterministic planning, dry runs, and guarded task execution.",
+  "authoritativeInterface": {
+    "interfaceRef": "make",
+    "entrypoint": "Makefile",
+    "secondaryInterfaces": [
+      "scripts/tasks/task_graph.py",
+      "scripts/agent/bootstrap_agent_workspace.sh",
+      "scripts/agent/run_card_task.sh",
+      "scripts/agent/verify_card_evidence.sh"
+    ]
+  },
+  "stateLayout": {
+    "stateDir": ".tmp/task-runner",
+    "planDir": ".tmp/task-runner/plans",
+    "resultDir": ".tmp/task-runner/results",
+    "logDir": ".tmp/task-runner/logs",
+    "stdoutDir": ".tmp/task-runner/logs/stdout",
+    "stderrDir": ".tmp/task-runner/logs/stderr"
+  },
+  "executionSemantics": {
+    "dryRunDefault": false,
+    "verboseDefault": false,
+    "failFastDefault": true,
+    "machineEventPrefix": "TASK_EVENT::",
+    "dangerousAckArg": "--allow-dangerous",
+    "profileArg": "--profile",
+    "paramArg": "--param"
+  },
+  "environmentProfiles": [
+    {
+      "profileRef": "local",
+      "label": "Local Authoring",
+      "environmentRef": "env_local_authoring",
+      "runtimeProfileRef": "local",
+      "scopeClassRefOrNull": "LOCAL_HIGH_FIDELITY_SHARD",
+      "destructiveProfileAllowed": true,
+      "notes": [
+        "Authoritative local workstation posture.",
+        "Durable local resets still require typed confirmation tokens."
+      ]
+    },
+    {
+      "profileRef": "devcontainer",
+      "label": "Devcontainer Authoring",
+      "environmentRef": "env_local_authoring",
+      "runtimeProfileRef": "devcontainer",
+      "scopeClassRefOrNull": "LOCAL_HIGH_FIDELITY_SHARD",
+      "destructiveProfileAllowed": true,
+      "notes": [
+        "Uses the same governed local authoring environment semantics through a containerized workstation."
+      ]
+    },
+    {
+      "profileRef": "local-provisioning",
+      "label": "Local Provisioning Sandbox",
+      "environmentRef": "env_local_provisioning_workstation",
+      "runtimeProfileRef": "local-provisioning",
+      "scopeClassRefOrNull": null,
+      "destructiveProfileAllowed": true,
+      "notes": [
+        "Local workstation profile that keeps sandbox-facing runtime resolution explicit."
+      ]
+    },
+    {
+      "profileRef": "ci-validation",
+      "label": "CI Validation Shard",
+      "environmentRef": "env_ci_ephemeral_validation",
+      "runtimeProfileRef": "local",
+      "scopeClassRefOrNull": "CI_RUN_SHARD",
+      "destructiveProfileAllowed": false,
+      "notes": [
+        "Validation-only profile for CI and non-destructive automation.",
+        "Destructive tasks are blocked in this profile."
+      ]
+    },
+    {
+      "profileRef": "preview-review",
+      "label": "Preview Review Shard",
+      "environmentRef": "env_ephemeral_review_preview",
+      "runtimeProfileRef": "local-provisioning",
+      "scopeClassRefOrNull": "PREVIEW_REVIEW_SHARD",
+      "destructiveProfileAllowed": false,
+      "notes": [
+        "Review-preview profile with sandbox-facing runtime posture.",
+        "Destructive tasks are blocked in this profile."
+      ]
+    },
+    {
+      "profileRef": "local-high-fidelity",
+      "label": "Local High Fidelity Shard",
+      "environmentRef": "env_local_authoring",
+      "runtimeProfileRef": "local",
+      "scopeClassRefOrNull": "LOCAL_HIGH_FIDELITY_SHARD",
+      "destructiveProfileAllowed": true,
+      "notes": [
+        "Explicit ephemeral identity on top of the local substrate for high-fidelity local suites."
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "taskRef": "bootstrap.workspace",
+      "makeTarget": "bootstrap.workspace",
+      "namespaceRef": "bootstrap",
+      "aliases": ["bootstrap", "workspace.bootstrap"],
+      "summary": "Bootstrap the repo workspace for human or agent execution through the non-interactive agent bootstrap wrapper.",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "requiredTools": ["bash", "node", "pnpm", "python3"],
+      "supportedProfileRefs": [
+        "local",
+        "devcontainer",
+        "local-provisioning",
+        "ci-validation",
+        "preview-review",
+        "local-high-fidelity"
+      ],
+      "destructivePosture": "NON_DESTRUCTIVE",
+      "typedConfirmationRefOrNull": null,
+      "requiredParams": [],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": [
+        ".venv/bin/python3",
+        "node_modules",
+        ".git/hooks/pre-commit"
+      ],
+      "commands": [
+        {
+          "commandRef": "bootstrap-agent-workspace",
+          "argv": [
+            "bash",
+            "./scripts/agent/bootstrap_agent_workspace.sh",
+            "--profile",
+            "{profile.profileRef}"
+          ]
+        }
+      ]
+    },
+    {
+      "taskRef": "validate.contracts",
+      "makeTarget": "validate.contracts",
+      "namespaceRef": "validate",
+      "aliases": ["validate-contracts", "contracts.validate"],
+      "summary": "Run the contract-integrity wrapper and the imported-contract mirror self-test.",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "requiredTools": ["python3"],
+      "supportedProfileRefs": [
+        "local",
+        "devcontainer",
+        "local-provisioning",
+        "ci-validation",
+        "preview-review",
+        "local-high-fidelity"
+      ],
+      "destructivePosture": "NON_DESTRUCTIVE",
+      "typedConfirmationRefOrNull": null,
+      "requiredParams": [],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": [
+        "contract-integrity gate pass",
+        "contracts-core validator pass",
+        "forensic guardrail pass through the wrapper"
+      ],
+      "commands": [
+        {
+          "commandRef": "contract-integrity-gate",
+          "argv": ["bash", "./scripts/ci/run_contract_integrity_gate.sh"]
+        },
+        {
+          "commandRef": "contracts-core-self-test",
+          "argv": [
+            "./.venv/bin/python3",
+            "./packages/contracts-core/python/validate_contracts.py",
+            "--self-test"
+          ]
+        }
+      ]
+    },
+    {
+      "taskRef": "validate.repo",
+      "makeTarget": "validate.repo",
+      "namespaceRef": "validate",
+      "aliases": ["validate", "repo.validate", "check"],
+      "summary": "Run the governed repo quality gate through the existing package.json check surface.",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "requiredTools": ["pnpm", "node", "python3", "swift"],
+      "supportedProfileRefs": [
+        "local",
+        "devcontainer",
+        "local-provisioning",
+        "ci-validation",
+        "preview-review",
+        "local-high-fidelity"
+      ],
+      "destructivePosture": "NON_DESTRUCTIVE",
+      "typedConfirmationRefOrNull": null,
+      "requiredParams": [],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": ["format check pass", "lint pass", "typecheck pass", "contract validation pass"],
+      "commands": [
+        {
+          "commandRef": "pnpm-check",
+          "argv": ["pnpm", "run", "check"]
+        }
+      ]
+    },
+    {
+      "taskRef": "contracts.import",
+      "makeTarget": "contracts.import",
+      "namespaceRef": "validate",
+      "aliases": ["import.contracts"],
+      "summary": "Refresh the imported contract schema and sample mirror from the authoritative Algorithm bundle.",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "requiredTools": ["node"],
+      "supportedProfileRefs": [
+        "local",
+        "devcontainer",
+        "local-provisioning",
+        "ci-validation",
+        "preview-review",
+        "local-high-fidelity"
+      ],
+      "destructivePosture": "NON_DESTRUCTIVE",
+      "typedConfirmationRefOrNull": null,
+      "requiredParams": [],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": [
+        "packages/contracts-core/schemas",
+        "packages/contracts-core/samples",
+        "packages/contracts-core/data/schema_source_map.json"
+      ],
+      "commands": [
+        {
+          "commandRef": "contracts-import-emit",
+          "argv": ["node", "--experimental-strip-types", "./tools/contracts/import_algorithm_contracts.ts", "--emit"]
+        }
+      ]
+    },
+    {
+      "taskRef": "contracts.bindings",
+      "makeTarget": "contracts.bindings",
+      "namespaceRef": "validate",
+      "aliases": ["bindings.generate"],
+      "summary": "Regenerate the governed language binding pack from the imported contract schema mirror.",
+      "dependsOn": ["contracts.import"],
+      "conflictsWith": [],
+      "requiredTools": ["node", "python3", "swift"],
+      "supportedProfileRefs": [
+        "local",
+        "devcontainer",
+        "local-provisioning",
+        "ci-validation",
+        "preview-review",
+        "local-high-fidelity"
+      ],
+      "destructivePosture": "NON_DESTRUCTIVE",
+      "typedConfirmationRefOrNull": null,
+      "requiredParams": [],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": [
+        "packages/generated-models/src/generated/typescript",
+        "python/generated_contract_models",
+        "native/TaxatOperator/GeneratedContracts"
+      ],
+      "commands": [
+        {
+          "commandRef": "binding-generation-emit",
+          "argv": ["node", "--experimental-strip-types", "./tools/contracts/generate_language_bindings.ts", "--emit"]
+        }
+      ]
+    },
+    {
+      "taskRef": "drift.report",
+      "makeTarget": "drift.report",
+      "namespaceRef": "drift",
+      "aliases": ["migration.readiness.report"],
+      "summary": "Emit the governed schema drift and migration-readiness report for the current workspace bundle.",
+      "dependsOn": ["contracts.import"],
+      "conflictsWith": [],
+      "requiredTools": ["node"],
+      "supportedProfileRefs": [
+        "local",
+        "devcontainer",
+        "local-provisioning",
+        "ci-validation",
+        "preview-review",
+        "local-high-fidelity"
+      ],
+      "destructivePosture": "NON_DESTRUCTIVE",
+      "typedConfirmationRefOrNull": null,
+      "requiredParams": [],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": [
+        "data/contracts/schema_drift_report.json",
+        "data/contracts/schema_bundle_compatibility_gate.materialized.json"
+      ],
+      "commands": [
+        {
+          "commandRef": "migration-readiness-emit",
+          "argv": [
+            "node",
+            "--experimental-strip-types",
+            "./scripts/contracts/generate_migration_readiness_report.ts",
+            "--emit"
+          ]
+        }
+      ]
+    },
+    {
+      "taskRef": "drift.check",
+      "makeTarget": "drift.check",
+      "namespaceRef": "drift",
+      "aliases": ["drift", "schema-drift.check"],
+      "summary": "Check the current schema drift posture without mutating generated drift artifacts.",
+      "dependsOn": ["contracts.import"],
+      "conflictsWith": [],
+      "requiredTools": ["node"],
+      "supportedProfileRefs": [
+        "local",
+        "devcontainer",
+        "local-provisioning",
+        "ci-validation",
+        "preview-review",
+        "local-high-fidelity"
+      ],
+      "destructivePosture": "NON_DESTRUCTIVE",
+      "typedConfirmationRefOrNull": null,
+      "requiredParams": [],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": ["schema drift validation status"],
+      "commands": [
+        {
+          "commandRef": "schema-drift-check",
+          "argv": ["node", "--experimental-strip-types", "./scripts/contracts/check_schema_drift.ts"]
+        }
+      ]
+    },
+    {
+      "taskRef": "docs.generate",
+      "makeTarget": "docs.generate",
+      "namespaceRef": "docs",
+      "aliases": ["observatory.generate", "contracts-observatory.generate"],
+      "summary": "Generate the canonical internal contract observatory from the authoritative prose, schema, sample, and binding corpus.",
+      "dependsOn": ["contracts.import", "contracts.bindings", "drift.report"],
+      "conflictsWith": [],
+      "requiredTools": ["node"],
+      "supportedProfileRefs": [
+        "local",
+        "devcontainer",
+        "local-provisioning",
+        "ci-validation",
+        "preview-review",
+        "local-high-fidelity"
+      ],
+      "destructivePosture": "NON_DESTRUCTIVE",
+      "typedConfirmationRefOrNull": null,
+      "requiredParams": [],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": [
+        "apps/operator-web/public/internal/contracts-observatory/data/site-manifest.json",
+        "apps/operator-web/public/internal/contracts-observatory/data/navigation-index.json",
+        "apps/operator-web/public/internal/contracts-observatory/data/search-index.json"
+      ],
+      "commands": [
+        {
+          "commandRef": "contracts-observatory-emit",
+          "argv": [
+            "node",
+            "--experimental-strip-types",
+            "./packages/contracts-docs/src/generate_contract_observatory.ts",
+            "--emit"
+          ]
+        }
+      ]
+    },
+    {
+      "taskRef": "docs.check",
+      "makeTarget": "docs.check",
+      "namespaceRef": "docs",
+      "aliases": ["observatory.check", "contracts-observatory.check"],
+      "summary": "Verify that the generated contract observatory remains in sync with the authoritative inputs.",
+      "dependsOn": ["contracts.import", "contracts.bindings", "drift.report"],
+      "conflictsWith": [],
+      "requiredTools": ["node"],
+      "supportedProfileRefs": [
+        "local",
+        "devcontainer",
+        "local-provisioning",
+        "ci-validation",
+        "preview-review",
+        "local-high-fidelity"
+      ],
+      "destructivePosture": "NON_DESTRUCTIVE",
+      "typedConfirmationRefOrNull": null,
+      "requiredParams": [],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": ["contract observatory sync verification"],
+      "commands": [
+        {
+          "commandRef": "contracts-observatory-check",
+          "argv": [
+            "node",
+            "--experimental-strip-types",
+            "./packages/contracts-docs/src/generate_contract_observatory.ts",
+            "--check"
+          ]
+        }
+      ]
+    },
+    {
+      "taskRef": "local.plan",
+      "makeTarget": "local.plan",
+      "namespaceRef": "local",
+      "aliases": ["local-stack.plan"],
+      "summary": "Show the governed local bootstrap plan without mutating the workstation substrate.",
+      "dependsOn": [],
+      "conflictsWith": ["local.bootstrap", "local.reset.disposable", "local.reset.full"],
+      "requiredTools": ["bash", "docker", "python3"],
+      "supportedProfileRefs": ["local", "devcontainer", "local-provisioning"],
+      "destructivePosture": "NON_DESTRUCTIVE",
+      "typedConfirmationRefOrNull": null,
+      "requiredParams": [],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": ["local bootstrap plan"],
+      "commands": [
+        {
+          "commandRef": "local-bootstrap-plan",
+          "argv": [
+            "./scripts/local/bootstrap_local_stack.sh",
+            "--runtime-profile",
+            "{profile.runtimeProfileRef}",
+            "--plan-only"
+          ]
+        }
+      ]
+    },
+    {
+      "taskRef": "local.bootstrap",
+      "makeTarget": "local.bootstrap",
+      "namespaceRef": "local",
+      "aliases": ["local", "local-stack.bootstrap"],
+      "summary": "Bootstrap the governed local substrate, deterministic seed basis, smoke path, and semantic readiness checks.",
+      "dependsOn": [],
+      "conflictsWith": ["local.plan"],
+      "requiredTools": ["bash", "docker", "python3", "node"],
+      "supportedProfileRefs": ["local", "devcontainer", "local-provisioning"],
+      "destructivePosture": "NON_DESTRUCTIVE",
+      "typedConfirmationRefOrNull": null,
+      "requiredParams": [],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": ["$HOME/.taxat/local-runtime/local_runtime_state.json"],
+      "commands": [
+        {
+          "commandRef": "local-bootstrap-run",
+          "argv": [
+            "./scripts/local/bootstrap_local_stack.sh",
+            "--runtime-profile",
+            "{profile.runtimeProfileRef}"
+          ]
+        }
+      ]
+    },
+    {
+      "taskRef": "local.reset.disposable",
+      "makeTarget": "local.reset.disposable",
+      "namespaceRef": "local",
+      "aliases": ["local-reset-disposable"],
+      "summary": "Re-bootstrap the local substrate after purging disposable acceleration stores only.",
+      "dependsOn": [],
+      "conflictsWith": ["local.plan"],
+      "requiredTools": ["bash", "docker", "python3", "node"],
+      "supportedProfileRefs": ["local", "devcontainer", "local-provisioning"],
+      "destructivePosture": "DISPOSABLE_RESET",
+      "typedConfirmationRefOrNull": "ALLOW_DISPOSABLE_LOCAL_RESET",
+      "requiredParams": [],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": ["refreshed local runtime state after disposable reset"],
+      "commands": [
+        {
+          "commandRef": "local-bootstrap-disposable-reset",
+          "argv": [
+            "./scripts/local/bootstrap_local_stack.sh",
+            "--runtime-profile",
+            "{profile.runtimeProfileRef}",
+            "--reset-disposable"
+          ]
+        }
+      ]
+    },
+    {
+      "taskRef": "local.reset.full",
+      "makeTarget": "local.reset.full",
+      "namespaceRef": "local",
+      "aliases": ["local-reset-full"],
+      "summary": "Re-bootstrap the local substrate after purging durable and disposable stores.",
+      "dependsOn": [],
+      "conflictsWith": ["local.plan"],
+      "requiredTools": ["bash", "docker", "python3", "node"],
+      "supportedProfileRefs": ["local", "devcontainer", "local-provisioning"],
+      "destructivePosture": "DURABLE_RESET",
+      "typedConfirmationRefOrNull": "ALLOW_DURABLE_LOCAL_RESET",
+      "requiredParams": [],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": ["refreshed local runtime state after durable reset"],
+      "commands": [
+        {
+          "commandRef": "local-bootstrap-full-reset",
+          "argv": [
+            "./scripts/local/bootstrap_local_stack.sh",
+            "--runtime-profile",
+            "{profile.runtimeProfileRef}",
+            "--full-reset",
+            "--confirm-durable-reset"
+          ]
+        }
+      ]
+    },
+    {
+      "taskRef": "ephemeral.bootstrap",
+      "makeTarget": "ephemeral.bootstrap",
+      "namespaceRef": "ephemeral",
+      "aliases": ["ephemeral", "ephemeral-env.bootstrap"],
+      "summary": "Bootstrap a deterministic ephemeral test-shard environment against a semantically healthy local substrate.",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "requiredTools": ["python3"],
+      "supportedProfileRefs": ["ci-validation", "preview-review", "local-high-fidelity"],
+      "destructivePosture": "NON_DESTRUCTIVE",
+      "typedConfirmationRefOrNull": null,
+      "requiredParams": ["environment_id", "owner_ref", "shard_ref", "state_dir"],
+      "defaultParams": {},
+      "preconditions": ["LOCAL_STACK_SEMANTIC_READY"],
+      "dryRunSafe": true,
+      "expectedOutputs": ["{param.state_dir}/{param.environment_id}/environment_manifest.json"],
+      "commands": [
+        {
+          "commandRef": "ephemeral-bootstrap",
+          "argv": [
+            "python3",
+            "./scripts/test/bootstrap_ephemeral_environment.py",
+            "--environment-id",
+            "{param.environment_id}",
+            "--scope-class",
+            "{profile.scopeClassRef}",
+            "--owner-ref",
+            "{param.owner_ref}",
+            "--shard-ref",
+            "{param.shard_ref}",
+            "--runtime-profile",
+            "{profile.runtimeProfileRef}",
+            "--state-dir",
+            "{param.state_dir}"
+          ]
+        }
+      ]
+    },
+    {
+      "taskRef": "ephemeral.reset",
+      "makeTarget": "ephemeral.reset",
+      "namespaceRef": "ephemeral",
+      "aliases": ["ephemeral-env.reset"],
+      "summary": "Reset an approved ephemeral environment using the governed reset scopes and explicit identity rechecks.",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "requiredTools": ["python3"],
+      "supportedProfileRefs": ["ci-validation", "preview-review", "local-high-fidelity"],
+      "destructivePosture": "EPHEMERAL_RESET",
+      "typedConfirmationRefOrNull": "ALLOW_EPHEMERAL_RESET",
+      "requiredParams": ["environment_id", "state_dir"],
+      "defaultParams": {
+        "reset_scope": "FULL_TEST_ISOLATION"
+      },
+      "preconditions": ["LOCAL_STACK_SEMANTIC_READY"],
+      "dryRunSafe": true,
+      "expectedOutputs": ["{param.state_dir}/{param.environment_id}/evidence/reset-*.json"],
+      "commands": [
+        {
+          "commandRef": "ephemeral-reset",
+          "argv": [
+            "python3",
+            "./scripts/test/reset_ephemeral_environment.py",
+            "--environment-id",
+            "{param.environment_id}",
+            "--state-dir",
+            "{param.state_dir}",
+            "--reset-scope",
+            "{param.reset_scope}"
+          ]
+        }
+      ]
+    },
+    {
+      "taskRef": "ephemeral.destroy",
+      "makeTarget": "ephemeral.destroy",
+      "namespaceRef": "ephemeral",
+      "aliases": ["ephemeral-env.destroy"],
+      "summary": "Destroy an approved ephemeral environment while preserving only evidence files.",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "requiredTools": ["python3"],
+      "supportedProfileRefs": ["ci-validation", "preview-review", "local-high-fidelity"],
+      "destructivePosture": "EPHEMERAL_DESTROY",
+      "typedConfirmationRefOrNull": "ALLOW_EPHEMERAL_DESTROY",
+      "requiredParams": ["environment_id", "state_dir"],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": ["{param.state_dir}/{param.environment_id}/evidence/destroy-*.json"],
+      "commands": [
+        {
+          "commandRef": "ephemeral-destroy",
+          "argv": [
+            "python3",
+            "./scripts/test/destroy_ephemeral_environment.py",
+            "--environment-id",
+            "{param.environment_id}",
+            "--state-dir",
+            "{param.state_dir}"
+          ]
+        }
+      ]
+    },
+    {
+      "taskRef": "test.unit.repository",
+      "makeTarget": "test.unit.repository",
+      "namespaceRef": "test",
+      "aliases": ["repository.unit-tests"],
+      "summary": "Run the repository-level unit contract tests for workspace, quality matrix, task graph, and environment profile behavior.",
+      "dependsOn": ["bootstrap.workspace"],
+      "conflictsWith": [],
+      "requiredTools": ["node"],
+      "supportedProfileRefs": [
+        "local",
+        "devcontainer",
+        "local-provisioning",
+        "ci-validation",
+        "preview-review",
+        "local-high-fidelity"
+      ],
+      "destructivePosture": "NON_DESTRUCTIVE",
+      "typedConfirmationRefOrNull": null,
+      "requiredParams": [],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": ["repository unit test pass"],
+      "commands": [
+        {
+          "commandRef": "repository-unit-playwright",
+          "argv": [
+            "./node_modules/.bin/playwright",
+            "test",
+            "--config=./playwright.config.ts",
+            "--project=unit",
+            "./tests/unit/repository/code_quality_matrix.spec.ts",
+            "./tests/unit/repository/workspace_graph.spec.ts",
+            "./tests/unit/repository/task_runner_contract.spec.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "taskRef": "test.integration.repository",
+      "makeTarget": "test.integration.repository",
+      "namespaceRef": "test",
+      "aliases": ["repository.integration-tests"],
+      "summary": "Run the repository integration contract for the agent task entrypoints.",
+      "dependsOn": ["bootstrap.workspace"],
+      "conflictsWith": [],
+      "requiredTools": ["node", "bash", "python3"],
+      "supportedProfileRefs": [
+        "local",
+        "devcontainer",
+        "local-provisioning",
+        "ci-validation",
+        "preview-review",
+        "local-high-fidelity"
+      ],
+      "destructivePosture": "NON_DESTRUCTIVE",
+      "typedConfirmationRefOrNull": null,
+      "requiredParams": [],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": ["repository integration test pass"],
+      "commands": [
+        {
+          "commandRef": "repository-integration-playwright",
+          "argv": [
+            "./node_modules/.bin/playwright",
+            "test",
+            "--config=./tests/integration/playwright.config.ts",
+            "./tests/integration/repository/agent_entrypoint_contract.spec.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "taskRef": "test.smoke.repository",
+      "makeTarget": "test.smoke.repository",
+      "namespaceRef": "test",
+      "aliases": ["repository.smoke-tests"],
+      "summary": "Smoke-test the top-level Make task surface in dry-run mode from the current checkout.",
+      "dependsOn": ["bootstrap.workspace"],
+      "conflictsWith": [],
+      "requiredTools": ["bash", "make", "python3"],
+      "supportedProfileRefs": [
+        "local",
+        "devcontainer",
+        "local-provisioning",
+        "ci-validation",
+        "preview-review",
+        "local-high-fidelity"
+      ],
+      "destructivePosture": "NON_DESTRUCTIVE",
+      "typedConfirmationRefOrNull": null,
+      "requiredParams": [],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": ["repository task runner smoke pass"],
+      "commands": [
+        {
+          "commandRef": "repository-smoke-shell",
+          "argv": ["bash", "./tests/integration/repository/task_runner_smoke.sh"]
+        }
+      ]
+    },
+    {
+      "taskRef": "release.readiness",
+      "makeTarget": "release.readiness",
+      "namespaceRef": "release",
+      "aliases": ["release", "release.gates"],
+      "summary": "Aggregate the current release-readiness gates from validation, drift, docs, and repository task runner coverage.",
+      "dependsOn": [
+        "validate.repo",
+        "drift.check",
+        "docs.check",
+        "test.unit.repository",
+        "test.integration.repository",
+        "test.smoke.repository"
+      ],
+      "conflictsWith": [],
+      "requiredTools": [],
+      "supportedProfileRefs": [
+        "local",
+        "devcontainer",
+        "local-provisioning",
+        "ci-validation",
+        "preview-review",
+        "local-high-fidelity"
+      ],
+      "destructivePosture": "NON_DESTRUCTIVE",
+      "typedConfirmationRefOrNull": null,
+      "requiredParams": [],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": ["aggregated release readiness pass"],
+      "commands": []
+    },
+    {
+      "taskRef": "agent.run-card",
+      "makeTarget": "agent.run-card",
+      "namespaceRef": "agent",
+      "aliases": ["card.run", "agent.card"],
+      "summary": "Resolve a known prompt card id to its governed execution and verification task families.",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "requiredTools": ["bash", "python3"],
+      "supportedProfileRefs": [
+        "local",
+        "devcontainer",
+        "local-provisioning",
+        "ci-validation",
+        "preview-review",
+        "local-high-fidelity"
+      ],
+      "destructivePosture": "NON_DESTRUCTIVE",
+      "typedConfirmationRefOrNull": null,
+      "requiredParams": ["card_id"],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": ["card task plan or execution result"],
+      "commands": [
+        {
+          "commandRef": "agent-run-card",
+          "argv": [
+            "bash",
+            "./scripts/agent/run_card_task.sh",
+            "--card-id",
+            "{param.card_id}",
+            "--profile",
+            "{profile.profileRef}"
+          ]
+        }
+      ]
+    },
+    {
+      "taskRef": "agent.verify-evidence",
+      "makeTarget": "agent.verify-evidence",
+      "namespaceRef": "agent",
+      "aliases": ["card.verify-evidence", "agent.verify-card-evidence"],
+      "summary": "Verify the evidence sections and checklist visibility for a known prompt card id.",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "requiredTools": ["bash", "python3"],
+      "supportedProfileRefs": [
+        "local",
+        "devcontainer",
+        "local-provisioning",
+        "ci-validation",
+        "preview-review",
+        "local-high-fidelity"
+      ],
+      "destructivePosture": "NON_DESTRUCTIVE",
+      "typedConfirmationRefOrNull": null,
+      "requiredParams": ["card_id"],
+      "defaultParams": {},
+      "preconditions": [],
+      "dryRunSafe": true,
+      "expectedOutputs": ["card evidence verification result"],
+      "commands": [
+        {
+          "commandRef": "agent-verify-card-evidence",
+          "argv": [
+            "bash",
+            "./scripts/agent/verify_card_evidence.sh",
+            "--card-id",
+            "{param.card_id}"
+          ]
+        }
+      ]
+    }
+  ],
+  "cardBindings": [
+    {
+      "cardId": "pc_0078",
+      "executionTaskRefs": ["local.plan", "local.bootstrap"],
+      "verificationTaskRefs": ["validate.contracts"],
+      "evidenceGlobs": [
+        "PROMPT/CARDS/pc_0078.md",
+        "docs/runtime/local_development_stack.md",
+        "apps/operator-web/public/internal/local-runtime-observatory/data/*.json"
+      ],
+      "allowedChecklistStates": ["[-]", "[X]"]
+    },
+    {
+      "cardId": "pc_0079",
+      "executionTaskRefs": ["ephemeral.bootstrap", "ephemeral.reset", "ephemeral.destroy"],
+      "verificationTaskRefs": ["validate.contracts"],
+      "evidenceGlobs": [
+        "PROMPT/CARDS/pc_0079.md",
+        "docs/testing/ephemeral_environment_and_reset_workflows.md",
+        "tests/integration/testing/*.spec.ts"
+      ],
+      "allowedChecklistStates": ["[-]", "[X]"]
+    },
+    {
+      "cardId": "pc_0080",
+      "executionTaskRefs": ["drift.report", "drift.check"],
+      "verificationTaskRefs": ["release.readiness"],
+      "evidenceGlobs": [
+        "PROMPT/CARDS/pc_0080.md",
+        "data/contracts/schema_drift_report.json",
+        "data/contracts/schema_bundle_compatibility_gate.materialized.json"
+      ],
+      "allowedChecklistStates": ["[-]", "[X]"]
+    },
+    {
+      "cardId": "pc_0081",
+      "executionTaskRefs": ["docs.generate"],
+      "verificationTaskRefs": ["docs.check"],
+      "evidenceGlobs": [
+        "PROMPT/CARDS/pc_0081.md",
+        "apps/operator-web/public/internal/contracts-observatory/data/*.json",
+        "docs/contracts/generated_contract_observatory.md"
+      ],
+      "allowedChecklistStates": ["[-]", "[X]"]
+    },
+    {
+      "cardId": "pc_0082",
+      "executionTaskRefs": ["bootstrap.workspace", "validate.contracts", "validate.repo"],
+      "verificationTaskRefs": [
+        "test.unit.repository",
+        "test.integration.repository",
+        "test.smoke.repository",
+        "agent.verify-evidence"
+      ],
+      "evidenceGlobs": [
+        "PROMPT/CARDS/pc_0082.md",
+        "Makefile",
+        "scripts/tasks/task_catalog.json",
+        "scripts/tasks/task_graph.py",
+        "scripts/agent/*.sh",
+        "scripts/agent/*.py",
+        "docs/repository/task_runner_and_agent_entrypoints.md",
+        "tests/integration/repository/*",
+        "tests/unit/repository/task_runner_contract.spec.ts"
+      ],
+      "allowedChecklistStates": ["[-]", "[X]"]
+    }
+  ]
+}

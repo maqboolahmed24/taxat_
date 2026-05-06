@@ -1,11 +1,56 @@
 {
-  "name": "taxat-analysis-atlas",
+  "name": "@taxat/workspace-root",
   "private": true,
+  "version": "0.0.0",
+  "packageManager": "pnpm@10.10.0",
   "type": "module",
+  "description": "Taxat monorepo bootstrap root for control-plane, operator web, client portal, provisioning workbench, shared contracts, Python validators, and native macOS scaffolds.",
+  "engines": {
+    "node": "24.10.0",
+    "pnpm": "10.x"
+  },
   "scripts": {
-    "test:run-engine-atlas": "playwright test tests/playwright/run_engine_swimlane_atlas.spec.ts"
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "format": "pnpm exec biome format --write . && ./.venv/bin/python3 -m ruff format python tools/analysis tools/security tools/contracts scripts/local scripts/test scripts/tasks scripts/agent",
+    "format:check": "pnpm exec biome check --formatter-enabled=true --linter-enabled=false --assist-enabled=false . && ./.venv/bin/python3 -m ruff format --check python tools/analysis tools/security tools/contracts scripts/local scripts/test scripts/tasks scripts/agent",
+    "lint": "pnpm exec biome lint . && ./.venv/bin/python3 -m ruff check python tools/analysis tools/security tools/contracts scripts/local scripts/test scripts/tasks scripts/agent && node --experimental-strip-types ./tools/repository/lint_playwright_locator_policy.ts",
+    "typecheck": "pnpm exec tsc --noEmit -p tsconfig.quality.json && pnpm --dir automation/provisioning exec tsc --noEmit -p tsconfig.json && pnpm exec pyright --project pyrightconfig.json && swift test --package-path native/TaxatOperator && python3 ./scripts/tasks/task_graph.py --json validate >/dev/null && python3 ./scripts/agent/resolve_environment_profile.py --json --task-ref validate.contracts --profile ci-validation >/dev/null && node --experimental-strip-types ./tools/contracts/import_algorithm_contracts.ts --check && ./.venv/bin/python3 ./tools/contracts/sync_contract_hashes.py --check && node --experimental-strip-types ./tools/contracts/generate_language_bindings.ts --check && node --experimental-strip-types ./packages/contracts-docs/src/generate_contract_observatory.ts --check && node --experimental-strip-types ./packages/runtime-foundation/src/load_runtime_profile.ts --check && node --experimental-strip-types ./packages/runtime-foundation/src/build_local_runtime_observatory.ts --check && node --experimental-strip-types ./packages/domain-kernel/src/config/build_config_resolution_atlas.ts --check && node --experimental-strip-types ./packages/domain-kernel/src/primitives/build_canonical_primitives_atlas.ts --check && node --experimental-strip-types ./packages/domain-kernel/src/references/build_reference_grammar_atlas.ts --check && node --experimental-strip-types ./packages/domain-kernel/src/cache/build_cache_isolation_atlas.ts --check && node --experimental-strip-types ./packages/domain-kernel/src/storage/build_object_lifecycle_atlas.ts --check && node --experimental-strip-types ./packages/domain-kernel/src/queue/build_queue_fabric_atlas.ts --check && node --experimental-strip-types ./packages/domain-kernel/src/streaming/build_stream_recovery_atlas.ts --check && node --experimental-strip-types ./packages/domain-kernel/src/uploads/build_upload_transfer_atlas.ts --check && node --experimental-strip-types ./packages/telemetry/src/build_telemetry_correlation_atlas.ts --check && node --experimental-strip-types ./packages/audit/src/build_audit_stream_atlas.ts --check && node --experimental-strip-types ./packages/control-plane-db/src/build_migration_window_atlas.ts --check && node --experimental-strip-types ./packages/access-control/src/emit_baseline_access_artifacts.ts --check && node --experimental-strip-types ./apps/control-plane-api/src/northbound/build_northbound_boundary_atlas.ts --check && node --experimental-strip-types ./tools/fixtures/build_deterministic_fixture_pack.ts --check && node --experimental-strip-types ./scripts/contracts/generate_migration_readiness_report.ts --check && node --experimental-strip-types ./scripts/contracts/check_schema_drift.ts && node --experimental-strip-types ./tools/repository/verify_code_quality_coverage.ts --check",
+    "check": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run validate-contracts",
+    "generate": "node --experimental-strip-types ./tools/contracts/import_algorithm_contracts.ts --emit && node --experimental-strip-types ./tools/contracts/generate_language_bindings.ts --emit && node --experimental-strip-types ./packages/contracts-docs/src/generate_contract_observatory.ts --emit && node --experimental-strip-types ./packages/runtime-foundation/src/load_runtime_profile.ts --emit && node --experimental-strip-types ./packages/runtime-foundation/src/build_local_runtime_observatory.ts --emit && node --experimental-strip-types ./packages/domain-kernel/src/config/build_config_resolution_atlas.ts --emit && node --experimental-strip-types ./packages/domain-kernel/src/primitives/build_canonical_primitives_atlas.ts --emit && node --experimental-strip-types ./packages/domain-kernel/src/references/build_reference_grammar_atlas.ts --emit && node --experimental-strip-types ./packages/domain-kernel/src/cache/build_cache_isolation_atlas.ts --emit && node --experimental-strip-types ./packages/domain-kernel/src/storage/build_object_lifecycle_atlas.ts --emit && node --experimental-strip-types ./packages/domain-kernel/src/queue/build_queue_fabric_atlas.ts --emit && node --experimental-strip-types ./packages/domain-kernel/src/streaming/build_stream_recovery_atlas.ts --emit && node --experimental-strip-types ./packages/domain-kernel/src/uploads/build_upload_transfer_atlas.ts --emit && node --experimental-strip-types ./packages/telemetry/src/build_telemetry_correlation_atlas.ts --emit && node --experimental-strip-types ./packages/audit/src/build_audit_stream_atlas.ts --emit && node --experimental-strip-types ./packages/control-plane-db/src/build_migration_window_atlas.ts --emit && node --experimental-strip-types ./packages/access-control/src/emit_baseline_access_artifacts.ts --emit && node --experimental-strip-types ./apps/control-plane-api/src/northbound/build_northbound_boundary_atlas.ts --emit && node --experimental-strip-types ./tools/fixtures/build_deterministic_fixture_pack.ts --emit && node --experimental-strip-types ./scripts/contracts/generate_migration_readiness_report.ts --emit && node ./tools/workspace-devx/scripts/build-workspace-topology-atlas.mjs && node --experimental-strip-types ./tools/repository/verify_code_quality_coverage.ts --emit",
+    "contract-integrity": "bash ./scripts/ci/run_contract_integrity_gate.sh",
+    "contract-integrity:dry-run": "bash ./scripts/ci/run_contract_integrity_gate.sh --dry-run",
+    "validate-contracts": "pnpm run contract-integrity && ./.venv/bin/python3 ./packages/contracts-core/python/validate_contracts.py --self-test",
+    "playwright": "pnpm exec playwright test --config=playwright.config.ts --project=browser",
+    "hooks:install": "./.venv/bin/python3 -m pre_commit install --hook-type pre-commit",
+    "hooks:run": "./.venv/bin/python3 -m pre_commit run --all-files",
+    "test:run-engine-atlas": "playwright test --config=playwright.config.ts --project=browser tests/playwright/run_engine_swimlane_atlas.spec.ts",
+    "test:workspace-topology-atlas": "playwright test --config=playwright.config.ts --project=browser tests/playwright/internal/workspace_topology_atlas.spec.ts",
+    "test:workspace-graph": "playwright test --config=playwright.config.ts --project=unit tests/unit/repository/workspace_graph.spec.ts",
+    "test:schema-catalog-atlas": "playwright test --config=playwright.config.ts --project=browser tests/playwright/internal/schema_catalog_atlas.spec.ts",
+    "test:schema-source-map": "playwright test --config=playwright.config.ts --project=unit tests/unit/contracts/schema_source_map.spec.ts",
+    "test:binding-generation-matrix": "playwright test --config=playwright.config.ts --project=unit tests/unit/contracts/binding_generation_matrix.spec.ts",
+    "test:binding-coverage-atlas": "playwright test --config=playwright.config.ts --project=browser tests/playwright/internal/binding_coverage_atlas.spec.ts",
+    "test:migration-window-atlas": "playwright test --config=playwright.config.ts --project=browser tests/playwright/internal/migration_window_atlas.spec.ts",
+    "test:generate-language-bindings": "playwright test --config=tests/integration/playwright.config.ts tests/integration/contracts/generate_language_bindings.spec.ts",
+    "sync:contract-hashes": "./.venv/bin/python3 ./tools/contracts/sync_contract_hashes.py --check"
   },
   "devDependencies": {
-    "@playwright/test": "^1.54.2"
+    "@biomejs/biome": "catalog:",
+    "@types/node": "catalog:",
+    "@playwright/test": "^1.54.2",
+    "pyright": "catalog:",
+    "turbo": "^2.7.0",
+    "typescript": "^5.9.3"
+  },
+  "taxatBootstrap": {
+    "languageStack": [
+      "TypeScript on Node.js 24 active-LTS line for product/runtime packages",
+      "Python 3 for validators and offline analysis tooling",
+      "Swift and SwiftUI with targeted AppKit for signed macOS delivery"
+    ],
+    "lockfilePolicy": "pnpm-lock.yaml is the authoritative lockfile once the workspace install is hydrated; this bootstrap does not fabricate one before the first real pnpm sync.",
+    "workspaceManager": "pnpm workspace",
+    "taskGraph": "turborepo"
   }
 }

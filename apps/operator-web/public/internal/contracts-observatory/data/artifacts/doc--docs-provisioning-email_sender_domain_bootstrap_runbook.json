@@ -1,0 +1,363 @@
+{
+  "artifactVersion": "CONTRACT_OBSERVATORY_ARTIFACT_V1",
+  "artifactSlug": "doc--docs-provisioning-email_sender_domain_bootstrap_runbook",
+  "artifactKind": "MARKDOWN",
+  "sectionRef": "SUPPORT_DOCS",
+  "authorityLevel": "SUPPORTING_REFERENCE",
+  "sourceTruthBadge": "Support Documentation",
+  "tone": "slate",
+  "title": "Email Sender Domain Bootstrap Runbook",
+  "subtitle": "docs/provisioning/email_sender_domain_bootstrap_runbook.md",
+  "summary": "",
+  "canonicalPath": "docs/provisioning/email_sender_domain_bootstrap_runbook.md",
+  "sourceLineage": [
+    "docs/provisioning/email_sender_domain_bootstrap_runbook.md"
+  ],
+  "headingCount": 10,
+  "headings": [
+    {
+      "level": 1,
+      "text": "Email Sender Domain Bootstrap Runbook",
+      "slug": "email-sender-domain-bootstrap-runbook"
+    },
+    {
+      "level": 2,
+      "text": "Scope",
+      "slug": "scope"
+    },
+    {
+      "level": 2,
+      "text": "Truth Boundary",
+      "slug": "truth-boundary"
+    },
+    {
+      "level": 2,
+      "text": "Workspace Strategy",
+      "slug": "workspace-strategy"
+    },
+    {
+      "level": 2,
+      "text": "Sender Domains",
+      "slug": "sender-domains"
+    },
+    {
+      "level": 2,
+      "text": "DNS Inventory",
+      "slug": "dns-inventory"
+    },
+    {
+      "level": 2,
+      "text": "Stream Partitioning",
+      "slug": "stream-partitioning"
+    },
+    {
+      "level": 2,
+      "text": "Current Official Provider Grounding",
+      "slug": "current-official-provider-grounding"
+    },
+    {
+      "level": 2,
+      "text": "Deferred To `pc_0042`",
+      "slug": "deferred-to-pc-0042"
+    },
+    {
+      "level": 2,
+      "text": "Source Gap",
+      "slug": "source-gap"
+    }
+  ],
+  "proseSections": [
+    {
+      "headingSlug": "email-sender-domain-bootstrap-runbook",
+      "headingText": "Email Sender Domain Bootstrap Runbook",
+      "level": 1,
+      "lines": [
+        ""
+      ],
+      "plainText": "",
+      "excerpt": "",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "scope",
+      "headingText": "Scope",
+      "level": 2,
+      "lines": [
+        "",
+        "This runbook freezes the delivery-foundation posture for Taxat transactional email:",
+        "",
+        "- one governed provider account boundary",
+        "- one environment-bound server per runtime environment",
+        "- one sender domain per runtime environment",
+        "- one explicit DNS inventory for verification, DKIM, Return-Path, and DMARC",
+        "- one stream partitioning model for customer-visible transactional, operator/security, and non-production sink traffic",
+        "",
+        "The active adapter is Postmark-compatible by default because no earlier ADR fixed a different vendor. Persistence remains vendor-neutral.",
+        ""
+      ],
+      "plainText": "This runbook freezes the delivery foundation posture for Taxat transactional email: one governed provider account boundary one environment bound server per runtime environment one sender domain per runtime environment one explicit DNS inventory for verification, DKIM, Return Path, and DMARC one stream partitioning model for customer visible transactional, operator/security, and non production sink traffic The active adapter is Postmark compatible by default because no earlier ADR fixed a different vendor. Persistence remains vendor neutral.",
+      "excerpt": "This runbook freezes the delivery foundation posture for Taxat transactional email: one governed provider account boundary one environment bound server per runtime environment one…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "truth-boundary",
+      "headingText": "Truth Boundary",
+      "level": 2,
+      "lines": [
+        "",
+        "Email delivery status, bounce posture, complaint posture, open or click telemetry, and suppression state remain transport or observability projections only. They never become workflow truth, authority truth, or notification legality on their own. `WorkItemNotification` and related product projections stay engine-authored.",
+        ""
+      ],
+      "plainText": "Email delivery status, bounce posture, complaint posture, open or click telemetry, and suppression state remain transport or observability projections only. They never become workflow truth, authority truth, or notification legality on their own. WorkItemNotification and related product projections stay engine authored.",
+      "excerpt": "Email delivery status, bounce posture, complaint posture, open or click telemetry, and suppression state remain transport or observability projections only. They never become work…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "workspace-strategy",
+      "headingText": "Workspace Strategy",
+      "level": 2,
+      "lines": [
+        "",
+        "- `email_ws_local_bootstrap`",
+        "  Local provisioning bootstrap only. Reuses sandbox posture for safe setup automation and never gets a production-trusted sender identity.",
+        "- `email_ws_sandbox`",
+        "  Shared sandbox integration. Sink-safe or allowlist-only.",
+        "- `email_ws_preprod`",
+        "  Preproduction verification. Live-capable provider posture, but Taxat keeps recipient delivery restricted until later callback and template work completes.",
+        "- `email_ws_production`",
+        "  Production. Only customer-safe transactional templates may reach live recipients.",
+        "",
+        "Account token and per-server tokens are stored only by vault metadata ref and fingerprint. No raw provider tokens belong in repo artifacts, screenshots, or chat output.",
+        ""
+      ],
+      "plainText": "email ws local bootstrap Local provisioning bootstrap only. Reuses sandbox posture for safe setup automation and never gets a production trusted sender identity. email ws sandbox Shared sandbox integration. Sink safe or allowlist only. email ws preprod Preproduction verification. Live capable provider posture, but Taxat keeps recipient delivery restricted until later callback and template work completes. email ws production Production. Only customer safe transactional templates may reach live recipients. Account token and per server tokens are stored only by vault metadata ref and fingerprint. No raw provider tokens belong in repo artifacts, screenshots, or chat output.",
+      "excerpt": "email ws local bootstrap Local provisioning bootstrap only. Reuses sandbox posture for safe setup automation and never gets a production trusted sender identity. email ws sandbox…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "sender-domains",
+      "headingText": "Sender Domains",
+      "level": 2,
+      "lines": [
+        "",
+        "- `notify.sandbox.taxat.example`",
+        "- `notify.preprod.taxat.example`",
+        "- `notify.production.taxat.example`",
+        "",
+        "Each sender domain also carries:",
+        "",
+        "- custom Return-Path `pm-bounces.<sender-domain>`",
+        "- DMARC host `_dmarc.<sender-domain>`",
+        "- domain-verified mailbox posture for `noreply@...` and `help@...`",
+        "",
+        "The domain-verified posture is primary. Avoid one-off sender-signature sprawl unless a later provider requirement forces a narrow exception.",
+        ""
+      ],
+      "plainText": "notify.sandbox.taxat.example notify.preprod.taxat.example notify.production.taxat.example Each sender domain also carries: custom Return Path pm bounces.<sender domain DMARC host dmarc.<sender domain domain verified mailbox posture for noreply@... and help@... The domain verified posture is primary. Avoid one off sender signature sprawl unless a later provider requirement forces a narrow exception.",
+      "excerpt": "notify.sandbox.taxat.example notify.preprod.taxat.example notify.production.taxat.example Each sender domain also carries: custom Return Path pm bounces.<sender domain DMARC host…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "dns-inventory",
+      "headingText": "DNS Inventory",
+      "level": 2,
+      "lines": [
+        "",
+        "Every sender domain must publish and track these records in `data/provisioning/email_dns_record_inventory.template.json`:",
+        "",
+        "- domain verification TXT",
+        "- DKIM TXT",
+        "- Return-Path CNAME",
+        "- DMARC TXT",
+        "",
+        "Every row carries:",
+        "",
+        "- explicit environment binding",
+        "- explicit owner role",
+        "- exact purpose",
+        "- TTL",
+        "- readiness state",
+        "",
+        "Manual checkpoints are required when provider verification remains pending after DNS publication or propagation.",
+        ""
+      ],
+      "plainText": "Every sender domain must publish and track these records in data/provisioning/email dns record inventory.template.json: domain verification TXT DKIM TXT Return Path CNAME DMARC TXT Every row carries: explicit environment binding explicit owner role exact purpose TTL readiness state Manual checkpoints are required when provider verification remains pending after DNS publication or propagation.",
+      "excerpt": "Every sender domain must publish and track these records in data/provisioning/email dns record inventory.template.json: domain verification TXT DKIM TXT Return Path CNAME DMARC TX…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "stream-partitioning",
+      "headingText": "Stream Partitioning",
+      "level": 2,
+      "lines": [
+        "",
+        "The canonical stream families are:",
+        "",
+        "- customer transactional",
+        "- operator/security",
+        "- test sink for local, sandbox, and preproduction only",
+        "",
+        "Rules:",
+        "",
+        "- customer-visible transactional mail must stay separate from internal-only operator/security traffic",
+        "- sink/test streams must never be promoted into production",
+        "- production may not host a sink stream",
+        "- suppressions remain per stream and require deliberate reactivation",
+        ""
+      ],
+      "plainText": "The canonical stream families are: customer transactional operator/security test sink for local, sandbox, and preproduction only Rules: customer visible transactional mail must stay separate from internal only operator/security traffic sink/test streams must never be promoted into production production may not host a sink stream suppressions remain per stream and require deliberate reactivation",
+      "excerpt": "The canonical stream families are: customer transactional operator/security test sink for local, sandbox, and preproduction only Rules: customer visible transactional mail must st…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "current-official-provider-grounding",
+      "headingText": "Current Official Provider Grounding",
+      "level": 2,
+      "lines": [
+        "",
+        "Revalidated on `2026-04-18` against official Postmark documentation:",
+        "",
+        "- [Overview](https://postmarkapp.com/developer/api/overview)",
+        "- [Servers API](https://postmarkapp.com/developer/api/servers-api)",
+        "- [Domains API](https://postmarkapp.com/developer/api/domains-api)",
+        "- [Sender Signatures API](https://postmarkapp.com/developer/api/signatures-api)",
+        "- [Message Streams API](https://postmarkapp.com/developer/api/message-streams-api)",
+        "- [Suppressions API](https://postmarkapp.com/developer/api/suppressions-api)",
+        "- [Sandbox Mode](https://postmarkapp.com/developer/user-guide/sandbox-mode)",
+        "- [Bounce Webhook](https://postmarkapp.com/developer/webhooks/bounce-webhook)",
+        "- [Webhooks Overview](https://postmarkapp.com/developer/webhooks/webhooks-overview)",
+        ""
+      ],
+      "plainText": "Revalidated on 2026 04 18 against official Postmark documentation: Overview Servers API Domains API Sender Signatures API Message Streams API Suppressions API Sandbox Mode Bounce Webhook Webhooks Overview",
+      "excerpt": "Revalidated on 2026 04 18 against official Postmark documentation: Overview Servers API Domains API Sender Signatures API Message Streams API Suppressions API Sandbox Mode Bounce…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "deferred-to-pc-0042",
+      "headingText": "Deferred To `pc_0042`",
+      "level": 2,
+      "lines": [
+        "",
+        "This card intentionally does not finalize:",
+        "",
+        "- webhook URLs",
+        "- callback authentication",
+        "- template registration",
+        "- delivery-event ingestion",
+        "",
+        "Those surfaces now have a stable workspace, sender-domain, DNS, and stream inventory to target in `pc_0042`.",
+        ""
+      ],
+      "plainText": "This card intentionally does not finalize: webhook URLs callback authentication template registration delivery event ingestion Those surfaces now have a stable workspace, sender domain, DNS, and stream inventory to target in pc 0042.",
+      "excerpt": "This card intentionally does not finalize: webhook URLs callback authentication template registration delivery event ingestion Those surfaces now have a stable workspace, sender d…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": [
+        "pc_0042"
+      ]
+    },
+    {
+      "headingSlug": "source-gap",
+      "headingText": "Source Gap",
+      "level": 2,
+      "lines": [
+        "",
+        "`shared_operating_contract_0038_to_0045.md` was absent during execution, so this runbook grounds itself directly in the named algorithm contracts, the environment catalog, the secret policy, and the current provider documentation.",
+        ""
+      ],
+      "plainText": "shared operating contract 0038 to 0045.md was absent during execution, so this runbook grounds itself directly in the named algorithm contracts, the environment catalog, the secret policy, and the current provider documentation.",
+      "excerpt": "shared operating contract 0038 to 0045.md was absent during execution, so this runbook grounds itself directly in the named algorithm contracts, the environment catalog, the secre…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    }
+  ],
+  "schemaIdentityOrNull": null,
+  "schemaFields": [],
+  "samplePointers": [],
+  "sampleIdentityOrNull": null,
+  "bindingIdentityOrNull": null,
+  "validatorIdentityOrNull": null,
+  "driftIdentityOrNull": null,
+  "headerStrip": {
+    "kind": "PROSE",
+    "badgeLabel": "Support Documentation",
+    "metricPairs": [
+      {
+        "label": "Headings",
+        "value": "10"
+      },
+      {
+        "label": "Schemas",
+        "value": "0"
+      },
+      {
+        "label": "Tasks",
+        "value": "1"
+      }
+    ]
+  },
+  "relationships": {
+    "schemas": [],
+    "samples": [],
+    "bindings": [],
+    "validators": [],
+    "docs": [],
+    "tasks": [
+      {
+        "artifactSlug": "task--PROMPT-CARDS-pc_0049",
+        "title": "pc_0049 · pc_0049",
+        "kind": "TASK_CARD",
+        "authorityLevel": "TRACEABILITY_REFERENCE",
+        "sectionRef": "SUPPORT_DOCS",
+        "headingSlugOrNull": null,
+        "reason": "roadmap card references this artifact"
+      }
+    ]
+  },
+  "sourceTruthStack": {
+    "file": [
+      "docs/provisioning/email_sender_domain_bootstrap_runbook.md"
+    ],
+    "headings": [
+      "Email Sender Domain Bootstrap Runbook",
+      "Scope",
+      "Truth Boundary",
+      "Workspace Strategy",
+      "Sender Domains",
+      "DNS Inventory",
+      "Stream Partitioning",
+      "Current Official Provider Grounding",
+      "Deferred To `pc_0042`",
+      "Source Gap"
+    ],
+    "schemaRefs": [],
+    "sampleRefs": [],
+    "bindingRefs": [],
+    "validatorRefs": [],
+    "driftRefs": [],
+    "taskRefs": [
+      "pc_0042"
+    ]
+  },
+  "fieldCrosslinks": [],
+  "taskRefs": [
+    "pc_0042"
+  ]
+}

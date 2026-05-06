@@ -21,8 +21,7 @@ COLLABORATION_PATH = ALGORITHM_DIR / "collaboration_workspace_contract.md"
 GOVERNANCE_PATH = ALGORITHM_DIR / "admin_governance_console_architecture.md"
 FRONTEND_SHELL_PATH = ALGORITHM_DIR / "frontend_shell_and_interaction_law.md"
 FOUNDATION_PATH = (
-    ALGORITHM_DIR
-    / "cross_shell_design_token_and_interaction_layer_foundation_contract.md"
+    ALGORITHM_DIR / "cross_shell_design_token_and_interaction_layer_foundation_contract.md"
 )
 NORTHBOUND_PATH = ALGORITHM_DIR / "northbound_api_and_session_contract.md"
 MACOS_PATH = ALGORITHM_DIR / "macos_native_operator_workspace_blueprint.md"
@@ -31,36 +30,22 @@ MODULES_PATH = ALGORITHM_DIR / "modules.md"
 READ_MODEL_INDEX_PATH = DATA_ANALYSIS_DIR / "read_model_projection_index.json"
 SURFACE_BINDING_PATH = DATA_ANALYSIS_DIR / "surface_read_model_api_binding.json"
 SURFACE_ROUTE_MATRIX_PATH = DATA_ANALYSIS_DIR / "surface_route_and_capability_matrix.json"
-SURFACE_STATE_MATRIX_PATH = (
-    DATA_ANALYSIS_DIR / "surface_state_visibility_recovery_matrix.json"
-)
+SURFACE_STATE_MATRIX_PATH = DATA_ANALYSIS_DIR / "surface_state_visibility_recovery_matrix.json"
 SHELL_ROUTE_MATRIX_PATH = DATA_ANALYSIS_DIR / "shell_route_matrix.json"
 FOUNDATION_MAP_PATH = DATA_ANALYSIS_DIR / "interaction_layer_foundation_map.json"
 NATIVE_TOPOLOGY_PATH = DATA_ANALYSIS_DIR / "native_scene_window_topology.json"
 GAP_REGISTER_PATH = DATA_ANALYSIS_DIR / "cross_surface_gap_register.json"
-AUTHORITY_TRUTH_MAP_PATH = (
-    DATA_ANALYSIS_DIR / "authority_truth_vs_internal_projection_map.json"
-)
+AUTHORITY_TRUTH_MAP_PATH = DATA_ANALYSIS_DIR / "authority_truth_vs_internal_projection_map.json"
 
 ADR_PATH = DOCS_ARCH_ADR_DIR / "ADR-005-read-model-projection-strategy.md"
-COMPARISON_PATH = (
-    DOCS_ARCH_ADR_DIR / "ADR-005-read-model-projection-strategy-comparison.md"
-)
-SCORECARD_PATH = (
-    DOCS_ARCH_ADR_DIR / "ADR-005-read-model-projection-strategy-scorecard.json"
-)
+COMPARISON_PATH = DOCS_ARCH_ADR_DIR / "ADR-005-read-model-projection-strategy-comparison.md"
+SCORECARD_PATH = DOCS_ARCH_ADR_DIR / "ADR-005-read-model-projection-strategy-scorecard.json"
 READ_MODEL_CATALOG_PATH = DATA_ANALYSIS_DIR / "read_model_catalog_and_owner_map.json"
 READ_MODEL_ROUTE_MAP_PATH = DATA_ANALYSIS_DIR / "read_model_to_route_and_shell_map.json"
-GENERATION_POLICY_PATH = (
-    DATA_ANALYSIS_DIR / "projection_generation_and_rebuild_policy.json"
-)
-CUSTOMER_SAFE_BOUNDARY_PATH = (
-    DATA_ANALYSIS_DIR / "customer_safe_projection_boundary_matrix.json"
-)
+GENERATION_POLICY_PATH = DATA_ANALYSIS_DIR / "projection_generation_and_rebuild_policy.json"
+CUSTOMER_SAFE_BOUNDARY_PATH = DATA_ANALYSIS_DIR / "customer_safe_projection_boundary_matrix.json"
 STREAM_CONTRACT_PATH = DATA_ANALYSIS_DIR / "projection_stream_delta_contracts.json"
-STALENESS_POLICY_PATH = (
-    DATA_ANALYSIS_DIR / "projection_version_and_staleness_policy.json"
-)
+STALENESS_POLICY_PATH = DATA_ANALYSIS_DIR / "projection_version_and_staleness_policy.json"
 MERMAID_PATH = DIAGRAMS_ANALYSIS_DIR / "ADR-005-read-model-projection-strategy.mmd"
 
 HEADING_RE = re.compile(r"^(#{2,4})\s+(.*)$")
@@ -229,9 +214,7 @@ def md_escape(value: Any) -> str:
 def markdown_table(headers: list[str], rows: list[list[Any]]) -> str:
     header_line = "| " + " | ".join(headers) + " |"
     divider_line = "| " + " | ".join("---" for _ in headers) + " |"
-    body_lines = [
-        "| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows
-    ]
+    body_lines = ["| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows]
     return "\n".join([header_line, divider_line, *body_lines])
 
 
@@ -451,7 +434,10 @@ def build_family_specs() -> dict[str, dict[str, Any]]:
                 heading_ref(COLLABORATION_PATH, "8. Command and read API additions"),
                 heading_ref(COLLABORATION_PATH, "9. Stream events and notifications"),
                 heading_ref(COLLABORATION_PATH, "12. Playwright scenarios"),
-                heading_ref(FRONTEND_SHELL_PATH, "5. State, freshness, visibility, and recovery presentation"),
+                heading_ref(
+                    FRONTEND_SHELL_PATH,
+                    "5. State, freshness, visibility, and recovery presentation",
+                ),
             ],
         },
         "portal_customer_safe": {
@@ -751,7 +737,9 @@ def build_criteria() -> list[dict[str, Any]]:
                 heading_ref(PORTAL_PATH, "Playwright validation minimum"),
                 heading_ref(COLLABORATION_PATH, "12. Playwright scenarios"),
                 heading_ref(GOVERNANCE_PATH, "9. Validation plan"),
-                heading_ref(FRONTEND_SHELL_PATH, "10. Automation anchors and UI observability fencing"),
+                heading_ref(
+                    FRONTEND_SHELL_PATH, "10. Automation anchors and UI observability fencing"
+                ),
             ],
         },
         {
@@ -968,9 +956,7 @@ def build_scorecard(
         criterion_breakdown: list[dict[str, Any]] = []
         weighted_total = 0.0
         for criterion in criteria:
-            raw_score, note = score_map[alternative["alternative_id"]][
-                criterion["criterion_id"]
-            ]
+            raw_score, note = score_map[alternative["alternative_id"]][criterion["criterion_id"]]
             weighted_score = round(criterion["weight"] * raw_score / 5, 2)
             weighted_total += weighted_score
             criterion_breakdown.append(
@@ -991,9 +977,7 @@ def build_scorecard(
                 "weighted_total": round(weighted_total, 2),
             }
         )
-    ranked = sorted(
-        scored_alternatives, key=lambda item: item["weighted_total"], reverse=True
-    )
+    ranked = sorted(scored_alternatives, key=lambda item: item["weighted_total"], reverse=True)
     for index, alternative in enumerate(ranked, 1):
         alternative["rank"] = index
     return {
@@ -1006,24 +990,16 @@ def build_scorecard(
     }
 
 
-def build_route_map(
-    family_specs: dict[str, dict[str, Any]]
-) -> dict[str, Any]:
+def build_route_map(family_specs: dict[str, dict[str, Any]]) -> dict[str, Any]:
     surface_bindings = load_json(SURFACE_BINDING_PATH)
     surface_routes = load_json(SURFACE_ROUTE_MATRIX_PATH)
     surface_state = load_json(SURFACE_STATE_MATRIX_PATH)
     shell_routes = load_json(SHELL_ROUTE_MATRIX_PATH)
     foundation_map = load_json(FOUNDATION_MAP_PATH)
 
-    binding_lookup = {
-        row["route_or_scene_key"]: row for row in surface_bindings["bindings"]
-    }
-    surface_lookup = {
-        row["route_or_scene_key"]: row for row in surface_routes["routes"]
-    }
-    state_lookup = {
-        row["route_or_scene_key"]: row for row in surface_state["rows"]
-    }
+    binding_lookup = {row["route_or_scene_key"]: row for row in surface_bindings["bindings"]}
+    surface_lookup = {row["route_or_scene_key"]: row for row in surface_routes["routes"]}
+    state_lookup = {row["route_or_scene_key"]: row for row in surface_state["rows"]}
     shell_route_lookup = {row["route_id"]: row for row in shell_routes["route_records"]}
     foundation_lookup = {
         row["shell_family"]: row["interaction_layer_contract"]
@@ -1113,9 +1089,7 @@ def build_route_map(
         elif route["shell_family"] == "GOVERNANCE_DENSITY_SHELL":
             projection_contract = "SERVER_AUTHORED_GOVERNANCE_SNAPSHOT"
         elif route["embodiment"].startswith("NATIVE"):
-            projection_contract = (
-                "SERVER_AUTHORED_NORTHBOUND_SNAPSHOT_WITH_DISPOSABLE_NATIVE_CACHE"
-            )
+            projection_contract = "SERVER_AUTHORED_NORTHBOUND_SNAPSHOT_WITH_DISPOSABLE_NATIVE_CACHE"
 
         route_rows.append(
             {
@@ -1141,9 +1115,7 @@ def build_route_map(
                 "command_transport": binding.get(
                     "command_transport", route.get("command_transport", [])
                 ),
-                "stream_sources": binding.get(
-                    "stream_sources", route.get("stream_sources", [])
-                ),
+                "stream_sources": binding.get("stream_sources", route.get("stream_sources", [])),
                 "visibility_lanes": route.get(
                     "visibility_lanes", state_row.get("visibility_lanes", [])
                 ),
@@ -1186,9 +1158,7 @@ def build_route_map(
                 shell_family: len(
                     [row for row in route_rows if row["shell_family"] == shell_family]
                 )
-                for shell_family in ordered_unique(
-                    row["shell_family"] for row in route_rows
-                )
+                for shell_family in ordered_unique(row["shell_family"] for row in route_rows)
             },
         },
         "routes": route_rows,
@@ -1329,15 +1299,9 @@ def build_generation_policy(catalog: dict[str, Any]) -> dict[str, Any]:
                 ],
                 "projector_updates": spec["generation_timing"]["projector_updates"],
                 "stream_publication": spec["generation_timing"]["stream_publication"],
-                "browser_cache_hydration": spec["generation_timing"][
-                    "browser_cache_hydration"
-                ],
-                "native_cache_hydration": spec["generation_timing"][
-                    "native_cache_hydration"
-                ],
-                "reconnect_and_catchup": spec["generation_timing"][
-                    "reconnect_and_catchup"
-                ],
+                "browser_cache_hydration": spec["generation_timing"]["browser_cache_hydration"],
+                "native_cache_hydration": spec["generation_timing"]["native_cache_hydration"],
+                "reconnect_and_catchup": spec["generation_timing"]["reconnect_and_catchup"],
                 "full_rebuild_after_drift_schema_or_restore": spec["generation_timing"][
                     "full_rebuild_after_drift_schema_or_restore"
                 ],
@@ -1354,7 +1318,11 @@ def build_generation_policy(catalog: dict[str, Any]) -> dict[str, Any]:
             "projection_family_count": len(policy_rows),
             "precompute_modes": {
                 row["precompute_mode"]: len(
-                    [candidate for candidate in policy_rows if candidate["precompute_mode"] == row["precompute_mode"]]
+                    [
+                        candidate
+                        for candidate in policy_rows
+                        if candidate["precompute_mode"] == row["precompute_mode"]
+                    ]
                 )
                 for row in policy_rows
             },
@@ -1458,8 +1426,7 @@ def build_customer_safe_boundary_matrix() -> dict[str, Any]:
                 "RequestInfoRecord",
                 "WorkflowItem",
             ],
-            "required_redactions": BLOCKED_CUSTOMER_SAFE_FAMILIES
-            + ["INTERNAL_THREAD_METADATA"],
+            "required_redactions": BLOCKED_CUSTOMER_SAFE_FAMILIES + ["INTERNAL_THREAD_METADATA"],
             "required_transformations": [
                 "Return only `thread_visibility_class = CUSTOMER_VISIBLE` entries.",
                 "Pin the customer-safe projection to the same route-visible guard spine as the mounted workspace.",
@@ -1493,7 +1460,9 @@ def build_customer_safe_boundary_matrix() -> dict[str, Any]:
             "stale_and_recovery_rule": "Historical artifacts stay visible as context but never become the default current artifact on rebase.",
             "source_refs": [
                 heading_ref(COLLABORATION_PATH, "`CollaborationAttachmentSlice`"),
-                heading_ref(FRONTEND_SHELL_PATH, "7. Artifact preview, export, print, and browser handoff"),
+                heading_ref(
+                    FRONTEND_SHELL_PATH, "7. Artifact preview, export, print, and browser handoff"
+                ),
             ],
         },
         {
@@ -1631,22 +1600,12 @@ def build_customer_safe_boundary_matrix() -> dict[str, Any]:
         "rows": rows,
         "typed_gaps": [
             {
-                "gap_key": gap_rows["PORTAL_READ_PATH_LITERALS_NOT_FULLY_ENUMERATED"][
-                    "gap_key"
-                ],
-                "summary": gap_rows["PORTAL_READ_PATH_LITERALS_NOT_FULLY_ENUMERATED"][
-                    "summary"
-                ],
-                "impact": gap_rows["PORTAL_READ_PATH_LITERALS_NOT_FULLY_ENUMERATED"][
-                    "impact"
-                ],
-                "status": gap_rows["PORTAL_READ_PATH_LITERALS_NOT_FULLY_ENUMERATED"][
-                    "status"
-                ],
+                "gap_key": gap_rows["PORTAL_READ_PATH_LITERALS_NOT_FULLY_ENUMERATED"]["gap_key"],
+                "summary": gap_rows["PORTAL_READ_PATH_LITERALS_NOT_FULLY_ENUMERATED"]["summary"],
+                "impact": gap_rows["PORTAL_READ_PATH_LITERALS_NOT_FULLY_ENUMERATED"]["impact"],
+                "status": gap_rows["PORTAL_READ_PATH_LITERALS_NOT_FULLY_ENUMERATED"]["status"],
                 "source_refs": normalize_source_refs(
-                    gap_rows["PORTAL_READ_PATH_LITERALS_NOT_FULLY_ENUMERATED"][
-                        "source_refs"
-                    ]
+                    gap_rows["PORTAL_READ_PATH_LITERALS_NOT_FULLY_ENUMERATED"]["source_refs"]
                 ),
             }
         ],
@@ -1834,7 +1793,11 @@ def build_stream_contracts() -> dict[str, Any]:
             "stream_contract_count": len(rows),
             "delivery_modes": {
                 row["delivery_mode"]: len(
-                    [candidate for candidate in rows if candidate["delivery_mode"] == row["delivery_mode"]]
+                    [
+                        candidate
+                        for candidate in rows
+                        if candidate["delivery_mode"] == row["delivery_mode"]
+                    ]
                 )
                 for row in rows
             },
@@ -1963,9 +1926,7 @@ def build_staleness_policy(route_map: dict[str, Any]) -> dict[str, Any]:
         "summary": {
             "surface_count": len(rows),
             "shell_family_counts": {
-                shell_family: len(
-                    [row for row in rows if row["shell_family"] == shell_family]
-                )
+                shell_family: len([row for row in rows if row["shell_family"] == shell_family])
                 for shell_family in ordered_unique(row["shell_family"] for row in rows)
             },
         },
@@ -2108,8 +2069,7 @@ def build_adr_markdown(
         for item in scorecard["criteria"]
     ]
     ranking_rows = [
-        [item["rank"], item["label"], item["weighted_total"]]
-        for item in scorecard["alternatives"]
+        [item["rank"], item["label"], item["weighted_total"]] for item in scorecard["alternatives"]
     ]
     deferred_gaps = load_json(GAP_REGISTER_PATH)["gaps"]
     deferred_rows = [
@@ -2259,9 +2219,7 @@ def build_comparison_markdown(
         "",
         "## Criteria and Weights",
         "",
-        markdown_table(
-            ["Criterion", "Priority", "Weight", "Source Grounding"], criteria_rows
-        ),
+        markdown_table(["Criterion", "Priority", "Weight", "Source Grounding"], criteria_rows),
         "",
         "## Coverage Summary",
         "",

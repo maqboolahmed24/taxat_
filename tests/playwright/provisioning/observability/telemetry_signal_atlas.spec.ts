@@ -13,15 +13,11 @@ test("renders the telemetry signal atlas with semantic planes and reduced-motion
   await expect(
     page.getByRole("navigation", { name: "Signal families and telemetry routes" }),
   ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Emission", exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Emission", exact: true })).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Collector / Processors", exact: true }),
   ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Backends / Sinks", exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Backends / Sinks", exact: true })).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Correlation To Audit", exact: true }),
   ).toBeVisible();
@@ -29,9 +25,7 @@ test("renders the telemetry signal atlas with semantic planes and reduced-motion
   await expect(page.locator("#run-status")).toHaveText("PROVIDER SELECTION REQUIRED");
 });
 
-test("supports keyboard selection across signal families and atlas rows", async ({
-  page,
-}) => {
+test("supports keyboard selection across signal families and atlas rows", async ({ page }) => {
   await page.goto(telemetrySignalAtlasUrl);
 
   await page.locator("#environment-select").selectOption("env_production");
@@ -50,12 +44,8 @@ test("supports keyboard selection across signal families and atlas rows", async 
   await collectorRow.focus();
   await page.keyboard.press("Enter");
 
-  await expect(page.locator("#drawer-title")).toHaveText(
-    "Security and privacy telemetry",
-  );
-  await expect(page.locator("#drawer-body")).toContainText(
-    "backend.security_signal_store",
-  );
+  await expect(page.locator("#drawer-title")).toHaveText("Security and privacy telemetry");
+  await expect(page.locator("#drawer-body")).toContainText("backend.security_signal_store");
   await expect(page.locator("#drawer-body")).toContainText(
     "Restricted export path with separate datasets and no vendor forwarding.",
   );
@@ -67,10 +57,6 @@ test("supports keyboard selection across signal families and atlas rows", async 
   await page.keyboard.press("Enter");
 
   await expect(page.locator("#drawer-title")).toHaveText("Mandatory keys");
-  await expect(page.locator("#drawer-body")).toContainText(
-    "accepted_risk_approval_id",
-  );
-  await expect(page.locator("#drawer-body")).toContainText(
-    "approval audit evidence",
-  );
+  await expect(page.locator("#drawer-body")).toContainText("accepted_risk_approval_id");
+  await expect(page.locator("#drawer-body")).toContainText("approval audit evidence");
 });

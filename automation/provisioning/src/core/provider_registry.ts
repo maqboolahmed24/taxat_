@@ -83,10 +83,7 @@ function hmrcProviderRecipe(): ProviderRecipe {
           "env_shared_sandbox_integration",
           "env_preproduction_verification",
         ],
-        supportedConnectionMethods: [
-          "WEB_APP_VIA_SERVER",
-          "DESKTOP_APP_VIA_SERVER",
-        ],
+        supportedConnectionMethods: ["WEB_APP_VIA_SERVER", "DESKTOP_APP_VIA_SERVER"],
         selectorManifestId: "hmrc-sandbox-app-registration",
         requiresLiveProviderGate: true,
         manualCheckpointReasons: ["MFA", "HUMAN_REVIEW"],
@@ -101,10 +98,7 @@ function hmrcProviderRecipe(): ProviderRecipe {
           "env_shared_sandbox_integration",
           "env_preproduction_verification",
         ],
-        supportedConnectionMethods: [
-          "WEB_APP_VIA_SERVER",
-          "DESKTOP_APP_VIA_SERVER",
-        ],
+        supportedConnectionMethods: ["WEB_APP_VIA_SERVER", "DESKTOP_APP_VIA_SERVER"],
         selectorManifestId: "hmrc-sandbox-fraud-prevention-validation",
         requiresLiveProviderGate: true,
         manualCheckpointReasons: [],
@@ -119,10 +113,7 @@ function hmrcProviderRecipe(): ProviderRecipe {
           "env_shared_sandbox_integration",
           "env_preproduction_verification",
         ],
-        supportedConnectionMethods: [
-          "WEB_APP_VIA_SERVER",
-          "DESKTOP_APP_VIA_SERVER",
-        ],
+        supportedConnectionMethods: ["WEB_APP_VIA_SERVER", "DESKTOP_APP_VIA_SERVER"],
         selectorManifestId: "hmrc-sandbox-client-credential-export",
         requiresLiveProviderGate: true,
         manualCheckpointReasons: ["POLICY_CONFIRMATION", "MFA", "HUMAN_REVIEW"],
@@ -132,10 +123,7 @@ function hmrcProviderRecipe(): ProviderRecipe {
         label: "Production application registration",
         description:
           "Verify production registration posture without automating product-runtime sign-in.",
-        allowedEnvironmentRefs: [
-          "env_preproduction_verification",
-          "env_production",
-        ],
+        allowedEnvironmentRefs: ["env_preproduction_verification", "env_production"],
         supportedConnectionMethods: [
           "WEB_APP_VIA_SERVER",
           "DESKTOP_APP_VIA_SERVER",
@@ -701,10 +689,7 @@ function pushProviderRecipe(): ProviderRecipe {
           "env_preproduction_verification",
           "env_production",
         ],
-        supportedConnectionMethods: [
-          "DESKTOP_APP_VIA_SERVER",
-          "MACHINE_TO_MACHINE",
-        ],
+        supportedConnectionMethods: ["DESKTOP_APP_VIA_SERVER", "MACHINE_TO_MACHINE"],
         selectorManifestId: "firebase-compatible-device-messaging-control-plane",
         requiresLiveProviderGate: true,
         manualCheckpointReasons: ["HUMAN_REVIEW", "POLICY_CONFIRMATION"],
@@ -920,17 +905,10 @@ function ocrProviderRecipe(): ProviderRecipe {
           "env_preproduction_verification",
           "env_production",
         ],
-        supportedConnectionMethods: [
-          "WEB_APP_VIA_SERVER",
-          "MACHINE_TO_MACHINE",
-        ],
+        supportedConnectionMethods: ["WEB_APP_VIA_SERVER", "MACHINE_TO_MACHINE"],
         selectorManifestId: "document-extraction-selection-control-plane",
         requiresLiveProviderGate: false,
-        manualCheckpointReasons: [
-          "POLICY_CONFIRMATION",
-          "LEGAL_APPROVAL",
-          "HUMAN_REVIEW",
-        ],
+        manualCheckpointReasons: ["POLICY_CONFIRMATION", "LEGAL_APPROVAL", "HUMAN_REVIEW"],
       },
     ],
     selectorManifests: [
@@ -1030,17 +1008,10 @@ function malwareProviderRecipe(): ProviderRecipe {
           "env_preproduction_verification",
           "env_production",
         ],
-        supportedConnectionMethods: [
-          "WEB_APP_VIA_SERVER",
-          "MACHINE_TO_MACHINE",
-        ],
+        supportedConnectionMethods: ["WEB_APP_VIA_SERVER", "MACHINE_TO_MACHINE"],
         selectorManifestId: "upload-intake-safety-selection-control-plane",
         requiresLiveProviderGate: false,
-        manualCheckpointReasons: [
-          "POLICY_CONFIRMATION",
-          "LEGAL_APPROVAL",
-          "HUMAN_REVIEW",
-        ],
+        manualCheckpointReasons: ["POLICY_CONFIRMATION", "LEGAL_APPROVAL", "HUMAN_REVIEW"],
       },
     ],
     selectorManifests: [
@@ -1143,11 +1114,7 @@ function supportProviderRecipe(): ProviderRecipe {
         supportedConnectionMethods: ["WEB_APP_VIA_SERVER"],
         selectorManifestId: "support-integration-selection-control-plane",
         requiresLiveProviderGate: false,
-        manualCheckpointReasons: [
-          "POLICY_CONFIRMATION",
-          "LEGAL_APPROVAL",
-          "HUMAN_REVIEW",
-        ],
+        manualCheckpointReasons: ["POLICY_CONFIRMATION", "LEGAL_APPROVAL", "HUMAN_REVIEW"],
       },
     ],
     selectorManifests: [
@@ -1299,9 +1266,7 @@ export function assertProviderFlowAllowed(
     throw new Error(`Provider ${provider.providerId} does not expose flow ${flowId}`);
   }
   if (!flow.allowedEnvironmentRefs.includes(context.productEnvironmentId)) {
-    throw new Error(
-      `Flow ${flowId} is not allowed in environment ${context.productEnvironmentId}`,
-    );
+    throw new Error(`Flow ${flowId} is not allowed in environment ${context.productEnvironmentId}`);
   }
   if (flow.requiresLiveProviderGate) {
     assertLiveProviderGate(context);

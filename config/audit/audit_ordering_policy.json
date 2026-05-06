@@ -1,0 +1,27 @@
+{
+  "contract_version": "AUDIT_ORDERING_POLICY_V1",
+  "policy_id": "audit_ordering_policy",
+  "basis_statement": "Audit rows are ordered strictly inside a stream and only secondarily merged for operator explanation, so review never confuses narrative grouping with the append-only source of truth.",
+  "sequence_origin": "ONE_BASED_APPEND_ONLY",
+  "canonical_stream_order": "audit_stream_ref plus monotonically increasing stream_sequence",
+  "merged_view_order": "recorded_at then audit_stream_ref then stream_sequence",
+  "compare_and_swap_policy": "head compare-and-swap uses expected previous hash when a caller supplies one and fails closed on drift",
+  "duplicate_publication_policy": "same stream plus same publication ref returns the existing row only when the semantic payload hash is identical",
+  "signature_failure_posture": "signature batch failure is recorded as follow-up batch metadata and never rewrites previously appended rows",
+  "notes": [
+    "The first row in a stream starts at sequence 1 and carries prev_event_hash = null.",
+    "Broken heads with sequence > 0 and a missing last_event_hash must fail closed before append."
+  ],
+  "source_lineage": [
+    {
+      "source_file": "docs/provisioning/postgres_control_audit_store_runbook.md",
+      "source_heading_or_logical_block": "audit stream head register",
+      "rationale": "Anchors one-based append-only sequencing and monotonic head semantics."
+    },
+    {
+      "source_file": "PROMPT/CARDS/pc_0050.md",
+      "source_heading_or_logical_block": "Implementation Notes",
+      "rationale": "Documents the append-only ledger and mutable head split already established in storage."
+    }
+  ]
+}

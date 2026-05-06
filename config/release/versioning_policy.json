@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "versioning_policy",
+  "policy_version": "RELEASE_VERSIONING_POLICY_V1",
+  "core_version_policy": {
+    "format_ref": "SEMVER_CORE",
+    "required_fields": [
+      "major",
+      "minor",
+      "patch"
+    ],
+    "hotfix_policy": "HOTFIX_RELEASES_INCREMENT_PATCH_AND_RECORD_HOTFIX_ITERATION_IN_BUILD_METADATA",
+    "notes": [
+      "Human-facing versions may carry channel and rollout hints, but the immutable candidate identity remains hash-based."
+    ]
+  },
+  "build_id_policy": {
+    "template": "b{timestamp_compact}-{channel_slug}-{build_sequence_padded}-{short_commit}",
+    "timestamp_compact_format": "YYYYMMDDtHHMMSSz",
+    "build_sequence_width": 4,
+    "short_commit_length": 12,
+    "candidate_hash_allowed_in_build_id": false,
+    "same_commit_cross_channel_divergence_policy": "CHANNEL_SLUG_MUST_APPEAR_IN_BUILD_ID_AND_HUMAN_VERSION_METADATA"
+  },
+  "candidate_binding_policy": {
+    "candidate_identity_hash_derivation": "DERIVED_AFTER_BUILD_ID_FROM_CANDIDATE_TUPLE_ONLY",
+    "artifact_names_include_short_candidate_hash": true,
+    "bundle_hash_truncation_length": 8,
+    "candidate_hash_truncation_length": 12,
+    "config_only_change_posture": "CONFIG_BUNDLE_HASH_AND_CANDIDATE_HASH_MUST_CHANGE_EVEN_IF_COMMIT_SHA_DOES_NOT"
+  },
+  "channel_version_rows": [
+    {
+      "release_channel_ref": "PREVIEW",
+      "allowed_branch_family_refs": [
+        "MAINLINE",
+        "EXPERIMENTAL"
+      ],
+      "prerelease_template": "preview.{channel_iteration}",
+      "build_metadata_tokens": [
+        "preview",
+        "b{build_sequence_padded}",
+        "sha{short_commit}"
+      ],
+      "display_track_label": "Internal preview",
+      "notes": [
+        "Preview labels must diverge even when the same commit is also built for sandbox or production lanes."
+      ]
+    },
+    {
+      "release_channel_ref": "SANDBOX",
+      "allowed_branch_family_refs": [
+        "MAINLINE",
+        "RELEASE_PREPARATION"
+      ],
+      "prerelease_template": "rc.{channel_iteration}",
+      "build_metadata_tokens": [
+        "sandbox",
+        "b{build_sequence_padded}",
+        "sha{short_commit}"
+      ],
+      "display_track_label": "Sandbox rehearsal",
+      "notes": [
+        "Sandbox versions stay human-readable but remain pre-release candidates."
+      ]
+    },
+    {
+      "release_channel_ref": "PREPRODUCTION",
+      "allowed_branch_family_refs": [
+        "MAINLINE",
+        "RELEASE_PREPARATION",
+        "HOTFIX"
+      ],
+      "prerelease_template": "rc.{channel_iteration}",
+      "build_metadata_tokens": [
+        "preprod",
+        "b{build_sequence_padded}",
+        "sha{short_commit}"
+      ],
+      "display_track_label": "Preproduction canary",
+      "notes": [
+        "Preproduction still uses release-candidate labels until promotion is approved."
+      ]
+    },
+    {
+      "release_channel_ref": "PRODUCTION",
+      "allowed_branch_family_refs": [
+        "MAINLINE",
+        "RELEASE_PREPARATION",
+        "HOTFIX"
+      ],
+      "prerelease_template": null,
+      "build_metadata_tokens": [
+        "prod",
+        "b{build_sequence_padded}",
+        "sha{short_commit}"
+      ],
+      "display_track_label": "Production",
+      "notes": [
+        "Production uses the plain semver core unless rollout overlays add build-metadata markers such as emergency, pin, or fail-forward."
+      ]
+    }
+  ],
+  "rollout_metadata_rows": [
+    {
+      "rollout_strategy_ref": "STANDARD_CANARY",
+      "additional_build_metadata_tokens": [
+        "canary"
+      ],
+      "notes": [
+        "Standard canary remains visible even though the immutable candidate identity stays unchanged."
+      ]
+    },
+    {
+      "rollout_strategy_ref": "EMERGENCY_PROMOTE",
+      "additional_build_metadata_tokens": [
+        "emergency"
+      ],
+      "notes": [
+        "Emergency promotions must remain discoverable in the human-facing version string and metadata."
+      ]
+    },
+    {
+      "rollout_strategy_ref": "PIN_BASELINE",
+      "additional_build_metadata_tokens": [
+        "pin{baseline_release_short}"
+      ],
+      "notes": [
+        "Pinned-baseline re-promotions surface the pinned release id in build metadata rather than mutating the canonical candidate tuple."
+      ]
+    },
+    {
+      "rollout_strategy_ref": "FAIL_FORWARD_COMPENSATING",
+      "additional_build_metadata_tokens": [
+        "ffwd",
+        "comp{compensating_release_short}"
+      ],
+      "notes": [
+        "Fail-forward compensating posture must be visible to human reviewers before they inspect the compatibility gate."
+      ]
+    }
+  ],
+  "notes": [
+    "Human-readable versions may be reformatted later, but immutable artifact identities must continue to flow from build id plus candidate tuple.",
+    "Build metadata is where channel, rollout, and hotfix overlays remain visible without changing semver precedence."
+  ]
+}

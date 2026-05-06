@@ -1,0 +1,40 @@
+{
+  "contract_version": "1.0",
+  "policy_id": "message_redaction_policy",
+  "basis_statement": "Outbox packets, inbox records, and observability traces carry only opaque refs, hashes, and safe routing hints. Raw secrets, raw authority payloads, and customer plaintext stay outside the message fabric.",
+  "surface_rows": [
+    {
+      "surface_ref": "EVENT_ENVELOPE_CORE",
+      "applies_to_family_refs": ["NORTHBOUND_COMMAND", "STAGE_TASK", "ARTIFACT_EVENT", "AUTHORITY_REQUEST", "AUTHORITY_INGRESS"],
+      "allowed_fields": ["packet_id", "source_record_ref", "source_record_version_hash", "payload_ref_or_null", "payload_hash", "duplicate_meaning_key", "request_hash", "idempotency_key", "order_domain_key"],
+      "forbidden_content": ["raw_secret_value", "plaintext_customer_payload", "raw_authority_body_bytes", "inline_blob_content"],
+      "masking_posture": "OPAQUE_REFS_AND_HASHES_ONLY",
+      "notes": [
+        "Payload refs and hashes are lawful; raw bodies are not.",
+        "Packet logs may explain routing and dedupe posture without replayable secret material."
+      ]
+    },
+    {
+      "surface_ref": "OBSERVABILITY_TRACE",
+      "applies_to_family_refs": ["NORTHBOUND_COMMAND", "STAGE_TASK", "ARTIFACT_EVENT", "AUTHORITY_REQUEST", "AUTHORITY_INGRESS"],
+      "allowed_fields": ["trace_ref", "causation_ref_or_null", "source_record_ref", "request_hash", "idempotency_key", "duplicate_meaning_key", "quarantine_reason_codes"],
+      "forbidden_content": ["authorization_header", "oauth_token", "cookie_value", "provider_signature_secret"],
+      "masking_posture": "REFERENTIAL_ONLY",
+      "notes": [
+        "Trace surfaces may name durable refs and hashes but may not reconstruct privileged transport headers.",
+        "Authority packet observability stays aligned with strict trace redaction."
+      ]
+    },
+    {
+      "surface_ref": "DEAD_LETTER_AND_QUARANTINE",
+      "applies_to_family_refs": ["AUTHORITY_REQUEST", "AUTHORITY_INGRESS"],
+      "allowed_fields": ["packet_id", "source_record_ref", "request_hash", "idempotency_key", "duplicate_meaning_key", "quarantine_reason_codes", "source_record_continuity_state"],
+      "forbidden_content": ["raw_callback_body_as_truth", "live_token_handle", "unsigned_provider_payload"],
+      "masking_posture": "INVESTIGATION_METADATA_ONLY",
+      "notes": [
+        "Operator review needs durable identity and reason codes, not replayable credentials.",
+        "Quarantine remains evidence-first and mutation-blocking."
+      ]
+    }
+  ]
+}

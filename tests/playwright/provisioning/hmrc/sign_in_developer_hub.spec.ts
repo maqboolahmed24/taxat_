@@ -4,17 +4,13 @@ import path from "node:path";
 
 import { expect, test } from "@playwright/test";
 
-import {
-  ensureHmrcProjectWorkspace,
-} from "../../../../automation/provisioning/src/providers/hmrc/flows/ensure_hmrc_project_workspace.js";
+import { ensureHmrcProjectWorkspace } from "../../../../automation/provisioning/src/providers/hmrc/flows/ensure_hmrc_project_workspace.js";
 import {
   DEVELOPER_HUB_FLOW_ID,
   DEVELOPER_HUB_PROVIDER_ID,
   type DeveloperHubEntryUrls,
 } from "../../../../automation/provisioning/src/providers/hmrc/flows/developer_hub_shared.js";
-import {
-  createRunContext,
-} from "../../../../automation/provisioning/src/core/run_context.js";
+import { createRunContext } from "../../../../automation/provisioning/src/core/run_context.js";
 
 function fixtureEntryUrls(scenario: string): DeveloperHubEntryUrls {
   const base = `/automation/provisioning/tests/fixtures/hmrc_developer_hub_portal.html?scenario=${scenario}`;
@@ -107,9 +103,7 @@ test("existing account sign-in reaches the Applications area and persists a safe
   });
 });
 
-test("already signed-in sessions are adopted instead of forcing a new login", async ({
-  page,
-}) => {
+test("already signed-in sessions are adopted instead of forcing a new login", async ({ page }) => {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), "taxat-hmrc-devhub-session-"));
   const workspaceRecordPath = path.join(rootDir, "workspace_record.json");
 
@@ -125,9 +119,7 @@ test("already signed-in sessions are adopted instead of forcing a new login", as
   });
 
   expect(result.outcome).toBe("APPLICATIONS_READY");
-  expect(result.workspaceRecord.developer_hub_account.source_disposition).toBe(
-    "ADOPTED_EXISTING",
-  );
+  expect(result.workspaceRecord.developer_hub_account.source_disposition).toBe("ADOPTED_EXISTING");
   expect(result.notes.join(" ")).toContain("adopted safely");
 });
 
@@ -155,9 +147,7 @@ test("MFA or suspicious-login interstitials surface as resumable manual checkpoi
   });
 });
 
-test("live HMRC entry points stay gated unless explicit approval is enabled", async ({
-  page,
-}) => {
+test("live HMRC entry points stay gated unless explicit approval is enabled", async ({ page }) => {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), "taxat-hmrc-devhub-live-gate-"));
   await expect(
     ensureHmrcProjectWorkspace({

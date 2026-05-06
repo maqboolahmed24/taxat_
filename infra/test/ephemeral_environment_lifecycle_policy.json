@@ -1,0 +1,216 @@
+{
+  "contract_version": "EPHEMERAL_ENVIRONMENT_LIFECYCLE_POLICY_V1",
+  "policy_id": "ephemeral_environment_lifecycle_policy",
+  "basis_statement": "Ephemeral environment lifecycle commands stay explicit, resumable, and fail closed. Partial progress is preserved as typed state rather than hidden shell output, and every reset or destroy action must leave evidence of what happened.",
+  "phase_rows": [
+    {
+      "phase_ref": "IDENTITY_LOCK",
+      "order": 1,
+      "completion_rule": "Explicit environment identity, scope class, owner ref, shard ref, and seed profile must all validate before any resource names are minted."
+    },
+    {
+      "phase_ref": "RUNTIME_HEALTH_GATE",
+      "order": 2,
+      "completion_rule": "The shared runtime substrate and approved service families must be acknowledged before namespace-specific work begins."
+    },
+    {
+      "phase_ref": "NAMESPACE_PROVISION",
+      "order": 3,
+      "completion_rule": "Isolated schemas, object prefixes, queue namespaces, cache partitions, cursor sets, and lease sets are derived and reserved."
+    },
+    {
+      "phase_ref": "MIGRATION_BASIS",
+      "order": 4,
+      "completion_rule": "The current schema-bundle basis is attached to the environment manifest before any deterministic seed material is loaded."
+    },
+    {
+      "phase_ref": "SEED_LOAD",
+      "order": 5,
+      "completion_rule": "Deterministic seed material is loaded from the reviewed fixture basis and hashed into the manifest."
+    },
+    {
+      "phase_ref": "CLEANLINESS_VERIFY",
+      "order": 6,
+      "completion_rule": "The environment proves it matches the declared clean basis instead of assuming reset or bootstrap succeeded."
+    },
+    {
+      "phase_ref": "DESTROY_CLEANUP",
+      "order": 7,
+      "completion_rule": "Destroy removes ephemeral namespaces and leaves only approved evidence or debug-retained artifacts."
+    }
+  ],
+  "transition_rows": [
+    {
+      "from_state": "REQUESTED",
+      "to_state": "BOOTSTRAPPING",
+      "allowed_phase_ref": "IDENTITY_LOCK",
+      "notes": [
+        "Bootstrap begins only after explicit identity validation."
+      ]
+    },
+    {
+      "from_state": "BOOTSTRAPPING",
+      "to_state": "BOOTSTRAPPING",
+      "allowed_phase_ref": "RUNTIME_HEALTH_GATE",
+      "notes": [
+        "Phase progress remains within bootstrapping until the clean basis is proven."
+      ]
+    },
+    {
+      "from_state": "BOOTSTRAPPING",
+      "to_state": "BOOTSTRAPPING",
+      "allowed_phase_ref": "NAMESPACE_PROVISION",
+      "notes": [
+        "Namespace derivation and reservation stay resumable."
+      ]
+    },
+    {
+      "from_state": "BOOTSTRAPPING",
+      "to_state": "BOOTSTRAPPING",
+      "allowed_phase_ref": "MIGRATION_BASIS",
+      "notes": [
+        "Interrupted migration-basis work must preserve typed posture."
+      ]
+    },
+    {
+      "from_state": "BOOTSTRAPPING",
+      "to_state": "BOOTSTRAPPING",
+      "allowed_phase_ref": "SEED_LOAD",
+      "notes": [
+        "Seed load remains restartable if deterministic inputs have not changed."
+      ]
+    },
+    {
+      "from_state": "BOOTSTRAPPING",
+      "to_state": "READY",
+      "allowed_phase_ref": "CLEANLINESS_VERIFY",
+      "notes": [
+        "An environment becomes ready only after cleanliness verification succeeds."
+      ]
+    },
+    {
+      "from_state": "BOOTSTRAPPING",
+      "to_state": "HALTED",
+      "allowed_phase_ref": "MIGRATION_BASIS",
+      "notes": [
+        "Interrupted bootstrap after migrations but before seed completion must halt with typed restart instructions."
+      ]
+    },
+    {
+      "from_state": "BOOTSTRAPPING",
+      "to_state": "HALTED",
+      "allowed_phase_ref": "SEED_LOAD",
+      "notes": [
+        "Seed-load interruptions preserve resumable posture instead of leaving an implicit dirty environment."
+      ]
+    },
+    {
+      "from_state": "READY",
+      "to_state": "RESETTING",
+      "allowed_phase_ref": "IDENTITY_LOCK",
+      "notes": [
+        "Reset begins with a fresh identity and safety-rail check."
+      ]
+    },
+    {
+      "from_state": "RESETTING",
+      "to_state": "RESETTING",
+      "allowed_phase_ref": "NAMESPACE_PROVISION",
+      "notes": [
+        "Reset may recreate ephemeral namespaces in place."
+      ]
+    },
+    {
+      "from_state": "RESETTING",
+      "to_state": "RESETTING",
+      "allowed_phase_ref": "SEED_LOAD",
+      "notes": [
+        "Full isolation reset re-runs deterministic seed loading."
+      ]
+    },
+    {
+      "from_state": "RESETTING",
+      "to_state": "READY",
+      "allowed_phase_ref": "CLEANLINESS_VERIFY",
+      "notes": [
+        "Reset returns to ready only after a fresh cleanliness proof."
+      ]
+    },
+    {
+      "from_state": "RESETTING",
+      "to_state": "HALTED",
+      "allowed_phase_ref": "RUNTIME_HEALTH_GATE",
+      "notes": [
+        "Queue or cache outages during reset stop the workflow instead of masking partial cleanup."
+      ]
+    },
+    {
+      "from_state": "HALTED",
+      "to_state": "BOOTSTRAPPING",
+      "allowed_phase_ref": "IDENTITY_LOCK",
+      "notes": [
+        "Bootstrap may resume from a halted state after the operator explicitly re-invokes it."
+      ]
+    },
+    {
+      "from_state": "HALTED",
+      "to_state": "RESETTING",
+      "allowed_phase_ref": "IDENTITY_LOCK",
+      "notes": [
+        "Reset may resume from a halted state after the safety rail is satisfied."
+      ]
+    },
+    {
+      "from_state": "READY",
+      "to_state": "DESTROY_PENDING",
+      "allowed_phase_ref": "IDENTITY_LOCK",
+      "notes": [
+        "Destroy must still validate explicit environment identity before cleanup."
+      ]
+    },
+    {
+      "from_state": "HALTED",
+      "to_state": "DESTROY_PENDING",
+      "allowed_phase_ref": "IDENTITY_LOCK",
+      "notes": [
+        "A halted environment may still be destroyed if debug retention does not block it."
+      ]
+    },
+    {
+      "from_state": "DESTROY_PENDING",
+      "to_state": "DESTROYED",
+      "allowed_phase_ref": "DESTROY_CLEANUP",
+      "notes": [
+        "Destroy completes only after isolated namespaces are removed and evidence is written."
+      ]
+    },
+    {
+      "from_state": "BOOTSTRAPPING",
+      "to_state": "FAILED",
+      "allowed_phase_ref": "CLEANLINESS_VERIFY",
+      "notes": [
+        "Bootstrap that reaches verification with drift or uncleared residue becomes failed instead of silently ready."
+      ]
+    },
+    {
+      "from_state": "RESETTING",
+      "to_state": "FAILED",
+      "allowed_phase_ref": "CLEANLINESS_VERIFY",
+      "notes": [
+        "Reset that finishes with residue or seed drift becomes failed."
+      ]
+    },
+    {
+      "from_state": "DESTROY_PENDING",
+      "to_state": "HALTED",
+      "allowed_phase_ref": "DESTROY_CLEANUP",
+      "notes": [
+        "Debug retention or partial cleanup can block destroy without losing state."
+      ]
+    }
+  ],
+  "haltable_phase_refs": [
+    "MIGRATION_BASIS",
+    "SEED_LOAD"
+  ]
+}

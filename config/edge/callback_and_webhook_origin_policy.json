@@ -1,0 +1,587 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "callback_and_webhook_origin_policy",
+  "selection_status": "PROVIDER_DEFAULT_APPLIED",
+  "selected_provider_family": "CLOUDFLARE_DNS_SSL_WAF_CACHE_RULES",
+  "callback_rows": [
+    {
+      "policy_ref": "sandbox.hmrc-oauth-redirect",
+      "label": "HMRC OAuth redirect callback",
+      "environment_ref": "env_shared_sandbox_integration",
+      "hostname": "auth.sandbox.taxat.example",
+      "path_glob": "/oauth/hmrc/callback",
+      "kind": "OAUTH_REDIRECT",
+      "allowed_upstream_senders": [
+        "HMRC sandbox authorization service via browser redirect",
+        "Human browser following the authorization redirect"
+      ],
+      "auth_posture": "STATE_NONCE_AND_PKCE_REQUIRED",
+      "replay_protection": "authorization_code_single_use_and_state_ledger",
+      "allowlist_ref_or_null": null,
+      "waf_policy_ref": "waf.callbacks",
+      "dns_origin_row_ref": "sandbox.auth-callback",
+      "notes": [
+        "Redirect callbacks are browser-assisted and do not use webhook-style source allowlists."
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "browser and API transport expectations",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::browser_api_transport_expectations",
+          "rationale": "Northbound API transport must preserve session safety, callback handling, uploads, and reconnect-safe routes."
+        },
+        {
+          "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+          "source_heading_or_logical_block": "cache identity envelope and exact-context reuse law",
+          "source_ref": "Algorithm/cache_isolation_and_secure_reuse_contract.md::cache_identity_envelope",
+          "rationale": "Delivery binding, preview binding, masking posture, and access context determine whether edge reuse is lawful."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "browser/API/network hardening",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::browser_api_network_hardening",
+          "rationale": "Strict transport posture, callback segregation, CSP/clickjacking, and fail-closed network defaults are required."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "reference runtime topology and promotion pipeline",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::runtime_topology_and_promotion",
+          "rationale": "The public edge must remain environment-scoped and must not widen runtime visibility or release truth."
+        },
+        {
+          "source_file": "data/analysis/environment_domain_dns_callback_matrix.json",
+          "source_heading_or_logical_block": "environment domain and callback host catalog",
+          "source_ref": "data/analysis/environment_domain_dns_callback_matrix.json::domain_rows",
+          "rationale": "Earlier environment work already froze the stable callback and browser hostname vocabulary."
+        },
+        {
+          "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+          "source_heading_or_logical_block": "callback_records",
+          "source_ref": "config/notifications/email_webhook_endpoint_contract.json::callback_records",
+          "rationale": "Email webhook ingress already has explicit callback hosts, auth posture, and replay-aware ledgers."
+        }
+      ]
+    },
+    {
+      "policy_ref": "sandbox.authority-callback-ingress",
+      "label": "Authority callback ingress",
+      "environment_ref": "env_shared_sandbox_integration",
+      "hostname": "authority-ingress.sandbox.taxat.example",
+      "path_glob": "/hmrc/inbox",
+      "kind": "AUTHORITY_CALLBACK",
+      "allowed_upstream_senders": [
+        "HMRC sandbox or a governed Taxat relay",
+        "Taxat replay or recovery injector by explicit approval"
+      ],
+      "auth_posture": "EDGE_SHARED_SECRET_OR_PROVIDER_SIGNATURE_REQUIRED_BEFORE_INBOX_ACCEPT",
+      "replay_protection": "provider_delivery_id_and_delivery_binding_hash_dedupe_ledger",
+      "allowlist_ref_or_null": "allowlist.hmrc-or-relay-egress",
+      "waf_policy_ref": "waf.callbacks",
+      "dns_origin_row_ref": "sandbox.authority-ingress",
+      "notes": [
+        "The corpus requires authenticated dedupe ingress even when provider callback mechanics still need live revalidation."
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "browser and API transport expectations",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::browser_api_transport_expectations",
+          "rationale": "Northbound API transport must preserve session safety, callback handling, uploads, and reconnect-safe routes."
+        },
+        {
+          "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+          "source_heading_or_logical_block": "cache identity envelope and exact-context reuse law",
+          "source_ref": "Algorithm/cache_isolation_and_secure_reuse_contract.md::cache_identity_envelope",
+          "rationale": "Delivery binding, preview binding, masking posture, and access context determine whether edge reuse is lawful."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "browser/API/network hardening",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::browser_api_network_hardening",
+          "rationale": "Strict transport posture, callback segregation, CSP/clickjacking, and fail-closed network defaults are required."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "reference runtime topology and promotion pipeline",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::runtime_topology_and_promotion",
+          "rationale": "The public edge must remain environment-scoped and must not widen runtime visibility or release truth."
+        },
+        {
+          "source_file": "data/analysis/environment_domain_dns_callback_matrix.json",
+          "source_heading_or_logical_block": "environment domain and callback host catalog",
+          "source_ref": "data/analysis/environment_domain_dns_callback_matrix.json::domain_rows",
+          "rationale": "Earlier environment work already froze the stable callback and browser hostname vocabulary."
+        },
+        {
+          "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+          "source_heading_or_logical_block": "callback_records",
+          "source_ref": "config/notifications/email_webhook_endpoint_contract.json::callback_records",
+          "rationale": "Email webhook ingress already has explicit callback hosts, auth posture, and replay-aware ledgers."
+        }
+      ]
+    },
+    {
+      "policy_ref": "sandbox.notification-webhooks",
+      "label": "Email delivery webhook ingress",
+      "environment_ref": "env_shared_sandbox_integration",
+      "hostname": "notification-ingress.sandbox.taxat.example",
+      "path_glob": "/webhooks/email/postmark/*",
+      "kind": "EMAIL_WEBHOOK",
+      "allowed_upstream_senders": [
+        "Postmark webhook delivery service"
+      ],
+      "auth_posture": "BASIC_AUTH_AND_SHARED_HEADER_SECRET_REQUIRED",
+      "replay_protection": "provider_message_id_and_event_id_dedupe_ledger",
+      "allowlist_ref_or_null": "allowlist.postmark-webhooks",
+      "waf_policy_ref": "waf.callbacks",
+      "dns_origin_row_ref": "sandbox.notification-webhooks",
+      "notes": [
+        "Postmark-compatible webhook auth comes from the existing callback contract and remains explicit here."
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "browser and API transport expectations",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::browser_api_transport_expectations",
+          "rationale": "Northbound API transport must preserve session safety, callback handling, uploads, and reconnect-safe routes."
+        },
+        {
+          "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+          "source_heading_or_logical_block": "cache identity envelope and exact-context reuse law",
+          "source_ref": "Algorithm/cache_isolation_and_secure_reuse_contract.md::cache_identity_envelope",
+          "rationale": "Delivery binding, preview binding, masking posture, and access context determine whether edge reuse is lawful."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "browser/API/network hardening",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::browser_api_network_hardening",
+          "rationale": "Strict transport posture, callback segregation, CSP/clickjacking, and fail-closed network defaults are required."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "reference runtime topology and promotion pipeline",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::runtime_topology_and_promotion",
+          "rationale": "The public edge must remain environment-scoped and must not widen runtime visibility or release truth."
+        },
+        {
+          "source_file": "data/analysis/environment_domain_dns_callback_matrix.json",
+          "source_heading_or_logical_block": "environment domain and callback host catalog",
+          "source_ref": "data/analysis/environment_domain_dns_callback_matrix.json::domain_rows",
+          "rationale": "Earlier environment work already froze the stable callback and browser hostname vocabulary."
+        },
+        {
+          "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+          "source_heading_or_logical_block": "callback_records",
+          "source_ref": "config/notifications/email_webhook_endpoint_contract.json::callback_records",
+          "rationale": "Email webhook ingress already has explicit callback hosts, auth posture, and replay-aware ledgers."
+        },
+        {
+          "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+          "source_heading_or_logical_block": "callback_records",
+          "source_ref": "config/notifications/email_webhook_endpoint_contract.json::callback_records",
+          "rationale": "The current webhook contract already states HTTPS, Basic Auth, shared header secret, and idempotency ledger posture."
+        }
+      ]
+    },
+    {
+      "policy_ref": "preprod.hmrc-oauth-redirect",
+      "label": "HMRC OAuth redirect callback",
+      "environment_ref": "env_preproduction_verification",
+      "hostname": "auth.preprod.taxat.example",
+      "path_glob": "/oauth/hmrc/callback",
+      "kind": "OAUTH_REDIRECT",
+      "allowed_upstream_senders": [
+        "HMRC sandbox authorization service via browser redirect",
+        "Human browser following the authorization redirect"
+      ],
+      "auth_posture": "STATE_NONCE_AND_PKCE_REQUIRED",
+      "replay_protection": "authorization_code_single_use_and_state_ledger",
+      "allowlist_ref_or_null": null,
+      "waf_policy_ref": "waf.callbacks",
+      "dns_origin_row_ref": "preprod.auth-callback",
+      "notes": [
+        "Redirect callbacks are browser-assisted and do not use webhook-style source allowlists."
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "browser and API transport expectations",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::browser_api_transport_expectations",
+          "rationale": "Northbound API transport must preserve session safety, callback handling, uploads, and reconnect-safe routes."
+        },
+        {
+          "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+          "source_heading_or_logical_block": "cache identity envelope and exact-context reuse law",
+          "source_ref": "Algorithm/cache_isolation_and_secure_reuse_contract.md::cache_identity_envelope",
+          "rationale": "Delivery binding, preview binding, masking posture, and access context determine whether edge reuse is lawful."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "browser/API/network hardening",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::browser_api_network_hardening",
+          "rationale": "Strict transport posture, callback segregation, CSP/clickjacking, and fail-closed network defaults are required."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "reference runtime topology and promotion pipeline",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::runtime_topology_and_promotion",
+          "rationale": "The public edge must remain environment-scoped and must not widen runtime visibility or release truth."
+        },
+        {
+          "source_file": "data/analysis/environment_domain_dns_callback_matrix.json",
+          "source_heading_or_logical_block": "environment domain and callback host catalog",
+          "source_ref": "data/analysis/environment_domain_dns_callback_matrix.json::domain_rows",
+          "rationale": "Earlier environment work already froze the stable callback and browser hostname vocabulary."
+        },
+        {
+          "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+          "source_heading_or_logical_block": "callback_records",
+          "source_ref": "config/notifications/email_webhook_endpoint_contract.json::callback_records",
+          "rationale": "Email webhook ingress already has explicit callback hosts, auth posture, and replay-aware ledgers."
+        }
+      ]
+    },
+    {
+      "policy_ref": "preprod.authority-callback-ingress",
+      "label": "Authority callback ingress",
+      "environment_ref": "env_preproduction_verification",
+      "hostname": "authority-ingress.preprod.taxat.example",
+      "path_glob": "/hmrc/inbox",
+      "kind": "AUTHORITY_CALLBACK",
+      "allowed_upstream_senders": [
+        "HMRC sandbox or a governed Taxat relay",
+        "Taxat replay or recovery injector by explicit approval"
+      ],
+      "auth_posture": "EDGE_SHARED_SECRET_OR_PROVIDER_SIGNATURE_REQUIRED_BEFORE_INBOX_ACCEPT",
+      "replay_protection": "provider_delivery_id_and_delivery_binding_hash_dedupe_ledger",
+      "allowlist_ref_or_null": "allowlist.hmrc-or-relay-egress",
+      "waf_policy_ref": "waf.callbacks",
+      "dns_origin_row_ref": "preprod.authority-ingress",
+      "notes": [
+        "The corpus requires authenticated dedupe ingress even when provider callback mechanics still need live revalidation."
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "browser and API transport expectations",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::browser_api_transport_expectations",
+          "rationale": "Northbound API transport must preserve session safety, callback handling, uploads, and reconnect-safe routes."
+        },
+        {
+          "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+          "source_heading_or_logical_block": "cache identity envelope and exact-context reuse law",
+          "source_ref": "Algorithm/cache_isolation_and_secure_reuse_contract.md::cache_identity_envelope",
+          "rationale": "Delivery binding, preview binding, masking posture, and access context determine whether edge reuse is lawful."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "browser/API/network hardening",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::browser_api_network_hardening",
+          "rationale": "Strict transport posture, callback segregation, CSP/clickjacking, and fail-closed network defaults are required."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "reference runtime topology and promotion pipeline",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::runtime_topology_and_promotion",
+          "rationale": "The public edge must remain environment-scoped and must not widen runtime visibility or release truth."
+        },
+        {
+          "source_file": "data/analysis/environment_domain_dns_callback_matrix.json",
+          "source_heading_or_logical_block": "environment domain and callback host catalog",
+          "source_ref": "data/analysis/environment_domain_dns_callback_matrix.json::domain_rows",
+          "rationale": "Earlier environment work already froze the stable callback and browser hostname vocabulary."
+        },
+        {
+          "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+          "source_heading_or_logical_block": "callback_records",
+          "source_ref": "config/notifications/email_webhook_endpoint_contract.json::callback_records",
+          "rationale": "Email webhook ingress already has explicit callback hosts, auth posture, and replay-aware ledgers."
+        }
+      ]
+    },
+    {
+      "policy_ref": "preprod.notification-webhooks",
+      "label": "Email delivery webhook ingress",
+      "environment_ref": "env_preproduction_verification",
+      "hostname": "notification-ingress.preprod.taxat.example",
+      "path_glob": "/webhooks/email/postmark/*",
+      "kind": "EMAIL_WEBHOOK",
+      "allowed_upstream_senders": [
+        "Postmark webhook delivery service"
+      ],
+      "auth_posture": "BASIC_AUTH_AND_SHARED_HEADER_SECRET_REQUIRED",
+      "replay_protection": "provider_message_id_and_event_id_dedupe_ledger",
+      "allowlist_ref_or_null": "allowlist.postmark-webhooks",
+      "waf_policy_ref": "waf.callbacks",
+      "dns_origin_row_ref": "preprod.notification-webhooks",
+      "notes": [
+        "Postmark-compatible webhook auth comes from the existing callback contract and remains explicit here."
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "browser and API transport expectations",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::browser_api_transport_expectations",
+          "rationale": "Northbound API transport must preserve session safety, callback handling, uploads, and reconnect-safe routes."
+        },
+        {
+          "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+          "source_heading_or_logical_block": "cache identity envelope and exact-context reuse law",
+          "source_ref": "Algorithm/cache_isolation_and_secure_reuse_contract.md::cache_identity_envelope",
+          "rationale": "Delivery binding, preview binding, masking posture, and access context determine whether edge reuse is lawful."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "browser/API/network hardening",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::browser_api_network_hardening",
+          "rationale": "Strict transport posture, callback segregation, CSP/clickjacking, and fail-closed network defaults are required."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "reference runtime topology and promotion pipeline",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::runtime_topology_and_promotion",
+          "rationale": "The public edge must remain environment-scoped and must not widen runtime visibility or release truth."
+        },
+        {
+          "source_file": "data/analysis/environment_domain_dns_callback_matrix.json",
+          "source_heading_or_logical_block": "environment domain and callback host catalog",
+          "source_ref": "data/analysis/environment_domain_dns_callback_matrix.json::domain_rows",
+          "rationale": "Earlier environment work already froze the stable callback and browser hostname vocabulary."
+        },
+        {
+          "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+          "source_heading_or_logical_block": "callback_records",
+          "source_ref": "config/notifications/email_webhook_endpoint_contract.json::callback_records",
+          "rationale": "Email webhook ingress already has explicit callback hosts, auth posture, and replay-aware ledgers."
+        },
+        {
+          "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+          "source_heading_or_logical_block": "callback_records",
+          "source_ref": "config/notifications/email_webhook_endpoint_contract.json::callback_records",
+          "rationale": "The current webhook contract already states HTTPS, Basic Auth, shared header secret, and idempotency ledger posture."
+        }
+      ]
+    },
+    {
+      "policy_ref": "production.hmrc-oauth-redirect",
+      "label": "HMRC OAuth redirect callback",
+      "environment_ref": "env_production",
+      "hostname": "auth.production.taxat.example",
+      "path_glob": "/oauth/hmrc/callback",
+      "kind": "OAUTH_REDIRECT",
+      "allowed_upstream_senders": [
+        "HMRC production authorization service via browser redirect",
+        "Human browser following the authorization redirect"
+      ],
+      "auth_posture": "STATE_NONCE_AND_PKCE_REQUIRED",
+      "replay_protection": "authorization_code_single_use_and_state_ledger",
+      "allowlist_ref_or_null": null,
+      "waf_policy_ref": "waf.callbacks",
+      "dns_origin_row_ref": "production.auth-callback",
+      "notes": [
+        "Redirect callbacks are browser-assisted and do not use webhook-style source allowlists."
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "browser and API transport expectations",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::browser_api_transport_expectations",
+          "rationale": "Northbound API transport must preserve session safety, callback handling, uploads, and reconnect-safe routes."
+        },
+        {
+          "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+          "source_heading_or_logical_block": "cache identity envelope and exact-context reuse law",
+          "source_ref": "Algorithm/cache_isolation_and_secure_reuse_contract.md::cache_identity_envelope",
+          "rationale": "Delivery binding, preview binding, masking posture, and access context determine whether edge reuse is lawful."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "browser/API/network hardening",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::browser_api_network_hardening",
+          "rationale": "Strict transport posture, callback segregation, CSP/clickjacking, and fail-closed network defaults are required."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "reference runtime topology and promotion pipeline",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::runtime_topology_and_promotion",
+          "rationale": "The public edge must remain environment-scoped and must not widen runtime visibility or release truth."
+        },
+        {
+          "source_file": "data/analysis/environment_domain_dns_callback_matrix.json",
+          "source_heading_or_logical_block": "environment domain and callback host catalog",
+          "source_ref": "data/analysis/environment_domain_dns_callback_matrix.json::domain_rows",
+          "rationale": "Earlier environment work already froze the stable callback and browser hostname vocabulary."
+        },
+        {
+          "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+          "source_heading_or_logical_block": "callback_records",
+          "source_ref": "config/notifications/email_webhook_endpoint_contract.json::callback_records",
+          "rationale": "Email webhook ingress already has explicit callback hosts, auth posture, and replay-aware ledgers."
+        }
+      ]
+    },
+    {
+      "policy_ref": "production.authority-callback-ingress",
+      "label": "Authority callback ingress",
+      "environment_ref": "env_production",
+      "hostname": "authority-ingress.production.taxat.example",
+      "path_glob": "/hmrc/inbox",
+      "kind": "AUTHORITY_CALLBACK",
+      "allowed_upstream_senders": [
+        "HMRC production or a governed Taxat relay",
+        "Taxat replay or recovery injector by explicit approval"
+      ],
+      "auth_posture": "EDGE_SHARED_SECRET_OR_PROVIDER_SIGNATURE_REQUIRED_BEFORE_INBOX_ACCEPT",
+      "replay_protection": "provider_delivery_id_and_delivery_binding_hash_dedupe_ledger",
+      "allowlist_ref_or_null": "allowlist.hmrc-or-relay-egress",
+      "waf_policy_ref": "waf.callbacks",
+      "dns_origin_row_ref": "production.authority-ingress",
+      "notes": [
+        "The corpus requires authenticated dedupe ingress even when provider callback mechanics still need live revalidation."
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "browser and API transport expectations",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::browser_api_transport_expectations",
+          "rationale": "Northbound API transport must preserve session safety, callback handling, uploads, and reconnect-safe routes."
+        },
+        {
+          "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+          "source_heading_or_logical_block": "cache identity envelope and exact-context reuse law",
+          "source_ref": "Algorithm/cache_isolation_and_secure_reuse_contract.md::cache_identity_envelope",
+          "rationale": "Delivery binding, preview binding, masking posture, and access context determine whether edge reuse is lawful."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "browser/API/network hardening",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::browser_api_network_hardening",
+          "rationale": "Strict transport posture, callback segregation, CSP/clickjacking, and fail-closed network defaults are required."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "reference runtime topology and promotion pipeline",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::runtime_topology_and_promotion",
+          "rationale": "The public edge must remain environment-scoped and must not widen runtime visibility or release truth."
+        },
+        {
+          "source_file": "data/analysis/environment_domain_dns_callback_matrix.json",
+          "source_heading_or_logical_block": "environment domain and callback host catalog",
+          "source_ref": "data/analysis/environment_domain_dns_callback_matrix.json::domain_rows",
+          "rationale": "Earlier environment work already froze the stable callback and browser hostname vocabulary."
+        },
+        {
+          "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+          "source_heading_or_logical_block": "callback_records",
+          "source_ref": "config/notifications/email_webhook_endpoint_contract.json::callback_records",
+          "rationale": "Email webhook ingress already has explicit callback hosts, auth posture, and replay-aware ledgers."
+        }
+      ]
+    },
+    {
+      "policy_ref": "production.notification-webhooks",
+      "label": "Email delivery webhook ingress",
+      "environment_ref": "env_production",
+      "hostname": "notification-ingress.production.taxat.example",
+      "path_glob": "/webhooks/email/postmark/*",
+      "kind": "EMAIL_WEBHOOK",
+      "allowed_upstream_senders": [
+        "Postmark webhook delivery service"
+      ],
+      "auth_posture": "BASIC_AUTH_AND_SHARED_HEADER_SECRET_REQUIRED",
+      "replay_protection": "provider_message_id_and_event_id_dedupe_ledger",
+      "allowlist_ref_or_null": "allowlist.postmark-webhooks",
+      "waf_policy_ref": "waf.callbacks",
+      "dns_origin_row_ref": "production.notification-webhooks",
+      "notes": [
+        "Postmark-compatible webhook auth comes from the existing callback contract and remains explicit here."
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/northbound_api_and_session_contract.md",
+          "source_heading_or_logical_block": "browser and API transport expectations",
+          "source_ref": "Algorithm/northbound_api_and_session_contract.md::browser_api_transport_expectations",
+          "rationale": "Northbound API transport must preserve session safety, callback handling, uploads, and reconnect-safe routes."
+        },
+        {
+          "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+          "source_heading_or_logical_block": "cache identity envelope and exact-context reuse law",
+          "source_ref": "Algorithm/cache_isolation_and_secure_reuse_contract.md::cache_identity_envelope",
+          "rationale": "Delivery binding, preview binding, masking posture, and access context determine whether edge reuse is lawful."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "browser/API/network hardening",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::browser_api_network_hardening",
+          "rationale": "Strict transport posture, callback segregation, CSP/clickjacking, and fail-closed network defaults are required."
+        },
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "reference runtime topology and promotion pipeline",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::runtime_topology_and_promotion",
+          "rationale": "The public edge must remain environment-scoped and must not widen runtime visibility or release truth."
+        },
+        {
+          "source_file": "data/analysis/environment_domain_dns_callback_matrix.json",
+          "source_heading_or_logical_block": "environment domain and callback host catalog",
+          "source_ref": "data/analysis/environment_domain_dns_callback_matrix.json::domain_rows",
+          "rationale": "Earlier environment work already froze the stable callback and browser hostname vocabulary."
+        },
+        {
+          "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+          "source_heading_or_logical_block": "callback_records",
+          "source_ref": "config/notifications/email_webhook_endpoint_contract.json::callback_records",
+          "rationale": "Email webhook ingress already has explicit callback hosts, auth posture, and replay-aware ledgers."
+        },
+        {
+          "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+          "source_heading_or_logical_block": "callback_records",
+          "source_ref": "config/notifications/email_webhook_endpoint_contract.json::callback_records",
+          "rationale": "The current webhook contract already states HTTPS, Basic Auth, shared header secret, and idempotency ledger posture."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Callback and webhook routes remain separate from browser-origin caching and challenge posture.",
+    "Replay protection is mandatory even when the upstream sender is allowlisted."
+  ],
+  "source_refs": [
+    {
+      "source_file": "Algorithm/northbound_api_and_session_contract.md",
+      "source_heading_or_logical_block": "browser and API transport expectations",
+      "source_ref": "Algorithm/northbound_api_and_session_contract.md::browser_api_transport_expectations",
+      "rationale": "Northbound API transport must preserve session safety, callback handling, uploads, and reconnect-safe routes."
+    },
+    {
+      "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+      "source_heading_or_logical_block": "cache identity envelope and exact-context reuse law",
+      "source_ref": "Algorithm/cache_isolation_and_secure_reuse_contract.md::cache_identity_envelope",
+      "rationale": "Delivery binding, preview binding, masking posture, and access context determine whether edge reuse is lawful."
+    },
+    {
+      "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+      "source_heading_or_logical_block": "browser/API/network hardening",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::browser_api_network_hardening",
+      "rationale": "Strict transport posture, callback segregation, CSP/clickjacking, and fail-closed network defaults are required."
+    },
+    {
+      "source_file": "Algorithm/deployment_and_resilience_contract.md",
+      "source_heading_or_logical_block": "reference runtime topology and promotion pipeline",
+      "source_ref": "Algorithm/deployment_and_resilience_contract.md::runtime_topology_and_promotion",
+      "rationale": "The public edge must remain environment-scoped and must not widen runtime visibility or release truth."
+    },
+    {
+      "source_file": "data/analysis/environment_domain_dns_callback_matrix.json",
+      "source_heading_or_logical_block": "environment domain and callback host catalog",
+      "source_ref": "data/analysis/environment_domain_dns_callback_matrix.json::domain_rows",
+      "rationale": "Earlier environment work already froze the stable callback and browser hostname vocabulary."
+    },
+    {
+      "source_file": "config/notifications/email_webhook_endpoint_contract.json",
+      "source_heading_or_logical_block": "callback_records",
+      "source_ref": "config/notifications/email_webhook_endpoint_contract.json::callback_records",
+      "rationale": "Email webhook ingress already has explicit callback hosts, auth posture, and replay-aware ledgers."
+    }
+  ]
+}

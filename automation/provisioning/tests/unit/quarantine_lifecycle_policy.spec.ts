@@ -15,13 +15,7 @@ import {
   type QuarantineStorageBinding,
 } from "../../src/providers/malware/flows/create_managed_scanning_service_or_record_self_host_decision.js";
 
-const repoRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "..",
-  "..",
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
 
 async function readJson<T>(segments: string[]): Promise<T> {
   const filePath = path.join(repoRoot, ...segments);
@@ -45,15 +39,9 @@ test("checked-in quarantine lifecycle and release artifacts match the builders",
     "quarantine_storage_binding.template.json",
   ]);
 
-  expect(persistedLifecycle).toEqual(
-    createRecommendedQuarantineLifecyclePolicy(),
-  );
-  expect(persistedRelease).toEqual(
-    createRecommendedQuarantineReleasePolicy(),
-  );
-  expect(persistedBinding).toEqual(
-    createRecommendedQuarantineStorageBinding(),
-  );
+  expect(persistedLifecycle).toEqual(createRecommendedQuarantineLifecyclePolicy());
+  expect(persistedRelease).toEqual(createRecommendedQuarantineReleasePolicy());
+  expect(persistedBinding).toEqual(createRecommendedQuarantineStorageBinding());
 });
 
 test("quarantine lifecycle keeps pending, rejected, and quarantined artifacts unavailable and audit-preserving", () => {
@@ -72,14 +60,8 @@ test("quarantine lifecycle keeps pending, rejected, and quarantined artifacts un
       expect(row.history_preserved).toBe(true);
     });
 
-  expect(
-    releasePolicy.release_rows.every((row) => row.history_preserved),
-  ).toBe(true);
-  expect(
-    releasePolicy.release_rows.some((row) => row.resulting_scan_state === "CLEAN"),
-  ).toBe(true);
+  expect(releasePolicy.release_rows.every((row) => row.history_preserved)).toBe(true);
+  expect(releasePolicy.release_rows.some((row) => row.resulting_scan_state === "CLEAN")).toBe(true);
   expect(storageBinding.isolation_strategy).toContain("QUARANTINE_STORAGE_IS_SEPARATE");
-  expect(storageBinding.preview_download_posture).toContain(
-    "NON_PREVIEWABLE_AND_NON_DOWNLOADABLE",
-  );
+  expect(storageBinding.preview_download_posture).toContain("NON_PREVIEWABLE_AND_NON_DOWNLOADABLE");
 });

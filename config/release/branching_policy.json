@@ -1,0 +1,201 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "branching_policy",
+  "policy_version": "RELEASE_BRANCHING_POLICY_V1",
+  "default_branch_refs": {
+    "integration_branch_ref": "dev",
+    "baseline_branch_ref": "main"
+  },
+  "branch_family_rows": [
+    {
+      "branch_family_ref": "MAINLINE",
+      "label": "Mainline",
+      "summary": "Mainline is split between shared integration on `dev` and the admissible baseline on `main` so the repo can stay two-branch by default while still distinguishing release posture.",
+      "promotion_posture": "BASELINE_BRANCH_IS_ADMISSIBLE_ONLY_AFTER_GATES",
+      "rollback_posture": "ROLLBACK_ALLOWED_ONLY_WHILE_COMPATIBILITY_GATE_REMAINS_OPEN",
+      "source_refs": [
+        {
+          "source_ref": "deployment_and_resilience_contract.md#promotion-pipeline",
+          "rationale": "Promotion copies exact tested digests forward and must not improvise release truth from mutable branches."
+        },
+        {
+          "source_ref": "release_candidate_identity_and_promotion_evidence_contract.md#governing-candidate-identity-model",
+          "rationale": "Candidate identity must remain the durable release anchor even when human-friendly labels or branch names differ."
+        }
+      ]
+    },
+    {
+      "branch_family_ref": "RELEASE_PREPARATION",
+      "label": "Release Preparation",
+      "summary": "Release preparation branches stabilize one planned version train, rehearse canaries, and preserve rollback-safe posture while they still track the same reader-window law as the baseline.",
+      "promotion_posture": "PREPRODUCTION_AND_PRODUCTION_REQUIRE_ADMISSIBLE_RELEASE_BRANCH_OR_MAINLINE_BASELINE",
+      "rollback_posture": "ROLLBACK_ALLOWED_ONLY_WHILE_READER_WINDOW_REMAINS_OPEN",
+      "source_refs": [
+        {
+          "source_ref": "deployment_and_resilience_contract.md#schema-and-datastore-migration-rules",
+          "rationale": "Release preparation exists to preserve expand -> migrate/backfill -> verify -> contract chronology before destructive promotion."
+        }
+      ]
+    },
+    {
+      "branch_family_ref": "HOTFIX",
+      "label": "Hotfix",
+      "summary": "Hotfix branches patch a pinned or currently admissible baseline and may enter emergency promotion only with explicit override lineage.",
+      "promotion_posture": "HOTFIX_REQUIRES_BASELINE_LINEAGE_AND_TYPED_EMERGENCY_OR_STANDARD_PATH",
+      "rollback_posture": "PIN_BASELINE_OR_FAIL_FORWARD_COMPENSATION_MUST_REMAIN_VISIBLE",
+      "source_refs": [
+        {
+          "source_ref": "deployment_and_resilience_contract.md#rollout-rollback-and-fail-forward-posture",
+          "rationale": "Emergency changes must still preserve typed rollback versus fail-forward posture."
+        }
+      ]
+    },
+    {
+      "branch_family_ref": "EXPERIMENTAL",
+      "label": "Experimental",
+      "summary": "Experimental work can build preview candidates but never becomes production evidence directly.",
+      "promotion_posture": "PREVIEW_ONLY",
+      "rollback_posture": "NO_PRODUCTION_ROLLBACK_RIGHTS",
+      "source_refs": [
+        {
+          "source_ref": "verification_and_release_gates.md#blocking-gates",
+          "rationale": "Non-admissible exploratory work must not inherit production release semantics through branch naming alone."
+        }
+      ]
+    }
+  ],
+  "branch_pattern_rows": [
+    {
+      "pattern_ref": "mainline.integration",
+      "regex": "^dev$",
+      "branch_family_ref": "MAINLINE",
+      "branch_role_ref": "INTEGRATION",
+      "label": "Integration mainline",
+      "allowed_release_channel_refs": [
+        "PREVIEW",
+        "SANDBOX"
+      ],
+      "allowed_rollout_strategy_refs": [
+        "STANDARD_CANARY"
+      ],
+      "source_branch_expectation": "PRIMARY_SHARED_INTEGRATION",
+      "production_admissibility": "NEVER_DIRECT",
+      "notes": [
+        "This keeps the day-to-day shared branch separate from the protected admissible baseline.",
+        "Direct production promotion from `dev` is forbidden."
+      ]
+    },
+    {
+      "pattern_ref": "mainline.baseline",
+      "regex": "^main$",
+      "branch_family_ref": "MAINLINE",
+      "branch_role_ref": "BASELINE",
+      "label": "Protected baseline",
+      "allowed_release_channel_refs": [
+        "SANDBOX",
+        "PREPRODUCTION",
+        "PRODUCTION"
+      ],
+      "allowed_rollout_strategy_refs": [
+        "STANDARD_CANARY",
+        "EMERGENCY_PROMOTE",
+        "PIN_BASELINE",
+        "FAIL_FORWARD_COMPENSATING"
+      ],
+      "source_branch_expectation": "PROTECTED_ADMISSIBLE_BASELINE",
+      "production_admissibility": "DIRECT_AFTER_VERIFICATION_MANIFEST_APPROVAL",
+      "notes": [
+        "The baseline branch is where admitted candidates are anchored after review.",
+        "Pinned-baseline re-promotions are expressed from the baseline family, not by special tags alone."
+      ]
+    },
+    {
+      "pattern_ref": "release.preparation",
+      "regex": "^release\\/v?(?<core_version>\\d+\\.\\d+\\.\\d+)(?:--(?<track>[a-z0-9._-]+))?$",
+      "branch_family_ref": "RELEASE_PREPARATION",
+      "branch_role_ref": "STABILIZATION",
+      "label": "Versioned release preparation branch",
+      "allowed_release_channel_refs": [
+        "SANDBOX",
+        "PREPRODUCTION",
+        "PRODUCTION"
+      ],
+      "allowed_rollout_strategy_refs": [
+        "STANDARD_CANARY",
+        "PIN_BASELINE",
+        "FAIL_FORWARD_COMPENSATING"
+      ],
+      "source_branch_expectation": "CUT_FROM_DEV_OR_MAIN_WITH_RECORDED_REASON",
+      "production_admissibility": "REQUIRES_MANIFEST_ADMISSION_AND_COMPATIBILITY_GATE",
+      "notes": [
+        "Release preparation branches are expected when a version train needs stabilization without freezing all integration work on `dev`."
+      ]
+    },
+    {
+      "pattern_ref": "hotfix.patch",
+      "regex": "^hotfix\\/v?(?<core_version>\\d+\\.\\d+\\.\\d+)(?:--(?<ticket>[a-z0-9._-]+))?$",
+      "branch_family_ref": "HOTFIX",
+      "branch_role_ref": "PATCH",
+      "label": "Versioned hotfix branch",
+      "allowed_release_channel_refs": [
+        "PREPRODUCTION",
+        "PRODUCTION"
+      ],
+      "allowed_rollout_strategy_refs": [
+        "STANDARD_CANARY",
+        "EMERGENCY_PROMOTE",
+        "PIN_BASELINE",
+        "FAIL_FORWARD_COMPENSATING"
+      ],
+      "source_branch_expectation": "CUT_FROM_MAIN_OR_PINNED_BASELINE_WITH_RELEASE_ID_LINEAGE",
+      "production_admissibility": "ALLOWED_WITH_BASELINE_LINEAGE_AND_APPROVAL",
+      "notes": [
+        "Hotfix branches must carry baseline lineage so emergency promotion cannot hide which release train is being patched."
+      ]
+    },
+    {
+      "pattern_ref": "experimental.preview",
+      "regex": "^(?:exp|experiment)\\/(?<topic>[a-z0-9._-]+)$",
+      "branch_family_ref": "EXPERIMENTAL",
+      "branch_role_ref": "EXPERIMENT",
+      "label": "Experimental branch",
+      "allowed_release_channel_refs": [
+        "PREVIEW"
+      ],
+      "allowed_rollout_strategy_refs": [
+        "STANDARD_CANARY"
+      ],
+      "source_branch_expectation": "SHORT_LIVED_TOPIC_BRANCH",
+      "production_admissibility": "NEVER_DIRECT",
+      "notes": [
+        "Experimental work may publish preview artifacts but must merge back through governed branches before admissible release."
+      ]
+    }
+  ],
+  "branch_role_notes": [
+    {
+      "branch_role_ref": "INTEGRATION",
+      "summary": "Shared branch for routine integration and preview rehearsal."
+    },
+    {
+      "branch_role_ref": "BASELINE",
+      "summary": "Protected branch for current admissible baseline and pinned-baseline re-promotions."
+    },
+    {
+      "branch_role_ref": "STABILIZATION",
+      "summary": "Version-specific hardening branch for release rehearsals."
+    },
+    {
+      "branch_role_ref": "PATCH",
+      "summary": "Patch branch cut from a known baseline or pinned release."
+    },
+    {
+      "branch_role_ref": "EXPERIMENT",
+      "summary": "Non-admissible exploratory branch."
+    }
+  ],
+  "notes": [
+    "The repo can remain two-branch by default (`main` and `dev`) while still allowing explicit release or hotfix branches when the release train needs isolation.",
+    "Branch names are never the source of release truth; they only govern admissibility and version-lane derivation."
+  ]
+}

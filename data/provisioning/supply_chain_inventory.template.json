@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "inventory_id": "supply_chain_inventory",
+  "provider_id": "release-supply-chain",
+  "flow_id": "provision-registry-signing-and-artifact-attestation-services",
+  "policy_version": "1.0",
+  "run_id": "run-fixture-supply-chain-001",
+  "workspace_id": "wk-provisioning-01",
+  "operator_identity_alias": "ops.release.supplychain",
+  "selection_status": "PROVIDER_SELECTION_REQUIRED",
+  "selected_provider_stack_id_or_null": null,
+  "recommended_provider_stack_id": "GITHUB_ACTIONS_GHCR_SIGSTORE_KEYLESS_GITHUB_ATTESTATIONS",
+  "provider_stack_options": [
+    {
+      "stack_id": "GITHUB_ACTIONS_GHCR_SIGSTORE_KEYLESS_GITHUB_ATTESTATIONS",
+      "provider_label": "GitHub Actions OIDC + GHCR + Sigstore keyless + GitHub artifact attestations",
+      "selection_state": "RECOMMENDED_PORTABLE_DEFAULT_PENDING_APPROVAL",
+      "registry_summary": "OCI images, web bundles, native packages, and evidence bundles land in GHCR namespaces that treat tags as discovery only and digests as durable identity.",
+      "signing_summary": "Cosign keyless signing binds GitHub OIDC workload identity to every promotable artifact and evidence bundle.",
+      "attestation_summary": "GitHub artifact attestations and cosign-compatible OCI evidence storage carry provenance and SBOM references.",
+      "notarization_summary": "macOS artifacts use Apple Developer ID signing and notarization outside general CI secret storage.",
+      "docs_urls": [
+        "https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/about-security-hardening-with-openid-connect",
+        "https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry",
+        "https://docs.sigstore.dev/cosign/signing/overview/",
+        "https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations",
+        "https://developer.apple.com/developer-id/",
+        "https://cyclonedx.org/specification/overview/"
+      ],
+      "fit_notes": [
+        "Matches current repo GitHub posture and keeps long-lived signing secrets out of repo variables.",
+        "Provides the cleanest portable default while provider selection remains an explicit governance decision."
+      ],
+      "source_refs": [
+        {
+          "source_ref": "security_and_runtime_hardening_contract.md#release-integrity",
+          "rationale": "Release integrity requires digest, signature, provenance, and runtime verification instead of mutable CI dashboards."
+        },
+        {
+          "source_ref": "deployment_and_resilience_contract.md#promotion-pipeline",
+          "rationale": "Promotion copies exact tested digests forward and never redefines truth by mutable tag movement."
+        },
+        {
+          "source_ref": "verification_and_release_gates.md#supply-chain-evidence",
+          "rationale": "Release candidates require signature verification, provenance, SBOM, vulnerability posture, and notarization where applicable."
+        },
+        {
+          "source_ref": "release_candidate_identity_and_promotion_evidence_contract.md#candidate-tuple",
+          "rationale": "Mixed-candidate evidence must be rejected and candidate identity remains hash-based."
+        }
+      ]
+    },
+    {
+      "stack_id": "CLOUD_MANAGED_OCI_REGISTRY_WITH_KMS_SIGNER",
+      "provider_label": "Cloud-managed OCI registry + cloud KMS signer",
+      "selection_state": "PROVIDER_DECISION_REQUIRED",
+      "registry_summary": "Managed regional OCI registry with per-environment repositories and digest-copy promotion.",
+      "signing_summary": "Cloud KMS or HSM-backed signing keys issue signatures from workload identity without exporting private key material.",
+      "attestation_summary": "In-toto provenance and CycloneDX bundles publish into append-only evidence namespaces.",
+      "notarization_summary": "macOS notarization still depends on Apple Developer ID credentials and a dedicated notarization path.",
+      "docs_urls": [
+        "https://docs.sigstore.dev/cosign/system_config/registry_support/",
+        "https://developer.apple.com/developer-id/"
+      ],
+      "fit_notes": [
+        "Valid when procurement requires cloud-native registry and KMS ownership outside GitHub Packages."
+      ],
+      "source_refs": [
+        {
+          "source_ref": "security_and_runtime_hardening_contract.md#release-integrity",
+          "rationale": "Release integrity requires digest, signature, provenance, and runtime verification instead of mutable CI dashboards."
+        },
+        {
+          "source_ref": "deployment_and_resilience_contract.md#promotion-pipeline",
+          "rationale": "Promotion copies exact tested digests forward and never redefines truth by mutable tag movement."
+        },
+        {
+          "source_ref": "verification_and_release_gates.md#supply-chain-evidence",
+          "rationale": "Release candidates require signature verification, provenance, SBOM, vulnerability posture, and notarization where applicable."
+        },
+        {
+          "source_ref": "release_candidate_identity_and_promotion_evidence_contract.md#candidate-tuple",
+          "rationale": "Mixed-candidate evidence must be rejected and candidate identity remains hash-based."
+        }
+      ]
+    },
+    {
+      "stack_id": "SELF_HOSTED_OCI_SIGSTORE_STACK",
+      "provider_label": "Self-hosted OCI registry + self-hosted Sigstore stack",
+      "selection_state": "SELF_HOST_DECISION_REQUIRED",
+      "registry_summary": "Dedicated OCI registry and append-only transparency stack operated inside Taxat-controlled infrastructure.",
+      "signing_summary": "Private Fulcio/Rekor deployment or equivalent workload-identity signer with internally governed trust roots.",
+      "attestation_summary": "Evidence bundles remain first-party, but operational burden and transparency guarantees must be accepted explicitly.",
+      "notarization_summary": "Native macOS release still requires Apple Developer ID and notarization service interaction.",
+      "docs_urls": [
+        "https://docs.sigstore.dev/cosign/signing/overview/",
+        "https://docs.sigstore.dev/cosign/system_config/registry_support/"
+      ],
+      "fit_notes": [
+        "Only acceptable if platform ownership wants full supply-chain hosting responsibility and audit overhead."
+      ],
+      "source_refs": [
+        {
+          "source_ref": "security_and_runtime_hardening_contract.md#release-integrity",
+          "rationale": "Release integrity requires digest, signature, provenance, and runtime verification instead of mutable CI dashboards."
+        },
+        {
+          "source_ref": "deployment_and_resilience_contract.md#promotion-pipeline",
+          "rationale": "Promotion copies exact tested digests forward and never redefines truth by mutable tag movement."
+        },
+        {
+          "source_ref": "verification_and_release_gates.md#supply-chain-evidence",
+          "rationale": "Release candidates require signature verification, provenance, SBOM, vulnerability posture, and notarization where applicable."
+        },
+        {
+          "source_ref": "release_candidate_identity_and_promotion_evidence_contract.md#candidate-tuple",
+          "rationale": "Mixed-candidate evidence must be rejected and candidate identity remains hash-based."
+        }
+      ]
+    }
+  ],
+  "adopted_namespace_refs": [
+    "registry.preview.server",
+    "registry.sandbox.server",
+    "registry.preproduction.server",
+    "registry.production.server",
+    "registry.preview.web",
+    "registry.sandbox.web",
+    "registry.preproduction.web",
+    "registry.production.web",
+    "registry.preview.native",
+    "registry.sandbox.native",
+    "registry.preproduction.native",
+    "registry.production.native",
+    "registry.evidence.sbom",
+    "registry.evidence.provenance",
+    "registry.evidence.release-admission"
+  ],
+  "trust_root_refs": [
+    "trust_root.sigstore.fulcio.github-oidc",
+    "trust_root.github.artifact-attestations",
+    "trust_root.apple.developer-id",
+    "trust_root.cloud.kms.signing"
+  ],
+  "build_target_refs": [
+    "target.operator-web-app",
+    "target.client-portal-web-app",
+    "target.northbound-api-session-gateway",
+    "target.manifest-orchestrator",
+    "target.stage-workers",
+    "target.read-projector-stream-broker",
+    "target.desktop-release-channel",
+    "target.native-macos-operator-client"
+  ],
+  "typed_gaps": [
+    "PROVIDER_SELECTION_REQUIRED_FOR_LIVE_REGISTRY_AND_SIGNING_RESOURCE_ADOPTION"
+  ],
+  "notes": [
+    "Inventory is sanitized and contains topology refs only.",
+    "Live provider mutation remains blocked until provider selection is explicitly approved."
+  ],
+  "last_verified_at": "2026-04-22T12:00:00Z"
+}

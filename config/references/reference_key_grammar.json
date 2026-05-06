@@ -1,0 +1,284 @@
+{
+  "$schema": "./reference_key_grammar.schema.json",
+  "contract_version": "1.0",
+  "grammar_id": "reference_key_grammar",
+  "grammar_badge": "REFERENCE GRAMMAR V1",
+  "basis_statement": "Identity, location, delivery, route continuity, and storage backing remain separate contract families; no later package may collapse them into one undifferentiated string vocabulary.",
+  "source_lineage": [
+    {
+      "source_file": "Algorithm/data_model.md",
+      "source_heading_or_logical_block": "Identifier and ref-bearing field families",
+      "rationale": "The data model publishes widespread `*_id`, `*_ref`, `*_hash`, `storage_ref`, and target-ref vocabulary that must stay coherent."
+    },
+    {
+      "source_file": "Algorithm/canonical_source_and_evidence_taxonomy.md",
+      "source_heading_or_logical_block": "SourceRecord and EvidenceItem refs",
+      "rationale": "Evidence lineage already distinguishes raw payload and content refs from human-readable labels."
+    },
+    {
+      "source_file": "Algorithm/provenance_graph_semantics.md",
+      "source_heading_or_logical_block": "target_ref, root_ref, and path traversal semantics",
+      "rationale": "Provenance traversal requires durable reference families that are not confused with delivery or route state."
+    },
+    {
+      "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+      "source_heading_or_logical_block": "Current-vs-history artifact selection and delivery-binding safety",
+      "rationale": "Preview, download, and print defaults must reflect the current artifact without leaking raw storage paths."
+    },
+    {
+      "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+      "source_heading_or_logical_block": "Route identity and delivery binding in cache envelopes",
+      "rationale": "Cache partitions and route identity must stay distinct from durable artifact truth."
+    },
+    {
+      "source_file": "Algorithm/upload_session_request_binding_and_rebase_contract.md",
+      "source_heading_or_logical_block": "Upload session continuity",
+      "rationale": "A resumable upload can keep the same `storage_ref` while request-version truth changes, which requires a separate storage namespace family."
+    }
+  ],
+  "family_rows": [
+    {
+      "family_ref": "IDENTITY",
+      "rail_label": "ID",
+      "display_name": "identity key",
+      "primary_string_kind": "ID",
+      "semantic_role": "Stable workflow or business identity used for joins, receipts, and replay anchors.",
+      "durability_posture": "DURABLE",
+      "exposure_posture": "CROSS_BOUNDARY_SAFE",
+      "exact_fields": [],
+      "suffix_rules": ["_id"],
+      "lawful_examples": ["manifest_id", "tenant_id", "upload_session_id"],
+      "allowed_producers": [
+        "control-store aggregates",
+        "northbound receipts",
+        "schema-generated bindings"
+      ],
+      "allowed_consumers": [
+        "join edges",
+        "route parameter resolution",
+        "idempotent mutation boundaries"
+      ],
+      "forbidden_substitutions": [
+        "REFERENCE",
+        "TARGET_REF",
+        "STORAGE_REF",
+        "DELIVERY_BINDING",
+        "ROUTE_TOKEN"
+      ],
+      "notes": [
+        "An ID may be rendered in URLs or logs only if the surrounding contract already allows it.",
+        "IDs do not imply object location, delivery affordance, or previewability."
+      ]
+    },
+    {
+      "family_ref": "REFERENCE",
+      "rail_label": "REF",
+      "display_name": "durable artifact ref",
+      "primary_string_kind": "REF",
+      "semantic_role": "Durable lineage, object, or content pointer resolved through control truth and provenance law.",
+      "durability_posture": "DURABLE",
+      "exposure_posture": "CONTRACT_SCOPED",
+      "exact_fields": [
+        "artifact_ref",
+        "build_artifact_ref",
+        "raw_payload_ref",
+        "content_ref",
+        "root_ref",
+        "current_artifact_ref",
+        "historical_artifact_refs"
+      ],
+      "suffix_rules": ["_ref"],
+      "lawful_examples": ["artifact_ref", "raw_payload_ref", "current_artifact_ref_or_null"],
+      "allowed_producers": [
+        "artifact projection services",
+        "provenance graph builders",
+        "authority payload importers"
+      ],
+      "allowed_consumers": [
+        "lineage views",
+        "control-store lookups",
+        "derivative publication workflows"
+      ],
+      "forbidden_substitutions": [
+        "IDENTITY",
+        "TARGET_REF",
+        "STORAGE_REF",
+        "DELIVERY_BINDING",
+        "ROUTE_TOKEN"
+      ],
+      "notes": [
+        "Generic `*_ref` remains lawful only when no more specific family applies.",
+        "A durable ref can survive copy-on-publish while downstream target refs change."
+      ]
+    },
+    {
+      "family_ref": "HASH",
+      "rail_label": "HASH",
+      "display_name": "integrity hash",
+      "primary_string_kind": "HASH",
+      "semantic_role": "Canonical integrity, cache, or security-binding digest computed over stable input.",
+      "durability_posture": "DURABLE_WITH_CONTEXT",
+      "exposure_posture": "CONTRACT_SCOPED",
+      "exact_fields": ["delivery_binding_hash"],
+      "suffix_rules": ["_hash"],
+      "lawful_examples": ["content_hash", "request_binding_hash", "delivery_binding_hash"],
+      "allowed_producers": [
+        "canonical hash helpers",
+        "delivery binding calculators",
+        "cache partition assemblers"
+      ],
+      "allowed_consumers": ["replay guards", "cache keys", "delivery reuse checks"],
+      "forbidden_substitutions": [
+        "IDENTITY",
+        "REFERENCE",
+        "TARGET_REF",
+        "STORAGE_REF",
+        "ROUTE_TOKEN"
+      ],
+      "notes": [
+        "Hashes prove canonical context; they do not identify the business object on their own.",
+        "Hash input must remain deterministic and side-effect free."
+      ]
+    },
+    {
+      "family_ref": "TARGET_REF",
+      "rail_label": "TARGET",
+      "display_name": "experience target ref",
+      "primary_string_kind": "REF",
+      "semantic_role": "Durable preview, print, governance, or current-download target selection for a specific experience surface.",
+      "durability_posture": "DURABLE",
+      "exposure_posture": "CUSTOMER_VISIBLE",
+      "exact_fields": [
+        "target_ref",
+        "preview_target_ref",
+        "print_target_ref",
+        "governance_target_ref",
+        "default_preview_target_ref",
+        "default_download_target_ref",
+        "default_print_target_ref"
+      ],
+      "suffix_rules": ["_target_ref"],
+      "lawful_examples": [
+        "target_ref",
+        "preview_target_ref",
+        "default_download_target_ref_or_null"
+      ],
+      "allowed_producers": [
+        "artifact selection projections",
+        "externalization governance services",
+        "customer-safe derivative publishers"
+      ],
+      "allowed_consumers": ["preview surfaces", "print/export routing", "governance review views"],
+      "forbidden_substitutions": [
+        "IDENTITY",
+        "REFERENCE",
+        "STORAGE_REF",
+        "DELIVERY_BINDING",
+        "ROUTE_TOKEN"
+      ],
+      "notes": [
+        "A target ref tells the product which lawful derivative to show; it never smuggles credentials.",
+        "Current defaults come from explicit target families and never from a storage handle."
+      ]
+    },
+    {
+      "family_ref": "STORAGE_REF",
+      "rail_label": "STORAGE",
+      "display_name": "storage ref",
+      "primary_string_kind": "REF",
+      "semantic_role": "Opaque internal object-storage backing handle aligned to bucket purpose and upload continuity law.",
+      "durability_posture": "INTERNAL_ONLY_DURABLE",
+      "exposure_posture": "INTERNAL_ONLY",
+      "exact_fields": ["storage_ref"],
+      "suffix_rules": ["_storage_ref"],
+      "lawful_examples": ["storage_ref", "retained_evidence_storage_ref", "quarantine_storage_ref"],
+      "allowed_producers": [
+        "upload intake services",
+        "object-store copy-on-publish workflows",
+        "retention and quarantine hooks"
+      ],
+      "allowed_consumers": [
+        "malware scanning",
+        "retention lifecycle jobs",
+        "proof-bundle assembly"
+      ],
+      "forbidden_substitutions": [
+        "IDENTITY",
+        "REFERENCE",
+        "TARGET_REF",
+        "DELIVERY_BINDING",
+        "ROUTE_TOKEN"
+      ],
+      "notes": [
+        "Storage refs survive resume and reconnect, including request-version drift, without becoming customer-facing truth.",
+        "A storage ref must not expose bucket names, provider credentials, or signed URL parameters."
+      ]
+    },
+    {
+      "family_ref": "DELIVERY_BINDING",
+      "rail_label": "DELIVERY",
+      "display_name": "delivery affordance",
+      "primary_string_kind": "REF_WITH_CONTEXT_HASH",
+      "semantic_role": "Customer or external handoff handle bound to invocation-time route, access, masking, and target context.",
+      "durability_posture": "INVOCATION_ONLY",
+      "exposure_posture": "SECURITY_CONTEXT_BOUND",
+      "exact_fields": ["download_ref", "delivery_binding_hash"],
+      "suffix_rules": ["_download_ref"],
+      "lawful_examples": [
+        "download_ref",
+        "delivery_binding_hash",
+        "current artifact download handle plus binding hash"
+      ],
+      "allowed_producers": [
+        "gateway delivery services",
+        "preview/export issuance endpoints",
+        "edge cache binding calculators"
+      ],
+      "allowed_consumers": [
+        "download and preview handlers",
+        "stale-tab and reuse guards",
+        "edge and browser cache partitions"
+      ],
+      "forbidden_substitutions": [
+        "IDENTITY",
+        "REFERENCE",
+        "TARGET_REF",
+        "STORAGE_REF",
+        "ROUTE_TOKEN"
+      ],
+      "notes": [
+        "Delivery uses both an opaque ref and a context hash; neither piece authorizes broad reuse alone.",
+        "Signed URLs, bearer tokens, and raw storage paths are explicitly forbidden content."
+      ]
+    },
+    {
+      "family_ref": "ROUTE_TOKEN",
+      "rail_label": "ROUTE",
+      "display_name": "route token",
+      "primary_string_kind": "ROUTE_TOKEN",
+      "semantic_role": "Shell continuity or scene token used for restoration, cache partitioning, and lawful same-object return.",
+      "durability_posture": "SESSION_SCOPED",
+      "exposure_posture": "CONTRACT_SCOPED",
+      "exact_fields": ["route_identity_ref"],
+      "suffix_rules": ["_route_token"],
+      "lawful_examples": ["route_identity_ref", "internal_route_token", "preview_route_token"],
+      "allowed_producers": [
+        "browser shell routing",
+        "native scene restoration",
+        "cache resume binding"
+      ],
+      "allowed_consumers": ["focus restoration", "resume tokens", "delivery binding context"],
+      "forbidden_substitutions": [
+        "IDENTITY",
+        "REFERENCE",
+        "TARGET_REF",
+        "STORAGE_REF",
+        "DELIVERY_BINDING"
+      ],
+      "notes": [
+        "Route tokens may describe patterns or scene keys but may not be full URLs.",
+        "Route state is a continuity aid, not durable artifact identity."
+      ]
+    }
+  ]
+}

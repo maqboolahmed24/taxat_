@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "registry_retention_and_promotion_policy",
+  "retention_classes": [
+    {
+      "retention_class_ref": "PREVIEW_SHORT_LIVED",
+      "label": "Preview short-lived",
+      "retention_window": "14 days",
+      "durable_identity_posture": "Digest still identifies the artifact, but preview artifacts are disposable and never production truth.",
+      "rollback_reference_posture": "No production rollback eligibility."
+    },
+    {
+      "retention_class_ref": "VERIFICATION_WINDOW",
+      "label": "Verification window",
+      "retention_window": "45 days",
+      "durable_identity_posture": "Retained long enough for integration replay, audit, and drift analysis.",
+      "rollback_reference_posture": "Rollback allowed only inside non-production lanes."
+    },
+    {
+      "retention_class_ref": "RELEASE_LONG_TAIL",
+      "label": "Release long tail",
+      "retention_window": "365 days",
+      "durable_identity_posture": "Promotable packages and release rollback digests remain addressable for a full release horizon.",
+      "rollback_reference_posture": "Rollback points always reference prior admitted digests, never floating tags."
+    },
+    {
+      "retention_class_ref": "EVIDENCE_APPEND_ONLY",
+      "label": "Evidence append-only",
+      "retention_window": "2555 days",
+      "durable_identity_posture": "SBOM, provenance, and release-admission records are append-only audit material.",
+      "rollback_reference_posture": "Evidence is never overwritten or garbage-collected on a normal release cadence."
+    }
+  ],
+  "promotion_lanes": [
+    {
+      "lane_ref": "lane.preview-to-sandbox",
+      "source_environment_ref": "env_preview",
+      "destination_environment_ref": "env_sandbox",
+      "promotion_mode": "NOT_ALLOWED",
+      "alias_behavior": "NO_TAG_ALIAS_FOR_THIS_LANE",
+      "notes": [
+        "Preview lanes cannot directly promote artifacts."
+      ]
+    },
+    {
+      "lane_ref": "lane.sandbox-to-preproduction",
+      "source_environment_ref": "env_sandbox",
+      "destination_environment_ref": "env_preproduction",
+      "promotion_mode": "COPY_BY_DIGEST_ONLY",
+      "alias_behavior": "TAGS_ARE_DISCOVERY_POINTERS_ONLY",
+      "notes": [
+        "Digest copy is allowed once verification evidence is complete."
+      ]
+    },
+    {
+      "lane_ref": "lane.preproduction-to-production",
+      "source_environment_ref": "env_preproduction",
+      "destination_environment_ref": "env_production",
+      "promotion_mode": "COPY_BY_DIGEST_ONLY",
+      "alias_behavior": "TAGS_ARE_DISCOVERY_POINTERS_ONLY",
+      "notes": [
+        "Production promotion binds to the exact preproduction-tested digest and candidate tuple."
+      ]
+    }
+  ],
+  "truth_statement": "Registry promotion moves digests, not mutable tags; evidence namespaces remain append-only and independently addressable.",
+  "notes": [
+    "Retagging never changes durable identity.",
+    "Rollback references remain previously admitted digests plus the release-admission manifest that named them."
+  ],
+  "source_refs": [
+    {
+      "source_ref": "security_and_runtime_hardening_contract.md#release-integrity",
+      "rationale": "Release integrity requires digest, signature, provenance, and runtime verification instead of mutable CI dashboards."
+    },
+    {
+      "source_ref": "deployment_and_resilience_contract.md#promotion-pipeline",
+      "rationale": "Promotion copies exact tested digests forward and never redefines truth by mutable tag movement."
+    },
+    {
+      "source_ref": "verification_and_release_gates.md#supply-chain-evidence",
+      "rationale": "Release candidates require signature verification, provenance, SBOM, vulnerability posture, and notarization where applicable."
+    },
+    {
+      "source_ref": "release_candidate_identity_and_promotion_evidence_contract.md#candidate-tuple",
+      "rationale": "Mixed-candidate evidence must be rejected and candidate identity remains hash-based."
+    }
+  ]
+}

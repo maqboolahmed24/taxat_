@@ -28,11 +28,11 @@ export const portalCheckpointAtlasRoute = {
     accentPlum: "#6B5877",
     success: "#16624B",
     warning: "#8A5C18",
-    danger: "#A63B32"
+    danger: "#A63B32",
   },
   notes: [
     "The main diagram is the stacked pause-and-resume timeline itself.",
     "Evidence refs, redaction posture, and resume preconditions stay visible together so later adapters do not guess checkpoint law from memory.",
-    "Reduced motion swaps translation for opacity and outline emphasis without changing information order."
-  ]
+    "Reduced motion swaps translation for opacity and outline emphasis without changing information order.",
+  ],
 } as const;

@@ -1,0 +1,139 @@
+{
+  "contract_version": "STREAM_EVENT_TYPE_CATALOG_V1",
+  "catalog_id": "stream-event-type-catalog",
+  "basis_statement": "Typed stream events carry refs and recovery lineage only. Heartbeats stay transport-only and never become pseudo business mutations.",
+  "event_type_rows": [
+    {
+      "stream_scope_class": "MANIFEST_EXPERIENCE",
+      "event_type": "experience.snapshot",
+      "display_name": "Experience snapshot",
+      "rail_label": "SNAPSHOT",
+      "payload_ref_field_or_null": "snapshot_ref",
+      "event_transport_mode": "SSE_EVENT",
+      "phase_ref": "SNAPSHOT",
+      "sequence_semantics": "SNAPSHOT_BASELINE",
+      "duplicate_identity_basis": "IDEMPOTENT_BY_SCOPE_EPOCH_SEQUENCE",
+      "notes": ["Carries one snapshot ref and establishes replay baseline."]
+    },
+    {
+      "stream_scope_class": "MANIFEST_EXPERIENCE",
+      "event_type": "experience.delta",
+      "display_name": "Experience delta",
+      "rail_label": "DELTA",
+      "payload_ref_field_or_null": "delta_ref",
+      "event_transport_mode": "SSE_EVENT",
+      "phase_ref": "CATCH_UP",
+      "sequence_semantics": "ADVANCES_SEQUENCE",
+      "duplicate_identity_basis": "IDEMPOTENT_BY_SCOPE_EPOCH_SEQUENCE",
+      "notes": ["Gap-free replay and live updates share the same sequence law."]
+    },
+    {
+      "stream_scope_class": "MANIFEST_EXPERIENCE",
+      "event_type": "terminal.bundle",
+      "display_name": "Terminal bundle",
+      "rail_label": "TERMINAL",
+      "payload_ref_field_or_null": "terminal_bundle_ref",
+      "event_transport_mode": "SSE_EVENT",
+      "phase_ref": "LIVE",
+      "sequence_semantics": "ADVANCES_SEQUENCE",
+      "duplicate_identity_basis": "IDEMPOTENT_BY_SCOPE_EPOCH_SEQUENCE",
+      "notes": ["Terminal bundles stay sequence-bearing and never bypass recovery law."]
+    },
+    {
+      "stream_scope_class": "MANIFEST_EXPERIENCE",
+      "event_type": "heartbeat",
+      "display_name": "Heartbeat",
+      "rail_label": "HEARTBEAT",
+      "payload_ref_field_or_null": null,
+      "event_transport_mode": "SSE_COMMENT",
+      "phase_ref": "HEARTBEAT",
+      "sequence_semantics": "NO_SEQUENCE_ADVANCE",
+      "duplicate_identity_basis": "IDEMPOTENT_BY_SCOPE_EPOCH_SEQUENCE",
+      "notes": ["Liveness only; transport comment rather than business event."]
+    },
+    {
+      "stream_scope_class": "WORKSPACE",
+      "event_type": "workspace.snapshot",
+      "display_name": "Workspace snapshot",
+      "rail_label": "SNAPSHOT",
+      "payload_ref_field_or_null": "snapshot_ref",
+      "event_transport_mode": "SSE_EVENT",
+      "phase_ref": "SNAPSHOT",
+      "sequence_semantics": "SNAPSHOT_BASELINE",
+      "duplicate_identity_basis": "IDEMPOTENT_BY_SCOPE_EPOCH_SEQUENCE",
+      "notes": ["Workspace snapshots freeze visibility and masking posture before replay."]
+    },
+    {
+      "stream_scope_class": "WORKSPACE",
+      "event_type": "workspace.delta",
+      "display_name": "Workspace delta",
+      "rail_label": "DELTA",
+      "payload_ref_field_or_null": "delta_ref",
+      "event_transport_mode": "SSE_EVENT",
+      "phase_ref": "CATCH_UP",
+      "sequence_semantics": "ADVANCES_SEQUENCE",
+      "duplicate_identity_basis": "IDEMPOTENT_BY_SCOPE_EPOCH_SEQUENCE",
+      "notes": ["Workspace deltas obey the same monotonic epoch law as experience deltas."]
+    },
+    {
+      "stream_scope_class": "WORKSPACE",
+      "event_type": "activity.appended",
+      "display_name": "Activity appended",
+      "rail_label": "ACTIVITY",
+      "payload_ref_field_or_null": "activity_ref",
+      "event_transport_mode": "SSE_EVENT",
+      "phase_ref": "CATCH_UP",
+      "sequence_semantics": "ADVANCES_SEQUENCE",
+      "duplicate_identity_basis": "IDEMPOTENT_BY_SCOPE_EPOCH_SEQUENCE",
+      "notes": ["Append-only activity remains sequence-bearing and replay-safe."]
+    },
+    {
+      "stream_scope_class": "WORKSPACE",
+      "event_type": "audit.appended",
+      "display_name": "Audit appended",
+      "rail_label": "AUDIT",
+      "payload_ref_field_or_null": "audit_ref",
+      "event_transport_mode": "SSE_EVENT",
+      "phase_ref": "LIVE",
+      "sequence_semantics": "ADVANCES_SEQUENCE",
+      "duplicate_identity_basis": "IDEMPOTENT_BY_SCOPE_EPOCH_SEQUENCE",
+      "notes": ["Audit append notifications stay visibility-safe and replayable."]
+    },
+    {
+      "stream_scope_class": "WORKSPACE",
+      "event_type": "notification.badge",
+      "display_name": "Notification badge",
+      "rail_label": "BADGE",
+      "payload_ref_field_or_null": "notification_ref",
+      "event_transport_mode": "SSE_EVENT",
+      "phase_ref": "LIVE",
+      "sequence_semantics": "ADVANCES_SEQUENCE",
+      "duplicate_identity_basis": "IDEMPOTENT_BY_SCOPE_EPOCH_SEQUENCE",
+      "notes": ["Badge changes stay subordinate to the same recovery tuple as other workspace deltas."]
+    },
+    {
+      "stream_scope_class": "WORKSPACE",
+      "event_type": "heartbeat",
+      "display_name": "Heartbeat",
+      "rail_label": "HEARTBEAT",
+      "payload_ref_field_or_null": null,
+      "event_transport_mode": "SSE_COMMENT",
+      "phase_ref": "HEARTBEAT",
+      "sequence_semantics": "NO_SEQUENCE_ADVANCE",
+      "duplicate_identity_basis": "IDEMPOTENT_BY_SCOPE_EPOCH_SEQUENCE",
+      "notes": ["Workspace heartbeats never substitute for visibility-bearing events."]
+    }
+  ],
+  "source_lineage": [
+    {
+      "rationale": "Makes the typed experience and workspace SSE families reusable instead of relying on endpoint-local switch statements.",
+      "source_file": "Algorithm/schemas/experience_stream_event.schema.json",
+      "source_heading_or_logical_block": "event_type and payload ref rules"
+    },
+    {
+      "rationale": "Captures the workspace event family and explicit heartbeat posture.",
+      "source_file": "Algorithm/schemas/workspace_stream_event.schema.json",
+      "source_heading_or_logical_block": "event_type and payload ref rules"
+    }
+  ]
+}

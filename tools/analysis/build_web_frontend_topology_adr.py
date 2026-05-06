@@ -26,13 +26,9 @@ SEMANTIC_SELECTOR_PATH = ALGORITHM_DIR / "semantic_selector_and_accessibility_co
 SEMANTIC_REGRESSION_PATH = (
     ALGORITHM_DIR / "semantic_selector_and_accessibility_regression_pack_contract.md"
 )
-SHELL_CONTINUITY_PATH = (
-    ALGORITHM_DIR / "shell_continuity_fuzzing_and_recovery_contract.md"
-)
+SHELL_CONTINUITY_PATH = ALGORITHM_DIR / "shell_continuity_fuzzing_and_recovery_contract.md"
 CROSS_DEVICE_PATH = ALGORITHM_DIR / "cross_device_continuity_and_restoration_contract.md"
-FOCUS_RESTORE_PATH = (
-    ALGORITHM_DIR / "focus_restoration_and_return_target_harness_contract.md"
-)
+FOCUS_RESTORE_PATH = ALGORITHM_DIR / "focus_restoration_and_return_target_harness_contract.md"
 UIUX_SKILL_PATH = ALGORITHM_DIR / "UIUX_DESIGN_SKILL.md"
 NORTHBOUND_PATH = ALGORITHM_DIR / "northbound_api_and_session_contract.md"
 
@@ -41,26 +37,18 @@ INTERACTION_LAYER_MAP_PATH = DATA_ANALYSIS_DIR / "interaction_layer_foundation_m
 SEMANTIC_SELECTOR_REGISTRY_PATH = DATA_ANALYSIS_DIR / "semantic_selector_registry.json"
 CONTINUITY_RECOVERY_MATRIX_PATH = DATA_ANALYSIS_DIR / "continuity_recovery_matrix.json"
 LAYOUT_BREAKPOINT_CONTRACT_PATH = DATA_ANALYSIS_DIR / "layout_breakpoint_contract.json"
-ROUTE_FOCUS_REGISTRY_PATH = (
-    DATA_ANALYSIS_DIR / "route_landmark_and_focus_order_registry.json"
-)
+ROUTE_FOCUS_REGISTRY_PATH = DATA_ANALYSIS_DIR / "route_landmark_and_focus_order_registry.json"
 SURFACE_ROUTE_MATRIX_PATH = DATA_ANALYSIS_DIR / "surface_route_and_capability_matrix.json"
 READ_MODEL_ROUTE_MAP_PATH = DATA_ANALYSIS_DIR / "read_model_to_route_and_shell_map.json"
 GAP_REGISTER_PATH = DATA_ANALYSIS_DIR / "cross_surface_gap_register.json"
 
 ADR_PATH = DOCS_ARCH_ADR_DIR / "ADR-006-web-frontend-topology.md"
-COMPARISON_PATH = (
-    DOCS_ARCH_ADR_DIR / "ADR-006-web-frontend-topology-comparison.md"
-)
-SCORECARD_PATH = (
-    DOCS_ARCH_ADR_DIR / "ADR-006-web-frontend-topology-scorecard.json"
-)
+COMPARISON_PATH = DOCS_ARCH_ADR_DIR / "ADR-006-web-frontend-topology-comparison.md"
+SCORECARD_PATH = DOCS_ARCH_ADR_DIR / "ADR-006-web-frontend-topology-scorecard.json"
 SURFACE_TOPOLOGY_PATH = DATA_ANALYSIS_DIR / "web_surface_topology_and_deployable_map.json"
 ROUTE_GROUP_PATH = DATA_ANALYSIS_DIR / "web_route_group_and_shell_ownership_map.json"
 STATE_DOMAIN_PATH = DATA_ANALYSIS_DIR / "web_state_domain_and_data_boundary_map.json"
-TOKEN_BINDING_PATH = (
-    DATA_ANALYSIS_DIR / "web_design_token_and_interaction_layer_binding.json"
-)
+TOKEN_BINDING_PATH = DATA_ANALYSIS_DIR / "web_design_token_and_interaction_layer_binding.json"
 PLAYWRIGHT_STRATEGY_PATH = DATA_ANALYSIS_DIR / "web_playwright_strategy.json"
 MERMAID_PATH = DIAGRAMS_ANALYSIS_DIR / "ADR-006-web-frontend-topology.mmd"
 ATLAS_DATA_PATH = PROTOTYPE_DIR / "atlas_data.json"
@@ -139,9 +127,7 @@ def md_escape(value: Any) -> str:
 def markdown_table(headers: list[str], rows: list[list[Any]]) -> str:
     header_line = "| " + " | ".join(headers) + " |"
     divider_line = "| " + " | ".join("---" for _ in headers) + " |"
-    body_lines = [
-        "| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows
-    ]
+    body_lines = ["| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows]
     return "\n".join([header_line, divider_line, *body_lines])
 
 
@@ -154,9 +140,7 @@ def normalize_source_refs(source_refs: Iterable[Any]) -> list[str]:
         if isinstance(ref, dict):
             source_file = ref.get("source_file", "unknown")
             logical_block = (
-                ref.get("source_heading_or_logical_block")
-                or ref.get("source_heading")
-                or "source"
+                ref.get("source_heading_or_logical_block") or ref.get("source_heading") or "source"
             )
             rationale = ref.get("rationale")
             text = f"{source_file}::{logical_block}"
@@ -322,7 +306,11 @@ def build_surface_topology_and_deployable_map() -> dict[str, Any]:
                 "SUPPORT_OPERATOR",
             ],
             "shell_families": ["CALM_SHELL", "GOVERNANCE_DENSITY_SHELL"],
-            "route_group_ids": ["manifest_workspace", "operator_collaboration", "governance_console"],
+            "route_group_ids": [
+                "manifest_workspace",
+                "operator_collaboration",
+                "governance_console",
+            ],
             "session_posture": "Internal authenticated browser surface with receipt-aware mutations, step-up checkpoints, and authority/help handoff returns.",
             "bundle_policy": "Keep calm-shell and governance code in one internal deployable with route-level code splitting so internal session and selector grammar stay unified without exposing portal bundles.",
             "why_separate": "The internal surface shares operator identity posture and can reuse internal shell runtime without shipping customer-safe copy or portal bundles.",
@@ -398,9 +386,7 @@ def build_surface_topology_and_deployable_map() -> dict[str, Any]:
     }
 
 
-def build_route_group_and_shell_ownership_map(
-    surface_topology: dict[str, Any]
-) -> dict[str, Any]:
+def build_route_group_and_shell_ownership_map(surface_topology: dict[str, Any]) -> dict[str, Any]:
     group_specs = {
         "manifest_workspace": {
             "label": "Manifest workspace",
@@ -447,9 +433,7 @@ def build_route_group_and_shell_ownership_map(
     group_rows = []
     for group_id, spec in group_specs.items():
         routes = [
-            row
-            for row in surface_topology["browser_routes"]
-            if row["route_group_id"] == group_id
+            row for row in surface_topology["browser_routes"] if row["route_group_id"] == group_id
         ]
         group_rows.append(
             {
@@ -616,7 +600,11 @@ def build_state_domain_and_data_boundary_map() -> dict[str, Any]:
                 "drawer open state",
                 "temporary highlight pulse",
             ],
-            "purge_or_invalidation_triggers": ["route remount", "full refresh", "reduced-motion preference change"],
+            "purge_or_invalidation_triggers": [
+                "route remount",
+                "full refresh",
+                "reduced-motion preference change",
+            ],
             "forbidden_misuse": "Do not encode business truth, customer-safe visibility, or settlement semantics here.",
             "source_refs": [
                 heading_ref(FRONTEND_SHELL_PATH, "3. Layout topology and support-region promotion"),
@@ -664,7 +652,9 @@ def build_state_domain_and_data_boundary_map() -> dict[str, Any]:
             "source_refs": [
                 heading_ref(PORTAL_PATH, "FE-25 Cache Isolation"),
                 heading_ref(NORTHBOUND_PATH, "FE-25 Cache Isolation"),
-                heading_ref(FRONTEND_SHELL_PATH, "7. Artifact preview, export, print, and browser handoff"),
+                heading_ref(
+                    FRONTEND_SHELL_PATH, "7. Artifact preview, export, print, and browser handoff"
+                ),
             ],
         },
     ]
@@ -686,7 +676,9 @@ def build_design_token_and_interaction_layer_binding() -> dict[str, Any]:
     selector_counts = {
         row["profile_id"]: len(row["selector_entries"]) for row in selectors["profiles"]
     }
-    breakpoint_lookup = {row["shell_family"]: row["breakpoints"] for row in breakpoints["shell_breakpoints"]}
+    breakpoint_lookup = {
+        row["shell_family"]: row["breakpoints"] for row in breakpoints["shell_breakpoints"]
+    }
     shell_rows = []
     for row in interaction_map["shell_foundations"]:
         shell_family = row["shell_family"]
@@ -747,7 +739,9 @@ def build_design_token_and_interaction_layer_binding() -> dict[str, Any]:
                 + [
                     heading_ref(UIUX_SKILL_PATH, "Design philosophy"),
                     heading_ref(UIUX_SKILL_PATH, "Core design language"),
-                    heading_ref(UIUX_SKILL_PATH, "Playwright-first / XCUITest-first design expectation"),
+                    heading_ref(
+                        UIUX_SKILL_PATH, "Playwright-first / XCUITest-first design expectation"
+                    ),
                     f"{repo_rel(ADR_PATH)}::selected_browser_visual_system[ADR-006 selected browser visual system]",
                 ],
             }
@@ -900,7 +894,9 @@ def build_criteria() -> list[dict[str, Any]]:
             "priority": "HARD_REQUIREMENT",
             "rationale": "Browser handoff, step-up, and session posture must map cleanly to the chosen deployable split.",
             "source_refs": [
-                heading_ref(FRONTEND_SHELL_PATH, "7. Artifact preview, export, print, and browser handoff"),
+                heading_ref(
+                    FRONTEND_SHELL_PATH, "7. Artifact preview, export, print, and browser handoff"
+                ),
                 heading_ref(NORTHBOUND_PATH, "8. Session, browser, and native-client rules"),
             ],
         },
@@ -945,8 +941,12 @@ def build_criteria() -> list[dict[str, Any]]:
             "priority": "HARD_REQUIREMENT",
             "rationale": "The topology should encourage semantic locators, deterministic shells, and stable browser automation contracts.",
             "source_refs": [
-                heading_ref(FRONTEND_SHELL_PATH, "10. Automation anchors and UI observability fencing"),
-                heading_ref(UIUX_SKILL_PATH, "Playwright-first / XCUITest-first design expectation"),
+                heading_ref(
+                    FRONTEND_SHELL_PATH, "10. Automation anchors and UI observability fencing"
+                ),
+                heading_ref(
+                    UIUX_SKILL_PATH, "Playwright-first / XCUITest-first design expectation"
+                ),
             ],
         },
         {
@@ -1301,7 +1301,9 @@ def build_atlas_data(
                         "id": "workitem",
                         "label": "Work item workspace",
                         "routeKey": "collaboration_staff_workspace",
-                        "routePattern": browser_routes["collaboration_staff_workspace"]["route_pattern"],
+                        "routePattern": browser_routes["collaboration_staff_workspace"][
+                            "route_pattern"
+                        ],
                         "objectAnchor": "work-item:REQ-184",
                         "dominantQuestion": "What workflow issue attached to this object requires intervention now?",
                         "primaryAction": "Request customer info",
@@ -1328,19 +1330,31 @@ def build_atlas_data(
                         "dominantQuestion": "What is the one next safe task for this client right now?",
                         "primaryAction": "Upload request documents",
                         "supportTitle": "Recent activity",
-                        "landmarks": ["PORTAL_HEADER", "STATUS_HERO", "TASK_QUEUE", "RECENT_ACTIVITY"],
+                        "landmarks": [
+                            "PORTAL_HEADER",
+                            "STATUS_HERO",
+                            "TASK_QUEUE",
+                            "RECENT_ACTIVITY",
+                        ],
                         "statusTone": "Customer-safe summary with explicit reassurance and limitation copy.",
                     },
                     {
                         "id": "request-detail",
                         "label": "Request detail",
                         "routeKey": "collaboration_customer_request_detail",
-                        "routePattern": browser_routes["collaboration_customer_request_detail"]["route_pattern"],
+                        "routePattern": browser_routes["collaboration_customer_request_detail"][
+                            "route_pattern"
+                        ],
                         "objectAnchor": "request:REQ-184",
                         "dominantQuestion": "What does the client need to complete this request safely?",
                         "primaryAction": "Provide requested file",
                         "supportTitle": "History and help",
-                        "landmarks": ["PORTAL_HEADER", "REQUEST_STATUS", "PRIMARY_TASK", "SUPPORT_PANEL"],
+                        "landmarks": [
+                            "PORTAL_HEADER",
+                            "REQUEST_STATUS",
+                            "PRIMARY_TASK",
+                            "SUPPORT_PANEL",
+                        ],
                         "statusTone": "Same portal shell, contextual return, no leakage of staff-only semantics.",
                     },
                 ],
@@ -1362,7 +1376,12 @@ def build_atlas_data(
                         "dominantQuestion": "Which governance slice requires review or staged mutation next?",
                         "primaryAction": "Review pending policy diffs",
                         "supportTitle": "Audit sidecar",
-                        "landmarks": ["SECTION_NAV", "WORKSPACE_CANVAS", "ATTENTION_SUMMARY", "AUXILIARY_SIDECAR"],
+                        "landmarks": [
+                            "SECTION_NAV",
+                            "WORKSPACE_CANVAS",
+                            "ATTENTION_SUMMARY",
+                            "AUXILIARY_SIDECAR",
+                        ],
                         "statusTone": "Dense control-plane workspace with one promoted sidecar and route-stable filters.",
                     },
                     {
@@ -1374,7 +1393,12 @@ def build_atlas_data(
                         "dominantQuestion": "What evidence explains this configuration or authority change?",
                         "primaryAction": "Open evidence trace",
                         "supportTitle": "Timeline sidecar",
-                        "landmarks": ["SECTION_NAV", "WORKSPACE_CANVAS", "FILTER_BAR", "AUXILIARY_SIDECAR"],
+                        "landmarks": [
+                            "SECTION_NAV",
+                            "WORKSPACE_CANVAS",
+                            "FILTER_BAR",
+                            "AUXILIARY_SIDECAR",
+                        ],
                         "statusTone": "The same shell remains mounted while the selected object and sidecar context change.",
                     },
                 ],
@@ -1387,7 +1411,12 @@ def build_atlas_data(
                     "label": "Stale rebase without object loss",
                     "ariaLive": "assertive",
                     "message": "The route keeps the same shell and object anchor, explains the changed basis, and offers rebase instead of remounting elsewhere.",
-                    "preserved": ["shell family", "object anchor", "dominant question", "return path"],
+                    "preserved": [
+                        "shell family",
+                        "object anchor",
+                        "dominant question",
+                        "return path",
+                    ],
                 },
                 {
                     "id": "deep_link_entry_and_restore",
@@ -1458,8 +1487,7 @@ def build_adr_markdown(
         for row in scorecard["criteria"]
     ]
     ranking_rows = [
-        [row["rank"], row["label"], row["weighted_total"]]
-        for row in scorecard["alternatives"]
+        [row["rank"], row["label"], row["weighted_total"]] for row in scorecard["alternatives"]
     ]
     deferred_rows = surface_topology["typed_gaps"]
     return f"""# ADR-006: Web Frontend Topology
@@ -1579,9 +1607,7 @@ Negative consequences and tradeoffs:
 """
 
 
-def build_comparison_markdown(
-    scorecard: dict[str, Any], surface_topology: dict[str, Any]
-) -> str:
+def build_comparison_markdown(scorecard: dict[str, Any], surface_topology: dict[str, Any]) -> str:
     ranking_rows = [
         [row["rank"], row["label"], row["weighted_total"], row["strengths"][:2]]
         for row in scorecard["alternatives"]
@@ -1603,9 +1629,7 @@ def build_comparison_markdown(
         "",
         "## Criteria and Weights",
         "",
-        markdown_table(
-            ["Criterion", "Priority", "Weight", "Source Grounding"], criteria_rows
-        ),
+        markdown_table(["Criterion", "Priority", "Weight", "Source Grounding"], criteria_rows),
         "",
         "## Coverage Summary",
         "",

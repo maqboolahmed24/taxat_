@@ -49,7 +49,9 @@ def main() -> int:
         fail("formula_registry.json drifted from the canonical builder output.")
 
     actual_dependencies = load_csv(builder.DEPENDENCY_CSV_PATH)
-    expected_dependencies = [{key: str(value) for key, value in row.items()} for row in outputs["dependencies"]]
+    expected_dependencies = [
+        {key: str(value) for key, value in row.items()} for row in outputs["dependencies"]
+    ]
     if actual_dependencies != expected_dependencies:
         fail("formula_dependencies.csv drifted from the canonical builder output.")
 
@@ -75,11 +77,17 @@ def main() -> int:
 
     expected_docs = outputs["docs"]
     if builder.FORMULA_DOC_PATH.read_text() != expected_docs[0] + "\n":
-        fail("11_compute_parity_risk_and_trust_formula_requirements.md drifted from the canonical builder render.")
+        fail(
+            "11_compute_parity_risk_and_trust_formula_requirements.md drifted from the canonical builder render."
+        )
     if builder.DEPENDENCY_DOC_PATH.read_text() != expected_docs[1] + "\n":
-        fail("11_formula_dependency_and_execution_basis.md drifted from the canonical builder render.")
+        fail(
+            "11_formula_dependency_and_execution_basis.md drifted from the canonical builder render."
+        )
     if builder.THRESHOLD_DOC_PATH.read_text() != expected_docs[2] + "\n":
-        fail("11_threshold_edge_case_and_sensitivity_matrix.md drifted from the canonical builder render.")
+        fail(
+            "11_threshold_edge_case_and_sensitivity_matrix.md drifted from the canonical builder render."
+        )
     if builder.MERMAID_PATH.read_text() != outputs["mermaid"]:
         fail("11_formula_dependency_graph.mmd drifted from the canonical builder render.")
 
@@ -129,11 +137,17 @@ def main() -> int:
         fail("Green trust threshold must remain exactly 85.")
     if Decimal(str(threshold_groups["trust_score_bands"]["values"]["amber_gte"])) != Decimal("65"):
         fail("Amber trust threshold must remain exactly 65.")
-    if Decimal(str(threshold_groups["trust_guard_bands"]["values"]["green_guard_band"])) != Decimal("2"):
+    if Decimal(str(threshold_groups["trust_guard_bands"]["values"]["green_guard_band"])) != Decimal(
+        "2"
+    ):
         fail("green_guard_band must remain exactly 2.")
-    if Decimal(str(threshold_groups["trust_guard_bands"]["values"]["completeness_guard_band"])) != Decimal("3"):
+    if Decimal(
+        str(threshold_groups["trust_guard_bands"]["values"]["completeness_guard_band"])
+    ) != Decimal("3"):
         fail("completeness_guard_band must remain exactly 3.")
-    if Decimal(str(threshold_groups["upload_confidence_thresholds"]["values"]["submit_attach_minimum"])) != Decimal("70"):
+    if Decimal(
+        str(threshold_groups["upload_confidence_thresholds"]["values"]["submit_attach_minimum"])
+    ) != Decimal("70"):
         fail("Upload confidence submit/attach minimum must remain exactly 70.")
 
     cap_rules = threshold_groups["trust_cap_band_rules"]["values"]
@@ -156,7 +170,13 @@ def main() -> int:
         fail("Money contract must require canonical decimal string serialization.")
     if money_contract["serialization_contract"]["required_trailing_zeros"] is not True:
         fail("Money contract must require trailing zeros.")
-    required_money_fields = {"currency_code", "scale", "rounding_mode", "aggregation_boundary", "serialization_profile"}
+    required_money_fields = {
+        "currency_code",
+        "scale",
+        "rounding_mode",
+        "aggregation_boundary",
+        "serialization_profile",
+    }
     if set(money_contract["money_profile_fields"]) != required_money_fields:
         fail("Money contract fields drifted from the required money profile boundary.")
     hard_rules = set(money_contract["hard_rules"])
@@ -174,9 +194,7 @@ def main() -> int:
     reason_map_rows = actual_reason_map["family_rows"]
     indexed_reason_codes = {row["reason_code"] for row in actual_reason_map["reason_code_index"]}
     emitted_reason_codes = {
-        reason_code
-        for record in records
-        for reason_code in record["reason_code_emissions"]
+        reason_code for record in records for reason_code in record["reason_code_emissions"]
     }
     if indexed_reason_codes != emitted_reason_codes:
         fail("Reason-code index does not match emitted reason codes from formula records.")
@@ -192,11 +210,15 @@ def main() -> int:
 
     existing_vector_ids = [row["vector_id"] for row in actual_test_plan["existing_vectors"]]
     if existing_vector_ids != builder.REQUIRED_EXISTING_VECTOR_IDS:
-        fail(f"Existing test-vector coverage drifted. Expected {builder.REQUIRED_EXISTING_VECTOR_IDS}, got {existing_vector_ids}")
+        fail(
+            f"Existing test-vector coverage drifted. Expected {builder.REQUIRED_EXISTING_VECTOR_IDS}, got {existing_vector_ids}"
+        )
     if actual_test_plan["summary"]["trust_probe_order"] != builder.TRUST_PROBE_ORDER:
         fail("Test-vector plan drifted from the canonical trust probe order.")
 
-    dependency_pairs = {(row["source_formula_id"], row["target_formula_id"]) for row in outputs["dependencies"]}
+    dependency_pairs = {
+        (row["source_formula_id"], row["target_formula_id"]) for row in outputs["dependencies"]
+    }
     required_dependency_pairs = {
         ("data_quality_and_completeness", "trust_scoring_bands_and_readiness"),
         ("risk_scoring", "trust_scoring_bands_and_readiness"),
@@ -208,7 +230,9 @@ def main() -> int:
     }
     missing_pairs = required_dependency_pairs - dependency_pairs
     if missing_pairs:
-        fail(f"Dependency graph is missing required parity/trust/gating edges: {sorted(missing_pairs)}")
+        fail(
+            f"Dependency graph is missing required parity/trust/gating edges: {sorted(missing_pairs)}"
+        )
 
     if not any("TRUST_GATE" in record["downstream_gate_consumers"] for record in records):
         fail("No formula record feeds TRUST_GATE.")

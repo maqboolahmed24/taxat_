@@ -59,19 +59,27 @@ def main() -> int:
 
     outputs = builder.build_outputs()
 
-    compare_json(builder.ARTIFACT_MATRIX_PATH, outputs["artifact_matrix"], "artifact_retention_matrix.json")
+    compare_json(
+        builder.ARTIFACT_MATRIX_PATH, outputs["artifact_matrix"], "artifact_retention_matrix.json"
+    )
     compare_json(
         builder.PRIVACY_THRESHOLD_PATH,
         outputs["privacy_thresholds"],
         "privacy_projection_and_survivability_thresholds.json",
     )
-    compare_json(builder.THREAT_CONTROL_PATH, outputs["threat_control_map"], "threat_class_to_control_map.json")
+    compare_json(
+        builder.THREAT_CONTROL_PATH,
+        outputs["threat_control_map"],
+        "threat_class_to_control_map.json",
+    )
     compare_json(
         builder.CONTROL_REGISTER_PATH,
         outputs["control_register"],
         "security_control_boundary_register.json",
     )
-    compare_json(builder.CACHE_MATRIX_PATH, outputs["cache_matrix"], "cache_partition_and_purge_matrix.json")
+    compare_json(
+        builder.CACHE_MATRIX_PATH, outputs["cache_matrix"], "cache_partition_and_purge_matrix.json"
+    )
     compare_json(
         builder.SESSION_STORAGE_PATH,
         outputs["session_storage"],
@@ -89,14 +97,22 @@ def main() -> int:
     )
 
     docs = outputs["docs"]
-    compare_text(builder.RETENTION_DOC_PATH, docs[0] + "\n", "16_retention_privacy_security_runtime_hardening.md")
+    compare_text(
+        builder.RETENTION_DOC_PATH,
+        docs[0] + "\n",
+        "16_retention_privacy_security_runtime_hardening.md",
+    )
     compare_text(
         builder.ARTIFACT_DOC_PATH,
         docs[1] + "\n",
         "16_artifact_retention_erasure_and_limitations_matrix.md",
     )
-    compare_text(builder.CACHE_DOC_PATH, docs[2] + "\n", "16_cache_session_and_secret_boundary_map.md")
-    compare_text(builder.MERMAID_PATH, outputs["mermaid"], "16_security_privacy_runtime_boundary.mmd")
+    compare_text(
+        builder.CACHE_DOC_PATH, docs[2] + "\n", "16_cache_session_and_secret_boundary_map.md"
+    )
+    compare_text(
+        builder.MERMAID_PATH, outputs["mermaid"], "16_security_privacy_runtime_boundary.mmd"
+    )
 
     payloads = [
         outputs["artifact_matrix"],
@@ -149,7 +165,9 @@ def main() -> int:
     }
     missing_artifacts = required_artifacts - set(artifact_index)
     if missing_artifacts:
-        fail(f"Artifact retention matrix is missing required artifact classes: {sorted(missing_artifacts)}")
+        fail(
+            f"Artifact retention matrix is missing required artifact classes: {sorted(missing_artifacts)}"
+        )
 
     privacy_rows = outputs["privacy_thresholds"]["rows"]
     privacy_index = rows_by_id(privacy_rows)
@@ -178,7 +196,9 @@ def main() -> int:
             fail(f"Threshold row {row_id} drifted from the canonical symbol/value pair.")
 
     explainability_scopes = {
-        row["boundary_scope"] for row in privacy_rows if row["category"] == "RETENTION_LIMITED_EXPLAINABILITY"
+        row["boundary_scope"]
+        for row in privacy_rows
+        if row["category"] == "RETENTION_LIMITED_EXPLAINABILITY"
     }
     if explainability_scopes != set(builder.EXPLAINABILITY_BOUNDARY_SCOPE_ENUM):
         fail(
@@ -189,7 +209,9 @@ def main() -> int:
     threat_rows = outputs["threat_control_map"]["rows"]
     threat_classes = {row["threat_class"] for row in threat_rows}
     if threat_classes != set(builder.THREAT_CLASS_ENUM):
-        fail(f"Threat-class coverage drifted. Expected {sorted(builder.THREAT_CLASS_ENUM)}, got {sorted(threat_classes)}")
+        fail(
+            f"Threat-class coverage drifted. Expected {sorted(builder.THREAT_CLASS_ENUM)}, got {sorted(threat_classes)}"
+        )
     for row in threat_rows:
         mapped = row.get("mapped_control_ids", [])
         if not mapped:
@@ -200,13 +222,16 @@ def main() -> int:
     control_rows = outputs["control_register"]["rows"]
     control_ids = unique_values(control_rows, "artifact_or_control_id")
     if control_ids != set(builder.CONTROL_ID_ENUM):
-        fail(f"Security control coverage drifted. Expected {sorted(builder.CONTROL_ID_ENUM)}, got {sorted(control_ids)}")
+        fail(
+            f"Security control coverage drifted. Expected {sorted(builder.CONTROL_ID_ENUM)}, got {sorted(control_ids)}"
+        )
 
     cache_rows = outputs["cache_matrix"]["rows"]
     cache_scope_rows = {
         row["cache_scope"][0]
         for row in cache_rows
-        if row.get("scope_family") == "CACHE_ISOLATION_SCOPE" and row["cache_scope"] != builder.NOT_APPLICABLE
+        if row.get("scope_family") == "CACHE_ISOLATION_SCOPE"
+        and row["cache_scope"] != builder.NOT_APPLICABLE
     }
     if cache_scope_rows != set(builder.CACHE_SCOPE_ENUM):
         fail(
@@ -216,7 +241,8 @@ def main() -> int:
     hydration_scope_rows = {
         row["cache_scope"][0]
         for row in cache_rows
-        if row.get("scope_family") == "NATIVE_HYDRATION_SCOPE" and row["cache_scope"] != builder.NOT_APPLICABLE
+        if row.get("scope_family") == "NATIVE_HYDRATION_SCOPE"
+        and row["cache_scope"] != builder.NOT_APPLICABLE
     }
     if hydration_scope_rows != set(builder.HYDRATION_SCOPE_ENUM):
         fail(
@@ -236,7 +262,9 @@ def main() -> int:
     }
     missing_purge_triggers = required_purge_triggers - purge_trigger_union
     if missing_purge_triggers:
-        fail(f"Required purge triggers are missing from cache/session coverage: {sorted(missing_purge_triggers)}")
+        fail(
+            f"Required purge triggers are missing from cache/session coverage: {sorted(missing_purge_triggers)}"
+        )
 
     session_rows = outputs["session_storage"]["rows"]
     credential_types = unique_values(session_rows, "credential_type")
@@ -259,9 +287,13 @@ def main() -> int:
         allowed = row.get("allowed_storage_boundary")
         forbidden = row.get("forbidden_boundaries", [])
         if not isinstance(allowed, str) or not allowed:
-            fail(f"Credential row {row['artifact_or_control_id']} is missing a single allowed storage boundary.")
+            fail(
+                f"Credential row {row['artifact_or_control_id']} is missing a single allowed storage boundary."
+            )
         if not isinstance(forbidden, list) or not forbidden:
-            fail(f"Credential row {row['artifact_or_control_id']} must declare explicit forbidden boundaries.")
+            fail(
+                f"Credential row {row['artifact_or_control_id']} must declare explicit forbidden boundaries."
+            )
 
     restore_rows = outputs["restore_matrix"]["rows"]
     restore_states = unique_values(restore_rows, "privacy_reconciliation_state")

@@ -19,10 +19,7 @@ import {
   transitionStep,
   type StepContract,
 } from "../../../core/step_contract.js";
-import {
-  rankSelectors,
-  type SelectorManifest,
-} from "../../../core/selector_contract.js";
+import { rankSelectors, type SelectorManifest } from "../../../core/selector_contract.js";
 
 export const IDP_PROVIDER_ID = "oidc-external-idp-control-plane";
 export const IDP_TENANT_CLIENT_FLOW_ID = "idp-tenant-and-clients-bootstrap";
@@ -55,9 +52,7 @@ export type IdpInteractiveSurfaceFamily =
   | "OPERATOR_BROWSER"
   | "PORTAL_BROWSER"
   | "NATIVE_MACOS_OPERATOR";
-export type IdpMachineClientFamily =
-  | "BACKEND_SERVICE_AUTOMATION"
-  | "PROVIDER_MANAGEMENT_BOOTSTRAP";
+export type IdpMachineClientFamily = "BACKEND_SERVICE_AUTOMATION" | "PROVIDER_MANAGEMENT_BOOTSTRAP";
 export type IdpApplicationType =
   | "REGULAR_WEB_APPLICATION"
   | "NATIVE_APPLICATION"
@@ -181,9 +176,10 @@ export interface IdpMachineClientRow {
   machine_client_family: IdpMachineClientFamily;
   tenant_ref: IdpTenantRef;
   provider_environment_tag: IdpTenantEnvironmentTag;
-  product_environment_id:
-    | Exclude<IdpProductEnvironmentId, "env_local_provisioning_workstation">
-    | null;
+  product_environment_id: Exclude<
+    IdpProductEnvironmentId,
+    "env_local_provisioning_workstation"
+  > | null;
   application_type: "MACHINE_TO_MACHINE_APPLICATION";
   client_visibility: "CONFIDENTIAL";
   client_display_name: string;
@@ -299,9 +295,10 @@ interface TenantState {
 interface ClientState {
   clientRef: string;
   family: IdpInteractiveSurfaceFamily | IdpMachineClientFamily;
-  productEnvironmentId:
-    | Exclude<IdpProductEnvironmentId, "env_local_provisioning_workstation">
-    | null;
+  productEnvironmentId: Exclude<
+    IdpProductEnvironmentId,
+    "env_local_provisioning_workstation"
+  > | null;
   tenantRef: IdpTenantRef;
   applicationType: IdpApplicationType;
   clientVisibility: IdpClientVisibility;
@@ -352,10 +349,7 @@ async function persistJson(filePath: string, value: unknown): Promise<void> {
 }
 
 async function loadAuth0SelectorManifest(): Promise<SelectorManifest> {
-  const raw = await readFile(
-    new URL("../auth0/selector_manifest.json", import.meta.url),
-    "utf8",
-  );
+  const raw = await readFile(new URL("../auth0/selector_manifest.json", import.meta.url), "utf8");
   const parsed = JSON.parse(raw) as SelectorManifest;
   return {
     ...parsed,
@@ -403,8 +397,7 @@ function createProviderSelectionRecord(): ProviderSelectionRecord {
           "Current Auth0 guidance recommends separate tenants for development, staging, and production environments.",
       },
       {
-        source_ref:
-          "https://auth0.com/docs/get-started/applications/application-settings",
+        source_ref: "https://auth0.com/docs/get-started/applications/application-settings",
         rationale:
           "Current Auth0 application settings guidance constrains callback, logout, origin, and native redirect posture.",
       },
@@ -412,9 +405,7 @@ function createProviderSelectionRecord(): ProviderSelectionRecord {
   };
 }
 
-function isInteractiveFamily(
-  family: ClientState["family"],
-): family is IdpInteractiveSurfaceFamily {
+function isInteractiveFamily(family: ClientState["family"]): family is IdpInteractiveSurfaceFamily {
   return (
     family === "OPERATOR_BROWSER" ||
     family === "PORTAL_BROWSER" ||
@@ -440,7 +431,7 @@ function secretMetadataForClient(client: ClientState): IdpSecretPosture {
 
   const fingerprint = client.clientSecret
     ? sha256(client.clientSecret)
-    : client.clientSecretFingerprint ?? sha256(client.clientRef);
+    : (client.clientSecretFingerprint ?? sha256(client.clientRef));
   const secretClassId =
     client.family === "PROVIDER_MANAGEMENT_BOOTSTRAP"
       ? "idp_management_client_secret"
@@ -457,16 +448,11 @@ function secretMetadataForClient(client: ClientState): IdpSecretPosture {
     vault_write_receipt_ref: `vault-write://${client.secretNamespaceRef}/${client.clientRef}`,
     client_secret_fingerprint: fingerprint,
     capture_posture:
-      client.clientSecret === null
-        ? "ADOPT_EXISTING_VAULT_BINDING"
-        : "IMMEDIATE_VAULT_CAPTURE",
+      client.clientSecret === null ? "ADOPT_EXISTING_VAULT_BINDING" : "IMMEDIATE_VAULT_CAPTURE",
   };
 }
 
-function buildTenantCatalog(
-  runContext: RunContext,
-  state: FixtureState,
-): IdpTenantRecordCatalog {
+function buildTenantCatalog(runContext: RunContext, state: FixtureState): IdpTenantRecordCatalog {
   return {
     schema_version: "1.0",
     record_id: `idp-tenant-record-catalog-${runContext.workspaceId}`,
@@ -522,68 +508,64 @@ function buildApplicationCatalog(
       isInteractiveFamily(client.family),
     )
     .map((client) => ({
-    client_ref: client.clientRef,
-    surface_family: client.family,
-    product_environment_id: client.productEnvironmentId!,
-    tenant_ref: client.tenantRef,
-    deployable_id: client.deployableId as
-      | "operator-web"
-      | "client-portal-web"
-      | "Apps/InternalOperatorWorkspaceMac",
-    application_type: client.applicationType as
-      | "REGULAR_WEB_APPLICATION"
-      | "NATIVE_APPLICATION",
-    client_visibility: client.clientVisibility,
-    client_display_name: client.clientDisplayName,
-    client_id_alias: client.clientIdAlias,
-    client_id_fingerprint: sha256(client.clientIdAlias),
-    source_disposition: client.sourceDisposition,
-    callback_profile_ref: client.callbackProfileRef!,
-    callback_urls: client.callbackUrls,
-    logout_urls: client.logoutUrls,
-    allowed_web_origins: client.allowedWebOrigins,
-    bundle_identifier: client.bundleIdentifier,
-    token_endpoint_auth_method: client.tokenEndpointAuthMethod,
-    grant_posture: client.grantPosture,
-    session_bootstrap_posture:
-      client.family === "NATIVE_MACOS_OPERATOR"
-        ? "System-browser Auth Code + PKCE bootstrap only; no embedded-webview primary sign-in."
-        : "Server-mediated browser session bootstrap via confidential regular-web client.",
-    engine_authorization_boundary:
-      "IdP client identity bootstraps authentication posture only; Taxat still resolves actor class, delegation, authority-link truth, and legality server-side.",
-    secret_posture: secretMetadataForClient(client),
-    source_refs: [
-      {
-        source_ref:
-          "Algorithm/data_model.md::L1811[ActorSession]",
-        rationale:
-          "ActorSession state is server-authored, so the IdP client only supplies coarse authentication bootstrap.",
-      },
-      {
-        source_ref:
-          "https://auth0.com/docs/get-started/applications/application-settings",
-        rationale:
-          "Current Auth0 application settings govern callback, logout, allowed origin, and native redirect handling.",
-      },
-    ],
-    typed_gaps:
-      client.family === "NATIVE_MACOS_OPERATOR"
-        ? [
-            "Bundle identifier is frozen here for IdP client binding, but the concrete Xcode target and signing profile remain for later app scaffolding cards.",
-          ]
-        : [],
-    notes:
-      client.family === "PORTAL_BROWSER"
-        ? [
-            "Portal browser client remains customer-safe and does not inherit governance-only origins or callback routes.",
-          ]
-        : client.family === "OPERATOR_BROWSER"
+      client_ref: client.clientRef,
+      surface_family: client.family,
+      product_environment_id: client.productEnvironmentId!,
+      tenant_ref: client.tenantRef,
+      deployable_id: client.deployableId as
+        | "operator-web"
+        | "client-portal-web"
+        | "Apps/InternalOperatorWorkspaceMac",
+      application_type: client.applicationType as "REGULAR_WEB_APPLICATION" | "NATIVE_APPLICATION",
+      client_visibility: client.clientVisibility,
+      client_display_name: client.clientDisplayName,
+      client_id_alias: client.clientIdAlias,
+      client_id_fingerprint: sha256(client.clientIdAlias),
+      source_disposition: client.sourceDisposition,
+      callback_profile_ref: client.callbackProfileRef!,
+      callback_urls: client.callbackUrls,
+      logout_urls: client.logoutUrls,
+      allowed_web_origins: client.allowedWebOrigins,
+      bundle_identifier: client.bundleIdentifier,
+      token_endpoint_auth_method: client.tokenEndpointAuthMethod,
+      grant_posture: client.grantPosture,
+      session_bootstrap_posture:
+        client.family === "NATIVE_MACOS_OPERATOR"
+          ? "System-browser Auth Code + PKCE bootstrap only; no embedded-webview primary sign-in."
+          : "Server-mediated browser session bootstrap via confidential regular-web client.",
+      engine_authorization_boundary:
+        "IdP client identity bootstraps authentication posture only; Taxat still resolves actor class, delegation, authority-link truth, and legality server-side.",
+      secret_posture: secretMetadataForClient(client),
+      source_refs: [
+        {
+          source_ref: "Algorithm/data_model.md::L1811[ActorSession]",
+          rationale:
+            "ActorSession state is server-authored, so the IdP client only supplies coarse authentication bootstrap.",
+        },
+        {
+          source_ref: "https://auth0.com/docs/get-started/applications/application-settings",
+          rationale:
+            "Current Auth0 application settings govern callback, logout, allowed origin, and native redirect handling.",
+        },
+      ],
+      typed_gaps:
+        client.family === "NATIVE_MACOS_OPERATOR"
           ? [
-              "Operator browser client is kept separate from portal posture to preserve internal shell isolation and independent secret rotation.",
+              "Bundle identifier is frozen here for IdP client binding, but the concrete Xcode target and signing profile remain for later app scaffolding cards.",
             ]
-          : [
-              "Native client stays public and PKCE-based; no shared secret is stored for the desktop app.",
-            ],
+          : [],
+      notes:
+        client.family === "PORTAL_BROWSER"
+          ? [
+              "Portal browser client remains customer-safe and does not inherit governance-only origins or callback routes.",
+            ]
+          : client.family === "OPERATOR_BROWSER"
+            ? [
+                "Operator browser client is kept separate from portal posture to preserve internal shell isolation and independent secret rotation.",
+              ]
+            : [
+                "Native client stays public and PKCE-based; no shared secret is stored for the desktop app.",
+              ],
     }));
 
   return {
@@ -631,10 +613,10 @@ function buildMachineInventory(
       tenant_ref: client.tenantRef,
       provider_environment_tag:
         client.family === "PROVIDER_MANAGEMENT_BOOTSTRAP"
-          ? state.tenants.find((tenant) => tenant.tenantRef === client.tenantRef)
-              ?.providerEnvironmentTag ?? "Staging"
-          : state.tenants.find((tenant) => tenant.tenantRef === client.tenantRef)
-              ?.providerEnvironmentTag ?? "Staging",
+          ? (state.tenants.find((tenant) => tenant.tenantRef === client.tenantRef)
+              ?.providerEnvironmentTag ?? "Staging")
+          : (state.tenants.find((tenant) => tenant.tenantRef === client.tenantRef)
+              ?.providerEnvironmentTag ?? "Staging"),
       product_environment_id: client.productEnvironmentId,
       application_type: "MACHINE_TO_MACHINE_APPLICATION",
       client_visibility: "CONFIDENTIAL",
@@ -654,8 +636,7 @@ function buildMachineInventory(
       secret_posture: secretMetadataForClient(client),
       source_refs: [
         {
-          source_ref:
-            "Algorithm/actor_and_authority_model.md::L555[3.13_Machine-actor_rules]",
+          source_ref: "Algorithm/actor_and_authority_model.md::L555[3.13_Machine-actor_rules]",
           rationale:
             "Machine actors remain distinct from human sessions and cannot satisfy human step-up or delegation rules.",
         },
@@ -674,9 +655,7 @@ function buildMachineInventory(
           : [
               "Taxat backend API audiences and client-grant details remain for later backend implementation cards; this card freezes the machine identity boundary only.",
             ],
-      notes: [
-        "Machine credentials never inherit browser callback, logout, or MFA semantics.",
-      ],
+      notes: ["Machine credentials never inherit browser callback, logout, or MFA semantics."],
     })),
     typed_gaps: [],
     notes: [
@@ -716,8 +695,7 @@ function buildCallbackOriginMatrix(
           "Browser and native channels keep distinct callback and session bootstrap rules.",
       },
       {
-        source_ref:
-          "https://auth0.com/docs/get-started/applications/application-settings",
+        source_ref: "https://auth0.com/docs/get-started/applications/application-settings",
         rationale:
           "Current Auth0 guidance requires explicit callback, logout, and allowed-origin registration per application.",
       },
@@ -743,8 +721,7 @@ function buildCallbackOriginMatrix(
         "Local browser bootstrap stays outside promotable IdP runtime registration.",
       source_refs: [
         {
-          source_ref:
-            "Algorithm/deployment_and_resilience_contract.md::L230[Promotion_boundary]",
+          source_ref: "Algorithm/deployment_and_resilience_contract.md::L230[Promotion_boundary]",
           rationale:
             "Promotion boundaries forbid collapsing workstation-only bootstrap hosts into canonical runtime configuration.",
         },
@@ -811,14 +788,20 @@ export function validateIdpApplicationClientCatalog(
 
   for (const client of catalog.application_clients) {
     if (!tenantRefs.has(client.tenant_ref)) {
-      throw new Error(`Application client ${client.client_ref} references unknown tenant ${client.tenant_ref}.`);
+      throw new Error(
+        `Application client ${client.client_ref} references unknown tenant ${client.tenant_ref}.`,
+      );
     }
     const row = matrixByClient.get(client.client_ref);
     if (!row) {
-      throw new Error(`Application client ${client.client_ref} is missing callback/origin matrix coverage.`);
+      throw new Error(
+        `Application client ${client.client_ref} is missing callback/origin matrix coverage.`,
+      );
     }
     if (client.callback_urls.length === 0 || client.logout_urls.length === 0) {
-      throw new Error(`Application client ${client.client_ref} must declare callback and logout URLs.`);
+      throw new Error(
+        `Application client ${client.client_ref} must declare callback and logout URLs.`,
+      );
     }
     if (
       client.surface_family !== "NATIVE_MACOS_OPERATOR" &&
@@ -837,7 +820,9 @@ export function validateIdpApplicationClientCatalog(
         throw new Error(`Native surface ${client.client_ref} must declare a bundle identifier.`);
       }
       if (client.secret_posture.requires_vault_secret) {
-        throw new Error(`Native surface ${client.client_ref} must not require a shared client secret.`);
+        throw new Error(
+          `Native surface ${client.client_ref} must not require a shared client secret.`,
+        );
       }
     } else {
       if (client.application_type !== "REGULAR_WEB_APPLICATION") {
@@ -847,7 +832,9 @@ export function validateIdpApplicationClientCatalog(
         throw new Error(`Browser surface ${client.client_ref} must remain confidential.`);
       }
       if (!client.secret_posture.requires_vault_secret) {
-        throw new Error(`Browser surface ${client.client_ref} must require a vault-bound secret posture.`);
+        throw new Error(
+          `Browser surface ${client.client_ref} must require a vault-bound secret posture.`,
+        );
       }
     }
   }
@@ -860,10 +847,18 @@ export function validateIdpMachineClientInventory(
   const tenantRefs = new Set(tenants.tenant_records.map((tenant) => tenant.tenant_ref));
   for (const client of inventory.machine_clients) {
     if (!tenantRefs.has(client.tenant_ref)) {
-      throw new Error(`Machine client ${client.client_ref} references unknown tenant ${client.tenant_ref}.`);
+      throw new Error(
+        `Machine client ${client.client_ref} references unknown tenant ${client.tenant_ref}.`,
+      );
     }
-    if (client.callback_urls.length || client.logout_urls.length || client.allowed_web_origins.length) {
-      throw new Error(`Machine client ${client.client_ref} must not carry callback or origin state.`);
+    if (
+      client.callback_urls.length ||
+      client.logout_urls.length ||
+      client.allowed_web_origins.length
+    ) {
+      throw new Error(
+        `Machine client ${client.client_ref} must not carry callback or origin state.`,
+      );
     }
     if (client.mfa_posture !== "NOT_APPLICABLE_MACHINE") {
       throw new Error(`Machine client ${client.client_ref} must remain outside MFA posture.`);
@@ -892,20 +887,13 @@ export function buildTemplateIdpArtifacts(
     state,
     "./idp_tenant_record.template.json",
   );
-  const callbackOriginMatrix = buildCallbackOriginMatrix(
-    runContext,
-    applicationClientCatalog,
-  );
+  const callbackOriginMatrix = buildCallbackOriginMatrix(runContext, applicationClientCatalog);
   const machineClientInventory = buildMachineInventory(
     runContext,
     state,
     "./idp_tenant_record.template.json",
   );
-  validateIdpApplicationClientCatalog(
-    applicationClientCatalog,
-    callbackOriginMatrix,
-    tenantRecord,
-  );
+  validateIdpApplicationClientCatalog(applicationClientCatalog, callbackOriginMatrix, tenantRecord);
   validateIdpMachineClientInventory(machineClientInventory, tenantRecord);
   return {
     tenantRecord,
@@ -937,10 +925,7 @@ export function createRecommendedFixtureState(
       customDomain: "auth.sandbox-preprod.taxat.example",
       providerEnvironmentTag: "Staging",
       region: "EU",
-      productEnvironmentIds: [
-        "env_shared_sandbox_integration",
-        "env_preproduction_verification",
-      ],
+      productEnvironmentIds: ["env_shared_sandbox_integration", "env_preproduction_verification"],
       secretNamespaceRefs: ["sec_sandbox_runtime", "sec_preprod_runtime"],
       sourceDisposition: "CREATED_DURING_RUN",
     },
@@ -1338,11 +1323,7 @@ async function appendNote(
   });
 }
 
-async function getRequiredLocator(
-  page: Page,
-  manifest: SelectorManifest,
-  selectorId: string,
-) {
+async function getRequiredLocator(page: Page, manifest: SelectorManifest, selectorId: string) {
   const selector = manifest.selectors.find((candidate) => candidate.selectorId === selectorId);
   if (!selector) {
     throw new Error(`Selector ${selectorId} missing from Auth0 manifest.`);
@@ -1415,7 +1396,11 @@ export async function createIdpTenantAndClients(
     createPendingStep({
       stepId: IDP_STEP_IDS.reconcileMachineClients,
       title: "Create or adopt machine and bootstrap clients",
-      selectorRefs: ["machine-clients-heading", "create-recommended-clients", "client-row-fallback"],
+      selectorRefs: [
+        "machine-clients-heading",
+        "create-recommended-clients",
+        "client-row-fallback",
+      ],
     }),
     createPendingStep({
       stepId: IDP_STEP_IDS.persistArtifacts,
@@ -1424,18 +1409,10 @@ export async function createIdpTenantAndClients(
     }),
   ];
 
-  steps[0] = transitionStep(
-    steps[0]!,
-    "RUNNING",
-    "Opening the IdP control-plane workspace.",
-  );
+  steps[0] = transitionStep(steps[0]!, "RUNNING", "Opening the IdP control-plane workspace.");
   await options.page.goto(entryUrls.controlPlane);
   await getRequiredLocator(options.page, selectorManifest, "control-plane-heading");
-  steps[0] = transitionStep(
-    steps[0]!,
-    "SUCCEEDED",
-    "Control-plane workspace opened.",
-  );
+  steps[0] = transitionStep(steps[0]!, "SUCCEEDED", "Control-plane workspace opened.");
   evidenceManifest = await appendNote(
     evidenceManifest,
     steps[0].stepId,
@@ -1445,24 +1422,18 @@ export async function createIdpTenantAndClients(
 
   let currentState = await readFixtureState(options.page);
 
-  steps[1] = transitionStep(
-    steps[1]!,
-    "RUNNING",
-    "Inspecting recommended tenant topology.",
-  );
+  steps[1] = transitionStep(steps[1]!, "RUNNING", "Inspecting recommended tenant topology.");
   await getRequiredLocator(options.page, selectorManifest, "tenants-heading");
   if (currentState.tenants.some((tenant) => tenant.sourceDisposition === "CREATED_DURING_RUN")) {
     // no-op when the fixture already starts from a fresh-created state
   } else if (currentState.tenants.length < 3) {
-    await (await getRequiredLocator(options.page, selectorManifest, "create-recommended-tenants")).click();
+    await (
+      await getRequiredLocator(options.page, selectorManifest, "create-recommended-tenants")
+    ).click();
     await clickFixtureAction(options.page, "createRecommendedTenants");
   }
   currentState = await readFixtureState(options.page);
-  steps[1] = transitionStep(
-    steps[1]!,
-    "SUCCEEDED",
-    "Tenant topology reconciled.",
-  );
+  steps[1] = transitionStep(steps[1]!, "SUCCEEDED", "Tenant topology reconciled.");
   evidenceManifest = await appendNote(
     evidenceManifest,
     steps[1].stepId,
@@ -1476,18 +1447,20 @@ export async function createIdpTenantAndClients(
     "Reconciling interactive browser and native clients.",
   );
   await getRequiredLocator(options.page, selectorManifest, "applications-heading");
-  if (currentState.interactiveClients.some((client) => client.sourceDisposition === "CREATED_DURING_RUN")) {
+  if (
+    currentState.interactiveClients.some(
+      (client) => client.sourceDisposition === "CREATED_DURING_RUN",
+    )
+  ) {
     // already created
   } else if (currentState.interactiveClients.length < 9) {
-    await (await getRequiredLocator(options.page, selectorManifest, "create-recommended-clients")).click();
+    await (
+      await getRequiredLocator(options.page, selectorManifest, "create-recommended-clients")
+    ).click();
     await clickFixtureAction(options.page, "createRecommendedClients");
   }
   currentState = await readFixtureState(options.page);
-  steps[2] = transitionStep(
-    steps[2]!,
-    "SUCCEEDED",
-    "Interactive client topology reconciled.",
-  );
+  steps[2] = transitionStep(steps[2]!, "SUCCEEDED", "Interactive client topology reconciled.");
   evidenceManifest = await appendNote(
     evidenceManifest,
     steps[2].stepId,
@@ -1502,11 +1475,7 @@ export async function createIdpTenantAndClients(
   );
   await getRequiredLocator(options.page, selectorManifest, "machine-clients-heading");
   currentState = await readFixtureState(options.page);
-  steps[3] = transitionStep(
-    steps[3]!,
-    "SUCCEEDED",
-    "Machine client topology reconciled.",
-  );
+  steps[3] = transitionStep(steps[3]!, "SUCCEEDED", "Machine client topology reconciled.");
   evidenceManifest = await appendNote(
     evidenceManifest,
     steps[3].stepId,
@@ -1514,41 +1483,25 @@ export async function createIdpTenantAndClients(
     "Separated runtime service automation from provider-management bootstrap so admin-boundary credentials do not collapse into product machine identity.",
   );
 
-  steps[4] = transitionStep(
-    steps[4]!,
-    "RUNNING",
-    "Persisting deterministic topology artifacts.",
-  );
+  steps[4] = transitionStep(steps[4]!, "RUNNING", "Persisting deterministic topology artifacts.");
   const artifacts = buildTemplateIdpArtifacts(options.runContext, currentState);
   await persistJson(options.tenantRecordPath, artifacts.tenantRecord);
-  await persistJson(
-    options.applicationClientCatalogPath,
-    {
-      ...artifacts.applicationClientCatalog,
-      tenant_record_ref: path.relative(
-        path.dirname(options.applicationClientCatalogPath),
-        options.tenantRecordPath,
-      ) || path.basename(options.tenantRecordPath),
-    },
-  );
+  await persistJson(options.applicationClientCatalogPath, {
+    ...artifacts.applicationClientCatalog,
+    tenant_record_ref:
+      path.relative(path.dirname(options.applicationClientCatalogPath), options.tenantRecordPath) ||
+      path.basename(options.tenantRecordPath),
+  });
   await persistJson(options.callbackOriginMatrixPath, artifacts.callbackOriginMatrix);
-  await persistJson(
-    options.machineClientInventoryPath,
-    {
-      ...artifacts.machineClientInventory,
-      tenant_record_ref: path.relative(
-        path.dirname(options.machineClientInventoryPath),
-        options.tenantRecordPath,
-      ) || path.basename(options.tenantRecordPath),
-    },
-  );
+  await persistJson(options.machineClientInventoryPath, {
+    ...artifacts.machineClientInventory,
+    tenant_record_ref:
+      path.relative(path.dirname(options.machineClientInventoryPath), options.tenantRecordPath) ||
+      path.basename(options.tenantRecordPath),
+  });
   const evidenceManifestPath = `${options.tenantRecordPath}.evidence_manifest.json`;
   await persistJson(evidenceManifestPath, evidenceManifest);
-  steps[4] = transitionStep(
-    steps[4]!,
-    "SUCCEEDED",
-    "Topology artifacts persisted.",
-  );
+  steps[4] = transitionStep(steps[4]!, "SUCCEEDED", "Topology artifacts persisted.");
 
   return {
     outcome: "IDP_TOPOLOGY_READY",

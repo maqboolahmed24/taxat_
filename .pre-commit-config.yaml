@@ -1,0 +1,127 @@
+minimum_pre_commit_version: "4.0.0"
+default_install_hook_types:
+  - pre-commit
+default_stages:
+  - pre-commit
+fail_fast: false
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+        exclude: >
+          ^(
+            packages/generated-models/src/generated/typescript/|
+            python/generated_contract_models/src/taxat_generated_contract_models/generated/|
+            native/TaxatOperator/GeneratedContracts/Sources/GeneratedContracts/Generated/|
+            packages/contracts-core/schemas/|
+            packages/contracts-core/samples/|
+            apps/operator-web/public/internal/.+/data/|
+            fixtures/synthetic/|
+            data/contracts/|
+            config/(ci|edge|smoke|supplychain)/|
+            data/(provisioning|smoke)/|
+            docs/(provisioning|verification)/|
+            automation/provisioning/report_viewer/data/sample_run\.json|
+            tests/playwright/.+\.spec\.ts-snapshots/|
+            automation/provisioning/artifacts/
+          )
+      - id: trailing-whitespace
+        args:
+          - --markdown-linebreak-ext=md
+        exclude: >
+          ^(
+            packages/generated-models/src/generated/typescript/|
+            python/generated_contract_models/src/taxat_generated_contract_models/generated/|
+            native/TaxatOperator/GeneratedContracts/Sources/GeneratedContracts/Generated/|
+            packages/contracts-core/schemas/|
+            packages/contracts-core/samples/|
+            apps/operator-web/public/internal/.+/data/|
+            fixtures/synthetic/|
+            data/contracts/|
+            config/(ci|edge|smoke|supplychain)/|
+            data/(provisioning|smoke)/|
+            docs/(provisioning|verification)/|
+            automation/provisioning/report_viewer/data/sample_run\.json|
+            tests/playwright/.+\.spec\.ts-snapshots/|
+            automation/provisioning/artifacts/
+          )
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.0
+    hooks:
+      - id: ruff-check
+        name: ruff-check-governed-python
+        files: >
+          ^(
+            python/validators/|
+            tools/(analysis|security|contracts)/.*\.py|
+            scripts/local/.*\.py|
+            scripts/test/.*\.py|
+            scripts/tasks/.*\.py|
+            scripts/agent/.*\.py
+          )
+        args:
+          - --fix
+          - --config=pyproject.toml
+      - id: ruff-format
+        name: ruff-format-governed-python
+        files: >
+          ^(
+            python/validators/|
+            tools/(analysis|security|contracts)/.*\.py|
+            scripts/local/.*\.py|
+            scripts/test/.*\.py|
+            scripts/tasks/.*\.py|
+            scripts/agent/.*\.py
+          )
+        args:
+          - --config=pyproject.toml
+  - repo: local
+    hooks:
+      - id: biome-check-staged
+        name: biome-check-staged
+        language: system
+        entry: pnpm exec biome check --write
+        files: >
+          ^(
+            package\.json|
+            pnpm-workspace\.yaml|
+            turbo\.json|
+            tsconfig\.(base|quality)\.json|
+            biome\.json|
+            pyrightconfig\.json|
+            \.pre-commit-config\.yaml|
+            playwright\.config\.ts|
+            scripts/tasks/.+\.json$|
+            apps/.+\.(ts|tsx|js|css|html|json)$|
+            packages/.+\.(ts|tsx|js|json)$|
+            scripts/contracts/.+\.ts$|
+            tools/.+\.(ts|tsx|js|mjs|json)$|
+            tests/.+\.(ts|tsx|js|json)$|
+            automation/provisioning/.+\.(ts|tsx|js|mjs|css|html|json)$|
+            prototypes/analysis/.+\.(js|json)$|
+            schemas/.+\.json$|
+            infra/local/.+\.json$|
+            infra/test/.+\.json$|
+            config/(contracts|primitives|references|runtime|tooling)/.+\.(json|md)$|
+            docs/(contracts|fixtures|primitives|references|repository|runtime|testing)/.+\.md$
+          )
+        pass_filenames: true
+      - id: code-quality-stage-guard
+        name: code-quality-stage-guard
+        language: system
+        entry: node --experimental-strip-types tools/repository/verify_code_quality_coverage.ts --stage-guard
+        files: ^(Makefile|apps/|packages/|tools/|scripts/|infra/|python/|tests/|automation/|native/|config/|docs/|data/|fixtures/|schemas/)
+        pass_filenames: true
+      - id: playwright-locator-policy
+        name: playwright-locator-policy
+        language: system
+        entry: node --experimental-strip-types tools/repository/lint_playwright_locator_policy.ts
+        files: ^(tests/playwright/|tests/integration/|automation/provisioning/tests/).+\.ts$
+        pass_filenames: true
+      - id: code-quality-coverage
+        name: code-quality-coverage
+        language: system
+        entry: node --experimental-strip-types tools/repository/verify_code_quality_coverage.ts --check
+        pass_filenames: false

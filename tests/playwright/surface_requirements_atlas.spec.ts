@@ -16,7 +16,9 @@ test("overview renders summary and navigation", async ({ page }) => {
   await expect(page.getByRole("tab", { name: "Collaboration" })).toBeVisible();
 });
 
-test("family pages render collaboration, portal, governance, and native compositions", async ({ page }) => {
+test("family pages render collaboration, portal, governance, and native compositions", async ({
+  page,
+}) => {
   await gotoAtlas(page);
 
   await page.getByRole("tab", { name: "Collaboration" }).click();
@@ -36,8 +38,11 @@ test("family pages render collaboration, portal, governance, and native composit
 
 test("overview screenshot baseline", async ({ page }) => {
   await gotoAtlas(page);
-  await expect(page.getByTestId("surface-requirements-atlas")).toHaveScreenshot("surface-requirements-atlas-overview.png", {
-    animations: "disabled",
-    fullPage: true,
-  });
+  await expect(page.getByTestId("surface-requirements-atlas")).toHaveScreenshot(
+    "surface-requirements-atlas-overview.png",
+    {
+      animations: "disabled",
+      fullPage: true,
+    },
+  );
 });

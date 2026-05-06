@@ -1,0 +1,447 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/risk_report.schema.json",
+  "title": "RiskReport",
+  "description": "Deterministic risk-scoring artifact. This schema freezes calibrated feature evaluations, aggregate flags, and unresolved material or blocking posture for one manifest-scoped run.",
+  "type": "object",
+  "required": [
+    "risk_id",
+    "manifest_id",
+    "artifact_type",
+    "execution_mode",
+    "analysis_only",
+    "non_compliance_config_refs",
+    "counterfactual_basis",
+    "risk_threshold_profile_ref",
+    "risk_score",
+    "feature_scores",
+    "flags",
+    "unresolved_material_blocking_risk_flag",
+    "unresolved_blocking_risk_flag",
+    "created_at",
+    "contract"
+  ],
+  "properties": {
+    "risk_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_type": {
+      "const": "RiskReport"
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": [
+        "COMPLIANCE",
+        "ANALYSIS"
+      ]
+    },
+    "analysis_only": {
+      "type": "boolean"
+    },
+    "non_compliance_config_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "counterfactual_basis": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "risk_threshold_profile_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "risk_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "feature_scores": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/featureScore"
+      }
+    },
+    "flags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "unresolved_material_blocking_risk_flag": {
+      "type": "boolean"
+    },
+    "unresolved_blocking_risk_flag": {
+      "type": "boolean"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "contract": {
+      "$ref": "./schema_bundle.schema.json#/$defs/artifactContract"
+    }
+  },
+  "$defs": {
+    "featureScore": {
+      "type": "object",
+      "required": [
+        "feature_code",
+        "feature_value",
+        "feature_weight",
+        "material_threshold",
+        "blocking_threshold",
+        "feature_resolved",
+        "flag_state"
+      ],
+      "properties": {
+        "feature_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "feature_value": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "feature_weight": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "material_threshold": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "blocking_threshold": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "feature_resolved": {
+          "type": "boolean"
+        },
+        "flag_state": {
+          "type": "string",
+          "enum": [
+            "NONE",
+            "MATERIAL_UNRESOLVED",
+            "BLOCKING_UNRESOLVED"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "feature_resolved": {
+                "const": true
+              }
+            },
+            "required": [
+              "feature_resolved"
+            ]
+          },
+          "then": {
+            "properties": {
+              "flag_state": {
+                "const": "NONE"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "flag_state": {
+                "enum": [
+                  "MATERIAL_UNRESOLVED",
+                  "BLOCKING_UNRESOLVED"
+                ]
+              }
+            },
+            "required": [
+              "flag_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "feature_resolved": {
+                "const": false
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "COMPLIANCE"
+          }
+        },
+        "required": [
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "analysis_only": {
+            "const": false
+          },
+          "non_compliance_config_refs": {
+            "maxItems": 0
+          },
+          "counterfactual_basis": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "ANALYSIS"
+          }
+        },
+        "required": [
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "analysis_only": {
+            "const": true
+          },
+          "counterfactual_basis": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "flags": {
+            "not": {
+              "contains": {
+                "const": "RISK_WEIGHT_PROFILE_INVALID"
+              }
+            }
+          }
+        },
+        "required": [
+          "flags"
+        ]
+      },
+      "then": {
+        "properties": {
+          "feature_scores": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "unresolved_blocking_risk_flag": {
+            "const": true
+          }
+        },
+        "required": [
+          "unresolved_blocking_risk_flag"
+        ]
+      },
+      "then": {
+        "properties": {
+          "unresolved_material_blocking_risk_flag": {
+            "const": true
+          },
+          "flags": {
+            "contains": {
+              "const": "BLOCKING_RISK_UNRESOLVED"
+            }
+          },
+          "feature_scores": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "flag_state": {
+                  "const": "BLOCKING_UNRESOLVED"
+                }
+              },
+              "required": [
+                "flag_state"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "unresolved_material_blocking_risk_flag": {
+            "const": true
+          }
+        },
+        "required": [
+          "unresolved_material_blocking_risk_flag"
+        ]
+      },
+      "then": {
+        "anyOf": [
+          {
+            "properties": {
+              "flags": {
+                "contains": {
+                  "const": "RISK_WEIGHT_PROFILE_INVALID"
+                }
+              }
+            }
+          },
+          {
+            "properties": {
+              "feature_scores": {
+                "contains": {
+                  "type": "object",
+                  "properties": {
+                    "flag_state": {
+                      "enum": [
+                        "MATERIAL_UNRESOLVED",
+                        "BLOCKING_UNRESOLVED"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "flag_state"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "unresolved_material_blocking_risk_flag": {
+            "const": false
+          }
+        },
+        "required": [
+          "unresolved_material_blocking_risk_flag"
+        ]
+      },
+      "then": {
+        "properties": {
+          "unresolved_blocking_risk_flag": {
+            "const": false
+          },
+          "feature_scores": {
+            "items": {
+              "$ref": "#/$defs/featureScore",
+              "properties": {
+                "flag_state": {
+                  "const": "NONE"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "unresolved_blocking_risk_flag": {
+            "const": false
+          }
+        },
+        "required": [
+          "unresolved_blocking_risk_flag"
+        ]
+      },
+      "then": {
+        "properties": {
+          "flags": {
+            "not": {
+              "contains": {
+                "const": "BLOCKING_RISK_UNRESOLVED"
+              }
+            }
+          },
+          "feature_scores": {
+            "not": {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "flag_state": {
+                    "const": "BLOCKING_UNRESOLVED"
+                  }
+                },
+                "required": [
+                  "flag_state"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "flags": {
+            "contains": {
+              "const": "RISK_WEIGHT_PROFILE_INVALID"
+            }
+          }
+        },
+        "required": [
+          "flags"
+        ]
+      },
+      "then": {
+        "properties": {
+          "risk_score": {
+            "const": 100
+          },
+          "feature_scores": {
+            "maxItems": 0
+          },
+          "unresolved_material_blocking_risk_flag": {
+            "const": true
+          },
+          "unresolved_blocking_risk_flag": {
+            "const": false
+          }
+        }
+      }
+    }
+  ]
+}

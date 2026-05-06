@@ -1,0 +1,104 @@
+{
+  "$schema": "./decimal_profile.schema.json",
+  "contract_version": "1.0",
+  "profile_id": "exact_decimal_profile_v1",
+  "basis_statement": "Exact decimals stay canonical string literals at contract and persistence boundaries while runtime helpers preserve unscaled integer precision plus explicit scale.",
+  "source_lineage": [
+    {
+      "source_file": "compute_parity_and_trust_formulas.md",
+      "source_heading_or_logical_block": "exact decimal and money scale rules",
+      "rationale": "Money and trust formulas require exact decimal strings with fixed scale and no float coercion."
+    },
+    {
+      "source_file": "replay_and_reproducibility_contract.md",
+      "source_heading_or_logical_block": "canonical decimal-string expectations",
+      "rationale": "Replay-safe serialization depends on exact decimal string fidelity."
+    },
+    {
+      "source_file": "Algorithm/scripts/validate_contracts.py",
+      "source_heading_or_logical_block": "parse_exact_decimal and validate_money_value",
+      "rationale": "Validator behavior is the executable guardrail for no-exponent, no-locale, no-negative-zero decimal parsing."
+    }
+  ],
+  "storage_posture": "STRING_ONLY_AT_SCHEMA_AND_PERSISTENCE_BOUNDARIES",
+  "representation": "UNSCALED_BIGINT_PLUS_EXPLICIT_SCALE",
+  "forbidden_inputs": [
+    {
+      "label": "Negative zero is illegal",
+      "literal": "-0.00",
+      "reason": "The validator explicitly rejects negative-zero serialization."
+    },
+    {
+      "label": "Exponent notation is forbidden",
+      "literal": "1e3",
+      "reason": "Canonical decimal strings may not use exponent form."
+    },
+    {
+      "label": "Locale separators are forbidden",
+      "literal": "1,23",
+      "reason": "Locale formatting would make replay and hashing non-deterministic."
+    },
+    {
+      "label": "Lossy number input is forbidden",
+      "literal": 1.23,
+      "reason": "The shared layer parses canonical string literals only."
+    }
+  ],
+  "literal_examples": [
+    {
+      "case_ref": "whole_zero",
+      "label": "Zero without fractional scale",
+      "literal": "0",
+      "scale": 0
+    },
+    {
+      "case_ref": "money_scale_four",
+      "label": "Scale is preserved as meaning",
+      "literal": "120.3400",
+      "scale": 4
+    },
+    {
+      "case_ref": "negative_amount",
+      "label": "Negative canonical literal",
+      "literal": "-12.50",
+      "scale": 2
+    }
+  ],
+  "operation_examples": [
+    {
+      "case_ref": "add_preserves_max_scale",
+      "label": "Addition uses the maximum operand scale by default",
+      "operation": "ADD",
+      "left": "1.20",
+      "right": "0.003",
+      "expected": "1.203"
+    },
+    {
+      "case_ref": "add_with_explicit_scale",
+      "label": "Explicit scale keeps fixed money shape",
+      "operation": "ADD",
+      "left": "1.20",
+      "right": "0.30",
+      "explicit_scale": 2,
+      "expected": "1.50"
+    },
+    {
+      "case_ref": "subtract_preserves_exactness",
+      "label": "Subtraction stays exact",
+      "operation": "SUBTRACT",
+      "left": "5.50",
+      "right": "1.25",
+      "expected": "4.25"
+    }
+  ],
+  "comparison_examples": [
+    {
+      "case_ref": "scale_is_meaningful",
+      "label": "Different scales can be numerically equal but representationally distinct",
+      "left": "1.20",
+      "right": "1.2",
+      "expected_numeric_relation": "EQUAL",
+      "expected_representation_equal": false
+    }
+  ]
+}

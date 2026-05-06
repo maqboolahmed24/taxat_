@@ -23,18 +23,10 @@ import {
   type PortalCheckpointAtlasViewModel,
 } from "../../src/providers/shared/flows/capture_manual_checkpoint_evidence.js";
 
-const repoRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "..",
-  "..",
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
 
 async function readJson<T>(segments: string[]): Promise<T> {
-  return JSON.parse(
-    await readFile(path.join(repoRoot, ...segments), "utf8"),
-  ) as T;
+  return JSON.parse(await readFile(path.join(repoRoot, ...segments), "utf8")) as T;
 }
 
 test("checked-in manual checkpoint policy pack and atlas match the builders", async () => {
@@ -60,21 +52,13 @@ test("checked-in manual checkpoint policy pack and atlas match the builders", as
   ]);
   const sampleRun = await readJson<{
     portalCheckpointAtlas: PortalCheckpointAtlasViewModel;
-  }>([
-    "automation",
-    "provisioning",
-    "report_viewer",
-    "data",
-    "sample_run.json",
-  ]);
+  }>(["automation", "provisioning", "report_viewer", "data", "sample_run.json"]);
 
   expect(reasonCodes).toEqual(createManualCheckpointReasonCodes());
   expect(resumePolicy).toEqual(createBlockedPortalResumePolicy());
   expect(redactionPolicy).toEqual(createCheckpointRedactionPolicy());
   expect(checkpointTemplate).toEqual(createRecommendedManualCheckpointRecordTemplate());
-  expect(sampleRun.portalCheckpointAtlas).toEqual(
-    createPortalCheckpointAtlasViewModel(),
-  );
+  expect(sampleRun.portalCheckpointAtlas).toEqual(createPortalCheckpointAtlasViewModel());
 });
 
 test("manual checkpoint pack fails closed on unknown challenges and rejects sensitive persistence", () => {

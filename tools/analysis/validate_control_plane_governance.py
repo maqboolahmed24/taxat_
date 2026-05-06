@@ -57,8 +57,16 @@ def main() -> int:
 
     outputs = builder.build_outputs()
 
-    compare_json(builder.ARTIFACT_INVENTORY_PATH, outputs["artifact_inventory"], "control_plane_artifact_inventory.json")
-    compare_json(builder.REPLAY_CLASS_MATRIX_PATH, outputs["replay_class_matrix"], "replay_class_and_precondition_matrix.json")
+    compare_json(
+        builder.ARTIFACT_INVENTORY_PATH,
+        outputs["artifact_inventory"],
+        "control_plane_artifact_inventory.json",
+    )
+    compare_json(
+        builder.REPLAY_CLASS_MATRIX_PATH,
+        outputs["replay_class_matrix"],
+        "replay_class_and_precondition_matrix.json",
+    )
     compare_json(
         builder.REPLAY_COMPARISON_MATRIX_PATH,
         outputs["replay_comparison_matrix"],
@@ -164,13 +172,19 @@ def main() -> int:
     }
     missing_artifacts = required_artifacts - artifact_names
     if missing_artifacts:
-        fail(f"Artifact inventory is missing required control-plane artifacts: {sorted(missing_artifacts)}")
+        fail(
+            f"Artifact inventory is missing required control-plane artifacts: {sorted(missing_artifacts)}"
+        )
 
     replay_matrix = outputs["replay_class_matrix"]
     replay_classes = unique_values(replay_matrix["replay_classes"], "replay_class")
     if replay_classes != set(builder.REPLAY_CLASS_ENUM):
-        fail(f"Replay class coverage drifted: expected {sorted(builder.REPLAY_CLASS_ENUM)}, got {sorted(replay_classes)}")
-    precondition_codes = unique_values(replay_matrix["exact_replay_preconditions"], "precondition_code")
+        fail(
+            f"Replay class coverage drifted: expected {sorted(builder.REPLAY_CLASS_ENUM)}, got {sorted(replay_classes)}"
+        )
+    precondition_codes = unique_values(
+        replay_matrix["exact_replay_preconditions"], "precondition_code"
+    )
     expected_precondition_codes = {code for code, _ in builder.REPLAY_PRECONDITION_SPECS}
     if precondition_codes != expected_precondition_codes:
         fail(
@@ -182,62 +196,82 @@ def main() -> int:
         fail("Counterfactual replay mutation isolation posture is missing.")
 
     comparison_matrix = outputs["replay_comparison_matrix"]
-    if unique_values(comparison_matrix["comparison_modes"], "comparison_mode") != set(builder.COMPARISON_MODE_ENUM):
+    if unique_values(comparison_matrix["comparison_modes"], "comparison_mode") != set(
+        builder.COMPARISON_MODE_ENUM
+    ):
         fail("Replay comparison mode coverage drifted.")
-    if unique_values(comparison_matrix["basis_validation_states"], "basis_validation_state") != set(builder.BASIS_VALIDATION_ENUM):
+    if unique_values(comparison_matrix["basis_validation_states"], "basis_validation_state") != set(
+        builder.BASIS_VALIDATION_ENUM
+    ):
         fail("Basis validation state coverage drifted.")
-    if unique_values(comparison_matrix["basis_identity_verdicts"], "basis_identity_verdict") != set(builder.BASIS_IDENTITY_ENUM):
+    if unique_values(comparison_matrix["basis_identity_verdicts"], "basis_identity_verdict") != set(
+        builder.BASIS_IDENTITY_ENUM
+    ):
         fail("Basis identity verdict coverage drifted.")
-    if (
-        unique_values(comparison_matrix["deterministic_equivalence_verdicts"], "deterministic_equivalence_verdict")
-        != set(builder.EQUIVALENCE_ENUM)
-    ):
+    if unique_values(
+        comparison_matrix["deterministic_equivalence_verdicts"], "deterministic_equivalence_verdict"
+    ) != set(builder.EQUIVALENCE_ENUM):
         fail("Deterministic equivalence verdict coverage drifted.")
-    if unique_values(comparison_matrix["outcome_classes"], "outcome_class") != set(builder.OUTCOME_CLASS_ENUM):
-        fail("Replay outcome class coverage drifted.")
-    if unique_values(comparison_matrix["variance_taxonomy"], "variance_class") != set(builder.REPLAY_VARIANCE_TAXONOMY):
-        fail("Replay variance taxonomy coverage drifted.")
-    if unique_values(comparison_matrix["attestation_confidence_bands"], "attestation_confidence_band") != set(
-        builder.ATTESTATION_CONFIDENCE_BANDS
+    if unique_values(comparison_matrix["outcome_classes"], "outcome_class") != set(
+        builder.OUTCOME_CLASS_ENUM
     ):
+        fail("Replay outcome class coverage drifted.")
+    if unique_values(comparison_matrix["variance_taxonomy"], "variance_class") != set(
+        builder.REPLAY_VARIANCE_TAXONOMY
+    ):
+        fail("Replay variance taxonomy coverage drifted.")
+    if unique_values(
+        comparison_matrix["attestation_confidence_bands"], "attestation_confidence_band"
+    ) != set(builder.ATTESTATION_CONFIDENCE_BANDS):
         fail("Replay attestation confidence-band coverage drifted.")
 
     claim_branch_matrix = outputs["claim_branch_matrix"]
-    if unique_values(claim_branch_matrix["claim_outcomes"], "claim_outcome") != set(builder.CLAIM_OUTCOMES):
+    if unique_values(claim_branch_matrix["claim_outcomes"], "claim_outcome") != set(
+        builder.CLAIM_OUTCOMES
+    ):
         fail("Manifest start-claim outcome coverage drifted.")
-    if unique_values(claim_branch_matrix["branch_actions"], "branch_action") != set(builder.BRANCH_ACTIONS):
+    if unique_values(claim_branch_matrix["branch_actions"], "branch_action") != set(
+        builder.BRANCH_ACTIONS
+    ):
         fail("Manifest branch action coverage drifted.")
-    if unique_values(claim_branch_matrix["branch_reason_codes"], "branch_reason_code") != set(builder.BRANCH_REASON_CODES):
+    if unique_values(claim_branch_matrix["branch_reason_codes"], "branch_reason_code") != set(
+        builder.BRANCH_REASON_CODES
+    ):
         fail("Manifest branch reason coverage drifted.")
-    if unique_values(claim_branch_matrix["frozen_identity_inputs"], "frozen_identity_input") != set(builder.FROZEN_IDENTITY_INPUTS):
+    if unique_values(claim_branch_matrix["frozen_identity_inputs"], "frozen_identity_input") != set(
+        builder.FROZEN_IDENTITY_INPUTS
+    ):
         fail("Frozen branch identity input coverage drifted.")
 
     nightly_selection_matrix = outputs["nightly_selection_matrix"]
-    if unique_values(nightly_selection_matrix["trigger_classes"], "trigger_class") != set(builder.NIGHTLY_TRIGGER_ENUM):
-        fail("Nightly trigger class coverage drifted.")
-    if unique_values(nightly_selection_matrix["selection_dispositions"], "selection_disposition") != set(
-        builder.SELECTION_DISPOSITION_ENUM
+    if unique_values(nightly_selection_matrix["trigger_classes"], "trigger_class") != set(
+        builder.NIGHTLY_TRIGGER_ENUM
     ):
+        fail("Nightly trigger class coverage drifted.")
+    if unique_values(
+        nightly_selection_matrix["selection_dispositions"], "selection_disposition"
+    ) != set(builder.SELECTION_DISPOSITION_ENUM):
         fail("Nightly selection disposition coverage drifted.")
     if unique_values(
         nightly_selection_matrix["terminal_result_reuse_states"], "terminal_result_reuse_state"
     ) != set(builder.TERMINAL_REUSE_ENUM):
         fail("Nightly terminal-result reuse-state coverage drifted.")
     if unique_values(
-        nightly_selection_matrix["active_attempt_resolution_states"], "active_attempt_resolution_state"
+        nightly_selection_matrix["active_attempt_resolution_states"],
+        "active_attempt_resolution_state",
     ) != set(builder.ACTIVE_ATTEMPT_RESOLUTION_ENUM):
         fail("Nightly active-attempt resolution-state coverage drifted.")
-    if unique_values(nightly_selection_matrix["recovery_resume_states"], "recovery_resume_state") != set(
-        builder.NIGHTLY_RESUME_ENUM
-    ):
+    if unique_values(
+        nightly_selection_matrix["recovery_resume_states"], "recovery_resume_state"
+    ) != set(builder.NIGHTLY_RESUME_ENUM):
         fail("Nightly recovery-resume state coverage drifted.")
     if unique_values(nightly_selection_matrix["shard_failure_states"], "shard_state") != set(
         builder.NIGHTLY_SHARD_FAILURE_ENUM
     ):
         fail("Nightly shard-state coverage drifted.")
-    if unique_values(nightly_selection_matrix["quiescence_outcome_buckets"], "outcome_bucket") != set(
-        builder.NIGHTLY_OUTCOME_BUCKET_ENUM
-    ):
+    if unique_values(
+        nightly_selection_matrix["quiescence_outcome_buckets"], "outcome_bucket"
+    ) != set(builder.NIGHTLY_OUTCOME_BUCKET_ENUM):
         fail("Nightly outcome-bucket coverage drifted.")
 
     nightly_policy_matrix = outputs["nightly_policy_matrix"]
@@ -251,17 +285,22 @@ def main() -> int:
     }
     if actual_policy_cells != expected_policy_cells:
         fail("Nightly unattended policy-cell coverage drifted.")
-    if unique_values(nightly_policy_matrix["hard_boundaries"], "hard_boundary") != set(builder.NIGHTLY_HARD_BOUNDARIES):
+    if unique_values(nightly_policy_matrix["hard_boundaries"], "hard_boundary") != set(
+        builder.NIGHTLY_HARD_BOUNDARIES
+    ):
         fail("Nightly hard-boundary coverage drifted.")
     if unique_values(
-        nightly_policy_matrix["safe_customer_visible_requirements"], "safe_customer_visible_requirement"
+        nightly_policy_matrix["safe_customer_visible_requirements"],
+        "safe_customer_visible_requirement",
     ) != set(builder.SAFE_CUSTOMER_VISIBLE_REQUIREMENTS):
         fail("Safe customer-visible automation coverage drifted.")
-    if unique_values(nightly_policy_matrix["retry_classes"], "retry_class") != set(builder.NIGHTLY_RETRY_CLASSES):
-        fail("Nightly retry-class coverage drifted.")
-    if unique_values(nightly_policy_matrix["global_stop_conditions"], "global_stop_condition") != set(
-        builder.NIGHTLY_STOP_CONDITIONS
+    if unique_values(nightly_policy_matrix["retry_classes"], "retry_class") != set(
+        builder.NIGHTLY_RETRY_CLASSES
     ):
+        fail("Nightly retry-class coverage drifted.")
+    if unique_values(
+        nightly_policy_matrix["global_stop_conditions"], "global_stop_condition"
+    ) != set(builder.NIGHTLY_STOP_CONDITIONS):
         fail("Nightly global stop-condition coverage drifted.")
 
     recovery_matrix = outputs["recovery_matrix"]
@@ -273,9 +312,9 @@ def main() -> int:
         builder.REOPEN_READINESS_ENUM
     ):
         fail("Recovery reopen-readiness coverage drifted.")
-    if unique_values(recovery_matrix["privacy_reconciliation_states"], "privacy_reconciliation_state") != set(
-        builder.PRIVACY_RECONCILIATION_ENUM
-    ):
+    if unique_values(
+        recovery_matrix["privacy_reconciliation_states"], "privacy_reconciliation_state"
+    ) != set(builder.PRIVACY_RECONCILIATION_ENUM):
         fail("Restore privacy reconciliation coverage drifted.")
 
     resend_matrix = outputs["resend_matrix"]
@@ -285,13 +324,13 @@ def main() -> int:
         fail("No-blind-resend legality-state coverage drifted.")
 
     release_gate_matrix = outputs["release_gate_matrix"]
-    if unique_values(release_gate_matrix["candidate_identity_fields"], "candidate_identity_field") != set(
-        builder.RELEASE_CANDIDATE_REQUIRED
-    ):
+    if unique_values(
+        release_gate_matrix["candidate_identity_fields"], "candidate_identity_field"
+    ) != set(builder.RELEASE_CANDIDATE_REQUIRED):
         fail("Release candidate identity field coverage drifted.")
-    if unique_values(release_gate_matrix["compatibility_gate_fields"], "compatibility_gate_field") != set(
-        builder.COMPATIBILITY_GATE_REQUIRED
-    ):
+    if unique_values(
+        release_gate_matrix["compatibility_gate_fields"], "compatibility_gate_field"
+    ) != set(builder.COMPATIBILITY_GATE_REQUIRED):
         fail("Compatibility gate field coverage drifted.")
     required_evidence_artifacts = {
         "VerificationSuiteResult",
@@ -302,7 +341,10 @@ def main() -> int:
         "ReleaseVerificationManifest",
         "DeploymentRelease",
     }
-    if unique_values(release_gate_matrix["evidence_bindings"], "evidence_artifact") != required_evidence_artifacts:
+    if (
+        unique_values(release_gate_matrix["evidence_bindings"], "evidence_artifact")
+        != required_evidence_artifacts
+    ):
         fail("Release evidence-binding coverage drifted.")
 
     rollback_matrix = outputs["rollback_matrix"]
@@ -311,7 +353,8 @@ def main() -> int:
     ):
         fail("Rollback-boundary state coverage drifted.")
     rollout_pairs = {
-        (row["rollout_strategy"], row["rollout_state"]) for row in rollback_matrix["rollout_strategy_state_alignment"]
+        (row["rollout_strategy"], row["rollout_state"])
+        for row in rollback_matrix["rollout_strategy_state_alignment"]
     }
     required_rollout_pairs = {
         ("STANDARD_CANARY", "CANARY"),
@@ -333,7 +376,9 @@ def main() -> int:
         "shared_operating_contract_reference_missing_for_pc_0015",
     }
     if gap_ids != required_gap_ids:
-        fail(f"Explicit gap register drifted: expected {sorted(required_gap_ids)}, got {sorted(gap_ids)}")
+        fail(
+            f"Explicit gap register drifted: expected {sorted(required_gap_ids)}, got {sorted(gap_ids)}"
+        )
 
     summary = {
         "status": "PASS",

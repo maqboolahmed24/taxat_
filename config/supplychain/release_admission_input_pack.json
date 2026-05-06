@@ -1,0 +1,215 @@
+{
+  "schema_version": "1.0",
+  "pack_id": "release_admission_input_pack",
+  "candidate_identity_hash_inputs": [
+    {
+      "field_ref": "candidate_hash",
+      "description": "Stable candidate tuple hash used to reject mixed-candidate evidence."
+    },
+    {
+      "field_ref": "build_artifact_digest",
+      "description": "Digest-pinned build artifact subject that all evidence must bind to."
+    },
+    {
+      "field_ref": "source_revision",
+      "description": "Source revision that produced the artifact and evidence bundle."
+    },
+    {
+      "field_ref": "dependency_lock_ref",
+      "description": "Dependency lock digest or equivalent immutable lock reference."
+    },
+    {
+      "field_ref": "schema_bundle_hash",
+      "description": "Schema bundle hash when a release candidate depends on compatibility bundle state."
+    },
+    {
+      "field_ref": "provider_profile_set_hash",
+      "description": "Provider profile or release compatibility set hash assembled later in the promotion flow."
+    },
+    {
+      "field_ref": "workflow_run_ref",
+      "description": "Builder workflow reference used for attestation verification."
+    },
+    {
+      "field_ref": "builder_identity",
+      "description": "Verified builder identity issuing provenance and signature evidence."
+    },
+    {
+      "field_ref": "sbom_ref",
+      "description": "CycloneDX bundle reference."
+    },
+    {
+      "field_ref": "provenance_ref",
+      "description": "In-toto/SLSA provenance statement reference."
+    },
+    {
+      "field_ref": "signature_verification_result",
+      "description": "Verifier result proving trust root, leaf identity, and subject digest agreement."
+    },
+    {
+      "field_ref": "notarization_ref",
+      "description": "Required only for macOS desktop distribution targets."
+    }
+  ],
+  "target_profiles": [
+    {
+      "profile_ref": "admission.container-service",
+      "label": "Container service admission",
+      "target_refs": [
+        "target.northbound-api-session-gateway",
+        "target.manifest-orchestrator",
+        "target.stage-workers",
+        "target.read-projector-stream-broker"
+      ],
+      "distribution_targets": [
+        "CONTAINER_IMAGE"
+      ],
+      "required_fields": [
+        "candidate_hash",
+        "build_artifact_digest",
+        "source_revision",
+        "dependency_lock_ref",
+        "schema_bundle_hash",
+        "workflow_run_ref",
+        "builder_identity"
+      ],
+      "required_evidence": [
+        "digest_pinned_subject",
+        "signature_verification",
+        "provenance_ref",
+        "sbom_ref",
+        "vulnerability_gate_pass"
+      ],
+      "notarization_required": false,
+      "mixed_candidate_rejection": true,
+      "tag_only_reference_rejected": true,
+      "gate_posture": "REJECT_UNTIL_ALL_EVIDENCE_IS_PRESENT",
+      "notes": [
+        "Container release never uses tags as durable identity."
+      ]
+    },
+    {
+      "profile_ref": "admission.web-bundle",
+      "label": "Web bundle admission",
+      "target_refs": [
+        "target.operator-web-app",
+        "target.client-portal-web-app"
+      ],
+      "distribution_targets": [
+        "WEB_BUNDLE"
+      ],
+      "required_fields": [
+        "candidate_hash",
+        "build_artifact_digest",
+        "source_revision",
+        "dependency_lock_ref",
+        "schema_bundle_hash",
+        "workflow_run_ref",
+        "builder_identity"
+      ],
+      "required_evidence": [
+        "digest_pinned_subject",
+        "signature_verification",
+        "provenance_ref",
+        "sbom_ref",
+        "vulnerability_gate_pass"
+      ],
+      "notarization_required": false,
+      "mixed_candidate_rejection": true,
+      "tag_only_reference_rejected": true,
+      "gate_posture": "REJECT_UNTIL_ALL_EVIDENCE_IS_PRESENT",
+      "notes": [
+        "Retained browser bundles remain signed build artifacts, not loose deployment folders."
+      ]
+    },
+    {
+      "profile_ref": "admission.release-manifest",
+      "label": "Release manifest admission",
+      "target_refs": [
+        "target.desktop-release-channel"
+      ],
+      "distribution_targets": [
+        "SUPPLY_CHAIN_EVIDENCE"
+      ],
+      "required_fields": [
+        "candidate_hash",
+        "build_artifact_digest",
+        "source_revision",
+        "dependency_lock_ref",
+        "schema_bundle_hash",
+        "workflow_run_ref",
+        "builder_identity"
+      ],
+      "required_evidence": [
+        "digest_pinned_subject",
+        "signature_verification",
+        "provenance_ref"
+      ],
+      "notarization_required": false,
+      "mixed_candidate_rejection": true,
+      "tag_only_reference_rejected": true,
+      "gate_posture": "REJECT_IF_CANDIDATE_TUPLE_IS_INCOMPLETE",
+      "notes": [
+        "Release manifest inputs capture the authoritative candidate tuple and promotion decision inputs."
+      ]
+    },
+    {
+      "profile_ref": "admission.macos-desktop",
+      "label": "macOS desktop admission",
+      "target_refs": [
+        "target.native-macos-operator-client"
+      ],
+      "distribution_targets": [
+        "MACOS_DESKTOP"
+      ],
+      "required_fields": [
+        "candidate_hash",
+        "build_artifact_digest",
+        "source_revision",
+        "dependency_lock_ref",
+        "schema_bundle_hash",
+        "workflow_run_ref",
+        "builder_identity",
+        "notarization_ref"
+      ],
+      "required_evidence": [
+        "digest_pinned_subject",
+        "signature_verification",
+        "provenance_ref",
+        "sbom_ref",
+        "vulnerability_gate_pass",
+        "notarization_ref"
+      ],
+      "notarization_required": true,
+      "mixed_candidate_rejection": true,
+      "tag_only_reference_rejected": true,
+      "gate_posture": "FAIL_CLOSED_WITHOUT_CURRENT_NOTARIZATION",
+      "notes": [
+        "Native macOS promotion requires Developer ID signature verification and current notarization evidence."
+      ]
+    }
+  ],
+  "evidence_truth_statement": "Release admission depends on digest, signature, provenance, SBOM, and notarization evidence refs rather than CI dashboard state.",
+  "notes": [
+    "Mixed-candidate evidence is always rejected.",
+    "Unsigned or unverifiable artifacts remain unpromotable."
+  ],
+  "source_refs": [
+    {
+      "source_ref": "security_and_runtime_hardening_contract.md#release-integrity",
+      "rationale": "Release integrity requires digest, signature, provenance, and runtime verification instead of mutable CI dashboards."
+    },
+    {
+      "source_ref": "deployment_and_resilience_contract.md#promotion-pipeline",
+      "rationale": "Promotion copies exact tested digests forward and never redefines truth by mutable tag movement."
+    },
+    {
+      "source_ref": "verification_and_release_gates.md#supply-chain-evidence",
+      "rationale": "Release candidates require signature verification, provenance, SBOM, vulnerability posture, and notarization where applicable."
+    },
+    {
+      "source_ref": "release_candidate_identity_and_promotion_evidence_contract.md#candidate-tuple",
+      "rationale": "Mixed-candidate evidence must be rejected and candidate identity remains hash-based."
+    }
+  ]
+}

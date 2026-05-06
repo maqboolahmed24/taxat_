@@ -175,7 +175,9 @@ def extract_numbered_markdown_items(text: str) -> list[int]:
     return [int(match.group(1)) for match in re.finditer(r"(?m)^(\d+)\. ", text)]
 
 
-def parse_markdown_table_after_heading(text: str, heading: str) -> tuple[list[str], list[list[str]]]:
+def parse_markdown_table_after_heading(
+    text: str, heading: str
+) -> tuple[list[str], list[list[str]]]:
     start = text.find(heading)
     ensure(start != -1, f"Missing `{heading}` heading.")
 
@@ -324,7 +326,9 @@ def check_live_constraint_traceability_register() -> None:
         preload={
             "constraint_coverage_index.md": load_doc("constraint_coverage_index.md"),
             "README.md": load_doc("README.md"),
-            "architecture_coherence_guardrails.md": load_doc("architecture_coherence_guardrails.md"),
+            "architecture_coherence_guardrails.md": load_doc(
+                "architecture_coherence_guardrails.md"
+            ),
             "implementation_conventions.md": load_doc("implementation_conventions.md"),
             "test_vectors.md": load_doc("test_vectors.md"),
         },
@@ -334,10 +338,15 @@ def check_live_constraint_traceability_register() -> None:
     ordered_ids: list[str] = []
     entry_by_id: dict[str, dict[str, Any]] = {}
     for entry in entries:
-        ensure(isinstance(entry, dict), "constraint_traceability_register.json entries must be objects")
+        ensure(
+            isinstance(entry, dict), "constraint_traceability_register.json entries must be objects"
+        )
         constraint_id = entry.get("constraint_id")
         constraint_name = entry.get("constraint_name")
-        ensure(isinstance(constraint_id, str), "Each live constraint entry must keep a string constraint_id")
+        ensure(
+            isinstance(constraint_id, str),
+            "Each live constraint entry must keep a string constraint_id",
+        )
         ensure(
             constraint_id not in seen_ids,
             f"constraint_traceability_register.json duplicates `{constraint_id}`",
@@ -345,10 +354,15 @@ def check_live_constraint_traceability_register() -> None:
         seen_ids.add(constraint_id)
         ordered_ids.append(constraint_id)
         entry_by_id[constraint_id] = entry
-        ensure(isinstance(constraint_name, str) and constraint_name, f"{constraint_id} must keep constraint_name")
+        ensure(
+            isinstance(constraint_name, str) and constraint_name,
+            f"{constraint_id} must keep constraint_name",
+        )
         lowered_name = constraint_name.lower()
         ensure(
-            not any(phrase in lowered_name for phrase in CONSTRAINT_TRACEABILITY_STALE_NAME_PHRASES),
+            not any(
+                phrase in lowered_name for phrase in CONSTRAINT_TRACEABILITY_STALE_NAME_PHRASES
+            ),
             f"{constraint_id} must describe a live constraint, not stale defect phrasing",
         )
 
@@ -359,21 +373,32 @@ def check_live_constraint_traceability_register() -> None:
                 f"{constraint_id} must keep `{group_name}` as an array",
             )
             for ref in refs:
-                ensure(isinstance(ref, dict), f"{constraint_id} `{group_name}` refs must be objects")
+                ensure(
+                    isinstance(ref, dict), f"{constraint_id} `{group_name}` refs must be objects"
+                )
                 path = ref.get("path")
                 kind = ref.get("kind")
                 required_terms = ref.get("required_terms")
-                ensure(isinstance(path, str), f"{constraint_id} `{group_name}` refs must keep a string path")
+                ensure(
+                    isinstance(path, str),
+                    f"{constraint_id} `{group_name}` refs must keep a string path",
+                )
                 ensure(
                     kind in TRACEABILITY_ALLOWED_KINDS_BY_GROUP[group_name],
                     f"{constraint_id} `{group_name}` uses unsupported kind `{kind}`",
                 )
                 ensure(
-                    not (kind == "FORENSIC_HISTORY" and group_name not in TRACEABILITY_ALLOWED_HISTORY_GROUPS),
+                    not (
+                        kind == "FORENSIC_HISTORY"
+                        and group_name not in TRACEABILITY_ALLOWED_HISTORY_GROUPS
+                    ),
                     f"{constraint_id} must keep FORENSIC_HISTORY refs out of `{group_name}`",
                 )
                 ensure(
-                    not (kind == "FORENSIC_HISTORY" and path not in CONSTRAINT_TRACEABILITY_ALLOWED_HISTORICAL_PATHS),
+                    not (
+                        kind == "FORENSIC_HISTORY"
+                        and path not in CONSTRAINT_TRACEABILITY_ALLOWED_HISTORICAL_PATHS
+                    ),
                     f"{constraint_id} must keep FORENSIC_HISTORY refs limited to the forensic history docs",
                 )
                 ensure(
@@ -381,10 +406,15 @@ def check_live_constraint_traceability_register() -> None:
                     f"{constraint_id} `{group_name}` ref `{path}` must keep required_terms[]",
                 )
                 text = doc_cache.get(path)
-                ensure(text is not None, f"{constraint_id} references missing traceability path `{path}`")
+                ensure(
+                    text is not None,
+                    f"{constraint_id} references missing traceability path `{path}`",
+                )
                 lowered = text.lower()
                 missing_terms = [
-                    term for term in required_terms if not isinstance(term, str) or term.lower() not in lowered
+                    term
+                    for term in required_terms
+                    if not isinstance(term, str) or term.lower() not in lowered
                 ]
                 ensure(
                     not missing_terms,
@@ -499,7 +529,9 @@ def check_live_constraint_traceability_register() -> None:
         )
 
 
-def find_rule_by_const(rules: Iterable[dict[str, Any]], field: str, value: Any) -> dict[str, Any] | None:
+def find_rule_by_const(
+    rules: Iterable[dict[str, Any]], field: str, value: Any
+) -> dict[str, Any] | None:
     for rule in rules:
         rule_if = rule.get("if", {})
         properties = rule_if.get("properties", {})
@@ -509,7 +541,9 @@ def find_rule_by_const(rules: Iterable[dict[str, Any]], field: str, value: Any) 
     return None
 
 
-def find_rule_by_enum(rules: Iterable[dict[str, Any]], field: str, values: list[Any]) -> dict[str, Any] | None:
+def find_rule_by_enum(
+    rules: Iterable[dict[str, Any]], field: str, values: list[Any]
+) -> dict[str, Any] | None:
     for rule in rules:
         rule_if = rule.get("if", {})
         properties = rule_if.get("properties", {})
@@ -519,7 +553,9 @@ def find_rule_by_enum(rules: Iterable[dict[str, Any]], field: str, values: list[
     return None
 
 
-def find_rule_by_contains_const(rules: Iterable[dict[str, Any]], field: str, value: Any) -> dict[str, Any] | None:
+def find_rule_by_contains_const(
+    rules: Iterable[dict[str, Any]], field: str, value: Any
+) -> dict[str, Any] | None:
     for rule in rules:
         rule_if = rule.get("if", {})
         properties = rule_if.get("properties", {})
@@ -577,12 +613,14 @@ def check_shell_dominance_contract_binding(
 
     if expected_question_surface is not None:
         ensure(
-            local_props.get("dominant_question_surface_code", {}).get("const") == expected_question_surface,
+            local_props.get("dominant_question_surface_code", {}).get("const")
+            == expected_question_surface,
             f"{schema_name}.dominance_contract.dominant_question_surface_code must stay `{expected_question_surface}`",
         )
     if expected_action_surface is not None:
         ensure(
-            local_props.get("dominant_action_surface_code", {}).get("const") == expected_action_surface,
+            local_props.get("dominant_action_surface_code", {}).get("const")
+            == expected_action_surface,
             f"{schema_name}.dominance_contract.dominant_action_surface_code must stay `{expected_action_surface}`",
         )
     if expected_queue_policy is not None:
@@ -592,7 +630,8 @@ def check_shell_dominance_contract_binding(
         )
     if expected_support_surfaces is not None:
         ensure(
-            local_props.get("promoted_support_surface_code_or_null", {}).get("enum") == [*expected_support_surfaces, None],
+            local_props.get("promoted_support_surface_code_or_null", {}).get("enum")
+            == [*expected_support_surfaces, None],
             f"{schema_name}.dominance_contract promoted-support enum must stay {expected_support_surfaces} plus null",
         )
 
@@ -607,7 +646,9 @@ def check_shell_state_taxonomy_contract_binding(
     )
     fragment = schema["properties"]["state_taxonomy_contract"]
     ensure(
-        schema_uses_ref(fragment, "https://taxat.dev/schemas/shell_state_taxonomy_contract.schema.json"),
+        schema_uses_ref(
+            fragment, "https://taxat.dev/schemas/shell_state_taxonomy_contract.schema.json"
+        ),
         f"{schema_name}.state_taxonomy_contract must stay bound to shell_state_taxonomy_contract.schema.json",
     )
 
@@ -947,7 +988,8 @@ def check_authority_layer_boundary_contract_binding(
     )
     if expected_integration_capability is not None:
         ensure(
-            local_props.get("integration_capability", {}).get("const") == expected_integration_capability,
+            local_props.get("integration_capability", {}).get("const")
+            == expected_integration_capability,
             f"{schema_name}.authority_layer_boundary.integration_capability must stay `{expected_integration_capability}`",
         )
 
@@ -978,7 +1020,10 @@ def check_authority_ingress_proof_contract_binding(
     )
     if nullable:
         ensure(
-            any(isinstance(branch, dict) and branch.get("type") == "null" for branch in fragment.get("anyOf", [])),
+            any(
+                isinstance(branch, dict) and branch.get("type") == "null"
+                for branch in fragment.get("anyOf", [])
+            ),
             f"{schema_name}.authority_ingress_proof_contract must remain nullable only through explicit anyOf null branches.",
         )
 
@@ -1010,7 +1055,10 @@ def check_authority_reconciliation_control_contract_binding(
     )
     if nullable:
         ensure(
-            any(isinstance(branch, dict) and branch.get("type") == "null" for branch in fragment.get("anyOf", [])),
+            any(
+                isinstance(branch, dict) and branch.get("type") == "null"
+                for branch in fragment.get("anyOf", [])
+            ),
             f"{schema_name}.{field_name} must remain nullable only through explicit anyOf null branches.",
         )
 
@@ -1035,7 +1083,9 @@ def check_authority_sandbox_coverage_contract_binding(
     )
 
 
-def check_authority_ingress_correlation_contract_binding(schema: dict[str, Any], schema_name: str) -> None:
+def check_authority_ingress_correlation_contract_binding(
+    schema: dict[str, Any], schema_name: str
+) -> None:
     ensure(
         "authority_ingress_correlation_contract" in schema["required"],
         f"{schema_name} must require `authority_ingress_correlation_contract` for ingress explainability discipline",
@@ -1073,7 +1123,8 @@ AUTHORITY_TRUTH_STATE_VALUES = [
 def check_authority_ingress_proof_contract() -> None:
     schema = load_schema("authority_ingress_proof_contract.schema.json")
     ensure(
-        schema["properties"]["contract_version"].get("const") == "AUTHORITY_INGRESS_PROOF_CONTRACT_V1",
+        schema["properties"]["contract_version"].get("const")
+        == "AUTHORITY_INGRESS_PROOF_CONTRACT_V1",
         "authority_ingress_proof_contract contract_version must freeze AUTHORITY_INGRESS_PROOF_CONTRACT_V1",
     )
     ensure(
@@ -1103,8 +1154,13 @@ def check_authority_ingress_proof_contract() -> None:
         "authority_ingress_proof_contract.transport_memory_mutation_policy must forbid mutation from transport memory",
     )
 
-    not_applicable_rule = find_rule_by_const(schema["allOf"], "authenticated_channel_state", "NOT_APPLICABLE")
-    ensure(not_applicable_rule is not None, "authority_ingress_proof_contract missing NOT_APPLICABLE reset guard")
+    not_applicable_rule = find_rule_by_const(
+        schema["allOf"], "authenticated_channel_state", "NOT_APPLICABLE"
+    )
+    ensure(
+        not_applicable_rule is not None,
+        "authority_ingress_proof_contract missing NOT_APPLICABLE reset guard",
+    )
     not_applicable_then = not_applicable_rule["then"]["properties"]
     ensure(
         not_applicable_then["lineage_binding_basis"].get("const") == "NOT_APPLICABLE"
@@ -1134,7 +1190,9 @@ def check_authority_ingress_proof_contract() -> None:
         )
 
     bound_rule = find_rule_by_const(schema["allOf"], "correlation_status_or_null", "BOUND")
-    ensure(bound_rule is not None, "authority_ingress_proof_contract missing BOUND correlation guard")
+    ensure(
+        bound_rule is not None, "authority_ingress_proof_contract missing BOUND correlation guard"
+    )
     bound_then = bound_rule["then"]["properties"]
     ensure(
         bound_then["lineage_binding_basis"].get("enum")
@@ -1155,8 +1213,13 @@ def check_authority_ingress_proof_contract() -> None:
             f"authority_ingress_proof_contract BOUND correlation must require {field}",
         )
 
-    weak_rule = find_rule_by_const(schema["allOf"], "correlation_status_or_null", "BOUND_WITH_AUTHORITY_REFERENCE_ONLY")
-    ensure(weak_rule is not None, "authority_ingress_proof_contract missing BOUND_WITH_AUTHORITY_REFERENCE_ONLY guard")
+    weak_rule = find_rule_by_const(
+        schema["allOf"], "correlation_status_or_null", "BOUND_WITH_AUTHORITY_REFERENCE_ONLY"
+    )
+    ensure(
+        weak_rule is not None,
+        "authority_ingress_proof_contract missing BOUND_WITH_AUTHORITY_REFERENCE_ONLY guard",
+    )
     weak_then = weak_rule["then"]["properties"]
     ensure(
         weak_then["lineage_binding_basis"].get("const") == "AUTHORITY_REFERENCE_ONLY",
@@ -1209,7 +1272,8 @@ def check_authority_reconciliation_control_contract() -> None:
         "authority_reconciliation_control_contract must stay closed to ungoverned fields",
     )
     ensure(
-        schema["properties"]["contract_version"].get("const") == "AUTHORITY_RECONCILIATION_CONTROL_V1",
+        schema["properties"]["contract_version"].get("const")
+        == "AUTHORITY_RECONCILIATION_CONTROL_V1",
         "authority_reconciliation_control_contract.contract_version must freeze AUTHORITY_RECONCILIATION_CONTROL_V1",
     )
     ensure(
@@ -1222,7 +1286,8 @@ def check_authority_reconciliation_control_contract() -> None:
         "authority_reconciliation_control_contract.replay_resume_policy must freeze durable replay-resume reuse",
     )
     ensure(
-        schema["properties"]["blind_resend_policy"].get("const") == "BLOCK_ON_AMBIGUITY_OR_EXHAUSTION",
+        schema["properties"]["blind_resend_policy"].get("const")
+        == "BLOCK_ON_AMBIGUITY_OR_EXHAUSTION",
         "authority_reconciliation_control_contract.blind_resend_policy must freeze the no-blind-resend rule",
     )
 
@@ -1235,15 +1300,22 @@ def check_authority_reconciliation_control_contract() -> None:
         ),
         None,
     )
-    ensure(auto_rule is not None, "authority_reconciliation_control_contract missing automatic reconciliation guard")
+    ensure(
+        auto_rule is not None,
+        "authority_reconciliation_control_contract missing automatic reconciliation guard",
+    )
     ensure(
         auto_rule["then"]["properties"]["max_auto_reconciliation_attempts"].get("minimum") == 1
-        and auto_rule["then"]["properties"]["reconciliation_cadence_seconds_or_null"].get("type") == "integer",
+        and auto_rule["then"]["properties"]["reconciliation_cadence_seconds_or_null"].get("type")
+        == "integer",
         "authority_reconciliation_control_contract automatic reconciliation must require attempt budget and cadence",
     )
 
     active_rule = find_rule_by_const(schema["allOf"], "reconciliation_budget_state", "ACTIVE")
-    ensure(active_rule is not None, "authority_reconciliation_control_contract missing ACTIVE budget guard")
+    ensure(
+        active_rule is not None,
+        "authority_reconciliation_control_contract missing ACTIVE budget guard",
+    )
     ensure(
         active_rule["then"]["properties"]["next_reconciliation_at_or_null"].get("type") == "string"
         and active_rule["then"]["properties"]["escalation_state"].get("const") == "NOT_REQUIRED",
@@ -1251,19 +1323,27 @@ def check_authority_reconciliation_control_contract() -> None:
     )
 
     exhausted_rule = find_rule_by_const(schema["allOf"], "reconciliation_budget_state", "EXHAUSTED")
-    ensure(exhausted_rule is not None, "authority_reconciliation_control_contract missing EXHAUSTED budget guard")
+    ensure(
+        exhausted_rule is not None,
+        "authority_reconciliation_control_contract missing EXHAUSTED budget guard",
+    )
     ensure(
         exhausted_rule["then"]["properties"]["next_reconciliation_at_or_null"].get("type") == "null"
-        and exhausted_rule["then"]["properties"]["escalation_state"].get("const") == "READY_FOR_ESCALATION",
+        and exhausted_rule["then"]["properties"]["escalation_state"].get("const")
+        == "READY_FOR_ESCALATION",
         "authority_reconciliation_control_contract EXHAUSTED posture must clear next follow-up and open ready-for-escalation posture",
     )
 
     escalated_rule = find_rule_by_const(schema["allOf"], "reconciliation_budget_state", "ESCALATED")
-    ensure(escalated_rule is not None, "authority_reconciliation_control_contract missing ESCALATED budget guard")
+    ensure(
+        escalated_rule is not None,
+        "authority_reconciliation_control_contract missing ESCALATED budget guard",
+    )
     ensure(
         escalated_rule["then"]["properties"]["next_reconciliation_at_or_null"].get("type") == "null"
         and escalated_rule["then"]["properties"]["escalation_state"].get("const") == "ESCALATED"
-        and escalated_rule["then"]["properties"]["escalation_workflow_item_ref_or_null"].get("type") == "string",
+        and escalated_rule["then"]["properties"]["escalation_workflow_item_ref_or_null"].get("type")
+        == "string",
         "authority_reconciliation_control_contract ESCALATED posture must clear next follow-up and require escalation lineage",
     )
 
@@ -1275,11 +1355,13 @@ def check_authority_reconciliation_analytics_snapshot() -> None:
         "authority_reconciliation_analytics_snapshot must stay closed to ungoverned fields",
     )
     ensure(
-        schema["properties"]["artifact_type"].get("const") == "AuthorityReconciliationAnalyticsSnapshot",
+        schema["properties"]["artifact_type"].get("const")
+        == "AuthorityReconciliationAnalyticsSnapshot",
         "authority_reconciliation_analytics_snapshot.artifact_type must stay pinned",
     )
     ensure(
-        schema["properties"]["source_policy"].get("const") == "DURABLE_RECONCILIATION_CONTROL_CONTRACTS_ONLY",
+        schema["properties"]["source_policy"].get("const")
+        == "DURABLE_RECONCILIATION_CONTROL_CONTRACTS_ONLY",
         "authority_reconciliation_analytics_snapshot.source_policy must freeze durable-only derivation",
     )
     ensure(
@@ -1311,7 +1393,10 @@ def check_authority_reconciliation_analytics_snapshot() -> None:
         "authority_reconciliation_analytics_snapshot missing escalated_count=0 latency guard",
     )
     ensure(
-        escalated_zero_rule["then"]["properties"]["escalation_latency_seconds_p95_or_null"].get("type") == "null",
+        escalated_zero_rule["then"]["properties"]["escalation_latency_seconds_p95_or_null"].get(
+            "type"
+        )
+        == "null",
         "authority_reconciliation_analytics_snapshot escalated_count=0 must clear escalation latency p95",
     )
 
@@ -1323,7 +1408,8 @@ def check_authority_ingress_correlation_contract() -> None:
         "authority_ingress_correlation_contract must stay closed to ungoverned fields",
     )
     ensure(
-        schema["properties"]["contract_version"].get("const") == "AUTHORITY_INGRESS_CORRELATION_CONTRACT_V1",
+        schema["properties"]["contract_version"].get("const")
+        == "AUTHORITY_INGRESS_CORRELATION_CONTRACT_V1",
         "authority_ingress_correlation_contract.contract_version must freeze AUTHORITY_INGRESS_CORRELATION_CONTRACT_V1",
     )
     ensure(
@@ -1350,7 +1436,9 @@ def check_authority_ingress_correlation_contract() -> None:
         "authority_ingress_correlation_contract BOUND posture must freeze exact-match explainability",
     )
 
-    weak_rule = find_rule_by_const(schema["allOf"], "correlation_status", "BOUND_WITH_AUTHORITY_REFERENCE_ONLY")
+    weak_rule = find_rule_by_const(
+        schema["allOf"], "correlation_status", "BOUND_WITH_AUTHORITY_REFERENCE_ONLY"
+    )
     ensure(weak_rule is not None, "authority_ingress_correlation_contract missing weak-bind guard")
     weak_then = weak_rule["then"]["properties"]
     ensure(
@@ -1360,7 +1448,9 @@ def check_authority_ingress_correlation_contract() -> None:
     )
 
     ambiguous_rule = find_rule_by_const(schema["allOf"], "correlation_status", "AMBIGUOUS")
-    ensure(ambiguous_rule is not None, "authority_ingress_correlation_contract missing AMBIGUOUS guard")
+    ensure(
+        ambiguous_rule is not None, "authority_ingress_correlation_contract missing AMBIGUOUS guard"
+    )
     ambiguous_then = ambiguous_rule["then"]["properties"]
     ensure(
         ambiguous_then["comparison_set_state"].get("const") == "MULTI_MATCH"
@@ -1394,12 +1484,16 @@ def check_authority_layer_boundary_contract() -> None:
         "authority_layer_boundary_contract.binding_scope_class must preserve the frozen authority boundary scope enum",
     )
     ensure(
-        schema["properties"]["integration_capability"].get("enum") == ["INTERNAL_ONLY", "AUTHORITY_INTEGRATED"],
+        schema["properties"]["integration_capability"].get("enum")
+        == ["INTERNAL_ONLY", "AUTHORITY_INTEGRATED"],
         "authority_layer_boundary_contract.integration_capability must preserve the frozen internal-vs-authority enum",
     )
     for field, expected in (
         ("authority_truth_precedence_policy", "EXTERNAL_TRUTH_SUPERSEDES_INTERNAL_EXCEPTION"),
-        ("tenant_permission_substitution_policy", "INTERNAL_PERMISSION_NEVER_SUFFICIENT_FOR_AUTHORITY_MUTATION"),
+        (
+            "tenant_permission_substitution_policy",
+            "INTERNAL_PERMISSION_NEVER_SUFFICIENT_FOR_AUTHORITY_MUTATION",
+        ),
         ("link_delegation_independence_policy", "AUTHORITY_LINK_NEVER_PROVES_CLIENT_DELEGATION"),
         ("exceptional_scope_policy", "EXCEPTION_BOUND_TO_APPROVED_ACTION_CLIENT_AND_PARTITIONS"),
     ):
@@ -1420,14 +1514,20 @@ def check_authority_layer_boundary_contract() -> None:
         )
 
     human_gate_rule = find_rule_by_const(schema["allOf"], "human_gate_requirement", "NOT_REQUIRED")
-    ensure(human_gate_rule is not None, "authority_layer_boundary_contract missing NOT_REQUIRED human gate guard")
     ensure(
-        human_gate_rule["then"]["properties"]["human_gate_resolution_state"].get("const") == "NOT_REQUIRED",
+        human_gate_rule is not None,
+        "authority_layer_boundary_contract missing NOT_REQUIRED human gate guard",
+    )
+    ensure(
+        human_gate_rule["then"]["properties"]["human_gate_resolution_state"].get("const")
+        == "NOT_REQUIRED",
         "authority_layer_boundary_contract NOT_REQUIRED human gate posture must force resolution=NOT_REQUIRED",
     )
 
     service_rule = find_rule_by_const(schema["allOf"], "active_principal_class", "SERVICE")
-    ensure(service_rule is not None, "authority_layer_boundary_contract missing SERVICE reverse guard")
+    ensure(
+        service_rule is not None, "authority_layer_boundary_contract missing SERVICE reverse guard"
+    )
     ensure(
         service_rule["then"]["properties"]["human_gate_resolution_state"].get("enum")
         == ["NOT_REQUIRED", "PENDING_EVIDENCE"],
@@ -1439,8 +1539,13 @@ def check_authority_layer_boundary_contract() -> None:
         "authority_layer_boundary_contract SERVICE posture must force internal/system delegation basis",
     )
 
-    no_delegation_rule = find_rule_by_const(schema["allOf"], "client_delegation_state", "NOT_REQUIRED")
-    ensure(no_delegation_rule is not None, "authority_layer_boundary_contract missing NOT_REQUIRED delegation guard")
+    no_delegation_rule = find_rule_by_const(
+        schema["allOf"], "client_delegation_state", "NOT_REQUIRED"
+    )
+    ensure(
+        no_delegation_rule is not None,
+        "authority_layer_boundary_contract missing NOT_REQUIRED delegation guard",
+    )
     ensure(
         no_delegation_rule["then"]["properties"]["delegation_basis"].get("enum")
         == ["SELF_ACTING", "TENANT_INTERNAL", "SYSTEM_ASSIGNED"],
@@ -1456,18 +1561,28 @@ def check_authority_layer_boundary_contract() -> None:
         ),
         None,
     )
-    ensure(imported_rule is not None, "authority_layer_boundary_contract missing imported delegation freshness guard")
+    ensure(
+        imported_rule is not None,
+        "authority_layer_boundary_contract missing imported delegation freshness guard",
+    )
     ensure(
         imported_rule["then"]["properties"]["delegation_freshness_state"].get("enum")
         == ["CURRENT", "REVALIDATION_REQUIRED"],
         "authority_layer_boundary_contract imported delegation must constrain delegation_freshness_state",
     )
 
-    internal_only_rule = find_rule_by_const(schema["allOf"], "integration_capability", "INTERNAL_ONLY")
-    ensure(internal_only_rule is not None, "authority_layer_boundary_contract missing INTERNAL_ONLY reverse guard")
+    internal_only_rule = find_rule_by_const(
+        schema["allOf"], "integration_capability", "INTERNAL_ONLY"
+    )
     ensure(
-        internal_only_rule["then"]["properties"]["client_delegation_state"].get("const") == "NOT_REQUIRED"
-        and internal_only_rule["then"]["properties"]["authority_link_state"].get("const") == "NOT_REQUIRED",
+        internal_only_rule is not None,
+        "authority_layer_boundary_contract missing INTERNAL_ONLY reverse guard",
+    )
+    ensure(
+        internal_only_rule["then"]["properties"]["client_delegation_state"].get("const")
+        == "NOT_REQUIRED"
+        and internal_only_rule["then"]["properties"]["authority_link_state"].get("const")
+        == "NOT_REQUIRED",
         "authority_layer_boundary_contract INTERNAL_ONLY posture must clear delegation and authority-link requirements",
     )
 
@@ -1479,9 +1594,12 @@ def check_authority_layer_boundary_contract() -> None:
         "authority_layer_boundary_contract missing BOUNDED_INTERNAL_EXCEPTION reverse guard",
     )
     ensure(
-        exceptional_rule["then"]["properties"]["human_gate_resolution_state"].get("const") == "EVIDENCE_FROZEN",
+        exceptional_rule["then"]["properties"]["human_gate_resolution_state"].get("const")
+        == "EVIDENCE_FROZEN",
         "authority_layer_boundary_contract active exceptional authority must require frozen human-gate evidence",
     )
+
+
 FAILURE_RESOLUTION_CONTRACT_POLICIES_BY_ROLE = {
     "ERROR_RECORD": "ERROR_RETAINS_OWNER_NEXT_ACTION_AND_CHILD_LINKS",
     "REMEDIATION_TASK": "TASK_CLOSURE_DECLARES_EFFECT_ON_ERROR",
@@ -1669,7 +1787,8 @@ def check_failure_resolution_contract_binding(
         f"{schema_name}.failure_resolution_contract.lifecycle_role must stay `{expected_lifecycle_role}`",
     )
     ensure(
-        local_props.get("role_specific_binding_policy", {}).get("const") == expected_role_specific_binding_policy,
+        local_props.get("role_specific_binding_policy", {}).get("const")
+        == expected_role_specific_binding_policy,
         f"{schema_name}.failure_resolution_contract.role_specific_binding_policy must stay `{expected_role_specific_binding_policy}`",
     )
 
@@ -1711,7 +1830,9 @@ def check_state_transition_contract_binding(
     *,
     expected_object_family: str,
 ) -> None:
-    expected_machine_code, expected_state_field_name = STATE_TRANSITION_MACHINE_CODES[expected_object_family]
+    expected_machine_code, expected_state_field_name = STATE_TRANSITION_MACHINE_CODES[
+        expected_object_family
+    ]
     ensure(
         "state_transition_contract" in schema["required"],
         f"{schema_name} must require `state_transition_contract` for FE-46 named-transition governance",
@@ -1959,7 +2080,10 @@ def check_restore_privacy_reconciliation_contract_binding(
 
 def check_restore_privacy_reconciliation_contract() -> None:
     schema = load_schema("restore_privacy_reconciliation_contract.schema.json")
-    ensure(schema.get("additionalProperties") is False, "restore_privacy_reconciliation_contract must reject unknown fields")
+    ensure(
+        schema.get("additionalProperties") is False,
+        "restore_privacy_reconciliation_contract must reject unknown fields",
+    )
     ensure(
         schema["required"]
         == [
@@ -1989,7 +2113,8 @@ def check_restore_privacy_reconciliation_contract() -> None:
         "restore_privacy_reconciliation_contract must require the full BE-82 restore privacy reconciliation tuple",
     )
     ensure(
-        schema["properties"]["contract_version"].get("const") == "RESTORE_PRIVACY_RECONCILIATION_V1",
+        schema["properties"]["contract_version"].get("const")
+        == "RESTORE_PRIVACY_RECONCILIATION_V1",
         "restore_privacy_reconciliation_contract.contract_version must stay RESTORE_PRIVACY_RECONCILIATION_V1",
     )
     ensure(
@@ -2017,18 +2142,25 @@ def check_restore_privacy_reconciliation_contract() -> None:
         "restore_privacy_reconciliation_contract.compensating_re_erasure_state must keep the typed compensating re-erasure lifecycle",
     )
     ensure(
-        schema["properties"]["replay_limitation_state"].get("enum") == ["VERIFIED", "LIMITED_RECONCILED", "FAILED"]
+        schema["properties"]["replay_limitation_state"].get("enum")
+        == ["VERIFIED", "LIMITED_RECONCILED", "FAILED"]
         and schema["properties"]["enquiry_limitation_state"].get("enum")
         == ["VERIFIED", "LIMITED_RECONCILED", "FAILED"],
         "restore_privacy_reconciliation_contract limitation states must keep verified, limited, and failed postures",
     )
     ensure(
-        schema["properties"]["reopen_access_state"].get("enum") == ["BLOCKED", "LIMITED", "READY_FOR_REOPEN"],
+        schema["properties"]["reopen_access_state"].get("enum")
+        == ["BLOCKED", "LIMITED", "READY_FOR_REOPEN"],
         "restore_privacy_reconciliation_contract.reopen_access_state must keep the typed reopen boundary",
     )
 
-    pending_rule = find_rule_by_const(schema["allOf"], "privacy_reconciliation_state", "PENDING_RECONCILIATION")
-    ensure(pending_rule is not None, "restore_privacy_reconciliation_contract missing PENDING_RECONCILIATION guard")
+    pending_rule = find_rule_by_const(
+        schema["allOf"], "privacy_reconciliation_state", "PENDING_RECONCILIATION"
+    )
+    ensure(
+        pending_rule is not None,
+        "restore_privacy_reconciliation_contract missing PENDING_RECONCILIATION guard",
+    )
     pending_then = pending_rule["then"]["properties"]
     ensure(
         pending_then["resurrected_data_posture"].get("const") == "UNKNOWN_UNTIL_RECONCILED"
@@ -2112,7 +2244,10 @@ def check_restore_privacy_reconciliation_contract() -> None:
         ("BLOCKED_AUTHORITY_AMBIGUITY", "authority_ambiguity_ref_or_null"),
     ]:
         blocked_rule = find_rule_by_const(schema["allOf"], "privacy_reconciliation_state", state)
-        ensure(blocked_rule is not None, f"restore_privacy_reconciliation_contract missing {state} guard")
+        ensure(
+            blocked_rule is not None,
+            f"restore_privacy_reconciliation_contract missing {state} guard",
+        )
         blocked_then = blocked_rule["then"]["properties"]
         ensure(
             blocked_then["compensating_re_erasure_state"].get("const") == "BLOCKED"
@@ -2123,19 +2258,30 @@ def check_restore_privacy_reconciliation_contract() -> None:
             f"restore_privacy_reconciliation_contract {state} must keep its blocker ref, limited limitation posture, and limited reopen state",
         )
 
-    not_required_rule = find_rule_by_const(schema["allOf"], "compensating_re_erasure_state", "NOT_REQUIRED")
+    not_required_rule = find_rule_by_const(
+        schema["allOf"], "compensating_re_erasure_state", "NOT_REQUIRED"
+    )
     ensure(
         not_required_rule is not None,
         "restore_privacy_reconciliation_contract missing NOT_REQUIRED reverse guard",
     )
     ensure(
-        not_required_rule["then"]["properties"]["compensating_re_erasure_workflow_ref_or_null"].get("type") == "null"
-        and not_required_rule["then"]["properties"]["compensating_re_erasure_audit_ref_or_null"].get("type") == "null"
-        and not_required_rule["then"]["properties"]["re_erasure_completed_at_or_null"].get("type") == "null",
+        not_required_rule["then"]["properties"]["compensating_re_erasure_workflow_ref_or_null"].get(
+            "type"
+        )
+        == "null"
+        and not_required_rule["then"]["properties"][
+            "compensating_re_erasure_audit_ref_or_null"
+        ].get("type")
+        == "null"
+        and not_required_rule["then"]["properties"]["re_erasure_completed_at_or_null"].get("type")
+        == "null",
         "restore_privacy_reconciliation_contract compensating_re_erasure_state=NOT_REQUIRED must clear workflow, audit, and completion refs",
     )
 
-    audit_failed_rule = find_rule_by_const(schema["allOf"], "audit_chain_continuity_state", "FAILED")
+    audit_failed_rule = find_rule_by_const(
+        schema["allOf"], "audit_chain_continuity_state", "FAILED"
+    )
     ensure(
         audit_failed_rule is not None,
         "restore_privacy_reconciliation_contract missing audit_chain_continuity_state=FAILED reverse guard",
@@ -2176,7 +2322,8 @@ def check_restore_privacy_reconciliation_contract() -> None:
             (
                 candidate
                 for candidate in schema["allOf"]
-                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type") == "string"
+                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type")
+                == "string"
             ),
             None,
         )
@@ -2185,7 +2332,8 @@ def check_restore_privacy_reconciliation_contract() -> None:
             f"restore_privacy_reconciliation_contract missing reverse guard for {field}",
         )
         ensure(
-            blocker_rule["then"]["properties"]["privacy_reconciliation_state"].get("const") == expected_state,
+            blocker_rule["then"]["properties"]["privacy_reconciliation_state"].get("const")
+            == expected_state,
             f"restore_privacy_reconciliation_contract non-null {field} must force privacy_reconciliation_state={expected_state}",
         )
 
@@ -2268,7 +2416,8 @@ def check_execution_mode_boundary_contract_binding(
         )
     if expected_legal_effect_boundary is not None:
         ensure(
-            local_props.get("legal_effect_boundary", {}).get("const") == expected_legal_effect_boundary,
+            local_props.get("legal_effect_boundary", {}).get("const")
+            == expected_legal_effect_boundary,
             f"{schema_name}.{field_name}.legal_effect_boundary must stay `{expected_legal_effect_boundary}`",
         )
 
@@ -2358,7 +2507,15 @@ def check_execution_mode_boundary_contract() -> None:
     )
     ensure(
         properties["run_kind"].get("enum")
-        == ["INTERACTIVE", "NIGHTLY", "BACKFILL", "REPLAY", "REMEDIATION", "AMENDMENT", "MIGRATION"],
+        == [
+            "INTERACTIVE",
+            "NIGHTLY",
+            "BACKFILL",
+            "REPLAY",
+            "REMEDIATION",
+            "AMENDMENT",
+            "MIGRATION",
+        ],
         "execution_mode_boundary_contract.run_kind must stay aligned to the shared run-kind vocabulary",
     )
     ensure(
@@ -2389,7 +2546,10 @@ def check_execution_mode_boundary_contract() -> None:
     )
 
     compliance_rule = find_rule_by_const(schema["allOf"], "execution_mode", "COMPLIANCE")
-    ensure(compliance_rule is not None, "execution_mode_boundary_contract missing COMPLIANCE reverse guard")
+    ensure(
+        compliance_rule is not None,
+        "execution_mode_boundary_contract missing COMPLIANCE reverse guard",
+    )
     compliance_then = compliance_rule["then"]["properties"]
     ensure(
         compliance_then["analysis_only"].get("const") is False
@@ -2399,7 +2559,9 @@ def check_execution_mode_boundary_contract() -> None:
     )
 
     analysis_rule = find_rule_by_const(schema["allOf"], "execution_mode", "ANALYSIS")
-    ensure(analysis_rule is not None, "execution_mode_boundary_contract missing ANALYSIS reverse guard")
+    ensure(
+        analysis_rule is not None, "execution_mode_boundary_contract missing ANALYSIS reverse guard"
+    )
     analysis_then = analysis_rule["then"]["properties"]
     ensure(
         analysis_then["analysis_only"].get("const") is True
@@ -2408,7 +2570,9 @@ def check_execution_mode_boundary_contract() -> None:
     )
 
     replay_rule = find_rule_by_const(schema["allOf"], "run_kind", "REPLAY")
-    ensure(replay_rule is not None, "execution_mode_boundary_contract missing run_kind=REPLAY guard")
+    ensure(
+        replay_rule is not None, "execution_mode_boundary_contract missing run_kind=REPLAY guard"
+    )
     ensure(
         replay_rule["then"]["properties"]["replay_class_or_null"].get("enum")
         == ["STANDARD_REPLAY", "AUDIT_REPLAY", "COUNTERFACTUAL_ANALYSIS"],
@@ -2443,7 +2607,10 @@ def check_execution_mode_boundary_contract() -> None:
             rule
             for rule in schema["allOf"]
             if rule.get("if", {}).get("properties", {}).get("run_kind", {}).get("const") == "REPLAY"
-            and rule.get("if", {}).get("properties", {}).get("replay_class_or_null", {}).get("const")
+            and rule.get("if", {})
+            .get("properties", {})
+            .get("replay_class_or_null", {})
+            .get("const")
             == "COUNTERFACTUAL_ANALYSIS"
         ),
         None,
@@ -2565,9 +2732,13 @@ def check_nightly_batch_identity_contract() -> None:
         "nightly_batch_identity_contract.recovery_lineage_policy must freeze successor reclaim lineage",
     )
     recovery_rule = find_rule_by_const(schema["allOf"], "trigger_class", "RECOVERY_RECLAIM_WINDOW")
-    ensure(recovery_rule is not None, "nightly_batch_identity_contract missing recovery-trigger rule")
     ensure(
-        recovery_rule["then"]["properties"]["reclaimed_predecessor_batch_run_ref_or_null"].get("type")
+        recovery_rule is not None, "nightly_batch_identity_contract missing recovery-trigger rule"
+    )
+    ensure(
+        recovery_rule["then"]["properties"]["reclaimed_predecessor_batch_run_ref_or_null"].get(
+            "type"
+        )
         == "string"
         and recovery_rule["then"]["properties"]["recovery_resume_state"].get("enum")
         == [
@@ -2590,12 +2761,15 @@ def check_nightly_batch_identity_contract() -> None:
         "nightly_batch_identity_contract missing non-recovery reverse guard",
     )
     ensure(
-        non_recovery_rule["then"]["properties"]["reclaimed_predecessor_batch_run_ref_or_null"].get("type")
+        non_recovery_rule["then"]["properties"]["reclaimed_predecessor_batch_run_ref_or_null"].get(
+            "type"
+        )
         == "null",
         "nightly_batch_identity_contract non-recovery triggers must keep predecessor linkage null",
     )
     ensure(
-        non_recovery_rule["then"]["properties"]["recovery_resume_state"].get("const") == "NOT_APPLICABLE",
+        non_recovery_rule["then"]["properties"]["recovery_resume_state"].get("const")
+        == "NOT_APPLICABLE",
         "nightly_batch_identity_contract non-recovery triggers must keep recovery_resume_state=NOT_APPLICABLE",
     )
 
@@ -2674,11 +2848,17 @@ def check_operator_digest_derivation_contract() -> None:
         "operator_digest_derivation_contract.execution_mode_boundary_contract must stay bound to execution_mode_boundary_contract.schema.json",
     )
     ensure(
-        properties["execution_mode_boundary_contract"]["allOf"][1]["properties"]["run_kind"].get("const")
+        properties["execution_mode_boundary_contract"]["allOf"][1]["properties"]["run_kind"].get(
+            "const"
+        )
         == "NIGHTLY"
-        and properties["execution_mode_boundary_contract"]["allOf"][1]["properties"]["execution_posture"].get("const")
+        and properties["execution_mode_boundary_contract"]["allOf"][1]["properties"][
+            "execution_posture"
+        ].get("const")
         == "LIVE_COMPLIANCE"
-        and properties["execution_mode_boundary_contract"]["allOf"][1]["properties"]["legal_effect_boundary"].get("const")
+        and properties["execution_mode_boundary_contract"]["allOf"][1]["properties"][
+            "legal_effect_boundary"
+        ].get("const")
         == "COMPLIANCE_CAPABLE",
         "operator_digest_derivation_contract.execution_mode_boundary_contract must pin nightly live-compliance posture",
     )
@@ -2736,7 +2916,8 @@ def check_operator_digest_derivation_contract() -> None:
         "operator_digest_derivation_contract missing published-workflow completion rule",
     )
     ensure(
-        workflow_complete_rule["then"]["properties"]["published_workflow_item_count"].get("minimum") == 1,
+        workflow_complete_rule["then"]["properties"]["published_workflow_item_count"].get("minimum")
+        == 1,
         "operator_digest_derivation_contract published-workflow state must require a positive workflow item count",
     )
     no_workflow_rule = find_rule_by_const(
@@ -2751,7 +2932,10 @@ def check_operator_digest_derivation_contract() -> None:
         "operator_digest_derivation_contract no-unresolved-items state must force zero published workflow items",
     )
     initial_rule = find_rule_by_const(schema["allOf"], "supersession_state", "INITIAL_PUBLICATION")
-    ensure(initial_rule is not None, "operator_digest_derivation_contract missing initial-publication guard")
+    ensure(
+        initial_rule is not None,
+        "operator_digest_derivation_contract missing initial-publication guard",
+    )
     ensure(
         initial_rule["then"]["properties"]["publication_generation"].get("const") == 1,
         "operator_digest_derivation_contract initial publication must force publication_generation=1",
@@ -2760,7 +2944,9 @@ def check_operator_digest_derivation_contract() -> None:
         initial_rule["then"]["properties"]["supersession_reason_codes"].get("maxItems") == 0,
         "operator_digest_derivation_contract initial publication must clear supersession_reason_codes",
     )
-    recovery_rule = find_rule_by_const(schema["allOf"], "supersession_state", "RECOVERY_SUPERSESSION")
+    recovery_rule = find_rule_by_const(
+        schema["allOf"], "supersession_state", "RECOVERY_SUPERSESSION"
+    )
     ensure(
         recovery_rule is not None,
         "operator_digest_derivation_contract missing recovery-supersession guard",
@@ -2821,7 +3007,9 @@ def check_release_candidate_identity_contract() -> None:
         "suite_context_policy",
         "admissibility_binding_policy",
     ]:
-        ensure(field in schema["required"], f"release_candidate_identity_contract must require {field}")
+        ensure(
+            field in schema["required"], f"release_candidate_identity_contract must require {field}"
+        )
     check_min_length_fields(
         schema,
         [
@@ -2888,7 +3076,10 @@ def check_schema_bundle_compatibility_gate_contract() -> None:
         "client_persistence_policy",
         "evidence_binding_policy",
     ]:
-        ensure(field in schema["required"], f"schema_bundle_compatibility_gate_contract must require {field}")
+        ensure(
+            field in schema["required"],
+            f"schema_bundle_compatibility_gate_contract must require {field}",
+        )
     check_min_length_fields(
         schema,
         [
@@ -2900,7 +3091,8 @@ def check_schema_bundle_compatibility_gate_contract() -> None:
         "schema_bundle_compatibility_gate_contract",
     )
     ensure(
-        schema["properties"]["contract_version"].get("const") == "SCHEMA_BUNDLE_COMPATIBILITY_GATE_V1",
+        schema["properties"]["contract_version"].get("const")
+        == "SCHEMA_BUNDLE_COMPATIBILITY_GATE_V1",
         "schema_bundle_compatibility_gate_contract.contract_version must stay SCHEMA_BUNDLE_COMPATIBILITY_GATE_V1",
     )
     ensure(
@@ -2924,7 +3116,10 @@ def check_schema_bundle_compatibility_gate_contract() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("migration_plan_ref_or_null", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("migration_plan_ref_or_null", {})
+            .get("type")
             == "null"
         ),
         None,
@@ -2934,7 +3129,8 @@ def check_schema_bundle_compatibility_gate_contract() -> None:
         "schema_bundle_compatibility_gate_contract missing no-migration reverse guard",
     )
     ensure(
-        no_migration_rule["then"]["properties"]["migration_chronology_state"].get("const") == "NOT_REQUIRED",
+        no_migration_rule["then"]["properties"]["migration_chronology_state"].get("const")
+        == "NOT_REQUIRED",
         "schema_bundle_compatibility_gate_contract null migration plan must force NOT_REQUIRED chronology",
     )
 
@@ -2942,7 +3138,10 @@ def check_schema_bundle_compatibility_gate_contract() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("supported_client_window_ref_or_null", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("supported_client_window_ref_or_null", {})
+            .get("type")
             == "null"
         ),
         None,
@@ -2952,7 +3151,8 @@ def check_schema_bundle_compatibility_gate_contract() -> None:
         "schema_bundle_compatibility_gate_contract missing null supported-client reverse guard",
     )
     ensure(
-        client_null_rule["then"]["properties"]["native_client_window_state"].get("const") == "NOT_APPLICABLE",
+        client_null_rule["then"]["properties"]["native_client_window_state"].get("const")
+        == "NOT_APPLICABLE",
         "schema_bundle_compatibility_gate_contract null supported client window must force NOT_APPLICABLE native posture",
     )
 
@@ -2965,16 +3165,26 @@ def check_schema_bundle_compatibility_gate_contract() -> None:
             "VERIFIED_PREVIOUS_READERS_SUPPORTED",
         ],
     )
-    ensure(open_window_rule is not None, "schema_bundle_compatibility_gate_contract missing open-window guard")
     ensure(
-        open_window_rule["then"]["properties"]["rollback_boundary_state"].get("const") == "ROLLBACK_ALLOWED",
+        open_window_rule is not None,
+        "schema_bundle_compatibility_gate_contract missing open-window guard",
+    )
+    ensure(
+        open_window_rule["then"]["properties"]["rollback_boundary_state"].get("const")
+        == "ROLLBACK_ALLOWED",
         "schema_bundle_compatibility_gate_contract open reader windows must force ROLLBACK_ALLOWED",
     )
 
-    closed_window_rule = find_rule_by_const(schema["allOf"], "reader_window_state", "CONTRACT_ELIGIBLE_WINDOW_CLOSED")
-    ensure(closed_window_rule is not None, "schema_bundle_compatibility_gate_contract missing closed-window guard")
+    closed_window_rule = find_rule_by_const(
+        schema["allOf"], "reader_window_state", "CONTRACT_ELIGIBLE_WINDOW_CLOSED"
+    )
     ensure(
-        closed_window_rule["then"]["properties"]["rollback_boundary_state"].get("const") == "FAIL_FORWARD_ONLY",
+        closed_window_rule is not None,
+        "schema_bundle_compatibility_gate_contract missing closed-window guard",
+    )
+    ensure(
+        closed_window_rule["then"]["properties"]["rollback_boundary_state"].get("const")
+        == "FAIL_FORWARD_ONLY",
         "schema_bundle_compatibility_gate_contract closed reader windows must force FAIL_FORWARD_ONLY",
     )
 
@@ -3087,7 +3297,8 @@ def check_release_verification_manifest_assembly_contract() -> None:
         "release_verification_manifest_assembly_contract missing compatibility-gate hash family rule",
     )
     ensure(
-        compatibility_rule["then"]["properties"]["compatibility_gate_hash_or_null"].get("type") == "string",
+        compatibility_rule["then"]["properties"]["compatibility_gate_hash_or_null"].get("type")
+        == "string",
         "release_verification_manifest_assembly_contract schema, migration, and operator-client gate bindings must require compatibility_gate_hash_or_null",
     )
     authority_rule = find_rule_by_const(gate_binding["allOf"], "suite_family", "AUTHORITY_SANDBOX")
@@ -3107,13 +3318,18 @@ def check_release_verification_manifest_assembly_contract() -> None:
     )
     ensure(
         approved_rule["then"]["properties"]["approval_ref_or_null"].get("type") == "string"
-        and approved_rule["then"]["properties"]["deployment_release_ref_or_null"].get("type") == "string"
-        and approved_rule["then"]["properties"]["canary_summary_ref_or_null"].get("type") == "string"
+        and approved_rule["then"]["properties"]["deployment_release_ref_or_null"].get("type")
+        == "string"
+        and approved_rule["then"]["properties"]["canary_summary_ref_or_null"].get("type")
+        == "string"
         and approved_rule["then"]["properties"]["deterministic_golden_pack_ref_or_null"].get("type")
         == "string"
         and approved_rule["then"]["properties"]["restore_drill_ref_or_null"].get("type") == "string"
-        and approved_rule["then"]["properties"]["restore_checkpoint_ref_or_null"].get("type") == "string"
-        and approved_rule["then"]["properties"]["client_compatibility_matrix_ref_or_null"].get("type")
+        and approved_rule["then"]["properties"]["restore_checkpoint_ref_or_null"].get("type")
+        == "string"
+        and approved_rule["then"]["properties"]["client_compatibility_matrix_ref_or_null"].get(
+            "type"
+        )
         == "string",
         "release_verification_manifest_assembly_contract APPROVED must require approval, deployment, canary, deterministic, restore, and client-matrix evidence refs",
     )
@@ -3137,7 +3353,9 @@ def check_release_verification_manifest_assembly_contract() -> None:
         "release_verification_manifest_assembly_contract missing deterministic companion-evidence guard",
     )
     ensure(
-        deterministic_rule["then"]["properties"]["deterministic_golden_pack_ref_or_null"].get("type")
+        deterministic_rule["then"]["properties"]["deterministic_golden_pack_ref_or_null"].get(
+            "type"
+        )
         == "string",
         "release_verification_manifest_assembly_contract GREEN deterministic gate must require deterministic_golden_pack_ref_or_null",
     )
@@ -3158,9 +3376,9 @@ def check_release_verification_manifest_assembly_contract() -> None:
         "release_verification_manifest_assembly_contract missing deterministic_golden_pack_ref_or_null reverse guard",
     )
     ensure(
-        deterministic_reverse_rule["then"]["properties"]["gate_bindings"]["contains"]["properties"]["status"].get(
-            "const"
-        )
+        deterministic_reverse_rule["then"]["properties"]["gate_bindings"]["contains"]["properties"][
+            "status"
+        ].get("const")
         == "GREEN",
         "release_verification_manifest_assembly_contract non-null deterministic_golden_pack_ref_or_null must force a GREEN deterministic gate binding",
     )
@@ -3181,7 +3399,9 @@ def check_release_verification_manifest_assembly_contract() -> None:
         blocked_pending_rule["then"]["properties"]["approval_ref_or_null"].get("type") == "null"
         and blocked_pending_rule["then"]["properties"]["deployment_release_ref_or_null"].get("type")
         == "null"
-        and blocked_pending_rule["then"]["properties"]["superseded_by_verification_manifest_ref_or_null"].get("type")
+        and blocked_pending_rule["then"]["properties"][
+            "superseded_by_verification_manifest_ref_or_null"
+        ].get("type")
         == "null",
         "release_verification_manifest_assembly_contract PENDING/BLOCKED must clear approval, deployment, and supersession refs",
     )
@@ -3207,7 +3427,9 @@ def check_decision_explainability_contract() -> None:
         "plain_text_field_name",
         "plain_text_character_limit",
     ]:
-        ensure(field in schema["required"], f"decision_explainability_contract must require {field}")
+        ensure(
+            field in schema["required"], f"decision_explainability_contract must require {field}"
+        )
     check_min_length_fields(schema, ["dominant_reason_code"], "decision_explainability_contract")
     for field in ["ordered_reason_codes", "compressed_reason_codes", "semantic_qualifiers"]:
         ensure(
@@ -3219,7 +3441,8 @@ def check_decision_explainability_contract() -> None:
         "decision_explainability_contract.contract_version must stay DECISION_EXPLAINABILITY_V1",
     )
     ensure(
-        schema["properties"]["grammar_profile_code"].get("const") == "LOW_NOISE_DECISION_GRAMMAR_V1",
+        schema["properties"]["grammar_profile_code"].get("const")
+        == "LOW_NOISE_DECISION_GRAMMAR_V1",
         "decision_explainability_contract.grammar_profile_code must stay LOW_NOISE_DECISION_GRAMMAR_V1",
     )
     ensure(
@@ -3251,9 +3474,12 @@ def check_decision_explainability_contract() -> None:
         "decision_explainability_contract.plain_text_character_limit must stay 200",
     )
     gate_rule = find_rule_by_const(schema["allOf"], "artifact_family", "GATE_DECISION_RECORD")
-    ensure(gate_rule is not None, "decision_explainability_contract missing gate artifact-family guard")
     ensure(
-        gate_rule["then"]["properties"]["plain_text_field_name"].get("const") == "plain_explanation",
+        gate_rule is not None, "decision_explainability_contract missing gate artifact-family guard"
+    )
+    ensure(
+        gate_rule["then"]["properties"]["plain_text_field_name"].get("const")
+        == "plain_explanation",
         "decision_explainability_contract gate artifact family must force plain_explanation",
     )
     ensure(
@@ -3262,7 +3488,10 @@ def check_decision_explainability_contract() -> None:
         "decision_explainability_contract gate artifact family must constrain action projection posture",
     )
     trust_rule = find_rule_by_const(schema["allOf"], "artifact_family", "TRUST_SUMMARY")
-    ensure(trust_rule is not None, "decision_explainability_contract missing trust artifact-family guard")
+    ensure(
+        trust_rule is not None,
+        "decision_explainability_contract missing trust artifact-family guard",
+    )
     ensure(
         trust_rule["then"]["properties"]["plain_text_field_name"].get("const") == "plain_summary",
         "decision_explainability_contract trust artifact family must force plain_summary",
@@ -3272,7 +3501,10 @@ def check_decision_explainability_contract() -> None:
         "decision_explainability_contract trust artifact family must force action_projection_state=NONE",
     )
     bundle_rule = find_rule_by_const(schema["allOf"], "artifact_family", "DECISION_BUNDLE")
-    ensure(bundle_rule is not None, "decision_explainability_contract missing bundle artifact-family guard")
+    ensure(
+        bundle_rule is not None,
+        "decision_explainability_contract missing bundle artifact-family guard",
+    )
     ensure(
         bundle_rule["then"]["properties"]["plain_text_field_name"].get("const") == "plain_reason",
         "decision_explainability_contract bundle artifact family must force plain_reason",
@@ -3314,7 +3546,8 @@ def check_backfill_execution_contract() -> None:
         "backfill_execution_contract.contract_version must stay BACKFILL_EXECUTION_CONTRACT_V1",
     )
     ensure(
-        properties["idempotency_policy"].get("const") == "REENTRANT_UPSERT_OR_COMPARE_AND_SWAP_ONLY",
+        properties["idempotency_policy"].get("const")
+        == "REENTRANT_UPSERT_OR_COMPARE_AND_SWAP_ONLY",
         "backfill_execution_contract.idempotency_policy must freeze reentrant compare-and-swap discipline",
     )
     ensure(
@@ -3342,8 +3575,13 @@ def check_backfill_execution_contract() -> None:
         == ["NOT_APPLICABLE", "PLANNED", "IN_PROGRESS", "COMPLETE", "HALTED", "FAILED"],
         "backfill_execution_contract.execution_state must freeze the six lawful execution states",
     )
-    no_backfill_rule = find_rule_by_const(schema["allOf"], "execution_requirement", "NO_BACKFILL_REQUIRED")
-    ensure(no_backfill_rule is not None, "backfill_execution_contract missing NO_BACKFILL_REQUIRED guard")
+    no_backfill_rule = find_rule_by_const(
+        schema["allOf"], "execution_requirement", "NO_BACKFILL_REQUIRED"
+    )
+    ensure(
+        no_backfill_rule is not None,
+        "backfill_execution_contract missing NO_BACKFILL_REQUIRED guard",
+    )
     ensure(
         no_backfill_rule["then"]["properties"]["execution_state"].get("const") == "NOT_APPLICABLE"
         and no_backfill_rule["then"]["properties"]["affected_artifact_types"].get("maxItems") == 0
@@ -3353,11 +3591,15 @@ def check_backfill_execution_contract() -> None:
     required_backfill_rule = find_rule_by_const(
         schema["allOf"], "execution_requirement", "IDEMPOTENT_BACKFILL_REQUIRED"
     )
-    ensure(required_backfill_rule is not None, "backfill_execution_contract missing IDEMPOTENT_BACKFILL_REQUIRED guard")
+    ensure(
+        required_backfill_rule is not None,
+        "backfill_execution_contract missing IDEMPOTENT_BACKFILL_REQUIRED guard",
+    )
     ensure(
         required_backfill_rule["then"]["properties"]["execution_state"].get("enum")
         == ["PLANNED", "IN_PROGRESS", "COMPLETE", "HALTED", "FAILED"]
-        and required_backfill_rule["then"]["properties"]["affected_artifact_types"].get("minItems") == 1,
+        and required_backfill_rule["then"]["properties"]["affected_artifact_types"].get("minItems")
+        == 1,
         "backfill_execution_contract IDEMPOTENT_BACKFILL_REQUIRED must exclude NOT_APPLICABLE and require affected artifacts",
     )
     terminal_state_rule = next(
@@ -3369,7 +3611,10 @@ def check_backfill_execution_contract() -> None:
         ),
         None,
     )
-    ensure(terminal_state_rule is not None, "backfill_execution_contract missing terminal execution-state guard")
+    ensure(
+        terminal_state_rule is not None,
+        "backfill_execution_contract missing terminal execution-state guard",
+    )
     ensure(
         terminal_state_rule["then"]["properties"]["backfill_audit_refs"].get("minItems") == 1,
         "backfill_execution_contract terminal execution states must require audit refs",
@@ -3399,7 +3644,8 @@ def check_governance_interaction_layer_schema(
     )
     preserved_context_codes = interaction_layer["properties"]["preserved_context_codes"]
     ensure(
-        preserved_context_codes.get("minItems") == 1 and preserved_context_codes.get("uniqueItems") is True,
+        preserved_context_codes.get("minItems") == 1
+        and preserved_context_codes.get("uniqueItems") is True,
         f"{schema_name}.interactionLayer.preserved_context_codes must remain a non-empty unique list",
     )
     preserved_context_enum = preserved_context_codes["items"].get("enum", [])
@@ -3487,7 +3733,8 @@ def check_governance_interaction_layer() -> None:
         "governance_interaction_layer.export_binding_policy must stay pinned to ACTIVE_FILTERED_SLICE_GOVERNS_EXPORT",
     )
     ensure(
-        properties["keyboard_focus_policy"].get("const") == "RETURN_FOCUS_ANCHOR_OR_ROVING_SELECTION",
+        properties["keyboard_focus_policy"].get("const")
+        == "RETURN_FOCUS_ANCHOR_OR_ROVING_SELECTION",
         "governance_interaction_layer.keyboard_focus_policy must stay pinned to RETURN_FOCUS_ANCHOR_OR_ROVING_SELECTION",
     )
     ensure(
@@ -3573,7 +3820,8 @@ def check_shell_dominance_contract() -> None:
         "shell_dominance_contract.safe_action_state must freeze the safe-action vocabulary",
     )
     ensure(
-        properties["support_surface_role"].get("enum") == ["NONE", "SUBORDINATE", "INVESTIGATION", "RECOVERY"],
+        properties["support_surface_role"].get("enum")
+        == ["NONE", "SUBORDINATE", "INVESTIGATION", "RECOVERY"],
         "shell_dominance_contract.support_surface_role must freeze the subordinate support-role vocabulary",
     )
     ensure(
@@ -3594,7 +3842,8 @@ def check_shell_dominance_contract() -> None:
         "shell_dominance_contract.renderer_salience_policy must stay pinned to SERVER_AUTHORED_ONLY",
     )
     ensure(
-        properties["responsive_collapse_policy"].get("const") == "PRESERVE_DOMINANT_SUMMARY_AND_ACTION",
+        properties["responsive_collapse_policy"].get("const")
+        == "PRESERVE_DOMINANT_SUMMARY_AND_ACTION",
         "shell_dominance_contract.responsive_collapse_policy must stay pinned to PRESERVE_DOMINANT_SUMMARY_AND_ACTION",
     )
     ensure(
@@ -3602,15 +3851,25 @@ def check_shell_dominance_contract() -> None:
         "shell_dominance_contract.detached_support_policy must stay pinned to SUPPORT_ONLY_NEVER_PRIMARY",
     )
     none_rule = find_rule_by_const(schema["allOf"], "support_surface_role", "NONE")
-    ensure(none_rule is not None, "shell_dominance_contract missing support_surface_role=NONE clearing guard")
     ensure(
-        none_rule["then"]["properties"]["promoted_support_surface_code_or_null"].get("type") == "null",
+        none_rule is not None,
+        "shell_dominance_contract missing support_surface_role=NONE clearing guard",
+    )
+    ensure(
+        none_rule["then"]["properties"]["promoted_support_surface_code_or_null"].get("type")
+        == "null",
         "shell_dominance_contract support_surface_role=NONE must clear promoted_support_surface_code_or_null",
     )
-    multifocus_rule = find_rule_by_enum(schema["allOf"], "explicit_multifocus_mode", ["COMPARE", "AUDIT"])
-    ensure(multifocus_rule is not None, "shell_dominance_contract missing explicit compare/audit support-role guard")
+    multifocus_rule = find_rule_by_enum(
+        schema["allOf"], "explicit_multifocus_mode", ["COMPARE", "AUDIT"]
+    )
     ensure(
-        multifocus_rule["then"]["properties"]["support_surface_role"].get("enum") == ["INVESTIGATION", "RECOVERY"],
+        multifocus_rule is not None,
+        "shell_dominance_contract missing explicit compare/audit support-role guard",
+    )
+    ensure(
+        multifocus_rule["then"]["properties"]["support_surface_role"].get("enum")
+        == ["INVESTIGATION", "RECOVERY"],
         "shell_dominance_contract compare/audit modes must require an investigative or recovery support role",
     )
 
@@ -3652,12 +3911,26 @@ def check_shell_state_taxonomy_contract() -> None:
     )
     ensure(
         properties["current_settlement_state"].get("enum")
-        == ["STEADY", "RECEIPT_PENDING", "FRESHENING", "STALE_REVIEW_REQUIRED", "DEGRADED_READ_ONLY", "RECOVERY_REQUIRED"],
+        == [
+            "STEADY",
+            "RECEIPT_PENDING",
+            "FRESHENING",
+            "STALE_REVIEW_REQUIRED",
+            "DEGRADED_READ_ONLY",
+            "RECOVERY_REQUIRED",
+        ],
         "shell_state_taxonomy_contract.current_settlement_state must freeze the shared shell settlement vocabulary",
     )
     ensure(
         properties["current_recovery_posture"].get("enum")
-        == ["NONE", "INLINE_RECONNECT", "INLINE_REBASE", "READ_ONLY_LIMITED", "OBJECT_SUPERSEDED", "ACCESS_REBIND_REQUIRED"],
+        == [
+            "NONE",
+            "INLINE_RECONNECT",
+            "INLINE_REBASE",
+            "READ_ONLY_LIMITED",
+            "OBJECT_SUPERSEDED",
+            "ACCESS_REBIND_REQUIRED",
+        ],
         "shell_state_taxonomy_contract.current_recovery_posture must freeze the shared shell recovery vocabulary",
     )
     ensure(
@@ -3682,11 +3955,18 @@ def check_shell_state_taxonomy_contract() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("current_empty_state_or_null", {}).get("type") == "null"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("current_empty_state_or_null", {})
+            .get("type")
+            == "null"
         ),
         None,
     )
-    ensure(none_rule is not None, "shell_state_taxonomy_contract missing empty-state null clearing guard")
+    ensure(
+        none_rule is not None,
+        "shell_state_taxonomy_contract missing empty-state null clearing guard",
+    )
     ensure(
         none_rule["then"]["properties"]["current_empty_surface_code_or_null"].get("type") == "null"
         and none_rule["then"]["properties"]["limitation_reason_codes"].get("maxItems") == 0,
@@ -3699,27 +3979,43 @@ def check_shell_state_taxonomy_contract() -> None:
         "shell_state_taxonomy_contract LIMITED posture must require limitation_reason_codes[]",
     )
     freshening_rule = find_rule_by_const(schema["allOf"], "current_settlement_state", "FRESHENING")
-    ensure(freshening_rule is not None, "shell_state_taxonomy_contract missing FRESHENING mount-state guard")
     ensure(
-        freshening_rule["then"]["properties"]["mounted_context_state"].get("const") == "INLINE_REFRESH",
+        freshening_rule is not None,
+        "shell_state_taxonomy_contract missing FRESHENING mount-state guard",
+    )
+    ensure(
+        freshening_rule["then"]["properties"]["mounted_context_state"].get("const")
+        == "INLINE_REFRESH",
         "shell_state_taxonomy_contract FRESHENING must keep mounted_context_state=INLINE_REFRESH",
     )
-    stale_rule = find_rule_by_enum(schema["allOf"], "current_settlement_state", ["STALE_REVIEW_REQUIRED", "DEGRADED_READ_ONLY"])
-    ensure(stale_rule is not None, "shell_state_taxonomy_contract missing stale/degraded mount-state guard")
+    stale_rule = find_rule_by_enum(
+        schema["allOf"], "current_settlement_state", ["STALE_REVIEW_REQUIRED", "DEGRADED_READ_ONLY"]
+    )
     ensure(
-        stale_rule["then"]["properties"]["mounted_context_state"].get("const") == "READ_ONLY_PRESERVED",
+        stale_rule is not None,
+        "shell_state_taxonomy_contract missing stale/degraded mount-state guard",
+    )
+    ensure(
+        stale_rule["then"]["properties"]["mounted_context_state"].get("const")
+        == "READ_ONLY_PRESERVED",
         "shell_state_taxonomy_contract stale/degraded posture must keep mounted_context_state=READ_ONLY_PRESERVED",
     )
     superseded_rule = next(
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("current_recovery_posture", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("current_recovery_posture", {})
+            .get("const")
             == "OBJECT_SUPERSEDED"
         ),
         None,
     )
-    ensure(superseded_rule is not None, "shell_state_taxonomy_contract missing OBJECT_SUPERSEDED mount-state guard")
+    ensure(
+        superseded_rule is not None,
+        "shell_state_taxonomy_contract missing OBJECT_SUPERSEDED mount-state guard",
+    )
     ensure(
         superseded_rule["then"]["properties"]["mounted_context_state"].get("const") == "SUPERSEDED",
         "shell_state_taxonomy_contract OBJECT_SUPERSEDED posture must keep mounted_context_state=SUPERSEDED",
@@ -3788,7 +4084,12 @@ def check_cross_device_continuity_contract() -> None:
     )
     ensure(
         properties["allowed_embodiments"]["items"].get("enum")
-        == ["BROWSER_WIDE", "BROWSER_NARROW_STACKED", "NATIVE_PRIMARY_SCENE", "NATIVE_SUPPORT_WINDOW"],
+        == [
+            "BROWSER_WIDE",
+            "BROWSER_NARROW_STACKED",
+            "NATIVE_PRIMARY_SCENE",
+            "NATIVE_SUPPORT_WINDOW",
+        ],
         "cross_device_continuity_contract.allowed_embodiments must freeze the shared embodiment vocabulary",
     )
     ensure(
@@ -3849,7 +4150,8 @@ def check_cross_device_continuity_contract() -> None:
             f"cross_device_continuity_contract.{field} must stay pinned to {expected}",
         )
     ensure(
-        properties["secondary_window_policy"].get("enum") == ["NOT_APPLICABLE", "SUPPORT_ONLY_PARENT_BOUND"],
+        properties["secondary_window_policy"].get("enum")
+        == ["NOT_APPLICABLE", "SUPPORT_ONLY_PARENT_BOUND"],
         "cross_device_continuity_contract.secondary_window_policy must freeze the support-window policy vocabulary",
     )
     ensure(
@@ -3877,7 +4179,10 @@ def check_cross_device_continuity_contract() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("parent_context_ref_or_null", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("parent_context_ref_or_null", {})
+            .get("type")
             == "null"
         ),
         None,
@@ -3887,14 +4192,18 @@ def check_cross_device_continuity_contract() -> None:
         "cross_device_continuity_contract missing null parent-context clearing guard",
     )
     ensure(
-        null_parent_rule["then"]["properties"]["return_focus_anchor_ref_or_null"].get("type") == "null",
+        null_parent_rule["then"]["properties"]["return_focus_anchor_ref_or_null"].get("type")
+        == "null",
         "cross_device_continuity_contract null parent context must clear return_focus_anchor_ref_or_null",
     )
     parent_rule = next(
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("parent_context_ref_or_null", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("parent_context_ref_or_null", {})
+            .get("type")
             == "string"
         ),
         None,
@@ -3905,15 +4214,23 @@ def check_cross_device_continuity_contract() -> None:
     )
     ensure(
         parent_rule["then"]["properties"]["return_focus_anchor_ref_or_null"].get("type") == "string"
-        and parent_rule["then"]["properties"]["return_focus_anchor_ref_or_null"].get("minLength") == 1,
+        and parent_rule["then"]["properties"]["return_focus_anchor_ref_or_null"].get("minLength")
+        == 1,
         "cross_device_continuity_contract non-null parent context must require a non-empty return focus anchor",
     )
 
-    notification_rule = find_rule_by_const(schema["allOf"], "continuity_scope", "WORK_ITEM_NOTIFICATION")
-    ensure(notification_rule is not None, "cross_device_continuity_contract missing work-item notification scope guard")
+    notification_rule = find_rule_by_const(
+        schema["allOf"], "continuity_scope", "WORK_ITEM_NOTIFICATION"
+    )
     ensure(
-        notification_rule["then"]["properties"]["dominant_action_state_or_null"].get("type") == "null"
-        and notification_rule["then"]["properties"]["narrow_layout_policy"].get("const") == "NOT_APPLICABLE",
+        notification_rule is not None,
+        "cross_device_continuity_contract missing work-item notification scope guard",
+    )
+    ensure(
+        notification_rule["then"]["properties"]["dominant_action_state_or_null"].get("type")
+        == "null"
+        and notification_rule["then"]["properties"]["narrow_layout_policy"].get("const")
+        == "NOT_APPLICABLE",
         "cross_device_continuity_contract work-item notifications must clear dominant action and disable layout restacking",
     )
 
@@ -3926,18 +4243,28 @@ def check_cross_device_continuity_contract() -> None:
         ),
         None,
     )
-    ensure(native_scope_rule is not None, "cross_device_continuity_contract missing native layout guard")
     ensure(
-        native_scope_rule["then"]["properties"]["narrow_layout_policy"].get("const") == "NOT_APPLICABLE",
+        native_scope_rule is not None,
+        "cross_device_continuity_contract missing native layout guard",
+    )
+    ensure(
+        native_scope_rule["then"]["properties"]["narrow_layout_policy"].get("const")
+        == "NOT_APPLICABLE",
         "cross_device_continuity_contract native scopes must keep narrow_layout_policy=NOT_APPLICABLE",
     )
 
-    native_secondary_rule = find_rule_by_const(schema["allOf"], "continuity_scope", "NATIVE_SECONDARY_WINDOW")
-    ensure(native_secondary_rule is not None, "cross_device_continuity_contract missing secondary-window scope guard")
+    native_secondary_rule = find_rule_by_const(
+        schema["allOf"], "continuity_scope", "NATIVE_SECONDARY_WINDOW"
+    )
+    ensure(
+        native_secondary_rule is not None,
+        "cross_device_continuity_contract missing secondary-window scope guard",
+    )
     ensure(
         native_secondary_rule["then"]["properties"]["secondary_window_policy"].get("const")
         == "SUPPORT_ONLY_PARENT_BOUND"
-        and native_secondary_rule["then"]["properties"]["dominant_action_state_or_null"].get("type") == "null",
+        and native_secondary_rule["then"]["properties"]["dominant_action_state_or_null"].get("type")
+        == "null",
         "cross_device_continuity_contract native secondary windows must stay support-only and non-dominant",
     )
 
@@ -3950,21 +4277,37 @@ def check_cross_device_continuity_contract() -> None:
         ),
         None,
     )
-    ensure(route_guard_scope_rule is not None, "cross_device_continuity_contract missing manifest/governance basis guard")
+    ensure(
+        route_guard_scope_rule is not None,
+        "cross_device_continuity_contract missing manifest/governance basis guard",
+    )
     ensure(
         route_guard_scope_rule["then"]["properties"]["compatibility_basis_class"].get("const")
         == "ROUTE_GUARD_ONLY",
         "cross_device_continuity_contract manifest and governance scopes must stay ROUTE_GUARD_ONLY",
     )
 
-    route_guard_only_rule = find_rule_by_const(schema["allOf"], "compatibility_basis_class", "ROUTE_GUARD_ONLY")
-    ensure(route_guard_only_rule is not None, "cross_device_continuity_contract missing ROUTE_GUARD_ONLY basis guard")
+    route_guard_only_rule = find_rule_by_const(
+        schema["allOf"], "compatibility_basis_class", "ROUTE_GUARD_ONLY"
+    )
     ensure(
-        route_guard_only_rule["then"]["properties"]["stability_guard_hash_or_null"].get("type") == "string"
-        and route_guard_only_rule["then"]["properties"]["access_scope_hash_or_null"].get("type") == "null"
-        and route_guard_only_rule["then"]["properties"]["masking_scope_fingerprint_or_null"].get("type") == "null"
-        and route_guard_only_rule["then"]["properties"]["session_scope_ref_or_null"].get("type") == "null"
-        and route_guard_only_rule["then"]["properties"]["visibility_cache_partition_key_or_null"].get("type")
+        route_guard_only_rule is not None,
+        "cross_device_continuity_contract missing ROUTE_GUARD_ONLY basis guard",
+    )
+    ensure(
+        route_guard_only_rule["then"]["properties"]["stability_guard_hash_or_null"].get("type")
+        == "string"
+        and route_guard_only_rule["then"]["properties"]["access_scope_hash_or_null"].get("type")
+        == "null"
+        and route_guard_only_rule["then"]["properties"]["masking_scope_fingerprint_or_null"].get(
+            "type"
+        )
+        == "null"
+        and route_guard_only_rule["then"]["properties"]["session_scope_ref_or_null"].get("type")
+        == "null"
+        and route_guard_only_rule["then"]["properties"][
+            "visibility_cache_partition_key_or_null"
+        ].get("type")
         == "null",
         "cross_device_continuity_contract ROUTE_GUARD_ONLY basis must require only the grouped stability guard",
     )
@@ -3977,24 +4320,50 @@ def check_cross_device_continuity_contract() -> None:
         "cross_device_continuity_contract missing ROUTE_GUARD_AND_VISIBILITY basis guard",
     )
     ensure(
-        route_guard_visibility_rule["then"]["properties"]["stability_guard_hash_or_null"].get("type") == "string"
-        and route_guard_visibility_rule["then"]["properties"]["access_scope_hash_or_null"].get("type") == "string"
-        and route_guard_visibility_rule["then"]["properties"]["masking_scope_fingerprint_or_null"].get("type")
+        route_guard_visibility_rule["then"]["properties"]["stability_guard_hash_or_null"].get(
+            "type"
+        )
         == "string"
-        and route_guard_visibility_rule["then"]["properties"]["session_scope_ref_or_null"].get("type") == "null"
-        and route_guard_visibility_rule["then"]["properties"]["visibility_cache_partition_key_or_null"].get("type")
+        and route_guard_visibility_rule["then"]["properties"]["access_scope_hash_or_null"].get(
+            "type"
+        )
+        == "string"
+        and route_guard_visibility_rule["then"]["properties"][
+            "masking_scope_fingerprint_or_null"
+        ].get("type")
+        == "string"
+        and route_guard_visibility_rule["then"]["properties"]["session_scope_ref_or_null"].get(
+            "type"
+        )
+        == "null"
+        and route_guard_visibility_rule["then"]["properties"][
+            "visibility_cache_partition_key_or_null"
+        ].get("type")
         == "string",
         "cross_device_continuity_contract ROUTE_GUARD_AND_VISIBILITY basis must require guard, access, masking, and cache partition continuity",
     )
 
-    visibility_only_rule = find_rule_by_const(schema["allOf"], "compatibility_basis_class", "VISIBILITY_ONLY")
-    ensure(visibility_only_rule is not None, "cross_device_continuity_contract missing VISIBILITY_ONLY basis guard")
+    visibility_only_rule = find_rule_by_const(
+        schema["allOf"], "compatibility_basis_class", "VISIBILITY_ONLY"
+    )
     ensure(
-        visibility_only_rule["then"]["properties"]["stability_guard_hash_or_null"].get("type") == "null"
-        and visibility_only_rule["then"]["properties"]["access_scope_hash_or_null"].get("type") == "string"
-        and visibility_only_rule["then"]["properties"]["masking_scope_fingerprint_or_null"].get("type") == "string"
-        and visibility_only_rule["then"]["properties"]["session_scope_ref_or_null"].get("type") == "null"
-        and visibility_only_rule["then"]["properties"]["visibility_cache_partition_key_or_null"].get("type")
+        visibility_only_rule is not None,
+        "cross_device_continuity_contract missing VISIBILITY_ONLY basis guard",
+    )
+    ensure(
+        visibility_only_rule["then"]["properties"]["stability_guard_hash_or_null"].get("type")
+        == "null"
+        and visibility_only_rule["then"]["properties"]["access_scope_hash_or_null"].get("type")
+        == "string"
+        and visibility_only_rule["then"]["properties"]["masking_scope_fingerprint_or_null"].get(
+            "type"
+        )
+        == "string"
+        and visibility_only_rule["then"]["properties"]["session_scope_ref_or_null"].get("type")
+        == "null"
+        and visibility_only_rule["then"]["properties"][
+            "visibility_cache_partition_key_or_null"
+        ].get("type")
         == "string",
         "cross_device_continuity_contract VISIBILITY_ONLY basis must require access, masking, and cache partition only",
     )
@@ -4003,20 +4372,32 @@ def check_cross_device_continuity_contract() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("compatibility_basis_class", {}).get("enum")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("compatibility_basis_class", {})
+            .get("enum")
             == ["SESSION_MASKING_AND_ROUTE_GUARD", "SESSION_MASKING_AND_PARENT_SCENE"]
         ),
         None,
     )
-    ensure(native_session_rule is not None, "cross_device_continuity_contract missing session-masking basis guard")
     ensure(
-        native_session_rule["then"]["properties"]["stability_guard_hash_or_null"].get("type") == "string"
+        native_session_rule is not None,
+        "cross_device_continuity_contract missing session-masking basis guard",
+    )
+    ensure(
+        native_session_rule["then"]["properties"]["stability_guard_hash_or_null"].get("type")
+        == "string"
         and native_session_rule["then"]["properties"]["access_scope_hash_or_null"].get("type")
         == ["string", "null"]
-        and native_session_rule["then"]["properties"]["masking_scope_fingerprint_or_null"].get("type")
+        and native_session_rule["then"]["properties"]["masking_scope_fingerprint_or_null"].get(
+            "type"
+        )
         == "string"
-        and native_session_rule["then"]["properties"]["session_scope_ref_or_null"].get("type") == "string"
-        and native_session_rule["then"]["properties"]["visibility_cache_partition_key_or_null"].get("type")
+        and native_session_rule["then"]["properties"]["session_scope_ref_or_null"].get("type")
+        == "string"
+        and native_session_rule["then"]["properties"]["visibility_cache_partition_key_or_null"].get(
+            "type"
+        )
         == "null",
         "cross_device_continuity_contract session-masking bases must require stability, masking, and session lineage while clearing cache partition",
     )
@@ -4174,17 +4555,24 @@ def check_shell_continuity_fuzz_harness() -> None:
         "shell_continuity_fuzz_harness missing preserved-outcome guard",
     )
     ensure(
-        preserved_rule["then"]["properties"]["expected_inline_recovery_reason_or_null"].get("type") == "null",
+        preserved_rule["then"]["properties"]["expected_inline_recovery_reason_or_null"].get("type")
+        == "null",
         "shell_continuity_fuzz_harness preserved cases must clear the inline recovery reason",
     )
-    inline_rule = find_rule_by_const(defs["fuzzCase"]["allOf"], "expected_outcome", "INLINE_RECOVERY")
+    inline_rule = find_rule_by_const(
+        defs["fuzzCase"]["allOf"], "expected_outcome", "INLINE_RECOVERY"
+    )
     ensure(
         inline_rule is not None,
         "shell_continuity_fuzz_harness missing inline-recovery guard",
     )
     ensure(
-        inline_rule["then"]["properties"]["expected_inline_recovery_reason_or_null"].get("type") == "string"
-        and inline_rule["then"]["properties"]["expected_inline_recovery_reason_or_null"].get("minLength") == 1,
+        inline_rule["then"]["properties"]["expected_inline_recovery_reason_or_null"].get("type")
+        == "string"
+        and inline_rule["then"]["properties"]["expected_inline_recovery_reason_or_null"].get(
+            "minLength"
+        )
+        == 1,
         "shell_continuity_fuzz_harness inline-recovery cases must require a non-empty typed recovery reason",
     )
 
@@ -4329,11 +4717,18 @@ def check_focus_restore_return_target_harness() -> None:
         == "KEYBOARD_ONLY",
         "focus_restore_return_target_harness covered_modalities must require KEYBOARD_ONLY participation",
     )
-    help_return_rule = find_rule_by_const(defs["harnessCase"]["allOf"], "trigger_action", "HELP_HANDOFF_RETURN")
-    ensure(help_return_rule is not None, "focus_restore_return_target_harness missing help-handoff guard")
+    help_return_rule = find_rule_by_const(
+        defs["harnessCase"]["allOf"], "trigger_action", "HELP_HANDOFF_RETURN"
+    )
     ensure(
-        help_return_rule["then"]["properties"]["support_surface_kind_or_null"].get("const") == "HELP_ROUTE"
-        and help_return_rule["then"]["properties"]["expected_target_kind"].get("const") == "PARENT_RETURN",
+        help_return_rule is not None,
+        "focus_restore_return_target_harness missing help-handoff guard",
+    )
+    ensure(
+        help_return_rule["then"]["properties"]["support_surface_kind_or_null"].get("const")
+        == "HELP_ROUTE"
+        and help_return_rule["then"]["properties"]["expected_target_kind"].get("const")
+        == "PARENT_RETURN",
         "focus_restore_return_target_harness help-handoff cases must require HELP_ROUTE and PARENT_RETURN",
     )
     live_update_rule = find_rule_by_const(
@@ -4341,12 +4736,17 @@ def check_focus_restore_return_target_harness() -> None:
         "trigger_action",
         "LIVE_UPDATE_DURING_ACTIVE_INPUT",
     )
-    ensure(live_update_rule is not None, "focus_restore_return_target_harness missing live-update guard")
+    ensure(
+        live_update_rule is not None,
+        "focus_restore_return_target_harness missing live-update guard",
+    )
     ensure(
         live_update_rule["then"]["properties"]["active_focus_lock_kind_or_null"].get("$ref")
         == "#/$defs/activeFocusLockKind"
         and live_update_rule["then"]["properties"]["expected_target_kind"].get("const") == "INVOKER"
-        and live_update_rule["then"]["properties"]["expected_focus_restoration_disposition"].get("const")
+        and live_update_rule["then"]["properties"]["expected_focus_restoration_disposition"].get(
+            "const"
+        )
         == "EXACT_FOCUS",
         "focus_restore_return_target_harness live-update cases must require a typed focus lock and exact invoker preservation",
     )
@@ -4375,7 +4775,10 @@ def check_focus_restore_return_target_harness() -> None:
         "object_loss_state",
         "EXACT_TARGET_VISIBLE",
     )
-    ensure(exact_visible_rule is not None, "focus_restore_return_target_harness missing exact-target-visible guard")
+    ensure(
+        exact_visible_rule is not None,
+        "focus_restore_return_target_harness missing exact-target-visible guard",
+    )
     ensure(
         exact_visible_rule["then"]["properties"]["expected_target_kind"].get("enum")
         == ["INVOKER", "PARENT_RETURN"],
@@ -4419,7 +4822,9 @@ def check_focus_restore_return_target_harness() -> None:
         "focus_restore_return_target_harness missing object-summary disposition guard",
     )
     ensure(
-        object_summary_rule["then"]["properties"]["expected_focus_restoration_disposition"].get("const")
+        object_summary_rule["then"]["properties"]["expected_focus_restoration_disposition"].get(
+            "const"
+        )
         == "OBJECT_SUMMARY",
         "focus_restore_return_target_harness object-summary cases must declare OBJECT_SUMMARY disposition",
     )
@@ -4560,22 +4965,37 @@ def check_upload_session_recovery_harness() -> None:
         "upload_session_recovery_harness.harnessCase must require the full FE-87 case record",
     )
 
-    resumable_rule = find_rule_by_const(defs["sessionSnapshot"]["allOf"], "resumability_state", "RESUMABLE")
-    ensure(resumable_rule is not None, "upload_session_recovery_harness missing resumable session guard")
+    resumable_rule = find_rule_by_const(
+        defs["sessionSnapshot"]["allOf"], "resumability_state", "RESUMABLE"
+    )
+    ensure(
+        resumable_rule is not None,
+        "upload_session_recovery_harness missing resumable session guard",
+    )
     ensure(
         resumable_rule["then"]["properties"]["resume_token_ref_or_null"].get("type") == "string",
         "upload_session_recovery_harness resumable session snapshots must require a resume token",
     )
-    attached_rule = find_rule_by_const(defs["sessionSnapshot"]["allOf"], "attachment_state", "ATTACHED")
-    ensure(attached_rule is not None, "upload_session_recovery_harness missing attached session guard")
+    attached_rule = find_rule_by_const(
+        defs["sessionSnapshot"]["allOf"], "attachment_state", "ATTACHED"
+    )
+    ensure(
+        attached_rule is not None, "upload_session_recovery_harness missing attached session guard"
+    )
     ensure(
         attached_rule["then"]["properties"]["attached_document_ref_or_null"].get("type") == "string"
-        and attached_rule["then"]["properties"]["attachment_confirmed_at_or_null"].get("type") == "string"
+        and attached_rule["then"]["properties"]["attachment_confirmed_at_or_null"].get("type")
+        == "string"
         and attached_rule["then"]["properties"]["next_action_code"].get("const") == "NONE",
         "upload_session_recovery_harness attached snapshots must require attachment evidence and clear next action",
     )
-    resume_action_rule = find_rule_by_const(defs["sessionSnapshot"]["allOf"], "next_action_code", "RESUME_UPLOAD")
-    ensure(resume_action_rule is not None, "upload_session_recovery_harness missing RESUME_UPLOAD guard")
+    resume_action_rule = find_rule_by_const(
+        defs["sessionSnapshot"]["allOf"], "next_action_code", "RESUME_UPLOAD"
+    )
+    ensure(
+        resume_action_rule is not None,
+        "upload_session_recovery_harness missing RESUME_UPLOAD guard",
+    )
     ensure(
         resume_action_rule["then"]["properties"]["resumability_state"].get("const") == "RESUMABLE",
         "upload_session_recovery_harness RESUME_UPLOAD snapshots must require resumability",
@@ -4585,9 +5005,13 @@ def check_upload_session_recovery_harness() -> None:
         "next_action_code",
         "CONFIRM_ATTACHMENT",
     )
-    ensure(confirm_action_rule is not None, "upload_session_recovery_harness missing CONFIRM_ATTACHMENT guard")
     ensure(
-        confirm_action_rule["then"]["properties"]["attachment_state"].get("const") == "CONFIRMATION_REQUIRED",
+        confirm_action_rule is not None,
+        "upload_session_recovery_harness missing CONFIRM_ATTACHMENT guard",
+    )
+    ensure(
+        confirm_action_rule["then"]["properties"]["attachment_state"].get("const")
+        == "CONFIRMATION_REQUIRED",
         "upload_session_recovery_harness CONFIRM_ATTACHMENT snapshots must require confirmation-required posture",
     )
     reconfirm_action_rule = find_rule_by_const(
@@ -4595,14 +5019,23 @@ def check_upload_session_recovery_harness() -> None:
         "next_action_code",
         "RECONFIRM_REQUEST",
     )
-    ensure(reconfirm_action_rule is not None, "upload_session_recovery_harness missing RECONFIRM_REQUEST guard")
     ensure(
-        reconfirm_action_rule["then"]["properties"]["attachment_state"].get("const") == "REBIND_REQUIRED",
+        reconfirm_action_rule is not None,
+        "upload_session_recovery_harness missing RECONFIRM_REQUEST guard",
+    )
+    ensure(
+        reconfirm_action_rule["then"]["properties"]["attachment_state"].get("const")
+        == "REBIND_REQUIRED",
         "upload_session_recovery_harness RECONFIRM_REQUEST snapshots must require rebind-required posture",
     )
 
-    stale_rebase_rule = find_rule_by_const(defs["harnessCase"]["allOf"], "scenario_code", "STALE_REQUEST_REBASE")
-    ensure(stale_rebase_rule is not None, "upload_session_recovery_harness missing stale-request-rebase guard")
+    stale_rebase_rule = find_rule_by_const(
+        defs["harnessCase"]["allOf"], "scenario_code", "STALE_REQUEST_REBASE"
+    )
+    ensure(
+        stale_rebase_rule is not None,
+        "upload_session_recovery_harness missing stale-request-rebase guard",
+    )
     ensure(
         stale_rebase_rule["then"]["properties"]["expected_request_completion_state"].get("const")
         == "NOT_READY_STALE_RECONFIRM_REQUIRED"
@@ -4622,7 +5055,9 @@ def check_upload_session_recovery_harness() -> None:
         "upload_session_recovery_harness missing attachment-confirmation guard",
     )
     ensure(
-        attachment_confirmation_rule["then"]["properties"]["expected_request_completion_state"].get("const")
+        attachment_confirmation_rule["then"]["properties"]["expected_request_completion_state"].get(
+            "const"
+        )
         == "READY_CURRENT_REQUEST_SATISFIED",
         "upload_session_recovery_harness attachment-confirmation cases must end in ready current-request satisfaction",
     )
@@ -4725,9 +5160,13 @@ def check_low_noise_budget_audit() -> None:
         "low_noise_budget_audit.duplicate_posture_codes must freeze the governed posture-duplication vocabulary",
     )
     first_view_rule = find_rule_by_const(schema["allOf"], "audit_scope", "FIRST_VIEW")
-    ensure(first_view_rule is not None, "low_noise_budget_audit missing FIRST_VIEW refresh-nullability guard")
     ensure(
-        first_view_rule["then"]["properties"]["refresh_budget_state"].get("const") == "NOT_APPLICABLE",
+        first_view_rule is not None,
+        "low_noise_budget_audit missing FIRST_VIEW refresh-nullability guard",
+    )
+    ensure(
+        first_view_rule["then"]["properties"]["refresh_budget_state"].get("const")
+        == "NOT_APPLICABLE",
         "low_noise_budget_audit FIRST_VIEW cases must pin refresh_budget_state to NOT_APPLICABLE",
     )
     refresh_rule = find_rule_by_enum(
@@ -4840,7 +5279,10 @@ def check_low_noise_budget_audit_pack() -> None:
         "low_noise_budget_audit_pack.auditCase must require the full FE-73 scenario case record",
     )
     ensure(
-        schema_uses_ref(defs["auditCase"]["properties"]["audit"], "https://taxat.dev/schemas/low_noise_budget_audit.schema.json"),
+        schema_uses_ref(
+            defs["auditCase"]["properties"]["audit"],
+            "https://taxat.dev/schemas/low_noise_budget_audit.schema.json",
+        ),
         "low_noise_budget_audit_pack cases must stay bound to low_noise_budget_audit.schema.json",
     )
 
@@ -4935,7 +5377,8 @@ def check_semantic_accessibility_contract() -> None:
     ensure(
         properties["announced_change_kinds"].get("minItems") == 1
         and properties["announced_change_kinds"].get("uniqueItems") is True
-        and properties["announced_change_kinds"]["items"].get("$ref") == "#/$defs/announcedChangeKind",
+        and properties["announced_change_kinds"]["items"].get("$ref")
+        == "#/$defs/announcedChangeKind",
         "semantic_accessibility_contract.announced_change_kinds must remain a unique non-empty announcement-kind list",
     )
 
@@ -5021,20 +5464,27 @@ def check_semantic_accessibility_contract() -> None:
     )
 
     calm_rule = find_rule_by_const(schema["allOf"], "shell_family", "CALM_SHELL")
-    ensure(calm_rule is not None, "semantic_accessibility_contract missing CALM_SHELL selector binding")
+    ensure(
+        calm_rule is not None, "semantic_accessibility_contract missing CALM_SHELL selector binding"
+    )
     ensure(
         calm_rule["then"]["properties"]["selector_profile"].get("const")
         == "OPERATOR_SEMANTIC_SELECTORS_V1",
         "semantic_accessibility_contract CALM_SHELL must bind OPERATOR_SEMANTIC_SELECTORS_V1",
     )
     portal_rule = find_rule_by_const(schema["allOf"], "shell_family", "CLIENT_PORTAL_SHELL")
-    ensure(portal_rule is not None, "semantic_accessibility_contract missing CLIENT_PORTAL_SHELL selector binding")
+    ensure(
+        portal_rule is not None,
+        "semantic_accessibility_contract missing CLIENT_PORTAL_SHELL selector binding",
+    )
     ensure(
         portal_rule["then"]["properties"]["selector_profile"].get("const")
         == "PORTAL_SEMANTIC_SELECTORS_V1",
         "semantic_accessibility_contract CLIENT_PORTAL_SHELL must bind PORTAL_SEMANTIC_SELECTORS_V1",
     )
-    governance_rule = find_rule_by_const(schema["allOf"], "shell_family", "GOVERNANCE_DENSITY_SHELL")
+    governance_rule = find_rule_by_const(
+        schema["allOf"], "shell_family", "GOVERNANCE_DENSITY_SHELL"
+    )
     ensure(
         governance_rule is not None,
         "semantic_accessibility_contract missing GOVERNANCE_DENSITY_SHELL selector binding",
@@ -5394,14 +5844,19 @@ def check_customer_safe_projection_contract() -> None:
         "customer_safe_projection_contract.boundary_scope must freeze the shared customer-safe surface vocabulary",
     )
     ensure(
-        properties["projection_audience"].get("enum") == ["CLIENT_PORTAL", "CUSTOMER_COLLABORATION"],
+        properties["projection_audience"].get("enum")
+        == ["CLIENT_PORTAL", "CUSTOMER_COLLABORATION"],
         "customer_safe_projection_contract.projection_audience must freeze the customer-safe audience vocabulary",
     )
     ensure(
         properties["shell_family"].get("const") == "CLIENT_PORTAL_SHELL",
         "customer_safe_projection_contract.shell_family must stay pinned to CLIENT_PORTAL_SHELL",
     )
-    for field in ["access_binding_hash", "masking_posture_fingerprint", "visibility_cache_partition_key"]:
+    for field in [
+        "access_binding_hash",
+        "masking_posture_fingerprint",
+        "visibility_cache_partition_key",
+    ]:
         ensure(
             properties[field].get("minLength") == 1,
             f"customer_safe_projection_contract.{field} must reject empty strings",
@@ -5549,7 +6004,14 @@ def check_externalization_governance_contract() -> None:
     )
     ensure(
         properties["eligibility_state"].get("enum")
-        == ["READY", "MASKED_ONLY", "LIMITED_READY", "APPROVAL_REQUIRED", "BLOCKED", "PENDING_RETURN"],
+        == [
+            "READY",
+            "MASKED_ONLY",
+            "LIMITED_READY",
+            "APPROVAL_REQUIRED",
+            "BLOCKED",
+            "PENDING_RETURN",
+        ],
         "externalization_governance_contract.eligibility_state must freeze the externalization eligibility vocabulary",
     )
     ensure(
@@ -5581,7 +6043,8 @@ def check_externalization_governance_contract() -> None:
         "visibility_cache_partition_key_or_null",
     ]:
         ensure(
-            properties[field].get("type") == ["string", "null"] and properties[field].get("minLength") == 1,
+            properties[field].get("type") == ["string", "null"]
+            and properties[field].get("minLength") == 1,
             f"externalization_governance_contract.{field} must stay string-or-null with non-empty string values",
         )
     for field in [
@@ -5592,7 +6055,8 @@ def check_externalization_governance_contract() -> None:
         "approval_requirement_token_or_null",
     ]:
         ensure(
-            properties[field].get("type") == ["string", "null"] and properties[field].get("minLength") == 1,
+            properties[field].get("type") == ["string", "null"]
+            and properties[field].get("minLength") == 1,
             f"externalization_governance_contract.{field} must stay string-or-null with non-empty string values",
         )
     ensure(
@@ -5629,7 +6093,10 @@ def check_externalization_governance_contract() -> None:
         "externalization_governance_contract APPROVAL_REQUIRED must require REQUIRED_PENDING approval state and a non-null approval token",
     )
     masked_rule = find_rule_by_const(schema["allOf"], "eligibility_state", "MASKED_ONLY")
-    ensure(masked_rule is not None, "externalization_governance_contract missing MASKED_ONLY preview guard")
+    ensure(
+        masked_rule is not None,
+        "externalization_governance_contract missing MASKED_ONLY preview guard",
+    )
     ensure(
         masked_rule["then"]["properties"]["preview_target_ref_or_null"].get("type") == "string",
         "externalization_governance_contract MASKED_ONLY must retain a preview target",
@@ -5643,19 +6110,33 @@ def check_externalization_governance_contract() -> None:
         ("AUTHORITY_LINK_HANDOFF", "GOVERNANCE_DENSITY_SHELL", "AUTHORITY_LINK_EXTERNAL_HANDOFF"),
     ):
         scope_rule = find_rule_by_const(schema["allOf"], "boundary_scope", scope)
-        ensure(scope_rule is not None, f"externalization_governance_contract missing {scope} binding rule")
+        ensure(
+            scope_rule is not None,
+            f"externalization_governance_contract missing {scope} binding rule",
+        )
         ensure(
             scope_rule["then"]["properties"]["shell_family_or_null"].get("const") == expected_shell
-            and scope_rule["then"]["properties"]["delivery_surface_kind"].get("const") == expected_delivery,
+            and scope_rule["then"]["properties"]["delivery_surface_kind"].get("const")
+            == expected_delivery,
             f"externalization_governance_contract {scope} rule must pin the expected shell and delivery surface",
         )
-    client_document_rule = find_rule_by_const(schema["allOf"], "boundary_scope", "CLIENT_DOCUMENT_REQUEST")
-    ensure(client_document_rule is not None, "externalization_governance_contract missing CLIENT_DOCUMENT_REQUEST binding rule")
+    client_document_rule = find_rule_by_const(
+        schema["allOf"], "boundary_scope", "CLIENT_DOCUMENT_REQUEST"
+    )
     ensure(
-        client_document_rule["then"]["properties"]["access_binding_hash_or_null"].get("type") == "string"
-        and client_document_rule["then"]["properties"]["masking_posture_fingerprint_or_null"].get("type")
+        client_document_rule is not None,
+        "externalization_governance_contract missing CLIENT_DOCUMENT_REQUEST binding rule",
+    )
+    ensure(
+        client_document_rule["then"]["properties"]["access_binding_hash_or_null"].get("type")
         == "string"
-        and client_document_rule["then"]["properties"]["visibility_cache_partition_key_or_null"].get("type")
+        and client_document_rule["then"]["properties"]["masking_posture_fingerprint_or_null"].get(
+            "type"
+        )
+        == "string"
+        and client_document_rule["then"]["properties"][
+            "visibility_cache_partition_key_or_null"
+        ].get("type")
         == "string",
         "externalization_governance_contract CLIENT_DOCUMENT_REQUEST rule must require non-null access, masking, and visibility binding mirrors",
     )
@@ -5688,7 +6169,12 @@ def check_command_truth_boundary_contract() -> None:
     )
     ensure(
         properties["artifact_role"].get("enum")
-        == ["COMMAND_REQUEST", "COMMAND_SIDE_AUTHORITY", "BOUNDARY_RECEIPT", "READ_SIDE_PROJECTION"],
+        == [
+            "COMMAND_REQUEST",
+            "COMMAND_SIDE_AUTHORITY",
+            "BOUNDARY_RECEIPT",
+            "READ_SIDE_PROJECTION",
+        ],
         "command_truth_boundary_contract.artifact_role must freeze the four FE-42 artifact roles",
     )
     ensure(
@@ -5843,7 +6329,8 @@ def check_authority_truth_contract() -> None:
         role_rule = find_rule_by_const(schema["allOf"], "truth_surface_role", role)
         ensure(role_rule is not None, f"authority_truth_contract missing `{role}` role rule")
         ensure(
-            role_rule["then"]["properties"]["surface_specific_binding_policy"].get("const") == expected_policy,
+            role_rule["then"]["properties"]["surface_specific_binding_policy"].get("const")
+            == expected_policy,
             f"authority_truth_contract {role} must force surface_specific_binding_policy={expected_policy}",
         )
 
@@ -5892,9 +6379,7 @@ def check_retention_limited_explainability_contract() -> None:
     )
     ensure(
         properties["surface_specific_binding_policy"].get("enum")
-        == [
-            binding[1] for binding in RETENTION_EXPLAINABILITY_CONTRACT_BY_SCOPE.values()
-        ],
+        == [binding[1] for binding in RETENTION_EXPLAINABILITY_CONTRACT_BY_SCOPE.values()],
         "retention_limited_explainability_contract.surface_specific_binding_policy must freeze the governed binding-policy vocabulary",
     )
     for field, expected in {
@@ -5909,15 +6394,22 @@ def check_retention_limited_explainability_contract() -> None:
             properties[field].get("const") == expected,
             f"retention_limited_explainability_contract.{field} must stay pinned to {expected}",
         )
-    for scope, (expected_role, expected_policy) in RETENTION_EXPLAINABILITY_CONTRACT_BY_SCOPE.items():
+    for scope, (
+        expected_role,
+        expected_policy,
+    ) in RETENTION_EXPLAINABILITY_CONTRACT_BY_SCOPE.items():
         scope_rule = find_rule_by_const(schema["allOf"], "boundary_scope", scope)
-        ensure(scope_rule is not None, f"retention_limited_explainability_contract missing `{scope}` scope rule")
+        ensure(
+            scope_rule is not None,
+            f"retention_limited_explainability_contract missing `{scope}` scope rule",
+        )
         ensure(
             scope_rule["then"]["properties"]["surface_role"].get("const") == expected_role,
             f"retention_limited_explainability_contract {scope} must force surface_role={expected_role}",
         )
         ensure(
-            scope_rule["then"]["properties"]["surface_specific_binding_policy"].get("const") == expected_policy,
+            scope_rule["then"]["properties"]["surface_specific_binding_policy"].get("const")
+            == expected_policy,
             f"retention_limited_explainability_contract {scope} must force surface_specific_binding_policy={expected_policy}",
         )
 
@@ -5974,7 +6466,10 @@ def check_recovery_governance_contract() -> None:
     for field, expected in (
         ("checkpoint_inventory_policy", "CHECKPOINTS_REQUIRED_AND_INVENTORY_LINKED"),
         ("checkpoint_evidence_policy", "VERIFIED_CHECKPOINT_REQUIRES_BOUND_RESTORE_DRILL"),
-        ("privacy_reconciliation_policy", "POST_RESTORE_PRIVACY_RECONCILIATION_REQUIRED_BEFORE_REOPEN"),
+        (
+            "privacy_reconciliation_policy",
+            "POST_RESTORE_PRIVACY_RECONCILIATION_REQUIRED_BEFORE_REOPEN",
+        ),
         (
             "compensating_re_erasure_policy",
             "RESURRECTED_RESTRICTED_DATA_REQUIRES_TYPED_COMPENSATING_RE_ERASURE",
@@ -5984,8 +6479,14 @@ def check_recovery_governance_contract() -> None:
             "REPLAY_AND_ENQUIRY_LIMITATIONS_MUST_REMAIN_REOPEN_SAFE",
         ),
         ("queue_recovery_policy", "QUEUES_REBUILT_FROM_DURABLE_TRUTH_ONLY"),
-        ("authority_recovery_policy", "AUTHORITY_MUTATIONS_REQUIRE_LINEAGE_AND_BINDING_REVALIDATION"),
-        ("reopen_gate_policy", "REOPEN_BLOCKED_UNTIL_RESTORE_PRIVACY_AUDIT_QUEUE_AND_AUTHORITY_PASS"),
+        (
+            "authority_recovery_policy",
+            "AUTHORITY_MUTATIONS_REQUIRE_LINEAGE_AND_BINDING_REVALIDATION",
+        ),
+        (
+            "reopen_gate_policy",
+            "REOPEN_BLOCKED_UNTIL_RESTORE_PRIVACY_AUDIT_QUEUE_AND_AUTHORITY_PASS",
+        ),
         ("rollback_boundary_policy", "ROLLBACK_ONLY_WHILE_SCHEMA_WINDOW_COMPATIBLE"),
         ("fail_forward_policy", "FAIL_FORWARD_REQUIRES_COMPENSATING_RELEASE_AND_OWNER"),
         ("failover_audit_policy", "FAILOVER_AND_FAILBACK_REQUIRE_AUDITABLE_OWNER"),
@@ -5996,14 +6497,20 @@ def check_recovery_governance_contract() -> None:
         )
 
     checkpoint_rule = find_rule_by_const(schema["allOf"], "boundary_scope", "RECOVERY_CHECKPOINT")
-    ensure(checkpoint_rule is not None, "recovery_governance_contract missing RECOVERY_CHECKPOINT scope rule")
+    ensure(
+        checkpoint_rule is not None,
+        "recovery_governance_contract missing RECOVERY_CHECKPOINT scope rule",
+    )
     ensure(
         checkpoint_rule["then"]["properties"]["boundary_specific_binding_policy"].get("const")
         == "CHECKPOINT_RETAINS_INVENTORY_RESTORE_EVIDENCE_AND_REOPEN_GATES",
         "recovery_governance_contract RECOVERY_CHECKPOINT must force checkpoint boundary policy",
     )
     release_rule = find_rule_by_const(schema["allOf"], "boundary_scope", "DEPLOYMENT_RELEASE")
-    ensure(release_rule is not None, "recovery_governance_contract missing DEPLOYMENT_RELEASE scope rule")
+    ensure(
+        release_rule is not None,
+        "recovery_governance_contract missing DEPLOYMENT_RELEASE scope rule",
+    )
     ensure(
         release_rule["then"]["properties"]["boundary_specific_binding_policy"].get("const")
         == "RELEASE_RETAINS_ROLLBACK_BOUNDARY_AND_FAIL_FORWARD_GOVERNANCE",
@@ -6017,7 +6524,9 @@ def check_recovery_governance_contract() -> None:
     }
     for workload_class, (tier, rpo, rto) in workload_expectations.items():
         rule = find_rule_by_const(schema["allOf"], "protected_workload_class", workload_class)
-        ensure(rule is not None, f"recovery_governance_contract missing {workload_class} workload rule")
+        ensure(
+            rule is not None, f"recovery_governance_contract missing {workload_class} workload rule"
+        )
         ensure(
             rule["then"]["properties"]["recovery_tier_class"].get("const") == tier,
             f"recovery_governance_contract {workload_class} must force recovery_tier_class={tier}",
@@ -6092,7 +6601,8 @@ def check_failure_resolution_contract() -> None:
         role_rule = find_rule_by_const(schema["allOf"], "lifecycle_role", role)
         ensure(role_rule is not None, f"failure_resolution_contract missing `{role}` role rule")
         ensure(
-            role_rule["then"]["properties"]["role_specific_binding_policy"].get("const") == expected_policy,
+            role_rule["then"]["properties"]["role_specific_binding_policy"].get("const")
+            == expected_policy,
             f"failure_resolution_contract {role} must force role_specific_binding_policy={expected_policy}",
         )
 
@@ -6141,7 +6651,8 @@ def check_invariant_enforcement_contract() -> None:
         "invariant_enforcement_contract.transition_event_code_or_null must stay system_fault/null",
     )
     ensure(
-        properties["terminal_audit_event_type_or_null"].get("enum") == ["ManifestBlocked", "ManifestFailed", None],
+        properties["terminal_audit_event_type_or_null"].get("enum")
+        == ["ManifestBlocked", "ManifestFailed", None],
         "invariant_enforcement_contract.terminal_audit_event_type_or_null must stay ManifestBlocked/ManifestFailed/null",
     )
     ensure(
@@ -6176,22 +6687,33 @@ def check_invariant_enforcement_contract() -> None:
     )
 
     run_manifest_rule = find_rule_by_const(schema["allOf"], "boundary_scope", "RUN_MANIFEST")
-    ensure(run_manifest_rule is not None, "invariant_enforcement_contract missing RUN_MANIFEST binding guard")
+    ensure(
+        run_manifest_rule is not None,
+        "invariant_enforcement_contract missing RUN_MANIFEST binding guard",
+    )
     ensure(
         run_manifest_rule["then"]["properties"]["boundary_specific_binding_policy"].get("const")
         == "MANIFEST_RETAINS_FAIL_CLOSED_STAGE_AND_PRIMARY_ERROR_LINK",
         "invariant_enforcement_contract RUN_MANIFEST must force the manifest binding policy",
     )
     error_record_rule = find_rule_by_const(schema["allOf"], "boundary_scope", "ERROR_RECORD")
-    ensure(error_record_rule is not None, "invariant_enforcement_contract missing ERROR_RECORD binding guard")
+    ensure(
+        error_record_rule is not None,
+        "invariant_enforcement_contract missing ERROR_RECORD binding guard",
+    )
     ensure(
         error_record_rule["then"]["properties"]["boundary_specific_binding_policy"].get("const")
         == "ERROR_RETAINS_INVARIANT_CLASS_FAULT_CODE_AND_TERMINAL_BINDING",
         "invariant_enforcement_contract ERROR_RECORD must force the error binding policy",
     )
 
-    not_triggered_rule = find_rule_by_const(schema["allOf"], "invariant_failure_state", "NOT_TRIGGERED")
-    ensure(not_triggered_rule is not None, "invariant_enforcement_contract missing NOT_TRIGGERED nulling guard")
+    not_triggered_rule = find_rule_by_const(
+        schema["allOf"], "invariant_failure_state", "NOT_TRIGGERED"
+    )
+    ensure(
+        not_triggered_rule is not None,
+        "invariant_enforcement_contract missing NOT_TRIGGERED nulling guard",
+    )
     for field in [
         "invariant_class_or_null",
         "error_family_or_null",
@@ -6210,7 +6732,8 @@ def check_invariant_enforcement_contract() -> None:
     triggered_rule = find_rule_by_const(schema["allOf"], "invariant_failure_state", "TRIGGERED")
     ensure(triggered_rule is not None, "invariant_enforcement_contract missing TRIGGERED guard")
     ensure(
-        triggered_rule["then"]["properties"]["transition_event_code_or_null"].get("const") == "system_fault",
+        triggered_rule["then"]["properties"]["transition_event_code_or_null"].get("const")
+        == "system_fault",
         "invariant_enforcement_contract TRIGGERED must force system_fault transition semantics",
     )
     ensure(
@@ -6219,23 +6742,36 @@ def check_invariant_enforcement_contract() -> None:
     )
 
     prestart_rule = find_rule_by_const(schema["allOf"], "failure_stage_or_null", "PRESTART")
-    ensure(prestart_rule is not None, "invariant_enforcement_contract missing PRESTART terminal mapping")
     ensure(
-        prestart_rule["then"]["properties"]["terminal_manifest_state_or_null"].get("const") == "BLOCKED"
-        and prestart_rule["then"]["properties"]["terminal_audit_event_type_or_null"].get("const") == "ManifestBlocked",
+        prestart_rule is not None,
+        "invariant_enforcement_contract missing PRESTART terminal mapping",
+    )
+    ensure(
+        prestart_rule["then"]["properties"]["terminal_manifest_state_or_null"].get("const")
+        == "BLOCKED"
+        and prestart_rule["then"]["properties"]["terminal_audit_event_type_or_null"].get("const")
+        == "ManifestBlocked",
         "invariant_enforcement_contract PRESTART must map to BLOCKED and ManifestBlocked",
     )
     poststart_rule = find_rule_by_const(schema["allOf"], "failure_stage_or_null", "POSTSTART")
-    ensure(poststart_rule is not None, "invariant_enforcement_contract missing POSTSTART terminal mapping")
     ensure(
-        poststart_rule["then"]["properties"]["terminal_manifest_state_or_null"].get("const") == "FAILED"
-        and poststart_rule["then"]["properties"]["terminal_audit_event_type_or_null"].get("const") == "ManifestFailed",
+        poststart_rule is not None,
+        "invariant_enforcement_contract missing POSTSTART terminal mapping",
+    )
+    ensure(
+        poststart_rule["then"]["properties"]["terminal_manifest_state_or_null"].get("const")
+        == "FAILED"
+        and poststart_rule["then"]["properties"]["terminal_audit_event_type_or_null"].get("const")
+        == "ManifestFailed",
         "invariant_enforcement_contract POSTSTART must map to FAILED and ManifestFailed",
     )
 
     for invariant_class, expected_codes in INVARIANT_ENFORCEMENT_ERROR_CODES_BY_CLASS.items():
         class_rule = find_rule_by_const(schema["allOf"], "invariant_class_or_null", invariant_class)
-        ensure(class_rule is not None, f"invariant_enforcement_contract missing {invariant_class} mapping guard")
+        ensure(
+            class_rule is not None,
+            f"invariant_enforcement_contract missing {invariant_class} mapping guard",
+        )
         ensure(
             class_rule["then"]["properties"]["error_family_or_null"].get("const")
             == INVARIANT_ENFORCEMENT_ERROR_FAMILY_BY_CLASS[invariant_class],
@@ -6292,12 +6828,21 @@ def check_state_transition_contract() -> None:
     )
     ensure(
         properties["machine_code"].get("enum")
-        == [machine_code for machine_code, _state_field_name in STATE_TRANSITION_MACHINE_CODES.values()],
+        == [
+            machine_code
+            for machine_code, _state_field_name in STATE_TRANSITION_MACHINE_CODES.values()
+        ],
         "state_transition_contract.machine_code must freeze the FE-46 machine-code vocabulary",
     )
     ensure(
         properties["state_field_name"].get("enum")
-        == ["lifecycle_state", "checkpoint_state", "phase_state", "rollout_state", "decision_state"],
+        == [
+            "lifecycle_state",
+            "checkpoint_state",
+            "phase_state",
+            "rollout_state",
+            "decision_state",
+        ],
         "state_transition_contract.state_field_name must freeze the governed state-field vocabulary",
     )
     ensure(
@@ -6318,15 +6863,21 @@ def check_state_transition_contract() -> None:
             f"state_transition_contract.{field} must stay pinned to {expected}",
         )
 
-    for object_family, (expected_machine_code, expected_state_field_name) in STATE_TRANSITION_MACHINE_CODES.items():
+    for object_family, (
+        expected_machine_code,
+        expected_state_field_name,
+    ) in STATE_TRANSITION_MACHINE_CODES.items():
         role_rule = find_rule_by_const(schema["allOf"], "object_family", object_family)
-        ensure(role_rule is not None, f"state_transition_contract missing `{object_family}` role rule")
+        ensure(
+            role_rule is not None, f"state_transition_contract missing `{object_family}` role rule"
+        )
         ensure(
             role_rule["then"]["properties"]["machine_code"].get("const") == expected_machine_code,
             f"state_transition_contract {object_family} must force machine_code={expected_machine_code}",
         )
         ensure(
-            role_rule["then"]["properties"]["state_field_name"].get("const") == expected_state_field_name,
+            role_rule["then"]["properties"]["state_field_name"].get("const")
+            == expected_state_field_name,
             f"state_transition_contract {object_family} must force state_field_name={expected_state_field_name}",
         )
 
@@ -6438,22 +6989,32 @@ def check_upload_request_binding_contract() -> None:
         "upload_request_binding_contract.rebase_detected_at_or_null must stay string-or-null",
     )
     original_rule = find_rule_by_const(schema["allOf"], "request_binding_state", "ORIGINAL_CURRENT")
-    ensure(original_rule is not None, "upload_request_binding_contract missing ORIGINAL_CURRENT guard")
+    ensure(
+        original_rule is not None, "upload_request_binding_contract missing ORIGINAL_CURRENT guard"
+    )
     ensure(
         original_rule["then"]["properties"]["binding_resolution_basis"].get("const")
         == "ORIGINAL_FROZEN_REQUEST"
         and original_rule["then"]["properties"]["rebase_detected_at_or_null"].get("type") == "null",
         "upload_request_binding_contract ORIGINAL_CURRENT must keep original-frozen basis and null rebase timestamp",
     )
-    reconfirmed_rule = find_rule_by_const(schema["allOf"], "request_binding_state", "RECONFIRMED_CURRENT")
-    ensure(reconfirmed_rule is not None, "upload_request_binding_contract missing RECONFIRMED_CURRENT guard")
+    reconfirmed_rule = find_rule_by_const(
+        schema["allOf"], "request_binding_state", "RECONFIRMED_CURRENT"
+    )
+    ensure(
+        reconfirmed_rule is not None,
+        "upload_request_binding_contract missing RECONFIRMED_CURRENT guard",
+    )
     ensure(
         reconfirmed_rule["then"]["properties"]["binding_resolution_basis"].get("const")
         == "EXPLICIT_RECONFIRMATION"
-        and reconfirmed_rule["then"]["properties"]["rebase_detected_at_or_null"].get("type") == "string",
+        and reconfirmed_rule["then"]["properties"]["rebase_detected_at_or_null"].get("type")
+        == "string",
         "upload_request_binding_contract RECONFIRMED_CURRENT must require explicit reconfirmation basis and non-null rebase timestamp",
     )
-    reconfirm_required_rule = find_rule_by_const(schema["allOf"], "request_binding_state", "RECONFIRMATION_REQUIRED")
+    reconfirm_required_rule = find_rule_by_const(
+        schema["allOf"], "request_binding_state", "RECONFIRMATION_REQUIRED"
+    )
     ensure(
         reconfirm_required_rule is not None,
         "upload_request_binding_contract missing RECONFIRMATION_REQUIRED guard",
@@ -6470,7 +7031,8 @@ def check_upload_request_binding_contract() -> None:
     ensure(
         superseded_rule["then"]["properties"]["binding_resolution_basis"].get("const")
         == "ACTIVE_REQUEST_SUPERSEDED"
-        and superseded_rule["then"]["properties"]["rebase_detected_at_or_null"].get("type") == "string",
+        and superseded_rule["then"]["properties"]["rebase_detected_at_or_null"].get("type")
+        == "string",
         "upload_request_binding_contract SUPERSEDED must require superseded basis and non-null rebase timestamp",
     )
 
@@ -6515,7 +7077,8 @@ def check_mutation_precondition_binding() -> None:
             f"mutation_precondition_binding.{field} must remain a non-empty unique list",
         )
     ensure(
-        "MUTATION_BASIS_CONTRACT_HASH" in schema["properties"]["stale_guard_families"]["items"].get("enum", []),
+        "MUTATION_BASIS_CONTRACT_HASH"
+        in schema["properties"]["stale_guard_families"]["items"].get("enum", []),
         "mutation_precondition_binding.stale_guard_families must include MUTATION_BASIS_CONTRACT_HASH",
     )
     governance_simulation_rule = find_rule_by_const(
@@ -6716,13 +7279,15 @@ def check_governance_mutation_hazard_contract() -> None:
         "governance_mutation_hazard_contract missing bounded_safe_mutation=1 reverse guard",
     )
     ensure(
-        bounded_safe_rule["then"]["properties"]["approval_requirement"].get("const") == "NOT_REQUIRED"
+        bounded_safe_rule["then"]["properties"]["approval_requirement"].get("const")
+        == "NOT_REQUIRED"
         and bounded_safe_rule["then"]["properties"]["commit_authority_posture"].get("const")
         == "BOUNDED_SAFE"
         and bounded_safe_rule["then"]["properties"]["required_approvals"].get("maxItems") == 0
         and bounded_safe_rule["then"]["properties"]["approval_trigger_codes"].get("maxItems") == 0
         and bounded_safe_rule["then"]["properties"]["confidence_limiter_codes"].get("maxItems") == 0
-        and bounded_safe_rule["then"]["properties"]["bounded_safety_blocker_codes"].get("maxItems") == 0,
+        and bounded_safe_rule["then"]["properties"]["bounded_safety_blocker_codes"].get("maxItems")
+        == 0,
         "governance_mutation_hazard_contract bounded_safe_mutation=1 must force no-approval bounded-safe posture and clear structured blocker arrays",
     )
     non_safe_rule = find_rule_by_const(schema["allOf"], "bounded_safe_mutation", 0)
@@ -6734,7 +7299,8 @@ def check_governance_mutation_hazard_contract() -> None:
         non_safe_rule["then"]["properties"]["approval_requirement"].get("enum")
         == ["SINGLE_APPROVER", "DUAL_APPROVER", "SECURITY_REVIEW", "CHANGE_ADVISORY_QUORUM"]
         and non_safe_rule["then"]["properties"]["required_approvals"].get("minItems") == 1
-        and non_safe_rule["then"]["properties"]["bounded_safety_blocker_codes"].get("minItems") == 1,
+        and non_safe_rule["then"]["properties"]["bounded_safety_blocker_codes"].get("minItems")
+        == 1,
         "governance_mutation_hazard_contract bounded_safe_mutation=0 must force concrete approval posture, non-empty approvals, and explicit blocker codes",
     )
     not_required_rule = find_rule_by_const(schema["allOf"], "approval_requirement", "NOT_REQUIRED")
@@ -6756,30 +7322,42 @@ def check_governance_mutation_hazard_contract() -> None:
         and preview_rule["then"]["properties"]["confidence_limiter_codes"].get("minItems") == 1,
         "governance_mutation_hazard_contract PREVIEW_ONLY must force bounded_safe_mutation=0 and explicit confidence limiters",
     )
-    approval_gated_rule = find_rule_by_const(schema["allOf"], "commit_authority_posture", "APPROVAL_GATED")
+    approval_gated_rule = find_rule_by_const(
+        schema["allOf"], "commit_authority_posture", "APPROVAL_GATED"
+    )
     ensure(
         approval_gated_rule is not None,
         "governance_mutation_hazard_contract missing APPROVAL_GATED reverse guard",
     )
     ensure(
-        approval_gated_rule["then"]["properties"]["simulation_confidence_score"].get("minimum") == 80
+        approval_gated_rule["then"]["properties"]["simulation_confidence_score"].get("minimum")
+        == 80
         and approval_gated_rule["then"]["properties"]["predictability_score"].get("minimum") == 75
         and approval_gated_rule["then"]["properties"]["bounded_safe_mutation"].get("const") == 0
-        and approval_gated_rule["then"]["properties"]["approval_trigger_codes"].get("minItems") == 1,
+        and approval_gated_rule["then"]["properties"]["approval_trigger_codes"].get("minItems")
+        == 1,
         "governance_mutation_hazard_contract APPROVAL_GATED must require strong confidence/predictability, bounded_safe_mutation=0, and explicit approval-trigger codes",
     )
-    bounded_safe_posture_rule = find_rule_by_const(schema["allOf"], "commit_authority_posture", "BOUNDED_SAFE")
+    bounded_safe_posture_rule = find_rule_by_const(
+        schema["allOf"], "commit_authority_posture", "BOUNDED_SAFE"
+    )
     ensure(
         bounded_safe_posture_rule is not None,
         "governance_mutation_hazard_contract missing BOUNDED_SAFE reverse guard",
     )
     ensure(
-        bounded_safe_posture_rule["then"]["properties"]["simulation_confidence_score"].get("minimum") == 80
-        and bounded_safe_posture_rule["then"]["properties"]["predictability_score"].get("minimum") == 75
-        and bounded_safe_posture_rule["then"]["properties"]["bounded_safe_mutation"].get("const") == 1
+        bounded_safe_posture_rule["then"]["properties"]["simulation_confidence_score"].get(
+            "minimum"
+        )
+        == 80
+        and bounded_safe_posture_rule["then"]["properties"]["predictability_score"].get("minimum")
+        == 75
+        and bounded_safe_posture_rule["then"]["properties"]["bounded_safe_mutation"].get("const")
+        == 1
         and bounded_safe_posture_rule["then"]["properties"]["approval_requirement"].get("const")
         == "NOT_REQUIRED"
-        and bounded_safe_posture_rule["then"]["properties"]["required_approvals"].get("maxItems") == 0,
+        and bounded_safe_posture_rule["then"]["properties"]["required_approvals"].get("maxItems")
+        == 0,
         "governance_mutation_hazard_contract BOUNDED_SAFE must require strong confidence/predictability, bounded-safe posture, and no approval list",
     )
 
@@ -6863,7 +7441,8 @@ def check_governance_mutation_basis_contract() -> None:
         "governance_mutation_basis_contract missing bounded_safe_mutation=1 reverse guard",
     )
     ensure(
-        bounded_safe_rule["then"]["properties"]["approval_requirement"].get("const") == "NOT_REQUIRED"
+        bounded_safe_rule["then"]["properties"]["approval_requirement"].get("const")
+        == "NOT_REQUIRED"
         and bounded_safe_rule["then"]["properties"]["required_approvals"].get("maxItems") == 0,
         "governance_mutation_basis_contract bounded_safe_mutation=1 must force NOT_REQUIRED approval posture and empty required_approvals",
     )
@@ -6905,29 +7484,40 @@ def check_governance_mutation_basis_contract() -> None:
         ),
         "governance_mutation_basis_contract PREVIEW_ONLY must derive from low confidence or low predictability",
     )
-    approval_gated_rule = find_rule_by_const(schema["allOf"], "commit_authority_posture", "APPROVAL_GATED")
+    approval_gated_rule = find_rule_by_const(
+        schema["allOf"], "commit_authority_posture", "APPROVAL_GATED"
+    )
     ensure(
         approval_gated_rule is not None,
         "governance_mutation_basis_contract missing APPROVAL_GATED reverse guard",
     )
     ensure(
-        approval_gated_rule["then"]["properties"]["simulation_confidence_score"].get("minimum") == 80
+        approval_gated_rule["then"]["properties"]["simulation_confidence_score"].get("minimum")
+        == 80
         and approval_gated_rule["then"]["properties"]["predictability_score"].get("minimum") == 75
         and approval_gated_rule["then"]["properties"]["bounded_safe_mutation"].get("const") == 0,
         "governance_mutation_basis_contract APPROVAL_GATED must require strong confidence/predictability and bounded_safe_mutation=0",
     )
-    bounded_safe_posture_rule = find_rule_by_const(schema["allOf"], "commit_authority_posture", "BOUNDED_SAFE")
+    bounded_safe_posture_rule = find_rule_by_const(
+        schema["allOf"], "commit_authority_posture", "BOUNDED_SAFE"
+    )
     ensure(
         bounded_safe_posture_rule is not None,
         "governance_mutation_basis_contract missing BOUNDED_SAFE reverse guard",
     )
     ensure(
-        bounded_safe_posture_rule["then"]["properties"]["simulation_confidence_score"].get("minimum") == 80
-        and bounded_safe_posture_rule["then"]["properties"]["predictability_score"].get("minimum") == 75
-        and bounded_safe_posture_rule["then"]["properties"]["bounded_safe_mutation"].get("const") == 1
+        bounded_safe_posture_rule["then"]["properties"]["simulation_confidence_score"].get(
+            "minimum"
+        )
+        == 80
+        and bounded_safe_posture_rule["then"]["properties"]["predictability_score"].get("minimum")
+        == 75
+        and bounded_safe_posture_rule["then"]["properties"]["bounded_safe_mutation"].get("const")
+        == 1
         and bounded_safe_posture_rule["then"]["properties"]["approval_requirement"].get("const")
         == "NOT_REQUIRED"
-        and bounded_safe_posture_rule["then"]["properties"]["required_approvals"].get("maxItems") == 0,
+        and bounded_safe_posture_rule["then"]["properties"]["required_approvals"].get("maxItems")
+        == 0,
         "governance_mutation_basis_contract BOUNDED_SAFE must require strong confidence/predictability plus the bounded-safe no-approval posture",
     )
 
@@ -6984,7 +7574,9 @@ def check_forensic_findings_closure_register() -> None:
         )
         start_id = int(match.group(1))
         end_id = int(match.group(2))
-        ensure(start_id <= end_id, f"Forensic closure range `{range_value}` must not invert start/end")
+        ensure(
+            start_id <= end_id, f"Forensic closure range `{range_value}` must not invert start/end"
+        )
         ensure(
             row_map["Status"] in FORENSIC_CLOSURE_ALLOWED_STATUSES,
             f"Forensic closure range `{range_value}` uses unsupported status `{row_map['Status']}`",
@@ -7069,7 +7661,9 @@ def check_corpus_reference_docs() -> None:
         "must inventory the final coverage map, current read-model families, and interaction-layer families.",
     )
     what_you_get = extract_markdown_section(readme, "What you get")
-    inventory_doc_tokens = [Path(token).name for token in re.findall(r"`([^`]+\.md)`", what_you_get)]
+    inventory_doc_tokens = [
+        Path(token).name for token in re.findall(r"`([^`]+\.md)`", what_you_get)
+    ]
     inventory_docs = set(inventory_doc_tokens)
     expected_docs = {path.name for path in ROOT.glob("*.md")} - {"README.md"}
     missing_inventory_docs = sorted(expected_docs - inventory_docs)
@@ -7148,7 +7742,11 @@ def check_corpus_reference_docs() -> None:
             if "<" not in embedded_path
             and ">" not in embedded_path
             and "*" not in embedded_path
-            and not (ROOT.parent / embedded_path if embedded_path.startswith("Algorithm/") else ROOT / embedded_path).exists()
+            and not (
+                ROOT.parent / embedded_path
+                if embedded_path.startswith("Algorithm/")
+                else ROOT / embedded_path
+            ).exists()
         }
     )
     ensure(
@@ -7198,7 +7796,8 @@ def check_corpus_reference_docs() -> None:
         "README `## Validation` must declare the authoritative validator entrypoints explicitly",
     )
     ensure(
-        "python3 algorithm/scripts/validate_contracts.py --self-test" in reference_doc_roles.lower(),
+        "python3 algorithm/scripts/validate_contracts.py --self-test"
+        in reference_doc_roles.lower(),
         "README `## Reference document roles` must include `python3 Algorithm/scripts/validate_contracts.py --self-test`",
     )
     ensure(
@@ -7405,8 +8004,7 @@ def check_operator_interaction_layer() -> None:
         "operator_interaction_layer.foundation_contract must bind the shared interaction-layer foundation contract",
     )
     ensure(
-        foundation_contract["allOf"][1]["properties"]["shell_family"].get("const")
-        == "CALM_SHELL",
+        foundation_contract["allOf"][1]["properties"]["shell_family"].get("const") == "CALM_SHELL",
         "operator_interaction_layer.foundation_contract must stay scoped to CALM_SHELL",
     )
     ensure(
@@ -7472,7 +8070,8 @@ def check_operator_interaction_layer() -> None:
         "operator_interaction_layer.motion_profile must stay pinned to SUBTLE_CAUSAL_ONLY",
     )
     ensure(
-        properties["unsafe_action_policy"].get("const") == "FAIL_CLOSED_DURING_DEGRADED_OR_RECOVERY",
+        properties["unsafe_action_policy"].get("const")
+        == "FAIL_CLOSED_DURING_DEGRADED_OR_RECOVERY",
         "operator_interaction_layer.unsafe_action_policy must stay pinned to FAIL_CLOSED_DURING_DEGRADED_OR_RECOVERY",
     )
     ensure(
@@ -7548,8 +8147,7 @@ def check_portal_interaction_layer() -> None:
         "portal_interaction_layer.focus_restoration_policy must stay pinned to RETURN_FOCUS_ANCHOR_THEN_LATEST_VISIBLE",
     )
     ensure(
-        properties["artifact_hierarchy_policy"].get("const")
-        == "CURRENT_PRIMARY_HISTORY_SECONDARY",
+        properties["artifact_hierarchy_policy"].get("const") == "CURRENT_PRIMARY_HISTORY_SECONDARY",
         "portal_interaction_layer.artifact_hierarchy_policy must stay pinned to CURRENT_PRIMARY_HISTORY_SECONDARY",
     )
     ensure(
@@ -7604,13 +8202,11 @@ def check_interaction_layer_foundation_contract() -> None:
         "interaction_layer_foundation_contract.contract_version must stay pinned to CROSS_SHELL_INTERACTION_FOUNDATION_V1",
     )
     ensure(
-        properties["design_token_binding_policy"].get("const")
-        == "EXPLICIT_SEMANTIC_BINDINGS_ONLY",
+        properties["design_token_binding_policy"].get("const") == "EXPLICIT_SEMANTIC_BINDINGS_ONLY",
         "interaction_layer_foundation_contract.design_token_binding_policy must prevent implicit theme-only shell semantics",
     )
     ensure(
-        properties["support_surface_policy"].get("const")
-        == "ONE_PROMOTED_SUPPORT_SURFACE_MAX",
+        properties["support_surface_policy"].get("const") == "ONE_PROMOTED_SUPPORT_SURFACE_MAX",
         "interaction_layer_foundation_contract.support_surface_policy must keep one promoted support surface by default",
     )
     ensure(
@@ -7782,17 +8378,23 @@ def check_bound_operator_interaction_layer_schema(
         (
             rule
             for rule in schema.get("allOf", [])
-            if rule.get("properties", {}).get("interaction_layer", {}).get("properties", {}).get(
-                "recovery_notice_surface", {}
-            ).get("const")
+            if rule.get("properties", {})
+            .get("interaction_layer", {})
+            .get("properties", {})
+            .get("recovery_notice_surface", {})
+            .get("const")
             == expected_recovery_notice_surface
-            and rule.get("properties", {}).get("interaction_layer", {}).get("properties", {}).get(
-                "notification_surface", {}
-            ).get("const")
+            and rule.get("properties", {})
+            .get("interaction_layer", {})
+            .get("properties", {})
+            .get("notification_surface", {})
+            .get("const")
             == expected_notification_surface
-            and rule.get("properties", {}).get("interaction_layer", {}).get("properties", {}).get(
-                "artifact_preview_surface", {}
-            ).get("const")
+            and rule.get("properties", {})
+            .get("interaction_layer", {})
+            .get("properties", {})
+            .get("artifact_preview_surface", {})
+            .get("const")
             == expected_artifact_preview_surface
         ),
         None,
@@ -7880,14 +8482,16 @@ def check_route_stability_contract() -> None:
         "route_stability_contract.guardVectorComponents must keep mutation_basis_contract_hash_or_null optional until governance stale recovery needs it",
     )
     ensure(
-        components["properties"]["mutation_basis_contract_hash_or_null"].get("type") == ["string", "null"]
+        components["properties"]["mutation_basis_contract_hash_or_null"].get("type")
+        == ["string", "null"]
         and components["properties"]["mutation_basis_contract_hash_or_null"].get("minLength") == 1,
         "route_stability_contract.guardVectorComponents.mutation_basis_contract_hash_or_null must stay string-or-null with non-empty strings",
     )
     stream_rule = find_rule_by_const(schema["allOf"], "resume_capability", "STREAM_RESUMABLE")
     ensure(stream_rule is not None, "route_stability_contract missing STREAM_RESUMABLE guard")
     ensure(
-        stream_rule["then"]["properties"]["last_published_sequence_or_null"].get("type") == "integer"
+        stream_rule["then"]["properties"]["last_published_sequence_or_null"].get("type")
+        == "integer"
         and stream_rule["then"]["properties"]["resume_token_or_null"].get("type") == "string",
         "route_stability_contract STREAM_RESUMABLE posture must require sequence and resume token",
     )
@@ -7944,7 +8548,8 @@ def check_stream_recovery_contract() -> None:
     ]:
         ensure(field in schema["required"], f"stream_recovery_contract must require `{field}`.")
     ensure(
-        schema["properties"]["stream_scope_class"].get("enum") == ["MANIFEST_EXPERIENCE", "WORKSPACE"],
+        schema["properties"]["stream_scope_class"].get("enum")
+        == ["MANIFEST_EXPERIENCE", "WORKSPACE"],
         "stream_recovery_contract.stream_scope_class must freeze the manifest/workspace scope vocabulary",
     )
     for field in [
@@ -7961,7 +8566,8 @@ def check_stream_recovery_contract() -> None:
             f"stream_recovery_contract.{field} must reject empty strings",
         )
     ensure(
-        schema["properties"]["resume_binding_representation"].get("enum") == ["RAW_TOKEN", "HASHED_TOKEN"],
+        schema["properties"]["resume_binding_representation"].get("enum")
+        == ["RAW_TOKEN", "HASHED_TOKEN"],
         "stream_recovery_contract.resume_binding_representation must freeze raw-token versus hashed-token vocabulary",
     )
     ensure(
@@ -8007,7 +8613,9 @@ def check_stream_recovery_contract() -> None:
         and rebase_rule["then"]["properties"]["rebase_reason_code_or_null"].get("type") == "string",
         "stream_recovery_contract REBASE_REQUIRED posture must clear resume binding and require a typed reason",
     )
-    access_rule = find_rule_by_const(schema["allOf"], "delivery_window_state", "ACCESS_REBIND_REQUIRED")
+    access_rule = find_rule_by_const(
+        schema["allOf"], "delivery_window_state", "ACCESS_REBIND_REQUIRED"
+    )
     ensure(access_rule is not None, "stream_recovery_contract missing ACCESS_REBIND_REQUIRED guard")
     ensure(
         access_rule["then"]["properties"]["resume_binding_ref_or_null"].get("type") == "null"
@@ -8129,10 +8737,14 @@ def check_cache_isolation_contract() -> None:
             "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE",
         ],
     )
-    ensure(access_rule is not None, "cache_isolation_contract missing access/masking-required scope guard")
+    ensure(
+        access_rule is not None,
+        "cache_isolation_contract missing access/masking-required scope guard",
+    )
     ensure(
         access_rule["then"]["properties"]["access_binding_hash_or_null"].get("type") == "string"
-        and access_rule["then"]["properties"]["masking_posture_fingerprint_or_null"].get("type") == "string",
+        and access_rule["then"]["properties"]["masking_posture_fingerprint_or_null"].get("type")
+        == "string",
         "cache_isolation_contract access/masking-required scopes must require non-null access and masking bindings",
     )
 
@@ -8146,7 +8758,10 @@ def check_cache_isolation_contract() -> None:
             "CUSTOMER_REQUEST_LIST",
         ],
     )
-    ensure(visibility_rule is not None, "cache_isolation_contract missing visibility-partition scope guard")
+    ensure(
+        visibility_rule is not None,
+        "cache_isolation_contract missing visibility-partition scope guard",
+    )
     ensure(
         visibility_rule["then"]["properties"]["visibility_cache_partition_key_or_null"].get("type")
         == "string",
@@ -8163,36 +8778,57 @@ def check_cache_isolation_contract() -> None:
             "ROLE_TEMPLATE_MATRIX",
         ],
     )
-    ensure(governance_rule is not None, "cache_isolation_contract missing governance nullability guard")
+    ensure(
+        governance_rule is not None, "cache_isolation_contract missing governance nullability guard"
+    )
     ensure(
         governance_rule["then"]["properties"]["access_binding_hash_or_null"].get("type") == "null"
         and governance_rule["then"]["properties"]["masking_posture_fingerprint_or_null"].get("type")
         == "null"
-        and governance_rule["then"]["properties"]["visibility_cache_partition_key_or_null"].get("type")
+        and governance_rule["then"]["properties"]["visibility_cache_partition_key_or_null"].get(
+            "type"
+        )
         == "null",
         "cache_isolation_contract governance scopes must clear access, masking, and visibility partition bindings",
     )
 
     customer_safe_rule = find_rule_by_const(schema["allOf"], "customer_safe_projection", True)
-    ensure(customer_safe_rule is not None, "cache_isolation_contract missing customer_safe_projection=true guard")
     ensure(
-        customer_safe_rule["then"]["properties"]["visibility_cache_partition_key_or_null"].get("type")
+        customer_safe_rule is not None,
+        "cache_isolation_contract missing customer_safe_projection=true guard",
+    )
+    ensure(
+        customer_safe_rule["then"]["properties"]["visibility_cache_partition_key_or_null"].get(
+            "type"
+        )
         == "string"
         and customer_safe_rule["then"]["properties"]["access_binding_hash_or_null"].get("type")
         == "string"
-        and customer_safe_rule["then"]["properties"]["masking_posture_fingerprint_or_null"].get("type")
+        and customer_safe_rule["then"]["properties"]["masking_posture_fingerprint_or_null"].get(
+            "type"
+        )
         == "string",
         "cache_isolation_contract customer-safe scopes must require access, masking, and visibility partition bindings",
     )
 
-    client_portal_rule = find_rule_by_const(schema["allOf"], "cache_scope_class", "CLIENT_PORTAL_WORKSPACE")
-    ensure(client_portal_rule is not None, "cache_isolation_contract missing CLIENT_PORTAL_WORKSPACE customer-safe guard")
+    client_portal_rule = find_rule_by_const(
+        schema["allOf"], "cache_scope_class", "CLIENT_PORTAL_WORKSPACE"
+    )
+    ensure(
+        client_portal_rule is not None,
+        "cache_isolation_contract missing CLIENT_PORTAL_WORKSPACE customer-safe guard",
+    )
     ensure(
         client_portal_rule["then"]["properties"]["customer_safe_projection"].get("const") is True,
         "cache_isolation_contract CLIENT_PORTAL_WORKSPACE must force customer_safe_projection=true",
     )
-    request_list_rule = find_rule_by_const(schema["allOf"], "cache_scope_class", "CUSTOMER_REQUEST_LIST")
-    ensure(request_list_rule is not None, "cache_isolation_contract missing CUSTOMER_REQUEST_LIST customer-safe guard")
+    request_list_rule = find_rule_by_const(
+        schema["allOf"], "cache_scope_class", "CUSTOMER_REQUEST_LIST"
+    )
+    ensure(
+        request_list_rule is not None,
+        "cache_isolation_contract missing CUSTOMER_REQUEST_LIST customer-safe guard",
+    )
     ensure(
         request_list_rule["then"]["properties"]["customer_safe_projection"].get("const") is True,
         "cache_isolation_contract CUSTOMER_REQUEST_LIST must force customer_safe_projection=true",
@@ -8212,9 +8848,13 @@ def check_cache_isolation_contract() -> None:
             "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE",
         ],
     )
-    ensure(false_projection_rule is not None, "cache_isolation_contract missing non-customer-safe scope guard")
     ensure(
-        false_projection_rule["then"]["properties"]["customer_safe_projection"].get("const") is False,
+        false_projection_rule is not None,
+        "cache_isolation_contract missing non-customer-safe scope guard",
+    )
+    ensure(
+        false_projection_rule["then"]["properties"]["customer_safe_projection"].get("const")
+        is False,
         "cache_isolation_contract non-customer-safe scopes must force customer_safe_projection=false",
     )
 
@@ -8223,9 +8863,13 @@ def check_cache_isolation_contract() -> None:
         "cache_scope_class",
         "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE",
     )
-    ensure(secondary_preview_rule is not None, "cache_isolation_contract missing secondary-window preview guard")
     ensure(
-        secondary_preview_rule["then"]["properties"]["preview_subject_ref_or_null"].get("type") == "string",
+        secondary_preview_rule is not None,
+        "cache_isolation_contract missing secondary-window preview guard",
+    )
+    ensure(
+        secondary_preview_rule["then"]["properties"]["preview_subject_ref_or_null"].get("type")
+        == "string",
         "cache_isolation_contract secondary-window scenes must require a non-null preview subject ref",
     )
 
@@ -8245,7 +8889,10 @@ def check_cache_isolation_contract() -> None:
             "NATIVE_OPERATOR_WORKSPACE_SCENE",
         ],
     )
-    ensure(non_secondary_preview_rule is not None, "cache_isolation_contract missing non-secondary preview-clearing guard")
+    ensure(
+        non_secondary_preview_rule is not None,
+        "cache_isolation_contract missing non-secondary preview-clearing guard",
+    )
     ensure(
         non_secondary_preview_rule["then"]["properties"]["preview_subject_ref_or_null"].get("type")
         == "null",
@@ -8390,24 +9037,39 @@ def check_native_cache_hydration_contract() -> None:
         "hydration_scope_class",
         ["EXPERIENCE_CURSOR", "WORKSPACE_CURSOR"],
     )
-    ensure(cursor_rule is not None, "native_cache_hydration_contract missing cursor-scope nullability guard")
+    ensure(
+        cursor_rule is not None,
+        "native_cache_hydration_contract missing cursor-scope nullability guard",
+    )
     ensure(
         cursor_rule["then"]["properties"]["restoration_anchor_ref_or_null"].get("type") == "null"
         and cursor_rule["then"]["properties"]["preview_subject_ref_or_null"].get("type") == "null",
         "native_cache_hydration_contract cursor scopes must clear restoration and preview bindings",
     )
-    primary_rule = find_rule_by_const(schema["allOf"], "hydration_scope_class", "NATIVE_PRIMARY_SCENE")
-    ensure(primary_rule is not None, "native_cache_hydration_contract missing NATIVE_PRIMARY_SCENE guard")
+    primary_rule = find_rule_by_const(
+        schema["allOf"], "hydration_scope_class", "NATIVE_PRIMARY_SCENE"
+    )
+    ensure(
+        primary_rule is not None,
+        "native_cache_hydration_contract missing NATIVE_PRIMARY_SCENE guard",
+    )
     ensure(
         primary_rule["then"]["properties"]["restoration_anchor_ref_or_null"].get("type") == "string"
         and primary_rule["then"]["properties"]["preview_subject_ref_or_null"].get("type") == "null",
         "native_cache_hydration_contract primary scenes must require restoration anchors and clear preview subject",
     )
-    secondary_rule = find_rule_by_const(schema["allOf"], "hydration_scope_class", "NATIVE_SECONDARY_WINDOW")
-    ensure(secondary_rule is not None, "native_cache_hydration_contract missing NATIVE_SECONDARY_WINDOW guard")
+    secondary_rule = find_rule_by_const(
+        schema["allOf"], "hydration_scope_class", "NATIVE_SECONDARY_WINDOW"
+    )
     ensure(
-        secondary_rule["then"]["properties"]["restoration_anchor_ref_or_null"].get("type") == "string"
-        and secondary_rule["then"]["properties"]["preview_subject_ref_or_null"].get("type") == "string",
+        secondary_rule is not None,
+        "native_cache_hydration_contract missing NATIVE_SECONDARY_WINDOW guard",
+    )
+    ensure(
+        secondary_rule["then"]["properties"]["restoration_anchor_ref_or_null"].get("type")
+        == "string"
+        and secondary_rule["then"]["properties"]["preview_subject_ref_or_null"].get("type")
+        == "string",
         "native_cache_hydration_contract secondary windows must require both restoration anchor and preview subject",
     )
 
@@ -8537,9 +9199,14 @@ def check_focus_restoration_contract() -> None:
     remapped_rule = find_rule_by_const(schema["allOf"], "restoration_disposition", "REMAPPED_FOCUS")
     ensure(remapped_rule is not None, "focus_restoration_contract missing REMAPPED_FOCUS guard")
     ensure(
-        remapped_rule["then"]["properties"]["requested_focus_anchor_ref_or_null"].get("minLength") == 1
-        and remapped_rule["then"]["properties"]["resolved_focus_anchor_ref_or_null"].get("minLength") == 1
-        and remapped_rule["then"]["properties"]["restoration_reason_code_or_null"].get("minLength") == 1,
+        remapped_rule["then"]["properties"]["requested_focus_anchor_ref_or_null"].get("minLength")
+        == 1
+        and remapped_rule["then"]["properties"]["resolved_focus_anchor_ref_or_null"].get(
+            "minLength"
+        )
+        == 1
+        and remapped_rule["then"]["properties"]["restoration_reason_code_or_null"].get("minLength")
+        == 1,
         "focus_restoration_contract REMAPPED_FOCUS must require requested/resolved focus anchors and a reason",
     )
     exact_rule = find_rule_by_const(schema["allOf"], "restoration_disposition", "EXACT_FOCUS")
@@ -8583,7 +9250,8 @@ def check_artifact_selection_contract() -> None:
         "artifact_selection_contract.selection_scope must freeze the shared artifact-selection scope vocabulary",
     )
     ensure(
-        schema["properties"]["presentation_mode"].get("const") == "CURRENT_PRIMARY_HISTORY_SECONDARY",
+        schema["properties"]["presentation_mode"].get("const")
+        == "CURRENT_PRIMARY_HISTORY_SECONDARY",
         "artifact_selection_contract.presentation_mode must stay pinned to CURRENT_PRIMARY_HISTORY_SECONDARY",
     )
     for field in ["primary_subject_refs", "authoritative_subject_refs", "historical_subject_refs"]:
@@ -8598,7 +9266,10 @@ def check_artifact_selection_contract() -> None:
         "artifact_selection_contract.limited_history_state must freeze the limited-history disclosure vocabulary",
     )
     none_rule = find_rule_by_const(schema["allOf"], "limited_history_state", "NONE")
-    ensure(none_rule is not None, "artifact_selection_contract missing limited_history_state=NONE reset guard")
+    ensure(
+        none_rule is not None,
+        "artifact_selection_contract missing limited_history_state=NONE reset guard",
+    )
     ensure(
         none_rule["then"]["properties"]["limited_history_count_or_null"].get("type") == "null",
         "artifact_selection_contract limited_history_state=NONE must clear limited_history_count_or_null",
@@ -8607,7 +9278,10 @@ def check_artifact_selection_contract() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("authoritative_subject_refs", {}).get("maxItems")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("authoritative_subject_refs", {})
+            .get("maxItems")
             == 0
         ),
         None,
@@ -8730,14 +9404,23 @@ def check_artifact_affordance_contract() -> None:
         == "VISIBLE_PRIMARY_AND_DEFAULT_TARGETS_MUST_MATCH_GOVERNED_POSTURE",
         "artifact_affordance_contract.invocation_validation_policy must keep visible-primary and target alignment mandatory",
     )
-    no_current_rule = find_rule_by_const(schema["allOf"], "primary_subject_role", "NO_CURRENT_ARTIFACT")
-    ensure(no_current_rule is not None, "artifact_affordance_contract missing NO_CURRENT_ARTIFACT visibility reset guard")
+    no_current_rule = find_rule_by_const(
+        schema["allOf"], "primary_subject_role", "NO_CURRENT_ARTIFACT"
+    )
     ensure(
-        no_current_rule["then"]["properties"]["visible_primary_subject_ref_or_null"].get("type") == "null",
+        no_current_rule is not None,
+        "artifact_affordance_contract missing NO_CURRENT_ARTIFACT visibility reset guard",
+    )
+    ensure(
+        no_current_rule["then"]["properties"]["visible_primary_subject_ref_or_null"].get("type")
+        == "null",
         "artifact_affordance_contract NO_CURRENT_ARTIFACT must clear visible_primary_subject_ref_or_null",
     )
     history_none_rule = find_rule_by_const(schema["allOf"], "history_affordance_state", "NONE")
-    ensure(history_none_rule is not None, "artifact_affordance_contract missing history_affordance_state=NONE preview guard")
+    ensure(
+        history_none_rule is not None,
+        "artifact_affordance_contract missing history_affordance_state=NONE preview guard",
+    )
     ensure(
         history_none_rule["then"]["properties"]["preview_open_policy"].get("const")
         == "CURRENT_SUMMARY_FIRST_ONLY",
@@ -8747,12 +9430,18 @@ def check_artifact_affordance_contract() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("history_affordance_state", {}).get("enum")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("history_affordance_state", {})
+            .get("enum")
             == ["EXPLICIT_SECONDARY", "EXPLICIT_SECONDARY_LIMITED", "HIDDEN_UNTIL_REQUESTED"]
         ),
         None,
     )
-    ensure(history_present_rule is not None, "artifact_affordance_contract missing explicit-history preview guard")
+    ensure(
+        history_present_rule is not None,
+        "artifact_affordance_contract missing explicit-history preview guard",
+    )
     ensure(
         history_present_rule["then"]["properties"]["preview_open_policy"].get("const")
         == "CURRENT_SUMMARY_FIRST_THEN_HISTORY_ON_DEMAND",
@@ -8824,7 +9513,8 @@ def check_visibility_partition_contract() -> None:
         "visibility_partition_contract.ordering_side_channel_policy must freeze the ordering-side-channel vocabulary",
     )
     ensure(
-        schema["properties"]["limited_state_presentation"].get("const") == "EXPLICIT_LIMITATION_NOTICE",
+        schema["properties"]["limited_state_presentation"].get("const")
+        == "EXPLICIT_LIMITATION_NOTICE",
         "visibility_partition_contract.limited_state_presentation must stay pinned to EXPLICIT_LIMITATION_NOTICE",
     )
     ensure(
@@ -8832,7 +9522,8 @@ def check_visibility_partition_contract() -> None:
         "visibility_partition_contract.export_scope_policy must stay pinned to MOUNTED_ROUTE_VISIBILITY_ONLY",
     )
     ensure(
-        schema["properties"]["fallback_discovery_policy"].get("const") == "NO_CROSS_PARTITION_DISCOVERY",
+        schema["properties"]["fallback_discovery_policy"].get("const")
+        == "NO_CROSS_PARTITION_DISCOVERY",
         "visibility_partition_contract.fallback_discovery_policy must stay pinned to NO_CROSS_PARTITION_DISCOVERY",
     )
     customer_audience_rule = find_rule_by_enum(
@@ -8847,7 +9538,9 @@ def check_visibility_partition_contract() -> None:
         == ["CUSTOMER_VISIBLE"],
         "visibility_partition_contract customer audiences must freeze allowed_visibility_classes to [CUSTOMER_VISIBLE]",
     )
-    split_badge_rule = find_rule_by_const(schema["allOf"], "badge_counter_policy", "SPLIT_LANE_COUNTS")
+    split_badge_rule = find_rule_by_const(
+        schema["allOf"], "badge_counter_policy", "SPLIT_LANE_COUNTS"
+    )
     ensure(
         split_badge_rule is not None,
         "visibility_partition_contract missing split-lane badge guard",
@@ -8928,7 +9621,14 @@ def check_action_authority_contract() -> None:
     )
     ensure(
         schema["properties"]["suggested_module_code_or_null"].get("enum")
-        == ["CUSTOMER_ACTIVITY", "INTERNAL_ACTIVITY", "FILES", "LINKED_CONTEXT", "AUDIT_TRAIL", None],
+        == [
+            "CUSTOMER_ACTIVITY",
+            "INTERNAL_ACTIVITY",
+            "FILES",
+            "LINKED_CONTEXT",
+            "AUDIT_TRAIL",
+            None,
+        ],
         "action_authority_contract.suggested_module_code_or_null must freeze the governed recovery-module vocabulary",
     )
     available_rule = find_rule_by_const(schema["allOf"], "actionability_state", "ACTION_AVAILABLE")
@@ -8936,9 +9636,11 @@ def check_action_authority_contract() -> None:
     ensure(
         available_rule["then"]["properties"]["primary_action_code_or_null"].get("type") == "string"
         and available_rule["then"]["properties"]["available_action_codes"].get("minItems") == 1
-        and available_rule["then"]["properties"]["blocking_reason_code_or_null"].get("type") == "null"
+        and available_rule["then"]["properties"]["blocking_reason_code_or_null"].get("type")
+        == "null"
         and available_rule["then"]["properties"]["recovery_route_ref_or_null"].get("type") == "null"
-        and available_rule["then"]["properties"]["recovery_focus_anchor_ref_or_null"].get("type") == "null",
+        and available_rule["then"]["properties"]["recovery_focus_anchor_ref_or_null"].get("type")
+        == "null",
         "action_authority_contract ACTION_AVAILABLE posture must require one visible primary action and no recovery path",
     )
     no_safe_rule = find_rule_by_const(schema["allOf"], "actionability_state", "NO_SAFE_ACTION")
@@ -8947,9 +9649,11 @@ def check_action_authority_contract() -> None:
         no_safe_rule["then"]["properties"]["primary_action_code_or_null"].get("type") == "null"
         and no_safe_rule["then"]["properties"]["available_action_codes"].get("maxItems") == 0
         and no_safe_rule["then"]["properties"]["blocked_action_codes"].get("minItems") == 1
-        and no_safe_rule["then"]["properties"]["blocking_reason_code_or_null"].get("type") == "string"
+        and no_safe_rule["then"]["properties"]["blocking_reason_code_or_null"].get("type")
+        == "string"
         and no_safe_rule["then"]["properties"]["recovery_route_ref_or_null"].get("type") == "string"
-        and no_safe_rule["then"]["properties"]["recovery_focus_anchor_ref_or_null"].get("type") == "string",
+        and no_safe_rule["then"]["properties"]["recovery_focus_anchor_ref_or_null"].get("type")
+        == "string",
         "action_authority_contract NO_SAFE_ACTION posture must require typed blocking reason plus an explicit recovery path",
     )
 
@@ -9033,28 +9737,38 @@ def check_collaboration_queue_projection_contract() -> None:
         ],
         "collaboration_queue_projection_contract.canonical_sort_key must require the full canonical inbox sort tuple",
     )
-    mixed_rule = find_rule_by_const(schema["allOf"], "latest_change_lane_or_null", "CUSTOMER_VISIBLE")
+    mixed_rule = find_rule_by_const(
+        schema["allOf"], "latest_change_lane_or_null", "CUSTOMER_VISIBLE"
+    )
     ensure(
         mixed_rule is not None
         and mixed_rule["then"]["properties"]["notification_target_module_code_or_null"].get("const")
         == "CUSTOMER_ACTIVITY",
         "collaboration_queue_projection_contract customer-lane updates must target CUSTOMER_ACTIVITY notifications",
     )
-    internal_rule = find_rule_by_const(schema["allOf"], "latest_change_lane_or_null", "INTERNAL_ONLY")
+    internal_rule = find_rule_by_const(
+        schema["allOf"], "latest_change_lane_or_null", "INTERNAL_ONLY"
+    )
     ensure(
         internal_rule is not None
-        and internal_rule["then"]["properties"]["notification_target_module_code_or_null"].get("const")
+        and internal_rule["then"]["properties"]["notification_target_module_code_or_null"].get(
+            "const"
+        )
         == "INTERNAL_ACTIVITY",
         "collaboration_queue_projection_contract internal-lane updates must target INTERNAL_ACTIVITY notifications",
     )
-    reorder_rule = find_rule_by_const(schema["allOf"], "focus_continuity_state", "PENDING_REORDER_UNTIL_FOCUS_EXIT")
+    reorder_rule = find_rule_by_const(
+        schema["allOf"], "focus_continuity_state", "PENDING_REORDER_UNTIL_FOCUS_EXIT"
+    )
     ensure(
         reorder_rule is not None
         and reorder_rule["then"]["properties"]["filter_membership_state"].get("const")
         == "IN_ACTIVE_FILTER_SET",
         "collaboration_queue_projection_contract deferred reorder posture must keep the row inside the active filter set",
     )
-    removal_rule = find_rule_by_const(schema["allOf"], "focus_continuity_state", "PENDING_REMOVAL_UNTIL_FOCUS_EXIT")
+    removal_rule = find_rule_by_const(
+        schema["allOf"], "focus_continuity_state", "PENDING_REMOVAL_UNTIL_FOCUS_EXIT"
+    )
     ensure(
         removal_rule is not None
         and removal_rule["then"]["properties"]["filter_membership_state"].get("const")
@@ -9110,7 +9824,8 @@ def check_collaboration_routing_contract() -> None:
         "collaboration_routing_contract.contract_version must stay pinned to COLLABORATION_ROUTING_V1",
     )
     ensure(
-        schema["properties"]["routing_profile_code"].get("const") == "COLLABORATION_ROUTING_FORMULA_V1",
+        schema["properties"]["routing_profile_code"].get("const")
+        == "COLLABORATION_ROUTING_FORMULA_V1",
         "collaboration_routing_contract.routing_profile_code must stay pinned to COLLABORATION_ROUTING_FORMULA_V1",
     )
     ensure(
@@ -9125,12 +9840,18 @@ def check_collaboration_routing_contract() -> None:
         "collaboration_routing_contract.routing_scope must freeze the cross-surface routing vocabulary",
     )
     ensure(
-        schema["properties"]["queue_health_state"].get("enum") == ["HEALTHY", "DEGRADED", "SATURATED"],
+        schema["properties"]["queue_health_state"].get("enum")
+        == ["HEALTHY", "DEGRADED", "SATURATED"],
         "collaboration_routing_contract.queue_health_state must freeze the queue-health posture vocabulary",
     )
     ensure(
         schema["properties"]["assignment_recommendation_state"].get("enum")
-        == ["KEEP_CURRENT_OWNER", "ASSIGN_RECOMMENDED", "REASSIGN_RECOMMENDED", "NO_ELIGIBLE_OWNER"],
+        == [
+            "KEEP_CURRENT_OWNER",
+            "ASSIGN_RECOMMENDED",
+            "REASSIGN_RECOMMENDED",
+            "NO_ELIGIBLE_OWNER",
+        ],
         "collaboration_routing_contract.assignment_recommendation_state must freeze the assignment recommendation vocabulary",
     )
     ensure(
@@ -9162,16 +9883,23 @@ def check_collaboration_routing_contract() -> None:
         ],
         "collaboration_routing_contract.canonical_sort_key must require the full canonical routing tuple",
     )
-    assign_keep_rule = find_rule_by_const(schema["allOf"], "assignment_recommendation_state", "KEEP_CURRENT_OWNER")
+    assign_keep_rule = find_rule_by_const(
+        schema["allOf"], "assignment_recommendation_state", "KEEP_CURRENT_OWNER"
+    )
     ensure(
         assign_keep_rule is not None
-        and assign_keep_rule["then"]["properties"]["recommended_assignee_ref_or_null"].get("type") == "null",
+        and assign_keep_rule["then"]["properties"]["recommended_assignee_ref_or_null"].get("type")
+        == "null",
         "collaboration_routing_contract KEEP_CURRENT_OWNER posture must clear recommended_assignee_ref_or_null",
     )
-    escalation_none_rule = find_rule_by_const(schema["allOf"], "escalation_recommendation_state", "NO_ESCALATION")
+    escalation_none_rule = find_rule_by_const(
+        schema["allOf"], "escalation_recommendation_state", "NO_ESCALATION"
+    )
     ensure(
         escalation_none_rule is not None
-        and escalation_none_rule["then"]["properties"]["recommended_escalation_target_ref_or_null"].get("type")
+        and escalation_none_rule["then"]["properties"][
+            "recommended_escalation_target_ref_or_null"
+        ].get("type")
         == "null",
         "collaboration_routing_contract NO_ESCALATION posture must clear recommended_escalation_target_ref_or_null",
     )
@@ -9216,13 +9944,15 @@ def check_work_queue_health_contract() -> None:
         "work_queue_health_contract.ordering_policy must force canonical persisted row order",
     )
     ensure(
-        schema["properties"]["focus_safe_live_update_policy"].get("const") == "DEFER_TO_ROUTING_CONTINUITY_STATE",
+        schema["properties"]["focus_safe_live_update_policy"].get("const")
+        == "DEFER_TO_ROUTING_CONTINUITY_STATE",
         "work_queue_health_contract.focus_safe_live_update_policy must defer focused-row behavior to the persisted routing contract",
     )
     healthy_rule = find_rule_by_const(schema["allOf"], "queue_health_state", "HEALTHY")
     ensure(
         healthy_rule is not None
-        and healthy_rule["then"]["properties"]["intervention_recommendation_state"].get("const") == "NONE",
+        and healthy_rule["then"]["properties"]["intervention_recommendation_state"].get("const")
+        == "NONE",
         "work_queue_health_contract HEALTHY posture must clear intervention recommendations",
     )
 
@@ -9239,7 +9969,9 @@ def check_workspace_snapshot() -> None:
         expected_support_surfaces=["DETAIL_DRAWER"],
     )
     check_shell_state_taxonomy_contract_binding(workspace, "workspace_snapshot")
-    check_cross_device_continuity_contract_binding(workspace, "workspace_snapshot", "WORKSPACE_ROUTE")
+    check_cross_device_continuity_contract_binding(
+        workspace, "workspace_snapshot", "WORKSPACE_ROUTE"
+    )
     check_cache_isolation_contract_binding(
         workspace,
         "workspace_snapshot",
@@ -9297,12 +10029,16 @@ def check_workspace_snapshot() -> None:
         "workspace_snapshot.queue_projection must stay bound to collaboration_queue_projection_contract.schema.json",
     )
     ensure(
-        workspace["properties"]["queue_projection"]["allOf"][1]["properties"]["projection_scope"].get("const")
+        workspace["properties"]["queue_projection"]["allOf"][1]["properties"][
+            "projection_scope"
+        ].get("const")
         == "WORKSPACE_QUEUE_PROJECTION",
         "workspace_snapshot.queue_projection must stay pinned to projection_scope=WORKSPACE_QUEUE_PROJECTION",
     )
     ensure(
-        workspace["properties"]["visibility_partition"]["allOf"][1]["properties"]["partition_scope"].get("const")
+        workspace["properties"]["visibility_partition"]["allOf"][1]["properties"][
+            "partition_scope"
+        ].get("const")
         == "WORKSPACE_SNAPSHOT",
         "workspace_snapshot.visibility_partition must stay pinned to partition_scope=WORKSPACE_SNAPSHOT",
     )
@@ -9382,7 +10118,8 @@ def check_workspace_snapshot() -> None:
         "workspace_snapshot.moduleState.module_badge_count must stay non-negative",
     )
     ensure(
-        module_state["properties"]["new_activity_marker_ref_or_null"].get("type") == ["string", "null"],
+        module_state["properties"]["new_activity_marker_ref_or_null"].get("type")
+        == ["string", "null"],
         "workspace_snapshot.moduleState.new_activity_marker_ref_or_null must stay string-or-null",
     )
     ensure(
@@ -9403,7 +10140,9 @@ def check_workspace_snapshot() -> None:
 
     module_rules = module_state["allOf"]
     limited_rule = find_rule_by_const(module_rules, "content_state", "LIMITED")
-    ensure(limited_rule is not None, "workspace_snapshot missing moduleState LIMITED placeholder guard")
+    ensure(
+        limited_rule is not None, "workspace_snapshot missing moduleState LIMITED placeholder guard"
+    )
     ensure(
         limited_rule["then"]["properties"]["limitation_reason_codes"].get("minItems") == 1
         and limited_rule["then"]["properties"]["state_reason_code_or_null"].get("type") == "null"
@@ -9411,7 +10150,10 @@ def check_workspace_snapshot() -> None:
         "workspace_snapshot LIMITED modules must require limitation_reason_codes[], clear state_reason_code_or_null, and retain placeholder_refs[]",
     )
     populated_rule = find_rule_by_const(module_rules, "content_state", "POPULATED")
-    ensure(populated_rule is not None, "workspace_snapshot missing moduleState POPULATED placeholder-clearing guard")
+    ensure(
+        populated_rule is not None,
+        "workspace_snapshot missing moduleState POPULATED placeholder-clearing guard",
+    )
     ensure(
         populated_rule["then"]["properties"]["state_reason_code_or_null"].get("type") == "null"
         and populated_rule["then"]["properties"]["placeholder_refs"].get("maxItems") == 0
@@ -9424,24 +10166,35 @@ def check_workspace_snapshot() -> None:
         "NOT_APPLICABLE": "NOT_APPLICABLE_TO_CONTEXT",
     }.items():
         state_rule = find_rule_by_const(module_rules, "content_state", state)
-        ensure(state_rule is not None, f"workspace_snapshot missing moduleState {state} placeholder guard")
         ensure(
-            state_rule["then"]["properties"]["state_reason_code_or_null"].get("const") == expected_reason
+            state_rule is not None,
+            f"workspace_snapshot missing moduleState {state} placeholder guard",
+        )
+        ensure(
+            state_rule["then"]["properties"]["state_reason_code_or_null"].get("const")
+            == expected_reason
             and state_rule["then"]["properties"]["limitation_reason_codes"].get("maxItems") == 0
             and state_rule["then"]["properties"]["placeholder_refs"].get("minItems") == 1,
             f"workspace_snapshot {state} modules must keep typed state_reason_code_or_null, clear limitation_reason_codes[], and retain placeholder_refs[]",
         )
     zero_badge_rule = find_rule_by_const(module_rules, "module_badge_count", 0)
-    ensure(zero_badge_rule is not None, "workspace_snapshot missing zero-badge new-activity clearing rule")
     ensure(
-        zero_badge_rule["then"]["properties"]["new_activity_marker_ref_or_null"].get("type") == "null",
+        zero_badge_rule is not None,
+        "workspace_snapshot missing zero-badge new-activity clearing rule",
+    )
+    ensure(
+        zero_badge_rule["then"]["properties"]["new_activity_marker_ref_or_null"].get("type")
+        == "null",
         "workspace_snapshot module_badge_count=0 must clear new_activity_marker_ref_or_null",
     )
     marker_rule = next(
         (
             rule
             for rule in module_rules
-            if rule.get("if", {}).get("properties", {}).get("new_activity_marker_ref_or_null", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("new_activity_marker_ref_or_null", {})
+            .get("type")
             == "string"
         ),
         None,
@@ -9488,13 +10241,20 @@ def check_workspace_snapshot() -> None:
         (
             rule
             for rule in module_rules
-            if rule.get("if", {}).get("properties", {}).get("module_code", {}).get("const") == "FILES"
-            and rule.get("if", {}).get("properties", {}).get("visibility_partition", {}).get("const")
+            if rule.get("if", {}).get("properties", {}).get("module_code", {}).get("const")
+            == "FILES"
+            and rule.get("if", {})
+            .get("properties", {})
+            .get("visibility_partition", {})
+            .get("const")
             == "CUSTOMER_VISIBLE_ONLY"
         ),
         None,
     )
-    ensure(files_customer_rule is not None, "workspace_snapshot missing customer-visible FILES partition guard")
+    ensure(
+        files_customer_rule is not None,
+        "workspace_snapshot missing customer-visible FILES partition guard",
+    )
     customer_file_segments = files_customer_rule["then"]["properties"]["file_segments"]
     ensure(
         customer_file_segments.get("prefixItems") == [{"const": "SHARED_WITH_CUSTOMER"}]
@@ -9510,13 +10270,20 @@ def check_workspace_snapshot() -> None:
         (
             rule
             for rule in module_rules
-            if rule.get("if", {}).get("properties", {}).get("module_code", {}).get("const") == "FILES"
-            and rule.get("if", {}).get("properties", {}).get("visibility_partition", {}).get("const")
+            if rule.get("if", {}).get("properties", {}).get("module_code", {}).get("const")
+            == "FILES"
+            and rule.get("if", {})
+            .get("properties", {})
+            .get("visibility_partition", {})
+            .get("const")
             == "SEGMENTED_BY_VISIBILITY"
         ),
         None,
     )
-    ensure(files_segmented_rule is not None, "workspace_snapshot missing segmented FILES partition guard")
+    ensure(
+        files_segmented_rule is not None,
+        "workspace_snapshot missing segmented FILES partition guard",
+    )
     segmented_file_segments = files_segmented_rule["then"]["properties"]["file_segments"]
     ensure(
         segmented_file_segments.get("prefixItems")
@@ -9576,19 +10343,30 @@ def check_workspace_snapshot() -> None:
         (
             rule
             for rule in detail_rules
-            if rule.get("if", {}).get("properties", {}).get("expanded_module_code", {}).get("type") == "null"
+            if rule.get("if", {}).get("properties", {}).get("expanded_module_code", {}).get("type")
+            == "null"
         ),
         None,
     )
-    ensure(collapsed_rule is not None, "workspace_snapshot missing collapsed drawer focus-anchor guard")
+    ensure(
+        collapsed_rule is not None, "workspace_snapshot missing collapsed drawer focus-anchor guard"
+    )
     ensure(
         collapsed_rule["then"]["properties"]["focus_anchor_ref"].get("type") == "null",
         "workspace_snapshot collapsed detail drawer must null focus_anchor_ref",
     )
 
-    for module_code in ["CUSTOMER_ACTIVITY", "INTERNAL_ACTIVITY", "FILES", "LINKED_CONTEXT", "AUDIT_TRAIL"]:
+    for module_code in [
+        "CUSTOMER_ACTIVITY",
+        "INTERNAL_ACTIVITY",
+        "FILES",
+        "LINKED_CONTEXT",
+        "AUDIT_TRAIL",
+    ]:
         rule = find_rule_by_const(detail_rules, "expanded_module_code", module_code)
-        ensure(rule is not None, f"workspace_snapshot missing expanded drawer guard for {module_code}")
+        ensure(
+            rule is not None, f"workspace_snapshot missing expanded drawer guard for {module_code}"
+        )
         then_props = rule["then"]["properties"]
         focus_schema = then_props["focus_anchor_ref"]
         ensure(
@@ -9638,15 +10416,26 @@ def check_workspace_snapshot() -> None:
     )
     ensure(
         composer_layer["properties"]["available_append_command_codes"]["items"].get("enum")
-        == ["ADD_INTERNAL_NOTE", "ADD_CUSTOMER_COMMENT", "REQUEST_CUSTOMER_INFO", "RESPOND_TO_REQUEST_INFO"],
+        == [
+            "ADD_INTERNAL_NOTE",
+            "ADD_CUSTOMER_COMMENT",
+            "REQUEST_CUSTOMER_INFO",
+            "RESPOND_TO_REQUEST_INFO",
+        ],
         "workspace_snapshot.composer_layer.available_append_command_codes must stay limited to the governed collaboration append commands",
     )
 
     composer_rules = composer_layer["allOf"]
-    internal_rule = find_rule_by_const(composer_rules, "selected_append_command_code_or_null", "ADD_INTERNAL_NOTE")
-    ensure(internal_rule is not None, "workspace_snapshot.composer_layer missing ADD_INTERNAL_NOTE visibility guard")
+    internal_rule = find_rule_by_const(
+        composer_rules, "selected_append_command_code_or_null", "ADD_INTERNAL_NOTE"
+    )
     ensure(
-        internal_rule["then"]["properties"]["composer_visibility_class_or_null"].get("const") == "INTERNAL_ONLY",
+        internal_rule is not None,
+        "workspace_snapshot.composer_layer missing ADD_INTERNAL_NOTE visibility guard",
+    )
+    ensure(
+        internal_rule["then"]["properties"]["composer_visibility_class_or_null"].get("const")
+        == "INTERNAL_ONLY",
         "workspace_snapshot ADD_INTERNAL_NOTE composers must force INTERNAL_ONLY visibility",
     )
     respond_rule = find_rule_by_const(
@@ -9654,23 +10443,37 @@ def check_workspace_snapshot() -> None:
         "selected_append_command_code_or_null",
         "RESPOND_TO_REQUEST_INFO",
     )
-    ensure(respond_rule is not None, "workspace_snapshot.composer_layer missing RESPOND_TO_REQUEST_INFO request binding guard")
     ensure(
-        respond_rule["then"]["properties"]["target_request_info_ref_or_null"].get("type") == "string",
+        respond_rule is not None,
+        "workspace_snapshot.composer_layer missing RESPOND_TO_REQUEST_INFO request binding guard",
+    )
+    ensure(
+        respond_rule["then"]["properties"]["target_request_info_ref_or_null"].get("type")
+        == "string",
         "workspace_snapshot RESPOND_TO_REQUEST_INFO composers must require target_request_info_ref_or_null",
     )
     draft_none_rule = find_rule_by_const(composer_rules, "draft_state", "NONE")
-    ensure(draft_none_rule is not None, "workspace_snapshot.composer_layer missing draft_state=NONE clearing rule")
+    ensure(
+        draft_none_rule is not None,
+        "workspace_snapshot.composer_layer missing draft_state=NONE clearing rule",
+    )
     ensure(
         draft_none_rule["then"]["properties"]["draft_ref_or_null"].get("type") == "null"
-        and draft_none_rule["then"]["properties"]["rebase_target_snapshot_ref_or_null"].get("type") == "null",
+        and draft_none_rule["then"]["properties"]["rebase_target_snapshot_ref_or_null"].get("type")
+        == "null",
         "workspace_snapshot draft_state=NONE must clear draft and rebase refs",
     )
     draft_active_rule = find_rule_by_const(composer_rules, "draft_state", "ACTIVE")
-    ensure(draft_active_rule is not None, "workspace_snapshot.composer_layer missing draft_state=ACTIVE rule")
+    ensure(
+        draft_active_rule is not None,
+        "workspace_snapshot.composer_layer missing draft_state=ACTIVE rule",
+    )
     ensure(
         draft_active_rule["then"]["properties"]["draft_ref_or_null"].get("type") == "string"
-        and draft_active_rule["then"]["properties"]["rebase_target_snapshot_ref_or_null"].get("type") == "null",
+        and draft_active_rule["then"]["properties"]["rebase_target_snapshot_ref_or_null"].get(
+            "type"
+        )
+        == "null",
         "workspace_snapshot draft_state=ACTIVE must keep a draft ref and clear rebase target",
     )
     draft_rebase_rule = next(
@@ -9682,7 +10485,10 @@ def check_workspace_snapshot() -> None:
         ),
         None,
     )
-    ensure(draft_rebase_rule is not None, "workspace_snapshot.composer_layer missing rebased-draft guard")
+    ensure(
+        draft_rebase_rule is not None,
+        "workspace_snapshot.composer_layer missing rebased-draft guard",
+    )
     rebase_then = draft_rebase_rule["then"]["properties"]
     ensure(
         rebase_then["rebase_target_snapshot_ref_or_null"].get("type") == "string"
@@ -9690,22 +10496,33 @@ def check_workspace_snapshot() -> None:
         "workspace_snapshot rebased drafts must keep rebase target and publish block reasons",
     )
     ensure(
-        rebase_then["publish_confirmation"]["properties"]["confirmation_state"].get("const") == "BLOCKED_BY_REBASE"
-        and rebase_then["publish_confirmation"]["properties"]["publish_action_code_or_null"].get("type") == "null",
+        rebase_then["publish_confirmation"]["properties"]["confirmation_state"].get("const")
+        == "BLOCKED_BY_REBASE"
+        and rebase_then["publish_confirmation"]["properties"]["publish_action_code_or_null"].get(
+            "type"
+        )
+        == "null",
         "workspace_snapshot rebased drafts must force BLOCKED_BY_REBASE and clear publish_action_code_or_null",
     )
 
     attachment_picker = workspace["$defs"]["attachmentPicker"]
     ensure(
-        attachment_picker["properties"]["picker_state"].get("enum") == ["EMPTY", "STAGED", "READY", "LIMITED"],
+        attachment_picker["properties"]["picker_state"].get("enum")
+        == ["EMPTY", "STAGED", "READY", "LIMITED"],
         "workspace_snapshot.attachment_picker.picker_state must keep the governed attachment staging vocabulary",
     )
     attachment_rules = attachment_picker["allOf"]
     picker_empty_rule = find_rule_by_const(attachment_rules, "picker_state", "EMPTY")
-    ensure(picker_empty_rule is not None, "workspace_snapshot.attachment_picker missing EMPTY clearing rule")
+    ensure(
+        picker_empty_rule is not None,
+        "workspace_snapshot.attachment_picker missing EMPTY clearing rule",
+    )
     ensure(
         picker_empty_rule["then"]["properties"]["staged_upload_refs"].get("maxItems") == 0
-        and picker_empty_rule["then"]["properties"]["inherited_visibility_class_or_null"].get("type") == "null",
+        and picker_empty_rule["then"]["properties"]["inherited_visibility_class_or_null"].get(
+            "type"
+        )
+        == "null",
         "workspace_snapshot EMPTY attachment pickers must clear staged uploads and inherited visibility",
     )
     picker_staged_rule = next(
@@ -9717,10 +10534,16 @@ def check_workspace_snapshot() -> None:
         ),
         None,
     )
-    ensure(picker_staged_rule is not None, "workspace_snapshot.attachment_picker missing staged attachment guard")
+    ensure(
+        picker_staged_rule is not None,
+        "workspace_snapshot.attachment_picker missing staged attachment guard",
+    )
     ensure(
         picker_staged_rule["then"]["properties"]["staged_upload_refs"].get("minItems") == 1
-        and picker_staged_rule["then"]["properties"]["inherited_visibility_class_or_null"].get("type") == "string",
+        and picker_staged_rule["then"]["properties"]["inherited_visibility_class_or_null"].get(
+            "type"
+        )
+        == "string",
         "workspace_snapshot staged attachment pickers must require uploads and inherited visibility",
     )
     confirmation_required_rule = find_rule_by_const(
@@ -9733,7 +10556,9 @@ def check_workspace_snapshot() -> None:
         "workspace_snapshot.attachment_picker missing visibility_confirmation_required=true guard",
     )
     ensure(
-        confirmation_required_rule["then"]["properties"]["inherited_visibility_class_or_null"].get("const")
+        confirmation_required_rule["then"]["properties"]["inherited_visibility_class_or_null"].get(
+            "const"
+        )
         == "CUSTOMER_VISIBLE",
         "workspace_snapshot customer-visible attachment confirmation must force inherited_visibility_class_or_null=CUSTOMER_VISIBLE",
     )
@@ -9746,15 +10571,25 @@ def check_workspace_snapshot() -> None:
     )
     confirmation_rules = publish_confirmation["allOf"]
     not_required_rule = find_rule_by_const(confirmation_rules, "confirmation_state", "NOT_REQUIRED")
-    ensure(not_required_rule is not None, "workspace_snapshot.publish_confirmation missing NOT_REQUIRED guard")
     ensure(
-        not_required_rule["then"]["properties"]["confirmation_message_ref_or_null"].get("type") == "null",
+        not_required_rule is not None,
+        "workspace_snapshot.publish_confirmation missing NOT_REQUIRED guard",
+    )
+    ensure(
+        not_required_rule["then"]["properties"]["confirmation_message_ref_or_null"].get("type")
+        == "null",
         "workspace_snapshot NOT_REQUIRED publish confirmation must clear confirmation_message_ref_or_null",
     )
-    blocked_rebase_rule = find_rule_by_const(confirmation_rules, "confirmation_state", "BLOCKED_BY_REBASE")
-    ensure(blocked_rebase_rule is not None, "workspace_snapshot.publish_confirmation missing BLOCKED_BY_REBASE guard")
+    blocked_rebase_rule = find_rule_by_const(
+        confirmation_rules, "confirmation_state", "BLOCKED_BY_REBASE"
+    )
     ensure(
-        blocked_rebase_rule["then"]["properties"]["publish_action_code_or_null"].get("type") == "null",
+        blocked_rebase_rule is not None,
+        "workspace_snapshot.publish_confirmation missing BLOCKED_BY_REBASE guard",
+    )
+    ensure(
+        blocked_rebase_rule["then"]["properties"]["publish_action_code_or_null"].get("type")
+        == "null",
         "workspace_snapshot BLOCKED_BY_REBASE publish confirmation must clear publish_action_code_or_null",
     )
 
@@ -9771,7 +10606,9 @@ def check_workspace_snapshot() -> None:
         "workspace_snapshot.actionStrip.authoritative_action must stay bound to action_authority_contract.schema.json",
     )
     ensure(
-        action_strip["properties"]["authoritative_action"]["allOf"][1]["properties"]["projection_scope"].get("const")
+        action_strip["properties"]["authoritative_action"]["allOf"][1]["properties"][
+            "projection_scope"
+        ].get("const")
         == "WORKSPACE_ACTION_STRIP",
         "workspace_snapshot.actionStrip.authoritative_action must stay pinned to projection_scope=WORKSPACE_ACTION_STRIP",
     )
@@ -9820,7 +10657,9 @@ def check_workspace_snapshot() -> None:
         == ["REPLY", "UPLOAD_FILE", "RESPOND_TO_REQUEST_INFO"],
         "workspace_snapshot.customerRequestWorkspace.visible_action_codes must stay limited to customer-safe action families",
     )
-    artifact_history_states = customer_request_workspace["properties"]["artifact_history_state"].get("enum")
+    artifact_history_states = customer_request_workspace["properties"][
+        "artifact_history_state"
+    ].get("enum")
     ensure(
         artifact_history_states
         == ["NO_SHARED_FILES", "CURRENT_ONLY", "CURRENT_PLUS_HISTORY", "HISTORY_ONLY", "LIMITED"],
@@ -9848,9 +10687,9 @@ def check_workspace_snapshot() -> None:
         "workspace_snapshot.customerRequestWorkspace.authoritative_action must stay bound to action_authority_contract.schema.json",
     )
     ensure(
-        customer_request_workspace["properties"]["authoritative_action"]["allOf"][1]["properties"]["projection_scope"].get(
-            "const"
-        )
+        customer_request_workspace["properties"]["authoritative_action"]["allOf"][1]["properties"][
+            "projection_scope"
+        ].get("const")
         == "CUSTOMER_REQUEST_DETAIL",
         "workspace_snapshot.customerRequestWorkspace.authoritative_action must stay pinned to projection_scope=CUSTOMER_REQUEST_DETAIL",
     )
@@ -9859,7 +10698,10 @@ def check_workspace_snapshot() -> None:
         (
             rule
             for rule in customer_request_rules
-            if rule.get("if", {}).get("properties", {}).get("no_safe_action_reason_ref_or_null", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("no_safe_action_reason_ref_or_null", {})
+            .get("type")
             == "string"
         ),
         None,
@@ -9870,7 +10712,10 @@ def check_workspace_snapshot() -> None:
     )
     ensure(
         no_safe_reason_rule["then"]["properties"]["visible_action_codes"].get("maxItems") == 0
-        and no_safe_reason_rule["then"]["properties"]["primary_action_label_ref_or_null"].get("type") == "null",
+        and no_safe_reason_rule["then"]["properties"]["primary_action_label_ref_or_null"].get(
+            "type"
+        )
+        == "null",
         "workspace_snapshot customer request workspaces with no-safe-action copy must clear visible actions and primary action label",
     )
 
@@ -9889,9 +10734,13 @@ def check_workspace_snapshot() -> None:
         ),
         None,
     )
-    ensure(fresh_rule is not None, "workspace_snapshot missing FRESH freshness notice clearing rule")
     ensure(
-        fresh_rule["then"]["properties"]["context_bar"]["properties"]["freshness_notice_ref_or_null"].get("type")
+        fresh_rule is not None, "workspace_snapshot missing FRESH freshness notice clearing rule"
+    )
+    ensure(
+        fresh_rule["then"]["properties"]["context_bar"]["properties"][
+            "freshness_notice_ref_or_null"
+        ].get("type")
         == "null",
         "workspace_snapshot FRESH workspaces must clear freshness_notice_ref_or_null",
     )
@@ -9911,9 +10760,9 @@ def check_workspace_snapshot() -> None:
         None,
     )
     ensure(nonfresh_rule is not None, "workspace_snapshot missing non-fresh notice rule")
-    nonfresh_notice = (
-        nonfresh_rule["then"]["properties"]["context_bar"]["properties"]["freshness_notice_ref_or_null"]
-    )
+    nonfresh_notice = nonfresh_rule["then"]["properties"]["context_bar"]["properties"][
+        "freshness_notice_ref_or_null"
+    ]
     ensure(
         nonfresh_notice.get("type") == "string" and nonfresh_notice.get("minLength") == 1,
         "workspace_snapshot non-fresh workspaces must require freshness_notice_ref_or_null",
@@ -9933,9 +10782,14 @@ def check_workspace_snapshot() -> None:
         ),
         None,
     )
-    ensure(stale_degraded_rule is not None, "workspace_snapshot missing stale/degraded fail-closed rule")
     ensure(
-        stale_degraded_rule["then"]["properties"]["action_strip"]["properties"]["actionability_state"].get("const")
+        stale_degraded_rule is not None,
+        "workspace_snapshot missing stale/degraded fail-closed rule",
+    )
+    ensure(
+        stale_degraded_rule["then"]["properties"]["action_strip"]["properties"][
+            "actionability_state"
+        ].get("const")
         == "NO_SAFE_ACTION",
         "workspace_snapshot stale or degraded freshness must force NO_SAFE_ACTION",
     )
@@ -9944,17 +10798,24 @@ def check_workspace_snapshot() -> None:
         (
             rule
             for rule in top_level_rules
-            if rule.get("if", {}).get("properties", {}).get("recovery_posture", {}).get("not", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("recovery_posture", {})
+            .get("not", {})
+            .get("const")
             == "NONE"
             and "action_strip" in rule.get("then", {}).get("properties", {})
             and "context_bar" in rule.get("then", {}).get("properties", {})
         ),
         None,
     )
-    ensure(recovery_rule is not None, "workspace_snapshot missing recovery_posture fail-closed rule")
+    ensure(
+        recovery_rule is not None, "workspace_snapshot missing recovery_posture fail-closed rule"
+    )
     recovery_then = recovery_rule["then"]["properties"]
     ensure(
-        recovery_then["action_strip"]["properties"]["actionability_state"].get("const") == "NO_SAFE_ACTION",
+        recovery_then["action_strip"]["properties"]["actionability_state"].get("const")
+        == "NO_SAFE_ACTION",
         "workspace_snapshot recovery_posture!=NONE must force NO_SAFE_ACTION",
     )
     recovery_notice = recovery_then["context_bar"]["properties"]["recovery_notice_ref_or_null"]
@@ -9966,7 +10827,11 @@ def check_workspace_snapshot() -> None:
         (
             rule
             for rule in top_level_rules
-            if rule.get("if", {}).get("properties", {}).get("recovery_posture", {}).get("not", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("recovery_posture", {})
+            .get("not", {})
+            .get("const")
             == "NONE"
             and "detail_drawer" in rule.get("then", {}).get("properties", {})
         ),
@@ -9977,9 +10842,11 @@ def check_workspace_snapshot() -> None:
         "workspace_snapshot missing recovery_posture composer publish guard",
     )
     ensure(
-        recovery_composer_rule["then"]["properties"]["detail_drawer"]["properties"]["composer_layer"]["properties"][
-            "publish_confirmation"
-        ]["properties"]["publish_action_code_or_null"].get("type")
+        recovery_composer_rule["then"]["properties"]["detail_drawer"]["properties"][
+            "composer_layer"
+        ]["properties"]["publish_confirmation"]["properties"]["publish_action_code_or_null"].get(
+            "type"
+        )
         == "null",
         "workspace_snapshot recovery_posture!=NONE must clear composer publish_action_code_or_null",
     )
@@ -10004,9 +10871,9 @@ def check_workspace_snapshot() -> None:
         "workspace_snapshot missing customer-visible ACTION_AVAILABLE customer-request guard",
     )
     ensure(
-        customer_action_available_rule["then"]["properties"]["customer_request_workspace"]["properties"][
-            "primary_action_label_ref_or_null"
-        ].get("type")
+        customer_action_available_rule["then"]["properties"]["customer_request_workspace"][
+            "properties"
+        ]["primary_action_label_ref_or_null"].get("type")
         == "string",
         "workspace_snapshot customer-visible ACTION_AVAILABLE posture must require primary_action_label_ref_or_null",
     )
@@ -10025,7 +10892,10 @@ def check_workspace_snapshot() -> None:
         ),
         None,
     )
-    ensure(no_safe_action_rule is not None, "workspace_snapshot missing NO_SAFE_ACTION detail-drawer guard")
+    ensure(
+        no_safe_action_rule is not None,
+        "workspace_snapshot missing NO_SAFE_ACTION detail-drawer guard",
+    )
     no_safe_detail = no_safe_action_rule["then"]["properties"]["detail_drawer"]["properties"]
     ensure(
         no_safe_detail["promoted_module_code"].get("type") == "string",
@@ -10039,7 +10909,8 @@ def check_workspace_snapshot() -> None:
         (
             rule
             for rule in top_level_rules
-            if rule.get("if", {}).get("properties", {}).get("viewer_scope", {}).get("const") == "CUSTOMER_VISIBLE"
+            if rule.get("if", {}).get("properties", {}).get("viewer_scope", {}).get("const")
+            == "CUSTOMER_VISIBLE"
             and rule.get("if", {})
             .get("properties", {})
             .get("action_strip", {})
@@ -10055,7 +10926,9 @@ def check_workspace_snapshot() -> None:
         customer_no_safe_action_rule is not None,
         "workspace_snapshot missing customer-visible NO_SAFE_ACTION customer-request guard",
     )
-    no_safe_customer_request = customer_no_safe_action_rule["then"]["properties"]["customer_request_workspace"]["properties"]
+    no_safe_customer_request = customer_no_safe_action_rule["then"]["properties"][
+        "customer_request_workspace"
+    ]["properties"]
     ensure(
         no_safe_customer_request["visible_action_codes"].get("maxItems") == 0
         and no_safe_customer_request["primary_action_label_ref_or_null"].get("type") == "null"
@@ -10063,7 +10936,13 @@ def check_workspace_snapshot() -> None:
         "workspace_snapshot customer-visible NO_SAFE_ACTION posture must clear visible actions and require no-safe-action explanation",
     )
 
-    for module_code in ["CUSTOMER_ACTIVITY", "INTERNAL_ACTIVITY", "FILES", "LINKED_CONTEXT", "AUDIT_TRAIL"]:
+    for module_code in [
+        "CUSTOMER_ACTIVITY",
+        "INTERNAL_ACTIVITY",
+        "FILES",
+        "LINKED_CONTEXT",
+        "AUDIT_TRAIL",
+    ]:
         suggested_rule = next(
             (
                 rule
@@ -10093,14 +10972,19 @@ def check_workspace_snapshot() -> None:
         (
             rule
             for rule in top_level_rules
-            if rule.get("if", {}).get("properties", {}).get("viewer_scope", {}).get("const") == "CUSTOMER_VISIBLE"
+            if rule.get("if", {}).get("properties", {}).get("viewer_scope", {}).get("const")
+            == "CUSTOMER_VISIBLE"
             and "customer_safe_projection" in rule.get("then", {}).get("properties", {})
         ),
         None,
     )
-    ensure(customer_projection_rule is not None, "workspace_snapshot missing CUSTOMER_VISIBLE customer_safe_projection branch")
     ensure(
-        customer_projection_rule["then"]["properties"]["customer_safe_projection"].get("type") == "object",
+        customer_projection_rule is not None,
+        "workspace_snapshot missing CUSTOMER_VISIBLE customer_safe_projection branch",
+    )
+    ensure(
+        customer_projection_rule["then"]["properties"]["customer_safe_projection"].get("type")
+        == "object",
         "workspace_snapshot CUSTOMER_VISIBLE branch must require an object customer_safe_projection contract",
     )
 
@@ -10108,10 +10992,14 @@ def check_workspace_snapshot() -> None:
         (
             rule
             for rule in top_level_rules
-            if rule.get("if", {}).get("properties", {}).get("viewer_scope", {}).get("const") == "CUSTOMER_VISIBLE"
+            if rule.get("if", {}).get("properties", {}).get("viewer_scope", {}).get("const")
+            == "CUSTOMER_VISIBLE"
             and "detail_drawer" in rule.get("then", {}).get("properties", {})
             and "modules"
-            in rule.get("then", {}).get("properties", {}).get("detail_drawer", {}).get("properties", {})
+            in rule.get("then", {})
+            .get("properties", {})
+            .get("detail_drawer", {})
+            .get("properties", {})
         ),
         None,
     )
@@ -10127,7 +11015,9 @@ def check_workspace_snapshot() -> None:
         module_props["contains"]["properties"]["module_code"]["const"] == "CUSTOMER_ACTIVITY",
         "workspace_snapshot customer-visible drawer must include CUSTOMER_ACTIVITY",
     )
-    file_presence_rule = customer_then["allOf"][0]["properties"]["detail_drawer"]["properties"]["modules"]
+    file_presence_rule = customer_then["allOf"][0]["properties"]["detail_drawer"]["properties"][
+        "modules"
+    ]
     ensure(
         file_presence_rule["contains"]["properties"]["module_code"]["const"] == "FILES",
         "workspace_snapshot customer-visible drawer must include FILES",
@@ -10143,23 +11033,30 @@ def check_workspace_snapshot() -> None:
         "workspace_snapshot customer-visible participants must not expose internal unread state",
     )
     ensure(
-        customer_then["properties"]["decision_summary"]["properties"]["customer_state_summary_ref"].get("const")
+        customer_then["properties"]["decision_summary"]["properties"][
+            "customer_state_summary_ref"
+        ].get("const")
         is None,
         "workspace_snapshot customer-visible decision summary must clear customer_state_summary_ref",
     )
     ensure(
-        customer_then["properties"]["detail_drawer"]["properties"]["promoted_module_code"].get("enum")
+        customer_then["properties"]["detail_drawer"]["properties"]["promoted_module_code"].get(
+            "enum"
+        )
         == ["CUSTOMER_ACTIVITY", "FILES", None],
         "workspace_snapshot customer-visible promoted_module_code must stay limited to customer-safe modules",
     )
-    customer_composer = customer_then["properties"]["detail_drawer"]["properties"]["composer_layer"]["properties"]
+    customer_composer = customer_then["properties"]["detail_drawer"]["properties"][
+        "composer_layer"
+    ]["properties"]
     ensure(
         customer_composer["available_append_command_codes"]["items"].get("enum")
         == ["ADD_CUSTOMER_COMMENT", "RESPOND_TO_REQUEST_INFO"],
         "workspace_snapshot customer-visible composer must stay limited to customer-safe append commands",
     )
     ensure(
-        customer_composer["composer_visibility_class_or_null"].get("enum") == ["CUSTOMER_VISIBLE", None],
+        customer_composer["composer_visibility_class_or_null"].get("enum")
+        == ["CUSTOMER_VISIBLE", None],
         "workspace_snapshot customer-visible composer must stay customer-visible when mounted",
     )
     customer_request_props = customer_then["properties"]["customer_request_workspace"]["properties"]
@@ -10175,14 +11072,19 @@ def check_workspace_snapshot() -> None:
         (
             rule
             for rule in top_level_rules
-            if rule.get("if", {}).get("properties", {}).get("viewer_scope", {}).get("const") == "STAFF_FULL"
+            if rule.get("if", {}).get("properties", {}).get("viewer_scope", {}).get("const")
+            == "STAFF_FULL"
             and "customer_safe_projection" in rule.get("then", {}).get("properties", {})
         ),
         None,
     )
-    ensure(staff_projection_rule is not None, "workspace_snapshot missing STAFF_FULL customer_safe_projection branch")
     ensure(
-        staff_projection_rule["then"]["properties"]["customer_safe_projection"].get("type") == "null",
+        staff_projection_rule is not None,
+        "workspace_snapshot missing STAFF_FULL customer_safe_projection branch",
+    )
+    ensure(
+        staff_projection_rule["then"]["properties"]["customer_safe_projection"].get("type")
+        == "null",
         "workspace_snapshot STAFF_FULL branch must clear customer_safe_projection",
     )
 
@@ -10190,31 +11092,46 @@ def check_workspace_snapshot() -> None:
         (
             rule
             for rule in top_level_rules
-            if rule.get("if", {}).get("properties", {}).get("viewer_scope", {}).get("const") == "STAFF_FULL"
+            if rule.get("if", {}).get("properties", {}).get("viewer_scope", {}).get("const")
+            == "STAFF_FULL"
             and "detail_drawer" in rule.get("then", {}).get("properties", {})
             and "modules"
-            in rule.get("then", {}).get("properties", {}).get("detail_drawer", {}).get("properties", {})
+            in rule.get("then", {})
+            .get("properties", {})
+            .get("detail_drawer", {})
+            .get("properties", {})
         ),
         None,
     )
     ensure(staff_view_rule is not None, "workspace_snapshot missing STAFF_FULL branch")
     staff_detail_props = staff_view_rule["then"]["properties"]["detail_drawer"]["properties"]
     ensure(
-        staff_detail_props["modules"].get("minItems") == 5 and staff_detail_props["modules"].get("maxItems") == 5,
+        staff_detail_props["modules"].get("minItems") == 5
+        and staff_detail_props["modules"].get("maxItems") == 5,
         "workspace_snapshot staff drawer must keep all five canonical modules mounted",
     )
     ensure(
         staff_detail_props["promoted_module_code"].get("enum")
-        == ["CUSTOMER_ACTIVITY", "INTERNAL_ACTIVITY", "FILES", "LINKED_CONTEXT", "AUDIT_TRAIL", None],
+        == [
+            "CUSTOMER_ACTIVITY",
+            "INTERNAL_ACTIVITY",
+            "FILES",
+            "LINKED_CONTEXT",
+            "AUDIT_TRAIL",
+            None,
+        ],
         "workspace_snapshot staff promoted_module_code must stay limited to the five staff modules",
     )
     staff_composer = staff_detail_props["composer_layer"]["properties"]
     ensure(
-        staff_composer["available_append_command_codes"]["contains"].get("const") == "ADD_INTERNAL_NOTE"
+        staff_composer["available_append_command_codes"]["contains"].get("const")
+        == "ADD_INTERNAL_NOTE"
         and staff_composer["available_append_command_codes"].get("minContains") == 1,
         "workspace_snapshot staff composer must keep ADD_INTERNAL_NOTE in the available append-command set",
     )
-    staff_files_rule = staff_view_rule["then"]["allOf"][0]["properties"]["detail_drawer"]["properties"]["modules"]
+    staff_files_rule = staff_view_rule["then"]["allOf"][0]["properties"]["detail_drawer"][
+        "properties"
+    ]["modules"]
     ensure(
         staff_files_rule["contains"]["properties"]["visibility_partition"].get("const")
         == "SEGMENTED_BY_VISIBILITY",
@@ -10274,7 +11191,9 @@ def check_customer_request_list_snapshot() -> None:
         "customer_request_list_snapshot.visibility_partition must stay bound to visibility_partition_contract.schema.json",
     )
     ensure(
-        schema["properties"]["visibility_partition"]["allOf"][1]["properties"]["partition_scope"].get("const")
+        schema["properties"]["visibility_partition"]["allOf"][1]["properties"][
+            "partition_scope"
+        ].get("const")
         == "CUSTOMER_REQUEST_LIST",
         "customer_request_list_snapshot.visibility_partition must stay pinned to partition_scope=CUSTOMER_REQUEST_LIST",
     )
@@ -10298,12 +11217,26 @@ def check_customer_request_list_snapshot() -> None:
     )
     ensure(
         schema["$defs"]["settlementState"].get("enum")
-        == ["STEADY", "RECEIPT_PENDING", "FRESHENING", "STALE_REVIEW_REQUIRED", "DEGRADED_READ_ONLY", "RECOVERY_REQUIRED"],
+        == [
+            "STEADY",
+            "RECEIPT_PENDING",
+            "FRESHENING",
+            "STALE_REVIEW_REQUIRED",
+            "DEGRADED_READ_ONLY",
+            "RECOVERY_REQUIRED",
+        ],
         "customer_request_list_snapshot.settlementState must keep the shared shell settlement vocabulary",
     )
     ensure(
         schema["$defs"]["recoveryPosture"].get("enum")
-        == ["NONE", "INLINE_RECONNECT", "INLINE_REBASE", "READ_ONLY_LIMITED", "OBJECT_SUPERSEDED", "ACCESS_REBIND_REQUIRED"],
+        == [
+            "NONE",
+            "INLINE_RECONNECT",
+            "INLINE_REBASE",
+            "READ_ONLY_LIMITED",
+            "OBJECT_SUPERSEDED",
+            "ACCESS_REBIND_REQUIRED",
+        ],
         "customer_request_list_snapshot.recoveryPosture must keep the shared shell recovery vocabulary",
     )
     ensure(
@@ -10347,7 +11280,8 @@ def check_customer_request_list_snapshot() -> None:
         "customer_request_list_snapshot.requestRow.due_label_ref_or_null must keep the FE-71 due-label budget",
     )
     ensure(
-        row["due_label_ref_or_null"].get("pattern") == "^(Due .*\\d.*|Overdue .*\\d.*|No deadline yet)$",
+        row["due_label_ref_or_null"].get("pattern")
+        == "^(Due .*\\d.*|Overdue .*\\d.*|No deadline yet)$",
         "customer_request_list_snapshot.requestRow.due_label_ref_or_null must keep the explicit due-label grammar",
     )
     ensure(
@@ -10387,7 +11321,10 @@ def check_customer_request_list_snapshot() -> None:
 
     row_rules = schema["$defs"]["requestRow"]["allOf"]
     due_none_rule = find_rule_by_const(row_rules, "due_state", "NONE")
-    ensure(due_none_rule is not None, "customer_request_list_snapshot missing due_state=NONE clearing rule")
+    ensure(
+        due_none_rule is not None,
+        "customer_request_list_snapshot missing due_state=NONE clearing rule",
+    )
     ensure(
         due_none_rule["then"]["properties"]["due_at_or_null"].get("type") == "null"
         and due_none_rule["then"]["properties"]["due_label_ref_or_null"].get("type") == "null",
@@ -10397,14 +11334,23 @@ def check_customer_request_list_snapshot() -> None:
         (
             rule
             for rule in row_rules
-            if rule.get("if", {}).get("properties", {}).get("primary_action_code_or_null", {}).get("type") == "null"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("primary_action_code_or_null", {})
+            .get("type")
+            == "null"
         ),
         None,
     )
-    ensure(no_action_rule is not None, "customer_request_list_snapshot missing no-safe-action row guard")
     ensure(
-        no_action_rule["then"]["properties"]["primary_action_label_ref_or_null"].get("type") == "null"
-        and no_action_rule["then"]["properties"]["no_safe_action_reason_ref_or_null"].get("type") == "string",
+        no_action_rule is not None,
+        "customer_request_list_snapshot missing no-safe-action row guard",
+    )
+    ensure(
+        no_action_rule["then"]["properties"]["primary_action_label_ref_or_null"].get("type")
+        == "null"
+        and no_action_rule["then"]["properties"]["no_safe_action_reason_ref_or_null"].get("type")
+        == "string",
         "customer_request_list_snapshot rows without a safe action must clear the action label and publish no-safe-action explanation",
     )
 
@@ -10413,7 +11359,11 @@ def check_customer_request_list_snapshot() -> None:
         (
             rule
             for rule in top_level_rules
-            if rule.get("if", {}).get("properties", {}).get("selected_item_ref_or_null", {}).get("type") == "null"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("selected_item_ref_or_null", {})
+            .get("type")
+            == "null"
         ),
         None,
     )
@@ -10422,14 +11372,19 @@ def check_customer_request_list_snapshot() -> None:
         "customer_request_list_snapshot missing selected_item_ref_or_null=null clearing rule",
     )
     ensure(
-        selected_none_rule["then"]["properties"]["selected_focus_anchor_ref_or_null"].get("type") == "null",
+        selected_none_rule["then"]["properties"]["selected_focus_anchor_ref_or_null"].get("type")
+        == "null",
         "customer_request_list_snapshot null selected item must clear selected focus anchor",
     )
     selected_present_rule = next(
         (
             rule
             for rule in top_level_rules
-            if rule.get("if", {}).get("properties", {}).get("selected_item_ref_or_null", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("selected_item_ref_or_null", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
@@ -10438,7 +11393,8 @@ def check_customer_request_list_snapshot() -> None:
         "customer_request_list_snapshot missing selected item focus-anchor guard",
     )
     ensure(
-        selected_present_rule["then"]["properties"]["selected_focus_anchor_ref_or_null"].get("type") == "string",
+        selected_present_rule["then"]["properties"]["selected_focus_anchor_ref_or_null"].get("type")
+        == "string",
         "customer_request_list_snapshot selected items must require a selected focus anchor",
     )
 
@@ -10489,12 +11445,26 @@ def check_work_inbox_snapshot() -> None:
     )
     ensure(
         schema["$defs"]["settlementState"].get("enum")
-        == ["STEADY", "RECEIPT_PENDING", "FRESHENING", "STALE_REVIEW_REQUIRED", "DEGRADED_READ_ONLY", "RECOVERY_REQUIRED"],
+        == [
+            "STEADY",
+            "RECEIPT_PENDING",
+            "FRESHENING",
+            "STALE_REVIEW_REQUIRED",
+            "DEGRADED_READ_ONLY",
+            "RECOVERY_REQUIRED",
+        ],
         "work_inbox_snapshot.settlementState must keep the shared shell settlement vocabulary",
     )
     ensure(
         schema["$defs"]["recoveryPosture"].get("enum")
-        == ["NONE", "INLINE_RECONNECT", "INLINE_REBASE", "READ_ONLY_LIMITED", "OBJECT_SUPERSEDED", "ACCESS_REBIND_REQUIRED"],
+        == [
+            "NONE",
+            "INLINE_RECONNECT",
+            "INLINE_REBASE",
+            "READ_ONLY_LIMITED",
+            "OBJECT_SUPERSEDED",
+            "ACCESS_REBIND_REQUIRED",
+        ],
         "work_inbox_snapshot.recoveryPosture must keep the shared shell recovery vocabulary",
     )
     ensure(
@@ -10505,7 +11475,9 @@ def check_work_inbox_snapshot() -> None:
         "work_inbox_snapshot.visibility_partition must stay bound to visibility_partition_contract.schema.json",
     )
     ensure(
-        schema["properties"]["visibility_partition"]["allOf"][1]["properties"]["partition_scope"].get("const")
+        schema["properties"]["visibility_partition"]["allOf"][1]["properties"][
+            "partition_scope"
+        ].get("const")
         == "WORK_INBOX_SNAPSHOT",
         "work_inbox_snapshot.visibility_partition must stay pinned to partition_scope=WORK_INBOX_SNAPSHOT",
     )
@@ -10517,7 +11489,9 @@ def check_work_inbox_snapshot() -> None:
         "work_inbox_snapshot.queue_health_contract must stay bound to work_queue_health_contract.schema.json",
     )
     ensure(
-        schema["properties"]["queue_health_contract"]["allOf"][1]["properties"]["queue_scope"].get("const")
+        schema["properties"]["queue_health_contract"]["allOf"][1]["properties"]["queue_scope"].get(
+            "const"
+        )
         == "WORK_INBOX_SNAPSHOT",
         "work_inbox_snapshot.queue_health_contract must stay pinned to queue_scope=WORK_INBOX_SNAPSHOT",
     )
@@ -10559,20 +11533,27 @@ def check_work_inbox_snapshot() -> None:
     )
 
     unassigned_rule = find_rule_by_const(filter_rules, "assignee_scope", "UNASSIGNED")
-    ensure(unassigned_rule is not None, "work_inbox_snapshot missing assignee_scope=UNASSIGNED chip guard")
     ensure(
-        unassigned_rule["then"]["properties"]["selected_filter_chips"]["contains"]["const"] == "UNASSIGNED",
+        unassigned_rule is not None,
+        "work_inbox_snapshot missing assignee_scope=UNASSIGNED chip guard",
+    )
+    ensure(
+        unassigned_rule["then"]["properties"]["selected_filter_chips"]["contains"]["const"]
+        == "UNASSIGNED",
         "work_inbox_snapshot assignee_scope=UNASSIGNED must emit the UNASSIGNED chip",
     )
 
     escalated_rule = find_rule_by_const(filter_rules, "escalation_only", True)
     ensure(escalated_rule is not None, "work_inbox_snapshot missing escalation_only chip guard")
     ensure(
-        escalated_rule["then"]["properties"]["selected_filter_chips"]["contains"]["const"] == "ESCALATED",
+        escalated_rule["then"]["properties"]["selected_filter_chips"]["contains"]["const"]
+        == "ESCALATED",
         "work_inbox_snapshot escalation_only=true must emit the ESCALATED chip",
     )
 
-    waiting_on_customer_rule = find_rule_by_contains_const(filter_rules, "waiting_on_actors", "CUSTOMER")
+    waiting_on_customer_rule = find_rule_by_contains_const(
+        filter_rules, "waiting_on_actors", "CUSTOMER"
+    )
     ensure(
         waiting_on_customer_rule is not None,
         "work_inbox_snapshot missing waiting_on_actors contains CUSTOMER chip guard",
@@ -10584,23 +11565,35 @@ def check_work_inbox_snapshot() -> None:
     )
 
     overdue_rule = find_rule_by_contains_const(filter_rules, "due_states", "OVERDUE")
-    ensure(overdue_rule is not None, "work_inbox_snapshot missing due_states contains OVERDUE chip guard")
     ensure(
-        overdue_rule["then"]["properties"]["selected_filter_chips"]["contains"]["const"] == "OVERDUE",
+        overdue_rule is not None,
+        "work_inbox_snapshot missing due_states contains OVERDUE chip guard",
+    )
+    ensure(
+        overdue_rule["then"]["properties"]["selected_filter_chips"]["contains"]["const"]
+        == "OVERDUE",
         "work_inbox_snapshot due_states contains OVERDUE must emit the OVERDUE chip",
     )
 
     breached_rule = find_rule_by_contains_const(filter_rules, "due_states", "BREACHED")
-    ensure(breached_rule is not None, "work_inbox_snapshot missing due_states contains BREACHED chip guard")
     ensure(
-        breached_rule["then"]["properties"]["selected_filter_chips"]["contains"]["const"] == "OVERDUE",
+        breached_rule is not None,
+        "work_inbox_snapshot missing due_states contains BREACHED chip guard",
+    )
+    ensure(
+        breached_rule["then"]["properties"]["selected_filter_chips"]["contains"]["const"]
+        == "OVERDUE",
         "work_inbox_snapshot due_states contains BREACHED must emit the OVERDUE chip",
     )
 
     blocked_rule = find_rule_by_contains_const(filter_rules, "lifecycle_states", "BLOCKED")
-    ensure(blocked_rule is not None, "work_inbox_snapshot missing lifecycle_states contains BLOCKED chip guard")
     ensure(
-        blocked_rule["then"]["properties"]["selected_filter_chips"]["contains"]["const"] == "BLOCKED",
+        blocked_rule is not None,
+        "work_inbox_snapshot missing lifecycle_states contains BLOCKED chip guard",
+    )
+    ensure(
+        blocked_rule["then"]["properties"]["selected_filter_chips"]["contains"]["const"]
+        == "BLOCKED",
         "work_inbox_snapshot lifecycle_states contains BLOCKED must emit the BLOCKED chip",
     )
 
@@ -10622,28 +11615,45 @@ def check_work_inbox_snapshot() -> None:
         "work_inbox_snapshot MINE chip must force assignee_scope=MINE",
     )
 
-    unassigned_reverse_rule = find_rule_by_contains_const(filter_rules, "selected_filter_chips", "UNASSIGNED")
-    ensure(unassigned_reverse_rule is not None, "work_inbox_snapshot missing UNASSIGNED reverse guard")
+    unassigned_reverse_rule = find_rule_by_contains_const(
+        filter_rules, "selected_filter_chips", "UNASSIGNED"
+    )
     ensure(
-        unassigned_reverse_rule["then"]["properties"]["assignee_scope"].get("const") == "UNASSIGNED",
+        unassigned_reverse_rule is not None, "work_inbox_snapshot missing UNASSIGNED reverse guard"
+    )
+    ensure(
+        unassigned_reverse_rule["then"]["properties"]["assignee_scope"].get("const")
+        == "UNASSIGNED",
         "work_inbox_snapshot UNASSIGNED chip must force assignee_scope=UNASSIGNED",
     )
 
-    escalated_reverse_rule = find_rule_by_contains_const(filter_rules, "selected_filter_chips", "ESCALATED")
-    ensure(escalated_reverse_rule is not None, "work_inbox_snapshot missing ESCALATED reverse guard")
+    escalated_reverse_rule = find_rule_by_contains_const(
+        filter_rules, "selected_filter_chips", "ESCALATED"
+    )
+    ensure(
+        escalated_reverse_rule is not None, "work_inbox_snapshot missing ESCALATED reverse guard"
+    )
     ensure(
         escalated_reverse_rule["then"]["properties"]["escalation_only"].get("const") is True,
         "work_inbox_snapshot ESCALATED chip must force escalation_only=true",
     )
 
-    waiting_reverse_rule = find_rule_by_contains_const(filter_rules, "selected_filter_chips", "WAITING_ON_CUSTOMER")
-    ensure(waiting_reverse_rule is not None, "work_inbox_snapshot missing WAITING_ON_CUSTOMER reverse guard")
+    waiting_reverse_rule = find_rule_by_contains_const(
+        filter_rules, "selected_filter_chips", "WAITING_ON_CUSTOMER"
+    )
     ensure(
-        waiting_reverse_rule["then"]["properties"]["waiting_on_actors"]["contains"]["const"] == "CUSTOMER",
+        waiting_reverse_rule is not None,
+        "work_inbox_snapshot missing WAITING_ON_CUSTOMER reverse guard",
+    )
+    ensure(
+        waiting_reverse_rule["then"]["properties"]["waiting_on_actors"]["contains"]["const"]
+        == "CUSTOMER",
         "work_inbox_snapshot WAITING_ON_CUSTOMER chip must force waiting_on_actors contains CUSTOMER",
     )
 
-    overdue_reverse_rule = find_rule_by_contains_const(filter_rules, "selected_filter_chips", "OVERDUE")
+    overdue_reverse_rule = find_rule_by_contains_const(
+        filter_rules, "selected_filter_chips", "OVERDUE"
+    )
     ensure(overdue_reverse_rule is not None, "work_inbox_snapshot missing OVERDUE reverse guard")
     overdue_any_of = overdue_reverse_rule["then"]["anyOf"]
     ensure(
@@ -10652,17 +11662,26 @@ def check_work_inbox_snapshot() -> None:
         "work_inbox_snapshot OVERDUE chip must force due_states contains OVERDUE or BREACHED",
     )
 
-    blocked_reverse_rule = find_rule_by_contains_const(filter_rules, "selected_filter_chips", "BLOCKED")
+    blocked_reverse_rule = find_rule_by_contains_const(
+        filter_rules, "selected_filter_chips", "BLOCKED"
+    )
     ensure(blocked_reverse_rule is not None, "work_inbox_snapshot missing BLOCKED reverse guard")
     ensure(
-        blocked_reverse_rule["then"]["properties"]["lifecycle_states"]["contains"]["const"] == "BLOCKED",
+        blocked_reverse_rule["then"]["properties"]["lifecycle_states"]["contains"]["const"]
+        == "BLOCKED",
         "work_inbox_snapshot BLOCKED chip must force lifecycle_states contains BLOCKED",
     )
 
-    resolved_reverse_rule = find_rule_by_contains_const(filter_rules, "selected_filter_chips", "RESOLVED_RECENTLY")
-    ensure(resolved_reverse_rule is not None, "work_inbox_snapshot missing RESOLVED_RECENTLY reverse guard")
+    resolved_reverse_rule = find_rule_by_contains_const(
+        filter_rules, "selected_filter_chips", "RESOLVED_RECENTLY"
+    )
     ensure(
-        resolved_reverse_rule["then"]["properties"]["include_resolved_recently"].get("const") is True,
+        resolved_reverse_rule is not None,
+        "work_inbox_snapshot missing RESOLVED_RECENTLY reverse guard",
+    )
+    ensure(
+        resolved_reverse_rule["then"]["properties"]["include_resolved_recently"].get("const")
+        is True,
         "work_inbox_snapshot RESOLVED_RECENTLY chip must force include_resolved_recently=true",
     )
 
@@ -10684,7 +11703,9 @@ def check_work_inbox_snapshot() -> None:
         "work_inbox_snapshot.row.queue_projection must stay bound to collaboration_queue_projection_contract.schema.json",
     )
     ensure(
-        row["properties"]["queue_projection"]["allOf"][1]["properties"]["projection_scope"].get("const")
+        row["properties"]["queue_projection"]["allOf"][1]["properties"]["projection_scope"].get(
+            "const"
+        )
         == "WORK_INBOX_ROW",
         "work_inbox_snapshot.row.queue_projection must stay pinned to projection_scope=WORK_INBOX_ROW",
     )
@@ -10715,13 +11736,17 @@ def check_work_inbox_snapshot() -> None:
         "work_inbox_snapshot.rowActions.authoritative_action must stay bound to action_authority_contract.schema.json",
     )
     ensure(
-        row_actions["properties"]["authoritative_action"]["allOf"][1]["properties"]["projection_scope"].get("const")
+        row_actions["properties"]["authoritative_action"]["allOf"][1]["properties"][
+            "projection_scope"
+        ].get("const")
         == "WORK_INBOX_ROW_ACTIONS",
         "work_inbox_snapshot.rowActions.authoritative_action must stay pinned to projection_scope=WORK_INBOX_ROW_ACTIONS",
     )
     action_rules = row_actions["allOf"]
     available_rule = find_rule_by_const(action_rules, "actionability_state", "ACTION_AVAILABLE")
-    ensure(available_rule is not None, "work_inbox_snapshot missing ACTION_AVAILABLE row-action guard")
+    ensure(
+        available_rule is not None, "work_inbox_snapshot missing ACTION_AVAILABLE row-action guard"
+    )
     ensure(
         available_rule["then"]["properties"]["primary_action_code"].get("type") == "string"
         and available_rule["then"]["properties"]["available_action_codes"].get("minItems") == 1
@@ -10730,11 +11755,15 @@ def check_work_inbox_snapshot() -> None:
     )
 
     no_safe_action_rule = find_rule_by_const(action_rules, "actionability_state", "NO_SAFE_ACTION")
-    ensure(no_safe_action_rule is not None, "work_inbox_snapshot missing NO_SAFE_ACTION row-action guard")
+    ensure(
+        no_safe_action_rule is not None,
+        "work_inbox_snapshot missing NO_SAFE_ACTION row-action guard",
+    )
     ensure(
         no_safe_action_rule["then"]["properties"]["primary_action_code"].get("type") == "null"
         and no_safe_action_rule["then"]["properties"]["available_action_codes"].get("maxItems") == 0
-        and no_safe_action_rule["then"]["properties"]["available_action_bindings"].get("maxItems") == 0,
+        and no_safe_action_rule["then"]["properties"]["available_action_bindings"].get("maxItems")
+        == 0,
         "work_inbox_snapshot NO_SAFE_ACTION rows must clear the primary action, available actions, and quick-action bindings",
     )
 
@@ -10746,10 +11775,13 @@ def check_work_inbox_snapshot() -> None:
         ),
         None,
     )
-    ensure(empty_rows_rule is not None, "work_inbox_snapshot missing empty-state selection reset guard")
+    ensure(
+        empty_rows_rule is not None, "work_inbox_snapshot missing empty-state selection reset guard"
+    )
     ensure(
         empty_rows_rule["then"]["properties"]["selected_item_ref"].get("type") == "null"
-        and empty_rows_rule["then"]["properties"]["selected_focus_anchor_ref_or_null"].get("type") == "null",
+        and empty_rows_rule["then"]["properties"]["selected_focus_anchor_ref_or_null"].get("type")
+        == "null",
         "work_inbox_snapshot empty rows must clear selected_item_ref and selected_focus_anchor_ref_or_null",
     )
 
@@ -10757,13 +11789,18 @@ def check_work_inbox_snapshot() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("selected_item_ref", {}).get("type") == "null"
+            if rule.get("if", {}).get("properties", {}).get("selected_item_ref", {}).get("type")
+            == "null"
         ),
         None,
     )
-    ensure(selected_null_rule is not None, "work_inbox_snapshot missing selected_item_ref=null focus reset")
     ensure(
-        selected_null_rule["then"]["properties"]["selected_focus_anchor_ref_or_null"].get("type") == "null",
+        selected_null_rule is not None,
+        "work_inbox_snapshot missing selected_item_ref=null focus reset",
+    )
+    ensure(
+        selected_null_rule["then"]["properties"]["selected_focus_anchor_ref_or_null"].get("type")
+        == "null",
         "work_inbox_snapshot selected_item_ref=null must force selected_focus_anchor_ref_or_null=null",
     )
 
@@ -10771,14 +11808,22 @@ def check_work_inbox_snapshot() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("selected_item_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("selected_item_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(selected_string_rule is not None, "work_inbox_snapshot missing selected-item focus-anchor guard")
     ensure(
-        selected_string_rule["then"]["properties"]["selected_focus_anchor_ref_or_null"].get("type") == "string"
-        and selected_string_rule["then"]["properties"]["selected_focus_anchor_ref_or_null"].get("minLength") == 1,
+        selected_string_rule is not None,
+        "work_inbox_snapshot missing selected-item focus-anchor guard",
+    )
+    ensure(
+        selected_string_rule["then"]["properties"]["selected_focus_anchor_ref_or_null"].get("type")
+        == "string"
+        and selected_string_rule["then"]["properties"]["selected_focus_anchor_ref_or_null"].get(
+            "minLength"
+        )
+        == 1,
         "work_inbox_snapshot selected rows must retain a non-empty selected_focus_anchor_ref_or_null",
     )
 
@@ -10810,14 +11855,17 @@ def check_work_inbox_delta() -> None:
         "work_inbox_delta.visibility_partition must stay bound to visibility_partition_contract.schema.json",
     )
     ensure(
-        schema["properties"]["visibility_partition"]["allOf"][1]["properties"]["partition_scope"].get("const")
+        schema["properties"]["visibility_partition"]["allOf"][1]["properties"][
+            "partition_scope"
+        ].get("const")
         == "WORK_INBOX_DELTA",
         "work_inbox_delta.visibility_partition must stay pinned to partition_scope=WORK_INBOX_DELTA",
     )
 
     row_upsert = schema["$defs"]["rowUpsert"]
     ensure(
-        row_upsert["properties"]["row"].get("$ref") == "./work_inbox_snapshot.schema.json#/$defs/row",
+        row_upsert["properties"]["row"].get("$ref")
+        == "./work_inbox_snapshot.schema.json#/$defs/row",
         "work_inbox_delta.rowUpsert.row must stay linked to work_inbox_snapshot.$defs.row",
     )
     check_min_length_fields(row_upsert, ["item_id"], "work_inbox_delta.rowUpsert")
@@ -10879,7 +11927,9 @@ def check_client_portal_workspace() -> None:
     check_portal_language_contract_binding(portal, "client_portal_workspace")
     check_shell_dominance_contract_binding(portal, "client_portal_workspace")
     check_shell_state_taxonomy_contract_binding(portal, "client_portal_workspace")
-    check_cross_device_continuity_contract_binding(portal, "client_portal_workspace", "CLIENT_PORTAL_ROUTE")
+    check_cross_device_continuity_contract_binding(
+        portal, "client_portal_workspace", "CLIENT_PORTAL_ROUTE"
+    )
     check_cache_isolation_contract_binding(
         portal,
         "client_portal_workspace",
@@ -10947,12 +11997,26 @@ def check_client_portal_workspace() -> None:
     )
     ensure(
         portal["$defs"]["settlementState"].get("enum")
-        == ["STEADY", "RECEIPT_PENDING", "FRESHENING", "STALE_REVIEW_REQUIRED", "DEGRADED_READ_ONLY", "RECOVERY_REQUIRED"],
+        == [
+            "STEADY",
+            "RECEIPT_PENDING",
+            "FRESHENING",
+            "STALE_REVIEW_REQUIRED",
+            "DEGRADED_READ_ONLY",
+            "RECOVERY_REQUIRED",
+        ],
         "client_portal_workspace.settlementState must keep the shared shell settlement vocabulary",
     )
     ensure(
         portal["$defs"]["recoveryPosture"].get("enum")
-        == ["NONE", "INLINE_RECONNECT", "INLINE_REBASE", "READ_ONLY_LIMITED", "OBJECT_SUPERSEDED", "ACCESS_REBIND_REQUIRED"],
+        == [
+            "NONE",
+            "INLINE_RECONNECT",
+            "INLINE_REBASE",
+            "READ_ONLY_LIMITED",
+            "OBJECT_SUPERSEDED",
+            "ACCESS_REBIND_REQUIRED",
+        ],
         "client_portal_workspace.recoveryPosture must keep the shared shell recovery vocabulary",
     )
     ensure(
@@ -10978,7 +12042,9 @@ def check_client_portal_workspace() -> None:
         "client_portal_workspace.visibility_partition must stay bound to visibility_partition_contract.schema.json",
     )
     ensure(
-        portal["properties"]["visibility_partition"]["allOf"][1]["properties"]["partition_scope"].get("const")
+        portal["properties"]["visibility_partition"]["allOf"][1]["properties"][
+            "partition_scope"
+        ].get("const")
         == "CLIENT_PORTAL_WORKSPACE",
         "client_portal_workspace.visibility_partition must stay pinned to partition_scope=CLIENT_PORTAL_WORKSPACE",
     )
@@ -11034,7 +12100,10 @@ def check_client_portal_workspace() -> None:
                 f"client_portal_workspace.routeContext.{field} must stay string-or-null",
             )
     route_context_none_rule = find_rule_by_const(route_context["allOf"], "context_route", "NONE")
-    ensure(route_context_none_rule is not None, "client_portal_workspace.routeContext missing NONE clearing guard")
+    ensure(
+        route_context_none_rule is not None,
+        "client_portal_workspace.routeContext missing NONE clearing guard",
+    )
     for field in [
         "context_object_ref",
         "return_route",
@@ -11052,11 +12121,17 @@ def check_client_portal_workspace() -> None:
             f"client_portal_workspace.routeContext NONE routes must clear `{field}`",
         )
     ensure(
-        route_context_none_rule["else"]["properties"]["return_focus_anchor_ref_or_null"].get("minLength") == 1,
+        route_context_none_rule["else"]["properties"]["return_focus_anchor_ref_or_null"].get(
+            "minLength"
+        )
+        == 1,
         "client_portal_workspace.routeContext contextual routes must require a non-empty return focus anchor",
     )
     ensure(
-        route_context_none_rule["else"]["properties"]["fallback_reason_ref_or_null"].get("minLength") == 1,
+        route_context_none_rule["else"]["properties"]["fallback_reason_ref_or_null"].get(
+            "minLength"
+        )
+        == 1,
         "client_portal_workspace.routeContext contextual routes must require non-empty fallback reason copy",
     )
     ensure(
@@ -11072,14 +12147,18 @@ def check_client_portal_workspace() -> None:
         "client_portal_workspace.routeContext missing LATEST_VISIBLE_OBJECT fallback guard",
     )
     ensure(
-        fallback_object_rule["then"]["properties"]["fallback_object_ref_or_null"].get("minLength") == 1,
+        fallback_object_rule["then"]["properties"]["fallback_object_ref_or_null"].get("minLength")
+        == 1,
         "client_portal_workspace.routeContext LATEST_VISIBLE_OBJECT fallback must require a non-empty fallback object ref",
     )
     ensure(
-        fallback_object_rule["else"]["properties"]["fallback_object_ref_or_null"].get("type") == "null",
+        fallback_object_rule["else"]["properties"]["fallback_object_ref_or_null"].get("type")
+        == "null",
         "client_portal_workspace.routeContext non-object fallbacks must clear fallback_object_ref_or_null",
     )
-    request_detail_rule = find_rule_by_const(route_context["allOf"], "context_route", "REQUEST_DETAIL")
+    request_detail_rule = find_rule_by_const(
+        route_context["allOf"], "context_route", "REQUEST_DETAIL"
+    )
     ensure(
         request_detail_rule is not None,
         "client_portal_workspace.routeContext missing REQUEST_DETAIL continuity guard",
@@ -11112,7 +12191,13 @@ def check_client_portal_workspace() -> None:
     )
 
     identity_context = portal["$defs"]["identityContext"]["properties"]
-    for field in ["client_display_name", "acting_role_label", "period_label", "reassurance_line", "context_hash"]:
+    for field in [
+        "client_display_name",
+        "acting_role_label",
+        "period_label",
+        "reassurance_line",
+        "context_hash",
+    ]:
         ensure(
             identity_context[field].get("minLength") == 1,
             f"client_portal_workspace.identityContext.{field} must reject empty strings when present",
@@ -11127,7 +12212,10 @@ def check_client_portal_workspace() -> None:
         ),
         None,
     )
-    ensure(home_route_order_rule is not None, "client_portal_workspace missing HOME surface-order guard")
+    ensure(
+        home_route_order_rule is not None,
+        "client_portal_workspace missing HOME surface-order guard",
+    )
     ensure(
         home_route_order_rule["then"]["properties"]["activity_timeline"].get("maxItems") == 6,
         "client_portal_workspace HOME route must cap activity_timeline to six events",
@@ -11139,13 +12227,22 @@ def check_client_portal_workspace() -> None:
             for rule in portal["allOf"]
             if rule.get("if", {}).get("properties", {}).get("route", {}).get("const") == "HOME"
             and "ACTION_REQUIRED"
-            in rule.get("if", {}).get("properties", {}).get("status_hero", {}).get("properties", {}).get("status_code", {}).get("enum", [])
+            in rule.get("if", {})
+            .get("properties", {})
+            .get("status_hero", {})
+            .get("properties", {})
+            .get("status_code", {})
+            .get("enum", [])
         ),
         None,
     )
-    ensure(home_primary_task_rule is not None, "client_portal_workspace missing HOME dominant-task guard")
     ensure(
-        home_primary_task_rule["then"]["properties"]["home_primary_task_ref"].get("type") == "string",
+        home_primary_task_rule is not None,
+        "client_portal_workspace missing HOME dominant-task guard",
+    )
+    ensure(
+        home_primary_task_rule["then"]["properties"]["home_primary_task_ref"].get("type")
+        == "string",
         "client_portal_workspace action-requiring HOME heroes must require home_primary_task_ref",
     )
     ensure(
@@ -11158,11 +12255,17 @@ def check_client_portal_workspace() -> None:
             rule
             for rule in portal["allOf"]
             if rule.get("if", {}).get("properties", {}).get("route", {}).get("const") == "HOME"
-            and rule.get("then", {}).get("properties", {}).get("activity_timeline", {}).get("maxItems") == 6
+            and rule.get("then", {})
+            .get("properties", {})
+            .get("activity_timeline", {})
+            .get("maxItems")
+            == 6
         ),
         None,
     )
-    ensure(home_activity_rule is not None, "client_portal_workspace missing HOME recent-activity bound")
+    ensure(
+        home_activity_rule is not None, "client_portal_workspace missing HOME recent-activity bound"
+    )
 
     passive_home_rule = next(
         (
@@ -11179,13 +12282,17 @@ def check_client_portal_workspace() -> None:
         ),
         None,
     )
-    ensure(passive_home_rule is not None, "client_portal_workspace missing passive HOME status guard")
+    ensure(
+        passive_home_rule is not None, "client_portal_workspace missing passive HOME status guard"
+    )
     ensure(
         passive_home_rule["then"]["properties"]["home_primary_task_ref"].get("type") == "null",
         "client_portal_workspace passive HOME heroes must clear home_primary_task_ref",
     )
     ensure(
-        passive_home_rule["then"]["properties"]["task_groups"]["not"]["contains"]["properties"]["group_code"].get("const")
+        passive_home_rule["then"]["properties"]["task_groups"]["not"]["contains"]["properties"][
+            "group_code"
+        ].get("const")
         == "DO_NOW",
         "client_portal_workspace passive HOME heroes must reject DO_NOW task buckets",
     )
@@ -11194,11 +12301,15 @@ def check_client_portal_workspace() -> None:
         (
             rule
             for rule in portal["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("route", {}).get("not", {}).get("const") == "HOME"
+            if rule.get("if", {}).get("properties", {}).get("route", {}).get("not", {}).get("const")
+            == "HOME"
         ),
         None,
     )
-    ensure(non_home_rule is not None, "client_portal_workspace missing non-HOME home-field reverse guard")
+    ensure(
+        non_home_rule is not None,
+        "client_portal_workspace missing non-HOME home-field reverse guard",
+    )
     ensure(
         non_home_rule["then"]["properties"]["home_surface_order"].get("type") == "null"
         and non_home_rule["then"]["properties"]["home_primary_task_ref"].get("type") == "null",
@@ -11225,7 +12336,10 @@ def check_client_portal_workspace() -> None:
                 f"client_portal_workspace.task_groups must cap {group_code} to one bucket",
             )
             task_group_limits[group_code] = True
-    ensure(all(task_group_limits.values()), "client_portal_workspace missing task-group uniqueness guards")
+    ensure(
+        all(task_group_limits.values()),
+        "client_portal_workspace missing task-group uniqueness guards",
+    )
 
     action_token = portal["$defs"]["actionToken"]["properties"]
     for field in ["action_code", "label", "context_object_ref", "focus_anchor_ref"]:
@@ -11249,7 +12363,10 @@ def check_client_portal_workspace() -> None:
     }
     for route, label in expected_nav_labels.items():
         route_rule = find_rule_by_const(navigation_tab["allOf"], "route", route)
-        ensure(route_rule is not None, f"client_portal_workspace.navigationTab missing {route} label guard")
+        ensure(
+            route_rule is not None,
+            f"client_portal_workspace.navigationTab missing {route} label guard",
+        )
         ensure(
             route_rule["then"]["properties"]["label"].get("const") == label,
             f"client_portal_workspace.navigationTab route {route} must freeze label {label!r}",
@@ -11294,7 +12411,8 @@ def check_client_portal_workspace() -> None:
         "client_portal_workspace.statusHero due_label must reject empty strings when present",
     )
     ensure(
-        status_hero["due_label"].get("pattern") == "^(Due .*\\d.*|Overdue .*\\d.*|No deadline yet)$",
+        status_hero["due_label"].get("pattern")
+        == "^(Due .*\\d.*|Overdue .*\\d.*|No deadline yet)$",
         "client_portal_workspace.statusHero due_label must freeze explicit due-label wording",
     )
     ensure(
@@ -11327,24 +12445,42 @@ def check_client_portal_workspace() -> None:
         "client_portal_workspace.taskGroup must omit empty buckets rather than serializing empty task headings",
     )
     task_group_do_now_rule = find_rule_by_const(task_group["allOf"], "group_code", "DO_NOW")
-    ensure(task_group_do_now_rule is not None, "client_portal_workspace.taskGroup missing DO_NOW label/status guard")
+    ensure(
+        task_group_do_now_rule is not None,
+        "client_portal_workspace.taskGroup missing DO_NOW label/status guard",
+    )
     ensure(
         task_group_do_now_rule["then"]["properties"]["label"].get("const") == "Do now"
-        and task_group_do_now_rule["then"]["properties"]["tasks"]["items"]["properties"]["status"].get("const") == "OPEN",
+        and task_group_do_now_rule["then"]["properties"]["tasks"]["items"]["properties"][
+            "status"
+        ].get("const")
+        == "OPEN",
         "client_portal_workspace DO_NOW task groups must freeze label and OPEN-task posture",
     )
     task_group_coming_rule = find_rule_by_const(task_group["allOf"], "group_code", "COMING_UP")
-    ensure(task_group_coming_rule is not None, "client_portal_workspace.taskGroup missing COMING_UP label/status guard")
+    ensure(
+        task_group_coming_rule is not None,
+        "client_portal_workspace.taskGroup missing COMING_UP label/status guard",
+    )
     ensure(
         task_group_coming_rule["then"]["properties"]["label"].get("const") == "Coming up"
-        and task_group_coming_rule["then"]["properties"]["tasks"]["items"]["properties"]["status"].get("const") == "WAITING",
+        and task_group_coming_rule["then"]["properties"]["tasks"]["items"]["properties"][
+            "status"
+        ].get("const")
+        == "WAITING",
         "client_portal_workspace COMING_UP task groups must freeze label and WAITING-task posture",
     )
     task_group_done_rule = find_rule_by_const(task_group["allOf"], "group_code", "DONE")
-    ensure(task_group_done_rule is not None, "client_portal_workspace.taskGroup missing DONE label/status guard")
+    ensure(
+        task_group_done_rule is not None,
+        "client_portal_workspace.taskGroup missing DONE label/status guard",
+    )
     ensure(
         task_group_done_rule["then"]["properties"]["label"].get("const") == "Done"
-        and task_group_done_rule["then"]["properties"]["tasks"]["items"]["properties"]["status"].get("const") == "DONE",
+        and task_group_done_rule["then"]["properties"]["tasks"]["items"]["properties"][
+            "status"
+        ].get("const")
+        == "DONE",
         "client_portal_workspace DONE task groups must freeze label and DONE-task posture",
     )
 
@@ -11368,9 +12504,14 @@ def check_client_portal_workspace() -> None:
         ),
         None,
     )
-    ensure(mutating_limitation_rule is not None, "client_portal_workspace missing mutating-vs-blocking-limitation guard")
     ensure(
-        mutating_limitation_rule["then"]["properties"]["content_limitations"]["not"]["contains"]["properties"]["blocking"].get("const")
+        mutating_limitation_rule is not None,
+        "client_portal_workspace missing mutating-vs-blocking-limitation guard",
+    )
+    ensure(
+        mutating_limitation_rule["then"]["properties"]["content_limitations"]["not"]["contains"][
+            "properties"
+        ]["blocking"].get("const")
         is True,
         "client_portal_workspace mutating posture must reject blocking content limitations",
     )
@@ -11402,11 +12543,15 @@ def check_client_portal_workspace() -> None:
         (
             rule
             for rule in upload_rules
-            if rule.get("if", {}).get("properties", {}).get("transfer_state", {}).get("enum") == ["QUEUED", "UPLOADING"]
+            if rule.get("if", {}).get("properties", {}).get("transfer_state", {}).get("enum")
+            == ["QUEUED", "UPLOADING"]
         ),
         None,
     )
-    ensure(transfer_phase_rule is not None, "client_portal_workspace missing transfer upload phase guard")
+    ensure(
+        transfer_phase_rule is not None,
+        "client_portal_workspace missing transfer upload phase guard",
+    )
     ensure(
         transfer_phase_rule["then"]["properties"]["status_phase"].get("const") == "TRANSFER",
         "client_portal_workspace queued/uploading rows must map to status_phase=TRANSFER",
@@ -11418,13 +12563,18 @@ def check_client_portal_workspace() -> None:
         "client_portal_workspace scanning rows must map to status_phase=SCAN",
     )
     rejected_phase_rule = find_rule_by_const(upload_rules, "transfer_state", "REJECTED")
-    ensure(rejected_phase_rule is not None, "client_portal_workspace missing rejected upload phase guard")
+    ensure(
+        rejected_phase_rule is not None,
+        "client_portal_workspace missing rejected upload phase guard",
+    )
     ensure(
         rejected_phase_rule["then"]["properties"]["status_phase"].get("const") == "REJECTION",
         "client_portal_workspace rejected rows must map to status_phase=REJECTION",
     )
     failed_phase_rule = find_rule_by_const(upload_rules, "transfer_state", "FAILED")
-    ensure(failed_phase_rule is not None, "client_portal_workspace missing failed upload phase guard")
+    ensure(
+        failed_phase_rule is not None, "client_portal_workspace missing failed upload phase guard"
+    )
     ensure(
         failed_phase_rule["then"]["properties"]["status_phase"].get("const") == "RETRY",
         "client_portal_workspace failed rows must map to status_phase=RETRY",
@@ -11433,12 +12583,17 @@ def check_client_portal_workspace() -> None:
         (
             rule
             for rule in upload_rules
-            if rule.get("if", {}).get("properties", {}).get("transfer_state", {}).get("const") == "ACCEPTED"
-            and rule.get("if", {}).get("properties", {}).get("next_action_code", {}).get("const") == "NONE"
+            if rule.get("if", {}).get("properties", {}).get("transfer_state", {}).get("const")
+            == "ACCEPTED"
+            and rule.get("if", {}).get("properties", {}).get("next_action_code", {}).get("const")
+            == "NONE"
         ),
         None,
     )
-    ensure(accepted_none_rule is not None, "client_portal_workspace missing accepted upload completion-phase guard")
+    ensure(
+        accepted_none_rule is not None,
+        "client_portal_workspace missing accepted upload completion-phase guard",
+    )
     ensure(
         accepted_none_rule["then"]["properties"]["status_phase"].get("const") == "ACCEPTANCE",
         "client_portal_workspace accepted rows with no remaining action must map to status_phase=ACCEPTANCE",
@@ -11447,13 +12602,17 @@ def check_client_portal_workspace() -> None:
         (
             rule
             for rule in upload_rules
-            if rule.get("if", {}).get("properties", {}).get("transfer_state", {}).get("const") == "ACCEPTED"
+            if rule.get("if", {}).get("properties", {}).get("transfer_state", {}).get("const")
+            == "ACCEPTED"
             and rule.get("if", {}).get("properties", {}).get("next_action_code", {}).get("enum")
             == ["CONFIRM_ATTACHMENT", "RECONFIRM_REQUEST", "CONTACT_SUPPORT"]
         ),
         None,
     )
-    ensure(accepted_validation_rule is not None, "client_portal_workspace missing accepted upload validation-phase guard")
+    ensure(
+        accepted_validation_rule is not None,
+        "client_portal_workspace missing accepted upload validation-phase guard",
+    )
     ensure(
         accepted_validation_rule["then"]["properties"]["status_phase"].get("const") == "VALIDATION",
         "client_portal_workspace accepted rows awaiting validation/reconfirmation must map to status_phase=VALIDATION",
@@ -11504,7 +12663,8 @@ def check_client_portal_workspace() -> None:
         "client_portal_workspace.documentRequest.artifact_affordance must stay bound to artifact_affordance_contract.schema.json",
     )
     ensure(
-        document_request_props["due_label"].get("pattern") == "^(Due .*\\d.*|Overdue .*\\d.*|No deadline yet)$",
+        document_request_props["due_label"].get("pattern")
+        == "^(Due .*\\d.*|Overdue .*\\d.*|No deadline yet)$",
         "client_portal_workspace.documentRequest due_label must freeze explicit due-label wording",
     )
     ensure(
@@ -11520,7 +12680,10 @@ def check_client_portal_workspace() -> None:
         ),
         None,
     )
-    ensure(active_upload_rule is not None, "client_portal_workspace missing active document upload guard")
+    ensure(
+        active_upload_rule is not None,
+        "client_portal_workspace missing active document upload guard",
+    )
     ensure(
         active_upload_rule["then"]["properties"]["uploads"].get("minItems") == 1,
         "client_portal_workspace active document requests must include at least one upload row",
@@ -11533,32 +12696,46 @@ def check_client_portal_workspace() -> None:
         (
             rule
             for rule in document_request["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("status", {}).get("enum") == ["UNDER_REVIEW", "ACCEPTED"]
+            if rule.get("if", {}).get("properties", {}).get("status", {}).get("enum")
+            == ["UNDER_REVIEW", "ACCEPTED"]
         ),
         None,
     )
-    ensure(current_artifact_rule is not None, "client_portal_workspace missing current artifact guard for reviewed document requests")
     ensure(
-        current_artifact_rule["then"]["properties"]["current_artifact_upload_ref"].get("minLength") == 1,
+        current_artifact_rule is not None,
+        "client_portal_workspace missing current artifact guard for reviewed document requests",
+    )
+    ensure(
+        current_artifact_rule["then"]["properties"]["current_artifact_upload_ref"].get("minLength")
+        == 1,
         "client_portal_workspace reviewed/accepted requests must require a non-empty current_artifact_upload_ref",
     )
     open_expired_rule = next(
         (
             rule
             for rule in document_request["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("status", {}).get("enum") == ["OPEN", "EXPIRED"]
+            if rule.get("if", {}).get("properties", {}).get("status", {}).get("enum")
+            == ["OPEN", "EXPIRED"]
         ),
         None,
     )
-    ensure(open_expired_rule is not None, "client_portal_workspace missing OPEN/EXPIRED current artifact reverse guard")
     ensure(
-        open_expired_rule["then"]["properties"]["current_artifact_upload_ref"].get("type") == "null",
+        open_expired_rule is not None,
+        "client_portal_workspace missing OPEN/EXPIRED current artifact reverse guard",
+    )
+    ensure(
+        open_expired_rule["then"]["properties"]["current_artifact_upload_ref"].get("type")
+        == "null",
         "client_portal_workspace OPEN/EXPIRED requests must clear current_artifact_upload_ref",
     )
     rejected_request_rule = find_rule_by_const(document_request["allOf"], "status", "REJECTED")
-    ensure(rejected_request_rule is not None, "client_portal_workspace missing REJECTED current artifact reverse guard")
     ensure(
-        rejected_request_rule["then"]["properties"]["current_artifact_upload_ref"].get("type") == "null",
+        rejected_request_rule is not None,
+        "client_portal_workspace missing REJECTED current artifact reverse guard",
+    )
+    ensure(
+        rejected_request_rule["then"]["properties"]["current_artifact_upload_ref"].get("type")
+        == "null",
         "client_portal_workspace REJECTED requests must clear current_artifact_upload_ref",
     )
 
@@ -11632,22 +12809,39 @@ def check_client_portal_workspace() -> None:
         ],
         "client_portal_workspace.uploadItem.preview_reason_code must freeze the governed preview downgrade and unavailability reasons",
     )
-    same_shell_preview_rule = find_rule_by_const(upload_item_schema["allOf"], "preview_posture", "SAME_SHELL_PREVIEW")
-    ensure(same_shell_preview_rule is not None, "client_portal_workspace.uploadItem missing SAME_SHELL_PREVIEW guard")
+    same_shell_preview_rule = find_rule_by_const(
+        upload_item_schema["allOf"], "preview_posture", "SAME_SHELL_PREVIEW"
+    )
+    ensure(
+        same_shell_preview_rule is not None,
+        "client_portal_workspace.uploadItem missing SAME_SHELL_PREVIEW guard",
+    )
     ensure(
         same_shell_preview_rule["then"]["properties"]["transfer_state"].get("const") == "ACCEPTED"
-        and same_shell_preview_rule["then"]["properties"]["preview_reason_code"].get("type") == "null",
+        and same_shell_preview_rule["then"]["properties"]["preview_reason_code"].get("type")
+        == "null",
         "client_portal_workspace.uploadItem SAME_SHELL_PREVIEW must stay accepted and clear preview_reason_code",
     )
-    download_only_rule = find_rule_by_const(upload_item_schema["allOf"], "preview_posture", "DOWNLOAD_ONLY")
-    ensure(download_only_rule is not None, "client_portal_workspace.uploadItem missing DOWNLOAD_ONLY guard")
+    download_only_rule = find_rule_by_const(
+        upload_item_schema["allOf"], "preview_posture", "DOWNLOAD_ONLY"
+    )
+    ensure(
+        download_only_rule is not None,
+        "client_portal_workspace.uploadItem missing DOWNLOAD_ONLY guard",
+    )
     ensure(
         download_only_rule["then"]["properties"]["transfer_state"].get("const") == "ACCEPTED"
-        and download_only_rule["then"]["properties"]["preview_reason_code"].get("const") == "FORMAT_UNSUPPORTED",
+        and download_only_rule["then"]["properties"]["preview_reason_code"].get("const")
+        == "FORMAT_UNSUPPORTED",
         "client_portal_workspace.uploadItem DOWNLOAD_ONLY must stay accepted and explain the downgrade as FORMAT_UNSUPPORTED",
     )
-    unavailable_preview_rule = find_rule_by_const(upload_item_schema["allOf"], "preview_posture", "NOT_AVAILABLE")
-    ensure(unavailable_preview_rule is not None, "client_portal_workspace.uploadItem missing NOT_AVAILABLE preview guard")
+    unavailable_preview_rule = find_rule_by_const(
+        upload_item_schema["allOf"], "preview_posture", "NOT_AVAILABLE"
+    )
+    ensure(
+        unavailable_preview_rule is not None,
+        "client_portal_workspace.uploadItem missing NOT_AVAILABLE preview guard",
+    )
     ensure(
         unavailable_preview_rule["then"]["properties"]["preview_reason_code"].get("minLength") == 1,
         "client_portal_workspace.uploadItem NOT_AVAILABLE preview rows must require a typed preview_reason_code",
@@ -11661,46 +12855,74 @@ def check_client_portal_workspace() -> None:
         ),
         None,
     )
-    ensure(queued_preview_rule is not None, "client_portal_workspace.uploadItem missing QUEUED/UPLOADING preview guard")
+    ensure(
+        queued_preview_rule is not None,
+        "client_portal_workspace.uploadItem missing QUEUED/UPLOADING preview guard",
+    )
     ensure(
         queued_preview_rule["then"]["properties"]["preview_posture"].get("const") == "NOT_AVAILABLE"
-        and queued_preview_rule["then"]["properties"]["preview_reason_code"].get("const") == "TRANSFER_IN_PROGRESS",
+        and queued_preview_rule["then"]["properties"]["preview_reason_code"].get("const")
+        == "TRANSFER_IN_PROGRESS",
         "client_portal_workspace.uploadItem QUEUED/UPLOADING rows must keep preview unavailable while transfer is in progress",
     )
-    scanning_preview_rule = find_rule_by_const(upload_item_schema["allOf"], "transfer_state", "SCANNING")
-    ensure(scanning_preview_rule is not None, "client_portal_workspace.uploadItem missing SCANNING preview guard")
+    scanning_preview_rule = find_rule_by_const(
+        upload_item_schema["allOf"], "transfer_state", "SCANNING"
+    )
     ensure(
-        scanning_preview_rule["then"]["properties"]["preview_posture"].get("const") == "NOT_AVAILABLE"
-        and scanning_preview_rule["then"]["properties"]["preview_reason_code"].get("const") == "SCAN_PENDING",
+        scanning_preview_rule is not None,
+        "client_portal_workspace.uploadItem missing SCANNING preview guard",
+    )
+    ensure(
+        scanning_preview_rule["then"]["properties"]["preview_posture"].get("const")
+        == "NOT_AVAILABLE"
+        and scanning_preview_rule["then"]["properties"]["preview_reason_code"].get("const")
+        == "SCAN_PENDING",
         "client_portal_workspace.uploadItem SCANNING rows must keep preview unavailable while scan is pending",
     )
-    replacement_preview_rule = find_rule_by_const(upload_item_schema["allOf"], "next_action_code", "UPLOAD_REPLACEMENT")
-    ensure(replacement_preview_rule is not None, "client_portal_workspace.uploadItem missing UPLOAD_REPLACEMENT preview guard")
+    replacement_preview_rule = find_rule_by_const(
+        upload_item_schema["allOf"], "next_action_code", "UPLOAD_REPLACEMENT"
+    )
     ensure(
-        replacement_preview_rule["then"]["properties"]["preview_posture"].get("const") == "NOT_AVAILABLE"
+        replacement_preview_rule is not None,
+        "client_portal_workspace.uploadItem missing UPLOAD_REPLACEMENT preview guard",
+    )
+    ensure(
+        replacement_preview_rule["then"]["properties"]["preview_posture"].get("const")
+        == "NOT_AVAILABLE"
         and replacement_preview_rule["then"]["properties"]["preview_reason_code"].get("enum")
         == ["REPLACEMENT_REQUIRED", "QUARANTINED"],
         "client_portal_workspace.uploadItem UPLOAD_REPLACEMENT rows must keep preview unavailable with replacement or quarantine reasons",
     )
-    retry_preview_rule = find_rule_by_const(upload_item_schema["allOf"], "next_action_code", "RETRY_UPLOAD")
-    ensure(retry_preview_rule is not None, "client_portal_workspace.uploadItem missing RETRY_UPLOAD preview guard")
+    retry_preview_rule = find_rule_by_const(
+        upload_item_schema["allOf"], "next_action_code", "RETRY_UPLOAD"
+    )
+    ensure(
+        retry_preview_rule is not None,
+        "client_portal_workspace.uploadItem missing RETRY_UPLOAD preview guard",
+    )
     ensure(
         retry_preview_rule["then"]["properties"]["preview_posture"].get("const") == "NOT_AVAILABLE"
-        and retry_preview_rule["then"]["properties"]["preview_reason_code"].get("const") == "RETRY_REQUIRED",
+        and retry_preview_rule["then"]["properties"]["preview_reason_code"].get("const")
+        == "RETRY_REQUIRED",
         "client_portal_workspace.uploadItem RETRY_UPLOAD rows must keep preview unavailable with RETRY_REQUIRED reason",
     )
     support_preview_rule = next(
         (
             rule
             for rule in upload_item_schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("next_action_code", {}).get("const") == "CONTACT_SUPPORT"
+            if rule.get("if", {}).get("properties", {}).get("next_action_code", {}).get("const")
+            == "CONTACT_SUPPORT"
             and "preview_posture" in rule.get("then", {}).get("properties", {})
         ),
         None,
     )
-    ensure(support_preview_rule is not None, "client_portal_workspace.uploadItem missing CONTACT_SUPPORT preview guard")
     ensure(
-        support_preview_rule["then"]["properties"]["preview_posture"].get("const") == "NOT_AVAILABLE"
+        support_preview_rule is not None,
+        "client_portal_workspace.uploadItem missing CONTACT_SUPPORT preview guard",
+    )
+    ensure(
+        support_preview_rule["then"]["properties"]["preview_posture"].get("const")
+        == "NOT_AVAILABLE"
         and support_preview_rule["then"]["properties"]["preview_reason_code"].get("enum")
         == ["QUARANTINED", "POLICY_LIMITED"],
         "client_portal_workspace.uploadItem CONTACT_SUPPORT rows must keep preview unavailable with quarantine or policy-limited reasons",
@@ -11709,7 +12931,10 @@ def check_client_portal_workspace() -> None:
         (
             rule
             for rule in upload_item_schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("request_binding_state", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("request_binding_state", {})
+            .get("const")
             == "RECONFIRMATION_REQUIRED"
             and rule.get("if", {}).get("properties", {}).get("transfer_state", {}).get("const")
             == "ACCEPTED"
@@ -11721,16 +12946,22 @@ def check_client_portal_workspace() -> None:
         "client_portal_workspace.uploadItem missing RECONFIRMATION_REQUIRED+ACCEPTED binding guard",
     )
     ensure(
-        reconfirm_binding_rule["then"]["properties"]["attachment_state"].get("const") == "REBIND_REQUIRED"
-        and reconfirm_binding_rule["then"]["properties"]["next_action_code"].get("const") == "RECONFIRM_REQUEST"
-        and reconfirm_binding_rule["then"]["properties"]["recovery_posture"].get("const") == "RECONFIRM_INLINE",
+        reconfirm_binding_rule["then"]["properties"]["attachment_state"].get("const")
+        == "REBIND_REQUIRED"
+        and reconfirm_binding_rule["then"]["properties"]["next_action_code"].get("const")
+        == "RECONFIRM_REQUEST"
+        and reconfirm_binding_rule["then"]["properties"]["recovery_posture"].get("const")
+        == "RECONFIRM_INLINE",
         "client_portal_workspace.uploadItem RECONFIRMATION_REQUIRED must force rebind posture and inline reconfirm recovery",
     )
     superseded_binding_rule = next(
         (
             rule
             for rule in upload_item_schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("request_binding_state", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("request_binding_state", {})
+            .get("const")
             == "SUPERSEDED"
             and rule.get("if", {}).get("properties", {}).get("transfer_state", {}).get("const")
             == "ACCEPTED"
@@ -11742,9 +12973,12 @@ def check_client_portal_workspace() -> None:
         "client_portal_workspace.uploadItem missing SUPERSEDED+ACCEPTED binding guard",
     )
     ensure(
-        superseded_binding_rule["then"]["properties"]["attachment_state"].get("const") == "REBIND_REQUIRED"
-        and superseded_binding_rule["then"]["properties"]["next_action_code"].get("const") == "RECONFIRM_REQUEST"
-        and superseded_binding_rule["then"]["properties"]["recovery_posture"].get("const") == "STALE_REVIEW_REQUIRED",
+        superseded_binding_rule["then"]["properties"]["attachment_state"].get("const")
+        == "REBIND_REQUIRED"
+        and superseded_binding_rule["then"]["properties"]["next_action_code"].get("const")
+        == "RECONFIRM_REQUEST"
+        and superseded_binding_rule["then"]["properties"]["recovery_posture"].get("const")
+        == "STALE_REVIEW_REQUIRED",
         "client_portal_workspace.uploadItem SUPERSEDED must force rebind posture and stale-review recovery",
     )
 
@@ -11840,8 +13074,10 @@ def check_client_portal_workspace() -> None:
             "SIGNED_RECEIPT",
         ]
         and approval_pack["step_up_surface"]["enum"] == ["NOT_REQUIRED", "INLINE_CHECKPOINT"]
-        and approval_pack["step_up_checkpoint_state"]["enum"] == ["NOT_REQUIRED", "REQUIRED", "SATISFIED"]
-        and approval_pack["receipt_state"]["enum"] == ["NOT_ISSUED", "PENDING_SETTLEMENT", "ISSUED"],
+        and approval_pack["step_up_checkpoint_state"]["enum"]
+        == ["NOT_REQUIRED", "REQUIRED", "SATISFIED"]
+        and approval_pack["receipt_state"]["enum"]
+        == ["NOT_ISSUED", "PENDING_SETTLEMENT", "ISSUED"],
         "client_portal_workspace.approvalPack must freeze sign-off, checkpoint, and receipt posture vocabulary",
     )
     ensure(
@@ -11851,16 +13087,25 @@ def check_client_portal_workspace() -> None:
         "client_portal_workspace.approvalPack.primary_action must stay on the approvals route and carry pack context",
     )
 
-    ack_rule = find_rule_by_const(portal["$defs"]["approvalPack"]["allOf"], "approval_acknowledged", True)
-    ensure(ack_rule is not None, "client_portal_workspace.approvalPack missing acknowledgement implication guard")
+    ack_rule = find_rule_by_const(
+        portal["$defs"]["approvalPack"]["allOf"], "approval_acknowledged", True
+    )
+    ensure(
+        ack_rule is not None,
+        "client_portal_workspace.approvalPack missing acknowledgement implication guard",
+    )
     ensure(
         ack_rule["then"]["properties"]["change_digest_acknowledged"].get("const") is True
         and ack_rule["then"]["properties"]["declaration_acknowledged"].get("const") is True,
         "client_portal_workspace.approvalPack approval_acknowledged=true must force digest and declaration acknowledgement complete",
     )
 
-    signed_rule = find_rule_by_const(portal["$defs"]["approvalPack"]["allOf"], "receipt_state", "ISSUED")
-    ensure(signed_rule is not None, "client_portal_workspace.approvalPack missing issued-receipt guard")
+    signed_rule = find_rule_by_const(
+        portal["$defs"]["approvalPack"]["allOf"], "receipt_state", "ISSUED"
+    )
+    ensure(
+        signed_rule is not None, "client_portal_workspace.approvalPack missing issued-receipt guard"
+    )
     ensure(
         signed_rule["then"]["properties"]["status"].get("const") == "SIGNED"
         and signed_rule["then"]["properties"]["sign_off_state"].get("const") == "SIGNED_RECEIPT"
@@ -11879,36 +13124,54 @@ def check_client_portal_workspace() -> None:
         "client_portal_workspace.approvalPack missing pending-settlement guard",
     )
     ensure(
-        pending_rule["then"]["properties"]["sign_off_state"].get("const") == "SIGNATURE_PENDING_SETTLEMENT"
+        pending_rule["then"]["properties"]["sign_off_state"].get("const")
+        == "SIGNATURE_PENDING_SETTLEMENT"
         and pending_rule["then"]["properties"]["sign_command_receipt_ref"].get("type") == "string"
         and pending_rule["then"]["properties"]["settlement_pending_label"].get("type") == "string"
         and pending_rule["then"]["properties"]["receipt_ref"].get("type") == "null",
         "client_portal_workspace.approvalPack pending-settlement state must require command-receipt linkage and clear final receipt refs",
     )
-    step_up_rule = find_rule_by_const(portal["$defs"]["approvalPack"]["allOf"], "status", "STEP_UP_REQUIRED")
-    ensure(step_up_rule is not None, "client_portal_workspace.approvalPack missing inline step-up guard")
+    step_up_rule = find_rule_by_const(
+        portal["$defs"]["approvalPack"]["allOf"], "status", "STEP_UP_REQUIRED"
+    )
+    ensure(
+        step_up_rule is not None,
+        "client_portal_workspace.approvalPack missing inline step-up guard",
+    )
     ensure(
         step_up_rule["then"]["properties"]["sign_off_state"].get("const") == "STEP_UP_CHECKPOINT"
-        and step_up_rule["then"]["properties"]["step_up_surface"].get("const") == "INLINE_CHECKPOINT"
-        and step_up_rule["then"]["properties"]["step_up_checkpoint_state"].get("const") == "REQUIRED",
+        and step_up_rule["then"]["properties"]["step_up_surface"].get("const")
+        == "INLINE_CHECKPOINT"
+        and step_up_rule["then"]["properties"]["step_up_checkpoint_state"].get("const")
+        == "REQUIRED",
         "client_portal_workspace.approvalPack step-up state must stay inline and explicitly checkpointed",
     )
     review_rule = find_rule_by_enum(
         portal["$defs"]["approvalPack"]["allOf"], "status", ["READY_FOR_CLIENT", "VIEWED"]
     )
-    ensure(review_rule is not None, "client_portal_workspace.approvalPack missing review-stage guard")
+    ensure(
+        review_rule is not None, "client_portal_workspace.approvalPack missing review-stage guard"
+    )
     ensure(
         review_rule["then"]["properties"]["sign_off_state"].get("const") == "REVIEW_REQUIRED",
         "client_portal_workspace.approvalPack reviewable states must keep sign_off_state = REVIEW_REQUIRED",
     )
-    ready_rule = find_rule_by_const(portal["$defs"]["approvalPack"]["allOf"], "status", "ACKNOWLEDGED")
-    ensure(ready_rule is not None, "client_portal_workspace.approvalPack missing ready-to-sign guard")
+    ready_rule = find_rule_by_const(
+        portal["$defs"]["approvalPack"]["allOf"], "status", "ACKNOWLEDGED"
+    )
+    ensure(
+        ready_rule is not None, "client_portal_workspace.approvalPack missing ready-to-sign guard"
+    )
     ensure(
         ready_rule["then"]["properties"]["sign_off_state"].get("const") == "READY_TO_SIGN",
         "client_portal_workspace.approvalPack acknowledged state must keep sign_off_state = READY_TO_SIGN",
     )
-    rebase_rule = find_rule_by_const(portal["$defs"]["approvalPack"]["allOf"], "stale_protection_state", "REBASE_REQUIRED")
-    ensure(rebase_rule is not None, "client_portal_workspace.approvalPack missing rebase-review guard")
+    rebase_rule = find_rule_by_const(
+        portal["$defs"]["approvalPack"]["allOf"], "stale_protection_state", "REBASE_REQUIRED"
+    )
+    ensure(
+        rebase_rule is not None, "client_portal_workspace.approvalPack missing rebase-review guard"
+    )
     ensure(
         rebase_rule["then"]["properties"]["sign_off_state"].get("const") == "STALE_REVIEW_REQUIRED",
         "client_portal_workspace.approvalPack rebase-required posture must demote signing into stale review",
@@ -11968,48 +13231,80 @@ def check_client_portal_workspace() -> None:
 
     onboarding_rules = onboarding_schema["allOf"]
     save_return_rule = find_rule_by_const(onboarding_rules, "save_return_state", "AVAILABLE")
-    ensure(save_return_rule is not None, "client_portal_workspace.onboardingJourney missing AVAILABLE save-and-return guard")
     ensure(
-        save_return_rule["then"]["properties"]["save_and_return_action"]["properties"]["route"].get("const")
+        save_return_rule is not None,
+        "client_portal_workspace.onboardingJourney missing AVAILABLE save-and-return guard",
+    )
+    ensure(
+        save_return_rule["then"]["properties"]["save_and_return_action"]["properties"]["route"].get(
+            "const"
+        )
         == "ONBOARDING"
         and "context_object_ref"
         in save_return_rule["then"]["properties"]["save_and_return_action"]["required"],
         "client_portal_workspace.onboardingJourney AVAILABLE save-and-return must stay on the onboarding route and carry journey context",
     )
     resume_live_rule = find_rule_by_const(onboarding_rules, "resume_state", "LIVE")
-    ensure(resume_live_rule is not None, "client_portal_workspace.onboardingJourney missing LIVE resume guard")
     ensure(
-        resume_live_rule["then"]["properties"]["step_workspace_state"].get("const") == "ACTIVE_STEP",
+        resume_live_rule is not None,
+        "client_portal_workspace.onboardingJourney missing LIVE resume guard",
+    )
+    ensure(
+        resume_live_rule["then"]["properties"]["step_workspace_state"].get("const")
+        == "ACTIVE_STEP",
         "client_portal_workspace.onboardingJourney LIVE resume must map to ACTIVE_STEP",
     )
-    resume_reconfirm_rule = find_rule_by_const(onboarding_rules, "resume_state", "RECONFIRMATION_REQUIRED")
-    ensure(resume_reconfirm_rule is not None, "client_portal_workspace.onboardingJourney missing RECONFIRMATION_REQUIRED guard")
+    resume_reconfirm_rule = find_rule_by_const(
+        onboarding_rules, "resume_state", "RECONFIRMATION_REQUIRED"
+    )
     ensure(
-        resume_reconfirm_rule["then"]["properties"]["step_workspace_state"].get("const") == "RECONFIRMATION_REVIEW",
+        resume_reconfirm_rule is not None,
+        "client_portal_workspace.onboardingJourney missing RECONFIRMATION_REQUIRED guard",
+    )
+    ensure(
+        resume_reconfirm_rule["then"]["properties"]["step_workspace_state"].get("const")
+        == "RECONFIRMATION_REVIEW",
         "client_portal_workspace.onboardingJourney RECONFIRMATION_REQUIRED must map to RECONFIRMATION_REVIEW",
     )
-    resume_stale_rule = find_rule_by_const(onboarding_rules, "resume_state", "STALE_REVIEW_REQUIRED")
-    ensure(resume_stale_rule is not None, "client_portal_workspace.onboardingJourney missing STALE_REVIEW_REQUIRED guard")
+    resume_stale_rule = find_rule_by_const(
+        onboarding_rules, "resume_state", "STALE_REVIEW_REQUIRED"
+    )
     ensure(
-        resume_stale_rule["then"]["properties"]["step_workspace_state"].get("const") == "STALE_REVIEW",
+        resume_stale_rule is not None,
+        "client_portal_workspace.onboardingJourney missing STALE_REVIEW_REQUIRED guard",
+    )
+    ensure(
+        resume_stale_rule["then"]["properties"]["step_workspace_state"].get("const")
+        == "STALE_REVIEW",
         "client_portal_workspace.onboardingJourney STALE_REVIEW_REQUIRED must map to STALE_REVIEW",
     )
     completed_rule = find_rule_by_const(onboarding_rules, "state", "COMPLETED")
-    ensure(completed_rule is not None, "client_portal_workspace.onboardingJourney missing COMPLETED terminal guard")
     ensure(
-        completed_rule["then"]["properties"]["step_workspace_state"].get("const") == "COMPLETION_SUMMARY"
-        and completed_rule["then"]["properties"]["save_return_state"].get("const") == "NOT_AVAILABLE_TERMINAL",
+        completed_rule is not None,
+        "client_portal_workspace.onboardingJourney missing COMPLETED terminal guard",
+    )
+    ensure(
+        completed_rule["then"]["properties"]["step_workspace_state"].get("const")
+        == "COMPLETION_SUMMARY"
+        and completed_rule["then"]["properties"]["save_return_state"].get("const")
+        == "NOT_AVAILABLE_TERMINAL",
         "client_portal_workspace.onboardingJourney COMPLETED must publish completion-summary and terminal save-return posture",
     )
     expired_rule = find_rule_by_const(onboarding_rules, "state", "EXPIRED")
-    ensure(expired_rule is not None, "client_portal_workspace.onboardingJourney missing EXPIRED terminal guard")
+    ensure(
+        expired_rule is not None,
+        "client_portal_workspace.onboardingJourney missing EXPIRED terminal guard",
+    )
     ensure(
         expired_rule["then"]["properties"]["step_workspace_state"].get("const") == "EXIT_SUPPORT"
         and expired_rule["then"]["properties"]["expired_at"].get("type") == "string",
         "client_portal_workspace.onboardingJourney EXPIRED must publish exit-support posture and expired_at",
     )
     abandoned_rule = find_rule_by_const(onboarding_rules, "state", "ABANDONED")
-    ensure(abandoned_rule is not None, "client_portal_workspace.onboardingJourney missing ABANDONED terminal guard")
+    ensure(
+        abandoned_rule is not None,
+        "client_portal_workspace.onboardingJourney missing ABANDONED terminal guard",
+    )
     ensure(
         abandoned_rule["then"]["properties"]["step_workspace_state"].get("const") == "EXIT_SUPPORT"
         and abandoned_rule["then"]["properties"]["abandoned_at"].get("type") == "string"
@@ -12019,9 +13314,13 @@ def check_client_portal_workspace() -> None:
 
     portal_top_level_rules = portal["allOf"]
     onboarding_route_rule = find_rule_by_const(portal_top_level_rules, "route", "ONBOARDING")
-    ensure(onboarding_route_rule is not None, "client_portal_workspace missing ONBOARDING route branch")
     ensure(
-        onboarding_route_rule["then"]["properties"]["status_hero"]["properties"]["status_code"].get("const")
+        onboarding_route_rule is not None, "client_portal_workspace missing ONBOARDING route branch"
+    )
+    ensure(
+        onboarding_route_rule["then"]["properties"]["status_hero"]["properties"]["status_code"].get(
+            "const"
+        )
         == "ONBOARDING_REQUIRED",
         "client_portal_workspace ONBOARDING route must keep status_hero.status_code = ONBOARDING_REQUIRED",
     )
@@ -12047,11 +13346,15 @@ def check_client_portal_workspace() -> None:
         (
             rule
             for rule in portal_top_level_rules
-            if rule.get("if", {}).get("properties", {}).get("route", {}).get("not", {}).get("const") == "HELP"
+            if rule.get("if", {}).get("properties", {}).get("route", {}).get("not", {}).get("const")
+            == "HELP"
         ),
         None,
     )
-    ensure(non_help_support_rule is not None, "client_portal_workspace missing non-HELP support clear rule")
+    ensure(
+        non_help_support_rule is not None,
+        "client_portal_workspace missing non-HELP support clear rule",
+    )
     non_help_support = non_help_support_rule["then"]["properties"]["support_panel"]["properties"]
     ensure(
         non_help_support["surface_order"].get("type") == "null"
@@ -12073,11 +13376,14 @@ def check_client_portal_workspace() -> None:
         ),
         None,
     )
-    ensure(terminal_support_rule is not None, "client_portal_workspace missing expired/abandoned onboarding support rule")
     ensure(
-        terminal_support_rule["then"]["properties"]["workspace_posture"]["properties"]["promoted_support_region"].get(
-            "const"
-        )
+        terminal_support_rule is not None,
+        "client_portal_workspace missing expired/abandoned onboarding support rule",
+    )
+    ensure(
+        terminal_support_rule["then"]["properties"]["workspace_posture"]["properties"][
+            "promoted_support_region"
+        ].get("const")
         == "SUPPORT_PANEL",
         "client_portal_workspace expired/abandoned onboarding must promote SUPPORT_PANEL",
     )
@@ -12109,7 +13415,8 @@ def check_client_portal_workspace() -> None:
         "client_portal_workspace.supportPanel.surface_order must use the governed help surface vocabulary",
     )
     ensure(
-        "surface_order" in support_panel["required"] and "case_context_panel" in support_panel["required"],
+        "surface_order" in support_panel["required"]
+        and "case_context_panel" in support_panel["required"],
         "client_portal_workspace.supportPanel must require surface_order and case_context_panel",
     )
     support_paths = support_panel["allOf"][0]["anyOf"]
@@ -12120,7 +13427,8 @@ def check_client_portal_workspace() -> None:
         "client_portal_workspace.supportPanel must always expose at least one usable help path",
     )
     ensure(
-        portal["$defs"]["helpSurfaceCode"]["enum"] == ["HELP_OPTIONS", "TOP_QUESTIONS", "CASE_CONTEXT_PANEL"],
+        portal["$defs"]["helpSurfaceCode"]["enum"]
+        == ["HELP_OPTIONS", "TOP_QUESTIONS", "CASE_CONTEXT_PANEL"],
         "client_portal_workspace.helpSurfaceCode must freeze the Help route surface vocabulary",
     )
     case_context_panel = portal["$defs"]["caseContextPanel"]
@@ -12218,11 +13526,15 @@ def check_client_document_request() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("latest_upload_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("latest_upload_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(latest_upload_guard is not None, "client_document_request missing latest_upload_ref reverse guard")
+    ensure(
+        latest_upload_guard is not None,
+        "client_document_request missing latest_upload_ref reverse guard",
+    )
     ensure(
         latest_upload_guard["then"]["properties"]["upload_refs"].get("minItems") == 1,
         "client_document_request non-null latest_upload_ref must require at least one upload_refs[] entry",
@@ -12231,12 +13543,18 @@ def check_client_document_request() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("current_request_upload_ref_or_null", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("current_request_upload_ref_or_null", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(current_upload_guard is not None, "client_document_request missing current_request_upload_ref reverse guard")
+    ensure(
+        current_upload_guard is not None,
+        "client_document_request missing current_request_upload_ref reverse guard",
+    )
     ensure(
         current_upload_guard["then"]["properties"]["upload_refs"].get("minItems") == 1,
         "client_document_request non-null current_request_upload_ref_or_null must require at least one upload_refs[] entry",
@@ -12250,13 +13568,16 @@ def check_client_document_request() -> None:
         ),
         None,
     )
-    ensure(empty_upload_guard is not None, "client_document_request missing empty upload reverse guard")
+    ensure(
+        empty_upload_guard is not None, "client_document_request missing empty upload reverse guard"
+    )
     ensure(
         empty_upload_guard["then"]["properties"]["latest_upload_ref"].get("type") == "null",
         "client_document_request empty upload_refs[] must clear latest_upload_ref",
     )
     ensure(
-        empty_upload_guard["then"]["properties"]["current_request_upload_ref_or_null"].get("type") == "null",
+        empty_upload_guard["then"]["properties"]["current_request_upload_ref_or_null"].get("type")
+        == "null",
         "client_document_request empty upload_refs[] must clear current_request_upload_ref_or_null",
     )
 
@@ -12264,18 +13585,22 @@ def check_client_document_request() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("lifecycle_state", {}).get("const") == "WITHDRAWN"
+            if rule.get("if", {}).get("properties", {}).get("lifecycle_state", {}).get("const")
+            == "WITHDRAWN"
         ),
         None,
     )
-    ensure(withdrawn_guard is not None, "client_document_request missing WITHDRAWN upload reset guard")
+    ensure(
+        withdrawn_guard is not None, "client_document_request missing WITHDRAWN upload reset guard"
+    )
     ensure(
         withdrawn_guard["then"]["properties"]["upload_refs"].get("maxItems") == 0
         and withdrawn_guard["then"]["properties"]["latest_upload_ref"].get("type") == "null",
         "client_document_request WITHDRAWN state must clear upload_refs[] and latest_upload_ref",
     )
     ensure(
-        withdrawn_guard["then"]["properties"]["current_request_upload_ref_or_null"].get("type") == "null",
+        withdrawn_guard["then"]["properties"]["current_request_upload_ref_or_null"].get("type")
+        == "null",
         "client_document_request WITHDRAWN state must clear current_request_upload_ref_or_null",
     )
 
@@ -12283,7 +13608,8 @@ def check_client_document_request() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("lifecycle_state", {}).get("const") == "EXPIRED"
+            if rule.get("if", {}).get("properties", {}).get("lifecycle_state", {}).get("const")
+            == "EXPIRED"
         ),
         None,
     )
@@ -12301,9 +13627,13 @@ def check_client_document_request() -> None:
         ),
         None,
     )
-    ensure(stale_current_guard is not None, "client_document_request missing OPEN/REJECTED/EXPIRED current-upload clearing guard")
     ensure(
-        stale_current_guard["then"]["properties"]["current_request_upload_ref_or_null"].get("type") == "null",
+        stale_current_guard is not None,
+        "client_document_request missing OPEN/REJECTED/EXPIRED current-upload clearing guard",
+    )
+    ensure(
+        stale_current_guard["then"]["properties"]["current_request_upload_ref_or_null"].get("type")
+        == "null",
         "client_document_request OPEN, REJECTED, and EXPIRED states must clear current_request_upload_ref_or_null",
     )
 
@@ -12459,7 +13789,8 @@ def check_client_approval_pack() -> None:
     ensure(stale_rule is not None, "client_approval_pack missing stale-protection score cap")
     ensure(
         stale_rule["then"]["properties"]["approval_readiness_score"].get("maximum") == 0
-        and stale_rule["then"]["properties"]["recovery_posture"].get("const") == "STALE_REVIEW_REQUIRED",
+        and stale_rule["then"]["properties"]["recovery_posture"].get("const")
+        == "STALE_REVIEW_REQUIRED",
         "client_approval_pack superseded or expired posture must force zero readiness and stale review",
     )
 
@@ -12474,14 +13805,18 @@ def check_client_approval_pack() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("lifecycle_state", {}).get("const") == "CANCELLED"
+            if rule.get("if", {}).get("properties", {}).get("lifecycle_state", {}).get("const")
+            == "CANCELLED"
             and "recovery_posture" in rule.get("then", {}).get("properties", {})
         ),
         None,
     )
-    ensure(cancelled_recovery_rule is not None, "client_approval_pack missing CANCELLED recovery guard")
     ensure(
-        cancelled_recovery_rule["then"]["properties"]["recovery_posture"].get("const") == "HARD_RESET_REQUIRED",
+        cancelled_recovery_rule is not None, "client_approval_pack missing CANCELLED recovery guard"
+    )
+    ensure(
+        cancelled_recovery_rule["then"]["properties"]["recovery_posture"].get("const")
+        == "HARD_RESET_REQUIRED",
         "client_approval_pack CANCELLED state must force hard-reset recovery posture",
     )
 
@@ -12501,14 +13836,17 @@ def check_client_onboarding_journey() -> None:
         "client_onboarding_journey.journey_id must reject empty strings",
     )
 
-    required_step_rules = {code: {"completed": False, "reconfirmation": False} for code in [
-        "INVITE_ACCEPTANCE",
-        "PROFILE_CONFIRMATION",
-        "IDENTITY_VERIFICATION",
-        "AUTHORITY_LINK_SETUP",
-        "DOCUMENT_COLLECTION",
-        "REVIEW_CONFIRMATION",
-    ]}
+    required_step_rules = {
+        code: {"completed": False, "reconfirmation": False}
+        for code in [
+            "INVITE_ACCEPTANCE",
+            "PROFILE_CONFIRMATION",
+            "IDENTITY_VERIFICATION",
+            "AUTHORITY_LINK_SETUP",
+            "DOCUMENT_COLLECTION",
+            "REVIEW_CONFIRMATION",
+        ]
+    }
     for rule in schema["allOf"]:
         rule_if = rule.get("if", {}).get("properties", {})
         then_required = (
@@ -12518,9 +13856,7 @@ def check_client_onboarding_journey() -> None:
             .get("contains", {})
             .get("const")
         )
-        completed_contains = (
-            rule_if.get("completed_steps", {}).get("contains", {}).get("const")
-        )
+        completed_contains = rule_if.get("completed_steps", {}).get("contains", {}).get("const")
         reconfirm_contains = (
             rule_if.get("reconfirmation_step_codes", {}).get("contains", {}).get("const")
         )
@@ -12530,7 +13866,10 @@ def check_client_onboarding_journey() -> None:
             required_step_rules[reconfirm_contains]["reconfirmation"] = True
 
     for code, state in required_step_rules.items():
-        ensure(state["completed"], f"client_onboarding_journey missing completed-step subset guard for {code}")
+        ensure(
+            state["completed"],
+            f"client_onboarding_journey missing completed-step subset guard for {code}",
+        )
         ensure(
             state["reconfirmation"],
             f"client_onboarding_journey missing reconfirmation-step subset guard for {code}",
@@ -12550,17 +13889,27 @@ def check_client_onboarding_journey() -> None:
         ),
         None,
     )
-    ensure(document_absence_rule is not None, "client_onboarding_journey missing document-step absence guard")
+    ensure(
+        document_absence_rule is not None,
+        "client_onboarding_journey missing document-step absence guard",
+    )
     ensure(
         document_absence_rule["then"]["properties"]["document_request_refs"].get("maxItems") == 0
-        and document_absence_rule["then"]["properties"]["draft_upload_session_refs"].get("maxItems") == 0,
+        and document_absence_rule["then"]["properties"]["draft_upload_session_refs"].get("maxItems")
+        == 0,
         "client_onboarding_journey must clear document artifacts when document collection is not required",
     )
 
-    authority_required_rule = find_rule_by_const(schema["allOf"], "authority_link_requirement", "REQUIRED")
-    ensure(authority_required_rule is not None, "client_onboarding_journey missing REQUIRED authority-link guard")
+    authority_required_rule = find_rule_by_const(
+        schema["allOf"], "authority_link_requirement", "REQUIRED"
+    )
     ensure(
-        authority_required_rule["then"]["properties"]["required_steps"]["contains"]["const"] == "AUTHORITY_LINK_SETUP",
+        authority_required_rule is not None,
+        "client_onboarding_journey missing REQUIRED authority-link guard",
+    )
+    ensure(
+        authority_required_rule["then"]["properties"]["required_steps"]["contains"]["const"]
+        == "AUTHORITY_LINK_SETUP",
         "client_onboarding_journey required authority links must include AUTHORITY_LINK_SETUP",
     )
 
@@ -12591,13 +13940,25 @@ def check_client_timeline_event() -> None:
     )
     check_min_length_fields(
         schema,
-        ["event_id", "tenant_id", "client_id", "manifest_id", "headline", "detail_ref", "related_object_ref"],
+        [
+            "event_id",
+            "tenant_id",
+            "client_id",
+            "manifest_id",
+            "headline",
+            "detail_ref",
+            "related_object_ref",
+        ],
         "client_timeline_event",
     )
     submission_sent_rule = find_rule_by_const(schema["allOf"], "event_kind", "SUBMISSION_SENT")
-    ensure(submission_sent_rule is not None, "client_timeline_event missing SUBMISSION_SENT authority-truth guard")
     ensure(
-        submission_sent_rule["then"]["properties"]["authority_truth_state"].get("const") == "PENDING_ACK",
+        submission_sent_rule is not None,
+        "client_timeline_event missing SUBMISSION_SENT authority-truth guard",
+    )
+    ensure(
+        submission_sent_rule["then"]["properties"]["authority_truth_state"].get("const")
+        == "PENDING_ACK",
         "client_timeline_event SUBMISSION_SENT must force authority_truth_state=PENDING_ACK",
     )
     non_authority_rule = next(
@@ -12612,14 +13973,21 @@ def check_client_timeline_event() -> None:
                 "APPROVAL_SIGNED",
                 "ONBOARDING_STEP_COMPLETED",
             ]
-            and candidate.get("then", {}).get("properties", {}).get("authority_truth_state", {}).get("const")
+            and candidate.get("then", {})
+            .get("properties", {})
+            .get("authority_truth_state", {})
+            .get("const")
             == "NOT_APPLICABLE"
         ),
         None,
     )
-    ensure(non_authority_rule is not None, "client_timeline_event missing non-authority authority-truth guard")
     ensure(
-        non_authority_rule["then"]["properties"]["authority_truth_state"].get("const") == "NOT_APPLICABLE",
+        non_authority_rule is not None,
+        "client_timeline_event missing non-authority authority-truth guard",
+    )
+    ensure(
+        non_authority_rule["then"]["properties"]["authority_truth_state"].get("const")
+        == "NOT_APPLICABLE",
         "client_timeline_event non-authority events must force authority_truth_state=NOT_APPLICABLE",
     )
 
@@ -12640,7 +14008,8 @@ def check_detail_drawer_state() -> None:
         "detail_drawer_state.detailEntry must require semantic_view_kind and plain_language_summary",
     )
     ensure(
-        schema["$defs"]["detailEntry"]["properties"]["plain_language_summary"].get("minLength") == 1,
+        schema["$defs"]["detailEntry"]["properties"]["plain_language_summary"].get("minLength")
+        == 1,
         "detail_drawer_state.detailEntry.plain_language_summary must reject empty strings",
     )
     ensure(
@@ -12656,14 +14025,17 @@ def check_detail_drawer_state() -> None:
         "detail_drawer_state.detailEntry.semantic_view_kind must freeze the six low-noise evidence/comparison semantics",
     )
 
-    uniqueness = {code: False for code in [
-        "EVIDENCE_TIDE",
-        "PACKET_FORGE",
-        "AUTHORITY_TUNNEL",
-        "DRIFT_FIELD",
-        "FOCUS_LENS",
-        "TWIN_PANEL",
-    ]}
+    uniqueness = {
+        code: False
+        for code in [
+            "EVIDENCE_TIDE",
+            "PACKET_FORGE",
+            "AUTHORITY_TUNNEL",
+            "DRIFT_FIELD",
+            "FOCUS_LENS",
+            "TWIN_PANEL",
+        ]
+    }
     expanded_rules = uniqueness.copy()
     detail_rules = schema["allOf"]
     for rule in detail_rules:
@@ -12682,10 +14054,7 @@ def check_detail_drawer_state() -> None:
             uniqueness[entry_code] = True
 
         expanded_code = (
-            rule.get("if", {})
-            .get("properties", {})
-            .get("expanded_module_code", {})
-            .get("const")
+            rule.get("if", {}).get("properties", {}).get("expanded_module_code", {}).get("const")
         )
         if expanded_code in expanded_rules:
             contains = (
@@ -12704,7 +14073,10 @@ def check_detail_drawer_state() -> None:
             expanded_rules[expanded_code] = True
 
     ensure(all(uniqueness.values()), "detail_drawer_state missing per-module uniqueness guards")
-    ensure(all(expanded_rules.values()), "detail_drawer_state missing expanded-module entry-point guards")
+    ensure(
+        all(expanded_rules.values()),
+        "detail_drawer_state missing expanded-module entry-point guards",
+    )
 
     mounted_focus_rule = next(
         (
@@ -12715,7 +14087,9 @@ def check_detail_drawer_state() -> None:
         ),
         None,
     )
-    ensure(mounted_focus_rule is not None, "detail_drawer_state missing expanded drawer focus guard")
+    ensure(
+        mounted_focus_rule is not None, "detail_drawer_state missing expanded drawer focus guard"
+    )
     ensure(
         mounted_focus_rule["then"]["properties"]["focus_anchor_ref"].get("minLength") == 1,
         "detail_drawer_state expanded drawers must require a non-empty focus anchor",
@@ -12744,8 +14118,12 @@ def check_detail_drawer_state() -> None:
         "detail_drawer_state audit_mode_explicit must stay limited to Audit Echo Panel (`FOCUS_LENS`)",
     )
 
-    populated_rule = find_rule_by_const(schema["$defs"]["detailEntry"]["allOf"], "content_state", "POPULATED")
-    ensure(populated_rule is not None, "detail_drawer_state.detailEntry missing POPULATED anchor guard")
+    populated_rule = find_rule_by_const(
+        schema["$defs"]["detailEntry"]["allOf"], "content_state", "POPULATED"
+    )
+    ensure(
+        populated_rule is not None, "detail_drawer_state.detailEntry missing POPULATED anchor guard"
+    )
     ensure(
         populated_rule["then"]["properties"]["anchorable_object_refs"].get("minItems") == 1,
         "detail_drawer_state POPULATED entries must require anchorable_object_refs",
@@ -12754,7 +14132,9 @@ def check_detail_drawer_state() -> None:
         populated_rule["then"]["properties"]["state_reason_code_or_null"].get("type") == "null",
         "detail_drawer_state POPULATED entries must clear state_reason_code_or_null",
     )
-    limited_rule = find_rule_by_const(schema["$defs"]["detailEntry"]["allOf"], "content_state", "LIMITED")
+    limited_rule = find_rule_by_const(
+        schema["$defs"]["detailEntry"]["allOf"], "content_state", "LIMITED"
+    )
     ensure(limited_rule is not None, "detail_drawer_state.detailEntry missing LIMITED reason guard")
     ensure(
         limited_rule["then"]["properties"]["limitation_reason_codes"].get("minItems") == 1
@@ -12766,10 +14146,15 @@ def check_detail_drawer_state() -> None:
         "NOT_YET_MATERIALIZED": "MATERIALIZATION_PENDING",
         "NOT_APPLICABLE": "NOT_APPLICABLE_TO_CONTEXT",
     }.items():
-        state_rule = find_rule_by_const(schema["$defs"]["detailEntry"]["allOf"], "content_state", state)
-        ensure(state_rule is not None, f"detail_drawer_state.detailEntry missing {state} reason guard")
+        state_rule = find_rule_by_const(
+            schema["$defs"]["detailEntry"]["allOf"], "content_state", state
+        )
         ensure(
-            state_rule["then"]["properties"]["state_reason_code_or_null"].get("const") == expected_reason,
+            state_rule is not None, f"detail_drawer_state.detailEntry missing {state} reason guard"
+        )
+        ensure(
+            state_rule["then"]["properties"]["state_reason_code_or_null"].get("const")
+            == expected_reason,
             f"detail_drawer_state {state} entries must keep state_reason_code_or_null={expected_reason}",
         )
         ensure(
@@ -12836,7 +14221,10 @@ def check_context_bar_state() -> None:
     }
     for freshness_state, connection_state in freshness_to_connection.items():
         rule = find_rule_by_const(schema["allOf"], "freshness_state", freshness_state)
-        ensure(rule is not None, f"context_bar_state missing reverse freshness guard for {freshness_state}")
+        ensure(
+            rule is not None,
+            f"context_bar_state missing reverse freshness guard for {freshness_state}",
+        )
         ensure(
             rule["then"]["properties"]["connection_state"].get("const") == connection_state,
             f"context_bar_state freshness {freshness_state} must map to connection {connection_state}",
@@ -12856,7 +14244,8 @@ def check_decision_summary_state() -> None:
         )
     source_modules = schema["properties"]["source_module_codes"]
     ensure(
-        source_modules.get("prefixItems") == [
+        source_modules.get("prefixItems")
+        == [
             {"const": "DECISION_CONSTELLATION"},
             {"const": "GATE_LATTICE"},
             {"const": "TRUST_PRISM"},
@@ -12883,7 +14272,10 @@ def check_decision_summary_state() -> None:
         ),
         None,
     )
-    ensure(non_blocked_rule is not None, "decision_summary_state missing non-BLOCKED blocking_reason reset")
+    ensure(
+        non_blocked_rule is not None,
+        "decision_summary_state missing non-BLOCKED blocking_reason reset",
+    )
     ensure(
         non_blocked_rule["then"]["properties"]["blocking_reason"].get("type") == "null",
         "decision_summary_state non-BLOCKED states must keep blocking_reason null",
@@ -12892,12 +14284,15 @@ def check_decision_summary_state() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("limitation_state", {}).get("const") == "NONE"
+            if rule.get("if", {}).get("properties", {}).get("limitation_state", {}).get("const")
+            == "NONE"
             and "state_reason_code_or_null" in rule.get("then", {}).get("properties", {})
         ),
         None,
     )
-    ensure(none_rule is not None, "decision_summary_state missing limitation_state=NONE clearing guard")
+    ensure(
+        none_rule is not None, "decision_summary_state missing limitation_state=NONE clearing guard"
+    )
     ensure(
         none_rule["then"]["properties"]["state_reason_code_or_null"].get("type") == "null"
         and none_rule["then"]["properties"]["limitation_reason_codes"].get("maxItems") == 0
@@ -12905,7 +14300,10 @@ def check_decision_summary_state() -> None:
         "decision_summary_state limitation_state=NONE must clear typed reason, limitation_reason_codes[], and limitation_statement",
     )
     limited_rule = find_rule_by_const(schema["allOf"], "limitation_state", "LIMITED")
-    ensure(limited_rule is not None, "decision_summary_state missing limitation_state=LIMITED reason guard")
+    ensure(
+        limited_rule is not None,
+        "decision_summary_state missing limitation_state=LIMITED reason guard",
+    )
     ensure(
         limited_rule["then"]["properties"]["state_reason_code_or_null"].get("type") == "null"
         and limited_rule["then"]["properties"]["limitation_reason_codes"].get("minItems") == 1,
@@ -12917,9 +14315,12 @@ def check_decision_summary_state() -> None:
         "NOT_APPLICABLE": "NOT_APPLICABLE_TO_CONTEXT",
     }.items():
         state_rule = find_rule_by_const(schema["allOf"], "limitation_state", state)
-        ensure(state_rule is not None, f"decision_summary_state missing limitation_state={state} guard")
         ensure(
-            state_rule["then"]["properties"]["state_reason_code_or_null"].get("const") == expected_reason,
+            state_rule is not None, f"decision_summary_state missing limitation_state={state} guard"
+        )
+        ensure(
+            state_rule["then"]["properties"]["state_reason_code_or_null"].get("const")
+            == expected_reason,
             f"decision_summary_state limitation_state={state} must keep state_reason_code_or_null={expected_reason}",
         )
         ensure(
@@ -12969,7 +14370,8 @@ def check_action_strip_state() -> None:
         "action_strip_state REFRESH actions must not carry a target_object_ref",
     )
     ensure(
-        refresh_rule["then"]["properties"]["mutation_precondition_binding_or_null"].get("type") == "null",
+        refresh_rule["then"]["properties"]["mutation_precondition_binding_or_null"].get("type")
+        == "null",
         "action_strip_state REFRESH actions must clear mutation_precondition_binding_or_null",
     )
 
@@ -12977,7 +14379,10 @@ def check_action_strip_state() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("active_detail_surface_code", {}).get("$ref")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("active_detail_surface_code", {})
+            .get("$ref")
             == "#/$defs/detailModuleCode"
         ),
         None,
@@ -13011,11 +14416,9 @@ def check_action_strip_state() -> None:
         mutation_secondary_rule is not None,
         "action_strip_state missing mutation-primary secondary-action guard",
     )
-    allowed_secondary_kinds = (
-        mutation_secondary_rule["then"]["properties"]["secondary_actions"]["items"]["allOf"][1]["properties"][
-            "action_kind"
-        ].get("enum")
-    )
+    allowed_secondary_kinds = mutation_secondary_rule["then"]["properties"]["secondary_actions"][
+        "items"
+    ]["allOf"][1]["properties"]["action_kind"].get("enum")
     ensure(
         allowed_secondary_kinds
         == ["INVESTIGATE", "COMPARE", "EXPORT", "REQUEST_REVIEW", "REFRESH"],
@@ -13058,7 +14461,9 @@ def check_collaboration_entry() -> None:
         ),
         None,
     )
-    ensure(non_request_info_rule is not None, "collaboration_entry missing request-info reset guard")
+    ensure(
+        non_request_info_rule is not None, "collaboration_entry missing request-info reset guard"
+    )
     ensure(
         non_request_info_rule["then"]["properties"]["request_info_ref"].get("type") == "null",
         "collaboration_entry non-request-info entries must keep request_info_ref null",
@@ -13097,7 +14502,9 @@ def check_work_item_notification() -> None:
         "work_item_notification.visibility_partition must stay bound to visibility_partition_contract.schema.json",
     )
     ensure(
-        schema["properties"]["visibility_partition"]["allOf"][1]["properties"]["partition_scope"].get("const")
+        schema["properties"]["visibility_partition"]["allOf"][1]["properties"][
+            "partition_scope"
+        ].get("const")
         == "WORK_ITEM_NOTIFICATION",
         "work_item_notification.visibility_partition must stay pinned to partition_scope=WORK_ITEM_NOTIFICATION",
     )
@@ -13116,7 +14523,9 @@ def check_work_item_notification() -> None:
         "work_item_notification.queue_projection must stay bound to collaboration_queue_projection_contract.schema.json",
     )
     ensure(
-        schema["properties"]["queue_projection"]["allOf"][1]["properties"]["projection_scope"].get("const")
+        schema["properties"]["queue_projection"]["allOf"][1]["properties"]["projection_scope"].get(
+            "const"
+        )
         == "WORK_ITEM_NOTIFICATION",
         "work_item_notification.queue_projection must stay pinned to projection_scope=WORK_ITEM_NOTIFICATION",
     )
@@ -13138,7 +14547,9 @@ def check_work_item_notification() -> None:
         ),
         None,
     )
-    ensure(module_focus_rule is not None, "work_item_notification missing target-module focus guard")
+    ensure(
+        module_focus_rule is not None, "work_item_notification missing target-module focus guard"
+    )
     ensure(
         module_focus_rule["then"]["properties"]["focus_anchor_ref"].get("minLength") == 1,
         "work_item_notification anchored module targets must require a non-empty focus anchor",
@@ -13148,7 +14559,8 @@ def check_work_item_notification() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("target_module_code", {}).get("type") == "null"
+            if rule.get("if", {}).get("properties", {}).get("target_module_code", {}).get("type")
+            == "null"
         ),
         None,
     )
@@ -13162,13 +14574,18 @@ def check_work_item_notification() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("focus_anchor_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("focus_anchor_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(focus_backlink_rule is not None, "work_item_notification missing focus-to-module backlink guard")
     ensure(
-        focus_backlink_rule["then"]["properties"]["target_module_code"].get("not", {}).get("type") == "null",
+        focus_backlink_rule is not None,
+        "work_item_notification missing focus-to-module backlink guard",
+    )
+    ensure(
+        focus_backlink_rule["then"]["properties"]["target_module_code"].get("not", {}).get("type")
+        == "null",
         "work_item_notification focus anchors must always point into a concrete target module",
     )
 
@@ -13185,38 +14602,65 @@ def check_work_item_notification() -> None:
         ),
         None,
     )
-    ensure(non_request_info_rule is not None, "work_item_notification missing non-request-info reset guard")
+    ensure(
+        non_request_info_rule is not None,
+        "work_item_notification missing non-request-info reset guard",
+    )
     ensure(
         non_request_info_rule["then"]["properties"]["request_info_ref"].get("type") == "null",
         "work_item_notification non-request-info events must keep request_info_ref null",
     )
 
-    request_info_open_rule = find_rule_by_const(schema["allOf"], "notification_type", "REQUEST_INFO_OPENED")
-    ensure(request_info_open_rule is not None, "work_item_notification missing REQUEST_INFO_OPENED guard")
+    request_info_open_rule = find_rule_by_const(
+        schema["allOf"], "notification_type", "REQUEST_INFO_OPENED"
+    )
     ensure(
-        request_info_open_rule["then"]["properties"]["visibility_class"].get("const") == "CUSTOMER_VISIBLE"
-        and request_info_open_rule["then"]["properties"]["focus_anchor_ref"].get("type") == "string",
+        request_info_open_rule is not None,
+        "work_item_notification missing REQUEST_INFO_OPENED guard",
+    )
+    ensure(
+        request_info_open_rule["then"]["properties"]["visibility_class"].get("const")
+        == "CUSTOMER_VISIBLE"
+        and request_info_open_rule["then"]["properties"]["focus_anchor_ref"].get("type")
+        == "string",
         "work_item_notification REQUEST_INFO_OPENED must stay customer-visible and focus-anchored",
     )
 
-    visible_comment_rule = find_rule_by_const(schema["allOf"], "notification_type", "CUSTOMER_VISIBLE_COMMENT")
-    ensure(visible_comment_rule is not None, "work_item_notification missing CUSTOMER_VISIBLE_COMMENT visibility guard")
+    visible_comment_rule = find_rule_by_const(
+        schema["allOf"], "notification_type", "CUSTOMER_VISIBLE_COMMENT"
+    )
     ensure(
-        visible_comment_rule["then"]["properties"]["visibility_class"].get("const") == "CUSTOMER_VISIBLE",
+        visible_comment_rule is not None,
+        "work_item_notification missing CUSTOMER_VISIBLE_COMMENT visibility guard",
+    )
+    ensure(
+        visible_comment_rule["then"]["properties"]["visibility_class"].get("const")
+        == "CUSTOMER_VISIBLE",
         "work_item_notification CUSTOMER_VISIBLE_COMMENT must stay customer-visible",
     )
 
-    customer_visibility_rule = find_rule_by_const(schema["allOf"], "visibility_class", "CUSTOMER_VISIBLE")
-    ensure(customer_visibility_rule is not None, "work_item_notification missing CUSTOMER_VISIBLE branch")
+    customer_visibility_rule = find_rule_by_const(
+        schema["allOf"], "visibility_class", "CUSTOMER_VISIBLE"
+    )
     ensure(
-        customer_visibility_rule["then"]["properties"]["customer_safe_projection"].get("type") == "object",
+        customer_visibility_rule is not None,
+        "work_item_notification missing CUSTOMER_VISIBLE branch",
+    )
+    ensure(
+        customer_visibility_rule["then"]["properties"]["customer_safe_projection"].get("type")
+        == "object",
         "work_item_notification CUSTOMER_VISIBLE branch must require an object customer_safe_projection contract",
     )
 
-    internal_visibility_rule = find_rule_by_const(schema["allOf"], "visibility_class", "INTERNAL_ONLY")
-    ensure(internal_visibility_rule is not None, "work_item_notification missing INTERNAL_ONLY branch")
+    internal_visibility_rule = find_rule_by_const(
+        schema["allOf"], "visibility_class", "INTERNAL_ONLY"
+    )
     ensure(
-        internal_visibility_rule["then"]["properties"]["customer_safe_projection"].get("type") == "null",
+        internal_visibility_rule is not None, "work_item_notification missing INTERNAL_ONLY branch"
+    )
+    ensure(
+        internal_visibility_rule["then"]["properties"]["customer_safe_projection"].get("type")
+        == "null",
         "work_item_notification INTERNAL_ONLY branch must clear customer_safe_projection",
     )
 
@@ -13237,9 +14681,13 @@ def check_work_item_notification() -> None:
         ),
         None,
     )
-    ensure(internal_types_rule is not None, "work_item_notification missing staff-only notification visibility guard")
     ensure(
-        internal_types_rule["then"]["properties"]["visibility_class"].get("const") == "INTERNAL_ONLY",
+        internal_types_rule is not None,
+        "work_item_notification missing staff-only notification visibility guard",
+    )
+    ensure(
+        internal_types_rule["then"]["properties"]["visibility_class"].get("const")
+        == "INTERNAL_ONLY",
         "work_item_notification staff-only notification families must stay internal-only",
     )
 
@@ -13267,7 +14715,8 @@ def check_collaboration_thread() -> None:
             rule
             for rule in schema["allOf"]
             if rule.get("if", {}).get("properties", {}).get("head_sequence", {}).get("const") == 0
-            and rule.get("then", {}).get("properties", {}).get("lifecycle_state", {}).get("const") == "OPEN"
+            and rule.get("then", {}).get("properties", {}).get("lifecycle_state", {}).get("const")
+            == "OPEN"
         ),
         None,
     )
@@ -13308,7 +14757,10 @@ def check_collaboration_attachment() -> None:
     }
     for (field, value), publication_state in reverse_publication_rules.items():
         rule = find_rule_by_const(schema["allOf"], field, value)
-        ensure(rule is not None, f"collaboration_attachment missing reverse publication guard for {field}={value}")
+        ensure(
+            rule is not None,
+            f"collaboration_attachment missing reverse publication guard for {field}={value}",
+        )
         ensure(
             rule["then"]["properties"]["publication_state"].get("const") == publication_state,
             f"collaboration_attachment {field}={value} must force publication_state={publication_state}",
@@ -13318,11 +14770,18 @@ def check_collaboration_attachment() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("unavailable_reason_code", {}).get("type") == "null"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("unavailable_reason_code", {})
+            .get("type")
+            == "null"
         ),
         None,
     )
-    ensure(null_reason_rule is not None, "collaboration_attachment missing null unavailable_reason reset")
+    ensure(
+        null_reason_rule is not None,
+        "collaboration_attachment missing null unavailable_reason reset",
+    )
     ensure(
         null_reason_rule["then"]["properties"]["publication_state"].get("const") == "AVAILABLE",
         "collaboration_attachment null unavailable_reason_code must imply publication_state=AVAILABLE",
@@ -13332,11 +14791,15 @@ def check_collaboration_attachment() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("source_attachment_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("source_attachment_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(source_rule is not None, "collaboration_attachment missing source_attachment_ref reverse guard")
+    ensure(
+        source_rule is not None,
+        "collaboration_attachment missing source_attachment_ref reverse guard",
+    )
     ensure(
         source_rule["then"]["properties"]["visibility_class"].get("const") == "CUSTOMER_VISIBLE"
         and source_rule["then"]["properties"]["publish_copy_mode"].get("enum")
@@ -13348,13 +14811,18 @@ def check_collaboration_attachment() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("scan_completed_at", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("scan_completed_at", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(scan_completed_rule is not None, "collaboration_attachment missing scan_completed_at reverse guard")
     ensure(
-        scan_completed_rule["then"]["properties"]["publication_state"].get("enum") == ["AVAILABLE", "QUARANTINED"],
+        scan_completed_rule is not None,
+        "collaboration_attachment missing scan_completed_at reverse guard",
+    )
+    ensure(
+        scan_completed_rule["then"]["properties"]["publication_state"].get("enum")
+        == ["AVAILABLE", "QUARANTINED"],
         "collaboration_attachment non-null scan_completed_at must force AVAILABLE or QUARANTINED publication state",
     )
 
@@ -13379,7 +14847,11 @@ def check_workspace_stream_event() -> None:
         "workspace_stream_event.stability_contract must stay bound to route_stability_contract.schema.json",
     )
     check_stream_recovery_contract_binding(schema, "workspace_stream_event")
-    for field in ["masking_posture_fingerprint", "visibility_partition", "queue_projection_or_null"]:
+    for field in [
+        "masking_posture_fingerprint",
+        "visibility_partition",
+        "queue_projection_or_null",
+    ]:
         ensure(
             field in schema["required"],
             f"workspace_stream_event must require `{field}` for visibility-partition-safe reconnect playback",
@@ -13392,7 +14864,9 @@ def check_workspace_stream_event() -> None:
         "workspace_stream_event.visibility_partition must stay bound to visibility_partition_contract.schema.json",
     )
     ensure(
-        schema["properties"]["visibility_partition"]["allOf"][1]["properties"]["partition_scope"].get("const")
+        schema["properties"]["visibility_partition"]["allOf"][1]["properties"][
+            "partition_scope"
+        ].get("const")
         == "WORKSPACE_STREAM_EVENT",
         "workspace_stream_event.visibility_partition must stay pinned to partition_scope=WORKSPACE_STREAM_EVENT",
     )
@@ -13445,7 +14919,9 @@ def check_workspace_stream_event() -> None:
             ),
             None,
         )
-        ensure(rule is not None, f"workspace_stream_event missing reverse payload guard for {field}")
+        ensure(
+            rule is not None, f"workspace_stream_event missing reverse payload guard for {field}"
+        )
         ensure(
             rule["then"]["properties"]["event_type"].get("const") == event_type,
             f"workspace_stream_event non-null {field} must force event_type={event_type}",
@@ -13455,44 +14931,65 @@ def check_workspace_stream_event() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("session_visibility_class", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("session_visibility_class", {})
+            .get("const")
             == "CUSTOMER_VISIBLE"
             and "event_type" in rule.get("then", {}).get("properties", {})
         ),
         None,
     )
-    ensure(customer_visibility_rule is not None, "workspace_stream_event missing customer-visibility audit exclusion")
     ensure(
-        customer_visibility_rule["then"]["properties"]["event_type"]["not"].get("const") == "audit.appended",
+        customer_visibility_rule is not None,
+        "workspace_stream_event missing customer-visibility audit exclusion",
+    )
+    ensure(
+        customer_visibility_rule["then"]["properties"]["event_type"]["not"].get("const")
+        == "audit.appended",
         "workspace_stream_event CUSTOMER_VISIBLE sessions must not receive audit.appended",
     )
     customer_projection_rule = next(
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("session_visibility_class", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("session_visibility_class", {})
+            .get("const")
             == "CUSTOMER_VISIBLE"
             and "customer_safe_projection" in rule.get("then", {}).get("properties", {})
         ),
         None,
     )
-    ensure(customer_projection_rule is not None, "workspace_stream_event missing customer-safe projection branch")
     ensure(
-        customer_projection_rule["then"]["properties"]["customer_safe_projection"].get("type") == "object",
+        customer_projection_rule is not None,
+        "workspace_stream_event missing customer-safe projection branch",
+    )
+    ensure(
+        customer_projection_rule["then"]["properties"]["customer_safe_projection"].get("type")
+        == "object",
         "workspace_stream_event CUSTOMER_VISIBLE sessions must require an object customer_safe_projection contract",
     )
     staff_visibility_rule = next(
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("session_visibility_class", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("session_visibility_class", {})
+            .get("const")
             == "STAFF_FULL"
         ),
         None,
     )
-    ensure(staff_visibility_rule is not None, "workspace_stream_event missing STAFF_FULL visibility branch")
     ensure(
-        staff_visibility_rule["then"]["properties"]["customer_safe_projection"].get("type") == "null",
+        staff_visibility_rule is not None,
+        "workspace_stream_event missing STAFF_FULL visibility branch",
+    )
+    ensure(
+        staff_visibility_rule["then"]["properties"]["customer_safe_projection"].get("type")
+        == "null",
         "workspace_stream_event STAFF_FULL sessions must clear customer_safe_projection",
     )
 
@@ -13529,7 +15026,9 @@ def check_collaboration_activity_slice() -> None:
         "collaboration_activity_slice.visibility_partition must stay bound to visibility_partition_contract.schema.json",
     )
     ensure(
-        schema["properties"]["visibility_partition"]["allOf"][1]["properties"]["partition_scope"].get("const")
+        schema["properties"]["visibility_partition"]["allOf"][1]["properties"][
+            "partition_scope"
+        ].get("const")
         == "COLLABORATION_ACTIVITY_SLICE",
         "collaboration_activity_slice.visibility_partition must stay pinned to partition_scope=COLLABORATION_ACTIVITY_SLICE",
     )
@@ -13550,7 +15049,8 @@ def check_collaboration_activity_slice() -> None:
     customer_rule = find_rule_by_const(schema["allOf"], "viewer_scope", "CUSTOMER_VISIBLE")
     ensure(customer_rule is not None, "collaboration_activity_slice missing CUSTOMER_VISIBLE guard")
     ensure(
-        customer_rule["then"]["properties"]["thread_visibility_class"].get("const") == "CUSTOMER_VISIBLE",
+        customer_rule["then"]["properties"]["thread_visibility_class"].get("const")
+        == "CUSTOMER_VISIBLE",
         "collaboration_activity_slice customer-visible responses must force thread_visibility_class=CUSTOMER_VISIBLE",
     )
     ensure(
@@ -13558,7 +15058,9 @@ def check_collaboration_activity_slice() -> None:
         "collaboration_activity_slice customer-visible responses must require an object customer_safe_projection contract",
     )
     internal_rule = find_rule_by_const(schema["allOf"], "thread_visibility_class", "INTERNAL_ONLY")
-    ensure(internal_rule is not None, "collaboration_activity_slice missing INTERNAL_ONLY staff guard")
+    ensure(
+        internal_rule is not None, "collaboration_activity_slice missing INTERNAL_ONLY staff guard"
+    )
     ensure(
         internal_rule["then"]["properties"]["customer_safe_projection"].get("type") == "null",
         "collaboration_activity_slice internal-only reads must clear customer_safe_projection",
@@ -13572,15 +15074,21 @@ def check_collaboration_activity_slice() -> None:
         ),
         None,
     )
-    ensure(head_zero_rule is not None, "collaboration_activity_slice missing head_sequence=0 empty-page guard")
+    ensure(
+        head_zero_rule is not None,
+        "collaboration_activity_slice missing head_sequence=0 empty-page guard",
+    )
     ensure(
         head_zero_rule["then"]["properties"]["entry_refs"].get("maxItems") == 0
-        and head_zero_rule["then"]["properties"]["next_before_sequence_or_null"].get("type") == "null",
+        and head_zero_rule["then"]["properties"]["next_before_sequence_or_null"].get("type")
+        == "null",
         "collaboration_activity_slice head_sequence=0 must clear entries and next_before_sequence_or_null",
     )
 
     no_more_rule = find_rule_by_const(schema["allOf"], "has_more_before", False)
-    ensure(no_more_rule is not None, "collaboration_activity_slice missing has_more_before=false guard")
+    ensure(
+        no_more_rule is not None, "collaboration_activity_slice missing has_more_before=false guard"
+    )
     ensure(
         no_more_rule["then"]["properties"]["next_before_sequence_or_null"].get("type") == "null",
         "collaboration_activity_slice has_more_before=false must clear next_before_sequence_or_null",
@@ -13609,8 +15117,7 @@ def check_collaboration_attachment_slice() -> None:
     )
     ensure(
         "visibility_partition" in schema["required"]
-        and
-        "active_filters" in schema["required"]
+        and "active_filters" in schema["required"]
         and "current_attachment_refs" in schema["required"]
         and "historical_attachment_refs" in schema["required"]
         and "artifact_selection" in schema["required"],
@@ -13624,7 +15131,9 @@ def check_collaboration_attachment_slice() -> None:
         "collaboration_attachment_slice.visibility_partition must stay bound to visibility_partition_contract.schema.json",
     )
     ensure(
-        schema["properties"]["visibility_partition"]["allOf"][1]["properties"]["partition_scope"].get("const")
+        schema["properties"]["visibility_partition"]["allOf"][1]["properties"][
+            "partition_scope"
+        ].get("const")
         == "COLLABORATION_ATTACHMENT_SLICE",
         "collaboration_attachment_slice.visibility_partition must stay pinned to partition_scope=COLLABORATION_ATTACHMENT_SLICE",
     )
@@ -13654,7 +15163,9 @@ def check_collaboration_attachment_slice() -> None:
     )
 
     customer_rule = find_rule_by_const(schema["allOf"], "viewer_scope", "CUSTOMER_VISIBLE")
-    ensure(customer_rule is not None, "collaboration_attachment_slice missing CUSTOMER_VISIBLE guard")
+    ensure(
+        customer_rule is not None, "collaboration_attachment_slice missing CUSTOMER_VISIBLE guard"
+    )
     ensure(
         customer_rule["then"]["properties"]["visibility_class"].get("const") == "CUSTOMER_VISIBLE",
         "collaboration_attachment_slice customer-visible responses must force visibility_class=CUSTOMER_VISIBLE",
@@ -13669,7 +15180,10 @@ def check_collaboration_attachment_slice() -> None:
         "collaboration_attachment_slice customer-visible responses must force include_pending_placeholders=false",
     )
     internal_rule = find_rule_by_const(schema["allOf"], "visibility_class", "INTERNAL_ONLY")
-    ensure(internal_rule is not None, "collaboration_attachment_slice missing INTERNAL_ONLY staff guard")
+    ensure(
+        internal_rule is not None,
+        "collaboration_attachment_slice missing INTERNAL_ONLY staff guard",
+    )
     ensure(
         internal_rule["then"]["properties"]["customer_safe_projection"].get("type") == "null",
         "collaboration_attachment_slice internal-only reads must clear customer_safe_projection",
@@ -13689,9 +15203,13 @@ def check_collaboration_attachment_slice() -> None:
         ),
         None,
     )
-    ensure(include_history_rule is not None, "collaboration_attachment_slice missing include_history=false guard")
     ensure(
-        include_history_rule["then"]["properties"]["historical_attachment_refs"].get("maxItems") == 0,
+        include_history_rule is not None,
+        "collaboration_attachment_slice missing include_history=false guard",
+    )
+    ensure(
+        include_history_rule["then"]["properties"]["historical_attachment_refs"].get("maxItems")
+        == 0,
         "collaboration_attachment_slice include_history=false must clear historical_attachment_refs",
     )
 
@@ -13730,7 +15248,9 @@ def check_experience_stream_event() -> None:
             ),
             None,
         )
-        ensure(rule is not None, f"experience_stream_event missing reverse payload guard for {field}")
+        ensure(
+            rule is not None, f"experience_stream_event missing reverse payload guard for {field}"
+        )
         ensure(
             rule["then"]["properties"]["event_type"].get("const") == event_type,
             f"experience_stream_event non-null {field} must force event_type={event_type}",
@@ -13825,14 +15345,18 @@ def check_decision_bundle() -> None:
     )
 
     analysis_true_rule = find_rule_by_const(schema["allOf"], "analysis_only", True)
-    ensure(analysis_true_rule is not None, "decision_bundle missing analysis_only=true reverse guard")
+    ensure(
+        analysis_true_rule is not None, "decision_bundle missing analysis_only=true reverse guard"
+    )
     ensure(
         analysis_true_rule["then"]["properties"]["execution_mode"].get("const") == "ANALYSIS",
         "decision_bundle analysis_only=true must force execution_mode=ANALYSIS",
     )
 
     analysis_false_rule = find_rule_by_const(schema["allOf"], "analysis_only", False)
-    ensure(analysis_false_rule is not None, "decision_bundle missing analysis_only=false reverse guard")
+    ensure(
+        analysis_false_rule is not None, "decision_bundle missing analysis_only=false reverse guard"
+    )
     ensure(
         analysis_false_rule["then"]["properties"]["execution_mode"].get("const") == "COMPLIANCE",
         "decision_bundle analysis_only=false must force execution_mode=COMPLIANCE",
@@ -13842,7 +15366,8 @@ def check_decision_bundle() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("counterfactual_basis", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("counterfactual_basis", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -13856,11 +15381,17 @@ def check_decision_bundle() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("active_detail_surface_code", {}).get("type") == "null"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("active_detail_surface_code", {})
+            .get("type")
+            == "null"
         ),
         None,
     )
-    ensure(collapsed_detail_rule is not None, "decision_bundle missing collapsed-detail focus reset")
+    ensure(
+        collapsed_detail_rule is not None, "decision_bundle missing collapsed-detail focus reset"
+    )
     ensure(
         collapsed_detail_rule["then"]["properties"]["focus_anchor_ref"].get("type") == "null",
         "decision_bundle null active_detail_surface_code must null focus_anchor_ref",
@@ -13870,7 +15401,10 @@ def check_decision_bundle() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("primary_proof_bundle_ref", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("primary_proof_bundle_ref", {})
+            .get("type")
             == "string"
         ),
         None,
@@ -13925,9 +15459,16 @@ def check_decision_bundle() -> None:
         "UNKNOWN": ("REVIEW_REQUIRED", "AUTHORITY_UNKNOWN", "AUTHORITY_UNKNOWN"),
         "OUT_OF_BAND": ("REVIEW_REQUIRED", "OUT_OF_BAND_REVIEW", "AUTHORITY_OUT_OF_BAND"),
     }
-    for checkpoint_state, (decision_status, outcome_class, truth_state) in resolved_checkpoint_rules.items():
+    for checkpoint_state, (
+        decision_status,
+        outcome_class,
+        truth_state,
+    ) in resolved_checkpoint_rules.items():
         rule = find_rule_by_const(schema["allOf"], "checkpoint_state", checkpoint_state)
-        ensure(rule is not None, f"decision_bundle missing checkpoint reverse guard for {checkpoint_state}")
+        ensure(
+            rule is not None,
+            f"decision_bundle missing checkpoint reverse guard for {checkpoint_state}",
+        )
         then_props = rule["then"]["properties"]
         ensure(
             then_props["decision_status"].get("const") == decision_status,
@@ -13952,7 +15493,11 @@ def check_decision_bundle() -> None:
         "AUTHORITY_UNKNOWN": ("REVIEW_REQUIRED", "AUTHORITY_UNKNOWN", "UNKNOWN"),
         "AUTHORITY_OUT_OF_BAND": ("REVIEW_REQUIRED", "OUT_OF_BAND_REVIEW", "OUT_OF_BAND"),
     }
-    for truth_state, (decision_status, outcome_class, checkpoint_state) in resolved_truth_rules.items():
+    for truth_state, (
+        decision_status,
+        outcome_class,
+        checkpoint_state,
+    ) in resolved_truth_rules.items():
         rule = find_rule_by_const(schema["allOf"], "truth_state", truth_state)
         ensure(rule is not None, f"decision_bundle missing truth reverse guard for {truth_state}")
         then_props = rule["then"]["properties"]
@@ -14055,7 +15600,9 @@ def check_trust_summary() -> None:
 
     analysis_rule = find_rule_by_const(schema["allOf"], "execution_mode", "ANALYSIS")
     ensure(analysis_rule is not None, "trust_summary missing ANALYSIS mode guard")
-    analysis_reason = analysis_rule["then"]["properties"]["reason_codes"].get("contains", {}).get("const")
+    analysis_reason = (
+        analysis_rule["then"]["properties"]["reason_codes"].get("contains", {}).get("const")
+    )
     ensure(
         analysis_reason == "TRUST_ANALYSIS_MODE_CAP",
         "trust_summary ANALYSIS mode must require TRUST_ANALYSIS_MODE_CAP",
@@ -14063,7 +15610,9 @@ def check_trust_summary() -> None:
 
     limited_rule = find_rule_by_const(schema["allOf"], "automation_level", "LIMITED")
     ensure(limited_rule is not None, "trust_summary missing LIMITED automation guard")
-    limited_reason = limited_rule["then"]["properties"]["reason_codes"].get("contains", {}).get("const")
+    limited_reason = (
+        limited_rule["then"]["properties"]["reason_codes"].get("contains", {}).get("const")
+    )
     ensure(
         limited_reason == "TRUST_AUTOMATION_LIMITED",
         "trust_summary automation_level=LIMITED must require TRUST_AUTOMATION_LIMITED",
@@ -14084,7 +15633,9 @@ def check_trust_summary() -> None:
     incomplete_then = incomplete_rule["then"]["properties"]
     ensure(
         incomplete_then["trust_band"].get("const") == "INSUFFICIENT_DATA"
-        and incomplete_then["trust_input_basis_contract"]["properties"]["trust_input_state"].get("const")
+        and incomplete_then["trust_input_basis_contract"]["properties"]["trust_input_state"].get(
+            "const"
+        )
         == "INCOMPLETE"
         and incomplete_then["automation_level"].get("const") == "BLOCKED"
         and incomplete_then["filing_readiness"].get("const") == "NOT_READY",
@@ -14154,7 +15705,9 @@ def check_trust_sensitivity_analysis_contract() -> None:
         and schema["properties"]["projected_case_results"].get("maxItems") == 6,
         "trust_sensitivity_contract.projected_case_results must retain the full canonical probe set",
     )
-    projected_case_properties = schema["properties"]["projected_case_results"]["items"]["properties"]
+    projected_case_properties = schema["properties"]["projected_case_results"]["items"][
+        "properties"
+    ]
     ensure(
         "projected_authority_allow_margin_or_null" not in projected_case_properties,
         "trust_sensitivity_contract projected cases must not retain projected_authority_allow_margin_or_null",
@@ -14184,13 +15737,17 @@ def check_trust_sensitivity_analysis_contract() -> None:
         ],
         "trust_sensitivity_contract edge_trigger_codes must stay bound to the canonical trust guard-band vocabulary",
     )
-    cap_stricter_rule = find_rule_by_const(schema["allOf"], "score_cap_alignment_state", "CAP_STRICTER_THAN_SCORE")
+    cap_stricter_rule = find_rule_by_const(
+        schema["allOf"], "score_cap_alignment_state", "CAP_STRICTER_THAN_SCORE"
+    )
     ensure(
         cap_stricter_rule is not None
         and cap_stricter_rule["then"]["properties"]["cap_driver_reason_codes"].get("minItems") == 1,
         "trust_sensitivity_contract cap-stricter posture must require cap_driver_reason_codes",
     )
-    edge_review_rule = find_rule_by_const(schema["allOf"], "threshold_stability_state", "EDGE_REVIEW")
+    edge_review_rule = find_rule_by_const(
+        schema["allOf"], "threshold_stability_state", "EDGE_REVIEW"
+    )
     ensure(
         edge_review_rule is not None
         and edge_review_rule["then"]["properties"]["edge_trigger_codes"].get("minItems") == 1,
@@ -14198,10 +15755,16 @@ def check_trust_sensitivity_analysis_contract() -> None:
     )
     ensure(
         edge_review_rule is not None
-        and edge_review_rule.get("else", {}).get("properties", {}).get("edge_trigger_codes", {}).get("maxItems") == 0,
+        and edge_review_rule.get("else", {})
+        .get("properties", {})
+        .get("edge_trigger_codes", {})
+        .get("maxItems")
+        == 0,
         "trust_sensitivity_contract stable posture must clear edge_trigger_codes",
     )
-    live_progression_rule = find_rule_by_const(schema["allOf"], "live_authority_progression_requested", True)
+    live_progression_rule = find_rule_by_const(
+        schema["allOf"], "live_authority_progression_requested", True
+    )
     ensure(
         live_progression_rule is not None,
         "trust_sensitivity_contract missing live-authority margin typing guard",
@@ -14221,6 +15784,8 @@ def check_trust_sensitivity_analysis_contract() -> None:
             and live_else.get("authority_block_margin_or_null", {}).get("const") is None,
             "trust_sensitivity_contract non-live progression must null graph/review/block margins",
         )
+
+
 def check_trust_input_basis_contract() -> None:
     schema = load_schema("trust_input_basis_contract.schema.json")
     check_execution_mode_boundary_contract_binding(schema, "trust_input_basis_contract")
@@ -14245,7 +15810,10 @@ def check_trust_input_basis_contract() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("freshness_dependency_classes", {}).get("maxItems")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("freshness_dependency_classes", {})
+            .get("maxItems")
             == 0
         ),
         None,
@@ -14276,7 +15844,9 @@ def check_trust_input_basis_contract() -> None:
     )
 
     incomplete_rule = find_rule_by_const(schema["allOf"], "input_presence_state", "INCOMPLETE")
-    ensure(incomplete_rule is not None, "trust_input_basis_contract missing INCOMPLETE presence guard")
+    ensure(
+        incomplete_rule is not None, "trust_input_basis_contract missing INCOMPLETE presence guard"
+    )
     incomplete_then = incomplete_rule["then"]["properties"]
     ensure(
         incomplete_then["trust_input_state"].get("const") == "INCOMPLETE"
@@ -14302,7 +15872,9 @@ def check_trust_input_basis_contract() -> None:
     )
     ensure(
         invalid_override_rule is not None
-        and invalid_override_rule["then"]["properties"]["input_reason_codes"].get("contains", {}).get("const")
+        and invalid_override_rule["then"]["properties"]["input_reason_codes"]
+        .get("contains", {})
+        .get("const")
         == "TRUST_OVERRIDE_INVALID",
         "trust_input_basis_contract invalid override dependency must require TRUST_OVERRIDE_INVALID",
     )
@@ -14316,7 +15888,8 @@ def check_trust_input_basis_contract() -> None:
     late_data_then = late_data_rule["then"]["properties"]
     ensure(
         late_data_then["freshness_state"].get("const") == "STALE_OR_INVALIDATED"
-        and late_data_then["input_reason_codes"].get("contains", {}).get("const") == "TRUST_INPUT_STALE"
+        and late_data_then["input_reason_codes"].get("contains", {}).get("const")
+        == "TRUST_INPUT_STALE"
         and late_data_then["automation_ceiling"].get("enum") == ["LIMITED", "BLOCKED"]
         and late_data_then["filing_readiness_ceiling"].get("enum") == ["READY_REVIEW", "NOT_READY"]
         and late_data_then["blocking_dependency_refs"].get("minItems") == 1,
@@ -14326,9 +15899,16 @@ def check_trust_input_basis_contract() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("late_data_invalidation_state", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("late_data_invalidation_state", {})
+            .get("const")
             == "INVALIDATING_FINDING_PRESENT"
-            and rule.get("then", {}).get("properties", {}).get("input_reason_codes", {}).get("contains", {}).get("const")
+            and rule.get("then", {})
+            .get("properties", {})
+            .get("input_reason_codes", {})
+            .get("contains", {})
+            .get("const")
             == "TRUST_RECALCULATION_REQUIRED"
         ),
         None,
@@ -14338,8 +15918,13 @@ def check_trust_input_basis_contract() -> None:
         "trust_input_basis_contract invalidating late-data posture must require TRUST_RECALCULATION_REQUIRED",
     )
 
-    not_applicable_rule = find_rule_by_const(schema["allOf"], "baseline_progression_state", "NOT_APPLICABLE")
-    ensure(not_applicable_rule is not None, "trust_input_basis_contract missing baseline not-applicable guard")
+    not_applicable_rule = find_rule_by_const(
+        schema["allOf"], "baseline_progression_state", "NOT_APPLICABLE"
+    )
+    ensure(
+        not_applicable_rule is not None,
+        "trust_input_basis_contract missing baseline not-applicable guard",
+    )
     not_applicable_then = not_applicable_rule["then"]["properties"]
     ensure(
         not_applicable_then["baseline_selection_contract_hash_or_null"].get("type") == "null"
@@ -14376,20 +15961,33 @@ def check_trust_input_basis_contract() -> None:
         "trust_input_basis_contract unknown/out-of-band baseline posture must block automation and require TRUST_BASELINE_UNRESOLVED",
     )
 
-    baseline_allowed_rule = find_rule_by_const(schema["allOf"], "baseline_automation_ceiling", "ALLOWED")
-    ensure(baseline_allowed_rule is not None, "trust_input_basis_contract missing baseline_automation_ceiling=ALLOWED guard")
+    baseline_allowed_rule = find_rule_by_const(
+        schema["allOf"], "baseline_automation_ceiling", "ALLOWED"
+    )
     ensure(
-        baseline_allowed_rule["then"]["properties"]["baseline_limitation_reason_codes"].get("maxItems") == 0,
+        baseline_allowed_rule is not None,
+        "trust_input_basis_contract missing baseline_automation_ceiling=ALLOWED guard",
+    )
+    ensure(
+        baseline_allowed_rule["then"]["properties"]["baseline_limitation_reason_codes"].get(
+            "maxItems"
+        )
+        == 0,
         "trust_input_basis_contract baseline_automation_ceiling=ALLOWED must clear baseline_limitation_reason_codes",
     )
 
-    baseline_limited_rule = find_rule_by_enum(schema["allOf"], "baseline_automation_ceiling", ["LIMITED", "BLOCKED"])
+    baseline_limited_rule = find_rule_by_enum(
+        schema["allOf"], "baseline_automation_ceiling", ["LIMITED", "BLOCKED"]
+    )
     ensure(
         baseline_limited_rule is not None,
         "trust_input_basis_contract missing baseline limited/blocking reverse guard",
     )
     ensure(
-        baseline_limited_rule["then"]["properties"]["baseline_limitation_reason_codes"].get("minItems") == 1,
+        baseline_limited_rule["then"]["properties"]["baseline_limitation_reason_codes"].get(
+            "minItems"
+        )
+        == 1,
         "trust_input_basis_contract baseline limited/blocking posture must require baseline_limitation_reason_codes",
     )
 
@@ -14402,7 +16000,7 @@ def check_gate_decision_record() -> None:
     )
     ensure(
         schema_uses_ref(
-        schema["properties"]["gate_semantics_contract"],
+            schema["properties"]["gate_semantics_contract"],
             "https://taxat.dev/schemas/gate_semantics_contract.schema.json",
         ),
         "gate_decision_record.gate_semantics_contract must stay bound to gate_semantics_contract.schema.json",
@@ -14463,19 +16061,28 @@ def check_gate_decision_record() -> None:
         ),
         None,
     )
-    ensure(pass_family_rule is not None, "gate_decision_record missing pass/review override posture guard")
+    ensure(
+        pass_family_rule is not None,
+        "gate_decision_record missing pass/review override posture guard",
+    )
     pass_family_then = pass_family_rule["then"]["properties"]
     ensure(
         pass_family_then["overrideability"].get("const") == "NONE",
         "gate_decision_record pass/review decisions must force overrideability=NONE",
     )
     ensure(
-        pass_family_then["override_resolution_state"].get("enum") == ["NOT_APPLICABLE", "VALID_OVERRIDE_ACTIVE"],
+        pass_family_then["override_resolution_state"].get("enum")
+        == ["NOT_APPLICABLE", "VALID_OVERRIDE_ACTIVE"],
         "gate_decision_record pass/review decisions must reject NO_VALID_OVERRIDE",
     )
 
-    no_valid_override_rule = find_rule_by_const(schema["allOf"], "override_resolution_state", "NO_VALID_OVERRIDE")
-    ensure(no_valid_override_rule is not None, "gate_decision_record missing NO_VALID_OVERRIDE reverse guard")
+    no_valid_override_rule = find_rule_by_const(
+        schema["allOf"], "override_resolution_state", "NO_VALID_OVERRIDE"
+    )
+    ensure(
+        no_valid_override_rule is not None,
+        "gate_decision_record missing NO_VALID_OVERRIDE reverse guard",
+    )
     no_valid_then = no_valid_override_rule["then"]["properties"]
     ensure(
         no_valid_then["decision"].get("const") == "OVERRIDABLE_BLOCK",
@@ -14494,11 +16101,13 @@ def check_gate_semantics_contract() -> None:
         "gate_semantics_contract contract_version must freeze GATE_SEMANTICS_CONTRACT_V1",
     )
     ensure(
-        schema["properties"]["evaluation_order_profile_code"].get("const") == "NON_ACCESS_GATE_ORDER_V1",
+        schema["properties"]["evaluation_order_profile_code"].get("const")
+        == "NON_ACCESS_GATE_ORDER_V1",
         "gate_semantics_contract evaluation_order_profile_code must freeze NON_ACCESS_GATE_ORDER_V1",
     )
     ensure(
-        schema["properties"]["reason_order_profile_code"].get("const") == "NON_ACCESS_GATE_REASON_PRIORITY_V1",
+        schema["properties"]["reason_order_profile_code"].get("const")
+        == "NON_ACCESS_GATE_REASON_PRIORITY_V1",
         "gate_semantics_contract reason_order_profile_code must freeze NON_ACCESS_GATE_REASON_PRIORITY_V1",
     )
     ensure(
@@ -14542,12 +16151,22 @@ def check_conflict_set() -> None:
     root = schema["allOf"][0]
     hashes = schema["allOf"][1]
 
-    for field in ["set_id", "manifest_id", "normalization_context_ref", "conflict_detection_policy_ref"]:
+    for field in [
+        "set_id",
+        "manifest_id",
+        "normalization_context_ref",
+        "conflict_detection_policy_ref",
+    ]:
         ensure(
             root["properties"][field].get("minLength") == 1,
             f"conflict_set.{field} must reject empty strings",
         )
-    for field in ["artifact_contract_hash", "item_identity_hash", "unresolved_conflict_hash", "set_hash"]:
+    for field in [
+        "artifact_contract_hash",
+        "item_identity_hash",
+        "unresolved_conflict_hash",
+        "set_hash",
+    ]:
         ensure(
             hashes["properties"][field].get("minLength") == 1,
             f"conflict_set.{field} must reject empty strings",
@@ -14559,7 +16178,9 @@ def check_conflict_set() -> None:
         )
 
     open_count_zero_rule = find_rule_by_const(schema["allOf"], "open_conflict_count", 0)
-    ensure(open_count_zero_rule is not None, "conflict_set missing open_conflict_count=0 reverse guard")
+    ensure(
+        open_count_zero_rule is not None, "conflict_set missing open_conflict_count=0 reverse guard"
+    )
     open_zero_then = open_count_zero_rule["then"]["properties"]
     ensure(
         open_zero_then["resolution_frontier"].get("const") == "CLEAR"
@@ -14571,11 +16192,18 @@ def check_conflict_set() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("blocking_conflict_count", {}).get("minimum") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("blocking_conflict_count", {})
+            .get("minimum")
+            == 1
         ),
         None,
     )
-    ensure(blocking_count_rule is not None, "conflict_set missing blocking_conflict_count reverse guard")
+    ensure(
+        blocking_count_rule is not None,
+        "conflict_set missing blocking_conflict_count reverse guard",
+    )
     blocking_then = blocking_count_rule["then"]["properties"]
     ensure(
         blocking_then["resolution_frontier"].get("const") == "BLOCKING_PRESENT"
@@ -14587,13 +16215,18 @@ def check_conflict_set() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("dominant_blocking_class", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("dominant_blocking_class", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
     ensure(dominant_rule is not None, "conflict_set missing dominant_blocking_class reverse guard")
     ensure(
-        dominant_rule["then"]["properties"]["resolution_frontier"].get("const") == "BLOCKING_PRESENT",
+        dominant_rule["then"]["properties"]["resolution_frontier"].get("const")
+        == "BLOCKING_PRESENT",
         "conflict_set non-null dominant_blocking_class must force BLOCKING_PRESENT",
     )
 
@@ -14601,14 +16234,23 @@ def check_conflict_set() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("open_conflict_count", {}).get("minimum") == 1
-            and rule.get("if", {}).get("properties", {}).get("blocking_conflict_count", {}).get("const") == 0
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("open_conflict_count", {})
+            .get("minimum")
+            == 1
+            and rule.get("if", {})
+            .get("properties", {})
+            .get("blocking_conflict_count", {})
+            .get("const")
+            == 0
         ),
         None,
     )
     ensure(monitoring_rule is not None, "conflict_set missing monitoring-only reverse guard")
     ensure(
-        monitoring_rule["then"]["properties"]["resolution_frontier"].get("const") == "MONITORING_ONLY",
+        monitoring_rule["then"]["properties"]["resolution_frontier"].get("const")
+        == "MONITORING_ONLY",
         "conflict_set open conflicts without blocking conflicts must force MONITORING_ONLY",
     )
 
@@ -14660,7 +16302,8 @@ def check_schema_bundle() -> None:
         "schema_bundle.moneyProfile.serialization_profile must stay pinned to CANONICAL_DECIMAL_STRING_V1",
     )
     ensure(
-        money_profile_props["aggregation_boundary"]["enum"] == ["DECLARED_AGGREGATION_BOUNDARY_ONLY"],
+        money_profile_props["aggregation_boundary"]["enum"]
+        == ["DECLARED_AGGREGATION_BOUNDARY_ONLY"],
         "schema_bundle.moneyProfile.aggregation_boundary must keep the declared-boundary rounding contract",
     )
 
@@ -14737,7 +16380,8 @@ def check_config_freeze() -> None:
         "config_freeze.feature_flag_snapshot_hash must reject empty strings when present",
     )
     ensure(
-        schema["properties"]["config_completeness_state"].get("const") == "COMPLETE_REQUIRED_CONFIG_SET",
+        schema["properties"]["config_completeness_state"].get("const")
+        == "COMPLETE_REQUIRED_CONFIG_SET",
         "config_freeze.config_completeness_state must stay COMPLETE_REQUIRED_CONFIG_SET",
     )
     ensure(
@@ -14774,10 +16418,16 @@ def check_config_freeze() -> None:
             entry[field]["items"].get("minLength") == 1,
             f"config_freeze.configEntry.{field} items must reject empty strings",
         )
-    direct_rule = find_rule_by_const(schema["allOf"], "config_resolution_basis", "DIRECT_REQUEST_RESOLUTION")
+    direct_rule = find_rule_by_const(
+        schema["allOf"], "config_resolution_basis", "DIRECT_REQUEST_RESOLUTION"
+    )
     ensure(direct_rule is not None, "config_freeze missing DIRECT_REQUEST_RESOLUTION lineage guard")
     direct_props = direct_rule["then"]["properties"]
-    for field in ["source_config_freeze_ref", "source_config_freeze_hash", "source_config_surface_hash"]:
+    for field in [
+        "source_config_freeze_ref",
+        "source_config_freeze_hash",
+        "source_config_surface_hash",
+    ]:
         ensure(
             direct_props[field].get("type") == "null",
             f"config_freeze DIRECT_REQUEST_RESOLUTION must clear `{field}`",
@@ -14786,7 +16436,10 @@ def check_config_freeze() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("config_resolution_basis", {}).get("enum")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("config_resolution_basis", {})
+            .get("enum")
             == [
                 "REPLAY_EXACT_REUSE",
                 "RECOVERY_EXACT_REUSE",
@@ -14797,11 +16450,92 @@ def check_config_freeze() -> None:
     )
     ensure(inherited_rule is not None, "config_freeze missing inherited config lineage guard")
     inherited_props = inherited_rule["then"]["properties"]
-    for field in ["source_config_freeze_ref", "source_config_freeze_hash", "source_config_surface_hash"]:
+    for field in [
+        "source_config_freeze_ref",
+        "source_config_freeze_hash",
+        "source_config_surface_hash",
+    ]:
         ensure(
             inherited_props[field].get("type") == "string"
             and inherited_props[field].get("minLength") == 1,
             f"config_freeze inherited lineage must require non-empty `{field}`",
+        )
+
+
+def check_feature_flag_snapshot() -> None:
+    schema = load_schema("feature_flag_snapshot.schema.json")
+    ensure(
+        schema.get("additionalProperties") is False,
+        "feature_flag_snapshot must stay closed to ungoverned fields",
+    )
+    check_min_length_fields(
+        schema,
+        ["feature_flag_snapshot_id"],
+        "feature_flag_snapshot",
+    )
+    ensure(
+        schema["properties"]["surface_state"].get("enum")
+        == ["GOVERNED_FLAG_SURFACE_PRESENT", "NO_GOVERNED_FLAG_SURFACE"],
+        "feature_flag_snapshot.surface_state must freeze the governed/null surface vocabulary",
+    )
+    ensure(
+        schema["properties"]["feature_flag_snapshot_hash"].get("minLength") == 1,
+        "feature_flag_snapshot.feature_flag_snapshot_hash must reject empty strings when present",
+    )
+    for field in [
+        "provider_adapter_ref_or_null",
+        "provider_environment_ref_or_null",
+        "provider_contract_profile_ref_or_null",
+    ]:
+        ensure(
+            schema["properties"][field].get("minLength") == 1,
+            f"feature_flag_snapshot.{field} must reject empty strings when present",
+        )
+    entry = schema["$defs"]["entry"]["properties"]
+    for field in ["flag_key", "variant_ref_or_null", "rule_ref_or_null"]:
+        ensure(
+            entry[field].get("minLength") == 1,
+            f"feature_flag_snapshot.entry.{field} must reject empty strings when present",
+        )
+    ensure(
+        entry["reason_code"].get("enum")
+        == ["TARGETING_MATCH", "STATIC_DEFAULT", "NO_GOVERNED_FLAG_SURFACE"],
+        "feature_flag_snapshot.entry.reason_code must freeze the provider-neutral reason vocabulary",
+    )
+    no_surface_rule = find_rule_by_const(
+        schema["allOf"], "surface_state", "NO_GOVERNED_FLAG_SURFACE"
+    )
+    ensure(
+        no_surface_rule is not None,
+        "feature_flag_snapshot missing NO_GOVERNED_FLAG_SURFACE posture guard",
+    )
+    for field in [
+        "provider_adapter_ref_or_null",
+        "provider_environment_ref_or_null",
+        "provider_contract_profile_ref_or_null",
+        "feature_flag_snapshot_hash",
+    ]:
+        ensure(
+            no_surface_rule["then"]["properties"][field].get("type") == "null",
+            f"feature_flag_snapshot NO_GOVERNED_FLAG_SURFACE must clear `{field}`",
+        )
+    governed_rule = find_rule_by_const(
+        schema["allOf"], "surface_state", "GOVERNED_FLAG_SURFACE_PRESENT"
+    )
+    ensure(
+        governed_rule is not None,
+        "feature_flag_snapshot missing GOVERNED_FLAG_SURFACE_PRESENT posture guard",
+    )
+    for field in [
+        "provider_adapter_ref_or_null",
+        "provider_environment_ref_or_null",
+        "provider_contract_profile_ref_or_null",
+        "feature_flag_snapshot_hash",
+    ]:
+        ensure(
+            governed_rule["then"]["properties"][field].get("type") == "string"
+            and governed_rule["then"]["properties"][field].get("minLength") == 1,
+            f"feature_flag_snapshot governed surface must require non-empty `{field}`",
         )
 
 
@@ -14845,7 +16579,9 @@ def check_manifest_start_claim_contract() -> None:
         )
 
     prestart_rule = find_rule_by_const(schema["allOf"], "claim_state", "UNCLAIMED_SEALED")
-    ensure(prestart_rule is not None, "manifest_start_claim_contract missing UNCLAIMED_SEALED guard")
+    ensure(
+        prestart_rule is not None, "manifest_start_claim_contract missing UNCLAIMED_SEALED guard"
+    )
     prestart_then = prestart_rule["then"]["properties"]
     ensure(
         prestart_then["claim_status_code"].get("const") == "CLAIMABLE",
@@ -14869,7 +16605,9 @@ def check_manifest_start_claim_contract() -> None:
     )
 
     stale_rule = find_rule_by_const(schema["allOf"], "claim_state", "STALE_RECLAIM_REQUIRED")
-    ensure(stale_rule is not None, "manifest_start_claim_contract missing STALE_RECLAIM_REQUIRED guard")
+    ensure(
+        stale_rule is not None, "manifest_start_claim_contract missing STALE_RECLAIM_REQUIRED guard"
+    )
     stale_then = stale_rule["then"]["properties"]
     ensure(
         stale_then["claim_status_code"].get("const") == "STALE_RECLAIM_REQUIRED",
@@ -14881,7 +16619,10 @@ def check_manifest_start_claim_contract() -> None:
     )
 
     terminal_rule = find_rule_by_const(schema["allOf"], "claim_state", "TERMINAL_RESULT_RECORDED")
-    ensure(terminal_rule is not None, "manifest_start_claim_contract missing TERMINAL_RESULT_RECORDED guard")
+    ensure(
+        terminal_rule is not None,
+        "manifest_start_claim_contract missing TERMINAL_RESULT_RECORDED guard",
+    )
     terminal_then = terminal_rule["then"]["properties"]
     ensure(
         terminal_then["claim_status_code"].get("const") == "ALREADY_TERMINAL",
@@ -14896,13 +16637,17 @@ def check_manifest_start_claim_contract() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("claim_token_or_null", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("claim_token_or_null", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(token_rule is not None, "manifest_start_claim_contract missing claim-token pairing guard")
     ensure(
-        set(token_rule["then"]["required"]) == {
+        token_rule is not None, "manifest_start_claim_contract missing claim-token pairing guard"
+    )
+    ensure(
+        set(token_rule["then"]["required"])
+        == {
             "claim_holder_ref_or_null",
             "claim_acquired_at_or_null",
             "claim_expires_at_or_null",
@@ -14914,13 +16659,15 @@ def check_manifest_start_claim_contract() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("stage_dag_ref_or_null", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("stage_dag_ref_or_null", {}).get("type")
+            == "string"
         ),
         None,
     )
     ensure(stage_rule is not None, "manifest_start_claim_contract missing stage-dag pairing guard")
     ensure(
-        set(stage_rule["then"]["required"]) == {
+        set(stage_rule["then"]["required"])
+        == {
             "outbox_batch_ref_or_null",
             "first_publication_committed_at_or_null",
         },
@@ -15043,7 +16790,8 @@ def check_run_manifest() -> None:
     )
     run_scope_binding = schema["properties"]["scope_execution_binding"]["allOf"]
     ensure(
-        run_scope_binding[0]["$ref"] == "https://taxat.dev/schemas/scope_execution_binding.schema.json",
+        run_scope_binding[0]["$ref"]
+        == "https://taxat.dev/schemas/scope_execution_binding.schema.json",
         "run_manifest.scope_execution_binding must stay bound to scope_execution_binding.schema.json",
     )
     ensure(
@@ -15054,12 +16802,16 @@ def check_run_manifest() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("frozen_at", {}).get("type") == "string"
+            if candidate.get("if", {}).get("properties", {}).get("frozen_at", {}).get("type")
+            == "string"
             and "preseal_gate_evaluation" in candidate.get("then", {}).get("required", [])
         ),
         None,
     )
-    ensure(frozen_preseal_rule is not None, "run_manifest missing frozen_at preseal gate evaluation guard")
+    ensure(
+        frozen_preseal_rule is not None,
+        "run_manifest missing frozen_at preseal gate evaluation guard",
+    )
     ensure(
         "preseal_gate_evaluation" in frozen_preseal_rule.get("then", {}).get("required", []),
         "run_manifest frozen_at guard must require preseal_gate_evaluation",
@@ -15068,12 +16820,15 @@ def check_run_manifest() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("sealed_at", {}).get("type") == "string"
+            if candidate.get("if", {}).get("properties", {}).get("sealed_at", {}).get("type")
+            == "string"
             and "manifest_start_claim" in candidate.get("then", {}).get("required", [])
         ),
         None,
     )
-    ensure(sealed_claim_rule is not None, "run_manifest missing sealed_at manifest_start_claim guard")
+    ensure(
+        sealed_claim_rule is not None, "run_manifest missing sealed_at manifest_start_claim guard"
+    )
     ensure(
         "manifest_start_claim" in sealed_claim_rule.get("then", {}).get("required", []),
         "run_manifest sealed_at guard must require manifest_start_claim",
@@ -15082,27 +16837,41 @@ def check_run_manifest() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("deterministic_outcome_hash", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("deterministic_outcome_hash", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(deterministic_hash_rule is not None, "run_manifest missing deterministic_outcome_hash bundle guard")
     ensure(
-        deterministic_hash_rule["then"]["properties"]["decision_bundle_hash"].get("type") == "string",
+        deterministic_hash_rule is not None,
+        "run_manifest missing deterministic_outcome_hash bundle guard",
+    )
+    ensure(
+        deterministic_hash_rule["then"]["properties"]["decision_bundle_hash"].get("type")
+        == "string",
         "run_manifest deterministic_outcome_hash must require decision_bundle_hash",
     )
     replay_outcome_rule = next(
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("run_kind", {}).get("const") == "REPLAY"
-            and candidate.get("if", {}).get("properties", {}).get("deterministic_outcome_hash", {}).get("type")
+            if candidate.get("if", {}).get("properties", {}).get("run_kind", {}).get("const")
+            == "REPLAY"
+            and candidate.get("if", {})
+            .get("properties", {})
+            .get("deterministic_outcome_hash", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(replay_outcome_rule is not None, "run_manifest missing replay deterministic_outcome_hash attestation guard")
+    ensure(
+        replay_outcome_rule is not None,
+        "run_manifest missing replay deterministic_outcome_hash attestation guard",
+    )
     ensure(
         replay_outcome_rule["then"]["properties"]["replay_attestation_ref"].get("type") == "string",
         "run_manifest REPLAY deterministic_outcome_hash must require replay_attestation_ref",
@@ -15111,14 +16880,21 @@ def check_run_manifest() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("replay_attestation_ref", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("replay_attestation_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(replay_attestation_rule is not None, "run_manifest missing replay_attestation_ref replay guard")
     ensure(
-        replay_attestation_rule["then"]["properties"]["deterministic_outcome_hash"].get("type") == "string",
+        replay_attestation_rule is not None,
+        "run_manifest missing replay_attestation_ref replay guard",
+    )
+    ensure(
+        replay_attestation_rule["then"]["properties"]["deterministic_outcome_hash"].get("type")
+        == "string",
         "run_manifest replay_attestation_ref must require deterministic_outcome_hash",
     )
 
@@ -15164,7 +16940,11 @@ def check_run_manifest() -> None:
             field in embedded_config_freeze["required"],
             f"run_manifest.configFreeze must require `{field}`",
         )
-    for field in ["config_completeness_state", "config_resolution_basis", "config_consumption_mode"]:
+    for field in [
+        "config_completeness_state",
+        "config_resolution_basis",
+        "config_consumption_mode",
+    ]:
         ensure(
             field in embedded_config_freeze["required"],
             f"run_manifest.configFreeze must require `{field}`",
@@ -15175,7 +16955,8 @@ def check_run_manifest() -> None:
         "run_manifest.configFreeze.config_completeness_state must stay COMPLETE_REQUIRED_CONFIG_SET",
     )
     ensure(
-        embedded_config_freeze["properties"]["config_consumption_mode"].get("const") == "FROZEN_CONFIG_ONLY",
+        embedded_config_freeze["properties"]["config_consumption_mode"].get("const")
+        == "FROZEN_CONFIG_ONLY",
         "run_manifest.configFreeze.config_consumption_mode must stay FROZEN_CONFIG_ONLY",
     )
     ensure(
@@ -15188,7 +16969,11 @@ def check_run_manifest() -> None:
         ],
         "run_manifest.configFreeze.config_resolution_basis must freeze the canonical config lineage vocabulary",
     )
-    for field in ["source_config_freeze_ref", "source_config_freeze_hash", "source_config_surface_hash"]:
+    for field in [
+        "source_config_freeze_ref",
+        "source_config_freeze_hash",
+        "source_config_surface_hash",
+    ]:
         ensure(
             embedded_config_freeze["properties"][field].get("minLength") == 1,
             f"run_manifest.configFreeze.{field} must reject empty strings when present",
@@ -15196,9 +16981,16 @@ def check_run_manifest() -> None:
     embedded_direct_rule = find_rule_by_const(
         embedded_config_freeze["allOf"], "config_resolution_basis", "DIRECT_REQUEST_RESOLUTION"
     )
-    ensure(embedded_direct_rule is not None, "run_manifest.configFreeze missing DIRECT_REQUEST_RESOLUTION lineage guard")
+    ensure(
+        embedded_direct_rule is not None,
+        "run_manifest.configFreeze missing DIRECT_REQUEST_RESOLUTION lineage guard",
+    )
     embedded_direct_props = embedded_direct_rule["then"]["properties"]
-    for field in ["source_config_freeze_ref", "source_config_freeze_hash", "source_config_surface_hash"]:
+    for field in [
+        "source_config_freeze_ref",
+        "source_config_freeze_hash",
+        "source_config_surface_hash",
+    ]:
         ensure(
             embedded_direct_props[field].get("type") == "null",
             f"run_manifest.configFreeze DIRECT_REQUEST_RESOLUTION must clear `{field}`",
@@ -15207,7 +16999,10 @@ def check_run_manifest() -> None:
         (
             rule
             for rule in embedded_config_freeze["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("config_resolution_basis", {}).get("enum")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("config_resolution_basis", {})
+            .get("enum")
             == [
                 "REPLAY_EXACT_REUSE",
                 "RECOVERY_EXACT_REUSE",
@@ -15216,9 +17011,16 @@ def check_run_manifest() -> None:
         ),
         None,
     )
-    ensure(embedded_inherited_rule is not None, "run_manifest.configFreeze missing inherited config lineage guard")
+    ensure(
+        embedded_inherited_rule is not None,
+        "run_manifest.configFreeze missing inherited config lineage guard",
+    )
     embedded_inherited_props = embedded_inherited_rule["then"]["properties"]
-    for field in ["source_config_freeze_ref", "source_config_freeze_hash", "source_config_surface_hash"]:
+    for field in [
+        "source_config_freeze_ref",
+        "source_config_freeze_hash",
+        "source_config_surface_hash",
+    ]:
         ensure(
             embedded_inherited_props[field].get("type") == "string"
             and embedded_inherited_props[field].get("minLength") == 1,
@@ -15277,12 +17079,15 @@ def check_run_manifest() -> None:
         "run_manifest.frozenExecutionBinding.scope_execution_binding must stay bound to scope_execution_binding.schema.json",
     )
     ensure(
-        frozen_binding["properties"]["scope_execution_binding"]["allOf"][1]["properties"]["binding_scope_class"].get("const")
+        frozen_binding["properties"]["scope_execution_binding"]["allOf"][1]["properties"][
+            "binding_scope_class"
+        ].get("const")
         == "FROZEN_EXECUTION_BINDING",
         "run_manifest.frozenExecutionBinding.scope_execution_binding must force binding_scope_class=FROZEN_EXECUTION_BINDING",
     )
     ensure(
-        frozen_binding["properties"]["worker_consumption_mode"].get("const") == "MANIFEST_BOUND_ONLY",
+        frozen_binding["properties"]["worker_consumption_mode"].get("const")
+        == "MANIFEST_BOUND_ONLY",
         "run_manifest.frozenExecutionBinding.worker_consumption_mode must stay MANIFEST_BOUND_ONLY",
     )
     for field in ["config_resolution_basis", "config_consumption_mode"]:
@@ -15291,7 +17096,8 @@ def check_run_manifest() -> None:
             f"run_manifest.frozenExecutionBinding must require `{field}`",
         )
     ensure(
-        frozen_binding["properties"]["config_consumption_mode"].get("const") == "FROZEN_CONFIG_ONLY",
+        frozen_binding["properties"]["config_consumption_mode"].get("const")
+        == "FROZEN_CONFIG_ONLY",
         "run_manifest.frozenExecutionBinding.config_consumption_mode must stay FROZEN_CONFIG_ONLY",
     )
     ensure(
@@ -15381,7 +17187,11 @@ def check_run_manifest() -> None:
         (
             rule
             for rule in outcome_projection.get("allOf", [])
-            if rule.get("if", {}).get("properties", {}).get("deterministic_outcome_hash", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("deterministic_outcome_hash", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
@@ -15397,7 +17207,11 @@ def check_run_manifest() -> None:
         (
             rule
             for rule in outcome_projection.get("allOf", [])
-            if rule.get("if", {}).get("properties", {}).get("replay_attestation_ref", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("replay_attestation_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
@@ -15406,7 +17220,8 @@ def check_run_manifest() -> None:
         "run_manifest.appendOnlyOutcomeProjection missing replay_attestation_ref guard",
     )
     ensure(
-        projection_attestation_rule["then"]["properties"]["deterministic_outcome_hash"].get("type") == "string",
+        projection_attestation_rule["then"]["properties"]["deterministic_outcome_hash"].get("type")
+        == "string",
         "run_manifest.appendOnlyOutcomeProjection replay_attestation_ref must require deterministic_outcome_hash",
     )
 
@@ -15429,7 +17244,12 @@ def check_run_manifest() -> None:
         )
 
     output_link_entry = schema["$defs"]["outputLinkEntry"]
-    for field in ["artifact_type", "artifact_ref", "artifact_hash_or_null", "produced_by_manifest_id"]:
+    for field in [
+        "artifact_type",
+        "artifact_ref",
+        "artifact_hash_or_null",
+        "produced_by_manifest_id",
+    ]:
         ensure(
             output_link_entry["properties"][field].get("minLength") == 1,
             f"run_manifest.outputLinkEntry.{field} must reject empty strings when present",
@@ -15438,26 +17258,47 @@ def check_run_manifest() -> None:
         output_link_entry["properties"]["dependency_identity_refs"]["items"].get("minLength") == 1,
         "run_manifest.outputLinkEntry.dependency_identity_refs items must reject empty strings",
     )
-    decision_bundle_link_rule = find_rule_by_const(output_link_entry["allOf"], "linkage_role_code", "DECISION_BUNDLE")
-    ensure(decision_bundle_link_rule is not None, "run_manifest.outputLinkEntry missing DECISION_BUNDLE hash guard")
+    decision_bundle_link_rule = find_rule_by_const(
+        output_link_entry["allOf"], "linkage_role_code", "DECISION_BUNDLE"
+    )
     ensure(
-        decision_bundle_link_rule["then"]["properties"]["artifact_hash_or_null"].get("type") == "string",
+        decision_bundle_link_rule is not None,
+        "run_manifest.outputLinkEntry missing DECISION_BUNDLE hash guard",
+    )
+    ensure(
+        decision_bundle_link_rule["then"]["properties"]["artifact_hash_or_null"].get("type")
+        == "string",
         "run_manifest.outputLinkEntry DECISION_BUNDLE must require artifact_hash_or_null",
     )
-    proof_link_rule = find_rule_by_const(output_link_entry["allOf"], "linkage_role_code", "PRIMARY_PROOF_BUNDLE")
-    ensure(proof_link_rule is not None, "run_manifest.outputLinkEntry missing PRIMARY_PROOF_BUNDLE dependency guard")
+    proof_link_rule = find_rule_by_const(
+        output_link_entry["allOf"], "linkage_role_code", "PRIMARY_PROOF_BUNDLE"
+    )
+    ensure(
+        proof_link_rule is not None,
+        "run_manifest.outputLinkEntry missing PRIMARY_PROOF_BUNDLE dependency guard",
+    )
     ensure(
         proof_link_rule["then"]["properties"]["dependency_identity_refs"].get("minItems") == 1,
         "run_manifest.outputLinkEntry PRIMARY_PROOF_BUNDLE must require dependency_identity_refs",
     )
-    twin_link_rule = find_rule_by_const(output_link_entry["allOf"], "linkage_role_code", "TWIN_VIEW")
-    ensure(twin_link_rule is not None, "run_manifest.outputLinkEntry missing TWIN_VIEW dependency guard")
+    twin_link_rule = find_rule_by_const(
+        output_link_entry["allOf"], "linkage_role_code", "TWIN_VIEW"
+    )
+    ensure(
+        twin_link_rule is not None,
+        "run_manifest.outputLinkEntry missing TWIN_VIEW dependency guard",
+    )
     ensure(
         twin_link_rule["then"]["properties"]["dependency_identity_refs"].get("minItems") == 2,
         "run_manifest.outputLinkEntry TWIN_VIEW must require graph-plus-parity dependency identity",
     )
-    replay_link_rule = find_rule_by_const(output_link_entry["allOf"], "linkage_role_code", "REPLAY_ATTESTATION")
-    ensure(replay_link_rule is not None, "run_manifest.outputLinkEntry missing REPLAY_ATTESTATION dependency guard")
+    replay_link_rule = find_rule_by_const(
+        output_link_entry["allOf"], "linkage_role_code", "REPLAY_ATTESTATION"
+    )
+    ensure(
+        replay_link_rule is not None,
+        "run_manifest.outputLinkEntry missing REPLAY_ATTESTATION dependency guard",
+    )
     ensure(
         replay_link_rule["then"]["properties"]["artifact_hash_or_null"].get("type") == "string",
         "run_manifest.outputLinkEntry REPLAY_ATTESTATION must require artifact_hash_or_null",
@@ -15484,7 +17325,10 @@ def check_run_manifest() -> None:
         "input_consumption_mode",
         "late_data_adoption_policy",
     ]:
-        ensure(field in embedded_input_freeze["required"], f"run_manifest.inputFreeze must require `{field}`.")
+        ensure(
+            field in embedded_input_freeze["required"],
+            f"run_manifest.inputFreeze must require `{field}`.",
+        )
     for field in [
         "source_plan_hash",
         "collection_boundary_hash",
@@ -15527,7 +17371,8 @@ def check_run_manifest() -> None:
         "run_manifest.inputFreeze.artifact_contract_refs must require the full 10-ref intake pack",
     )
     ensure(
-        embedded_input_freeze["properties"]["input_consumption_mode"].get("const") == "FROZEN_INPUT_ONLY",
+        embedded_input_freeze["properties"]["input_consumption_mode"].get("const")
+        == "FROZEN_INPUT_ONLY",
         "run_manifest.inputFreeze.input_consumption_mode must stay FROZEN_INPUT_ONLY",
     )
     ensure(
@@ -15544,7 +17389,8 @@ def check_run_manifest() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("manifest_generation", {}).get("const") == 0
+            if rule.get("if", {}).get("properties", {}).get("manifest_generation", {}).get("const")
+            == 0
         ),
         None,
     )
@@ -15567,11 +17413,17 @@ def check_run_manifest() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("manifest_generation", {}).get("minimum") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("manifest_generation", {})
+            .get("minimum")
+            == 1
         ),
         None,
     )
-    ensure(child_rule is not None, "run_manifest missing manifest_generation>=1 child-manifest guard")
+    ensure(
+        child_rule is not None, "run_manifest missing manifest_generation>=1 child-manifest guard"
+    )
     child_then = child_rule["then"]["properties"]
     ensure(
         child_then["parent_manifest_id"].get("type") == "string"
@@ -15603,9 +17455,17 @@ def check_run_manifest() -> None:
         ),
         None,
     )
-    ensure(frozen_required_rule is not None, "run_manifest missing frozen-basis required-fields guard")
+    ensure(
+        frozen_required_rule is not None, "run_manifest missing frozen-basis required-fields guard"
+    )
     frozen_required = set(frozen_required_rule["then"]["required"])
-    for field in ["config_freeze", "input_freeze", "hash_set", "frozen_execution_binding", "append_only_outcome_projection"]:
+    for field in [
+        "config_freeze",
+        "input_freeze",
+        "hash_set",
+        "frozen_execution_binding",
+        "append_only_outcome_projection",
+    ]:
         ensure(field in frozen_required, f"run_manifest frozen guard must require `{field}`")
 
     sealed_rule = find_rule_by_const(schema["allOf"], "lifecycle_state", "SEALED")
@@ -15657,14 +17517,17 @@ def check_run_manifest() -> None:
         "run_manifest SEALED must keep drift_refs empty before start",
     )
     ensure(
-        sealed_then["manifest_start_claim"]["properties"]["claim_state"].get("const") == "UNCLAIMED_SEALED",
+        sealed_then["manifest_start_claim"]["properties"]["claim_state"].get("const")
+        == "UNCLAIMED_SEALED",
         "run_manifest SEALED must keep manifest_start_claim.claim_state=UNCLAIMED_SEALED",
     )
 
     in_progress_rule = find_rule_by_const(schema["allOf"], "lifecycle_state", "IN_PROGRESS")
     ensure(in_progress_rule is not None, "run_manifest missing IN_PROGRESS start-claim guard")
     ensure(
-        in_progress_rule["then"]["properties"]["manifest_start_claim"]["properties"]["claim_state"].get("enum")
+        in_progress_rule["then"]["properties"]["manifest_start_claim"]["properties"][
+            "claim_state"
+        ].get("enum")
         == ["ACTIVE_LEASED", "STALE_RECLAIM_REQUIRED"],
         "run_manifest IN_PROGRESS must keep manifest_start_claim.claim_state inside {ACTIVE_LEASED, STALE_RECLAIM_REQUIRED}",
     )
@@ -15672,7 +17535,9 @@ def check_run_manifest() -> None:
     failed_rule = find_rule_by_const(schema["allOf"], "lifecycle_state", "FAILED")
     ensure(failed_rule is not None, "run_manifest missing FAILED start-claim guard")
     ensure(
-        failed_rule["then"]["properties"]["manifest_start_claim"]["properties"]["claim_state"].get("enum")
+        failed_rule["then"]["properties"]["manifest_start_claim"]["properties"]["claim_state"].get(
+            "enum"
+        )
         == ["STALE_RECLAIM_REQUIRED", "TERMINAL_RESULT_RECORDED"],
         "run_manifest FAILED must distinguish stale reclaim from terminal failure in manifest_start_claim.claim_state",
     )
@@ -15792,7 +17657,10 @@ def check_replay_attestation() -> None:
     )
 
     compliance_rule = find_rule_by_const(schema["allOf"], "execution_mode", "COMPLIANCE")
-    ensure(compliance_rule is not None, "replay_attestation missing execution_mode=COMPLIANCE posture guard")
+    ensure(
+        compliance_rule is not None,
+        "replay_attestation missing execution_mode=COMPLIANCE posture guard",
+    )
     compliance_then = compliance_rule["then"]["properties"]
     ensure(
         compliance_then["analysis_only"].get("const") is False,
@@ -15812,7 +17680,10 @@ def check_replay_attestation() -> None:
     )
 
     analysis_rule = find_rule_by_const(schema["allOf"], "execution_mode", "ANALYSIS")
-    ensure(analysis_rule is not None, "replay_attestation missing execution_mode=ANALYSIS posture guard")
+    ensure(
+        analysis_rule is not None,
+        "replay_attestation missing execution_mode=ANALYSIS posture guard",
+    )
     analysis_then = analysis_rule["then"]["properties"]
     ensure(
         analysis_then["analysis_only"].get("const") is True,
@@ -15828,8 +17699,12 @@ def check_replay_attestation() -> None:
         "replay_attestation execution_mode=ANALYSIS must bind to COUNTERFACTUAL_ANALYSIS",
     )
 
-    counterfactual_rule = find_rule_by_const(schema["allOf"], "replay_class", "COUNTERFACTUAL_ANALYSIS")
-    ensure(counterfactual_rule is not None, "replay_attestation missing COUNTERFACTUAL_ANALYSIS guard")
+    counterfactual_rule = find_rule_by_const(
+        schema["allOf"], "replay_class", "COUNTERFACTUAL_ANALYSIS"
+    )
+    ensure(
+        counterfactual_rule is not None, "replay_attestation missing COUNTERFACTUAL_ANALYSIS guard"
+    )
     counterfactual_then = counterfactual_rule["then"]["properties"]
     ensure(
         counterfactual_then["execution_mode"].get("const") == "ANALYSIS",
@@ -15849,7 +17724,9 @@ def check_replay_attestation() -> None:
         "replay_attestation COUNTERFACTUAL_ANALYSIS must require difference_reason_codes",
     )
 
-    counterfactual_mode_rule = find_rule_by_const(schema["allOf"], "comparison_mode", "COUNTERFACTUAL_DECLARED")
+    counterfactual_mode_rule = find_rule_by_const(
+        schema["allOf"], "comparison_mode", "COUNTERFACTUAL_DECLARED"
+    )
     ensure(
         counterfactual_mode_rule is not None,
         "replay_attestation missing comparison_mode=COUNTERFACTUAL_DECLARED guard",
@@ -15899,7 +17776,9 @@ def check_replay_attestation() -> None:
         "replay_attestation limited basis_validation_state must keep basis_identity_verdict to DIFFERENT or UNDECIDABLE",
     )
 
-    limited_rule = find_rule_by_const(schema["allOf"], "comparison_mode", "LIMITED_HISTORICAL_COMPARISON")
+    limited_rule = find_rule_by_const(
+        schema["allOf"], "comparison_mode", "LIMITED_HISTORICAL_COMPARISON"
+    )
     ensure(
         limited_rule is not None,
         "replay_attestation missing comparison_mode=LIMITED_HISTORICAL_COMPARISON guard",
@@ -15930,7 +17809,9 @@ def check_replay_attestation() -> None:
         "replay_attestation BASIS_INCOMPLETE must require limitation_codes",
     )
 
-    expected_difference_rule = find_rule_by_const(schema["allOf"], "outcome_class", "EXPECTED_DIFFERENCE")
+    expected_difference_rule = find_rule_by_const(
+        schema["allOf"], "outcome_class", "EXPECTED_DIFFERENCE"
+    )
     ensure(
         expected_difference_rule is not None,
         "replay_attestation missing outcome_class=EXPECTED_DIFFERENCE guard",
@@ -15945,7 +17826,9 @@ def check_replay_attestation() -> None:
         "replay_attestation EXPECTED_DIFFERENCE must force deterministic_equivalence_verdict=DIFFERENT",
     )
 
-    expected_equivalence_rule = find_rule_by_const(schema["allOf"], "outcome_class", "EXPECTED_EQUIVALENCE")
+    expected_equivalence_rule = find_rule_by_const(
+        schema["allOf"], "outcome_class", "EXPECTED_EQUIVALENCE"
+    )
     ensure(
         expected_equivalence_rule is not None,
         "replay_attestation missing outcome_class=EXPECTED_EQUIVALENCE guard",
@@ -15989,13 +17872,16 @@ def check_replay_basis_integrity_contract() -> None:
         "temporal_propagation_event_source_class",
         "publication_gate",
     ]:
-        ensure(field in schema["required"], f"replay_basis_integrity_contract must require `{field}`")
+        ensure(
+            field in schema["required"], f"replay_basis_integrity_contract must require `{field}`"
+        )
     ensure(
         schema["properties"]["integrity_profile_code"].get("const") == "REPLAY_BASIS_INTEGRITY_V1",
         "replay_basis_integrity_contract.integrity_profile_code must stay REPLAY_BASIS_INTEGRITY_V1",
     )
     ensure(
-        schema["properties"]["historical_basis_policy"].get("const") == "NO_SILENT_HISTORICAL_SUBSTITUTION",
+        schema["properties"]["historical_basis_policy"].get("const")
+        == "NO_SILENT_HISTORICAL_SUBSTITUTION",
         "replay_basis_integrity_contract.historical_basis_policy must stay NO_SILENT_HISTORICAL_SUBSTITUTION",
     )
     ensure(
@@ -16004,7 +17890,8 @@ def check_replay_basis_integrity_contract() -> None:
         "replay_basis_integrity_contract.deterministic_outcome_source_policy must stay PERSISTED_OR_TRANSACTIONALLY_STAGED_ONLY",
     )
     ensure(
-        schema["properties"]["publication_gate"].get("const") == "ATTESTATION_REQUIRED_BEFORE_REPLAY_CLAIM",
+        schema["properties"]["publication_gate"].get("const")
+        == "ATTESTATION_REQUIRED_BEFORE_REPLAY_CLAIM",
         "replay_basis_integrity_contract.publication_gate must stay ATTESTATION_REQUIRED_BEFORE_REPLAY_CLAIM",
     )
     for field in [
@@ -16024,38 +17911,75 @@ def check_replay_basis_integrity_contract() -> None:
             f"replay_basis_integrity_contract.{field} must keep a frozen enum vocabulary",
         )
     ensure(
-        schema["properties"]["non_persisted_outcome_component_classes"]["items"].get("enum") is not None,
+        schema["properties"]["non_persisted_outcome_component_classes"]["items"].get("enum")
+        is not None,
         "replay_basis_integrity_contract.non_persisted_outcome_component_classes must keep a frozen enum vocabulary",
     )
-    counterfactual_rule = find_rule_by_const(schema["allOf"], "replay_class", "COUNTERFACTUAL_ANALYSIS")
-    ensure(counterfactual_rule is not None, "replay_basis_integrity_contract missing COUNTERFACTUAL_ANALYSIS guard")
+    counterfactual_rule = find_rule_by_const(
+        schema["allOf"], "replay_class", "COUNTERFACTUAL_ANALYSIS"
+    )
     ensure(
-        counterfactual_rule["then"]["properties"]["declared_counterfactual_dimensions"].get("minItems") == 1,
+        counterfactual_rule is not None,
+        "replay_basis_integrity_contract missing COUNTERFACTUAL_ANALYSIS guard",
+    )
+    ensure(
+        counterfactual_rule["then"]["properties"]["declared_counterfactual_dimensions"].get(
+            "minItems"
+        )
+        == 1,
         "replay_basis_integrity_contract COUNTERFACTUAL_ANALYSIS must require declared_counterfactual_dimensions",
     )
-    compliance_rule = find_rule_by_enum(schema["allOf"], "replay_class", ["STANDARD_REPLAY", "AUDIT_REPLAY"])
-    ensure(compliance_rule is not None, "replay_basis_integrity_contract missing standard/audit replay guard")
+    compliance_rule = find_rule_by_enum(
+        schema["allOf"], "replay_class", ["STANDARD_REPLAY", "AUDIT_REPLAY"]
+    )
     ensure(
-        compliance_rule["then"]["properties"]["declared_counterfactual_dimensions"].get("maxItems") == 0,
+        compliance_rule is not None,
+        "replay_basis_integrity_contract missing standard/audit replay guard",
+    )
+    ensure(
+        compliance_rule["then"]["properties"]["declared_counterfactual_dimensions"].get("maxItems")
+        == 0,
         "replay_basis_integrity_contract standard/audit replay must clear declared_counterfactual_dimensions",
     )
-    live_connector_rule = find_rule_by_const(schema["allOf"], "live_connector_read_class", "DECLARED_COUNTERFACTUAL_EXECUTED")
-    ensure(live_connector_rule is not None, "replay_basis_integrity_contract missing declared live connector-read guard")
+    live_connector_rule = find_rule_by_const(
+        schema["allOf"], "live_connector_read_class", "DECLARED_COUNTERFACTUAL_EXECUTED"
+    )
     ensure(
-        live_connector_rule["then"]["properties"]["declared_counterfactual_dimensions"]["contains"].get("const") == "INPUT",
+        live_connector_rule is not None,
+        "replay_basis_integrity_contract missing declared live connector-read guard",
+    )
+    ensure(
+        live_connector_rule["then"]["properties"]["declared_counterfactual_dimensions"][
+            "contains"
+        ].get("const")
+        == "INPUT",
         "replay_basis_integrity_contract declared live connector reads must declare INPUT variance",
     )
-    live_authority_rule = find_rule_by_const(schema["allOf"], "live_authority_read_class", "DECLARED_COUNTERFACTUAL_EXECUTED")
-    ensure(live_authority_rule is not None, "replay_basis_integrity_contract missing declared live authority-read guard")
+    live_authority_rule = find_rule_by_const(
+        schema["allOf"], "live_authority_read_class", "DECLARED_COUNTERFACTUAL_EXECUTED"
+    )
     ensure(
-        live_authority_rule["then"]["properties"]["declared_counterfactual_dimensions"]["contains"].get("const")
+        live_authority_rule is not None,
+        "replay_basis_integrity_contract missing declared live authority-read guard",
+    )
+    ensure(
+        live_authority_rule["then"]["properties"]["declared_counterfactual_dimensions"][
+            "contains"
+        ].get("const")
         == "AUTHORITY_POST_SEAL",
         "replay_basis_integrity_contract declared live authority reads must declare AUTHORITY_POST_SEAL variance",
     )
-    late_data_rule = find_rule_by_const(schema["allOf"], "late_data_rescan_class", "DECLARED_COUNTERFACTUAL_EXECUTED")
-    ensure(late_data_rule is not None, "replay_basis_integrity_contract missing declared late-data rescan guard")
+    late_data_rule = find_rule_by_const(
+        schema["allOf"], "late_data_rescan_class", "DECLARED_COUNTERFACTUAL_EXECUTED"
+    )
     ensure(
-        late_data_rule["then"]["properties"]["declared_counterfactual_dimensions"]["contains"].get("const")
+        late_data_rule is not None,
+        "replay_basis_integrity_contract missing declared late-data rescan guard",
+    )
+    ensure(
+        late_data_rule["then"]["properties"]["declared_counterfactual_dimensions"]["contains"].get(
+            "const"
+        )
         == "LATE_DATA_POST_SEAL",
         "replay_basis_integrity_contract declared late-data rescans must declare LATE_DATA_POST_SEAL variance",
     )
@@ -16065,13 +17989,17 @@ def check_replay_basis_integrity_contract() -> None:
         ("late_data_basis_source_class", "LATE_DATA_POST_SEAL"),
         ("temporal_propagation_event_source_class", "TEMPORAL_PROPAGATION_POST_SEAL"),
     ]:
-        declared_rule = find_rule_by_const(schema["allOf"], field, "DECLARED_COUNTERFACTUAL_SUBSTITUTION")
+        declared_rule = find_rule_by_const(
+            schema["allOf"], field, "DECLARED_COUNTERFACTUAL_SUBSTITUTION"
+        )
         ensure(
             declared_rule is not None,
             f"replay_basis_integrity_contract missing declared substitution guard for {field}",
         )
         ensure(
-            declared_rule["then"]["properties"]["declared_counterfactual_dimensions"]["contains"].get("const")
+            declared_rule["then"]["properties"]["declared_counterfactual_dimensions"][
+                "contains"
+            ].get("const")
             == dimension,
             f"replay_basis_integrity_contract {field} declared substitutions must declare {dimension} variance",
         )
@@ -16144,17 +18072,24 @@ def check_temporal_propagation_event() -> None:
     )
 
     late_data_rule = find_rule_by_const(schema["allOf"], "event_class", "LATE_DATA_INVALIDATION")
-    ensure(late_data_rule is not None, "temporal_propagation_event missing LATE_DATA_INVALIDATION guard")
+    ensure(
+        late_data_rule is not None,
+        "temporal_propagation_event missing LATE_DATA_INVALIDATION guard",
+    )
     late_data_then = late_data_rule["then"]
     ensure(
         late_data_then["properties"]["trust_effect"].get("const") == "RECALC_REQUIRED"
-        and late_data_then["properties"]["proof_effect"].get("const") == "STALE_REVALIDATION_REQUIRED"
-        and late_data_then["properties"]["replay_effect"].get("const") == "HISTORICAL_EVENT_REQUIRED",
+        and late_data_then["properties"]["proof_effect"].get("const")
+        == "STALE_REVALIDATION_REQUIRED"
+        and late_data_then["properties"]["replay_effect"].get("const")
+        == "HISTORICAL_EVENT_REQUIRED",
         "temporal_propagation_event LATE_DATA_INVALIDATION must force trust, proof, and replay invalidation posture",
     )
 
     authority_rule = find_rule_by_const(schema["allOf"], "event_class", "AUTHORITY_CORRECTION")
-    ensure(authority_rule is not None, "temporal_propagation_event missing AUTHORITY_CORRECTION guard")
+    ensure(
+        authority_rule is not None, "temporal_propagation_event missing AUTHORITY_CORRECTION guard"
+    )
     authority_then = authority_rule["then"]["properties"]
     ensure(
         authority_then["source_authority_basis_refs"].get("minItems") == 1
@@ -16164,7 +18099,10 @@ def check_temporal_propagation_event() -> None:
     )
 
     out_of_band_rule = find_rule_by_const(schema["allOf"], "event_class", "OUT_OF_BAND_DISCOVERY")
-    ensure(out_of_band_rule is not None, "temporal_propagation_event missing OUT_OF_BAND_DISCOVERY guard")
+    ensure(
+        out_of_band_rule is not None,
+        "temporal_propagation_event missing OUT_OF_BAND_DISCOVERY guard",
+    )
     out_of_band_then = out_of_band_rule["then"]["properties"]
     ensure(
         out_of_band_then["baseline_effect"].get("const") == "SCOPE_SLICED_REBUILD_REQUIRED"
@@ -16173,8 +18111,13 @@ def check_temporal_propagation_event() -> None:
         "temporal_propagation_event OUT_OF_BAND_DISCOVERY must force scope-sliced rebuild, historical-event replay, and mirror reopen",
     )
 
-    uncertainty_rule = find_rule_by_const(schema["allOf"], "event_class", "TEMPORAL_UNCERTAINTY_BLOCK")
-    ensure(uncertainty_rule is not None, "temporal_propagation_event missing TEMPORAL_UNCERTAINTY_BLOCK guard")
+    uncertainty_rule = find_rule_by_const(
+        schema["allOf"], "event_class", "TEMPORAL_UNCERTAINTY_BLOCK"
+    )
+    ensure(
+        uncertainty_rule is not None,
+        "temporal_propagation_event missing TEMPORAL_UNCERTAINTY_BLOCK guard",
+    )
     uncertainty_then = uncertainty_rule["then"]["properties"]
     ensure(
         uncertainty_then["trust_effect"].get("const") == "RECALC_REQUIRED"
@@ -16183,8 +18126,12 @@ def check_temporal_propagation_event() -> None:
         "temporal_propagation_event TEMPORAL_UNCERTAINTY_BLOCK must force blocked replay posture",
     )
 
-    retroactive_rule = find_rule_by_const(schema["allOf"], "retroactive_effect", "ANALYSIS_REQUIRED")
-    ensure(retroactive_rule is not None, "temporal_propagation_event missing ANALYSIS_REQUIRED guard")
+    retroactive_rule = find_rule_by_const(
+        schema["allOf"], "retroactive_effect", "ANALYSIS_REQUIRED"
+    )
+    ensure(
+        retroactive_rule is not None, "temporal_propagation_event missing ANALYSIS_REQUIRED guard"
+    )
     ensure(
         retroactive_rule["then"]["properties"]["affected_submission_refs"].get("minItems") == 1,
         "temporal_propagation_event ANALYSIS_REQUIRED must require affected_submission_refs",
@@ -16193,7 +18140,9 @@ def check_temporal_propagation_event() -> None:
 
 def check_source_plan() -> None:
     schema = load_schema("source_plan.schema.json")
-    check_min_length_fields(schema, ["source_plan_id", "manifest_id", "source_plan_hash"], "source_plan")
+    check_min_length_fields(
+        schema, ["source_plan_id", "manifest_id", "source_plan_hash"], "source_plan"
+    )
     for field in ["required_domains", "planned_sources", "source_plan_hash"]:
         ensure(field in schema["required"], f"source_plan must require `{field}`.")
     ensure(
@@ -16223,7 +18172,10 @@ def check_source_plan() -> None:
         "freshness_slo_ref",
         "required_schema_refs",
     ]:
-        ensure(field in planned_source["required"], f"source_plan.plannedSource must require `{field}`.")
+        ensure(
+            field in planned_source["required"],
+            f"source_plan.plannedSource must require `{field}`.",
+        )
     for field in ["partition_scope_refs", "required_schema_refs", "required_source_class_refs"]:
         ensure(
             planned_source["properties"][field]["items"].get("minLength") == 1,
@@ -16253,7 +18205,8 @@ def check_source_window() -> None:
             f"source_window.{field} must stay date-time typed",
         )
     ensure(
-        schema["properties"]["cutoff_enforcement_state"].get("const") == "HARD_CLOSED_AT_READ_CUTOFF",
+        schema["properties"]["cutoff_enforcement_state"].get("const")
+        == "HARD_CLOSED_AT_READ_CUTOFF",
         "source_window.cutoff_enforcement_state must stay HARD_CLOSED_AT_READ_CUTOFF",
     )
     ensure(
@@ -16278,7 +18231,8 @@ def check_collection_boundary() -> None:
         "collection_boundary",
     )
     ensure(
-        schema["properties"]["boundary_coverage_state"].get("const") == "EXPLICIT_SOURCE_DOMAIN_ACCOUNTING",
+        schema["properties"]["boundary_coverage_state"].get("const")
+        == "EXPLICIT_SOURCE_DOMAIN_ACCOUNTING",
         "collection_boundary.boundary_coverage_state must stay EXPLICIT_SOURCE_DOMAIN_ACCOUNTING",
     )
     ensure(
@@ -16301,7 +18255,10 @@ def check_collection_boundary() -> None:
         "late_data_policy_ref",
         "boundary_disposition",
     ]:
-        ensure(field in source_boundary["required"], f"collection_boundary.sourceBoundary must require `{field}`.")
+        ensure(
+            field in source_boundary["required"],
+            f"collection_boundary.sourceBoundary must require `{field}`.",
+        )
     for field in ["request_audit_refs", "page_request_audit_refs"]:
         ensure(
             source_boundary["properties"][field]["items"].get("minLength") == 1,
@@ -16326,7 +18283,9 @@ def check_tenant_governance_snapshot() -> None:
         ],
     )
     check_shell_state_taxonomy_contract_binding(schema, "tenant_governance_snapshot")
-    check_cross_device_continuity_contract_binding(schema, "tenant_governance_snapshot", "GOVERNANCE_ROUTE")
+    check_cross_device_continuity_contract_binding(
+        schema, "tenant_governance_snapshot", "GOVERNANCE_ROUTE"
+    )
     check_cache_isolation_contract_binding(
         schema,
         "tenant_governance_snapshot",
@@ -16419,12 +18378,19 @@ def check_tenant_governance_snapshot() -> None:
             f"tenant_governance_snapshot.activeFilters.{field} items must reject empty strings",
         )
     ensure(
-        active_filters["principal_classes"]["items"].get("enum") == ["HUMAN", "SERVICE", "EXTERNAL"],
+        active_filters["principal_classes"]["items"].get("enum")
+        == ["HUMAN", "SERVICE", "EXTERNAL"],
         "tenant_governance_snapshot.activeFilters.principal_classes must freeze the principal-class vocabulary",
     )
     ensure(
         active_filters["risk_families"]["items"].get("enum")
-        == ["PENDING_APPROVALS", "CONFIGURATION_DRIFT", "AUTHORITY_LINK_RISKS", "RETENTION_EXCEPTIONS", "AUDIT_HOTSPOTS"],
+        == [
+            "PENDING_APPROVALS",
+            "CONFIGURATION_DRIFT",
+            "AUTHORITY_LINK_RISKS",
+            "RETENTION_EXCEPTIONS",
+            "AUDIT_HOTSPOTS",
+        ],
         "tenant_governance_snapshot.activeFilters.risk_families must freeze the governance queue vocabulary",
     )
 
@@ -16450,7 +18416,8 @@ def check_tenant_governance_snapshot() -> None:
 
     risk_ledger_entry = schema["$defs"]["riskLedgerEntry"]
     ensure(
-        risk_ledger_entry["properties"]["queue_code"]["enum"] == [
+        risk_ledger_entry["properties"]["queue_code"]["enum"]
+        == [
             "PENDING_APPROVALS",
             "CONFIGURATION_DRIFT",
             "AUTHORITY_LINK_RISKS",
@@ -16473,7 +18440,10 @@ def check_tenant_governance_snapshot() -> None:
         ),
         None,
     )
-    ensure(zero_open_rule is not None, "tenant_governance_snapshot.riskLedgerEntry missing open_count=0 guard")
+    ensure(
+        zero_open_rule is not None,
+        "tenant_governance_snapshot.riskLedgerEntry missing open_count=0 guard",
+    )
     ensure(
         zero_open_rule["then"]["properties"]["affected_scope_label"].get("type") == "null"
         and zero_open_rule["then"]["properties"]["next_action_label"].get("type") == "null",
@@ -16485,11 +18455,15 @@ def check_tenant_governance_snapshot() -> None:
         (
             rule
             for rule in support_rules
-            if rule.get("if", {}).get("properties", {}).get("selected_object_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("selected_object_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(selected_object_rule is not None, "tenant_governance_snapshot missing selected_object_ref reverse support guard")
+    ensure(
+        selected_object_rule is not None,
+        "tenant_governance_snapshot missing selected_object_ref reverse support guard",
+    )
     ensure(
         selected_object_rule["then"]["properties"]["mode"]["not"].get("const") == "NONE"
         and selected_object_rule["then"]["properties"]["reason_code"].get("type") == "string",
@@ -16500,11 +18474,15 @@ def check_tenant_governance_snapshot() -> None:
         (
             rule
             for rule in support_rules
-            if rule.get("if", {}).get("properties", {}).get("reason_code", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("reason_code", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(reason_code_rule is not None, "tenant_governance_snapshot missing reason_code reverse support guard")
+    ensure(
+        reason_code_rule is not None,
+        "tenant_governance_snapshot missing reason_code reverse support guard",
+    )
     ensure(
         reason_code_rule["then"]["properties"]["mode"]["not"].get("const") == "NONE"
         and reason_code_rule["then"]["properties"]["selected_object_ref"].get("type") == "string",
@@ -16515,13 +18493,18 @@ def check_tenant_governance_snapshot() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("focus_anchor_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("focus_anchor_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(focus_anchor_rule is not None, "tenant_governance_snapshot missing focus_anchor_ref reverse guard")
     ensure(
-        focus_anchor_rule["then"]["properties"]["selected_canvas_object_ref"].get("type") == "string",
+        focus_anchor_rule is not None,
+        "tenant_governance_snapshot missing focus_anchor_ref reverse guard",
+    )
+    ensure(
+        focus_anchor_rule["then"]["properties"]["selected_canvas_object_ref"].get("type")
+        == "string",
         "tenant_governance_snapshot focus_anchor_ref must force selected_canvas_object_ref",
     )
 
@@ -16544,14 +18527,19 @@ def check_tenant_governance_snapshot() -> None:
         "tenant_governance_snapshot missing support-region to selected-canvas reverse guard",
     )
     ensure(
-        support_to_canvas_rule["then"]["properties"]["selected_canvas_object_ref"].get("type") == "string",
+        support_to_canvas_rule["then"]["properties"]["selected_canvas_object_ref"].get("type")
+        == "string",
         "tenant_governance_snapshot active support region must force selected_canvas_object_ref",
     )
 
     recovery_none_rule = find_rule_by_const(schema["allOf"], "recovery_posture", "NONE")
-    ensure(recovery_none_rule is not None, "tenant_governance_snapshot missing recovery NONE reverse guard")
     ensure(
-        recovery_none_rule["then"]["properties"]["settlement_state"]["not"].get("const") == "RECOVERY_REQUIRED",
+        recovery_none_rule is not None,
+        "tenant_governance_snapshot missing recovery NONE reverse guard",
+    )
+    ensure(
+        recovery_none_rule["then"]["properties"]["settlement_state"]["not"].get("const")
+        == "RECOVERY_REQUIRED",
         "tenant_governance_snapshot recovery_posture=NONE must exclude settlement_state=RECOVERY_REQUIRED",
     )
 
@@ -16559,13 +18547,26 @@ def check_tenant_governance_snapshot() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("pending_approval_count", {}).get("const") == 0
-            and rule.get("if", {}).get("properties", {}).get("audit_hotspot_refs", {}).get("maxItems") == 0
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("pending_approval_count", {})
+            .get("const")
+            == 0
+            and rule.get("if", {})
+            .get("properties", {})
+            .get("audit_hotspot_refs", {})
+            .get("maxItems")
+            == 0
         ),
         None,
     )
-    ensure(calm_reverse_rule is not None, "tenant_governance_snapshot missing calm reverse attention guard")
-    calm_attention = calm_reverse_rule["then"]["properties"]["attention_summary"]["properties"]["attention_family"]
+    ensure(
+        calm_reverse_rule is not None,
+        "tenant_governance_snapshot missing calm reverse attention guard",
+    )
+    calm_attention = calm_reverse_rule["then"]["properties"]["attention_summary"]["properties"][
+        "attention_family"
+    ]
     ensure(
         calm_attention.get("const") == "CALM",
         "tenant_governance_snapshot zero outstanding issue counts must force CALM attention",
@@ -16575,8 +18576,16 @@ def check_tenant_governance_snapshot() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("expiring_authority_link_count", {}).get("const") == 0
-            and rule.get("then", {}).get("properties", {}).get("authority_link_risk_refs", {}).get("maxItems") == 0
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("expiring_authority_link_count", {})
+            .get("const")
+            == 0
+            and rule.get("then", {})
+            .get("properties", {})
+            .get("authority_link_risk_refs", {})
+            .get("maxItems")
+            == 0
         ),
         None,
     )
@@ -16593,8 +18602,16 @@ def check_tenant_governance_snapshot() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("retention_exception_count", {}).get("const") == 0
-            and rule.get("then", {}).get("properties", {}).get("retention_exception_refs", {}).get("maxItems") == 0
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("retention_exception_count", {})
+            .get("const")
+            == 0
+            and rule.get("then", {})
+            .get("properties", {})
+            .get("retention_exception_refs", {})
+            .get("maxItems")
+            == 0
         ),
         None,
     )
@@ -16625,7 +18642,11 @@ def check_tenant_governance_snapshot() -> None:
                 .get("attention_family", {})
                 .get("const")
                 == family
-                and rule.get("then", {}).get("properties", {}).get("primary_queue_code", {}).get("const") == queue
+                and rule.get("then", {})
+                .get("properties", {})
+                .get("primary_queue_code", {})
+                .get("const")
+                == queue
             ),
             None,
         )
@@ -16719,7 +18740,13 @@ def check_governance_policy_snapshot() -> None:
     )
 
     staged_change = schema["$defs"]["stagedChange"]["properties"]
-    for field in ["change_ref", "field_ref", "current_value_label", "proposed_value_label", "effective_scope_label"]:
+    for field in [
+        "change_ref",
+        "field_ref",
+        "current_value_label",
+        "proposed_value_label",
+        "effective_scope_label",
+    ]:
         ensure(
             staged_change[field].get("minLength") == 1,
             f"governance_policy_snapshot.stagedChange.{field} must reject empty strings",
@@ -16795,19 +18822,27 @@ def check_governance_policy_snapshot() -> None:
         "governance_policy_snapshot.changeBasket.required_approvals items must reject empty strings",
     )
     empty_rule = find_rule_by_const(change_basket["allOf"], "simulation_atomicity", "EMPTY")
-    ensure(empty_rule is not None, "governance_policy_snapshot changeBasket missing EMPTY reverse guard")
+    ensure(
+        empty_rule is not None,
+        "governance_policy_snapshot changeBasket missing EMPTY reverse guard",
+    )
     ensure(
         empty_rule["then"]["properties"]["basket_state"].get("const") == "EMPTY"
         and empty_rule["then"]["properties"]["active_mutation_hazard_or_null"].get("type") == "null"
-        and empty_rule["then"]["properties"]["active_mutation_basis_contract_or_null"].get("type") == "null"
+        and empty_rule["then"]["properties"]["active_mutation_basis_contract_or_null"].get("type")
+        == "null"
         and empty_rule["then"]["properties"]["staged_change_groups"].get("maxItems") == 0,
         "governance_policy_snapshot changeBasket EMPTY posture must clear staged groups, basket state, and the active mutation hazard/basis contracts",
     )
     atomic_rule = find_rule_by_const(change_basket["allOf"], "simulation_atomicity", "ATOMIC")
-    ensure(atomic_rule is not None, "governance_policy_snapshot changeBasket missing ATOMIC reverse guard")
+    ensure(
+        atomic_rule is not None,
+        "governance_policy_snapshot changeBasket missing ATOMIC reverse guard",
+    )
     ensure(
         atomic_rule["then"]["properties"]["active_simulation_basis_hash"].get("type") == "string"
-        and atomic_rule["then"]["properties"]["active_dependency_topology_hash"].get("type") == "string"
+        and atomic_rule["then"]["properties"]["active_dependency_topology_hash"].get("type")
+        == "string"
         and schema_uses_ref(
             atomic_rule["then"]["properties"]["active_mutation_hazard_or_null"],
             "https://taxat.dev/schemas/governance_mutation_hazard_contract.schema.json",
@@ -16859,7 +18894,9 @@ def check_governance_policy_snapshot() -> None:
         approval_composer["properties"]["related_object_refs"]["items"].get("minLength") == 1,
         "governance_policy_snapshot.approvalComposer.related_object_refs items must reject empty strings",
     )
-    not_required_rule = find_rule_by_const(approval_composer["allOf"], "composer_state", "NOT_REQUIRED")
+    not_required_rule = find_rule_by_const(
+        approval_composer["allOf"], "composer_state", "NOT_REQUIRED"
+    )
     ensure(
         not_required_rule is not None,
         "governance_policy_snapshot approvalComposer missing NOT_REQUIRED reverse guard",
@@ -16910,7 +18947,8 @@ def check_governance_policy_snapshot() -> None:
     )
     ensure(
         panel_empty_rule["then"]["properties"]["mutation_hazard_or_null"].get("type") == "null"
-        and panel_empty_rule["then"]["properties"]["mutation_basis_contract_or_null"].get("type") == "null",
+        and panel_empty_rule["then"]["properties"]["mutation_basis_contract_or_null"].get("type")
+        == "null",
         "governance_policy_snapshot empty blastRadiusPanel must clear reviewed mutation hazard and basis contracts",
     )
     for state in ("ACTIVE", "STALE"):
@@ -16961,14 +18999,20 @@ def check_governance_policy_snapshot() -> None:
         "governance_policy_snapshot missing approval-composer submitted to receipt-pending guard",
     )
     ensure(
-        submitted_to_receipt_rule["then"]["properties"]["change_basket"]["properties"]["basket_state"].get("const")
+        submitted_to_receipt_rule["then"]["properties"]["change_basket"]["properties"][
+            "basket_state"
+        ].get("const")
         == "RECEIPT_PENDING",
         "governance_policy_snapshot submitted approvalComposer must force change_basket.basket_state=RECEIPT_PENDING",
     )
     rebase_rule = find_rule_by_const(schema["allOf"], "recovery_posture", "INLINE_REBASE")
-    ensure(rebase_rule is not None, "governance_policy_snapshot missing INLINE_REBASE timeline guard")
     ensure(
-        rebase_rule["then"]["properties"]["config_history_timeline"]["properties"]["timeline_state"].get("const")
+        rebase_rule is not None, "governance_policy_snapshot missing INLINE_REBASE timeline guard"
+    )
+    ensure(
+        rebase_rule["then"]["properties"]["config_history_timeline"]["properties"][
+            "timeline_state"
+        ].get("const")
         == "REBASE_REQUIRED",
         "governance_policy_snapshot INLINE_REBASE posture must force config_history_timeline.timeline_state=REBASE_REQUIRED",
     )
@@ -16991,7 +19035,9 @@ def check_governance_policy_snapshot() -> None:
         "governance_policy_snapshot missing stale basket to rebase timeline guard",
     )
     ensure(
-        stale_basket_rule["then"]["properties"]["config_history_timeline"]["properties"]["timeline_state"].get("const")
+        stale_basket_rule["then"]["properties"]["config_history_timeline"]["properties"][
+            "timeline_state"
+        ].get("const")
         == "REBASE_REQUIRED",
         "governance_policy_snapshot STALE_REBASE_REQUIRED basket must force config_history_timeline.timeline_state=REBASE_REQUIRED",
     )
@@ -17073,7 +19119,8 @@ def check_amendment_case() -> None:
         "amendment_case INTENT_SUBMITTED must force calculation_type=intent-to-amend",
     )
     ensure(
-        intent_rule["then"]["properties"]["authority_operation_profile_ref"].get("type") == "string",
+        intent_rule["then"]["properties"]["authority_operation_profile_ref"].get("type")
+        == "string",
         "amendment_case INTENT_SUBMITTED must require authority_operation_profile_ref",
     )
 
@@ -17084,7 +19131,8 @@ def check_amendment_case() -> None:
         "amendment_case READY_TO_AMEND must require calculation_hash",
     )
     ensure(
-        ready_rule["then"]["properties"]["validation_outcome"].get("enum") == ["PASS", "PASS_WITH_NOTICE"],
+        ready_rule["then"]["properties"]["validation_outcome"].get("enum")
+        == ["PASS", "PASS_WITH_NOTICE"],
         "amendment_case READY_TO_AMEND must limit validation_outcome to PASS or PASS_WITH_NOTICE",
     )
     ensure(
@@ -17107,13 +19155,21 @@ def check_amendment_case() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("retroactive_impact_ref", {}).get("type") == "string"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("retroactive_impact_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(retroactive_pair_rule is not None, "amendment_case missing retroactive_impact_ref pairing guard")
     ensure(
-        retroactive_pair_rule["then"]["properties"]["retroactive_impact_hash"].get("type") == "string",
+        retroactive_pair_rule is not None,
+        "amendment_case missing retroactive_impact_ref pairing guard",
+    )
+    ensure(
+        retroactive_pair_rule["then"]["properties"]["retroactive_impact_hash"].get("type")
+        == "string",
         "amendment_case non-null retroactive_impact_ref must require retroactive_impact_hash",
     )
 
@@ -17121,13 +19177,21 @@ def check_amendment_case() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("retroactive_impact_hash", {}).get("type") == "string"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("retroactive_impact_hash", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(retroactive_hash_rule is not None, "amendment_case missing retroactive_impact_hash reverse guard")
     ensure(
-        retroactive_hash_rule["then"]["properties"]["retroactive_impact_ref"].get("type") == "string",
+        retroactive_hash_rule is not None,
+        "amendment_case missing retroactive_impact_hash reverse guard",
+    )
+    ensure(
+        retroactive_hash_rule["then"]["properties"]["retroactive_impact_ref"].get("type")
+        == "string",
         "amendment_case non-null retroactive_impact_hash must require retroactive_impact_ref",
     )
 
@@ -17135,13 +19199,20 @@ def check_amendment_case() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("amendment_window_ref", {}).get("type") == "string"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("amendment_window_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(window_pair_rule is not None, "amendment_case missing amendment_window_ref pairing guard")
     ensure(
-        window_pair_rule["then"]["properties"]["amendment_window_evaluation_hash"].get("type") == "string",
+        window_pair_rule is not None, "amendment_case missing amendment_window_ref pairing guard"
+    )
+    ensure(
+        window_pair_rule["then"]["properties"]["amendment_window_evaluation_hash"].get("type")
+        == "string",
         "amendment_case non-null amendment_window_ref must require amendment_window_evaluation_hash",
     )
 
@@ -17149,12 +19220,18 @@ def check_amendment_case() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("amendment_window_evaluation_hash", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("amendment_window_evaluation_hash", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(window_hash_rule is not None, "amendment_case missing amendment_window_evaluation_hash reverse guard")
+    ensure(
+        window_hash_rule is not None,
+        "amendment_case missing amendment_window_evaluation_hash reverse guard",
+    )
     ensure(
         window_hash_rule["then"]["properties"]["amendment_window_ref"].get("type") == "string",
         "amendment_case non-null amendment_window_evaluation_hash must require amendment_window_ref",
@@ -17163,7 +19240,8 @@ def check_amendment_case() -> None:
     stale_rule = find_rule_by_const(schema["allOf"], "freshness_state", "STALE")
     ensure(stale_rule is not None, "amendment_case missing freshness_state=STALE guard")
     ensure(
-        stale_rule["then"]["properties"]["freshness_invalidation_reason_codes"].get("minItems") == 1,
+        stale_rule["then"]["properties"]["freshness_invalidation_reason_codes"].get("minItems")
+        == 1,
         "amendment_case STALE must require freshness_invalidation_reason_codes",
     )
 
@@ -17171,12 +19249,18 @@ def check_amendment_case() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("freshness_invalidation_reason_codes", {}).get("minItems")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("freshness_invalidation_reason_codes", {})
+            .get("minItems")
             == 1
         ),
         None,
     )
-    ensure(reverse_stale_rule is not None, "amendment_case missing freshness_invalidation_reason_codes reverse guard")
+    ensure(
+        reverse_stale_rule is not None,
+        "amendment_case missing freshness_invalidation_reason_codes reverse guard",
+    )
     ensure(
         reverse_stale_rule["then"]["properties"]["freshness_state"].get("const") == "STALE",
         "amendment_case non-empty freshness_invalidation_reason_codes must force freshness_state=STALE",
@@ -17197,14 +19281,26 @@ def check_amendment_case() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("current_bundle_ref", {}).get("type") == "string"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("current_bundle_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(current_bundle_rule is not None, "amendment_case missing current_bundle_ref reverse guard")
+    ensure(
+        current_bundle_rule is not None, "amendment_case missing current_bundle_ref reverse guard"
+    )
     ensure(
         current_bundle_rule["then"]["properties"]["lifecycle_state"].get("enum")
-        == ["READY_TO_AMEND", "AMEND_SUBMITTED", "AMEND_PENDING", "AMEND_CONFIRMED", "AMEND_REJECTED"],
+        == [
+            "READY_TO_AMEND",
+            "AMEND_SUBMITTED",
+            "AMEND_PENDING",
+            "AMEND_CONFIRMED",
+            "AMEND_REJECTED",
+        ],
         "amendment_case non-null current_bundle_ref must stay in bundle-backed states",
     )
 
@@ -17212,7 +19308,8 @@ def check_amendment_case() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("superseded_at", {}).get("type") == "string"
+            if candidate.get("if", {}).get("properties", {}).get("superseded_at", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -17235,11 +19332,13 @@ def check_baseline_selection_contract() -> None:
         "baseline_selection_contract must stay closed to ungoverned fields",
     )
     ensure(
-        schema["properties"]["selection_profile_code"].get("const") == "DRIFT_BASELINE_SELECTION_V1",
+        schema["properties"]["selection_profile_code"].get("const")
+        == "DRIFT_BASELINE_SELECTION_V1",
         "baseline_selection_contract selection_profile_code must freeze DRIFT_BASELINE_SELECTION_V1",
     )
     ensure(
-        schema["properties"]["dominance_key_profile_code"].get("const") == "DRIFT_BASELINE_DOMINANCE_KEY_V1",
+        schema["properties"]["dominance_key_profile_code"].get("const")
+        == "DRIFT_BASELINE_DOMINANCE_KEY_V1",
         "baseline_selection_contract dominance_key_profile_code must freeze DRIFT_BASELINE_DOMINANCE_KEY_V1",
     )
     for field in ["target_scope_refs", "selected_scope_refs", "uncertainty_reason_codes"]:
@@ -17249,7 +19348,10 @@ def check_baseline_selection_contract() -> None:
         )
 
     exact_rule = find_rule_by_const(schema["allOf"], "exact_scope_candidate_present", True)
-    ensure(exact_rule is not None, "baseline_selection_contract missing exact_scope_candidate_present guard")
+    ensure(
+        exact_rule is not None,
+        "baseline_selection_contract missing exact_scope_candidate_present guard",
+    )
     ensure(
         exact_rule["then"]["properties"]["scope_match_class"].get("const") == "EXACT_SCOPE_MATCH",
         "baseline_selection_contract exact_scope_candidate_present=true must force EXACT_SCOPE_MATCH",
@@ -17259,19 +19361,28 @@ def check_baseline_selection_contract() -> None:
         "baseline_selection_contract exact_scope_candidate_present=true must force scope_rank=3",
     )
     ensure(
-        exact_rule["then"]["properties"]["scope_resolution_state"].get("const") == "EXACT_SCOPE_SELECTED",
+        exact_rule["then"]["properties"]["scope_resolution_state"].get("const")
+        == "EXACT_SCOPE_SELECTED",
         "baseline_selection_contract exact_scope_candidate_present=true must force scope_resolution_state=EXACT_SCOPE_SELECTED",
     )
 
-    internal_rule = find_rule_by_const(schema["allOf"], "continuity_class", "INTERNAL_CHAIN_CONTINUITY")
-    ensure(internal_rule is not None, "baseline_selection_contract missing internal continuity guard")
+    internal_rule = find_rule_by_const(
+        schema["allOf"], "continuity_class", "INTERNAL_CHAIN_CONTINUITY"
+    )
     ensure(
-        internal_rule["then"]["properties"]["internal_chain_continuity_asserted"].get("const") is True,
+        internal_rule is not None, "baseline_selection_contract missing internal continuity guard"
+    )
+    ensure(
+        internal_rule["then"]["properties"]["internal_chain_continuity_asserted"].get("const")
+        is True,
         "baseline_selection_contract internal continuity must force internal_chain_continuity_asserted=true",
     )
 
     out_of_band_rule = find_rule_by_const(schema["allOf"], "selected_baseline_type", "OUT_OF_BAND")
-    ensure(out_of_band_rule is not None, "baseline_selection_contract missing OUT_OF_BAND truth-resolution guard")
+    ensure(
+        out_of_band_rule is not None,
+        "baseline_selection_contract missing OUT_OF_BAND truth-resolution guard",
+    )
     ensure(
         out_of_band_rule["then"]["properties"]["same_scope_truth_resolution_state"].get("const")
         == "OUT_OF_BAND_EXTERNAL_TRUTH_BLOCKS_INTERNAL_LINEAGE",
@@ -17282,13 +19393,21 @@ def check_baseline_selection_contract() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("uncertainty_reason_codes", {}).get("minItems") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("uncertainty_reason_codes", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
-    ensure(uncertainty_rule is not None, "baseline_selection_contract missing uncertainty reverse guard")
     ensure(
-        uncertainty_rule["then"]["properties"]["baseline_anchor_weight"].get("exclusiveMaximum") == 1,
+        uncertainty_rule is not None,
+        "baseline_selection_contract missing uncertainty reverse guard",
+    )
+    ensure(
+        uncertainty_rule["then"]["properties"]["baseline_anchor_weight"].get("exclusiveMaximum")
+        == 1,
         "baseline_selection_contract uncertainty reasons must cap baseline_anchor_weight below 1",
     )
     ensure(
@@ -17297,7 +19416,8 @@ def check_baseline_selection_contract() -> None:
         "baseline_selection_contract uncertainty reasons must cap amendment progression below straight-through eligibility",
     )
     ensure(
-        uncertainty_rule["then"]["properties"]["benign_drift_eligibility_state"].get("const") == "FORBIDDEN",
+        uncertainty_rule["then"]["properties"]["benign_drift_eligibility_state"].get("const")
+        == "FORBIDDEN",
         "baseline_selection_contract uncertainty reasons must forbid benign-drift eligibility",
     )
 
@@ -17327,11 +19447,13 @@ def check_drift_baseline_selection_visualization_basis_contract() -> None:
         "drift_baseline_selection_visualization_basis_contract contract_version must freeze DRIFT_BASELINE_SELECTION_VISUALIZATION_BASIS_V1",
     )
     ensure(
-        schema["properties"]["selection_profile_code"].get("const") == "DRIFT_BASELINE_SELECTION_V1",
+        schema["properties"]["selection_profile_code"].get("const")
+        == "DRIFT_BASELINE_SELECTION_V1",
         "drift_baseline_selection_visualization_basis_contract must stay bound to DRIFT_BASELINE_SELECTION_V1",
     )
     ensure(
-        schema["properties"]["dominance_key_profile_code"].get("const") == "DRIFT_BASELINE_DOMINANCE_KEY_V1",
+        schema["properties"]["dominance_key_profile_code"].get("const")
+        == "DRIFT_BASELINE_DOMINANCE_KEY_V1",
         "drift_baseline_selection_visualization_basis_contract must stay bound to DRIFT_BASELINE_DOMINANCE_KEY_V1",
     )
     for field in ["target_scope_refs", "candidate_refs"]:
@@ -17343,7 +19465,10 @@ def check_drift_baseline_selection_visualization_basis_contract() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("prior_active_baseline_envelope_ref_or_null", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("prior_active_baseline_envelope_ref_or_null", {})
+            .get("type")
             == "string"
         ),
         None,
@@ -17353,7 +19478,8 @@ def check_drift_baseline_selection_visualization_basis_contract() -> None:
         "drift_baseline_selection_visualization_basis_contract missing prior envelope/hash pairing guard",
     )
     ensure(
-        pair_rule["then"]["properties"]["prior_active_baseline_frozen_hash_or_null"].get("type") == "string",
+        pair_rule["then"]["properties"]["prior_active_baseline_frozen_hash_or_null"].get("type")
+        == "string",
         "drift_baseline_selection_visualization_basis_contract prior active envelope ref must require prior frozen hash",
     )
 
@@ -17427,7 +19553,8 @@ def check_drift_baseline_selection_visualization() -> None:
         (
             rule
             for rule in candidate_result["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("selection_outcome", {}).get("const") == "SELECTED"
+            if rule.get("if", {}).get("properties", {}).get("selection_outcome", {}).get("const")
+            == "SELECTED"
         ),
         None,
     )
@@ -17436,7 +19563,8 @@ def check_drift_baseline_selection_visualization() -> None:
         "drift_baseline_selection_visualization candidateResult missing selection_outcome=SELECTED guard",
     )
     ensure(
-        selected_rule["then"]["properties"]["selection_reason_codes_if_selected"].get("minItems") == 1,
+        selected_rule["then"]["properties"]["selection_reason_codes_if_selected"].get("minItems")
+        == 1,
         "drift_baseline_selection_visualization selected candidates must require selection_reason_codes_if_selected",
     )
     ensure(
@@ -17460,13 +19588,15 @@ def check_drift_baseline_selection_visualization() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("properties", {}).get("same_scope_envelope_lineage", {}).get("minContains") == 1
+            if rule.get("properties", {}).get("same_scope_envelope_lineage", {}).get("minContains")
+            == 1
         ),
         None,
     )
     ensure(
         active_lineage_rule is not None
-        and active_lineage_rule["properties"]["same_scope_envelope_lineage"].get("maxContains") == 1,
+        and active_lineage_rule["properties"]["same_scope_envelope_lineage"].get("maxContains")
+        == 1,
         "drift_baseline_selection_visualization same_scope_envelope_lineage must contain exactly one active selected or reused entry",
     )
 
@@ -17536,9 +19666,12 @@ def check_drift_baseline_envelope() -> None:
     }
     for baseline_type, submission_state in expected_states.items():
         rule = find_rule_by_const(schema["allOf"], "baseline_type", baseline_type)
-        ensure(rule is not None, f"drift_baseline_envelope missing baseline_type={baseline_type} guard")
         ensure(
-            rule["then"]["properties"]["baseline_submission_state"].get("const") == submission_state,
+            rule is not None, f"drift_baseline_envelope missing baseline_type={baseline_type} guard"
+        )
+        ensure(
+            rule["then"]["properties"]["baseline_submission_state"].get("const")
+            == submission_state,
             f"drift_baseline_envelope baseline_type={baseline_type} must force baseline_submission_state={submission_state}",
         )
 
@@ -17575,12 +19708,18 @@ def check_drift_baseline_envelope() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("superseded_by_baseline_envelope_id", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("superseded_by_baseline_envelope_id", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(supersedes_rule is not None, "drift_baseline_envelope missing superseded_by_baseline_envelope_id pairing guard")
+    ensure(
+        supersedes_rule is not None,
+        "drift_baseline_envelope missing superseded_by_baseline_envelope_id pairing guard",
+    )
     ensure(
         supersedes_rule["then"]["properties"]["superseded_at"].get("type") == "string",
         "drift_baseline_envelope non-null superseded_by_baseline_envelope_id must require superseded_at",
@@ -17590,13 +19729,18 @@ def check_drift_baseline_envelope() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("superseded_at", {}).get("type") == "string"
+            if candidate.get("if", {}).get("properties", {}).get("superseded_at", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(superseded_at_rule is not None, "drift_baseline_envelope missing superseded_at pairing guard")
     ensure(
-        superseded_at_rule["then"]["properties"]["superseded_by_baseline_envelope_id"].get("type") == "string",
+        superseded_at_rule is not None,
+        "drift_baseline_envelope missing superseded_at pairing guard",
+    )
+    ensure(
+        superseded_at_rule["then"]["properties"]["superseded_by_baseline_envelope_id"].get("type")
+        == "string",
         "drift_baseline_envelope non-null superseded_at must require superseded_by_baseline_envelope_id",
     )
 
@@ -17628,24 +19772,39 @@ def check_amendment_eligibility_contract() -> None:
     )
 
     not_triggered_rule = find_rule_by_const(schema["allOf"], "trigger_state", "NOT_TRIGGERED")
-    ensure(not_triggered_rule is not None, "amendment_eligibility_contract missing NOT_TRIGGERED guard")
     ensure(
-        not_triggered_rule["then"]["properties"]["eligibility_state"].get("const") == "NOT_EVALUATED",
+        not_triggered_rule is not None, "amendment_eligibility_contract missing NOT_TRIGGERED guard"
+    )
+    ensure(
+        not_triggered_rule["then"]["properties"]["eligibility_state"].get("const")
+        == "NOT_EVALUATED",
         "amendment_eligibility_contract NOT_TRIGGERED must force eligibility_state=NOT_EVALUATED",
     )
     ensure(
-        not_triggered_rule["then"]["properties"]["readiness_reuse_state"].get("const") == "NOT_APPLICABLE",
+        not_triggered_rule["then"]["properties"]["readiness_reuse_state"].get("const")
+        == "NOT_APPLICABLE",
         "amendment_eligibility_contract NOT_TRIGGERED must force readiness_reuse_state=NOT_APPLICABLE",
     )
     ensure(
-        not_triggered_rule["then"]["properties"]["baseline_selection_contract_hash_or_null"].get("type") == "null"
-        and not_triggered_rule["then"]["properties"]["baseline_progression_ceiling_or_null"].get("type") == "null"
-        and not_triggered_rule["then"]["properties"]["baseline_limitation_reason_codes"].get("maxItems") == 0,
+        not_triggered_rule["then"]["properties"]["baseline_selection_contract_hash_or_null"].get(
+            "type"
+        )
+        == "null"
+        and not_triggered_rule["then"]["properties"]["baseline_progression_ceiling_or_null"].get(
+            "type"
+        )
+        == "null"
+        and not_triggered_rule["then"]["properties"]["baseline_limitation_reason_codes"].get(
+            "maxItems"
+        )
+        == 0,
         "amendment_eligibility_contract NOT_TRIGGERED must clear baseline-derived lineage and limitation fields",
     )
 
     triggered_rule = find_rule_by_const(schema["allOf"], "trigger_state", "TRIGGERED")
-    ensure(triggered_rule is not None, "amendment_eligibility_contract missing TRIGGERED reason guard")
+    ensure(
+        triggered_rule is not None, "amendment_eligibility_contract missing TRIGGERED reason guard"
+    )
     ensure(
         triggered_rule["then"]["properties"]["trigger_reason_codes"].get("minItems") == 1,
         "amendment_eligibility_contract TRIGGERED must require trigger_reason_codes",
@@ -17656,9 +19815,13 @@ def check_amendment_eligibility_contract() -> None:
         "eligibility_state",
         ["ELIGIBLE_NOW", "REVIEW_ONLY", "RECONCILE_FIRST", "WINDOW_CLOSED", "UNPROVEN"],
     )
-    ensure(evaluated_rule is not None, "amendment_eligibility_contract missing evaluated baseline-lineage guard")
     ensure(
-        evaluated_rule["then"]["properties"]["baseline_selection_contract_hash_or_null"].get("type") == "string"
+        evaluated_rule is not None,
+        "amendment_eligibility_contract missing evaluated baseline-lineage guard",
+    )
+    ensure(
+        evaluated_rule["then"]["properties"]["baseline_selection_contract_hash_or_null"].get("type")
+        == "string"
         and evaluated_rule["then"]["properties"]["baseline_progression_ceiling_or_null"].get("enum")
         == ["ELIGIBLE_NOW_ALLOWED", "REVIEW_ONLY", "RECONCILE_FIRST"],
         "amendment_eligibility_contract evaluated posture must require baseline selection lineage and a baseline progression ceiling",
@@ -17672,7 +19835,10 @@ def check_amendment_eligibility_contract() -> None:
         "amendment_eligibility_contract missing limited baseline progression reverse guard",
     )
     ensure(
-        limited_baseline_rule["then"]["properties"]["baseline_limitation_reason_codes"].get("minItems") == 1,
+        limited_baseline_rule["then"]["properties"]["baseline_limitation_reason_codes"].get(
+            "minItems"
+        )
+        == 1,
         "amendment_eligibility_contract limited baseline progression must require baseline_limitation_reason_codes",
     )
 
@@ -17684,7 +19850,10 @@ def check_amendment_eligibility_contract() -> None:
         "amendment_eligibility_contract missing ELIGIBLE_NOW_ALLOWED baseline reverse guard",
     )
     ensure(
-        allowed_baseline_rule["then"]["properties"]["baseline_limitation_reason_codes"].get("maxItems") == 0,
+        allowed_baseline_rule["then"]["properties"]["baseline_limitation_reason_codes"].get(
+            "maxItems"
+        )
+        == 0,
         "amendment_eligibility_contract ELIGIBLE_NOW_ALLOWED baseline ceiling must clear baseline_limitation_reason_codes",
     )
 
@@ -17695,14 +19864,16 @@ def check_amendment_eligibility_contract() -> None:
         "amendment_eligibility_contract FRESH must require readiness_context_ref_or_null",
     )
     ensure(
-        fresh_rule["then"]["properties"]["readiness_invalidation_reason_codes"].get("maxItems") == 0,
+        fresh_rule["then"]["properties"]["readiness_invalidation_reason_codes"].get("maxItems")
+        == 0,
         "amendment_eligibility_contract FRESH must clear readiness_invalidation_reason_codes",
     )
 
     stale_rule = find_rule_by_const(schema["allOf"], "readiness_reuse_state", "STALE")
     ensure(stale_rule is not None, "amendment_eligibility_contract missing STALE readiness guard")
     ensure(
-        stale_rule["then"]["properties"]["readiness_invalidation_reason_codes"].get("minItems") == 1,
+        stale_rule["then"]["properties"]["readiness_invalidation_reason_codes"].get("minItems")
+        == 1,
         "amendment_eligibility_contract STALE must require readiness_invalidation_reason_codes",
     )
 
@@ -17710,12 +19881,18 @@ def check_amendment_eligibility_contract() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("readiness_invalidation_reason_codes", {}).get("minItems")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("readiness_invalidation_reason_codes", {})
+            .get("minItems")
             == 1
         ),
         None,
     )
-    ensure(invalidation_rule is not None, "amendment_eligibility_contract missing invalidation reverse guard")
+    ensure(
+        invalidation_rule is not None,
+        "amendment_eligibility_contract missing invalidation reverse guard",
+    )
     ensure(
         invalidation_rule["then"]["properties"]["readiness_reuse_state"].get("const") == "STALE",
         "amendment_eligibility_contract non-empty readiness_invalidation_reason_codes must force STALE reuse",
@@ -17727,7 +19904,13 @@ def check_amendment_window_context() -> None:
     check_execution_mode_boundary_contract_binding(schema, "amendment_window_context")
     check_min_length_fields(
         schema,
-        ["amendment_window_context_id", "manifest_id", "baseline_envelope_ref", "window_anchor_basis", "evaluation_hash"],
+        [
+            "amendment_window_context_id",
+            "manifest_id",
+            "baseline_envelope_ref",
+            "window_anchor_basis",
+            "evaluation_hash",
+        ],
         "amendment_window_context",
     )
     for field in ["provider_profile_ref", "authority_basis_ref"]:
@@ -17764,7 +19947,9 @@ def check_amendment_window_context() -> None:
     )
 
     unproven_rule = find_rule_by_const(schema["allOf"], "window_state", "UNPROVEN")
-    ensure(unproven_rule is not None, "amendment_window_context missing window_state=UNPROVEN guard")
+    ensure(
+        unproven_rule is not None, "amendment_window_context missing window_state=UNPROVEN guard"
+    )
     ensure(
         unproven_rule["then"]["properties"]["eligible_scope_refs"].get("maxItems") == 0,
         "amendment_window_context UNPROVEN must clear eligible_scope_refs",
@@ -17778,11 +19963,18 @@ def check_amendment_window_context() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("eligible_scope_refs", {}).get("minItems") == 1
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("eligible_scope_refs", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
-    ensure(eligible_rule is not None, "amendment_window_context missing eligible_scope_refs reverse guard")
+    ensure(
+        eligible_rule is not None,
+        "amendment_window_context missing eligible_scope_refs reverse guard",
+    )
     ensure(
         eligible_rule["then"]["properties"]["window_state"].get("const") == "OPEN",
         "amendment_window_context non-empty eligible_scope_refs must force window_state=OPEN",
@@ -17792,11 +19984,17 @@ def check_amendment_window_context() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("blocked_scope_refs", {}).get("minItems") == 1
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("blocked_scope_refs", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
-    ensure(blocked_rule is not None, "amendment_window_context missing blocked_scope_refs reason guard")
+    ensure(
+        blocked_rule is not None, "amendment_window_context missing blocked_scope_refs reason guard"
+    )
     ensure(
         blocked_rule["then"]["properties"]["reason_codes"].get("minItems") == 1,
         "amendment_window_context non-empty blocked_scope_refs must require reason_codes",
@@ -17808,28 +20006,45 @@ def check_retroactive_impact_analysis() -> None:
     check_execution_mode_boundary_contract_binding(schema, "retroactive_impact_analysis")
     check_min_length_fields(
         schema,
-        ["retroactive_impact_id", "manifest_id", "baseline_envelope_ref", "temporal_propagation_event_ref", "analysis_hash"],
+        [
+            "retroactive_impact_id",
+            "manifest_id",
+            "baseline_envelope_ref",
+            "temporal_propagation_event_ref",
+            "analysis_hash",
+        ],
         "retroactive_impact_analysis",
     )
     ensure(
         schema["properties"]["drift_ref"].get("minLength") == 1,
         "retroactive_impact_analysis.drift_ref must reject empty strings when present",
     )
-    for field in ["impacted_scope_refs", "impacted_submission_refs", "restatement_scope_refs", "reason_codes"]:
+    for field in [
+        "impacted_scope_refs",
+        "impacted_submission_refs",
+        "restatement_scope_refs",
+        "reason_codes",
+    ]:
         ensure(
             schema["properties"][field]["items"].get("minLength") == 1,
             f"retroactive_impact_analysis.{field} items must reject empty strings",
         )
 
     required_rule = find_rule_by_const(schema["allOf"], "restatement_required", True)
-    ensure(required_rule is not None, "retroactive_impact_analysis missing restatement_required=true guard")
+    ensure(
+        required_rule is not None,
+        "retroactive_impact_analysis missing restatement_required=true guard",
+    )
     ensure(
         required_rule["then"]["properties"]["restatement_scope_refs"].get("minItems") == 1,
         "retroactive_impact_analysis restatement_required=true must require restatement_scope_refs",
     )
 
     false_rule = find_rule_by_const(schema["allOf"], "restatement_required", False)
-    ensure(false_rule is not None, "retroactive_impact_analysis missing restatement_required=false guard")
+    ensure(
+        false_rule is not None,
+        "retroactive_impact_analysis missing restatement_required=false guard",
+    )
     ensure(
         false_rule["then"]["properties"]["restatement_scope_refs"].get("maxItems") == 0,
         "retroactive_impact_analysis restatement_required=false must clear restatement_scope_refs",
@@ -17839,18 +20054,28 @@ def check_retroactive_impact_analysis() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("restatement_scope_refs", {}).get("minItems") == 1
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("restatement_scope_refs", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
-    ensure(reverse_restatement_rule is not None, "retroactive_impact_analysis missing restatement_scope_refs reverse guard")
+    ensure(
+        reverse_restatement_rule is not None,
+        "retroactive_impact_analysis missing restatement_scope_refs reverse guard",
+    )
     ensure(
         reverse_restatement_rule["then"]["properties"]["restatement_required"].get("const") is True,
         "retroactive_impact_analysis non-empty restatement_scope_refs must force restatement_required=true",
     )
 
     none_rule = find_rule_by_const(schema["allOf"], "bounded_retroactivity_class", "NONE")
-    ensure(none_rule is not None, "retroactive_impact_analysis missing bounded_retroactivity_class=NONE guard")
+    ensure(
+        none_rule is not None,
+        "retroactive_impact_analysis missing bounded_retroactivity_class=NONE guard",
+    )
     ensure(
         none_rule["then"]["properties"]["replay_requirement"].get("const") == "NONE",
         "retroactive_impact_analysis bounded_retroactivity_class=NONE must force replay_requirement=NONE",
@@ -17859,9 +20084,17 @@ def check_retroactive_impact_analysis() -> None:
     non_none_scope_rule = find_rule_by_enum(
         schema["allOf"],
         "bounded_retroactivity_class",
-        ["CURRENT_SCOPE_ONLY", "RESTATE_PRIOR_POSITION", "REOPEN_CHAIN_REPLAY", "AUTHORITY_RECONCILIATION_REQUIRED"],
+        [
+            "CURRENT_SCOPE_ONLY",
+            "RESTATE_PRIOR_POSITION",
+            "REOPEN_CHAIN_REPLAY",
+            "AUTHORITY_RECONCILIATION_REQUIRED",
+        ],
     )
-    ensure(non_none_scope_rule is not None, "retroactive_impact_analysis missing non-NONE impacted_scope guard")
+    ensure(
+        non_none_scope_rule is not None,
+        "retroactive_impact_analysis missing non-NONE impacted_scope guard",
+    )
     ensure(
         non_none_scope_rule["then"]["properties"]["impacted_scope_refs"].get("minItems") == 1,
         "retroactive_impact_analysis non-NONE retroactivity must require impacted_scope_refs",
@@ -17872,7 +20105,9 @@ def check_retroactive_impact_analysis() -> None:
         "bounded_retroactivity_class",
         ["RESTATE_PRIOR_POSITION", "REOPEN_CHAIN_REPLAY", "AUTHORITY_RECONCILIATION_REQUIRED"],
     )
-    ensure(replay_rule is not None, "retroactive_impact_analysis missing prior-position replay guard")
+    ensure(
+        replay_rule is not None, "retroactive_impact_analysis missing prior-position replay guard"
+    )
     ensure(
         replay_rule["then"]["properties"]["impacted_submission_refs"].get("minItems") == 1,
         "retroactive_impact_analysis prior-position retroactivity must require impacted_submission_refs",
@@ -17882,7 +20117,11 @@ def check_retroactive_impact_analysis() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("impacted_submission_refs", {}).get("minItems") == 1
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("impacted_submission_refs", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
@@ -17891,15 +20130,23 @@ def check_retroactive_impact_analysis() -> None:
         "retroactive_impact_analysis missing impacted_submission_refs reverse guard",
     )
     ensure(
-        impacted_submission_reverse_rule["then"]["properties"]["bounded_retroactivity_class"].get("enum")
+        impacted_submission_reverse_rule["then"]["properties"]["bounded_retroactivity_class"].get(
+            "enum"
+        )
         == ["RESTATE_PRIOR_POSITION", "REOPEN_CHAIN_REPLAY", "AUTHORITY_RECONCILIATION_REQUIRED"],
         "retroactive_impact_analysis non-empty impacted_submission_refs must force prior-position or reconciliation retroactivity",
     )
 
-    contradictory_rule = find_rule_by_const(schema["allOf"], "late_data_interaction_class", "CONTRADICTORY")
-    ensure(contradictory_rule is not None, "retroactive_impact_analysis missing contradictory late-data guard")
+    contradictory_rule = find_rule_by_const(
+        schema["allOf"], "late_data_interaction_class", "CONTRADICTORY"
+    )
     ensure(
-        contradictory_rule["then"]["properties"]["replay_requirement"].get("const") == "RECONCILE_FIRST",
+        contradictory_rule is not None,
+        "retroactive_impact_analysis missing contradictory late-data guard",
+    )
+    ensure(
+        contradictory_rule["then"]["properties"]["replay_requirement"].get("const")
+        == "RECONCILE_FIRST",
         "retroactive_impact_analysis CONTRADICTORY must force replay_requirement=RECONCILE_FIRST",
     )
 
@@ -17950,7 +20197,8 @@ def check_late_data_retroactive_impact_simulation_basis_contract() -> None:
     )
     properties = schema["properties"]
     ensure(
-        properties["contract_version"].get("const") == "LATE_DATA_RETROACTIVE_IMPACT_SIMULATION_BASIS_V1",
+        properties["contract_version"].get("const")
+        == "LATE_DATA_RETROACTIVE_IMPACT_SIMULATION_BASIS_V1",
         "late_data_retroactive_impact_simulation_basis_contract.contract_version must stay pinned",
     )
     for field in [
@@ -18195,7 +20443,9 @@ def check_amendment_bundle() -> None:
         "amendment_bundle.affected_scope_refs items must reject empty strings",
     )
 
-    active_rule = find_rule_by_enum(schema["allOf"], "bundle_state", ["PREPARED", "FROZEN", "SUBMITTED", "CONFIRMED"])
+    active_rule = find_rule_by_enum(
+        schema["allOf"], "bundle_state", ["PREPARED", "FROZEN", "SUBMITTED", "CONFIRMED"]
+    )
     ensure(active_rule is not None, "amendment_bundle missing active bundle-state guard")
     for field in [
         "retroactive_impact_ref",
@@ -18221,8 +20471,12 @@ def check_amendment_bundle() -> None:
         "amendment_bundle SUBMITTED or CONFIRMED must require packet_ref",
     )
 
-    pre_submit_rule = find_rule_by_enum(schema["allOf"], "bundle_state", ["PREPARED", "FROZEN", "VOID"])
-    ensure(pre_submit_rule is not None, "amendment_bundle missing pre-submit packet_ref clearing guard")
+    pre_submit_rule = find_rule_by_enum(
+        schema["allOf"], "bundle_state", ["PREPARED", "FROZEN", "VOID"]
+    )
+    ensure(
+        pre_submit_rule is not None, "amendment_bundle missing pre-submit packet_ref clearing guard"
+    )
     ensure(
         pre_submit_rule["then"]["properties"]["packet_ref"].get("type") == "null",
         "amendment_bundle PREPARED/FROZEN/VOID must clear packet_ref",
@@ -18232,13 +20486,21 @@ def check_amendment_bundle() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("retroactive_impact_ref", {}).get("type") == "string"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("retroactive_impact_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(retroactive_pair_rule is not None, "amendment_bundle missing retroactive_impact_ref pairing guard")
     ensure(
-        retroactive_pair_rule["then"]["properties"]["retroactive_impact_hash"].get("type") == "string",
+        retroactive_pair_rule is not None,
+        "amendment_bundle missing retroactive_impact_ref pairing guard",
+    )
+    ensure(
+        retroactive_pair_rule["then"]["properties"]["retroactive_impact_hash"].get("type")
+        == "string",
         "amendment_bundle non-null retroactive_impact_ref must require retroactive_impact_hash",
     )
 
@@ -18246,13 +20508,21 @@ def check_amendment_bundle() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("retroactive_impact_hash", {}).get("type") == "string"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("retroactive_impact_hash", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(retroactive_hash_rule is not None, "amendment_bundle missing retroactive_impact_hash reverse guard")
     ensure(
-        retroactive_hash_rule["then"]["properties"]["retroactive_impact_ref"].get("type") == "string",
+        retroactive_hash_rule is not None,
+        "amendment_bundle missing retroactive_impact_hash reverse guard",
+    )
+    ensure(
+        retroactive_hash_rule["then"]["properties"]["retroactive_impact_ref"].get("type")
+        == "string",
         "amendment_bundle non-null retroactive_impact_hash must require retroactive_impact_ref",
     )
 
@@ -18260,14 +20530,21 @@ def check_amendment_bundle() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("amendment_window_context_ref", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("amendment_window_context_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(window_pair_rule is not None, "amendment_bundle missing amendment_window_context_ref pairing guard")
     ensure(
-        window_pair_rule["then"]["properties"]["amendment_window_evaluation_hash"].get("type") == "string",
+        window_pair_rule is not None,
+        "amendment_bundle missing amendment_window_context_ref pairing guard",
+    )
+    ensure(
+        window_pair_rule["then"]["properties"]["amendment_window_evaluation_hash"].get("type")
+        == "string",
         "amendment_bundle non-null amendment_window_context_ref must require amendment_window_evaluation_hash",
     )
 
@@ -18275,14 +20552,21 @@ def check_amendment_bundle() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("amendment_window_evaluation_hash", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("amendment_window_evaluation_hash", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(window_hash_rule is not None, "amendment_bundle missing amendment_window_evaluation_hash reverse guard")
     ensure(
-        window_hash_rule["then"]["properties"]["amendment_window_context_ref"].get("type") == "string",
+        window_hash_rule is not None,
+        "amendment_bundle missing amendment_window_evaluation_hash reverse guard",
+    )
+    ensure(
+        window_hash_rule["then"]["properties"]["amendment_window_context_ref"].get("type")
+        == "string",
         "amendment_bundle non-null amendment_window_evaluation_hash must require amendment_window_context_ref",
     )
 
@@ -18290,11 +20574,17 @@ def check_amendment_bundle() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("calculation_basis_ref", {}).get("type") == "string"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("calculation_basis_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(basis_pair_rule is not None, "amendment_bundle missing calculation_basis_ref pairing guard")
+    ensure(
+        basis_pair_rule is not None, "amendment_bundle missing calculation_basis_ref pairing guard"
+    )
     ensure(
         basis_pair_rule["then"]["properties"]["calculation_basis_hash"].get("type") == "string",
         "amendment_bundle non-null calculation_basis_ref must require calculation_basis_hash",
@@ -18304,11 +20594,17 @@ def check_amendment_bundle() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("calculation_basis_hash", {}).get("type") == "string"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("calculation_basis_hash", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(basis_hash_rule is not None, "amendment_bundle missing calculation_basis_hash reverse guard")
+    ensure(
+        basis_hash_rule is not None, "amendment_bundle missing calculation_basis_hash reverse guard"
+    )
     ensure(
         basis_hash_rule["then"]["properties"]["calculation_basis_ref"].get("type") == "string",
         "amendment_bundle non-null calculation_basis_hash must require calculation_basis_ref",
@@ -18318,7 +20614,8 @@ def check_amendment_bundle() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("packet_ref", {}).get("type") == "string"
+            if candidate.get("if", {}).get("properties", {}).get("packet_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -18340,7 +20637,8 @@ def check_amendment_bundle() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("superseded_at", {}).get("type") == "string"
+            if candidate.get("if", {}).get("properties", {}).get("superseded_at", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -18358,7 +20656,8 @@ def check_authority_binding_drift_sentinel_contract() -> None:
         "authority_binding_drift_sentinel_contract must reject unknown fields",
     )
     ensure(
-        schema["properties"]["contract_version"].get("const") == "AUTHORITY_BINDING_DRIFT_SENTINEL_V1",
+        schema["properties"]["contract_version"].get("const")
+        == "AUTHORITY_BINDING_DRIFT_SENTINEL_V1",
         "authority_binding_drift_sentinel_contract contract_version must stay pinned to AUTHORITY_BINDING_DRIFT_SENTINEL_V1",
     )
     ensure(
@@ -18389,7 +20688,10 @@ def check_authority_binding_drift_sentinel_contract() -> None:
         "duplicate_truth_inputs_state",
         "exclusive_send_claim_state",
     ]:
-        ensure(field in schema["required"], f"authority_binding_drift_sentinel_contract must require {field}")
+        ensure(
+            field in schema["required"],
+            f"authority_binding_drift_sentinel_contract must require {field}",
+        )
     check_min_length_fields(
         schema,
         [
@@ -18429,7 +20731,8 @@ def check_authority_binding_drift_sentinel_contract() -> None:
         "authority_binding_drift_sentinel_contract.checked_action_class must preserve the reusable action set",
     )
     ensure(
-        schema["properties"]["decision_state"].get("enum") == ["NOT_EVALUATED", "CLEAR_TO_PROCEED", "BLOCKED"],
+        schema["properties"]["decision_state"].get("enum")
+        == ["NOT_EVALUATED", "CLEAR_TO_PROCEED", "BLOCKED"],
         "authority_binding_drift_sentinel_contract.decision_state must preserve the evaluated outcome set",
     )
     ensure(
@@ -18461,8 +20764,13 @@ def check_authority_binding_drift_sentinel_contract() -> None:
         "authority_binding_drift_sentinel_contract.block_reason_codes must preserve the explicit fail-closed drift reasons",
     )
 
-    not_attempted_rule = find_rule_by_const(schema["allOf"], "checked_action_class", "NOT_YET_ATTEMPTED")
-    ensure(not_attempted_rule is not None, "authority_binding_drift_sentinel_contract missing NOT_YET_ATTEMPTED guard")
+    not_attempted_rule = find_rule_by_const(
+        schema["allOf"], "checked_action_class", "NOT_YET_ATTEMPTED"
+    )
+    ensure(
+        not_attempted_rule is not None,
+        "authority_binding_drift_sentinel_contract missing NOT_YET_ATTEMPTED guard",
+    )
     not_attempted_then = not_attempted_rule["then"]["properties"]
     ensure(
         not_attempted_then["decision_state"].get("const") == "NOT_EVALUATED"
@@ -18476,10 +20784,14 @@ def check_authority_binding_drift_sentinel_contract() -> None:
     )
 
     clear_rule = find_rule_by_const(schema["allOf"], "decision_state", "CLEAR_TO_PROCEED")
-    ensure(clear_rule is not None, "authority_binding_drift_sentinel_contract missing CLEAR_TO_PROCEED guard")
+    ensure(
+        clear_rule is not None,
+        "authority_binding_drift_sentinel_contract missing CLEAR_TO_PROCEED guard",
+    )
     clear_then = clear_rule["then"]["properties"]
     ensure(
-        clear_then["checked_action_class"].get("enum") == ["TRANSMIT_MUTATION", "RECONCILIATION_POLL", "RECOVERY_READ"]
+        clear_then["checked_action_class"].get("enum")
+        == ["TRANSMIT_MUTATION", "RECONCILIATION_POLL", "RECOVERY_READ"]
         and clear_then["checked_at"].get("type") == "string"
         and clear_then["checked_token_version_ref_or_null"].get("type") == "string"
         and clear_then["duplicate_truth_inputs_state"].get("const") == "RECHECKED_NO_CONFLICT"
@@ -18488,10 +20800,13 @@ def check_authority_binding_drift_sentinel_contract() -> None:
     )
 
     blocked_rule = find_rule_by_const(schema["allOf"], "decision_state", "BLOCKED")
-    ensure(blocked_rule is not None, "authority_binding_drift_sentinel_contract missing BLOCKED guard")
+    ensure(
+        blocked_rule is not None, "authority_binding_drift_sentinel_contract missing BLOCKED guard"
+    )
     blocked_then = blocked_rule["then"]["properties"]
     ensure(
-        blocked_then["checked_action_class"].get("enum") == ["TRANSMIT_MUTATION", "RECONCILIATION_POLL", "RECOVERY_READ"]
+        blocked_then["checked_action_class"].get("enum")
+        == ["TRANSMIT_MUTATION", "RECONCILIATION_POLL", "RECOVERY_READ"]
         and blocked_then["checked_at"].get("type") == "string"
         and blocked_then["checked_token_version_ref_or_null"].get("type") == "null"
         and blocked_then["pass_reason_code_or_null"].get("type") == "null"
@@ -18500,19 +20815,26 @@ def check_authority_binding_drift_sentinel_contract() -> None:
     )
 
     transmit_rule = find_rule_by_const(schema["allOf"], "checked_action_class", "TRANSMIT_MUTATION")
-    ensure(transmit_rule is not None, "authority_binding_drift_sentinel_contract missing transmit-action guard")
     ensure(
-        transmit_rule["then"]["properties"]["exclusive_send_claim_state"].get("enum") == ["CLAIM_HELD", "CLAIM_CONFLICT"],
+        transmit_rule is not None,
+        "authority_binding_drift_sentinel_contract missing transmit-action guard",
+    )
+    ensure(
+        transmit_rule["then"]["properties"]["exclusive_send_claim_state"].get("enum")
+        == ["CLAIM_HELD", "CLAIM_CONFLICT"],
         "authority_binding_drift_sentinel_contract transmit checks must keep explicit claim-held or claim-conflict posture",
     )
 
-    claim_conflict_rule = find_rule_by_const(schema["allOf"], "exclusive_send_claim_state", "CLAIM_CONFLICT")
+    claim_conflict_rule = find_rule_by_const(
+        schema["allOf"], "exclusive_send_claim_state", "CLAIM_CONFLICT"
+    )
     ensure(
         claim_conflict_rule is not None,
         "authority_binding_drift_sentinel_contract missing CLAIM_CONFLICT reverse guard",
     )
     ensure(
-        claim_conflict_rule["then"]["properties"]["checked_action_class"].get("const") == "TRANSMIT_MUTATION"
+        claim_conflict_rule["then"]["properties"]["checked_action_class"].get("const")
+        == "TRANSMIT_MUTATION"
         and claim_conflict_rule["then"]["properties"]["decision_state"].get("const") == "BLOCKED"
         and claim_conflict_rule["then"]["properties"]["block_reason_codes"]["contains"].get("const")
         == "SEND_CLAIM_CONFLICT",
@@ -18523,7 +20845,11 @@ def check_authority_binding_drift_sentinel_contract() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("block_reason_codes", {}).get("contains", {}).get("enum")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("block_reason_codes", {})
+            .get("contains", {})
+            .get("enum")
             == ["DUPLICATE_BUCKET_CHANGED", "STRONGER_EXTERNAL_TRUTH_PRESENT"]
         ),
         None,
@@ -18647,7 +20973,9 @@ def check_authority_interaction_record() -> None:
         "authority_interaction_record.submission_record_ref must reject empty strings when present",
     )
     ensure(
-        schema["properties"]["request_identity_contract"]["allOf"][1]["properties"]["binding_scope_class"].get("const")
+        schema["properties"]["request_identity_contract"]["allOf"][1]["properties"][
+            "binding_scope_class"
+        ].get("const")
         == "AUTHORITY_INTERACTION_RECORD",
         "authority_interaction_record.request_identity_contract must force binding_scope_class=AUTHORITY_INTERACTION_RECORD",
     )
@@ -18673,7 +21001,8 @@ def check_authority_interaction_record() -> None:
         "authority_interaction_record.response_history_ids items must reject empty strings",
     )
     ensure(
-        schema["properties"]["send_revalidation_state"].get("enum") == ["NOT_PERFORMED", "CLEAR_TO_SEND", "BLOCKED"],
+        schema["properties"]["send_revalidation_state"].get("enum")
+        == ["NOT_PERFORMED", "CLEAR_TO_SEND", "BLOCKED"],
         "authority_interaction_record.send_revalidation_state must preserve the send-time revalidation enum",
     )
     ensure(
@@ -18711,56 +21040,104 @@ def check_authority_interaction_record() -> None:
         "authority_interaction_record.resend_legality_state must preserve the resend-control posture enum",
     )
 
-    not_performed_rule = find_rule_by_const(schema["allOf"], "send_revalidation_state", "NOT_PERFORMED")
-    ensure(not_performed_rule is not None, "authority_interaction_record missing send_revalidation_state=NOT_PERFORMED guard")
+    not_performed_rule = find_rule_by_const(
+        schema["allOf"], "send_revalidation_state", "NOT_PERFORMED"
+    )
+    ensure(
+        not_performed_rule is not None,
+        "authority_interaction_record missing send_revalidation_state=NOT_PERFORMED guard",
+    )
     ensure(
         not_performed_rule["then"]["properties"]["send_revalidated_at"].get("type") == "null"
-        and not_performed_rule["then"]["properties"]["send_authorized_token_version_ref"].get("type") == "null"
-        and not_performed_rule["then"]["properties"]["binding_drift_sentinel_contract"]["properties"]["decision_state"].get("const")
+        and not_performed_rule["then"]["properties"]["send_authorized_token_version_ref"].get(
+            "type"
+        )
+        == "null"
+        and not_performed_rule["then"]["properties"]["binding_drift_sentinel_contract"][
+            "properties"
+        ]["decision_state"].get("const")
         == "NOT_EVALUATED"
-        and not_performed_rule["then"]["properties"]["send_revalidation_reason_codes"].get("maxItems") == 0,
+        and not_performed_rule["then"]["properties"]["send_revalidation_reason_codes"].get(
+            "maxItems"
+        )
+        == 0,
         "authority_interaction_record NOT_PERFORMED must clear send-time evidence fields and keep the sentinel unevaluated",
     )
 
-    clear_to_send_rule = find_rule_by_const(schema["allOf"], "send_revalidation_state", "CLEAR_TO_SEND")
-    ensure(clear_to_send_rule is not None, "authority_interaction_record missing send_revalidation_state=CLEAR_TO_SEND guard")
+    clear_to_send_rule = find_rule_by_const(
+        schema["allOf"], "send_revalidation_state", "CLEAR_TO_SEND"
+    )
+    ensure(
+        clear_to_send_rule is not None,
+        "authority_interaction_record missing send_revalidation_state=CLEAR_TO_SEND guard",
+    )
     ensure(
         clear_to_send_rule["then"]["properties"]["send_revalidated_at"].get("type") == "string"
-        and clear_to_send_rule["then"]["properties"]["send_authorized_token_version_ref"].get("type") == "string"
-        and clear_to_send_rule["then"]["properties"]["binding_drift_sentinel_contract"]["properties"]["checked_action_class"].get("const")
+        and clear_to_send_rule["then"]["properties"]["send_authorized_token_version_ref"].get(
+            "type"
+        )
+        == "string"
+        and clear_to_send_rule["then"]["properties"]["binding_drift_sentinel_contract"][
+            "properties"
+        ]["checked_action_class"].get("const")
         == "TRANSMIT_MUTATION"
-        and clear_to_send_rule["then"]["properties"]["binding_drift_sentinel_contract"]["properties"]["decision_state"].get("const")
+        and clear_to_send_rule["then"]["properties"]["binding_drift_sentinel_contract"][
+            "properties"
+        ]["decision_state"].get("const")
         == "CLEAR_TO_PROCEED"
-        and clear_to_send_rule["then"]["properties"]["send_revalidation_reason_codes"].get("minItems") == 1
-        and clear_to_send_rule["then"]["properties"]["send_revalidation_reason_codes"].get("maxItems") == 1,
+        and clear_to_send_rule["then"]["properties"]["send_revalidation_reason_codes"].get(
+            "minItems"
+        )
+        == 1
+        and clear_to_send_rule["then"]["properties"]["send_revalidation_reason_codes"].get(
+            "maxItems"
+        )
+        == 1,
         "authority_interaction_record CLEAR_TO_SEND must require a timestamp, one authorized token version, one pass reason, and a cleared transmit sentinel",
     )
 
     blocked_rule = find_rule_by_const(schema["allOf"], "send_revalidation_state", "BLOCKED")
-    ensure(blocked_rule is not None, "authority_interaction_record missing send_revalidation_state=BLOCKED guard")
+    ensure(
+        blocked_rule is not None,
+        "authority_interaction_record missing send_revalidation_state=BLOCKED guard",
+    )
     ensure(
         blocked_rule["then"]["properties"]["send_revalidated_at"].get("type") == "string"
-        and blocked_rule["then"]["properties"]["send_authorized_token_version_ref"].get("type") == "null"
-        and blocked_rule["then"]["properties"]["binding_drift_sentinel_contract"]["properties"]["checked_action_class"].get("const")
+        and blocked_rule["then"]["properties"]["send_authorized_token_version_ref"].get("type")
+        == "null"
+        and blocked_rule["then"]["properties"]["binding_drift_sentinel_contract"]["properties"][
+            "checked_action_class"
+        ].get("const")
         == "TRANSMIT_MUTATION"
-        and blocked_rule["then"]["properties"]["binding_drift_sentinel_contract"]["properties"]["decision_state"].get("const")
+        and blocked_rule["then"]["properties"]["binding_drift_sentinel_contract"]["properties"][
+            "decision_state"
+        ].get("const")
         == "BLOCKED"
-        and blocked_rule["then"]["properties"]["send_revalidation_reason_codes"].get("minItems") == 1,
+        and blocked_rule["then"]["properties"]["send_revalidation_reason_codes"].get("minItems")
+        == 1,
         "authority_interaction_record BLOCKED must require a timestamp, clear the authorized token version, keep explicit block reasons, and persist a blocked transmit sentinel",
     )
 
-    response_captured_rule = find_rule_by_const(schema["allOf"], "lifecycle_state", "RESPONSE_CAPTURED")
-    ensure(response_captured_rule is not None, "authority_interaction_record missing RESPONSE_CAPTURED resolution guard")
+    response_captured_rule = find_rule_by_const(
+        schema["allOf"], "lifecycle_state", "RESPONSE_CAPTURED"
+    )
+    ensure(
+        response_captured_rule is not None,
+        "authority_interaction_record missing RESPONSE_CAPTURED resolution guard",
+    )
     ensure(
         response_captured_rule["then"]["properties"]["resolution_basis"].get("type") == "null",
         "authority_interaction_record RESPONSE_CAPTURED must keep resolution_basis null until RESOLVED",
     )
     ensure(
-        response_captured_rule["then"]["properties"]["send_revalidation_state"].get("const") == "CLEAR_TO_SEND",
+        response_captured_rule["then"]["properties"]["send_revalidation_state"].get("const")
+        == "CLEAR_TO_SEND",
         "authority_interaction_record RESPONSE_CAPTURED must retain send_revalidation_state=CLEAR_TO_SEND",
     )
 
-    queued_rule = find_rule_by_enum(schema["allOf"], "lifecycle_state", ["REQUEST_REGISTERED", "DISPATCH_READY"])
+    queued_rule = find_rule_by_enum(
+        schema["allOf"], "lifecycle_state", ["REQUEST_REGISTERED", "DISPATCH_READY"]
+    )
     ensure(queued_rule is not None, "authority_interaction_record missing queued lifecycle guard")
     queued_then = queued_rule["then"]["properties"]
     ensure(
@@ -18777,14 +21154,19 @@ def check_authority_interaction_record() -> None:
         and queued_then["reconciliation_deadline_at"].get("type") == "null"
         and queued_then["resolution_basis"].get("type") == "null"
         and queued_then["abandonment_reason_code"].get("type") == "null"
-        and queued_then["binding_drift_sentinel_contract"]["properties"]["decision_state"].get("const")
+        and queued_then["binding_drift_sentinel_contract"]["properties"]["decision_state"].get(
+            "const"
+        )
         == "NOT_EVALUATED"
         and queued_then["send_revalidation_state"].get("const") == "NOT_PERFORMED",
         "authority_interaction_record queued exchanges must preserve no-response posture, an unevaluated drift sentinel, and send_revalidation_state=NOT_PERFORMED",
     )
 
     transmit_rule = find_rule_by_const(schema["allOf"], "lifecycle_state", "TRANSMIT_IN_FLIGHT")
-    ensure(transmit_rule is not None, "authority_interaction_record missing TRANSMIT_IN_FLIGHT send-time guard")
+    ensure(
+        transmit_rule is not None,
+        "authority_interaction_record missing TRANSMIT_IN_FLIGHT send-time guard",
+    )
     transmit_then = transmit_rule["then"]["properties"]
     ensure(
         transmit_then["active_response_id"].get("type") == "null"
@@ -18800,23 +21182,38 @@ def check_authority_interaction_record() -> None:
         and transmit_then["reconciliation_deadline_at"].get("type") == "null"
         and transmit_then["resolution_basis"].get("type") == "null"
         and transmit_then["abandonment_reason_code"].get("type") == "null"
-        and transmit_then["binding_drift_sentinel_contract"]["properties"]["checked_action_class"].get("const")
+        and transmit_then["binding_drift_sentinel_contract"]["properties"][
+            "checked_action_class"
+        ].get("const")
         == "TRANSMIT_MUTATION"
-        and transmit_then["binding_drift_sentinel_contract"]["properties"]["decision_state"].get("const")
+        and transmit_then["binding_drift_sentinel_contract"]["properties"]["decision_state"].get(
+            "const"
+        )
         == "CLEAR_TO_PROCEED"
         and transmit_then["send_revalidation_state"].get("const") == "CLEAR_TO_SEND",
         "authority_interaction_record TRANSMIT_IN_FLIGHT must preserve no-response posture, a cleared transmit sentinel, and send_revalidation_state=CLEAR_TO_SEND",
     )
 
-    post_capture_rule = find_rule_by_enum(schema["allOf"], "lifecycle_state", ["RESPONSE_CAPTURED", "RECONCILING", "RESOLVED"])
-    ensure(post_capture_rule is not None, "authority_interaction_record missing post-capture lifecycle guard")
+    post_capture_rule = find_rule_by_enum(
+        schema["allOf"], "lifecycle_state", ["RESPONSE_CAPTURED", "RECONCILING", "RESOLVED"]
+    )
+    ensure(
+        post_capture_rule is not None,
+        "authority_interaction_record missing post-capture lifecycle guard",
+    )
     post_capture_then = post_capture_rule["then"]["properties"]
     ensure(
         post_capture_then["active_response_id"].get("type") == "string"
         and post_capture_then["response_history_ids"].get("minItems") == 1
-        and post_capture_then["reconciliation_budget_state"].get("enum") == ["ACTIVE", "EXHAUSTED", "ESCALATED", "CLOSED"]
+        and post_capture_then["reconciliation_budget_state"].get("enum")
+        == ["ACTIVE", "EXHAUSTED", "ESCALATED", "CLOSED"]
         and post_capture_then["resend_legality_state"].get("enum")
-        == ["FOLLOW_UP_READ_ONLY", "BLOCKED_BY_RECONCILIATION", "BLOCKED_BY_ESCALATION", "CLOSED_NO_RESEND"]
+        == [
+            "FOLLOW_UP_READ_ONLY",
+            "BLOCKED_BY_RECONCILIATION",
+            "BLOCKED_BY_ESCALATION",
+            "CLOSED_NO_RESEND",
+        ]
         and post_capture_then["resend_control_reason_codes"].get("minItems") == 1
         and post_capture_then["meaning_resolution_state"].get("enum")
         == [
@@ -18836,7 +21233,8 @@ def check_authority_interaction_record() -> None:
     reconciling_then = reconciling_rule["then"]["properties"]
     ensure(
         reconciling_then["meaning_resolution_state"].get("const") == "RECONCILIATION_REQUIRED"
-        and reconciling_then["reconciliation_budget_state"].get("enum") == ["ACTIVE", "EXHAUSTED", "ESCALATED"]
+        and reconciling_then["reconciliation_budget_state"].get("enum")
+        == ["ACTIVE", "EXHAUSTED", "ESCALATED"]
         and reconciling_then["resend_legality_state"].get("enum")
         == ["FOLLOW_UP_READ_ONLY", "BLOCKED_BY_RECONCILIATION", "BLOCKED_BY_ESCALATION"]
         and reconciling_then["reconciliation_attempt_count"].get("minimum") == 1
@@ -18866,8 +21264,10 @@ def check_authority_interaction_record() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("lifecycle_state", {}).get("const") == "RESOLVED"
-            and rule.get("if", {}).get("properties", {}).get("resolution_basis", {}).get("const") == "TERMINAL_RESPONSE"
+            if rule.get("if", {}).get("properties", {}).get("lifecycle_state", {}).get("const")
+            == "RESOLVED"
+            and rule.get("if", {}).get("properties", {}).get("resolution_basis", {}).get("const")
+            == "TERMINAL_RESPONSE"
         ),
         None,
     )
@@ -18878,7 +21278,10 @@ def check_authority_interaction_record() -> None:
     ensure(
         resolved_terminal_rule["then"]["properties"]["meaning_resolution_state"].get("enum")
         == ["ACTIVE_DIRECT", "ACTIVE_CORROBORATED"]
-        and resolved_terminal_rule["then"]["properties"]["reconciliation_attempt_count"].get("const") == 0,
+        and resolved_terminal_rule["then"]["properties"]["reconciliation_attempt_count"].get(
+            "const"
+        )
+        == 0,
         "authority_interaction_record TERMINAL_RESPONSE resolutions must remain direct or corroborated with reconciliation_attempt_count=0",
     )
 
@@ -18886,7 +21289,8 @@ def check_authority_interaction_record() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("lifecycle_state", {}).get("const") == "RESOLVED"
+            if rule.get("if", {}).get("properties", {}).get("lifecycle_state", {}).get("const")
+            == "RESOLVED"
             and rule.get("if", {}).get("properties", {}).get("resolution_basis", {}).get("const")
             == "RECONCILIATION_RESULT"
         ),
@@ -18899,7 +21303,10 @@ def check_authority_interaction_record() -> None:
     ensure(
         resolved_reconciliation_rule["then"]["properties"]["meaning_resolution_state"].get("const")
         == "RECONCILIATION_RESOLVED"
-        and resolved_reconciliation_rule["then"]["properties"]["reconciliation_attempt_count"].get("minimum") == 1,
+        and resolved_reconciliation_rule["then"]["properties"]["reconciliation_attempt_count"].get(
+            "minimum"
+        )
+        == 1,
         "authority_interaction_record RECONCILIATION_RESULT resolutions must retain meaning_resolution_state=RECONCILIATION_RESOLVED with a positive attempt count",
     )
 
@@ -18907,11 +21314,15 @@ def check_authority_interaction_record() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("resolution_basis", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("resolution_basis", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(resolution_basis_rule is not None, "authority_interaction_record missing resolution_basis reverse guard")
+    ensure(
+        resolution_basis_rule is not None,
+        "authority_interaction_record missing resolution_basis reverse guard",
+    )
     ensure(
         resolution_basis_rule["then"]["properties"]["lifecycle_state"].get("const") == "RESOLVED",
         "authority_interaction_record non-null resolution_basis must force lifecycle_state=RESOLVED",
@@ -18920,13 +21331,24 @@ def check_authority_interaction_record() -> None:
     abandoned_state_rule = find_rule_by_const(schema["allOf"], "lifecycle_state", "ABANDONED")
     ensure(abandoned_state_rule is not None, "authority_interaction_record missing ABANDONED guard")
     ensure(
-        abandoned_state_rule["then"]["properties"]["reconciliation_budget_state"].get("const") == "NOT_OPENED"
-        and abandoned_state_rule["then"]["properties"]["next_reconciliation_at"].get("type") == "null"
-        and abandoned_state_rule["then"]["properties"]["reconciliation_escalated_at"].get("type") == "null"
-        and abandoned_state_rule["then"]["properties"]["reconciliation_workflow_item_ref"].get("type") == "null"
-        and abandoned_state_rule["then"]["properties"]["resend_legality_state"].get("const") == "CLOSED_NO_RESEND"
-        and abandoned_state_rule["then"]["properties"]["resend_control_reason_codes"].get("minItems") == 1
-        and abandoned_state_rule["then"]["properties"]["send_revalidation_state"].get("enum") == ["CLEAR_TO_SEND", "BLOCKED"],
+        abandoned_state_rule["then"]["properties"]["reconciliation_budget_state"].get("const")
+        == "NOT_OPENED"
+        and abandoned_state_rule["then"]["properties"]["next_reconciliation_at"].get("type")
+        == "null"
+        and abandoned_state_rule["then"]["properties"]["reconciliation_escalated_at"].get("type")
+        == "null"
+        and abandoned_state_rule["then"]["properties"]["reconciliation_workflow_item_ref"].get(
+            "type"
+        )
+        == "null"
+        and abandoned_state_rule["then"]["properties"]["resend_legality_state"].get("const")
+        == "CLOSED_NO_RESEND"
+        and abandoned_state_rule["then"]["properties"]["resend_control_reason_codes"].get(
+            "minItems"
+        )
+        == 1
+        and abandoned_state_rule["then"]["properties"]["send_revalidation_state"].get("enum")
+        == ["CLEAR_TO_SEND", "BLOCKED"],
         "authority_interaction_record ABANDONED must preserve closed no-resend posture and whether send-time revalidation blocked before send or had already cleared send",
     )
 
@@ -18934,11 +21356,18 @@ def check_authority_interaction_record() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("abandonment_reason_code", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("abandonment_reason_code", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(abandonment_rule is not None, "authority_interaction_record missing abandonment_reason_code reverse guard")
+    ensure(
+        abandonment_rule is not None,
+        "authority_interaction_record missing abandonment_reason_code reverse guard",
+    )
     ensure(
         abandonment_rule["then"]["properties"]["lifecycle_state"].get("const") == "ABANDONED",
         "authority_interaction_record non-null abandonment_reason_code must force lifecycle_state=ABANDONED",
@@ -18948,35 +21377,49 @@ def check_authority_interaction_record() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("active_response_id", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("active_response_id", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(active_response_rule is not None, "authority_interaction_record missing active_response_id reverse guard")
+    ensure(
+        active_response_rule is not None,
+        "authority_interaction_record missing active_response_id reverse guard",
+    )
     ensure(
         active_response_rule["then"]["properties"]["response_history_ids"].get("minItems") == 1,
         "authority_interaction_record non-null active_response_id must require response_history_ids",
     )
 
-    no_response_rule = find_rule_by_const(schema["allOf"], "meaning_resolution_state", "NO_RESPONSE")
-    ensure(no_response_rule is not None, "authority_interaction_record missing meaning_resolution_state=NO_RESPONSE guard")
+    no_response_rule = find_rule_by_const(
+        schema["allOf"], "meaning_resolution_state", "NO_RESPONSE"
+    )
+    ensure(
+        no_response_rule is not None,
+        "authority_interaction_record missing meaning_resolution_state=NO_RESPONSE guard",
+    )
     ensure(
         no_response_rule["then"]["properties"]["active_response_id"].get("type") == "null"
         and no_response_rule["then"]["properties"]["response_history_ids"].get("maxItems") == 0,
         "authority_interaction_record NO_RESPONSE must clear active_response_id and response_history_ids",
     )
 
-    provisional_timeout_rule = find_rule_by_const(schema["allOf"], "meaning_resolution_state", "PROVISIONAL_TIMEOUT")
+    provisional_timeout_rule = find_rule_by_const(
+        schema["allOf"], "meaning_resolution_state", "PROVISIONAL_TIMEOUT"
+    )
     ensure(
         provisional_timeout_rule is not None,
         "authority_interaction_record missing meaning_resolution_state=PROVISIONAL_TIMEOUT guard",
     )
     ensure(
-        provisional_timeout_rule["then"]["properties"]["lifecycle_state"].get("const") == "RESPONSE_CAPTURED",
+        provisional_timeout_rule["then"]["properties"]["lifecycle_state"].get("const")
+        == "RESPONSE_CAPTURED",
         "authority_interaction_record PROVISIONAL_TIMEOUT must force lifecycle_state=RESPONSE_CAPTURED",
     )
 
-    corroborated_rule = find_rule_by_const(schema["allOf"], "meaning_resolution_state", "ACTIVE_CORROBORATED")
+    corroborated_rule = find_rule_by_const(
+        schema["allOf"], "meaning_resolution_state", "ACTIVE_CORROBORATED"
+    )
     ensure(
         corroborated_rule is not None,
         "authority_interaction_record missing meaning_resolution_state=ACTIVE_CORROBORATED guard",
@@ -18986,7 +21429,9 @@ def check_authority_interaction_record() -> None:
         "authority_interaction_record ACTIVE_CORROBORATED must require at least two response ids in response_history_ids",
     )
 
-    reconciliation_required_rule = find_rule_by_const(schema["allOf"], "meaning_resolution_state", "RECONCILIATION_REQUIRED")
+    reconciliation_required_rule = find_rule_by_const(
+        schema["allOf"], "meaning_resolution_state", "RECONCILIATION_REQUIRED"
+    )
     ensure(
         reconciliation_required_rule is not None,
         "authority_interaction_record missing meaning_resolution_state=RECONCILIATION_REQUIRED guard",
@@ -18997,13 +21442,16 @@ def check_authority_interaction_record() -> None:
         "authority_interaction_record RECONCILIATION_REQUIRED must force lifecycle_state RESPONSE_CAPTURED or RECONCILING",
     )
 
-    reconciliation_resolved_rule = find_rule_by_const(schema["allOf"], "meaning_resolution_state", "RECONCILIATION_RESOLVED")
+    reconciliation_resolved_rule = find_rule_by_const(
+        schema["allOf"], "meaning_resolution_state", "RECONCILIATION_RESOLVED"
+    )
     ensure(
         reconciliation_resolved_rule is not None,
         "authority_interaction_record missing meaning_resolution_state=RECONCILIATION_RESOLVED guard",
     )
     ensure(
-        reconciliation_resolved_rule["then"]["properties"]["lifecycle_state"].get("const") == "RESOLVED"
+        reconciliation_resolved_rule["then"]["properties"]["lifecycle_state"].get("const")
+        == "RESOLVED"
         and reconciliation_resolved_rule["then"]["properties"]["resolution_basis"].get("const")
         == "RECONCILIATION_RESULT",
         "authority_interaction_record RECONCILIATION_RESOLVED must force lifecycle_state=RESOLVED and resolution_basis=RECONCILIATION_RESULT",
@@ -19013,13 +21461,21 @@ def check_authority_interaction_record() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("next_reconciliation_at", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("next_reconciliation_at", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(next_reconciliation_rule is not None, "authority_interaction_record missing next_reconciliation_at reverse guard")
     ensure(
-        next_reconciliation_rule["then"]["properties"]["reconciliation_budget_state"].get("const") == "ACTIVE",
+        next_reconciliation_rule is not None,
+        "authority_interaction_record missing next_reconciliation_at reverse guard",
+    )
+    ensure(
+        next_reconciliation_rule["then"]["properties"]["reconciliation_budget_state"].get("const")
+        == "ACTIVE",
         "authority_interaction_record non-null next_reconciliation_at must force reconciliation_budget_state=ACTIVE",
     )
 
@@ -19027,13 +21483,21 @@ def check_authority_interaction_record() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("reconciliation_escalated_at", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("reconciliation_escalated_at", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(escalated_at_rule is not None, "authority_interaction_record missing reconciliation_escalated_at reverse guard")
     ensure(
-        escalated_at_rule["then"]["properties"]["reconciliation_budget_state"].get("enum") == ["ESCALATED", "CLOSED"],
+        escalated_at_rule is not None,
+        "authority_interaction_record missing reconciliation_escalated_at reverse guard",
+    )
+    ensure(
+        escalated_at_rule["then"]["properties"]["reconciliation_budget_state"].get("enum")
+        == ["ESCALATED", "CLOSED"],
         "authority_interaction_record non-null reconciliation_escalated_at must force reconciliation_budget_state ESCALATED or CLOSED",
     )
 
@@ -19041,116 +21505,204 @@ def check_authority_interaction_record() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("reconciliation_workflow_item_ref", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("reconciliation_workflow_item_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(workflow_ref_rule is not None, "authority_interaction_record missing reconciliation_workflow_item_ref reverse guard")
     ensure(
-        workflow_ref_rule["then"]["properties"]["reconciliation_budget_state"].get("enum") == ["ESCALATED", "CLOSED"],
+        workflow_ref_rule is not None,
+        "authority_interaction_record missing reconciliation_workflow_item_ref reverse guard",
+    )
+    ensure(
+        workflow_ref_rule["then"]["properties"]["reconciliation_budget_state"].get("enum")
+        == ["ESCALATED", "CLOSED"],
         "authority_interaction_record non-null reconciliation_workflow_item_ref must force reconciliation_budget_state ESCALATED or CLOSED",
     )
 
-    active_budget_rule = find_rule_by_const(schema["allOf"], "reconciliation_budget_state", "ACTIVE")
-    ensure(active_budget_rule is not None, "authority_interaction_record missing reconciliation_budget_state=ACTIVE guard")
+    active_budget_rule = find_rule_by_const(
+        schema["allOf"], "reconciliation_budget_state", "ACTIVE"
+    )
     ensure(
-        active_budget_rule["then"]["properties"]["lifecycle_state"].get("enum") == ["RESPONSE_CAPTURED", "RECONCILING"]
-        and active_budget_rule["then"]["properties"]["next_reconciliation_at"].get("type") == "string"
-        and active_budget_rule["then"]["properties"]["resend_legality_state"].get("const") == "FOLLOW_UP_READ_ONLY",
+        active_budget_rule is not None,
+        "authority_interaction_record missing reconciliation_budget_state=ACTIVE guard",
+    )
+    ensure(
+        active_budget_rule["then"]["properties"]["lifecycle_state"].get("enum")
+        == ["RESPONSE_CAPTURED", "RECONCILING"]
+        and active_budget_rule["then"]["properties"]["next_reconciliation_at"].get("type")
+        == "string"
+        and active_budget_rule["then"]["properties"]["resend_legality_state"].get("const")
+        == "FOLLOW_UP_READ_ONLY",
         "authority_interaction_record ACTIVE reconciliation budget must require an open post-capture lifecycle, a next follow-up time, and resend_legality_state=FOLLOW_UP_READ_ONLY",
     )
 
-    exhausted_budget_rule = find_rule_by_const(schema["allOf"], "reconciliation_budget_state", "EXHAUSTED")
-    ensure(exhausted_budget_rule is not None, "authority_interaction_record missing reconciliation_budget_state=EXHAUSTED guard")
+    exhausted_budget_rule = find_rule_by_const(
+        schema["allOf"], "reconciliation_budget_state", "EXHAUSTED"
+    )
     ensure(
-        exhausted_budget_rule["then"]["properties"]["lifecycle_state"].get("enum") == ["RESPONSE_CAPTURED", "RECONCILING"]
-        and exhausted_budget_rule["then"]["properties"]["next_reconciliation_at"].get("type") == "null"
-        and exhausted_budget_rule["then"]["properties"]["resend_legality_state"].get("const") == "BLOCKED_BY_RECONCILIATION",
+        exhausted_budget_rule is not None,
+        "authority_interaction_record missing reconciliation_budget_state=EXHAUSTED guard",
+    )
+    ensure(
+        exhausted_budget_rule["then"]["properties"]["lifecycle_state"].get("enum")
+        == ["RESPONSE_CAPTURED", "RECONCILING"]
+        and exhausted_budget_rule["then"]["properties"]["next_reconciliation_at"].get("type")
+        == "null"
+        and exhausted_budget_rule["then"]["properties"]["resend_legality_state"].get("const")
+        == "BLOCKED_BY_RECONCILIATION",
         "authority_interaction_record EXHAUSTED reconciliation budget must block resend and clear the next follow-up time",
     )
 
-    escalated_budget_rule = find_rule_by_const(schema["allOf"], "reconciliation_budget_state", "ESCALATED")
-    ensure(escalated_budget_rule is not None, "authority_interaction_record missing reconciliation_budget_state=ESCALATED guard")
+    escalated_budget_rule = find_rule_by_const(
+        schema["allOf"], "reconciliation_budget_state", "ESCALATED"
+    )
     ensure(
-        escalated_budget_rule["then"]["properties"]["lifecycle_state"].get("enum") == ["RESPONSE_CAPTURED", "RECONCILING"]
-        and escalated_budget_rule["then"]["properties"]["next_reconciliation_at"].get("type") == "null"
-        and escalated_budget_rule["then"]["properties"]["reconciliation_escalated_at"].get("type") == "string"
-        and escalated_budget_rule["then"]["properties"]["reconciliation_workflow_item_ref"].get("type") == "string"
-        and escalated_budget_rule["then"]["properties"]["resend_legality_state"].get("const") == "BLOCKED_BY_ESCALATION",
+        escalated_budget_rule is not None,
+        "authority_interaction_record missing reconciliation_budget_state=ESCALATED guard",
+    )
+    ensure(
+        escalated_budget_rule["then"]["properties"]["lifecycle_state"].get("enum")
+        == ["RESPONSE_CAPTURED", "RECONCILING"]
+        and escalated_budget_rule["then"]["properties"]["next_reconciliation_at"].get("type")
+        == "null"
+        and escalated_budget_rule["then"]["properties"]["reconciliation_escalated_at"].get("type")
+        == "string"
+        and escalated_budget_rule["then"]["properties"]["reconciliation_workflow_item_ref"].get(
+            "type"
+        )
+        == "string"
+        and escalated_budget_rule["then"]["properties"]["resend_legality_state"].get("const")
+        == "BLOCKED_BY_ESCALATION",
         "authority_interaction_record ESCALATED reconciliation budget must require durable escalation ownership and blocked resend posture",
     )
 
-    closed_budget_rule = find_rule_by_const(schema["allOf"], "reconciliation_budget_state", "CLOSED")
-    ensure(closed_budget_rule is not None, "authority_interaction_record missing reconciliation_budget_state=CLOSED guard")
+    closed_budget_rule = find_rule_by_const(
+        schema["allOf"], "reconciliation_budget_state", "CLOSED"
+    )
     ensure(
-        closed_budget_rule["then"]["properties"]["lifecycle_state"].get("enum") == ["RESPONSE_CAPTURED", "RESOLVED"]
+        closed_budget_rule is not None,
+        "authority_interaction_record missing reconciliation_budget_state=CLOSED guard",
+    )
+    ensure(
+        closed_budget_rule["then"]["properties"]["lifecycle_state"].get("enum")
+        == ["RESPONSE_CAPTURED", "RESOLVED"]
         and closed_budget_rule["then"]["properties"]["next_reconciliation_at"].get("type") == "null"
-        and closed_budget_rule["then"]["properties"]["resend_legality_state"].get("const") == "CLOSED_NO_RESEND",
+        and closed_budget_rule["then"]["properties"]["resend_legality_state"].get("const")
+        == "CLOSED_NO_RESEND",
         "authority_interaction_record CLOSED reconciliation budget must clear future follow-up and retain closed no-resend posture",
     )
 
-    unassessed_resend_rule = find_rule_by_const(schema["allOf"], "resend_legality_state", "UNASSESSED")
-    ensure(unassessed_resend_rule is not None, "authority_interaction_record missing resend_legality_state=UNASSESSED guard")
+    unassessed_resend_rule = find_rule_by_const(
+        schema["allOf"], "resend_legality_state", "UNASSESSED"
+    )
     ensure(
-        unassessed_resend_rule["then"]["properties"]["lifecycle_state"].get("enum") == ["REQUEST_REGISTERED", "DISPATCH_READY"]
-        and unassessed_resend_rule["then"]["properties"]["resend_control_reason_codes"].get("maxItems") == 0,
+        unassessed_resend_rule is not None,
+        "authority_interaction_record missing resend_legality_state=UNASSESSED guard",
+    )
+    ensure(
+        unassessed_resend_rule["then"]["properties"]["lifecycle_state"].get("enum")
+        == ["REQUEST_REGISTERED", "DISPATCH_READY"]
+        and unassessed_resend_rule["then"]["properties"]["resend_control_reason_codes"].get(
+            "maxItems"
+        )
+        == 0,
         "authority_interaction_record UNASSESSED resend posture must remain queued and reason-free",
     )
 
-    idempotent_recovery_rule = find_rule_by_const(schema["allOf"], "resend_legality_state", "IDEMPOTENT_RECOVERY_ONLY")
+    idempotent_recovery_rule = find_rule_by_const(
+        schema["allOf"], "resend_legality_state", "IDEMPOTENT_RECOVERY_ONLY"
+    )
     ensure(
         idempotent_recovery_rule is not None,
         "authority_interaction_record missing resend_legality_state=IDEMPOTENT_RECOVERY_ONLY guard",
     )
     ensure(
-        idempotent_recovery_rule["then"]["properties"]["lifecycle_state"].get("const") == "TRANSMIT_IN_FLIGHT"
-        and idempotent_recovery_rule["then"]["properties"]["resend_control_reason_codes"].get("minItems") == 1,
+        idempotent_recovery_rule["then"]["properties"]["lifecycle_state"].get("const")
+        == "TRANSMIT_IN_FLIGHT"
+        and idempotent_recovery_rule["then"]["properties"]["resend_control_reason_codes"].get(
+            "minItems"
+        )
+        == 1,
         "authority_interaction_record IDEMPOTENT_RECOVERY_ONLY must be restricted to TRANSMIT_IN_FLIGHT with explicit reasons",
     )
 
-    follow_up_read_only_rule = find_rule_by_const(schema["allOf"], "resend_legality_state", "FOLLOW_UP_READ_ONLY")
+    follow_up_read_only_rule = find_rule_by_const(
+        schema["allOf"], "resend_legality_state", "FOLLOW_UP_READ_ONLY"
+    )
     ensure(
         follow_up_read_only_rule is not None,
         "authority_interaction_record missing resend_legality_state=FOLLOW_UP_READ_ONLY guard",
     )
     ensure(
-        follow_up_read_only_rule["then"]["properties"]["reconciliation_budget_state"].get("const") == "ACTIVE"
-        and follow_up_read_only_rule["then"]["properties"]["resend_control_reason_codes"].get("minItems") == 1,
+        follow_up_read_only_rule["then"]["properties"]["reconciliation_budget_state"].get("const")
+        == "ACTIVE"
+        and follow_up_read_only_rule["then"]["properties"]["resend_control_reason_codes"].get(
+            "minItems"
+        )
+        == 1,
         "authority_interaction_record FOLLOW_UP_READ_ONLY must force an active reconciliation budget and explicit reasons",
     )
 
-    blocked_reconciliation_rule = find_rule_by_const(schema["allOf"], "resend_legality_state", "BLOCKED_BY_RECONCILIATION")
+    blocked_reconciliation_rule = find_rule_by_const(
+        schema["allOf"], "resend_legality_state", "BLOCKED_BY_RECONCILIATION"
+    )
     ensure(
         blocked_reconciliation_rule is not None,
         "authority_interaction_record missing resend_legality_state=BLOCKED_BY_RECONCILIATION guard",
     )
     ensure(
-        blocked_reconciliation_rule["then"]["properties"]["reconciliation_budget_state"].get("const") == "EXHAUSTED"
-        and blocked_reconciliation_rule["then"]["properties"]["resend_control_reason_codes"].get("minItems") == 1,
+        blocked_reconciliation_rule["then"]["properties"]["reconciliation_budget_state"].get(
+            "const"
+        )
+        == "EXHAUSTED"
+        and blocked_reconciliation_rule["then"]["properties"]["resend_control_reason_codes"].get(
+            "minItems"
+        )
+        == 1,
         "authority_interaction_record BLOCKED_BY_RECONCILIATION must force an exhausted budget and explicit reasons",
     )
 
-    blocked_escalation_rule = find_rule_by_const(schema["allOf"], "resend_legality_state", "BLOCKED_BY_ESCALATION")
+    blocked_escalation_rule = find_rule_by_const(
+        schema["allOf"], "resend_legality_state", "BLOCKED_BY_ESCALATION"
+    )
     ensure(
         blocked_escalation_rule is not None,
         "authority_interaction_record missing resend_legality_state=BLOCKED_BY_ESCALATION guard",
     )
     ensure(
-        blocked_escalation_rule["then"]["properties"]["reconciliation_budget_state"].get("const") == "ESCALATED"
-        and blocked_escalation_rule["then"]["properties"]["reconciliation_workflow_item_ref"].get("type") == "string"
-        and blocked_escalation_rule["then"]["properties"]["reconciliation_escalated_at"].get("type") == "string"
-        and blocked_escalation_rule["then"]["properties"]["resend_control_reason_codes"].get("minItems") == 1,
+        blocked_escalation_rule["then"]["properties"]["reconciliation_budget_state"].get("const")
+        == "ESCALATED"
+        and blocked_escalation_rule["then"]["properties"]["reconciliation_workflow_item_ref"].get(
+            "type"
+        )
+        == "string"
+        and blocked_escalation_rule["then"]["properties"]["reconciliation_escalated_at"].get("type")
+        == "string"
+        and blocked_escalation_rule["then"]["properties"]["resend_control_reason_codes"].get(
+            "minItems"
+        )
+        == 1,
         "authority_interaction_record BLOCKED_BY_ESCALATION must force an escalated budget with durable workflow ownership and explicit reasons",
     )
 
-    closed_no_resend_rule = find_rule_by_const(schema["allOf"], "resend_legality_state", "CLOSED_NO_RESEND")
+    closed_no_resend_rule = find_rule_by_const(
+        schema["allOf"], "resend_legality_state", "CLOSED_NO_RESEND"
+    )
     ensure(
         closed_no_resend_rule is not None,
         "authority_interaction_record missing resend_legality_state=CLOSED_NO_RESEND guard",
     )
     ensure(
-        closed_no_resend_rule["then"]["properties"]["lifecycle_state"].get("enum") == ["RESPONSE_CAPTURED", "RESOLVED", "ABANDONED"]
-        and closed_no_resend_rule["then"]["properties"]["resend_control_reason_codes"].get("minItems") == 1,
+        closed_no_resend_rule["then"]["properties"]["lifecycle_state"].get("enum")
+        == ["RESPONSE_CAPTURED", "RESOLVED", "ABANDONED"]
+        and closed_no_resend_rule["then"]["properties"]["resend_control_reason_codes"].get(
+            "minItems"
+        )
+        == 1,
         "authority_interaction_record CLOSED_NO_RESEND must be restricted to post-capture terminal or abandoned states with explicit reasons",
     )
 
@@ -19224,31 +21776,47 @@ def check_authority_binding() -> None:
         )
 
     mismatch_rule = find_rule_by_const(schema["allOf"], "token_client_binding_state", "MISMATCH")
-    ensure(mismatch_rule is not None, "authority_binding missing token_client_binding_state=MISMATCH guard")
     ensure(
-        mismatch_rule["then"]["properties"]["binding_health"].get("const") == "CLIENT_BINDING_MISMATCH",
+        mismatch_rule is not None,
+        "authority_binding missing token_client_binding_state=MISMATCH guard",
+    )
+    ensure(
+        mismatch_rule["then"]["properties"]["binding_health"].get("const")
+        == "CLIENT_BINDING_MISMATCH",
         "authority_binding token_client_binding_state=MISMATCH must force binding_health=CLIENT_BINDING_MISMATCH",
     )
 
-    reverse_mismatch_rule = find_rule_by_const(schema["allOf"], "binding_health", "CLIENT_BINDING_MISMATCH")
-    ensure(reverse_mismatch_rule is not None, "authority_binding missing binding_health=CLIENT_BINDING_MISMATCH guard")
+    reverse_mismatch_rule = find_rule_by_const(
+        schema["allOf"], "binding_health", "CLIENT_BINDING_MISMATCH"
+    )
     ensure(
-        reverse_mismatch_rule["then"]["properties"]["token_client_binding_state"].get("const") == "MISMATCH",
+        reverse_mismatch_rule is not None,
+        "authority_binding missing binding_health=CLIENT_BINDING_MISMATCH guard",
+    )
+    ensure(
+        reverse_mismatch_rule["then"]["properties"]["token_client_binding_state"].get("const")
+        == "MISMATCH",
         "authority_binding binding_health=CLIENT_BINDING_MISMATCH must force token_client_binding_state=MISMATCH",
     )
 
-    healthy_rule = find_rule_by_enum(schema["allOf"], "binding_health", ["HEALTHY", "EXPIRING_SOON"])
-    ensure(healthy_rule is not None, "authority_binding missing healthy/expiring binding-health guard")
+    healthy_rule = find_rule_by_enum(
+        schema["allOf"], "binding_health", ["HEALTHY", "EXPIRING_SOON"]
+    )
+    ensure(
+        healthy_rule is not None, "authority_binding missing healthy/expiring binding-health guard"
+    )
     ensure(
         healthy_rule["then"]["properties"]["token_client_binding_state"].get("const") == "BOUND",
         "authority_binding healthy or expiring bindings must force token_client_binding_state=BOUND",
     )
     ensure(
-        healthy_rule["then"]["properties"]["delegation_state"].get("enum") == ["NOT_REQUIRED", "SATISFIED"],
+        healthy_rule["then"]["properties"]["delegation_state"].get("enum")
+        == ["NOT_REQUIRED", "SATISFIED"],
         "authority_binding healthy or expiring bindings must constrain delegation_state",
     )
     ensure(
-        healthy_rule["then"]["properties"]["authority_link_state"].get("const") == "AUTHORISED_ACTIVE",
+        healthy_rule["then"]["properties"]["authority_link_state"].get("const")
+        == "AUTHORISED_ACTIVE",
         "authority_binding healthy or expiring bindings must force authority_link_state=AUTHORISED_ACTIVE",
     )
     ensure(
@@ -19257,13 +21825,18 @@ def check_authority_binding() -> None:
     )
 
     delegation_null_rule = find_rule_by_const(schema["allOf"], "delegation_state", "NOT_REQUIRED")
-    ensure(delegation_null_rule is not None, "authority_binding missing delegation_state=NOT_REQUIRED guard")
+    ensure(
+        delegation_null_rule is not None,
+        "authority_binding missing delegation_state=NOT_REQUIRED guard",
+    )
     ensure(
         delegation_null_rule["then"]["properties"]["delegation_grant_ref"].get("type") == "null",
         "authority_binding delegation_state=NOT_REQUIRED must clear delegation_grant_ref",
     )
 
-    expiring_rule = find_rule_by_enum(schema["allOf"], "binding_health", ["EXPIRING_SOON", "EXPIRED"])
+    expiring_rule = find_rule_by_enum(
+        schema["allOf"], "binding_health", ["EXPIRING_SOON", "EXPIRED"]
+    )
     ensure(expiring_rule is not None, "authority_binding missing expiring/expired expiry guard")
     ensure(
         expiring_rule["then"]["properties"]["expires_at"].get("type") == "string",
@@ -19314,20 +21887,25 @@ def check_preseal_gate_evaluation_contract() -> None:
     )
 
     pending_rule = find_rule_by_const(schema["allOf"], "completion_state", "PENDING_PREREQUISITES")
-    ensure(pending_rule is not None, "preseal_gate_evaluation_contract missing pending-prerequisites guard")
+    ensure(
+        pending_rule is not None,
+        "preseal_gate_evaluation_contract missing pending-prerequisites guard",
+    )
     ensure(
         pending_rule["then"]["properties"]["evaluated_gate_codes"].get("maxItems") == 0,
         "preseal_gate_evaluation_contract pending state must keep evaluated_gate_codes empty",
     )
     ensure(
-        pending_rule["then"]["properties"]["durability_boundary"].get("const") == "NO_PERSISTED_TAPE_YET",
+        pending_rule["then"]["properties"]["durability_boundary"].get("const")
+        == "NO_PERSISTED_TAPE_YET",
         "preseal_gate_evaluation_contract pending state must force NO_PERSISTED_TAPE_YET durability",
     )
 
     ready_rule = find_rule_by_const(schema["allOf"], "completion_state", "COMPLETE_READY_TO_SEAL")
     ensure(ready_rule is not None, "preseal_gate_evaluation_contract missing complete-ready guard")
     ensure(
-        ready_rule["then"]["properties"]["evaluated_gate_codes"].get("$ref") == "#/$defs/presealGateCodeArray",
+        ready_rule["then"]["properties"]["evaluated_gate_codes"].get("$ref")
+        == "#/$defs/presealGateCodeArray",
         "preseal_gate_evaluation_contract ready state must require the full canonical preseal gate chain",
     )
     ensure(
@@ -19335,14 +21913,20 @@ def check_preseal_gate_evaluation_contract() -> None:
         "preseal_gate_evaluation_contract ready state must clear blocking_gate_codes",
     )
     ensure(
-        ready_rule["then"]["properties"]["durability_boundary"].get("const") == "ATOMIC_GATE_BATCH_AND_SEAL",
+        ready_rule["then"]["properties"]["durability_boundary"].get("const")
+        == "ATOMIC_GATE_BATCH_AND_SEAL",
         "preseal_gate_evaluation_contract ready state must force ATOMIC_GATE_BATCH_AND_SEAL durability",
     )
 
-    blocked_rule = find_rule_by_const(schema["allOf"], "completion_state", "COMPLETE_BLOCKED_PRESTART")
-    ensure(blocked_rule is not None, "preseal_gate_evaluation_contract missing blocked-prestart guard")
+    blocked_rule = find_rule_by_const(
+        schema["allOf"], "completion_state", "COMPLETE_BLOCKED_PRESTART"
+    )
     ensure(
-        blocked_rule["then"]["properties"]["evaluated_gate_codes"].get("$ref") == "#/$defs/presealGateCodeArray",
+        blocked_rule is not None, "preseal_gate_evaluation_contract missing blocked-prestart guard"
+    )
+    ensure(
+        blocked_rule["then"]["properties"]["evaluated_gate_codes"].get("$ref")
+        == "#/$defs/presealGateCodeArray",
         "preseal_gate_evaluation_contract blocked-prestart state must still require the full canonical preseal gate chain",
     )
     ensure(
@@ -19359,7 +21943,12 @@ def check_preseal_gate_evaluation_contract() -> None:
 def check_scope_execution_binding() -> None:
     schema = load_schema("scope_execution_binding.schema.json")
     check_min_length_fields(schema, ["access_binding_hash"], "scope_execution_binding")
-    for field in ["executable_partition_scope_refs", "masking_rules", "required_approvals", "reason_codes"]:
+    for field in [
+        "executable_partition_scope_refs",
+        "masking_rules",
+        "required_approvals",
+        "reason_codes",
+    ]:
         ensure(
             schema["properties"][field]["items"].get("minLength") == 1,
             f"scope_execution_binding.{field} items must reject empty strings",
@@ -19390,7 +21979,8 @@ def check_scope_execution_binding() -> None:
         "scope_execution_binding ANALYSIS must force executable_scope_family=READ_ONLY",
     )
     ensure(
-        analysis_rule["then"]["properties"]["mutation_atomicity"].get("const") == "NARROWING_ALLOWED",
+        analysis_rule["then"]["properties"]["mutation_atomicity"].get("const")
+        == "NARROWING_ALLOWED",
         "scope_execution_binding ANALYSIS must force mutation_atomicity=NARROWING_ALLOWED",
     )
 
@@ -19443,7 +22033,9 @@ def check_manifest_branch_decision_contract() -> None:
     )
 
     nightly_rule = find_rule_by_const(schema["allOf"], "run_kind", "NIGHTLY")
-    ensure(nightly_rule is not None, "manifest_branch_decision_contract missing NIGHTLY window guard")
+    ensure(
+        nightly_rule is not None, "manifest_branch_decision_contract missing NIGHTLY window guard"
+    )
     ensure(
         nightly_rule["then"]["properties"]["nightly_window_key_or_null"].get("type") == "string",
         "manifest_branch_decision_contract NIGHTLY branches must require nightly_window_key_or_null",
@@ -19457,36 +22049,57 @@ def check_manifest_branch_decision_contract() -> None:
     )
 
     new_manifest_rule = find_rule_by_const(schema["allOf"], "branch_action", "NEW_MANIFEST")
-    ensure(new_manifest_rule is not None, "manifest_branch_decision_contract missing NEW_MANIFEST guard")
     ensure(
-        new_manifest_rule["then"]["properties"]["branch_reason_code"].get("const") == "NO_PRIOR_MANIFEST",
+        new_manifest_rule is not None,
+        "manifest_branch_decision_contract missing NEW_MANIFEST guard",
+    )
+    ensure(
+        new_manifest_rule["then"]["properties"]["branch_reason_code"].get("const")
+        == "NO_PRIOR_MANIFEST",
         "manifest_branch_decision_contract NEW_MANIFEST must require branch_reason_code=NO_PRIOR_MANIFEST",
     )
 
-    bundle_return_rule = find_rule_by_const(schema["allOf"], "branch_action", "RETURN_EXISTING_BUNDLE")
-    ensure(bundle_return_rule is not None, "manifest_branch_decision_contract missing RETURN_EXISTING_BUNDLE guard")
+    bundle_return_rule = find_rule_by_const(
+        schema["allOf"], "branch_action", "RETURN_EXISTING_BUNDLE"
+    )
     ensure(
-        bundle_return_rule["then"]["properties"]["returned_decision_bundle_hash_or_null"].get("type") == "string",
+        bundle_return_rule is not None,
+        "manifest_branch_decision_contract missing RETURN_EXISTING_BUNDLE guard",
+    )
+    ensure(
+        bundle_return_rule["then"]["properties"]["returned_decision_bundle_hash_or_null"].get(
+            "type"
+        )
+        == "string",
         "manifest_branch_decision_contract RETURN_EXISTING_BUNDLE must require returned_decision_bundle_hash_or_null",
     )
     ensure(
-        bundle_return_rule["then"]["properties"]["branch_reason_code"].get("const") == "TERMINAL_IDEMPOTENT_RETRY",
+        bundle_return_rule["then"]["properties"]["branch_reason_code"].get("const")
+        == "TERMINAL_IDEMPOTENT_RETRY",
         "manifest_branch_decision_contract RETURN_EXISTING_BUNDLE must require branch_reason_code=TERMINAL_IDEMPOTENT_RETRY",
     )
 
     reuse_rule = find_rule_by_const(schema["allOf"], "branch_action", "REUSE_SEALED_MANIFEST")
-    ensure(reuse_rule is not None, "manifest_branch_decision_contract missing REUSE_SEALED_MANIFEST guard")
     ensure(
-        reuse_rule["then"]["properties"]["prior_manifest_lifecycle_state_or_null"].get("const") == "SEALED",
+        reuse_rule is not None,
+        "manifest_branch_decision_contract missing REUSE_SEALED_MANIFEST guard",
+    )
+    ensure(
+        reuse_rule["then"]["properties"]["prior_manifest_lifecycle_state_or_null"].get("const")
+        == "SEALED",
         "manifest_branch_decision_contract REUSE_SEALED_MANIFEST must require prior_manifest_lifecycle_state_or_null=SEALED",
     )
     ensure(
-        reuse_rule["then"]["properties"]["branch_reason_code"].get("const") == "PRESTART_SEALED_CONTEXT_REUSE",
+        reuse_rule["then"]["properties"]["branch_reason_code"].get("const")
+        == "PRESTART_SEALED_CONTEXT_REUSE",
         "manifest_branch_decision_contract REUSE_SEALED_MANIFEST must require branch_reason_code=PRESTART_SEALED_CONTEXT_REUSE",
     )
 
     replay_child_rule = find_rule_by_const(schema["allOf"], "branch_action", "REPLAY_CHILD")
-    ensure(replay_child_rule is not None, "manifest_branch_decision_contract missing REPLAY_CHILD guard")
+    ensure(
+        replay_child_rule is not None,
+        "manifest_branch_decision_contract missing REPLAY_CHILD guard",
+    )
     replay_child_then = replay_child_rule["then"]["properties"]
     ensure(
         replay_child_then["config_inheritance_mode_or_null"].get("const") == "REPLAY_EXACT"
@@ -19499,7 +22112,10 @@ def check_manifest_branch_decision_contract() -> None:
     )
 
     recovery_child_rule = find_rule_by_const(schema["allOf"], "branch_action", "RECOVERY_CHILD")
-    ensure(recovery_child_rule is not None, "manifest_branch_decision_contract missing RECOVERY_CHILD guard")
+    ensure(
+        recovery_child_rule is not None,
+        "manifest_branch_decision_contract missing RECOVERY_CHILD guard",
+    )
     recovery_child_then = recovery_child_rule["then"]["properties"]
     ensure(
         recovery_child_then["config_inheritance_mode_or_null"].get("const") == "RECOVERY_EXACT"
@@ -19511,10 +22127,16 @@ def check_manifest_branch_decision_contract() -> None:
         "manifest_branch_decision_contract RECOVERY_CHILD must require branch_reason_code=STARTED_ATTEMPT_RECOVERY",
     )
 
-    new_request_child_rule = find_rule_by_const(schema["allOf"], "branch_action", "NEW_REQUEST_CHILD")
-    ensure(new_request_child_rule is not None, "manifest_branch_decision_contract missing NEW_REQUEST_CHILD guard")
+    new_request_child_rule = find_rule_by_const(
+        schema["allOf"], "branch_action", "NEW_REQUEST_CHILD"
+    )
     ensure(
-        new_request_child_rule["then"]["properties"]["branch_reason_code"].get("const") == "REQUEST_IDENTITY_CHANGED",
+        new_request_child_rule is not None,
+        "manifest_branch_decision_contract missing NEW_REQUEST_CHILD guard",
+    )
+    ensure(
+        new_request_child_rule["then"]["properties"]["branch_reason_code"].get("const")
+        == "REQUEST_IDENTITY_CHANGED",
         "manifest_branch_decision_contract NEW_REQUEST_CHILD must require branch_reason_code=REQUEST_IDENTITY_CHANGED",
     )
 
@@ -19576,9 +22198,9 @@ def check_manifest_lineage_trace_contract() -> None:
             "NIGHTLY_PREDECESSOR_CONTEXT_MISSING",
         }.issubset(
             set(
-                schema["$defs"]["candidateEvaluation"]["properties"]["disqualifier_reason_codes"]["items"].get(
-                    "enum", []
-                )
+                schema["$defs"]["candidateEvaluation"]["properties"]["disqualifier_reason_codes"][
+                    "items"
+                ].get("enum", [])
             )
         ),
         "manifest_lineage_trace candidate disqualifier vocabulary must expose the canonical rejection reasons",
@@ -19604,24 +22226,38 @@ def check_manifest_lineage_trace_contract() -> None:
         replay_rule["then"]["properties"]["replay_class_or_null"].get("type") == "string",
         "manifest_lineage_trace REPLAY traces must require replay_class_or_null",
     )
-    bundle_return_rule = find_rule_by_const(schema["allOf"], "selected_branch_action", "RETURN_EXISTING_BUNDLE")
-    ensure(bundle_return_rule is not None, "manifest_lineage_trace missing RETURN_EXISTING_BUNDLE guard")
+    bundle_return_rule = find_rule_by_const(
+        schema["allOf"], "selected_branch_action", "RETURN_EXISTING_BUNDLE"
+    )
     ensure(
-        bundle_return_rule["then"]["properties"]["returned_decision_bundle_hash_or_null"].get("type") == "string",
+        bundle_return_rule is not None,
+        "manifest_lineage_trace missing RETURN_EXISTING_BUNDLE guard",
+    )
+    ensure(
+        bundle_return_rule["then"]["properties"]["returned_decision_bundle_hash_or_null"].get(
+            "type"
+        )
+        == "string",
         "manifest_lineage_trace RETURN_EXISTING_BUNDLE must require returned_decision_bundle_hash_or_null",
     )
-    replay_child_rule = find_rule_by_const(schema["allOf"], "selected_branch_action", "REPLAY_CHILD")
+    replay_child_rule = find_rule_by_const(
+        schema["allOf"], "selected_branch_action", "REPLAY_CHILD"
+    )
     ensure(replay_child_rule is not None, "manifest_lineage_trace missing REPLAY_CHILD guard")
     ensure(
-        replay_child_rule["then"]["properties"]["config_inheritance_mode_or_null"].get("const") == "REPLAY_EXACT"
+        replay_child_rule["then"]["properties"]["config_inheritance_mode_or_null"].get("const")
+        == "REPLAY_EXACT"
         and replay_child_rule["then"]["properties"]["input_inheritance_mode_or_null"].get("const")
         == "REPLAY_EXACT",
         "manifest_lineage_trace REPLAY_CHILD must force exact replay inheritance modes",
     )
-    recovery_child_rule = find_rule_by_const(schema["allOf"], "selected_branch_action", "RECOVERY_CHILD")
+    recovery_child_rule = find_rule_by_const(
+        schema["allOf"], "selected_branch_action", "RECOVERY_CHILD"
+    )
     ensure(recovery_child_rule is not None, "manifest_lineage_trace missing RECOVERY_CHILD guard")
     ensure(
-        recovery_child_rule["then"]["properties"]["config_inheritance_mode_or_null"].get("const") == "RECOVERY_EXACT"
+        recovery_child_rule["then"]["properties"]["config_inheritance_mode_or_null"].get("const")
+        == "RECOVERY_EXACT"
         and recovery_child_rule["then"]["properties"]["input_inheritance_mode_or_null"].get("const")
         == "RECOVERY_EXACT",
         "manifest_lineage_trace RECOVERY_CHILD must force exact recovery inheritance modes",
@@ -19631,11 +22267,13 @@ def check_manifest_lineage_trace_contract() -> None:
 def check_authority_request_identity_contract() -> None:
     schema = load_schema("authority_request_identity_contract.schema.json")
     ensure(
-        schema["properties"]["contract_version"].get("const") == "AUTHORITY_REQUEST_IDENTITY_CONTRACT_V1",
+        schema["properties"]["contract_version"].get("const")
+        == "AUTHORITY_REQUEST_IDENTITY_CONTRACT_V1",
         "authority_request_identity_contract contract_version must freeze AUTHORITY_REQUEST_IDENTITY_CONTRACT_V1",
     )
     ensure(
-        schema["properties"]["identity_profile_version"].get("const") == "AUTHORITY_REQUEST_IDENTITY_V2",
+        schema["properties"]["identity_profile_version"].get("const")
+        == "AUTHORITY_REQUEST_IDENTITY_V2",
         "authority_request_identity_contract identity_profile_version must stay pinned to AUTHORITY_REQUEST_IDENTITY_V2",
     )
     ensure(
@@ -19710,14 +22348,21 @@ def check_authority_calculation_request() -> None:
     )
     calc_scope_binding = schema["properties"]["scope_execution_binding"]["allOf"]
     ensure(
-        calc_scope_binding[0]["$ref"] == "https://taxat.dev/schemas/scope_execution_binding.schema.json",
+        calc_scope_binding[0]["$ref"]
+        == "https://taxat.dev/schemas/scope_execution_binding.schema.json",
         "authority_calculation_request.scope_execution_binding must stay bound to scope_execution_binding.schema.json",
     )
     ensure(
-        calc_scope_binding[1]["properties"]["binding_scope_class"].get("const") == "AUTHORITY_CALCULATION_REQUEST",
+        calc_scope_binding[1]["properties"]["binding_scope_class"].get("const")
+        == "AUTHORITY_CALCULATION_REQUEST",
         "authority_calculation_request.scope_execution_binding must force binding_scope_class=AUTHORITY_CALCULATION_REQUEST",
     )
-    for field in ["authority_operation_ref", "target_obligation_ref", "request_envelope_ref", "authority_interaction_ref"]:
+    for field in [
+        "authority_operation_ref",
+        "target_obligation_ref",
+        "request_envelope_ref",
+        "authority_interaction_ref",
+    ]:
         ensure(
             schema["properties"][field].get("minLength") == 1,
             f"authority_calculation_request.{field} must reject empty strings when present",
@@ -19729,7 +22374,10 @@ def check_authority_calculation_request() -> None:
         )
 
     modeled_rule = find_rule_by_const(schema["allOf"], "live_authority_call_executed", False)
-    ensure(modeled_rule is not None, "authority_calculation_request missing modeled-only live-call guard")
+    ensure(
+        modeled_rule is not None,
+        "authority_calculation_request missing modeled-only live-call guard",
+    )
     ensure(
         modeled_rule["then"]["properties"]["request_state"].get("const") == "MODELED_ONLY",
         "authority_calculation_request live_authority_call_executed=false must force MODELED_ONLY",
@@ -19755,28 +22403,35 @@ def check_authority_calculation_request() -> None:
     )
 
     amend_rule = find_rule_by_const(schema["allOf"], "calculation_type", "intent-to-amend")
-    ensure(amend_rule is not None, "authority_calculation_request missing intent-to-amend scope guard")
+    ensure(
+        amend_rule is not None, "authority_calculation_request missing intent-to-amend scope guard"
+    )
     amend_scope = amend_rule["then"]["properties"]["runtime_scope"]["allOf"]
     ensure(
         amend_scope[0]["contains"].get("const") == "amendment_intent",
         "authority_calculation_request intent-to-amend must require amendment_intent in runtime_scope",
     )
     ensure(
-        amend_scope[1]["not"]["contains"].get("enum") == ["prepare_submission", "submit", "amendment_submit"],
+        amend_scope[1]["not"]["contains"].get("enum")
+        == ["prepare_submission", "submit", "amendment_submit"],
         "authority_calculation_request intent-to-amend must reject filing or submit scope leakage",
     )
 
     filing_rule = find_rule_by_enum(
         schema["allOf"], "calculation_type", ["in-year", "intent-to-finalise", "final-declaration"]
     )
-    ensure(filing_rule is not None, "authority_calculation_request missing filing-preparation scope guard")
+    ensure(
+        filing_rule is not None,
+        "authority_calculation_request missing filing-preparation scope guard",
+    )
     filing_scope = filing_rule["then"]["properties"]["runtime_scope"]["allOf"]
     ensure(
         filing_scope[0]["contains"].get("const") == "prepare_submission",
         "authority_calculation_request filing calculation types must require prepare_submission in runtime_scope",
     )
     ensure(
-        filing_scope[1]["not"]["contains"].get("enum") == ["amendment_intent", "submit", "amendment_submit"],
+        filing_scope[1]["not"]["contains"].get("enum")
+        == ["amendment_intent", "submit", "amendment_submit"],
         "authority_calculation_request filing calculation types must reject amendment or submit scope leakage",
     )
 
@@ -19873,7 +22528,8 @@ def check_calculation_basis() -> None:
             candidate
             for candidate in schema["allOf"]
             if candidate.get("if", {}).get("anyOf")
-            and candidate.get("then", {}).get("properties", {}).get("basis_status", {}).get("const") == "CONFIRMED"
+            and candidate.get("then", {}).get("properties", {}).get("basis_status", {}).get("const")
+            == "CONFIRMED"
         ),
         None,
     )
@@ -19883,7 +22539,8 @@ def check_calculation_basis() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("superseded_at", {}).get("type") == "string"
+            if candidate.get("if", {}).get("properties", {}).get("superseded_at", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -19897,13 +22554,21 @@ def check_calculation_basis() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("user_confirmation_ref", {}).get("type") == "string"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("user_confirmation_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(confirmation_ref_rule is not None, "calculation_basis missing user_confirmation_ref reverse guard")
     ensure(
-        confirmation_ref_rule["then"]["properties"]["basis_status"].get("enum") == ["CONFIRMED", "SUPERSEDED"],
+        confirmation_ref_rule is not None,
+        "calculation_basis missing user_confirmation_ref reverse guard",
+    )
+    ensure(
+        confirmation_ref_rule["then"]["properties"]["basis_status"].get("enum")
+        == ["CONFIRMED", "SUPERSEDED"],
         "calculation_basis non-null user_confirmation_ref must force confirmed-or-superseded basis posture",
     )
 
@@ -19912,7 +22577,14 @@ def check_calculation_user_confirmation() -> None:
     schema = load_schema("calculation_user_confirmation.schema.json")
     check_min_length_fields(
         schema,
-        ["user_confirmation_id", "calculation_id", "calculation_basis_ref", "manifest_id", "actor_ref", "presentation_ref"],
+        [
+            "user_confirmation_id",
+            "calculation_id",
+            "calculation_basis_ref",
+            "manifest_id",
+            "actor_ref",
+            "presentation_ref",
+        ],
         "calculation_user_confirmation",
     )
     ensure(
@@ -19949,11 +22621,14 @@ def check_calculation_user_confirmation() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("reason_codes", {}).get("minItems") == 1
+            if candidate.get("if", {}).get("properties", {}).get("reason_codes", {}).get("minItems")
+            == 1
         ),
         None,
     )
-    ensure(reason_rule is not None, "calculation_user_confirmation missing reason_codes reverse guard")
+    ensure(
+        reason_rule is not None, "calculation_user_confirmation missing reason_codes reverse guard"
+    )
     ensure(
         reason_rule["then"]["properties"]["confirmation_state"].get("const") == "DECLINED",
         "calculation_user_confirmation non-empty reason_codes must force confirmation_state=DECLINED",
@@ -20014,7 +22689,13 @@ def check_telemetry_resource() -> None:
         )
     ensure(
         correlation["properties"]["input_inheritance_mode"].get("enum")
-        == ["FRESH_CHILD_COLLECTION", "REPLAY_EXACT", "RECOVERY_EXACT", "HISTORICAL_EXPLICIT", None],
+        == [
+            "FRESH_CHILD_COLLECTION",
+            "REPLAY_EXACT",
+            "RECOVERY_EXACT",
+            "HISTORICAL_EXPLICIT",
+            None,
+        ],
         "telemetry_resource.correlationContext.input_inheritance_mode must freeze the canonical input inheritance vocabulary",
     )
     ensure(
@@ -20050,11 +22731,15 @@ def check_telemetry_resource() -> None:
         (
             rule
             for rule in correlation["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("nightly_batch_run_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("nightly_batch_run_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(nightly_batch_rule is not None, "telemetry_resource missing nightly_batch_run_ref pairing guard")
+    ensure(
+        nightly_batch_rule is not None,
+        "telemetry_resource missing nightly_batch_run_ref pairing guard",
+    )
     ensure(
         nightly_batch_rule["then"]["properties"]["nightly_window_key"].get("type") == "string",
         "telemetry_resource non-null nightly_batch_run_ref must require nightly_window_key",
@@ -20064,11 +22749,15 @@ def check_telemetry_resource() -> None:
         (
             rule
             for rule in correlation["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("nightly_window_key", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("nightly_window_key", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(nightly_window_rule is not None, "telemetry_resource missing nightly_window_key pairing guard")
+    ensure(
+        nightly_window_rule is not None,
+        "telemetry_resource missing nightly_window_key pairing guard",
+    )
     ensure(
         nightly_window_rule["then"]["properties"]["nightly_batch_run_ref"].get("type") == "string",
         "telemetry_resource non-null nightly_window_key must require nightly_batch_run_ref",
@@ -20078,11 +22767,14 @@ def check_telemetry_resource() -> None:
         (
             rule
             for rule in correlation["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("selection_disposition", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("selection_disposition", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(selection_rule is not None, "telemetry_resource missing selection_disposition nightly guard")
+    ensure(
+        selection_rule is not None, "telemetry_resource missing selection_disposition nightly guard"
+    )
     then_props = selection_rule["then"]["properties"]
     ensure(
         then_props["nightly_batch_run_ref"].get("type") == "string"
@@ -20094,7 +22786,8 @@ def check_telemetry_resource() -> None:
         (
             rule
             for rule in correlation["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("comparison_mode", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("comparison_mode", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -20108,7 +22801,11 @@ def check_telemetry_resource() -> None:
         (
             rule
             for rule in correlation["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("basis_validation_state", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("basis_validation_state", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
@@ -20134,7 +22831,10 @@ def check_snapshot() -> None:
         "audit_refs",
         "provenance_refs",
     ]:
-        ensure(field in schema["required"], f"snapshot must require `{field}` for FE-46 lifecycle governance.")
+        ensure(
+            field in schema["required"],
+            f"snapshot must require `{field}` for FE-46 lifecycle governance.",
+        )
     ensure(
         "BUILT" in schema["properties"]["lifecycle_state"].get("enum", []),
         "snapshot.lifecycle_state must retain the persisted BUILT state for FE-46 initial transition legality",
@@ -20164,7 +22864,8 @@ def check_snapshot() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("counterfactual_basis", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("counterfactual_basis", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -20196,7 +22897,9 @@ def check_snapshot() -> None:
         "snapshot.provenance_refs items must reject empty strings",
     )
 
-    built_rule = find_rule_by_enum(schema["allOf"], "lifecycle_state", ["BUILT", "VALID", "WARNED", "INVALID"])
+    built_rule = find_rule_by_enum(
+        schema["allOf"], "lifecycle_state", ["BUILT", "VALID", "WARNED", "INVALID"]
+    )
     ensure(built_rule is not None, "snapshot missing normal-state reverse guard")
     ensure(
         built_rule["then"]["properties"]["superseded_by_snapshot_id_or_null"].get("type") == "null",
@@ -20206,14 +22909,18 @@ def check_snapshot() -> None:
     superseded_rule = find_rule_by_const(schema["allOf"], "lifecycle_state", "SUPERSEDED")
     ensure(superseded_rule is not None, "snapshot missing SUPERSEDED reverse guard")
     ensure(
-        superseded_rule["then"]["properties"]["superseded_by_snapshot_id_or_null"].get("type") == "string",
+        superseded_rule["then"]["properties"]["superseded_by_snapshot_id_or_null"].get("type")
+        == "string",
         "snapshot SUPERSEDED must require superseded_by_snapshot_id_or_null",
     )
 
-    retention_limited_rule = find_rule_by_const(schema["allOf"], "lifecycle_state", "RETENTION_LIMITED")
+    retention_limited_rule = find_rule_by_const(
+        schema["allOf"], "lifecycle_state", "RETENTION_LIMITED"
+    )
     ensure(retention_limited_rule is not None, "snapshot missing RETENTION_LIMITED reverse guard")
     ensure(
-        retention_limited_rule["then"]["properties"]["retention_limitation_ref_or_null"].get("type") == "string",
+        retention_limited_rule["then"]["properties"]["retention_limitation_ref_or_null"].get("type")
+        == "string",
         "snapshot RETENTION_LIMITED must require retention_limitation_ref_or_null",
     )
 
@@ -20255,13 +22962,15 @@ def check_config_version() -> None:
     deprecated_rule = find_rule_by_const(schema["allOf"], "lifecycle_state", "DEPRECATED")
     ensure(deprecated_rule is not None, "config_version missing DEPRECATED reverse guard")
     ensure(
-        deprecated_rule["then"]["properties"]["superseded_by_version_id_or_null"].get("type") == "string",
+        deprecated_rule["then"]["properties"]["superseded_by_version_id_or_null"].get("type")
+        == "string",
         "config_version DEPRECATED must require superseded_by_version_id_or_null",
     )
     revoked_rule = find_rule_by_const(schema["allOf"], "lifecycle_state", "REVOKED")
     ensure(revoked_rule is not None, "config_version missing REVOKED reverse guard")
     ensure(
-        revoked_rule["then"]["properties"]["revocation_reason_code_or_null"].get("type") == "string",
+        revoked_rule["then"]["properties"]["revocation_reason_code_or_null"].get("type")
+        == "string",
         "config_version REVOKED must require revocation_reason_code_or_null",
     )
 
@@ -20298,13 +23007,15 @@ def check_config_change_request() -> None:
     implemented_rule = find_rule_by_const(schema["allOf"], "lifecycle_state", "IMPLEMENTED")
     ensure(implemented_rule is not None, "config_change_request missing IMPLEMENTED reverse guard")
     ensure(
-        implemented_rule["then"]["properties"]["implemented_release_ref_or_null"].get("type") == "string",
+        implemented_rule["then"]["properties"]["implemented_release_ref_or_null"].get("type")
+        == "string",
         "config_change_request IMPLEMENTED must require implemented_release_ref_or_null",
     )
     rollback_rule = find_rule_by_const(schema["allOf"], "lifecycle_state", "ROLLED_BACK")
     ensure(rollback_rule is not None, "config_change_request missing ROLLED_BACK reverse guard")
     ensure(
-        rollback_rule["then"]["properties"]["rolled_back_release_ref_or_null"].get("type") == "string",
+        rollback_rule["then"]["properties"]["rolled_back_release_ref_or_null"].get("type")
+        == "string",
         "config_change_request ROLLED_BACK must require rolled_back_release_ref_or_null",
     )
 
@@ -20419,7 +23130,8 @@ def check_input_freeze() -> None:
         "input_freeze.input_consumption_mode must stay FROZEN_INPUT_ONLY",
     )
     ensure(
-        schema["properties"]["late_data_adoption_policy"].get("const") == "CHILD_REVIEW_OR_EXCLUDE_ONLY",
+        schema["properties"]["late_data_adoption_policy"].get("const")
+        == "CHILD_REVIEW_OR_EXCLUDE_ONLY",
         "input_freeze.late_data_adoption_policy must stay CHILD_REVIEW_OR_EXCLUDE_ONLY",
     )
     ensure(
@@ -20440,7 +23152,10 @@ def check_input_freeze() -> None:
         "canonical_fact_count",
         "conflict_count",
     ]:
-        ensure(field in posture["required"], f"input_freeze.sourceDomainPosture must require `{field}`.")
+        ensure(
+            field in posture["required"],
+            f"input_freeze.sourceDomainPosture must require `{field}`.",
+        )
     open_zero_rule = find_rule_by_const(schema["allOf"], "open_conflict_count", 0)
     ensure(open_zero_rule is not None, "input_freeze missing open_conflict_count=0 reverse guard")
     ensure(
@@ -20452,14 +23167,23 @@ def check_input_freeze() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("open_conflict_count", {}).get("minimum") == 1
-            and rule.get("if", {}).get("properties", {}).get("blocking_conflict_count", {}).get("const") == 0
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("open_conflict_count", {})
+            .get("minimum")
+            == 1
+            and rule.get("if", {})
+            .get("properties", {})
+            .get("blocking_conflict_count", {})
+            .get("const")
+            == 0
         ),
         None,
     )
     ensure(monitoring_rule is not None, "input_freeze missing monitoring-only reverse guard")
     ensure(
-        monitoring_rule["then"]["properties"]["resolution_frontier"].get("const") == "MONITORING_ONLY",
+        monitoring_rule["then"]["properties"]["resolution_frontier"].get("const")
+        == "MONITORING_ONLY",
         "input_freeze open conflicts without blocking conflicts must force MONITORING_ONLY",
     )
 
@@ -20467,13 +23191,18 @@ def check_input_freeze() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("blocking_conflict_count", {}).get("minimum") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("blocking_conflict_count", {})
+            .get("minimum")
+            == 1
         ),
         None,
     )
     ensure(blocking_rule is not None, "input_freeze missing blocking_conflict_count reverse guard")
     ensure(
-        blocking_rule["then"]["properties"]["resolution_frontier"].get("const") == "BLOCKING_PRESENT",
+        blocking_rule["then"]["properties"]["resolution_frontier"].get("const")
+        == "BLOCKING_PRESENT",
         "input_freeze blocking_conflict_count>0 must force BLOCKING_PRESENT",
     )
 
@@ -20481,7 +23210,11 @@ def check_input_freeze() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("dominant_blocking_class", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("dominant_blocking_class", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
@@ -20527,7 +23260,11 @@ def check_experience_cursor() -> None:
         ],
         expected_observable_projection_families=[],
     )
-    for field in ["stability_contract", "replacement_stability_contract_or_null", "schema_compatibility_ref"]:
+    for field in [
+        "stability_contract",
+        "replacement_stability_contract_or_null",
+        "schema_compatibility_ref",
+    ]:
         ensure(
             field in schema["required"],
             f"experience_cursor must require `{field}` for grouped current and replacement marker lineage",
@@ -20558,11 +23295,17 @@ def check_experience_cursor() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("replacement_snapshot_ref", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("replacement_snapshot_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(replacement_rule is not None, "experience_cursor missing replacement_snapshot reverse guard")
+    ensure(
+        replacement_rule is not None, "experience_cursor missing replacement_snapshot reverse guard"
+    )
     ensure(
         replacement_rule["then"]["properties"]["cursor_state"].get("const") == "REBASED",
         "experience_cursor non-null replacement_snapshot_ref must force cursor_state=REBASED",
@@ -20579,11 +23322,18 @@ def check_experience_cursor() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("invalidation_reason_code", {}).get("type") == "null"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("invalidation_reason_code", {})
+            .get("type")
+            == "null"
         ),
         None,
     )
-    ensure(invalidation_live_rule is not None, "experience_cursor missing null invalidation reverse guard")
+    ensure(
+        invalidation_live_rule is not None,
+        "experience_cursor missing null invalidation reverse guard",
+    )
     ensure(
         invalidation_live_rule["then"]["properties"]["cursor_state"].get("const") == "LIVE",
         "experience_cursor null invalidation_reason_code must force cursor_state=LIVE",
@@ -20604,7 +23354,10 @@ def check_experience_cursor() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("invalidation_reason_code", {}).get("enum")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("invalidation_reason_code", {})
+            .get("enum")
             == ["FRAME_EPOCH_ADVANCED", "HISTORY_COMPACTED", "SHELL_STABILITY_CHANGED"]
         ),
         None,
@@ -20619,7 +23372,10 @@ def check_experience_cursor() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("invalidation_reason_code", {}).get("enum")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("invalidation_reason_code", {})
+            .get("enum")
             == [
                 "SESSION_REVOKED",
                 "SESSION_BINDING_CHANGED",
@@ -20669,7 +23425,8 @@ def check_workspace_cursor() -> None:
         "workspace_cursor.stability_contract must stay bound to route_stability_contract.schema.json",
     )
     ensure(
-        schema["properties"]["session_visibility_class"].get("enum") == ["STAFF_FULL", "CUSTOMER_VISIBLE"],
+        schema["properties"]["session_visibility_class"].get("enum")
+        == ["STAFF_FULL", "CUSTOMER_VISIBLE"],
         "workspace_cursor.session_visibility_class must freeze staff versus customer-visible recovery scope",
     )
     ensure(
@@ -20684,11 +23441,17 @@ def check_workspace_cursor() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("replacement_snapshot_ref", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("replacement_snapshot_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(replacement_rule is not None, "workspace_cursor missing replacement_snapshot reverse guard")
+    ensure(
+        replacement_rule is not None, "workspace_cursor missing replacement_snapshot reverse guard"
+    )
     ensure(
         replacement_rule["then"]["properties"]["cursor_state"].get("const") == "REBASED",
         "workspace_cursor non-null replacement_snapshot_ref must force cursor_state=REBASED",
@@ -20704,11 +23467,18 @@ def check_workspace_cursor() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("invalidation_reason_code", {}).get("type") == "null"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("invalidation_reason_code", {})
+            .get("type")
+            == "null"
         ),
         None,
     )
-    ensure(invalidation_live_rule is not None, "workspace_cursor missing null invalidation reverse guard")
+    ensure(
+        invalidation_live_rule is not None,
+        "workspace_cursor missing null invalidation reverse guard",
+    )
     ensure(
         invalidation_live_rule["then"]["properties"]["cursor_state"].get("const") == "LIVE",
         "workspace_cursor null invalidation_reason_code must force cursor_state=LIVE",
@@ -20756,11 +23526,13 @@ def check_authority_operation() -> None:
     )
     operation_scope_binding = schema["properties"]["scope_execution_binding"]["allOf"]
     ensure(
-        operation_scope_binding[0]["$ref"] == "https://taxat.dev/schemas/scope_execution_binding.schema.json",
+        operation_scope_binding[0]["$ref"]
+        == "https://taxat.dev/schemas/scope_execution_binding.schema.json",
         "authority_operation.scope_execution_binding must stay bound to scope_execution_binding.schema.json",
     )
     ensure(
-        operation_scope_binding[1]["properties"]["binding_scope_class"].get("const") == "AUTHORITY_OPERATION",
+        operation_scope_binding[1]["properties"]["binding_scope_class"].get("const")
+        == "AUTHORITY_OPERATION",
         "authority_operation.scope_execution_binding must force binding_scope_class=AUTHORITY_OPERATION",
     )
     ensure(
@@ -20784,7 +23556,10 @@ def check_authority_operation() -> None:
         ),
         None,
     )
-    ensure(mutation_rule is not None, "authority_operation missing mutation/calc/submit partition guard")
+    ensure(
+        mutation_rule is not None,
+        "authority_operation missing mutation/calc/submit partition guard",
+    )
     ensure(
         mutation_rule["then"]["properties"]["business_partitions"].get("minItems") == 1,
         "authority_operation mutation/calc/submit families must require non-empty business_partitions",
@@ -20812,8 +23587,12 @@ def check_authority_operation() -> None:
         "authority_operation read/reconcile families must reject submit and amendment_submit tokens",
     )
 
-    periodic_rule = find_rule_by_const(schema["allOf"], "operation_family", "AUTH_SUBMIT_PERIODIC_UPDATE")
-    ensure(periodic_rule is not None, "authority_operation missing AUTH_SUBMIT_PERIODIC_UPDATE guard")
+    periodic_rule = find_rule_by_const(
+        schema["allOf"], "operation_family", "AUTH_SUBMIT_PERIODIC_UPDATE"
+    )
+    ensure(
+        periodic_rule is not None, "authority_operation missing AUTH_SUBMIT_PERIODIC_UPDATE guard"
+    )
     periodic_scope = periodic_rule["then"]["properties"]["runtime_scope"]["allOf"]
     ensure(
         periodic_scope[0]["contains"].get("const") == "quarterly_update"
@@ -20825,8 +23604,12 @@ def check_authority_operation() -> None:
         "authority_operation AUTH_SUBMIT_PERIODIC_UPDATE must require target_obligation_ref",
     )
 
-    final_rule = find_rule_by_const(schema["allOf"], "operation_family", "AUTH_SUBMIT_FINAL_DECLARATION")
-    ensure(final_rule is not None, "authority_operation missing AUTH_SUBMIT_FINAL_DECLARATION guard")
+    final_rule = find_rule_by_const(
+        schema["allOf"], "operation_family", "AUTH_SUBMIT_FINAL_DECLARATION"
+    )
+    ensure(
+        final_rule is not None, "authority_operation missing AUTH_SUBMIT_FINAL_DECLARATION guard"
+    )
     final_scope = final_rule["then"]["properties"]["runtime_scope"]["allOf"]
     ensure(
         final_scope[0]["contains"].get("const") == "year_end"
@@ -20841,7 +23624,10 @@ def check_authority_operation() -> None:
     amendment_rule = find_rule_by_const(
         schema["allOf"], "operation_family", "AUTH_SUBMIT_POST_FINALISATION_AMENDMENT"
     )
-    ensure(amendment_rule is not None, "authority_operation missing AUTH_SUBMIT_POST_FINALISATION_AMENDMENT guard")
+    ensure(
+        amendment_rule is not None,
+        "authority_operation missing AUTH_SUBMIT_POST_FINALISATION_AMENDMENT guard",
+    )
     amendment_scope = amendment_rule["then"]["properties"]["runtime_scope"]["allOf"]
     ensure(
         amendment_scope[0]["contains"].get("const") == "year_end"
@@ -20853,8 +23639,12 @@ def check_authority_operation() -> None:
         "authority_operation AUTH_SUBMIT_POST_FINALISATION_AMENDMENT must require basis_type",
     )
 
-    calculation_rule = find_rule_by_const(schema["allOf"], "operation_family", "AUTH_TRIGGER_CALCULATION")
-    ensure(calculation_rule is not None, "authority_operation missing AUTH_TRIGGER_CALCULATION guard")
+    calculation_rule = find_rule_by_const(
+        schema["allOf"], "operation_family", "AUTH_TRIGGER_CALCULATION"
+    )
+    ensure(
+        calculation_rule is not None, "authority_operation missing AUTH_TRIGGER_CALCULATION guard"
+    )
     calculation_scope = calculation_rule["then"]["properties"]["runtime_scope"]["anyOf"]
     ensure(
         calculation_scope[0]["contains"].get("const") == "prepare_submission"
@@ -20887,7 +23677,9 @@ def check_authority_request_envelope() -> None:
         "authority_request_envelope.request_identity_contract must stay bound to authority_request_identity_contract.schema.json",
     )
     ensure(
-        schema["properties"]["request_identity_contract"]["allOf"][1]["properties"]["binding_scope_class"].get("const")
+        schema["properties"]["request_identity_contract"]["allOf"][1]["properties"][
+            "binding_scope_class"
+        ].get("const")
         == "AUTHORITY_REQUEST_ENVELOPE",
         "authority_request_envelope.request_identity_contract must force binding_scope_class=AUTHORITY_REQUEST_ENVELOPE",
     )
@@ -20927,34 +23719,45 @@ def check_authority_request_envelope() -> None:
         "authority_request_envelope.delegation_grant_ref must reject empty strings when present",
     )
     ensure(
-        schema["properties"]["identity_profile_version"].get("const") == "AUTHORITY_REQUEST_IDENTITY_V2",
+        schema["properties"]["identity_profile_version"].get("const")
+        == "AUTHORITY_REQUEST_IDENTITY_V2",
         "authority_request_envelope.identity_profile_version must stay pinned to AUTHORITY_REQUEST_IDENTITY_V2",
     )
     obligation_null_rule = next(
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("obligation_ref", {}).get("type") == "null"
+            if rule.get("if", {}).get("properties", {}).get("obligation_ref", {}).get("type")
+            == "null"
         ),
         None,
     )
-    ensure(obligation_null_rule is not None, "authority_request_envelope missing obligation_ref=null normalization rule")
     ensure(
-        obligation_null_rule["then"]["properties"]["normalized_obligation_ref"].get("const") == "<NONE>",
+        obligation_null_rule is not None,
+        "authority_request_envelope missing obligation_ref=null normalization rule",
+    )
+    ensure(
+        obligation_null_rule["then"]["properties"]["normalized_obligation_ref"].get("const")
+        == "<NONE>",
         "authority_request_envelope null obligation_ref must force normalized_obligation_ref=<NONE>",
     )
     obligation_value_rule = next(
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("obligation_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("obligation_ref", {}).get("type")
+            == "string"
             and "normalized_obligation_ref" in rule.get("then", {}).get("properties", {})
         ),
         None,
     )
-    ensure(obligation_value_rule is not None, "authority_request_envelope missing obligation_ref reverse normalization rule")
     ensure(
-        obligation_value_rule["then"]["properties"]["normalized_obligation_ref"]["not"].get("const") == "<NONE>",
+        obligation_value_rule is not None,
+        "authority_request_envelope missing obligation_ref reverse normalization rule",
+    )
+    ensure(
+        obligation_value_rule["then"]["properties"]["normalized_obligation_ref"]["not"].get("const")
+        == "<NONE>",
         "authority_request_envelope populated obligation_ref must reject normalized_obligation_ref=<NONE>",
     )
     basis_null_rule = next(
@@ -20965,7 +23768,10 @@ def check_authority_request_envelope() -> None:
         ),
         None,
     )
-    ensure(basis_null_rule is not None, "authority_request_envelope missing basis_type=null normalization rule")
+    ensure(
+        basis_null_rule is not None,
+        "authority_request_envelope missing basis_type=null normalization rule",
+    )
     ensure(
         basis_null_rule["then"]["properties"]["normalized_basis_type"].get("const") == "<NONE>",
         "authority_request_envelope null basis_type must force normalized_basis_type=<NONE>",
@@ -20974,14 +23780,19 @@ def check_authority_request_envelope() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("basis_type", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("basis_type", {}).get("type")
+            == "string"
             and "normalized_basis_type" in rule.get("then", {}).get("properties", {})
         ),
         None,
     )
-    ensure(basis_value_rule is not None, "authority_request_envelope missing basis_type reverse normalization rule")
     ensure(
-        basis_value_rule["then"]["properties"]["normalized_basis_type"]["not"].get("const") == "<NONE>",
+        basis_value_rule is not None,
+        "authority_request_envelope missing basis_type reverse normalization rule",
+    )
+    ensure(
+        basis_value_rule["then"]["properties"]["normalized_basis_type"]["not"].get("const")
+        == "<NONE>",
         "authority_request_envelope populated basis_type must reject normalized_basis_type=<NONE>",
     )
     payload_null_rule = next(
@@ -20992,7 +23803,10 @@ def check_authority_request_envelope() -> None:
         ),
         None,
     )
-    ensure(payload_null_rule is not None, "authority_request_envelope missing null-payload reverse guard")
+    ensure(
+        payload_null_rule is not None,
+        "authority_request_envelope missing null-payload reverse guard",
+    )
     ensure(
         payload_null_rule["then"]["properties"]["http_method"].get("enum") == ["GET", "DELETE"],
         "authority_request_envelope null payload_ref must force GET/DELETE methods",
@@ -21006,14 +23820,19 @@ def check_authority_request_envelope() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("payload_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("payload_ref", {}).get("type")
+            == "string"
             and "http_method" in rule.get("then", {}).get("properties", {})
         ),
         None,
     )
-    ensure(payload_string_method_rule is not None, "authority_request_envelope missing payload-method reverse guard")
     ensure(
-        payload_string_method_rule["then"]["properties"]["http_method"].get("enum") == ["POST", "PUT", "PATCH"],
+        payload_string_method_rule is not None,
+        "authority_request_envelope missing payload-method reverse guard",
+    )
+    ensure(
+        payload_string_method_rule["then"]["properties"]["http_method"].get("enum")
+        == ["POST", "PUT", "PATCH"],
         "authority_request_envelope non-null payload_ref must force write methods",
     )
 
@@ -21021,19 +23840,27 @@ def check_authority_request_envelope() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("payload_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("payload_ref", {}).get("type")
+            == "string"
             and "request_body_hash" in rule.get("then", {}).get("properties", {})
         ),
         None,
     )
-    ensure(payload_string_hash_rule is not None, "authority_request_envelope missing payload-hash reverse guard")
     ensure(
-        payload_string_hash_rule["then"]["properties"]["request_body_hash"]["not"].get("const") == "<NONE>",
+        payload_string_hash_rule is not None,
+        "authority_request_envelope missing payload-hash reverse guard",
+    )
+    ensure(
+        payload_string_hash_rule["then"]["properties"]["request_body_hash"]["not"].get("const")
+        == "<NONE>",
         "authority_request_envelope non-null payload_ref must reject request_body_hash=<NONE>",
     )
 
     body_hash_none_rule = find_rule_by_const(schema["allOf"], "request_body_hash", "<NONE>")
-    ensure(body_hash_none_rule is not None, "authority_request_envelope missing request_body_hash=<NONE> reverse guard")
+    ensure(
+        body_hash_none_rule is not None,
+        "authority_request_envelope missing request_body_hash=<NONE> reverse guard",
+    )
     ensure(
         body_hash_none_rule["then"]["properties"]["payload_ref"].get("type") == "null",
         "authority_request_envelope request_body_hash=<NONE> must null payload_ref",
@@ -21061,8 +23888,13 @@ def check_authority_request_envelope() -> None:
         "authority_request_envelope mutation/calc/submit families must require business_partition_refs",
     )
 
-    periodic_rule = find_rule_by_const(schema["allOf"], "operation_family", "AUTH_SUBMIT_PERIODIC_UPDATE")
-    ensure(periodic_rule is not None, "authority_request_envelope missing AUTH_SUBMIT_PERIODIC_UPDATE guard")
+    periodic_rule = find_rule_by_const(
+        schema["allOf"], "operation_family", "AUTH_SUBMIT_PERIODIC_UPDATE"
+    )
+    ensure(
+        periodic_rule is not None,
+        "authority_request_envelope missing AUTH_SUBMIT_PERIODIC_UPDATE guard",
+    )
     ensure(
         periodic_rule["then"]["properties"]["obligation_ref"].get("type") == "string",
         "authority_request_envelope AUTH_SUBMIT_PERIODIC_UPDATE must require obligation_ref",
@@ -21091,13 +23923,24 @@ def check_authority_request_envelope() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("fraud_header_profile_ref", {}).get("type") == "null"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("fraud_header_profile_ref", {})
+            .get("type")
+            == "null"
         ),
         None,
     )
-    ensure(fraud_profile_null_rule is not None, "authority_request_envelope missing null fraud-profile reset")
+    ensure(
+        fraud_profile_null_rule is not None,
+        "authority_request_envelope missing null fraud-profile reset",
+    )
     fraud_then = fraud_profile_null_rule["then"]["properties"]
-    for field in ["fraud_header_capture_ref", "fraud_header_validation_ref", "fraud_header_exemption_reason"]:
+    for field in [
+        "fraud_header_capture_ref",
+        "fraud_header_validation_ref",
+        "fraud_header_exemption_reason",
+    ]:
         ensure(
             fraud_then[field].get("type") == "null",
             f"authority_request_envelope null fraud_header_profile_ref must null {field}",
@@ -21142,7 +23985,9 @@ def check_authority_response_envelope() -> None:
             then_props["response_source"].get("enum") == ["CALLBACK", "POLL", "RECOVERY_READ"],
             f"authority_response_envelope non-null {field} must force asynchronous response_source",
         )
-        counterpart = "inbox_receipt_ref" if field == "provider_delivery_ref" else "provider_delivery_ref"
+        counterpart = (
+            "inbox_receipt_ref" if field == "provider_delivery_ref" else "provider_delivery_ref"
+        )
         ensure(
             then_props[counterpart].get("type") == "string",
             f"authority_response_envelope non-null {field} must require {counterpart}",
@@ -21152,18 +23997,26 @@ def check_authority_response_envelope() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("ingress_receipt_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("ingress_receipt_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(ingress_receipt_rule is not None, "authority_response_envelope missing reverse guard for ingress_receipt_ref")
     ensure(
-        ingress_receipt_rule["then"]["properties"]["response_source"].get("enum") == ["CALLBACK", "POLL", "RECOVERY_READ"],
+        ingress_receipt_rule is not None,
+        "authority_response_envelope missing reverse guard for ingress_receipt_ref",
+    )
+    ensure(
+        ingress_receipt_rule["then"]["properties"]["response_source"].get("enum")
+        == ["CALLBACK", "POLL", "RECOVERY_READ"],
         "authority_response_envelope non-null ingress_receipt_ref must force asynchronous response_source",
     )
 
     body_hash_none_rule = find_rule_by_const(schema["allOf"], "response_body_hash", "<NONE>")
-    ensure(body_hash_none_rule is not None, "authority_response_envelope missing <NONE> response_body_hash reverse guard")
+    ensure(
+        body_hash_none_rule is not None,
+        "authority_response_envelope missing <NONE> response_body_hash reverse guard",
+    )
     ensure(
         body_hash_none_rule["then"]["properties"]["response_body_ref"].get("type") == "null",
         "authority_response_envelope response_body_hash=<NONE> must null response_body_ref",
@@ -21175,7 +24028,8 @@ def check_authority_response_envelope() -> None:
         inline_rule["then"]["properties"]["provider_delivery_ref"].get("type") == "null"
         and inline_rule["then"]["properties"]["inbox_receipt_ref"].get("type") == "null"
         and inline_rule["then"]["properties"]["ingress_receipt_ref"].get("type") == "null"
-        and inline_rule["then"]["properties"]["authority_ingress_proof_contract"].get("type") == "null",
+        and inline_rule["then"]["properties"]["authority_ingress_proof_contract"].get("type")
+        == "null",
         "authority_response_envelope INLINE_HTTP must clear provider_delivery_ref, inbox_receipt_ref, ingress_receipt_ref, and authority_ingress_proof_contract",
     )
 
@@ -21189,7 +24043,10 @@ def check_authority_response_envelope() -> None:
         ),
         None,
     )
-    ensure(timeout_rule is not None, "authority_response_envelope missing TRANSPORT_TIMEOUT reverse guard")
+    ensure(
+        timeout_rule is not None,
+        "authority_response_envelope missing TRANSPORT_TIMEOUT reverse guard",
+    )
     timeout_then = timeout_rule["then"]["properties"]
     for field in [
         "provider_received_at",
@@ -21224,10 +24081,16 @@ def check_authority_response_envelope() -> None:
             f"authority_response_envelope TRANSPORT_TIMEOUT must clear {field}",
         )
 
-    timeout_class_rule = find_rule_by_const(schema["allOf"], "response_class", "ACK_TIMEOUT_OR_NO_RESOLUTION")
-    ensure(timeout_class_rule is not None, "authority_response_envelope missing ACK_TIMEOUT_OR_NO_RESOLUTION reverse guard")
+    timeout_class_rule = find_rule_by_const(
+        schema["allOf"], "response_class", "ACK_TIMEOUT_OR_NO_RESOLUTION"
+    )
     ensure(
-        timeout_class_rule["then"]["properties"]["response_source"].get("const") == "TRANSPORT_TIMEOUT",
+        timeout_class_rule is not None,
+        "authority_response_envelope missing ACK_TIMEOUT_OR_NO_RESOLUTION reverse guard",
+    )
+    ensure(
+        timeout_class_rule["then"]["properties"]["response_source"].get("const")
+        == "TRANSPORT_TIMEOUT",
         "authority_response_envelope ACK_TIMEOUT_OR_NO_RESOLUTION must force response_source=TRANSPORT_TIMEOUT",
     )
 
@@ -21240,7 +24103,10 @@ def check_authority_response_envelope() -> None:
         ),
         None,
     )
-    ensure(async_source_rule is not None, "authority_response_envelope missing asynchronous response_source guard")
+    ensure(
+        async_source_rule is not None,
+        "authority_response_envelope missing asynchronous response_source guard",
+    )
     async_then = async_source_rule["then"]["properties"]
     for field in ["provider_delivery_ref", "inbox_receipt_ref", "ingress_receipt_ref"]:
         ensure(
@@ -21267,24 +24133,38 @@ def check_authority_response_envelope() -> None:
         ),
         None,
     )
-    ensure(bound_success_rule is not None, "authority_response_envelope missing bound-correlation success guard")
+    ensure(
+        bound_success_rule is not None,
+        "authority_response_envelope missing bound-correlation success guard",
+    )
     ensure(
         bound_success_rule["then"]["properties"]["correlation_status"].get("const") == "BOUND",
         "authority_response_envelope success/pending/rejection/retryable classes must require correlation_status=BOUND",
     )
 
-    external_state_rule = find_rule_by_const(schema["allOf"], "response_class", "ACK_EXTERNAL_STATE_DISCOVERED")
-    ensure(external_state_rule is not None, "authority_response_envelope missing ACK_EXTERNAL_STATE_DISCOVERED guard")
+    external_state_rule = find_rule_by_const(
+        schema["allOf"], "response_class", "ACK_EXTERNAL_STATE_DISCOVERED"
+    )
+    ensure(
+        external_state_rule is not None,
+        "authority_response_envelope missing ACK_EXTERNAL_STATE_DISCOVERED guard",
+    )
     ensure(
         external_state_rule["then"]["properties"]["correlation_status"].get("const") == "BOUND",
         "authority_response_envelope ACK_EXTERNAL_STATE_DISCOVERED must require correlation_status=BOUND",
     )
 
-    weak_bind_rule = find_rule_by_const(schema["allOf"], "correlation_status", "BOUND_WITH_AUTHORITY_REFERENCE_ONLY")
-    ensure(weak_bind_rule is not None, "authority_response_envelope missing BOUND_WITH_AUTHORITY_REFERENCE_ONLY guard")
+    weak_bind_rule = find_rule_by_const(
+        schema["allOf"], "correlation_status", "BOUND_WITH_AUTHORITY_REFERENCE_ONLY"
+    )
+    ensure(
+        weak_bind_rule is not None,
+        "authority_response_envelope missing BOUND_WITH_AUTHORITY_REFERENCE_ONLY guard",
+    )
     ensure(
         weak_bind_rule["then"]["properties"]["authority_reference"].get("type") == "string"
-        and weak_bind_rule["then"]["properties"]["response_class"].get("const") == "ACK_INCONSISTENT_STATE",
+        and weak_bind_rule["then"]["properties"]["response_class"].get("const")
+        == "ACK_INCONSISTENT_STATE",
         "authority_response_envelope BOUND_WITH_AUTHORITY_REFERENCE_ONLY must require authority_reference and ACK_INCONSISTENT_STATE",
     )
 
@@ -21297,7 +24177,10 @@ def check_authority_response_envelope() -> None:
         ),
         None,
     )
-    ensure(ambiguous_rule is not None, "authority_response_envelope missing ambiguous/unbound correlation guard")
+    ensure(
+        ambiguous_rule is not None,
+        "authority_response_envelope missing ambiguous/unbound correlation guard",
+    )
     ambiguous_then = ambiguous_rule["then"]["properties"]
     ensure(
         ambiguous_then["response_class"].get("const") == "ACK_AMBIGUOUS_CORRELATION"
@@ -21307,11 +24190,17 @@ def check_authority_response_envelope() -> None:
         "authority_response_envelope ambiguous or unbound correlation must force ACK_AMBIGUOUS_CORRELATION with reconciliation-only retry posture",
     )
 
-    inconsistent_rule = find_rule_by_const(schema["allOf"], "response_class", "ACK_INCONSISTENT_STATE")
-    ensure(inconsistent_rule is not None, "authority_response_envelope missing ACK_INCONSISTENT_STATE guard")
+    inconsistent_rule = find_rule_by_const(
+        schema["allOf"], "response_class", "ACK_INCONSISTENT_STATE"
+    )
+    ensure(
+        inconsistent_rule is not None,
+        "authority_response_envelope missing ACK_INCONSISTENT_STATE guard",
+    )
     inconsistent_then = inconsistent_rule["then"]["properties"]
     ensure(
-        inconsistent_then["correlation_status"].get("enum") == ["BOUND", "BOUND_WITH_AUTHORITY_REFERENCE_ONLY"]
+        inconsistent_then["correlation_status"].get("enum")
+        == ["BOUND", "BOUND_WITH_AUTHORITY_REFERENCE_ONLY"]
         and inconsistent_then["legal_effect_posture"].get("const") == "RECONCILIATION_ONLY"
         and inconsistent_then["retry_class"].get("enum")
         == ["RECONCILE_THEN_RETRY", "HUMAN_REVIEW_THEN_RETRY", "MANUAL_INTERVENTION_REQUIRED"],
@@ -21319,16 +24208,24 @@ def check_authority_response_envelope() -> None:
     )
 
     recovery_rule = find_rule_by_const(schema["allOf"], "response_source", "RECOVERY_READ")
-    ensure(recovery_rule is not None, "authority_response_envelope missing RECOVERY_READ lineage guard")
+    ensure(
+        recovery_rule is not None, "authority_response_envelope missing RECOVERY_READ lineage guard"
+    )
     ensure(
         recovery_rule["then"]["properties"]["recovery_basis_response_id"].get("type") == "string"
         and recovery_rule["then"]["properties"]["derivation_posture"].get("enum")
-        == ["CORROBORATING_OBSERVATION", "SUPERSEDES_TIMEOUT_PLACEHOLDER", "CONFLICTING_OBSERVATION"],
+        == [
+            "CORROBORATING_OBSERVATION",
+            "SUPERSEDES_TIMEOUT_PLACEHOLDER",
+            "CONFLICTING_OBSERVATION",
+        ],
         "authority_response_envelope RECOVERY_READ must require recovery_basis_response_id and non-primary derivation posture",
     )
 
     primary_rule = find_rule_by_const(schema["allOf"], "derivation_posture", "PRIMARY_OBSERVATION")
-    ensure(primary_rule is not None, "authority_response_envelope missing PRIMARY_OBSERVATION guard")
+    ensure(
+        primary_rule is not None, "authority_response_envelope missing PRIMARY_OBSERVATION guard"
+    )
     primary_then = primary_rule["then"]["properties"]
     ensure(
         primary_then["legal_effect_posture"].get("const") == "DIRECT_STATE_MUTATION"
@@ -21339,7 +24236,9 @@ def check_authority_response_envelope() -> None:
         "authority_response_envelope PRIMARY_OBSERVATION must retain direct-state posture only and clear lineage refs",
     )
 
-    corroborating_rule = find_rule_by_const(schema["allOf"], "derivation_posture", "CORROBORATING_OBSERVATION")
+    corroborating_rule = find_rule_by_const(
+        schema["allOf"], "derivation_posture", "CORROBORATING_OBSERVATION"
+    )
     ensure(
         corroborating_rule is not None,
         "authority_response_envelope missing CORROBORATING_OBSERVATION guard",
@@ -21353,7 +24252,9 @@ def check_authority_response_envelope() -> None:
         "authority_response_envelope CORROBORATING_OBSERVATION must preserve corroboration lineage without a second state mutation",
     )
 
-    supersedes_rule = find_rule_by_const(schema["allOf"], "derivation_posture", "SUPERSEDES_TIMEOUT_PLACEHOLDER")
+    supersedes_rule = find_rule_by_const(
+        schema["allOf"], "derivation_posture", "SUPERSEDES_TIMEOUT_PLACEHOLDER"
+    )
     ensure(
         supersedes_rule is not None,
         "authority_response_envelope missing SUPERSEDES_TIMEOUT_PLACEHOLDER guard",
@@ -21368,8 +24269,13 @@ def check_authority_response_envelope() -> None:
         "authority_response_envelope SUPERSEDES_TIMEOUT_PLACEHOLDER must preserve async source lineage, require supersedes_response_id, and remain reconciliation-owned",
     )
 
-    conflicting_rule = find_rule_by_const(schema["allOf"], "derivation_posture", "CONFLICTING_OBSERVATION")
-    ensure(conflicting_rule is not None, "authority_response_envelope missing CONFLICTING_OBSERVATION guard")
+    conflicting_rule = find_rule_by_const(
+        schema["allOf"], "derivation_posture", "CONFLICTING_OBSERVATION"
+    )
+    ensure(
+        conflicting_rule is not None,
+        "authority_response_envelope missing CONFLICTING_OBSERVATION guard",
+    )
     conflicting_then = conflicting_rule["then"]["properties"]
     ensure(
         conflicting_then["legal_effect_posture"].get("const") == "RECONCILIATION_ONLY"
@@ -21380,12 +24286,18 @@ def check_authority_response_envelope() -> None:
         "authority_response_envelope CONFLICTING_OBSERVATION must preserve ACK_INCONSISTENT_STATE with conflicting lineage only",
     )
 
-    timeout_derivation_rule = find_rule_by_const(schema["allOf"], "derivation_posture", "TIMEOUT_PLACEHOLDER")
-    ensure(timeout_derivation_rule is not None, "authority_response_envelope missing TIMEOUT_PLACEHOLDER guard")
+    timeout_derivation_rule = find_rule_by_const(
+        schema["allOf"], "derivation_posture", "TIMEOUT_PLACEHOLDER"
+    )
+    ensure(
+        timeout_derivation_rule is not None,
+        "authority_response_envelope missing TIMEOUT_PLACEHOLDER guard",
+    )
     timeout_derivation_then = timeout_derivation_rule["then"]["properties"]
     ensure(
         timeout_derivation_then["response_source"].get("const") == "TRANSPORT_TIMEOUT"
-        and timeout_derivation_then["legal_effect_posture"].get("const") == "PROVISIONAL_STATE_MUTATION"
+        and timeout_derivation_then["legal_effect_posture"].get("const")
+        == "PROVISIONAL_STATE_MUTATION"
         and timeout_derivation_then["supersedes_response_id"].get("type") == "null"
         and timeout_derivation_then["corroborates_response_ids"].get("maxItems") == 0
         and timeout_derivation_then["conflicting_response_ids"].get("maxItems") == 0
@@ -21393,25 +24305,31 @@ def check_authority_response_envelope() -> None:
         "authority_response_envelope TIMEOUT_PLACEHOLDER must stay transport-timeout-only with cleared lineage refs",
     )
 
-    provisional_effect_rule = find_rule_by_const(schema["allOf"], "legal_effect_posture", "PROVISIONAL_STATE_MUTATION")
+    provisional_effect_rule = find_rule_by_const(
+        schema["allOf"], "legal_effect_posture", "PROVISIONAL_STATE_MUTATION"
+    )
     ensure(
         provisional_effect_rule is not None,
         "authority_response_envelope missing PROVISIONAL_STATE_MUTATION reverse guard",
     )
     ensure(
-        provisional_effect_rule["then"]["properties"]["response_class"].get("const") == "ACK_TIMEOUT_OR_NO_RESOLUTION"
+        provisional_effect_rule["then"]["properties"]["response_class"].get("const")
+        == "ACK_TIMEOUT_OR_NO_RESOLUTION"
         and provisional_effect_rule["then"]["properties"]["derivation_posture"].get("const")
         == "TIMEOUT_PLACEHOLDER",
         "authority_response_envelope PROVISIONAL_STATE_MUTATION must be reserved for timeout placeholders",
     )
 
-    no_mutation_rule = find_rule_by_const(schema["allOf"], "legal_effect_posture", "NO_STATE_MUTATION")
+    no_mutation_rule = find_rule_by_const(
+        schema["allOf"], "legal_effect_posture", "NO_STATE_MUTATION"
+    )
     ensure(
         no_mutation_rule is not None,
         "authority_response_envelope missing NO_STATE_MUTATION reverse guard",
     )
     ensure(
-        no_mutation_rule["then"]["properties"]["derivation_posture"].get("const") == "CORROBORATING_OBSERVATION",
+        no_mutation_rule["then"]["properties"]["derivation_posture"].get("const")
+        == "CORROBORATING_OBSERVATION",
         "authority_response_envelope NO_STATE_MUTATION must be reserved for corroborating observations",
     )
 
@@ -21419,7 +24337,11 @@ def check_authority_response_envelope() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("supersedes_response_id", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("supersedes_response_id", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
@@ -21437,7 +24359,11 @@ def check_authority_response_envelope() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("corroborates_response_ids", {}).get("minItems") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("corroborates_response_ids", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
@@ -21455,7 +24381,11 @@ def check_authority_response_envelope() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("conflicting_response_ids", {}).get("minItems") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("conflicting_response_ids", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
@@ -21473,7 +24403,11 @@ def check_authority_response_envelope() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("recovery_basis_response_id", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("recovery_basis_response_id", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
@@ -21482,7 +24416,8 @@ def check_authority_response_envelope() -> None:
         "authority_response_envelope missing recovery_basis_response_id reverse guard",
     )
     ensure(
-        recovery_basis_rule["then"]["properties"]["response_source"].get("const") == "RECOVERY_READ",
+        recovery_basis_rule["then"]["properties"]["response_source"].get("const")
+        == "RECOVERY_READ",
         "authority_response_envelope non-null recovery_basis_response_id must force response_source=RECOVERY_READ",
     )
 
@@ -21501,8 +24436,13 @@ def check_metric_event() -> None:
     ]:
         ensure(family in metric_families, f"metric_event must support {family}")
 
-    digest_latency_rule = find_rule_by_const(schema["allOf"], "metric_family", "OPERATOR_DIGEST_PUBLISH_LATENCY")
-    ensure(digest_latency_rule is not None, "metric_event missing OPERATOR_DIGEST_PUBLISH_LATENCY guard")
+    digest_latency_rule = find_rule_by_const(
+        schema["allOf"], "metric_family", "OPERATOR_DIGEST_PUBLISH_LATENCY"
+    )
+    ensure(
+        digest_latency_rule is not None,
+        "metric_event missing OPERATOR_DIGEST_PUBLISH_LATENCY guard",
+    )
     digest_then = digest_latency_rule["then"]["properties"]
     ensure(
         set(digest_then["instrument_kind"].get("enum", [])) == {"GAUGE", "HISTOGRAM"},
@@ -21515,8 +24455,13 @@ def check_metric_event() -> None:
         "metric_event OPERATOR_DIGEST_PUBLISH_LATENCY must require nightly batch correlation",
     )
 
-    selection_count_rule = find_rule_by_const(schema["allOf"], "metric_family", "NIGHTLY_SELECTION_DISPOSITION_COUNT")
-    ensure(selection_count_rule is not None, "metric_event missing NIGHTLY_SELECTION_DISPOSITION_COUNT guard")
+    selection_count_rule = find_rule_by_const(
+        schema["allOf"], "metric_family", "NIGHTLY_SELECTION_DISPOSITION_COUNT"
+    )
+    ensure(
+        selection_count_rule is not None,
+        "metric_event missing NIGHTLY_SELECTION_DISPOSITION_COUNT guard",
+    )
     selection_then = selection_count_rule["then"]["properties"]
     selection_counter_rule = next(
         (
@@ -21524,16 +24469,22 @@ def check_metric_event() -> None:
             for rule in schema["allOf"]
             if "NIGHTLY_SELECTION_DISPOSITION_COUNT"
             in rule.get("if", {}).get("properties", {}).get("metric_family", {}).get("enum", [])
-            and rule.get("then", {}).get("properties", {}).get("instrument_kind", {}).get("const") == "COUNTER"
+            and rule.get("then", {}).get("properties", {}).get("instrument_kind", {}).get("const")
+            == "COUNTER"
         ),
         None,
     )
-    ensure(selection_counter_rule is not None, "metric_event missing NIGHTLY_SELECTION_DISPOSITION_COUNT counter guard")
+    ensure(
+        selection_counter_rule is not None,
+        "metric_event missing NIGHTLY_SELECTION_DISPOSITION_COUNT counter guard",
+    )
     ensure(
         selection_counter_rule["then"]["properties"]["instrument_kind"].get("const") == "COUNTER",
         "metric_event NIGHTLY_SELECTION_DISPOSITION_COUNT must stay a counter",
     )
-    selection_dimension = selection_then["dimensions"]["properties"]["selection_disposition"]["enum"]
+    selection_dimension = selection_then["dimensions"]["properties"]["selection_disposition"][
+        "enum"
+    ]
     ensure(
         selection_dimension
         == [
@@ -21548,7 +24499,9 @@ def check_metric_event() -> None:
         "metric_event NIGHTLY_SELECTION_DISPOSITION_COUNT must freeze the nightly disposition taxonomy",
     )
 
-    outcome_rule = find_rule_by_const(schema["allOf"], "metric_family", "NIGHTLY_BATCH_OUTCOME_RATE")
+    outcome_rule = find_rule_by_const(
+        schema["allOf"], "metric_family", "NIGHTLY_BATCH_OUTCOME_RATE"
+    )
     ensure(outcome_rule is not None, "metric_event missing NIGHTLY_BATCH_OUTCOME_RATE guard")
     outcome_then = outcome_rule["then"]["properties"]
     outcome_context = outcome_then["correlation_context"]["properties"]
@@ -21563,10 +24516,16 @@ def check_metric_event() -> None:
         "metric_event NIGHTLY_BATCH_OUTCOME_RATE must freeze the nightly outcome-bucket taxonomy",
     )
 
-    masked_view_rule = find_rule_by_const(schema["allOf"], "metric_family", "MASKED_VS_FULL_SENSITIVE_VIEWS")
-    ensure(masked_view_rule is not None, "metric_event missing MASKED_VS_FULL_SENSITIVE_VIEWS guard")
+    masked_view_rule = find_rule_by_const(
+        schema["allOf"], "metric_family", "MASKED_VS_FULL_SENSITIVE_VIEWS"
+    )
     ensure(
-        masked_view_rule["then"]["properties"]["dimensions"]["properties"]["view_posture"].get("enum")
+        masked_view_rule is not None, "metric_event missing MASKED_VS_FULL_SENSITIVE_VIEWS guard"
+    )
+    ensure(
+        masked_view_rule["then"]["properties"]["dimensions"]["properties"]["view_posture"].get(
+            "enum"
+        )
         == ["MASKED_ONLY", "FULL_ALLOWED"],
         "metric_event MASKED_VS_FULL_SENSITIVE_VIEWS must require a masked/full view_posture dimension",
     )
@@ -21583,7 +24542,12 @@ def check_trace_span() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("correlation_context", {}).get("properties", {}).get("run_kind", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("correlation_context", {})
+            .get("properties", {})
+            .get("run_kind", {})
+            .get("const")
             == "NIGHTLY"
         ),
         None,
@@ -21600,20 +24564,30 @@ def check_trace_span() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("correlation_context", {}).get("properties", {}).get("run_kind", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("correlation_context", {})
+            .get("properties", {})
+            .get("run_kind", {})
+            .get("const")
             == "REPLAY"
         ),
         None,
     )
     ensure(replay_root_rule is not None, "trace_span missing REPLAY run-root replay_class guard")
     ensure(
-        replay_root_rule["then"]["properties"]["correlation_context"]["properties"]["replay_class"].get("enum")
+        replay_root_rule["then"]["properties"]["correlation_context"]["properties"][
+            "replay_class"
+        ].get("enum")
         == ["STANDARD_REPLAY", "AUDIT_REPLAY", "COUNTERFACTUAL_ANALYSIS"],
         "trace_span REPLAY run roots must require the canonical replay_class vocabulary",
     )
 
     reuse_rule = find_rule_by_const(schema["allOf"], "span_code", "REUSE_CONTINUATION_DECISION")
-    ensure(reuse_rule is not None, "trace_span missing REUSE_CONTINUATION_DECISION access-binding guard")
+    ensure(
+        reuse_rule is not None,
+        "trace_span missing REUSE_CONTINUATION_DECISION access-binding guard",
+    )
     reuse_props = reuse_rule["then"]["properties"]["correlation_context"]["properties"]
     ensure(
         reuse_props["idempotency_key"].get("minLength") == 1
@@ -21630,8 +24604,13 @@ def check_trace_span() -> None:
         "trace_span REUSE_CONTINUATION_DECISION must require manifest_branch_decision correlation",
     )
 
-    config_rule = find_rule_by_const(schema["allOf"], "span_code", "CONFIG_RESOLVE_OR_INHERITANCE_DECISION")
-    ensure(config_rule is not None, "trace_span missing CONFIG_RESOLVE_OR_INHERITANCE_DECISION access-binding guard")
+    config_rule = find_rule_by_const(
+        schema["allOf"], "span_code", "CONFIG_RESOLVE_OR_INHERITANCE_DECISION"
+    )
+    ensure(
+        config_rule is not None,
+        "trace_span missing CONFIG_RESOLVE_OR_INHERITANCE_DECISION access-binding guard",
+    )
     config_props = config_rule["then"]["properties"]["correlation_context"]["properties"]
     ensure(
         config_props["idempotency_key"].get("minLength") == 1
@@ -21650,7 +24629,9 @@ def check_trace_span() -> None:
     )
 
     start_claim_rule = find_rule_by_const(schema["allOf"], "span_code", "MANIFEST_START_CLAIM")
-    ensure(start_claim_rule is not None, "trace_span missing MANIFEST_START_CLAIM correlation guard")
+    ensure(
+        start_claim_rule is not None, "trace_span missing MANIFEST_START_CLAIM correlation guard"
+    )
     start_claim_props = start_claim_rule["then"]["properties"]["correlation_context"]["properties"]
     ensure(
         start_claim_props["idempotency_key"].get("minLength") == 1
@@ -21678,7 +24659,13 @@ def check_trace_span() -> None:
 def check_log_record() -> None:
     schema = load_schema("log_record.schema.json")
 
-    for field in ["log_record_id", "retention_class", "service_name", "environment_ref", "message_template"]:
+    for field in [
+        "log_record_id",
+        "retention_class",
+        "service_name",
+        "environment_ref",
+        "message_template",
+    ]:
         ensure(
             schema["properties"][field].get("minLength") == 1,
             f"log_record.{field} must reject empty strings",
@@ -21710,13 +24697,17 @@ def check_log_record() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("severity", {}).get("enum") == ["ERROR", "FATAL"]
+            if rule.get("if", {}).get("properties", {}).get("severity", {}).get("enum")
+            == ["ERROR", "FATAL"]
         ),
         None,
     )
     ensure(fatal_rule is not None, "log_record missing ERROR/FATAL error_id guard")
     ensure(
-        fatal_rule["then"]["properties"]["correlation_context"]["properties"]["error_id"].get("minLength") == 1,
+        fatal_rule["then"]["properties"]["correlation_context"]["properties"]["error_id"].get(
+            "minLength"
+        )
+        == 1,
         "log_record ERROR/FATAL records must require error_id",
     )
 
@@ -21757,13 +24748,20 @@ def check_operator_morning_digest() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("queue_summaries", {}).get("minItems") == 1
+            if rule.get("if", {}).get("properties", {}).get("queue_summaries", {}).get("minItems")
+            == 1
         ),
         None,
     )
-    ensure(queue_summary_publication_rule is not None, "operator_morning_digest missing queue-summary publication guard")
     ensure(
-        queue_summary_publication_rule["then"]["properties"]["published_workflow_item_refs"].get("minItems") == 1,
+        queue_summary_publication_rule is not None,
+        "operator_morning_digest missing queue-summary publication guard",
+    )
+    ensure(
+        queue_summary_publication_rule["then"]["properties"]["published_workflow_item_refs"].get(
+            "minItems"
+        )
+        == 1,
         "operator_morning_digest non-empty queue_summaries must require published_workflow_item_refs",
     )
     workflow_empty_rule = next(
@@ -21785,7 +24783,8 @@ def check_operator_morning_digest() -> None:
         "operator_morning_digest missing no-unresolved workflow-publication guard",
     )
     ensure(
-        workflow_empty_rule["then"]["properties"]["published_workflow_item_refs"].get("maxItems") == 0
+        workflow_empty_rule["then"]["properties"]["published_workflow_item_refs"].get("maxItems")
+        == 0
         and workflow_empty_rule["then"]["properties"]["queue_summaries"].get("maxItems") == 0,
         "operator_morning_digest no-unresolved workflow-publication state must clear queue_summaries and published_workflow_item_refs",
     )
@@ -21808,7 +24807,8 @@ def check_operator_morning_digest() -> None:
         "operator_morning_digest missing explicit-none notification guard",
     )
     ensure(
-        notification_none_rule["then"]["properties"]["published_notification_refs"].get("maxItems") == 0,
+        notification_none_rule["then"]["properties"]["published_notification_refs"].get("maxItems")
+        == 0,
         "operator_morning_digest explicit-none notification state must clear published_notification_refs",
     )
 
@@ -21816,11 +24816,20 @@ def check_operator_morning_digest() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("summary_counts", {}).get("properties", {}).get("waiting_on_authority", {}).get("const") == 0
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("summary_counts", {})
+            .get("properties", {})
+            .get("waiting_on_authority", {})
+            .get("const")
+            == 0
         ),
         None,
     )
-    ensure(waiting_zero_rule is not None, "operator_morning_digest missing waiting_on_authority zero guard")
+    ensure(
+        waiting_zero_rule is not None,
+        "operator_morning_digest missing waiting_on_authority zero guard",
+    )
     ensure(
         waiting_zero_rule["then"]["properties"]["waiting_on_authority_refs"].get("maxItems") == 0,
         "operator_morning_digest waiting_on_authority=0 must keep waiting_on_authority_refs empty",
@@ -21830,11 +24839,20 @@ def check_operator_morning_digest() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("summary_counts", {}).get("properties", {}).get("waiting_on_authority", {}).get("minimum") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("summary_counts", {})
+            .get("properties", {})
+            .get("waiting_on_authority", {})
+            .get("minimum")
+            == 1
         ),
         None,
     )
-    ensure(waiting_some_rule is not None, "operator_morning_digest missing waiting_on_authority nonzero guard")
+    ensure(
+        waiting_some_rule is not None,
+        "operator_morning_digest missing waiting_on_authority nonzero guard",
+    )
     ensure(
         waiting_some_rule["then"]["properties"]["waiting_on_authority_refs"].get("minItems") == 1,
         "operator_morning_digest waiting_on_authority>0 must require waiting_on_authority_refs",
@@ -21844,11 +24862,20 @@ def check_operator_morning_digest() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("summary_counts", {}).get("properties", {}).get("waiting_on_late_data", {}).get("const") == 0
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("summary_counts", {})
+            .get("properties", {})
+            .get("waiting_on_late_data", {})
+            .get("const")
+            == 0
         ),
         None,
     )
-    ensure(late_zero_rule is not None, "operator_morning_digest missing waiting_on_late_data zero guard")
+    ensure(
+        late_zero_rule is not None,
+        "operator_morning_digest missing waiting_on_late_data zero guard",
+    )
     ensure(
         late_zero_rule["then"]["properties"]["late_data_hold_refs"].get("maxItems") == 0,
         "operator_morning_digest waiting_on_late_data=0 must keep late_data_hold_refs empty",
@@ -21858,11 +24885,20 @@ def check_operator_morning_digest() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("summary_counts", {}).get("properties", {}).get("waiting_on_late_data", {}).get("minimum") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("summary_counts", {})
+            .get("properties", {})
+            .get("waiting_on_late_data", {})
+            .get("minimum")
+            == 1
         ),
         None,
     )
-    ensure(late_some_rule is not None, "operator_morning_digest missing waiting_on_late_data nonzero guard")
+    ensure(
+        late_some_rule is not None,
+        "operator_morning_digest missing waiting_on_late_data nonzero guard",
+    )
     ensure(
         late_some_rule["then"]["properties"]["late_data_hold_refs"].get("minItems") == 1,
         "operator_morning_digest waiting_on_late_data>0 must require late_data_hold_refs",
@@ -21883,7 +24919,9 @@ def check_operator_morning_digest() -> None:
         ),
         None,
     )
-    ensure(work_item_rule is not None, "operator_morning_digest missing highlighted work-item guard")
+    ensure(
+        work_item_rule is not None, "operator_morning_digest missing highlighted work-item guard"
+    )
     ensure(
         work_item_rule["then"]["properties"]["work_item_ref"].get("type") == "string",
         "operator_morning_digest highlighted waiting/failure outcomes must require work_item_ref",
@@ -21892,12 +24930,16 @@ def check_operator_morning_digest() -> None:
         (
             rule
             for rule in highlighted_outcome["allOf"]
-            if set(rule.get("if", {}).get("properties", {}).get("dominant_outcome", {}).get("enum", []))
+            if set(
+                rule.get("if", {}).get("properties", {}).get("dominant_outcome", {}).get("enum", [])
+            )
             == {"WAITING_ON_AUTHORITY", "WAITING_ON_LATE_DATA", "DEFERRED"}
         ),
         None,
     )
-    ensure(checkpoint_rule is not None, "operator_morning_digest missing highlighted checkpoint guard")
+    ensure(
+        checkpoint_rule is not None, "operator_morning_digest missing highlighted checkpoint guard"
+    )
     ensure(
         checkpoint_rule["then"]["properties"]["next_checkpoint_at"].get("type") == "string",
         "operator_morning_digest highlighted waiting/late/deferred outcomes must require next_checkpoint_at",
@@ -21922,7 +24964,8 @@ def check_operator_morning_digest() -> None:
         "operator_morning_digest missing recovery supersession guard",
     )
     ensure(
-        recovery_supersession_rule["then"]["properties"]["supersedes_digest_id"].get("type") == "string",
+        recovery_supersession_rule["then"]["properties"]["supersedes_digest_id"].get("type")
+        == "string",
         "operator_morning_digest recovery supersession must require supersedes_digest_id",
     )
 
@@ -21945,7 +24988,8 @@ def check_operator_morning_digest() -> None:
         "operator_morning_digest missing initial-publication supersession guard",
     )
     ensure(
-        initial_supersession_rule["then"]["properties"]["supersedes_digest_id"].get("type") == "null",
+        initial_supersession_rule["then"]["properties"]["supersedes_digest_id"].get("type")
+        == "null",
         "operator_morning_digest initial publication must keep supersedes_digest_id null",
     )
 
@@ -22089,24 +25133,33 @@ def check_nightly_portfolio_simulation_basis_contract() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("source_batch_count", {}).get("const") == 1
+            if rule.get("if", {}).get("properties", {}).get("source_batch_count", {}).get("const")
+            == 1
         ),
         None,
     )
-    ensure(single_batch_rule is not None, "nightly_portfolio_simulation_basis_contract missing single-batch recovery guard")
     ensure(
-        single_batch_rule["then"]["properties"]["source_batch_recovery_state"].get("const") == "SINGLE_BATCH",
+        single_batch_rule is not None,
+        "nightly_portfolio_simulation_basis_contract missing single-batch recovery guard",
+    )
+    ensure(
+        single_batch_rule["then"]["properties"]["source_batch_recovery_state"].get("const")
+        == "SINGLE_BATCH",
         "nightly_portfolio_simulation_basis_contract source_batch_count=1 must force SINGLE_BATCH recovery posture",
     )
     recovery_chain_rule = next(
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("source_batch_count", {}).get("minimum") == 2
+            if rule.get("if", {}).get("properties", {}).get("source_batch_count", {}).get("minimum")
+            == 2
         ),
         None,
     )
-    ensure(recovery_chain_rule is not None, "nightly_portfolio_simulation_basis_contract missing successor-chain guard")
+    ensure(
+        recovery_chain_rule is not None,
+        "nightly_portfolio_simulation_basis_contract missing successor-chain guard",
+    )
     ensure(
         recovery_chain_rule["then"]["properties"]["source_batch_recovery_state"].get("const")
         == "SUCCESSOR_RECOVERY_CHAIN",
@@ -22129,7 +25182,9 @@ def check_nightly_portfolio_simulation_basis_contract() -> None:
         "nightly_portfolio_simulation_basis_contract missing release-manifest counterfactual guard",
     )
     ensure(
-        release_manifest_rule["then"]["properties"]["counterfactual_release_candidate_identity_contract_or_null"].get("type")
+        release_manifest_rule["then"]["properties"][
+            "counterfactual_release_candidate_identity_contract_or_null"
+        ].get("type")
         == "object",
         "nightly_portfolio_simulation_basis_contract counterfactual release manifest must require a release candidate identity contract",
     )
@@ -22150,7 +25205,9 @@ def check_nightly_portfolio_simulation_basis_contract() -> None:
         "nightly_portfolio_simulation_basis_contract missing reverse release-identity guard",
     )
     ensure(
-        release_identity_rule["then"]["properties"]["counterfactual_release_verification_manifest_ref_or_null"].get("type")
+        release_identity_rule["then"]["properties"][
+            "counterfactual_release_verification_manifest_ref_or_null"
+        ].get("type")
         == "string",
         "nightly_portfolio_simulation_basis_contract release identity what-if must require a release verification manifest ref",
     )
@@ -22200,7 +25257,9 @@ def check_nightly_portfolio_what_if_simulation() -> None:
         schema["properties"]["artifact_type"].get("const") == "NightlyPortfolioWhatIfSimulation",
         "nightly_portfolio_what_if_simulation.artifact_type must stay NightlyPortfolioWhatIfSimulation",
     )
-    boundary_props = collect_nested_properties(schema["properties"]["execution_mode_boundary_contract"])
+    boundary_props = collect_nested_properties(
+        schema["properties"]["execution_mode_boundary_contract"]
+    )
     ensure(
         boundary_props.get("execution_mode", {}).get("const") == "ANALYSIS",
         "nightly_portfolio_what_if_simulation.execution_mode_boundary_contract.execution_mode must stay ANALYSIS",
@@ -22286,11 +25345,18 @@ def check_remediation_task() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("artifact_retention_ref", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("artifact_retention_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(retention_ref_rule is not None, "remediation_task missing artifact_retention_ref reverse guard")
+    ensure(
+        retention_ref_rule is not None,
+        "remediation_task missing artifact_retention_ref reverse guard",
+    )
     ensure(
         retention_ref_rule["then"]["properties"]["retention_class"].get("type") == "string",
         "remediation_task non-null artifact_retention_ref must require retention_class",
@@ -22300,20 +25366,25 @@ def check_remediation_task() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("retention_class", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("retention_class", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(retention_class_rule is not None, "remediation_task missing retention_class reverse guard")
     ensure(
-        retention_class_rule["then"]["properties"]["artifact_retention_ref"].get("type") == "string",
+        retention_class_rule is not None, "remediation_task missing retention_class reverse guard"
+    )
+    ensure(
+        retention_class_rule["then"]["properties"]["artifact_retention_ref"].get("type")
+        == "string",
         "remediation_task non-null retention_class must require artifact_retention_ref",
     )
 
     retention_hold_rule = find_rule_by_const(schema["allOf"], "task_type", "CHECK_RETENTION_HOLD")
     ensure(retention_hold_rule is not None, "remediation_task missing CHECK_RETENTION_HOLD guard")
     ensure(
-        retention_hold_rule["then"]["properties"]["blocking_class"].get("const") == "BLOCKS_ERASURE",
+        retention_hold_rule["then"]["properties"]["blocking_class"].get("const")
+        == "BLOCKS_ERASURE",
         "remediation_task CHECK_RETENTION_HOLD must force BLOCKS_ERASURE",
     )
     ensure(
@@ -22329,14 +25400,19 @@ def check_remediation_task() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("accepted_risk_approval_ref", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("accepted_risk_approval_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
     ensure(accepted_risk_rule is not None, "remediation_task missing accepted-risk reverse guard")
     ensure(
         accepted_risk_rule["then"]["properties"]["task_state"].get("const") == "COMPLETED"
-        and accepted_risk_rule["then"]["properties"]["closure_outcome"].get("const") == "ACCEPTED_RISK",
+        and accepted_risk_rule["then"]["properties"]["closure_outcome"].get("const")
+        == "ACCEPTED_RISK",
         "remediation_task accepted_risk_approval_ref must force COMPLETED/ACCEPTED_RISK",
     )
     ensure(
@@ -22365,7 +25441,13 @@ def check_accepted_risk_approval() -> None:
         ],
         "accepted_risk_approval",
     )
-    for field in ["approver_ref", "policy_basis_ref", "artifact_retention_ref", "workflow_item_id", "superseded_by_approval_id"]:
+    for field in [
+        "approver_ref",
+        "policy_basis_ref",
+        "artifact_retention_ref",
+        "workflow_item_id",
+        "superseded_by_approval_id",
+    ]:
         ensure(
             schema["properties"][field].get("minLength") == 1,
             f"accepted_risk_approval.{field} must reject empty strings when present",
@@ -22379,7 +25461,9 @@ def check_accepted_risk_approval() -> None:
     )
 
     system_policy_rule = find_rule_by_const(schema["allOf"], "approver_type", "SYSTEM_POLICY")
-    ensure(system_policy_rule is not None, "accepted_risk_approval missing SYSTEM_POLICY reverse guard")
+    ensure(
+        system_policy_rule is not None, "accepted_risk_approval missing SYSTEM_POLICY reverse guard"
+    )
     ensure(
         system_policy_rule["then"]["properties"]["decision_basis"].get("const") == "POLICY_BASIS",
         "accepted_risk_approval approver_type=SYSTEM_POLICY must force decision_basis=POLICY_BASIS",
@@ -22389,13 +25473,17 @@ def check_accepted_risk_approval() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("approver_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("approver_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(approver_ref_rule is not None, "accepted_risk_approval missing approver_ref reverse guard")
     ensure(
-        approver_ref_rule["then"]["properties"]["decision_basis"].get("const") == "EXPLICIT_APPROVAL",
+        approver_ref_rule is not None, "accepted_risk_approval missing approver_ref reverse guard"
+    )
+    ensure(
+        approver_ref_rule["then"]["properties"]["decision_basis"].get("const")
+        == "EXPLICIT_APPROVAL",
         "accepted_risk_approval non-null approver_ref must force decision_basis=EXPLICIT_APPROVAL",
     )
 
@@ -22403,11 +25491,14 @@ def check_accepted_risk_approval() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("policy_basis_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("policy_basis_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(policy_ref_rule is not None, "accepted_risk_approval missing policy_basis_ref reverse guard")
+    ensure(
+        policy_ref_rule is not None, "accepted_risk_approval missing policy_basis_ref reverse guard"
+    )
     ensure(
         policy_ref_rule["then"]["properties"]["decision_basis"].get("const") == "POLICY_BASIS",
         "accepted_risk_approval non-null policy_basis_ref must force decision_basis=POLICY_BASIS",
@@ -22417,7 +25508,8 @@ def check_accepted_risk_approval() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("revoked_at", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("revoked_at", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -22431,7 +25523,11 @@ def check_accepted_risk_approval() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("superseded_by_approval_id", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("superseded_by_approval_id", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
@@ -22445,11 +25541,18 @@ def check_accepted_risk_approval() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("artifact_retention_ref", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("artifact_retention_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(retention_ref_rule is not None, "accepted_risk_approval missing artifact_retention_ref reverse guard")
+    ensure(
+        retention_ref_rule is not None,
+        "accepted_risk_approval missing artifact_retention_ref reverse guard",
+    )
     ensure(
         retention_ref_rule["then"]["properties"]["retention_class"].get("type") == "string",
         "accepted_risk_approval non-null artifact_retention_ref must require retention_class",
@@ -22459,13 +25562,18 @@ def check_accepted_risk_approval() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("retention_class", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("retention_class", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(retention_class_rule is not None, "accepted_risk_approval missing retention_class reverse guard")
     ensure(
-        retention_class_rule["then"]["properties"]["artifact_retention_ref"].get("type") == "string",
+        retention_class_rule is not None,
+        "accepted_risk_approval missing retention_class reverse guard",
+    )
+    ensure(
+        retention_class_rule["then"]["properties"]["artifact_retention_ref"].get("type")
+        == "string",
         "accepted_risk_approval non-null retention_class must require artifact_retention_ref",
     )
 
@@ -22513,7 +25621,8 @@ def check_actor_session() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("revocation_reason", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("revocation_reason", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -22537,7 +25646,14 @@ def check_authorization_decision() -> None:
     )
     ensure(
         schema["properties"]["approval_requirement"]["enum"]
-        == ["NOT_REQUIRED", "SINGLE_APPROVER", "DUAL_APPROVER", "SECURITY_REVIEW", "CHANGE_ADVISORY_QUORUM", None],
+        == [
+            "NOT_REQUIRED",
+            "SINGLE_APPROVER",
+            "DUAL_APPROVER",
+            "SECURITY_REVIEW",
+            "CHANGE_ADVISORY_QUORUM",
+            None,
+        ],
         "authorization_decision.approval_requirement must freeze the governance mutation approval vocabulary",
     )
     for field in ["dependency_topology_hash", "simulation_basis_hash"]:
@@ -22550,11 +25666,17 @@ def check_authorization_decision() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("bounded_safe_mutation", {}).get("const") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("bounded_safe_mutation", {})
+            .get("const")
+            == 1
         ),
         None,
     )
-    ensure(safe_rule is not None, "authorization_decision missing bounded_safe_mutation reverse guard")
+    ensure(
+        safe_rule is not None, "authorization_decision missing bounded_safe_mutation reverse guard"
+    )
     ensure(
         safe_rule["then"]["properties"]["approval_requirement"].get("const") == "NOT_REQUIRED",
         "authorization_decision bounded_safe_mutation=1 must force approval_requirement=NOT_REQUIRED",
@@ -22569,11 +25691,18 @@ def check_authorization_decision() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("bounded_safe_mutation", {}).get("const") == 0
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("bounded_safe_mutation", {})
+            .get("const")
+            == 0
         ),
         None,
     )
-    ensure(unsafe_rule is not None, "authorization_decision missing bounded_safe_mutation=0 reverse guard")
+    ensure(
+        unsafe_rule is not None,
+        "authorization_decision missing bounded_safe_mutation=0 reverse guard",
+    )
     ensure(
         unsafe_rule["then"]["properties"]["approval_requirement"].get("enum")
         == ["SINGLE_APPROVER", "DUAL_APPROVER", "SECURITY_REVIEW", "CHANGE_ADVISORY_QUORUM"],
@@ -22625,7 +25754,8 @@ def check_authorization_decision() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("simulation_basis_hash", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("simulation_basis_hash", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -22634,7 +25764,8 @@ def check_authorization_decision() -> None:
         "authorization_decision missing simulation_basis_hash reverse guard",
     )
     ensure(
-        simulation_basis_rule["then"]["properties"]["dependency_topology_hash"].get("type") == "string",
+        simulation_basis_rule["then"]["properties"]["dependency_topology_hash"].get("type")
+        == "string",
         "authorization_decision non-null simulation_basis_hash must force dependency_topology_hash",
     )
 
@@ -22642,7 +25773,11 @@ def check_authorization_decision() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("dependency_topology_hash", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("dependency_topology_hash", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
@@ -22651,7 +25786,8 @@ def check_authorization_decision() -> None:
         "authorization_decision missing dependency_topology_hash reverse guard",
     )
     ensure(
-        dependency_topology_rule["then"]["properties"]["simulation_basis_hash"].get("type") == "string",
+        dependency_topology_rule["then"]["properties"]["simulation_basis_hash"].get("type")
+        == "string",
         "authorization_decision non-null dependency_topology_hash must force simulation_basis_hash",
     )
 
@@ -22659,11 +25795,14 @@ def check_authorization_decision() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("required_authn_level", {}).get("enum") == ["MFA", "STEP_UP"]
+            if rule.get("if", {}).get("properties", {}).get("required_authn_level", {}).get("enum")
+            == ["MFA", "STEP_UP"]
         ),
         None,
     )
-    ensure(authn_rule is not None, "authorization_decision missing required_authn_level reverse guard")
+    ensure(
+        authn_rule is not None, "authorization_decision missing required_authn_level reverse guard"
+    )
     ensure(
         authn_rule["then"]["properties"]["decision"].get("const") == "REQUIRE_STEP_UP",
         "authorization_decision non-null required_authn_level must force decision=REQUIRE_STEP_UP",
@@ -22673,11 +25812,18 @@ def check_authorization_decision() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("required_approvals", {}).get("minItems") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("required_approvals", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
-    ensure(approvals_rule is not None, "authorization_decision missing required_approvals reverse guard")
+    ensure(
+        approvals_rule is not None,
+        "authorization_decision missing required_approvals reverse guard",
+    )
     ensure(
         approvals_rule["then"]["properties"]["decision"].get("const") == "REQUIRE_APPROVAL",
         "authorization_decision required approvals must force decision=REQUIRE_APPROVAL",
@@ -22687,7 +25833,8 @@ def check_authorization_decision() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("masking_rules", {}).get("minItems") == 1
+            if rule.get("if", {}).get("properties", {}).get("masking_rules", {}).get("minItems")
+            == 1
         ),
         None,
     )
@@ -22701,7 +25848,8 @@ def check_authorization_decision() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("effective_scope", {}).get("maxItems") == 0
+            if rule.get("if", {}).get("properties", {}).get("effective_scope", {}).get("maxItems")
+            == 0
         ),
         None,
     )
@@ -22715,11 +25863,14 @@ def check_authorization_decision() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("bounded_safe_mutation", {}).get("type") == "null"
+            if rule.get("if", {}).get("properties", {}).get("bounded_safe_mutation", {}).get("type")
+            == "null"
         ),
         None,
     )
-    ensure(null_mutation_rule is not None, "authorization_decision missing null mutation reverse guard")
+    ensure(
+        null_mutation_rule is not None, "authorization_decision missing null mutation reverse guard"
+    )
     ensure(
         null_mutation_rule["then"]["properties"]["dependency_topology_hash"].get("type") == "null"
         and null_mutation_rule["then"]["properties"]["simulation_basis_hash"].get("type") == "null",
@@ -22766,11 +25917,18 @@ def check_failure_investigation() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("artifact_retention_ref", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("artifact_retention_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(retention_ref_rule is not None, "failure_investigation missing artifact_retention_ref reverse guard")
+    ensure(
+        retention_ref_rule is not None,
+        "failure_investigation missing artifact_retention_ref reverse guard",
+    )
     ensure(
         retention_ref_rule["then"]["properties"]["retention_class"].get("type") == "string",
         "failure_investigation non-null artifact_retention_ref must require retention_class",
@@ -22780,20 +25938,31 @@ def check_failure_investigation() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("retention_class", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("retention_class", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(retention_class_rule is not None, "failure_investigation missing retention_class reverse guard")
     ensure(
-        retention_class_rule["then"]["properties"]["artifact_retention_ref"].get("type") == "string",
+        retention_class_rule is not None,
+        "failure_investigation missing retention_class reverse guard",
+    )
+    ensure(
+        retention_class_rule["then"]["properties"]["artifact_retention_ref"].get("type")
+        == "string",
         "failure_investigation non-null retention_class must require artifact_retention_ref",
     )
 
-    retention_exception_rule = find_rule_by_const(schema["allOf"], "investigation_class", "RETENTION_PRIVACY_EXCEPTION")
-    ensure(retention_exception_rule is not None, "failure_investigation missing RETENTION_PRIVACY_EXCEPTION guard")
+    retention_exception_rule = find_rule_by_const(
+        schema["allOf"], "investigation_class", "RETENTION_PRIVACY_EXCEPTION"
+    )
     ensure(
-        retention_exception_rule["then"]["properties"]["artifact_retention_ref"].get("type") == "string",
+        retention_exception_rule is not None,
+        "failure_investigation missing RETENTION_PRIVACY_EXCEPTION guard",
+    )
+    ensure(
+        retention_exception_rule["then"]["properties"]["artifact_retention_ref"].get("type")
+        == "string",
         "failure_investigation RETENTION_PRIVACY_EXCEPTION must require artifact_retention_ref",
     )
 
@@ -22801,13 +25970,20 @@ def check_failure_investigation() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("accepted_risk_approval_ref", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("accepted_risk_approval_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(accepted_risk_rule is not None, "failure_investigation missing accepted-risk reverse guard")
     ensure(
-        accepted_risk_rule["then"]["properties"]["investigation_state"].get("const") == "ACCEPTED_RISK"
+        accepted_risk_rule is not None, "failure_investigation missing accepted-risk reverse guard"
+    )
+    ensure(
+        accepted_risk_rule["then"]["properties"]["investigation_state"].get("const")
+        == "ACCEPTED_RISK"
         and accepted_risk_rule["then"]["properties"]["outcome"].get("const") == "ACCEPTED_RISK",
         "failure_investigation accepted_risk_approval_ref must force ACCEPTED_RISK state and outcome",
     )
@@ -22816,7 +25992,11 @@ def check_failure_investigation() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("superseded_by_investigation_id", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("superseded_by_investigation_id", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
@@ -22842,9 +26022,13 @@ def check_failure_investigation() -> None:
         ),
         None,
     )
-    ensure(resolved_outcome_rule is not None, "failure_investigation missing resolved-outcome reverse guard")
     ensure(
-        resolved_outcome_rule["then"]["properties"]["investigation_state"].get("const") == "RESOLVED",
+        resolved_outcome_rule is not None,
+        "failure_investigation missing resolved-outcome reverse guard",
+    )
+    ensure(
+        resolved_outcome_rule["then"]["properties"]["investigation_state"].get("const")
+        == "RESOLVED",
         "failure_investigation resolved outcomes must force investigation_state=RESOLVED",
     )
 
@@ -22854,7 +26038,9 @@ def check_failure_investigation() -> None:
         ("CANCELLED", "CANCELLED"),
     ]:
         rule = find_rule_by_const(schema["allOf"], "outcome", outcome)
-        ensure(rule is not None, f"failure_investigation missing reverse guard for outcome={outcome}")
+        ensure(
+            rule is not None, f"failure_investigation missing reverse guard for outcome={outcome}"
+        )
         ensure(
             rule["then"]["properties"]["investigation_state"].get("const") == state,
             f"failure_investigation outcome={outcome} must force investigation_state={state}",
@@ -22864,7 +26050,8 @@ def check_failure_investigation() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("resolved_at", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("resolved_at", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -22879,7 +26066,8 @@ def check_failure_investigation() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("resolution_basis_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("resolution_basis_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -22897,7 +26085,11 @@ def check_failure_investigation() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("closure_evidence_refs", {}).get("minItems") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("closure_evidence_refs", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
@@ -22919,18 +26111,27 @@ def check_principal_context() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("service_identity_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("service_identity_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(service_identity_rule is not None, "principal_context missing service_identity reverse guard")
+    ensure(
+        service_identity_rule is not None,
+        "principal_context missing service_identity reverse guard",
+    )
     ensure(
         service_identity_rule["then"]["properties"]["principal_type"].get("const") == "SERVICE",
         "principal_context non-null service_identity_ref must force principal_type=SERVICE",
     )
 
-    step_up_verified_rule = find_rule_by_const(schema["allOf"], "subject_identity_assurance_level", "STEP_UP_VERIFIED")
-    ensure(step_up_verified_rule is not None, "principal_context missing STEP_UP_VERIFIED reverse guard")
+    step_up_verified_rule = find_rule_by_const(
+        schema["allOf"], "subject_identity_assurance_level", "STEP_UP_VERIFIED"
+    )
+    ensure(
+        step_up_verified_rule is not None,
+        "principal_context missing STEP_UP_VERIFIED reverse guard",
+    )
     ensure(
         step_up_verified_rule["then"]["properties"]["authn_level"].get("const") == "STEP_UP",
         "principal_context STEP_UP_VERIFIED assurance must force authn_level=STEP_UP",
@@ -22979,7 +26180,9 @@ def check_workflow_item() -> None:
         "workflow_item.routing_contract must stay bound to collaboration_routing_contract.schema.json",
     )
     ensure(
-        schema["properties"]["routing_contract"]["allOf"][1]["properties"]["routing_scope"].get("const")
+        schema["properties"]["routing_contract"]["allOf"][1]["properties"]["routing_scope"].get(
+            "const"
+        )
         == "WORKFLOW_ITEM",
         "workflow_item.routing_contract must stay pinned to routing_scope=WORKFLOW_ITEM",
     )
@@ -22992,13 +26195,21 @@ def check_workflow_item() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("customer_status_projection", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("customer_status_projection", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(customer_projection_rule is not None, "workflow_item missing customer projection reverse guard")
     ensure(
-        customer_projection_rule["then"]["properties"]["collaboration_visibility"].get("const") == "CUSTOMER_SHARED",
+        customer_projection_rule is not None,
+        "workflow_item missing customer projection reverse guard",
+    )
+    ensure(
+        customer_projection_rule["then"]["properties"]["collaboration_visibility"].get("const")
+        == "CUSTOMER_SHARED",
         "workflow_item customer status projection must force collaboration_visibility=CUSTOMER_SHARED",
     )
 
@@ -23006,13 +26217,18 @@ def check_workflow_item() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("customer_status_projection", {}).get("type") == "null"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("customer_status_projection", {})
+            .get("type")
+            == "null"
         ),
         None,
     )
     ensure(internal_only_rule is not None, "workflow_item missing internal-only reverse guard")
     ensure(
-        internal_only_rule["then"]["properties"]["collaboration_visibility"].get("const") == "INTERNAL_ONLY",
+        internal_only_rule["then"]["properties"]["collaboration_visibility"].get("const")
+        == "INTERNAL_ONLY",
         "workflow_item null customer_status_projection must force collaboration_visibility=INTERNAL_ONLY",
     )
 
@@ -23020,7 +26236,8 @@ def check_workflow_item() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("current_assignee_ref", {}).get("type") == "null"
+            if rule.get("if", {}).get("properties", {}).get("current_assignee_ref", {}).get("type")
+            == "null"
         ),
         None,
     )
@@ -23034,7 +26251,8 @@ def check_workflow_item() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("escalation_target_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("escalation_target_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -23076,24 +26294,37 @@ def check_workflow_item() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("active_request_info_ref", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("active_request_info_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
     ensure(request_info_rule is not None, "workflow_item missing active_request_info reverse guard")
     ensure(
         request_info_rule["then"]["properties"]["waiting_on_actor"].get("const") == "CUSTOMER"
-        and request_info_rule["then"]["properties"]["lifecycle_state"].get("const") == "WAITING_ON_CLIENT",
+        and request_info_rule["then"]["properties"]["lifecycle_state"].get("const")
+        == "WAITING_ON_CLIENT",
         "workflow_item active_request_info_ref must force CUSTOMER/WAITING_ON_CLIENT posture",
     )
 
-    waiting_on_client_rule = find_rule_by_const(schema["allOf"], "lifecycle_state", "WAITING_ON_CLIENT")
-    ensure(waiting_on_client_rule is not None, "workflow_item missing WAITING_ON_CLIENT reverse guard")
+    waiting_on_client_rule = find_rule_by_const(
+        schema["allOf"], "lifecycle_state", "WAITING_ON_CLIENT"
+    )
     ensure(
-        waiting_on_client_rule["then"]["properties"]["collaboration_visibility"].get("const") == "CUSTOMER_SHARED"
-        and waiting_on_client_rule["then"]["properties"]["waiting_on_actor"].get("const") == "CUSTOMER"
-        and waiting_on_client_rule["then"]["properties"]["active_request_info_ref"].get("type") == "string"
-        and waiting_on_client_rule["then"]["properties"]["customer_status_projection"].get("const") == "ACTION_REQUIRED",
+        waiting_on_client_rule is not None, "workflow_item missing WAITING_ON_CLIENT reverse guard"
+    )
+    ensure(
+        waiting_on_client_rule["then"]["properties"]["collaboration_visibility"].get("const")
+        == "CUSTOMER_SHARED"
+        and waiting_on_client_rule["then"]["properties"]["waiting_on_actor"].get("const")
+        == "CUSTOMER"
+        and waiting_on_client_rule["then"]["properties"]["active_request_info_ref"].get("type")
+        == "string"
+        and waiting_on_client_rule["then"]["properties"]["customer_status_projection"].get("const")
+        == "ACTION_REQUIRED",
         "workflow_item WAITING_ON_CLIENT must force customer-shared request-info posture",
     )
 
@@ -23102,32 +26333,53 @@ def check_workflow_item() -> None:
         ("WAITING_ON_CONFIRMATION", "WAITING_ON_AUTHORITY"),
         ("RESOLVED", "DONE"),
     ):
-        projection_rule = find_rule_by_const(schema["allOf"], "customer_status_projection", projection)
-        ensure(projection_rule is not None, f"workflow_item missing {projection} reverse projection guard")
+        projection_rule = find_rule_by_const(
+            schema["allOf"], "customer_status_projection", projection
+        )
         ensure(
-            projection_rule["then"]["properties"]["lifecycle_state"].get("const") == expected_lifecycle,
+            projection_rule is not None,
+            f"workflow_item missing {projection} reverse projection guard",
+        )
+        ensure(
+            projection_rule["then"]["properties"]["lifecycle_state"].get("const")
+            == expected_lifecycle,
             f"workflow_item {projection} must derive from {expected_lifecycle}",
         )
 
-    waiting_projection_rule = find_rule_by_const(schema["allOf"], "customer_status_projection", "WAITING_ON_CONFIRMATION")
-    ensure(waiting_projection_rule is not None, "workflow_item missing WAITING_ON_CONFIRMATION authority-truth guard")
+    waiting_projection_rule = find_rule_by_const(
+        schema["allOf"], "customer_status_projection", "WAITING_ON_CONFIRMATION"
+    )
+    ensure(
+        waiting_projection_rule is not None,
+        "workflow_item missing WAITING_ON_CONFIRMATION authority-truth guard",
+    )
     ensure(
         waiting_projection_rule["then"]["properties"]["authority_truth_state"].get("enum")
         == ["UNKNOWN", "PENDING_ACK", "PARTIAL_ACK"],
         "workflow_item WAITING_ON_CONFIRMATION must keep authority_truth_state inside UNKNOWN, PENDING_ACK, or PARTIAL_ACK",
     )
 
-    under_review_rule = find_rule_by_const(schema["allOf"], "customer_status_projection", "UNDER_REVIEW")
-    ensure(under_review_rule is not None, "workflow_item missing UNDER_REVIEW reverse projection guard")
+    under_review_rule = find_rule_by_const(
+        schema["allOf"], "customer_status_projection", "UNDER_REVIEW"
+    )
     ensure(
-        under_review_rule["then"]["properties"]["lifecycle_state"].get("enum") == ["OPEN", "IN_PROGRESS", "BLOCKED"],
+        under_review_rule is not None, "workflow_item missing UNDER_REVIEW reverse projection guard"
+    )
+    ensure(
+        under_review_rule["then"]["properties"]["lifecycle_state"].get("enum")
+        == ["OPEN", "IN_PROGRESS", "BLOCKED"],
         "workflow_item UNDER_REVIEW must derive from OPEN, IN_PROGRESS, or BLOCKED",
     )
 
-    closed_projection_rule = find_rule_by_const(schema["allOf"], "customer_status_projection", "CLOSED")
-    ensure(closed_projection_rule is not None, "workflow_item missing CLOSED reverse projection guard")
+    closed_projection_rule = find_rule_by_const(
+        schema["allOf"], "customer_status_projection", "CLOSED"
+    )
     ensure(
-        closed_projection_rule["then"]["properties"]["lifecycle_state"].get("enum") == ["CANCELLED", "STALE"],
+        closed_projection_rule is not None, "workflow_item missing CLOSED reverse projection guard"
+    )
+    ensure(
+        closed_projection_rule["then"]["properties"]["lifecycle_state"].get("enum")
+        == ["CANCELLED", "STALE"],
         "workflow_item CLOSED customer projection must derive from CANCELLED or STALE",
     )
 
@@ -23185,7 +26437,9 @@ def check_request_info_record() -> None:
         ),
         None,
     )
-    ensure(cancel_rule is not None, "request_info_record missing cancel/supersede response reset guard")
+    ensure(
+        cancel_rule is not None, "request_info_record missing cancel/supersede response reset guard"
+    )
     ensure(
         cancel_rule["then"]["properties"]["response_entry_ref"].get("type") == "null"
         and cancel_rule["then"]["properties"]["responded_at"].get("type") == "null",
@@ -23210,7 +26464,9 @@ def check_request_info_record() -> None:
         "request_info_record RESPONDED state must force request_state_version=2",
     )
 
-    accepted_rule = find_rule_by_const(schema["allOf"], "closure_reason_code", "CUSTOMER_REPLY_ACCEPTED")
+    accepted_rule = find_rule_by_const(
+        schema["allOf"], "closure_reason_code", "CUSTOMER_REPLY_ACCEPTED"
+    )
     ensure(accepted_rule is not None, "request_info_record missing CUSTOMER_REPLY_ACCEPTED guard")
     ensure(
         accepted_rule["then"]["properties"]["request_state_version"].get("const") == 3
@@ -23247,16 +26503,24 @@ def check_work_item_participant() -> None:
         ),
         None,
     )
-    ensure(customer_role_rule is not None, "work_item_participant missing customer role watch-state guard")
     ensure(
-        customer_role_rule["then"]["properties"]["watch_state"].get("const") == "CUSTOMER_PARTICIPANT",
+        customer_role_rule is not None,
+        "work_item_participant missing customer role watch-state guard",
+    )
+    ensure(
+        customer_role_rule["then"]["properties"]["watch_state"].get("const")
+        == "CUSTOMER_PARTICIPANT",
         "work_item_participant customer-facing roles must force CUSTOMER_PARTICIPANT watch state",
     )
 
     customer_watch_rule = find_rule_by_const(schema["allOf"], "watch_state", "CUSTOMER_PARTICIPANT")
-    ensure(customer_watch_rule is not None, "work_item_participant missing CUSTOMER_PARTICIPANT reverse guard")
     ensure(
-        customer_watch_rule["then"]["properties"]["last_read_internal_sequence"].get("type") == "null",
+        customer_watch_rule is not None,
+        "work_item_participant missing CUSTOMER_PARTICIPANT reverse guard",
+    )
+    ensure(
+        customer_watch_rule["then"]["properties"]["last_read_internal_sequence"].get("type")
+        == "null",
         "work_item_participant CUSTOMER_PARTICIPANT watch state must clear last_read_internal_sequence",
     )
 
@@ -23352,14 +26616,20 @@ def check_api_command_receipt() -> None:
         "api_command_receipt.stale_guard_family must include governance simulation-to-commit, portal-workspace, and request-state stale guards",
     )
 
-    manifest_stream_rule = find_rule_by_const(schema["allOf"], "projection_stream_class", "MANIFEST_EXPERIENCE")
-    ensure(manifest_stream_rule is not None, "api_command_receipt missing MANIFEST_EXPERIENCE guard")
+    manifest_stream_rule = find_rule_by_const(
+        schema["allOf"], "projection_stream_class", "MANIFEST_EXPERIENCE"
+    )
+    ensure(
+        manifest_stream_rule is not None, "api_command_receipt missing MANIFEST_EXPERIENCE guard"
+    )
     ensure(
         manifest_stream_rule["then"]["properties"]["latest_projection_ref"].get("minLength") == 1,
         "api_command_receipt MANIFEST_EXPERIENCE receipts must require a non-empty latest_projection_ref",
     )
 
-    workspace_stream_rule = find_rule_by_const(schema["allOf"], "projection_stream_class", "WORKSPACE")
+    workspace_stream_rule = find_rule_by_const(
+        schema["allOf"], "projection_stream_class", "WORKSPACE"
+    )
     ensure(workspace_stream_rule is not None, "api_command_receipt missing WORKSPACE guard")
     ensure(
         workspace_stream_rule["then"]["properties"]["latest_projection_ref"].get("minLength") == 1,
@@ -23379,7 +26649,8 @@ def check_api_command_receipt() -> None:
         "api_command_receipt ACCEPTED receipts must clear latest_stale_guard_value",
     )
     ensure(
-        accepted_rule["then"]["properties"]["latest_stability_contract_or_null"].get("type") == "null",
+        accepted_rule["then"]["properties"]["latest_stability_contract_or_null"].get("type")
+        == "null",
         "api_command_receipt ACCEPTED receipts must clear latest_stability_contract_or_null",
     )
     ensure_recovery_anchor_anyof(
@@ -23395,14 +26666,16 @@ def check_api_command_receipt() -> None:
         "api_command_receipt DUPLICATE_REPLAY receipts must clear latest_stale_guard_value",
     )
     ensure(
-        duplicate_rule["then"]["properties"]["latest_stability_contract_or_null"].get("type") == "null",
+        duplicate_rule["then"]["properties"]["latest_stability_contract_or_null"].get("type")
+        == "null",
         "api_command_receipt DUPLICATE_REPLAY receipts must clear latest_stability_contract_or_null",
     )
 
     stale_view_rule = find_rule_by_const(schema["allOf"], "acceptance_state", "REJECTED_STALE_VIEW")
     ensure(stale_view_rule is not None, "api_command_receipt missing REJECTED_STALE_VIEW guard")
     ensure(
-        stale_view_rule["then"]["properties"]["latest_stale_guard_value"].get("type") == ["string", "integer"]
+        stale_view_rule["then"]["properties"]["latest_stale_guard_value"].get("type")
+        == ["string", "integer"]
         and stale_view_rule["then"]["properties"]["latest_stale_guard_value"].get("minLength") == 1
         and stale_view_rule["then"]["properties"]["latest_stale_guard_value"].get("minimum") == 0,
         "api_command_receipt REJECTED_STALE_VIEW receipts must require a typed latest_stale_guard_value",
@@ -23416,7 +26689,9 @@ def check_api_command_receipt() -> None:
     )
 
     for original_state in ["ACCEPTED", "DUPLICATE_REPLAY"]:
-        original_rule = find_rule_by_const(schema["allOf"], "original_acceptance_state", original_state)
+        original_rule = find_rule_by_const(
+            schema["allOf"], "original_acceptance_state", original_state
+        )
         ensure(
             original_rule is not None,
             f"api_command_receipt missing original_acceptance_state={original_state} guard",
@@ -23426,7 +26701,8 @@ def check_api_command_receipt() -> None:
             f"api_command_receipt original_acceptance_state={original_state} must clear latest_stale_guard_value",
         )
         ensure(
-            original_rule["then"]["properties"]["latest_stability_contract_or_null"].get("type") == "null",
+            original_rule["then"]["properties"]["latest_stability_contract_or_null"].get("type")
+            == "null",
             f"api_command_receipt original_acceptance_state={original_state} must clear latest_stability_contract_or_null",
         )
         ensure_recovery_anchor_anyof(
@@ -23434,15 +26710,20 @@ def check_api_command_receipt() -> None:
             f"api_command_receipt original_acceptance_state={original_state} must preserve a recovery anchor anyOf after expiry",
         )
 
-    original_stale_rule = find_rule_by_const(schema["allOf"], "original_acceptance_state", "REJECTED_STALE_VIEW")
+    original_stale_rule = find_rule_by_const(
+        schema["allOf"], "original_acceptance_state", "REJECTED_STALE_VIEW"
+    )
     ensure(
         original_stale_rule is not None,
         "api_command_receipt missing original_acceptance_state=REJECTED_STALE_VIEW guard",
     )
     ensure(
-        original_stale_rule["then"]["properties"]["latest_stale_guard_value"].get("type") == ["string", "integer"]
-        and original_stale_rule["then"]["properties"]["latest_stale_guard_value"].get("minLength") == 1
-        and original_stale_rule["then"]["properties"]["latest_stale_guard_value"].get("minimum") == 0,
+        original_stale_rule["then"]["properties"]["latest_stale_guard_value"].get("type")
+        == ["string", "integer"]
+        and original_stale_rule["then"]["properties"]["latest_stale_guard_value"].get("minLength")
+        == 1
+        and original_stale_rule["then"]["properties"]["latest_stale_guard_value"].get("minimum")
+        == 0,
         "api_command_receipt original_acceptance_state=REJECTED_STALE_VIEW must preserve a typed latest_stale_guard_value",
     )
     ensure(
@@ -23463,7 +26744,8 @@ def check_api_command_receipt() -> None:
             (
                 candidate
                 for candidate in schema["allOf"]
-                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type") == "string"
+                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type")
+                == "string"
             ),
             None,
         )
@@ -23477,14 +26759,22 @@ def check_api_command_receipt() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("simulation_basis_hash", {}).get("type") == "string"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("simulation_basis_hash", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(simulation_rule is not None, "api_command_receipt missing simulation_basis_hash reverse guard")
+    ensure(
+        simulation_rule is not None,
+        "api_command_receipt missing simulation_basis_hash reverse guard",
+    )
     ensure(
         simulation_rule["then"]["properties"]["target_scope_class"].get("const") == "GOVERNANCE"
-        and simulation_rule["then"]["properties"]["dependency_topology_hash"].get("type") == "string",
+        and simulation_rule["then"]["properties"]["dependency_topology_hash"].get("type")
+        == "string",
         "api_command_receipt non-null simulation_basis_hash must force governance scope and dependency_topology_hash",
     )
     ensure(
@@ -23499,7 +26789,10 @@ def check_api_command_receipt() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("target_scope_class", {}).get("enum")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("target_scope_class", {})
+            .get("enum")
             == ["MANIFEST", "WORK_ITEM"]
         ),
         None,
@@ -23510,11 +26803,14 @@ def check_api_command_receipt() -> None:
     )
     ensure(
         non_governance_rule["then"]["properties"]["dependency_topology_hash"].get("type") == "null"
-        and non_governance_rule["then"]["properties"]["simulation_basis_hash"].get("type") == "null",
+        and non_governance_rule["then"]["properties"]["simulation_basis_hash"].get("type")
+        == "null",
         "api_command_receipt non-governance receipts must clear simulation hashes",
     )
     ensure(
-        non_governance_rule["then"]["properties"]["latest_mutation_basis_contract_or_null"].get("type")
+        non_governance_rule["then"]["properties"]["latest_mutation_basis_contract_or_null"].get(
+            "type"
+        )
         == "null",
         "api_command_receipt non-governance receipts must clear latest_mutation_basis_contract_or_null",
     )
@@ -23527,7 +26823,10 @@ def check_api_command_receipt() -> None:
             (
                 candidate
                 for candidate in schema["allOf"]
-                if candidate.get("if", {}).get("properties", {}).get("stale_guard_family", {}).get("const")
+                if candidate.get("if", {})
+                .get("properties", {})
+                .get("stale_guard_family", {})
+                .get("const")
                 == stale_guard
             ),
             None,
@@ -23565,11 +26864,18 @@ def check_api_command_receipt() -> None:
         "api_command_receipt stale guard MUTATION_BASIS_CONTRACT_HASH must require latest_mutation_basis_contract_or_null",
     )
 
-    request_state_rule = find_rule_by_const(schema["allOf"], "stale_guard_family", "REQUEST_STATE_VERSION")
-    ensure(request_state_rule is not None, "api_command_receipt missing REQUEST_STATE_VERSION reverse guard")
+    request_state_rule = find_rule_by_const(
+        schema["allOf"], "stale_guard_family", "REQUEST_STATE_VERSION"
+    )
     ensure(
-        request_state_rule["then"]["properties"]["command_type"].get("const") == "RESPOND_TO_REQUEST_INFO"
-        and request_state_rule["then"]["properties"]["target_scope_class"].get("const") == "WORK_ITEM",
+        request_state_rule is not None,
+        "api_command_receipt missing REQUEST_STATE_VERSION reverse guard",
+    )
+    ensure(
+        request_state_rule["then"]["properties"]["command_type"].get("const")
+        == "RESPOND_TO_REQUEST_INFO"
+        and request_state_rule["then"]["properties"]["target_scope_class"].get("const")
+        == "WORK_ITEM",
         "api_command_receipt stale guard REQUEST_STATE_VERSION must bind RESPOND_TO_REQUEST_INFO on WORK_ITEM scope",
     )
 
@@ -23596,11 +26902,18 @@ def check_api_command_receipt() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("stale_guard_family", {}).get("type") == "null"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("stale_guard_family", {})
+            .get("type")
+            == "null"
         ),
         None,
     )
-    ensure(stale_null_rule is not None, "api_command_receipt missing stale_guard_family=null reverse guard")
+    ensure(
+        stale_null_rule is not None,
+        "api_command_receipt missing stale_guard_family=null reverse guard",
+    )
     ensure(
         stale_null_rule["then"]["properties"]["latest_stale_guard_value"].get("type") == "null",
         "api_command_receipt null stale_guard_family must clear latest_stale_guard_value",
@@ -23610,12 +26923,18 @@ def check_api_command_receipt() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("latest_stale_guard_value", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("latest_stale_guard_value", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(string_value_rule is not None, "api_command_receipt missing string latest_stale_guard_value reverse guard")
+    ensure(
+        string_value_rule is not None,
+        "api_command_receipt missing string latest_stale_guard_value reverse guard",
+    )
     ensure(
         string_value_rule["then"]["properties"]["stale_guard_family"].get("enum")
         == [
@@ -23634,12 +26953,18 @@ def check_api_command_receipt() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("latest_stale_guard_value", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("latest_stale_guard_value", {})
+            .get("type")
             == "integer"
         ),
         None,
     )
-    ensure(integer_value_rule is not None, "api_command_receipt missing integer latest_stale_guard_value reverse guard")
+    ensure(
+        integer_value_rule is not None,
+        "api_command_receipt missing integer latest_stale_guard_value reverse guard",
+    )
     ensure(
         integer_value_rule["then"]["properties"]["stale_guard_family"].get("enum")
         == [
@@ -23658,7 +26983,8 @@ def check_api_command_receipt() -> None:
             (
                 candidate
                 for candidate in schema["allOf"]
-                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type") == "null"
+                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type")
+                == "null"
             ),
             None,
         )
@@ -23684,7 +27010,14 @@ def check_audit_event() -> None:
         "RunStartClaimRejected" in schema["properties"]["event_type"]["enum"],
         "audit_event must support RunStartClaimRejected",
     )
-    for field in ["client_id", "manifest_id", "actor_ref", "service_ref", "prev_event_hash", "signature_ref"]:
+    for field in [
+        "client_id",
+        "manifest_id",
+        "actor_ref",
+        "service_ref",
+        "prev_event_hash",
+        "signature_ref",
+    ]:
         ensure(
             schema["properties"][field].get("minLength") == 1,
             f"audit_event.{field} must reject empty strings when present",
@@ -23719,7 +27052,8 @@ def check_audit_event() -> None:
         "audit_event.retained_context.payload_availability_state must freeze the payload-availability vocabulary",
     )
     ensure(
-        retained_context["properties"]["audit_sufficiency_state"].get("enum") == ["SUFFICIENT", "LIMITED"],
+        retained_context["properties"]["audit_sufficiency_state"].get("enum")
+        == ["SUFFICIENT", "LIMITED"],
         "audit_event.retained_context.audit_sufficiency_state must freeze the audit-sufficiency vocabulary",
     )
     ensure(
@@ -23731,11 +27065,7 @@ def check_audit_event() -> None:
         (
             candidate
             for rule in schema.get("allOf", [])
-            for candidate in (
-                rule.get("anyOf", [])
-                if isinstance(rule, dict)
-                else []
-            )
+            for candidate in (rule.get("anyOf", []) if isinstance(rule, dict) else [])
             if candidate.get("properties", {})
             .get("correlation_context", {})
             .get("properties", {})
@@ -23819,7 +27149,9 @@ def check_audit_event() -> None:
     ensure(start_claim_rule is not None, "audit_event missing start-claim correlation guard")
     ensure(
         schema_uses_ref(
-            start_claim_rule["then"]["properties"]["correlation_context"]["properties"]["manifest_start_claim"],
+            start_claim_rule["then"]["properties"]["correlation_context"]["properties"][
+                "manifest_start_claim"
+            ],
             "https://taxat.dev/schemas/manifest_start_claim_contract.schema.json",
         ),
         "audit_event RunStarted and RunStartClaimRejected must require manifest_start_claim correlation",
@@ -23836,11 +27168,18 @@ def check_audit_event() -> None:
             rule
             for rule in schema["allOf"]
             if rule.get("if", {}).get("properties", {}).get("event_type", {}).get("enum")
-            == ["ErrorRecorded", "ManifestBlocked", "ManifestFailed", "ReplayBasisCorruptionDetected"]
+            == [
+                "ErrorRecorded",
+                "ManifestBlocked",
+                "ManifestFailed",
+                "ReplayBasisCorruptionDetected",
+            ]
         ),
         None,
     )
-    ensure(invariant_reason_rule is not None, "audit_event missing invariant-failure reason-code guard")
+    ensure(
+        invariant_reason_rule is not None, "audit_event missing invariant-failure reason-code guard"
+    )
     ensure(
         invariant_reason_rule["then"]["properties"]["reason_codes"].get("minItems") == 1,
         "audit_event ErrorRecorded/ManifestBlocked/ManifestFailed/ReplayBasisCorruptionDetected must require reason_codes",
@@ -23856,8 +27195,12 @@ def check_audit_event() -> None:
     )
     ensure(manifest_fault_rule is not None, "audit_event missing manifest invariant error-id guard")
     ensure(
-        manifest_fault_rule["then"]["properties"]["correlation_context"]["properties"]["error_id"].get("minLength") == 1
-        and manifest_fault_rule["then"]["properties"]["correlation_context"].get("required") == ["error_id"],
+        manifest_fault_rule["then"]["properties"]["correlation_context"]["properties"][
+            "error_id"
+        ].get("minLength")
+        == 1
+        and manifest_fault_rule["then"]["properties"]["correlation_context"].get("required")
+        == ["error_id"],
         "audit_event ManifestBlocked/ManifestFailed must require correlation_context.error_id",
     )
 
@@ -23877,12 +27220,16 @@ def check_audit_event() -> None:
     )
     ensure(full_payload_rule is not None, "audit_event missing full-payload retention guard")
     ensure(
-        full_payload_rule["then"]["properties"]["retained_context"]["properties"]["audit_sufficiency_state"].get("const")
+        full_payload_rule["then"]["properties"]["retained_context"]["properties"][
+            "audit_sufficiency_state"
+        ].get("const")
         == "SUFFICIENT",
         "audit_event FULL payload availability must force audit_sufficiency_state=SUFFICIENT",
     )
     ensure(
-        full_payload_rule["then"]["properties"]["retained_context"]["properties"]["payload_expiry_at_or_null"].get("type")
+        full_payload_rule["then"]["properties"]["retained_context"]["properties"][
+            "payload_expiry_at_or_null"
+        ].get("type")
         == "null",
         "audit_event FULL payload availability must clear payload_expiry_at_or_null",
     )
@@ -23903,16 +27250,16 @@ def check_audit_event() -> None:
     )
     ensure(limited_payload_rule is not None, "audit_event missing post-expiry retention guard")
     ensure(
-        limited_payload_rule["then"]["properties"]["retained_context"]["properties"]["audit_sufficiency_state"].get(
-            "const"
-        )
+        limited_payload_rule["then"]["properties"]["retained_context"]["properties"][
+            "audit_sufficiency_state"
+        ].get("const")
         == "LIMITED",
         "audit_event HASH_ONLY/TOMBSTONED/ERASED payload availability must force audit_sufficiency_state=LIMITED",
     )
     ensure(
-        limited_payload_rule["then"]["properties"]["retained_context"]["properties"]["limitation_reason_codes"].get(
-            "minItems"
-        )
+        limited_payload_rule["then"]["properties"]["retained_context"]["properties"][
+            "limitation_reason_codes"
+        ].get("minItems")
         == 1,
         "audit_event HASH_ONLY/TOMBSTONED/ERASED payload availability must require limitation_reason_codes",
     )
@@ -24003,7 +27350,9 @@ def check_audit_event() -> None:
     )
     ensure(nightly_client_rule is not None, "audit_event missing nightly client selection guard")
     ensure(
-        nightly_client_rule["then"]["properties"]["correlation_context"]["properties"]["selection_disposition"].get("enum")
+        nightly_client_rule["then"]["properties"]["correlation_context"]["properties"][
+            "selection_disposition"
+        ].get("enum")
         == [
             "EXECUTE_NEW_MANIFEST",
             "EXECUTE_CONTINUATION_CHILD",
@@ -24052,7 +27401,9 @@ def check_audit_event() -> None:
         None,
     )
     ensure(replay_outcome_rule is not None, "audit_event missing replay outcome hash guard")
-    replay_outcome_props = replay_outcome_rule["then"]["properties"]["correlation_context"]["properties"]
+    replay_outcome_props = replay_outcome_rule["then"]["properties"]["correlation_context"][
+        "properties"
+    ]
     ensure(
         replay_outcome_props["expected_deterministic_outcome_hash"].get("minLength") == 1
         and replay_outcome_props["actual_deterministic_outcome_hash"].get("minLength") == 1,
@@ -24086,7 +27437,9 @@ def check_audit_event() -> None:
         None,
     )
     ensure(compensation_rule is not None, "audit_event missing compensation correlation guard")
-    compensation_props = compensation_rule["then"]["properties"]["correlation_context"]["properties"]
+    compensation_props = compensation_rule["then"]["properties"]["correlation_context"][
+        "properties"
+    ]
     ensure(
         compensation_props["error_id"].get("minLength") == 1
         and compensation_props["compensation_id"].get("minLength") == 1,
@@ -24170,7 +27523,8 @@ def check_audit_investigation_frame() -> None:
         "audit_investigation_frame auditWorkspace must freeze the audit route reading order",
     )
     ensure(
-        schema["$defs"]["auditTape"]["properties"]["timeline_mode"].get("$ref") == "#/$defs/timelineMode",
+        schema["$defs"]["auditTape"]["properties"]["timeline_mode"].get("$ref")
+        == "#/$defs/timelineMode",
         "audit_investigation_frame auditTape must bind timeline_mode to the shared append-only enum",
     )
     ensure(
@@ -24210,8 +27564,12 @@ def check_audit_investigation_frame() -> None:
     )
     neighborhood_context_rule = schema["$defs"]["objectNeighborhood"]["allOf"][0]
     ensure(
-        neighborhood_context_rule["anyOf"][0]["properties"]["upstream_event_refs"].get("minItems") == 1
-        and neighborhood_context_rule["anyOf"][1]["properties"]["downstream_event_refs"].get("minItems") == 1,
+        neighborhood_context_rule["anyOf"][0]["properties"]["upstream_event_refs"].get("minItems")
+        == 1
+        and neighborhood_context_rule["anyOf"][1]["properties"]["downstream_event_refs"].get(
+            "minItems"
+        )
+        == 1,
         "audit_investigation_frame ObjectNeighborhood must require upstream or downstream context",
     )
     export_posture_rule = next(
@@ -24223,7 +27581,10 @@ def check_audit_investigation_frame() -> None:
         ),
         None,
     )
-    ensure(export_posture_rule is not None, "audit_investigation_frame missing restricted export posture guard")
+    ensure(
+        export_posture_rule is not None,
+        "audit_investigation_frame missing restricted export posture guard",
+    )
     ensure(
         export_posture_rule["then"]["properties"]["reason_codes"].get("minItems") == 1,
         "audit_investigation_frame restricted export posture must require reason codes",
@@ -24238,7 +27599,9 @@ def check_audit_investigation_frame() -> None:
         ),
         None,
     )
-    ensure(diff_change_rule is not None, "audit_investigation_frame missing change-nuclei diff guard")
+    ensure(
+        diff_change_rule is not None, "audit_investigation_frame missing change-nuclei diff guard"
+    )
     ensure(
         diff_change_rule["then"]["properties"]["changed_field_refs"].get("minItems") == 1,
         "audit_investigation_frame change-nuclei diff panels must require changed_field_refs",
@@ -24247,7 +27610,10 @@ def check_audit_investigation_frame() -> None:
     diff_limitation_rule = find_rule_by_const(
         schema["$defs"]["eventDiffInspector"]["allOf"], "panel_mode", "LIMITATION_NOTICE"
     )
-    ensure(diff_limitation_rule is not None, "audit_investigation_frame missing limitation-notice diff guard")
+    ensure(
+        diff_limitation_rule is not None,
+        "audit_investigation_frame missing limitation-notice diff guard",
+    )
     ensure(
         diff_limitation_rule["then"]["properties"]["changed_field_refs"].get("maxItems") == 0,
         "audit_investigation_frame limitation-notice diff panels must clear changed_field_refs",
@@ -24265,20 +27631,36 @@ def check_audit_investigation_frame() -> None:
     denied_export_rule = find_rule_by_const(
         schema["$defs"]["exportEligibilityPanel"]["allOf"], "state", "DENIED"
     )
-    ensure(full_export_rule is not None, "audit_investigation_frame missing FULL_ALLOWED export panel guard")
-    ensure(masked_export_rule is not None, "audit_investigation_frame missing MASKED_ONLY export panel guard")
-    ensure(approval_export_rule is not None, "audit_investigation_frame missing APPROVAL_REQUIRED export panel guard")
-    ensure(denied_export_rule is not None, "audit_investigation_frame missing DENIED export panel guard")
+    ensure(
+        full_export_rule is not None,
+        "audit_investigation_frame missing FULL_ALLOWED export panel guard",
+    )
+    ensure(
+        masked_export_rule is not None,
+        "audit_investigation_frame missing MASKED_ONLY export panel guard",
+    )
+    ensure(
+        approval_export_rule is not None,
+        "audit_investigation_frame missing APPROVAL_REQUIRED export panel guard",
+    )
+    ensure(
+        denied_export_rule is not None,
+        "audit_investigation_frame missing DENIED export panel guard",
+    )
     ensure(
         full_export_rule["then"]["properties"]["panel_mode"].get("const") == "FULL_EXPORT_READY",
         "audit_investigation_frame FULL_ALLOWED export panels must force FULL_EXPORT_READY",
     )
     ensure(
-        masked_export_rule["then"]["properties"]["masked_preview_ref_or_null"].get("minLength") == 1,
+        masked_export_rule["then"]["properties"]["masked_preview_ref_or_null"].get("minLength")
+        == 1,
         "audit_investigation_frame MASKED_ONLY export panels must require masked_preview_ref_or_null",
     )
     ensure(
-        approval_export_rule["then"]["properties"]["approval_requirement_ref_or_null"].get("minLength") == 1,
+        approval_export_rule["then"]["properties"]["approval_requirement_ref_or_null"].get(
+            "minLength"
+        )
+        == 1,
         "audit_investigation_frame APPROVAL_REQUIRED export panels must require approval_requirement_ref_or_null",
     )
     ensure(
@@ -24287,9 +27669,12 @@ def check_audit_investigation_frame() -> None:
     )
 
     audit_trail_rule = find_rule_by_const(schema["allOf"], "query_contract_code", "AUDIT_TRAIL")
-    ensure(audit_trail_rule is not None, "audit_investigation_frame missing AUDIT_TRAIL ordering guard")
     ensure(
-        audit_trail_rule["then"]["properties"]["ordering_basis"].get("const") == "AUDIT_STREAM_SEQUENCE",
+        audit_trail_rule is not None, "audit_investigation_frame missing AUDIT_TRAIL ordering guard"
+    )
+    ensure(
+        audit_trail_rule["then"]["properties"]["ordering_basis"].get("const")
+        == "AUDIT_STREAM_SEQUENCE",
         "audit_investigation_frame AUDIT_TRAIL must force ordering_basis=AUDIT_STREAM_SEQUENCE",
     )
 
@@ -24307,7 +27692,9 @@ def check_audit_investigation_frame() -> None:
         ),
         None,
     )
-    ensure(merged_timeline_rule is not None, "audit_investigation_frame missing merged ordering guard")
+    ensure(
+        merged_timeline_rule is not None, "audit_investigation_frame missing merged ordering guard"
+    )
     ensure(
         merged_timeline_rule["then"]["properties"]["ordering_basis"].get("const")
         == "RECORDED_AT_THEN_STREAM_SEQUENCE",
@@ -24323,9 +27710,13 @@ def check_audit_investigation_frame() -> None:
         ),
         None,
     )
-    ensure(timeline_trace_rule is not None, "audit_investigation_frame missing timeline trace support guard")
     ensure(
-        timeline_trace_rule["then"]["properties"]["supporting_trace_span_refs"].get("minItems") == 1,
+        timeline_trace_rule is not None,
+        "audit_investigation_frame missing timeline trace support guard",
+    )
+    ensure(
+        timeline_trace_rule["then"]["properties"]["supporting_trace_span_refs"].get("minItems")
+        == 1,
         "audit_investigation_frame run/nightly timelines must require supporting trace span refs",
     )
 
@@ -24505,7 +27896,9 @@ def check_authority_link_inventory_item() -> None:
         ),
         None,
     )
-    ensure(blocked_rule is not None, "authority_link_inventory_item missing BLOCKED handshake guard")
+    ensure(
+        blocked_rule is not None, "authority_link_inventory_item missing BLOCKED handshake guard"
+    )
     ensure(
         blocked_rule["then"]["properties"]["guided_handshake_stepper"]["properties"][
             "preflight_blocking_check_refs"
@@ -24560,7 +27953,8 @@ def check_retention_tag() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("legal_hold_ref", {}).get("type") == "string"
+            if candidate.get("if", {}).get("properties", {}).get("legal_hold_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -24575,19 +27969,26 @@ def check_retention_tag() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("legal_hold_changed_at", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("legal_hold_changed_at", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(hold_changed_rule is not None, "retention_tag missing legal_hold_changed_at reverse guard")
+    ensure(
+        hold_changed_rule is not None, "retention_tag missing legal_hold_changed_at reverse guard"
+    )
     ensure(
         hold_changed_rule["then"]["properties"]["legal_hold_state"].get("enum")
         == ["ACTIVE", "RELEASE_ELIGIBLE", "RELEASED"],
         "retention_tag non-null legal_hold_changed_at must force an active or released legal_hold_state",
     )
 
-    proof_rule = find_rule_by_const(schema["allOf"], "erasure_eligibility", "BLOCKED_PROOF_PRESERVATION")
+    proof_rule = find_rule_by_const(
+        schema["allOf"], "erasure_eligibility", "BLOCKED_PROOF_PRESERVATION"
+    )
     ensure(proof_rule is not None, "retention_tag missing BLOCKED_PROOF_PRESERVATION guard")
     ensure(
         proof_rule["then"]["properties"]["proof_preservation_basis_ref"].get("type") == "string",
@@ -24598,18 +27999,27 @@ def check_retention_tag() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("proof_preservation_basis_ref", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("proof_preservation_basis_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(proof_ref_rule is not None, "retention_tag missing proof_preservation_basis_ref reverse guard")
     ensure(
-        proof_ref_rule["then"]["properties"]["erasure_eligibility"].get("const") == "BLOCKED_PROOF_PRESERVATION",
+        proof_ref_rule is not None,
+        "retention_tag missing proof_preservation_basis_ref reverse guard",
+    )
+    ensure(
+        proof_ref_rule["then"]["properties"]["erasure_eligibility"].get("const")
+        == "BLOCKED_PROOF_PRESERVATION",
         "retention_tag non-null proof_preservation_basis_ref must force BLOCKED_PROOF_PRESERVATION",
     )
 
-    ambiguity_rule = find_rule_by_const(schema["allOf"], "erasure_eligibility", "BLOCKED_AUTHORITY_AMBIGUITY")
+    ambiguity_rule = find_rule_by_const(
+        schema["allOf"], "erasure_eligibility", "BLOCKED_AUTHORITY_AMBIGUITY"
+    )
     ensure(ambiguity_rule is not None, "retention_tag missing BLOCKED_AUTHORITY_AMBIGUITY guard")
     ensure(
         ambiguity_rule["then"]["properties"]["authority_ambiguity_ref"].get("type") == "string",
@@ -24620,14 +28030,21 @@ def check_retention_tag() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("authority_ambiguity_ref", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("authority_ambiguity_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(ambiguity_ref_rule is not None, "retention_tag missing authority_ambiguity_ref reverse guard")
     ensure(
-        ambiguity_ref_rule["then"]["properties"]["erasure_eligibility"].get("const") == "BLOCKED_AUTHORITY_AMBIGUITY",
+        ambiguity_ref_rule is not None,
+        "retention_tag missing authority_ambiguity_ref reverse guard",
+    )
+    ensure(
+        ambiguity_ref_rule["then"]["properties"]["erasure_eligibility"].get("const")
+        == "BLOCKED_AUTHORITY_AMBIGUITY",
         "retention_tag non-null authority_ambiguity_ref must force BLOCKED_AUTHORITY_AMBIGUITY",
     )
 
@@ -24742,7 +28159,8 @@ def check_artifact_retention() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("hold_ref", {}).get("type") == "string"
+            if candidate.get("if", {}).get("properties", {}).get("hold_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -24756,12 +28174,18 @@ def check_artifact_retention() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("next_checkpoint_at", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("next_checkpoint_at", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(next_checkpoint_rule is not None, "artifact_retention missing next_checkpoint_at reverse guard")
+    ensure(
+        next_checkpoint_rule is not None,
+        "artifact_retention missing next_checkpoint_at reverse guard",
+    )
     ensure(
         next_checkpoint_rule["then"]["properties"]["lifecycle_state"].get("enum")
         == ["LEGAL_HOLD", "ERASURE_PENDING"],
@@ -24772,11 +28196,18 @@ def check_artifact_retention() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("workflow_item_refs", {}).get("minItems") == 1
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("workflow_item_refs", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
-    ensure(workflow_refs_rule is not None, "artifact_retention missing workflow_item_refs reverse guard")
+    ensure(
+        workflow_refs_rule is not None,
+        "artifact_retention missing workflow_item_refs reverse guard",
+    )
     ensure(
         workflow_refs_rule["then"]["properties"]["lifecycle_state"].get("enum")
         == ["LEGAL_HOLD", "ERASURE_PENDING"],
@@ -24787,14 +28218,20 @@ def check_artifact_retention() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("limitation_behavior", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("limitation_behavior", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(limitation_rule is not None, "artifact_retention missing limitation_behavior reverse guard")
     ensure(
-        limitation_rule["then"]["properties"]["lifecycle_state"].get("enum") == ["LIMITED", "PSEUDONYMISED"],
+        limitation_rule is not None, "artifact_retention missing limitation_behavior reverse guard"
+    )
+    ensure(
+        limitation_rule["then"]["properties"]["lifecycle_state"].get("enum")
+        == ["LIMITED", "PSEUDONYMISED"],
         "artifact_retention non-null limitation_behavior must stay in limited states",
     )
 
@@ -24802,11 +28239,18 @@ def check_artifact_retention() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("limitation_reason_codes", {}).get("minItems") == 1
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("limitation_reason_codes", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
-    ensure(limitation_reason_rule is not None, "artifact_retention missing limitation_reason_codes reverse guard")
+    ensure(
+        limitation_reason_rule is not None,
+        "artifact_retention missing limitation_reason_codes reverse guard",
+    )
     ensure(
         limitation_reason_rule["then"]["properties"]["lifecycle_state"].get("enum")
         == ["LIMITED", "PSEUDONYMISED"],
@@ -24817,12 +28261,18 @@ def check_artifact_retention() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("erasure_request_ref", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("erasure_request_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(erasure_request_rule is not None, "artifact_retention missing erasure_request_ref reverse guard")
+    ensure(
+        erasure_request_rule is not None,
+        "artifact_retention missing erasure_request_ref reverse guard",
+    )
     ensure(
         erasure_request_rule["then"]["properties"]["lifecycle_state"].get("enum")
         == ["ERASURE_PENDING", "PSEUDONYMISED", "ERASED"],
@@ -24833,14 +28283,21 @@ def check_artifact_retention() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("erasure_action_ref", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("erasure_action_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(erasure_action_rule is not None, "artifact_retention missing erasure_action_ref reverse guard")
     ensure(
-        erasure_action_rule["then"]["properties"]["lifecycle_state"].get("enum") == ["PSEUDONYMISED", "ERASED"],
+        erasure_action_rule is not None,
+        "artifact_retention missing erasure_action_ref reverse guard",
+    )
+    ensure(
+        erasure_action_rule["then"]["properties"]["lifecycle_state"].get("enum")
+        == ["PSEUDONYMISED", "ERASED"],
         "artifact_retention non-null erasure_action_ref must stay in terminal erasure states",
     )
 
@@ -24848,14 +28305,20 @@ def check_artifact_retention() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("erasure_proof_ref", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("erasure_proof_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(erasure_proof_rule is not None, "artifact_retention missing erasure_proof_ref reverse guard")
     ensure(
-        erasure_proof_rule["then"]["properties"]["lifecycle_state"].get("enum") == ["PSEUDONYMISED", "ERASED"],
+        erasure_proof_rule is not None, "artifact_retention missing erasure_proof_ref reverse guard"
+    )
+    ensure(
+        erasure_proof_rule["then"]["properties"]["lifecycle_state"].get("enum")
+        == ["PSEUDONYMISED", "ERASED"],
         "artifact_retention non-null erasure_proof_ref must stay in terminal erasure states",
     )
 
@@ -24922,10 +28385,12 @@ def check_error_record() -> None:
         ensure(
             schema["properties"][field].get("minLength") == 1,
             f"error_record.{field} must reject empty strings when present",
-    )
+        )
 
     system_owner_rule = find_rule_by_const(schema["allOf"], "remediation_owner_type", "SYSTEM")
-    ensure(system_owner_rule is not None, "error_record missing remediation_owner_type=SYSTEM guard")
+    ensure(
+        system_owner_rule is not None, "error_record missing remediation_owner_type=SYSTEM guard"
+    )
     ensure(
         system_owner_rule["then"]["properties"]["remediation_owner_ref"].get("type") == "null",
         "error_record remediation_owner_type=SYSTEM must clear remediation_owner_ref",
@@ -24985,7 +28450,8 @@ def check_error_record() -> None:
     )
     ensure(precondition_retry_rule is not None, "error_record missing retry precondition guard")
     ensure(
-        precondition_retry_rule["then"]["properties"]["retry_precondition_refs"].get("minItems") == 1,
+        precondition_retry_rule["then"]["properties"]["retry_precondition_refs"].get("minItems")
+        == 1,
         "error_record reconcile and rebuild retries must require retry_precondition_refs",
     )
 
@@ -24993,21 +28459,29 @@ def check_error_record() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("artifact_retention_ref", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("artifact_retention_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(retention_ref_rule is not None, "error_record missing artifact_retention_ref reverse guard")
+    ensure(
+        retention_ref_rule is not None, "error_record missing artifact_retention_ref reverse guard"
+    )
     ensure(
         retention_ref_rule["then"]["properties"]["retention_class"].get("type") == "string",
         "error_record non-null artifact_retention_ref must require retention_class",
     )
 
-    retention_family_rule = find_rule_by_enum(schema["allOf"], "error_family", ["RETENTION_ERROR", "PRIVACY_ERROR"])
+    retention_family_rule = find_rule_by_enum(
+        schema["allOf"], "error_family", ["RETENTION_ERROR", "PRIVACY_ERROR"]
+    )
     ensure(retention_family_rule is not None, "error_record missing retention/privacy family guard")
     ensure(
-        retention_family_rule["then"]["properties"]["artifact_retention_ref"].get("type") == "string",
+        retention_family_rule["then"]["properties"]["artifact_retention_ref"].get("type")
+        == "string",
         "error_record retention/privacy families must require artifact_retention_ref",
     )
     ensure(
@@ -25022,11 +28496,13 @@ def check_error_record() -> None:
     accepted_risk_rule = find_rule_by_const(schema["allOf"], "resolution_state", "ACCEPTED_RISK")
     ensure(accepted_risk_rule is not None, "error_record missing ACCEPTED_RISK guard")
     ensure(
-        accepted_risk_rule["then"]["properties"]["accepted_risk_approval_ref"].get("type") == "string",
+        accepted_risk_rule["then"]["properties"]["accepted_risk_approval_ref"].get("type")
+        == "string",
         "error_record ACCEPTED_RISK must require accepted_risk_approval_ref",
     )
     ensure(
-        accepted_risk_rule["then"]["properties"]["accepted_risk_expires_at"].get("type") == "string",
+        accepted_risk_rule["then"]["properties"]["accepted_risk_expires_at"].get("type")
+        == "string",
         "error_record ACCEPTED_RISK must require accepted_risk_expires_at",
     )
 
@@ -25034,14 +28510,21 @@ def check_error_record() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("accepted_risk_approval_ref", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("accepted_risk_approval_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(accepted_risk_ref_rule is not None, "error_record missing accepted_risk_approval_ref reverse guard")
     ensure(
-        accepted_risk_ref_rule["then"]["properties"]["resolution_state"].get("const") == "ACCEPTED_RISK",
+        accepted_risk_ref_rule is not None,
+        "error_record missing accepted_risk_approval_ref reverse guard",
+    )
+    ensure(
+        accepted_risk_ref_rule["then"]["properties"]["resolution_state"].get("const")
+        == "ACCEPTED_RISK",
         "error_record non-null accepted_risk_approval_ref must force ACCEPTED_RISK",
     )
 
@@ -25049,14 +28532,21 @@ def check_error_record() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("accepted_risk_expires_at", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("accepted_risk_expires_at", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(accepted_risk_expiry_rule is not None, "error_record missing accepted_risk_expires_at reverse guard")
     ensure(
-        accepted_risk_expiry_rule["then"]["properties"]["resolution_state"].get("const") == "ACCEPTED_RISK",
+        accepted_risk_expiry_rule is not None,
+        "error_record missing accepted_risk_expires_at reverse guard",
+    )
+    ensure(
+        accepted_risk_expiry_rule["then"]["properties"]["resolution_state"].get("const")
+        == "ACCEPTED_RISK",
         "error_record non-null accepted_risk_expires_at must force ACCEPTED_RISK",
     )
 
@@ -25064,7 +28554,10 @@ def check_error_record() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("remediation_class", {}).get("enum")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("remediation_class", {})
+            .get("enum")
             == [
                 "SPAWN_WORKFLOW",
                 "REQUEST_CLIENT_INPUT",
@@ -25077,7 +28570,10 @@ def check_error_record() -> None:
         ),
         None,
     )
-    ensure(next_action_required_rule is not None, "error_record missing object-backed next_action_ref guard")
+    ensure(
+        next_action_required_rule is not None,
+        "error_record missing object-backed next_action_ref guard",
+    )
     ensure(
         next_action_required_rule["then"]["properties"]["next_action_ref"].get("type") == "string",
         "error_record object-backed remediation classes must require next_action_ref",
@@ -25087,7 +28583,10 @@ def check_error_record() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("resolved_by_task_id", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("resolved_by_task_id", {})
+            .get("type")
             == "string"
         ),
         None,
@@ -25103,7 +28602,10 @@ def check_error_record() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("reopened_by_error_id", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("reopened_by_error_id", {})
+            .get("type")
             == "string"
         ),
         None,
@@ -25126,7 +28628,8 @@ def check_error_record() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("escalated_at", {}).get("type") == "string"
+            if candidate.get("if", {}).get("properties", {}).get("escalated_at", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -25154,7 +28657,13 @@ def check_compensation_record() -> None:
     )
     check_min_length_fields(
         schema,
-        ["compensation_id", "error_id", "manifest_id", "root_manifest_id", "compensation_steps_ref"],
+        [
+            "compensation_id",
+            "error_id",
+            "manifest_id",
+            "root_manifest_id",
+            "compensation_steps_ref",
+        ],
         "compensation_record",
     )
     for field in ["target_object_refs", "audit_refs", "provenance_refs"]:
@@ -25207,7 +28716,8 @@ def check_compensation_record() -> None:
     superseded_rule = find_rule_by_const(schema["allOf"], "compensation_status", "SUPERSEDED")
     ensure(superseded_rule is not None, "compensation_record missing SUPERSEDED guard")
     ensure(
-        superseded_rule["then"]["properties"]["superseded_by_compensation_id"].get("type") == "string",
+        superseded_rule["then"]["properties"]["superseded_by_compensation_id"].get("type")
+        == "string",
         "compensation_record SUPERSEDED must require superseded_by_compensation_id",
     )
 
@@ -25215,11 +28725,14 @@ def check_compensation_record() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("verification_ref", {}).get("type") == "string"
+            if candidate.get("if", {}).get("properties", {}).get("verification_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(verification_rule is not None, "compensation_record missing verification_ref reverse guard")
+    ensure(
+        verification_rule is not None, "compensation_record missing verification_ref reverse guard"
+    )
     ensure(
         verification_rule["then"]["properties"]["compensation_status"].get("const") == "VERIFIED",
         "compensation_record non-null verification_ref must force VERIFIED",
@@ -25229,14 +28742,21 @@ def check_compensation_record() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("superseded_by_compensation_id", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("superseded_by_compensation_id", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(superseded_ref_rule is not None, "compensation_record missing superseded_by_compensation_id reverse guard")
     ensure(
-        superseded_ref_rule["then"]["properties"]["compensation_status"].get("const") == "SUPERSEDED",
+        superseded_ref_rule is not None,
+        "compensation_record missing superseded_by_compensation_id reverse guard",
+    )
+    ensure(
+        superseded_ref_rule["then"]["properties"]["compensation_status"].get("const")
+        == "SUPERSEDED",
         "compensation_record non-null superseded_by_compensation_id must force SUPERSEDED",
     )
 
@@ -25244,12 +28764,18 @@ def check_compensation_record() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("artifact_retention_ref", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("artifact_retention_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(retention_ref_rule is not None, "compensation_record missing artifact_retention_ref reverse guard")
+    ensure(
+        retention_ref_rule is not None,
+        "compensation_record missing artifact_retention_ref reverse guard",
+    )
     ensure(
         retention_ref_rule["then"]["properties"]["retention_class"].get("type") == "string",
         "compensation_record non-null artifact_retention_ref must require retention_class",
@@ -25259,20 +28785,30 @@ def check_compensation_record() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("retention_class", {}).get("type") == "string"
+            if candidate.get("if", {}).get("properties", {}).get("retention_class", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(retention_class_rule is not None, "compensation_record missing retention_class reverse guard")
     ensure(
-        retention_class_rule["then"]["properties"]["artifact_retention_ref"].get("type") == "string",
+        retention_class_rule is not None,
+        "compensation_record missing retention_class reverse guard",
+    )
+    ensure(
+        retention_class_rule["then"]["properties"]["artifact_retention_ref"].get("type")
+        == "string",
         "compensation_record non-null retention_class must require artifact_retention_ref",
     )
 
-    preserve_and_limit_rule = find_rule_by_const(schema["allOf"], "compensation_mode", "PRESERVE_AND_LIMIT")
-    ensure(preserve_and_limit_rule is not None, "compensation_record missing PRESERVE_AND_LIMIT guard")
+    preserve_and_limit_rule = find_rule_by_const(
+        schema["allOf"], "compensation_mode", "PRESERVE_AND_LIMIT"
+    )
     ensure(
-        preserve_and_limit_rule["then"]["properties"]["artifact_retention_ref"].get("type") == "string",
+        preserve_and_limit_rule is not None, "compensation_record missing PRESERVE_AND_LIMIT guard"
+    )
+    ensure(
+        preserve_and_limit_rule["then"]["properties"]["artifact_retention_ref"].get("type")
+        == "string",
         "compensation_record PRESERVE_AND_LIMIT must require artifact_retention_ref",
     )
 
@@ -25350,46 +28886,66 @@ def check_failure_lifecycle_dashboard() -> None:
         next_legal_action["properties"]["reason_codes"]["items"].get("minLength") == 1,
         "failure_lifecycle_dashboard.nextLegalAction.reason_codes items must reject empty strings",
     )
-    no_action_rule = find_rule_by_const(next_legal_action["allOf"], "action_state", "NO_FURTHER_ACTION")
-    ensure(no_action_rule is not None, "failure_lifecycle_dashboard.nextLegalAction missing NO_FURTHER_ACTION guard")
+    no_action_rule = find_rule_by_const(
+        next_legal_action["allOf"], "action_state", "NO_FURTHER_ACTION"
+    )
+    ensure(
+        no_action_rule is not None,
+        "failure_lifecycle_dashboard.nextLegalAction missing NO_FURTHER_ACTION guard",
+    )
     ensure(
         no_action_rule["then"]["properties"]["action_ref_or_null"].get("type") == "null"
-        and no_action_rule["then"]["properties"]["source_artifact_type_or_null"].get("type") == "null",
+        and no_action_rule["then"]["properties"]["source_artifact_type_or_null"].get("type")
+        == "null",
         "failure_lifecycle_dashboard.nextLegalAction NO_FURTHER_ACTION must clear action refs and source type",
     )
 
     compensation_posture = schema["$defs"]["compensationPosture"]
     none_compensation_rule = find_rule_by_const(compensation_posture["allOf"], "state", "NONE")
-    ensure(none_compensation_rule is not None, "failure_lifecycle_dashboard.compensationPosture missing NONE guard")
     ensure(
-        none_compensation_rule["then"]["properties"]["latest_compensation_ref_or_null"].get("type") == "null",
+        none_compensation_rule is not None,
+        "failure_lifecycle_dashboard.compensationPosture missing NONE guard",
+    )
+    ensure(
+        none_compensation_rule["then"]["properties"]["latest_compensation_ref_or_null"].get("type")
+        == "null",
         "failure_lifecycle_dashboard.compensationPosture state=NONE must clear latest_compensation_ref_or_null",
     )
-    verified_compensation_rule = find_rule_by_const(compensation_posture["allOf"], "state", "VERIFIED")
+    verified_compensation_rule = find_rule_by_const(
+        compensation_posture["allOf"], "state", "VERIFIED"
+    )
     ensure(
         verified_compensation_rule is not None,
         "failure_lifecycle_dashboard.compensationPosture missing VERIFIED guard",
     )
     ensure(
-        verified_compensation_rule["then"]["properties"]["verification_ref_or_null"].get("type") == "string",
+        verified_compensation_rule["then"]["properties"]["verification_ref_or_null"].get("type")
+        == "string",
         "failure_lifecycle_dashboard.compensationPosture state=VERIFIED must require verification_ref_or_null",
     )
 
     investigation_posture = schema["$defs"]["investigationPosture"]
-    active_investigation_rule = find_rule_by_const(investigation_posture["allOf"], "state", "ACTIVE")
+    active_investigation_rule = find_rule_by_const(
+        investigation_posture["allOf"], "state", "ACTIVE"
+    )
     ensure(
         active_investigation_rule is not None,
         "failure_lifecycle_dashboard.investigationPosture missing ACTIVE guard",
     )
     ensure(
-        active_investigation_rule["then"]["properties"]["active_investigation_ref_or_null"].get("type")
+        active_investigation_rule["then"]["properties"]["active_investigation_ref_or_null"].get(
+            "type"
+        )
         == "string",
         "failure_lifecycle_dashboard.investigationPosture state=ACTIVE must require active_investigation_ref_or_null",
     )
 
     accepted_risk_posture = schema["$defs"]["acceptedRiskPosture"]
     active_risk_rule = find_rule_by_const(accepted_risk_posture["allOf"], "state", "ACTIVE")
-    ensure(active_risk_rule is not None, "failure_lifecycle_dashboard.acceptedRiskPosture missing ACTIVE guard")
+    ensure(
+        active_risk_rule is not None,
+        "failure_lifecycle_dashboard.acceptedRiskPosture missing ACTIVE guard",
+    )
     ensure(
         active_risk_rule["then"]["properties"]["approval_ref_or_null"].get("type") == "string",
         "failure_lifecycle_dashboard.acceptedRiskPosture state=ACTIVE must require approval_ref_or_null",
@@ -25399,7 +28955,8 @@ def check_failure_lifecycle_dashboard() -> None:
         "failure_lifecycle_dashboard.acceptedRiskPosture state=ACTIVE must require expires_at_or_null",
     )
     ensure(
-        active_risk_rule["then"]["properties"]["accountable_owner_ref_or_null"].get("type") == "string",
+        active_risk_rule["then"]["properties"]["accountable_owner_ref_or_null"].get("type")
+        == "string",
         "failure_lifecycle_dashboard.acceptedRiskPosture state=ACTIVE must require accountable_owner_ref_or_null",
     )
 
@@ -25408,7 +28965,10 @@ def check_failure_lifecycle_dashboard() -> None:
         (
             candidate
             for candidate in workflow_coordination["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("workflow_item_ref_or_null", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("workflow_item_ref_or_null", {})
+            .get("type")
             == "null"
         ),
         None,
@@ -25437,12 +28997,18 @@ def check_failure_lifecycle_dashboard() -> None:
         "failure_lifecycle_dashboard.closurePosture missing terminal resolution guard",
     )
     ensure(
-        terminal_resolution_rule["then"]["properties"]["closure_evidence_refs"].get("minItems") == 1,
+        terminal_resolution_rule["then"]["properties"]["closure_evidence_refs"].get("minItems")
+        == 1,
         "failure_lifecycle_dashboard.closurePosture terminal states must require closure_evidence_refs",
     )
 
-    remediation_active_rule = find_rule_by_const(schema["allOf"], "current_lineage_state", "REMEDIATION_ACTIVE")
-    ensure(remediation_active_rule is not None, "failure_lifecycle_dashboard missing REMEDIATION_ACTIVE guard")
+    remediation_active_rule = find_rule_by_const(
+        schema["allOf"], "current_lineage_state", "REMEDIATION_ACTIVE"
+    )
+    ensure(
+        remediation_active_rule is not None,
+        "failure_lifecycle_dashboard missing REMEDIATION_ACTIVE guard",
+    )
     ensure(
         remediation_active_rule["then"]["properties"]["remediation_summary"]["properties"][
             "active_task_ref_or_null"
@@ -25451,30 +29017,39 @@ def check_failure_lifecycle_dashboard() -> None:
         "failure_lifecycle_dashboard REMEDIATION_ACTIVE must require remediation_summary.active_task_ref_or_null",
     )
 
-    compensation_active_rule = find_rule_by_const(schema["allOf"], "current_lineage_state", "COMPENSATION_ACTIVE")
-    ensure(compensation_active_rule is not None, "failure_lifecycle_dashboard missing COMPENSATION_ACTIVE guard")
+    compensation_active_rule = find_rule_by_const(
+        schema["allOf"], "current_lineage_state", "COMPENSATION_ACTIVE"
+    )
     ensure(
-        compensation_active_rule["then"]["properties"]["compensation_posture"]["properties"]["state"].get("enum")
+        compensation_active_rule is not None,
+        "failure_lifecycle_dashboard missing COMPENSATION_ACTIVE guard",
+    )
+    ensure(
+        compensation_active_rule["then"]["properties"]["compensation_posture"]["properties"][
+            "state"
+        ].get("enum")
         == ["PLANNED", "IN_PROGRESS", "APPLIED"],
         "failure_lifecycle_dashboard COMPENSATION_ACTIVE must keep compensation_posture.state in the active compensation vocabulary",
     )
 
-    accepted_risk_lineage_rule = find_rule_by_const(schema["allOf"], "current_lineage_state", "ACCEPTED_RISK_ACTIVE")
+    accepted_risk_lineage_rule = find_rule_by_const(
+        schema["allOf"], "current_lineage_state", "ACCEPTED_RISK_ACTIVE"
+    )
     ensure(
         accepted_risk_lineage_rule is not None,
         "failure_lifecycle_dashboard missing ACCEPTED_RISK_ACTIVE guard",
     )
     ensure(
-        accepted_risk_lineage_rule["then"]["properties"]["accepted_risk_posture"]["properties"]["state"].get(
-            "const"
-        )
+        accepted_risk_lineage_rule["then"]["properties"]["accepted_risk_posture"]["properties"][
+            "state"
+        ].get("const")
         == "ACTIVE",
         "failure_lifecycle_dashboard ACCEPTED_RISK_ACTIVE must force accepted_risk_posture.state=ACTIVE",
     )
     ensure(
-        accepted_risk_lineage_rule["then"]["properties"]["closure_posture"]["properties"]["resolution_state"].get(
-            "const"
-        )
+        accepted_risk_lineage_rule["then"]["properties"]["closure_posture"]["properties"][
+            "resolution_state"
+        ].get("const")
         == "ACCEPTED_RISK",
         "failure_lifecycle_dashboard ACCEPTED_RISK_ACTIVE must force closure_posture.resolution_state=ACCEPTED_RISK",
     )
@@ -25483,16 +29058,22 @@ def check_failure_lifecycle_dashboard() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("current_lineage_state", {}).get("enum")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("current_lineage_state", {})
+            .get("enum")
             == ["RESOLVED", "SUPERSEDED", "CANCELLED"]
         ),
         None,
     )
-    ensure(terminal_lineage_rule is not None, "failure_lifecycle_dashboard missing terminal lineage guard")
     ensure(
-        terminal_lineage_rule["then"]["properties"]["next_legal_action"]["properties"]["action_state"].get(
-            "const"
-        )
+        terminal_lineage_rule is not None,
+        "failure_lifecycle_dashboard missing terminal lineage guard",
+    )
+    ensure(
+        terminal_lineage_rule["then"]["properties"]["next_legal_action"]["properties"][
+            "action_state"
+        ].get("const")
         == "NO_FURTHER_ACTION",
         "failure_lifecycle_dashboard terminal lineage states must force next_legal_action.action_state=NO_FURTHER_ACTION",
     )
@@ -25606,9 +29187,13 @@ def check_retention_governance_frame() -> None:
         "override_state",
         "BLOCKED_BY_STATUTORY_MINIMUM",
     )
-    ensure(statutory_block_rule is not None, "retention_governance_frame missing statutory-block row guard")
     ensure(
-        statutory_block_rule["then"]["properties"]["warning_posture"].get("const") == "STATUTORY_BLOCK"
+        statutory_block_rule is not None,
+        "retention_governance_frame missing statutory-block row guard",
+    )
+    ensure(
+        statutory_block_rule["then"]["properties"]["warning_posture"].get("const")
+        == "STATUTORY_BLOCK"
         and statutory_block_rule["then"]["properties"]["blocking_reason_refs"].get("minItems") == 1,
         "retention_governance_frame blocked-by-statutory rows must publish STATUTORY_BLOCK posture and blocker refs",
     )
@@ -25651,15 +29236,25 @@ def check_retention_governance_frame() -> None:
         (
             rule
             for rule in schema["$defs"]["legalHoldRegister"]["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("release_action_posture", {}).get("enum")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("release_action_posture", {})
+            .get("enum")
             == ["PREVIEW_ONLY", "CHANGE_BASKET_REQUIRED"]
         ),
         None,
     )
-    ensure(release_posture_rule is not None, "retention_governance_frame missing legal-hold release preview guard")
     ensure(
-        release_posture_rule["then"]["properties"]["selected_hold_ref_or_null"].get("minLength") == 1
-        and release_posture_rule["then"]["properties"]["release_preview_ref_or_null"].get("minLength") == 1,
+        release_posture_rule is not None,
+        "retention_governance_frame missing legal-hold release preview guard",
+    )
+    ensure(
+        release_posture_rule["then"]["properties"]["selected_hold_ref_or_null"].get("minLength")
+        == 1
+        and release_posture_rule["then"]["properties"]["release_preview_ref_or_null"].get(
+            "minLength"
+        )
+        == 1,
         "retention_governance_frame legal-hold release posture must require a selected hold and release preview ref",
     )
 
@@ -25690,7 +29285,10 @@ def check_retention_governance_frame() -> None:
         "action_posture",
         "BLOCKED",
     )
-    ensure(blocked_preview_rule is not None, "retention_governance_frame missing blocked impact-preview guard")
+    ensure(
+        blocked_preview_rule is not None,
+        "retention_governance_frame missing blocked impact-preview guard",
+    )
     ensure(
         blocked_preview_rule["then"]["properties"]["blocked_reason_refs"].get("minItems") == 1,
         "retention_governance_frame blocked impact previews must require blocker refs",
@@ -25700,16 +29298,23 @@ def check_retention_governance_frame() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("retention_workspace", {}).get("properties", {}).get("workspace_mode", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("retention_workspace", {})
+            .get("properties", {})
+            .get("workspace_mode", {})
+            .get("const")
             == "POLICIES"
         ),
         None,
     )
-    ensure(policy_mode_rule is not None, "retention_governance_frame missing POLICIES workspace guard")
     ensure(
-        policy_mode_rule["then"]["properties"]["retention_policy_matrix"]["properties"]["selected_row_ref"].get(
-            "minLength"
-        )
+        policy_mode_rule is not None, "retention_governance_frame missing POLICIES workspace guard"
+    )
+    ensure(
+        policy_mode_rule["then"]["properties"]["retention_policy_matrix"]["properties"][
+            "selected_row_ref"
+        ].get("minLength")
         == 1,
         "retention_governance_frame POLICIES mode must require a selected policy row",
     )
@@ -25717,16 +29322,24 @@ def check_retention_governance_frame() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("retention_workspace", {}).get("properties", {}).get("workspace_mode", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("retention_workspace", {})
+            .get("properties", {})
+            .get("workspace_mode", {})
+            .get("const")
             == "LEGAL_HOLDS"
         ),
         None,
     )
-    ensure(legal_hold_mode_rule is not None, "retention_governance_frame missing LEGAL_HOLDS workspace guard")
     ensure(
-        legal_hold_mode_rule["then"]["properties"]["legal_hold_register"]["properties"]["release_preview_ref_or_null"].get(
-            "minLength"
-        )
+        legal_hold_mode_rule is not None,
+        "retention_governance_frame missing LEGAL_HOLDS workspace guard",
+    )
+    ensure(
+        legal_hold_mode_rule["then"]["properties"]["legal_hold_register"]["properties"][
+            "release_preview_ref_or_null"
+        ].get("minLength")
         == 1,
         "retention_governance_frame LEGAL_HOLDS mode must require a release preview ref",
     )
@@ -25734,16 +29347,23 @@ def check_retention_governance_frame() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("retention_workspace", {}).get("properties", {}).get("workspace_mode", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("retention_workspace", {})
+            .get("properties", {})
+            .get("workspace_mode", {})
+            .get("const")
             == "ERASURE"
         ),
         None,
     )
-    ensure(erasure_mode_rule is not None, "retention_governance_frame missing ERASURE workspace guard")
     ensure(
-        erasure_mode_rule["then"]["properties"]["retention_workspace"]["properties"]["promoted_support_surface"].get(
-            "const"
-        )
+        erasure_mode_rule is not None, "retention_governance_frame missing ERASURE workspace guard"
+    )
+    ensure(
+        erasure_mode_rule["then"]["properties"]["retention_workspace"]["properties"][
+            "promoted_support_surface"
+        ].get("const")
         == "RETENTION_IMPACT_PREVIEW",
         "retention_governance_frame ERASURE mode must promote the impact preview",
     )
@@ -25862,16 +29482,28 @@ def check_principal_access_view() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("access_workspace", {}).get("properties", {}).get("workspace_mode", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("access_workspace", {})
+            .get("properties", {})
+            .get("workspace_mode", {})
+            .get("const")
             == "SIMULATOR"
         ),
         None,
     )
-    ensure(simulator_mode_rule is not None, "principal_access_view missing workspace_mode=SIMULATOR guard")
     ensure(
-        simulator_mode_rule["then"]["properties"]["access_workspace"]["properties"]["latest_simulation_ref"].get("type")
+        simulator_mode_rule is not None,
+        "principal_access_view missing workspace_mode=SIMULATOR guard",
+    )
+    ensure(
+        simulator_mode_rule["then"]["properties"]["access_workspace"]["properties"][
+            "latest_simulation_ref"
+        ].get("type")
         == "string"
-        and simulator_mode_rule["then"]["properties"]["access_workspace"]["properties"]["promoted_support_surface"].get("const")
+        and simulator_mode_rule["then"]["properties"]["access_workspace"]["properties"][
+            "promoted_support_surface"
+        ].get("const")
         == "POLICY_SIMULATOR",
         "principal_access_view workspace_mode=SIMULATOR must require latest_simulation_ref and promoted_support_surface=POLICY_SIMULATOR",
     )
@@ -25880,12 +29512,20 @@ def check_principal_access_view() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("access_workspace", {}).get("properties", {}).get("selected_cell_ref", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("access_workspace", {})
+            .get("properties", {})
+            .get("selected_cell_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(selected_cell_rule is not None, "principal_access_view missing selected_cell_ref reverse guard")
+    ensure(
+        selected_cell_rule is not None,
+        "principal_access_view missing selected_cell_ref reverse guard",
+    )
     ensure(
         selected_cell_rule["then"]["properties"]["focus_anchor_ref"].get("type") == "string",
         "principal_access_view selected_cell_ref must force non-null focus_anchor_ref",
@@ -25988,15 +29628,24 @@ def check_role_template_matrix() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("role_matrix_workspace", {}).get("properties", {}).get("selected_cell_ref", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("role_matrix_workspace", {})
+            .get("properties", {})
+            .get("selected_cell_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(selected_cell_rule is not None, "role_template_matrix missing selected_cell_ref reverse guard")
+    ensure(
+        selected_cell_rule is not None,
+        "role_template_matrix missing selected_cell_ref reverse guard",
+    )
     ensure(
         selected_cell_rule["then"]["properties"]["focus_anchor_ref"].get("type") == "string"
-        and selected_cell_rule["then"]["properties"]["selected_action_detail"].get("type") == "object",
+        and selected_cell_rule["then"]["properties"]["selected_action_detail"].get("type")
+        == "object",
         "role_template_matrix selected_cell_ref must force non-null focus_anchor_ref and selected_action_detail",
     )
 
@@ -26004,7 +29653,12 @@ def check_role_template_matrix() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("role_matrix_workspace", {}).get("properties", {}).get("inspector_state", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("role_matrix_workspace", {})
+            .get("properties", {})
+            .get("inspector_state", {})
+            .get("const")
             == "HIDDEN"
         ),
         None,
@@ -26020,14 +29674,24 @@ def check_role_template_matrix() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("role_matrix_workspace", {}).get("properties", {}).get("latest_simulation_ref", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("role_matrix_workspace", {})
+            .get("properties", {})
+            .get("latest_simulation_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(latest_simulation_rule is not None, "role_template_matrix missing latest_simulation_ref reverse guard")
     ensure(
-        latest_simulation_rule["then"]["properties"]["role_matrix_workspace"]["properties"]["promoted_support_surface"].get("const")
+        latest_simulation_rule is not None,
+        "role_template_matrix missing latest_simulation_ref reverse guard",
+    )
+    ensure(
+        latest_simulation_rule["then"]["properties"]["role_matrix_workspace"]["properties"][
+            "promoted_support_surface"
+        ].get("const")
         == "POLICY_SIMULATOR",
         "role_template_matrix latest_simulation_ref must force promoted_support_surface=POLICY_SIMULATOR",
     )
@@ -26046,9 +29710,14 @@ def check_role_template_matrix() -> None:
         ),
         None,
     )
-    ensure(pending_changes_rule is not None, "role_template_matrix missing pending-change reverse guard")
     ensure(
-        pending_changes_rule["then"]["properties"]["role_matrix_workspace"]["properties"]["inspector_state"].get("const")
+        pending_changes_rule is not None,
+        "role_template_matrix missing pending-change reverse guard",
+    )
+    ensure(
+        pending_changes_rule["then"]["properties"]["role_matrix_workspace"]["properties"][
+            "inspector_state"
+        ].get("const")
         == "ROLE_EDITING",
         "role_template_matrix non-empty role_editor_pending_change_refs must force inspector_state=ROLE_EDITING",
     )
@@ -26080,7 +29749,8 @@ def check_governance_access_simulation() -> None:
         "governance_access_simulation must require authority_chain_layers, simulator_posture, and mutation_basis_contract",
     )
     ensure(
-        schema["properties"]["authorization_decision"].get("$ref") == "./authorization_decision.schema.json",
+        schema["properties"]["authorization_decision"].get("$ref")
+        == "./authorization_decision.schema.json",
         "governance_access_simulation.authorization_decision must stay bound to authorization_decision.schema.json",
     )
     ensure(
@@ -26141,7 +29811,9 @@ def check_governance_access_simulation() -> None:
         "governance_access_simulation missing simulator_posture=BOUNDED_SAFE reverse guard",
     )
     ensure(
-        bounded_safe_rule["then"]["properties"]["mutation_hazard"]["properties"]["bounded_safe_mutation"].get("const")
+        bounded_safe_rule["then"]["properties"]["mutation_hazard"]["properties"][
+            "bounded_safe_mutation"
+        ].get("const")
         == 1
         and schema_uses_ref(
             bounded_safe_rule["then"]["properties"]["mutation_basis_contract"],
@@ -26156,7 +29828,9 @@ def check_governance_access_simulation() -> None:
         "governance_access_simulation missing simulator_posture=APPROVAL_GATED reverse guard",
     )
     ensure(
-        approval_gated_rule["then"]["properties"]["mutation_hazard"]["properties"]["bounded_safe_mutation"].get("const")
+        approval_gated_rule["then"]["properties"]["mutation_hazard"]["properties"][
+            "bounded_safe_mutation"
+        ].get("const")
         == 0
         and schema_uses_ref(
             approval_gated_rule["then"]["properties"]["mutation_basis_contract"],
@@ -26263,7 +29937,10 @@ def check_candidate_fact() -> None:
         "evidence_lineage_complete",
         "visibility_safe_for_authority",
     ]:
-        ensure(field in promotion_readiness["required"], f"candidate_fact.promotionReadiness must require `{field}`")
+        ensure(
+            field in promotion_readiness["required"],
+            f"candidate_fact.promotionReadiness must require `{field}`",
+        )
     ensure(
         promotion_readiness["properties"]["readiness_state"].get("enum")
         == ["CANDIDATE_ONLY", "PROVISIONAL_ALLOWED", "READY_FOR_CANONICAL", "CONFLICT_BLOCKED"],
@@ -26274,7 +29951,10 @@ def check_candidate_fact() -> None:
         "candidate_fact must expose adjustment_binding for ADJUSTMENT_FACT scope semantics",
     )
     adjustment_rule = find_rule_by_const(schema["allOf"], "fact_family", "ADJUSTMENT_FACT")
-    ensure(adjustment_rule is not None, "candidate_fact missing ADJUSTMENT_FACT adjustment-binding guard")
+    ensure(
+        adjustment_rule is not None,
+        "candidate_fact missing ADJUSTMENT_FACT adjustment-binding guard",
+    )
     ensure(
         "adjustment_binding" in adjustment_rule["then"].get("required", []),
         "candidate_fact ADJUSTMENT_FACT must require adjustment_binding",
@@ -26381,13 +30061,19 @@ def check_canonical_fact() -> None:
         "evidence_lineage_complete",
         "visibility_safe_for_authority",
     ]:
-        ensure(field in promotion_record["required"], f"canonical_fact.promotionRecord must require `{field}`")
+        ensure(
+            field in promotion_record["required"],
+            f"canonical_fact.promotionRecord must require `{field}`",
+        )
     ensure(
         "adjustment_binding" in schema["properties"],
         "canonical_fact must expose adjustment_binding for ADJUSTMENT_FACT scope semantics",
     )
     adjustment_rule = find_rule_by_const(schema["allOf"], "fact_family", "ADJUSTMENT_FACT")
-    ensure(adjustment_rule is not None, "canonical_fact missing ADJUSTMENT_FACT adjustment-binding guard")
+    ensure(
+        adjustment_rule is not None,
+        "canonical_fact missing ADJUSTMENT_FACT adjustment-binding guard",
+    )
     ensure(
         "adjustment_binding" in adjustment_rule["then"].get("required", []),
         "canonical_fact ADJUSTMENT_FACT must require adjustment_binding",
@@ -26516,17 +30202,26 @@ def check_obligation_mirror() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("current_submission_ref", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("current_submission_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(current_submission_rule is not None, "obligation_mirror missing current_submission_ref reverse guard")
     ensure(
-        current_submission_rule["then"]["properties"]["lifecycle_state"].get("const") == "SUBMITTED_PENDING",
+        current_submission_rule is not None,
+        "obligation_mirror missing current_submission_ref reverse guard",
+    )
+    ensure(
+        current_submission_rule["then"]["properties"]["lifecycle_state"].get("const")
+        == "SUBMITTED_PENDING",
         "obligation_mirror non-null current_submission_ref must force lifecycle_state=SUBMITTED_PENDING",
     )
     ensure(
-        current_submission_rule["then"]["properties"]["authority_truth_state"].get("const") == "PENDING_ACK",
+        current_submission_rule["then"]["properties"]["authority_truth_state"].get("const")
+        == "PENDING_ACK",
         "obligation_mirror non-null current_submission_ref must force authority_truth_state=PENDING_ACK",
     )
 
@@ -26534,18 +30229,26 @@ def check_obligation_mirror() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("last_confirmed_submission_ref", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("last_confirmed_submission_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(confirmed_submission_rule is not None, "obligation_mirror missing last_confirmed_submission_ref reverse guard")
     ensure(
-        confirmed_submission_rule["then"]["properties"]["lifecycle_state"].get("const") == "MET_CONFIRMED",
+        confirmed_submission_rule is not None,
+        "obligation_mirror missing last_confirmed_submission_ref reverse guard",
+    )
+    ensure(
+        confirmed_submission_rule["then"]["properties"]["lifecycle_state"].get("const")
+        == "MET_CONFIRMED",
         "obligation_mirror non-null last_confirmed_submission_ref must force lifecycle_state=MET_CONFIRMED",
     )
     ensure(
-        confirmed_submission_rule["then"]["properties"]["authority_truth_state"].get("const") == "CONFIRMED",
+        confirmed_submission_rule["then"]["properties"]["authority_truth_state"].get("const")
+        == "CONFIRMED",
         "obligation_mirror non-null last_confirmed_submission_ref must force authority_truth_state=CONFIRMED",
     )
 
@@ -26553,57 +30256,91 @@ def check_obligation_mirror() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("ready_manifest_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("ready_manifest_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(ready_manifest_rule is not None, "obligation_mirror missing ready_manifest_ref reverse guard")
     ensure(
-        ready_manifest_rule["then"]["properties"]["lifecycle_state"].get("const") == "READY_TO_FILE",
+        ready_manifest_rule is not None,
+        "obligation_mirror missing ready_manifest_ref reverse guard",
+    )
+    ensure(
+        ready_manifest_rule["then"]["properties"]["lifecycle_state"].get("const")
+        == "READY_TO_FILE",
         "obligation_mirror non-null ready_manifest_ref must force lifecycle_state=READY_TO_FILE",
     )
     ensure(
-        ready_manifest_rule["then"]["properties"]["authority_truth_state"].get("const") == "NOT_REQUESTED",
+        ready_manifest_rule["then"]["properties"]["authority_truth_state"].get("const")
+        == "NOT_REQUESTED",
         "obligation_mirror non-null ready_manifest_ref must force authority_truth_state=NOT_REQUESTED",
     )
 
     pending_truth_rule = find_rule_by_const(schema["allOf"], "authority_truth_state", "PENDING_ACK")
-    ensure(pending_truth_rule is not None, "obligation_mirror missing authority_truth_state=PENDING_ACK guard")
     ensure(
-        pending_truth_rule["then"]["properties"]["lifecycle_state"].get("const") == "SUBMITTED_PENDING",
+        pending_truth_rule is not None,
+        "obligation_mirror missing authority_truth_state=PENDING_ACK guard",
+    )
+    ensure(
+        pending_truth_rule["then"]["properties"]["lifecycle_state"].get("const")
+        == "SUBMITTED_PENDING",
         "obligation_mirror authority_truth_state=PENDING_ACK must force lifecycle_state=SUBMITTED_PENDING",
     )
     ensure(
-        pending_truth_rule["then"]["properties"]["reconciliation_control_contract_or_null"].get("type") == "object",
+        pending_truth_rule["then"]["properties"]["reconciliation_control_contract_or_null"].get(
+            "type"
+        )
+        == "object",
         "obligation_mirror authority_truth_state=PENDING_ACK must require reconciliation_control_contract_or_null",
     )
 
     confirmed_truth_rule = find_rule_by_const(schema["allOf"], "authority_truth_state", "CONFIRMED")
-    ensure(confirmed_truth_rule is not None, "obligation_mirror missing authority_truth_state=CONFIRMED guard")
     ensure(
-        confirmed_truth_rule["then"]["properties"]["lifecycle_state"].get("const") == "MET_CONFIRMED"
-        and confirmed_truth_rule["then"]["properties"]["last_confirmed_submission_ref"].get("type") == "string"
-        and confirmed_truth_rule["then"]["properties"]["authority_status_ref"].get("type") == "string",
+        confirmed_truth_rule is not None,
+        "obligation_mirror missing authority_truth_state=CONFIRMED guard",
+    )
+    ensure(
+        confirmed_truth_rule["then"]["properties"]["lifecycle_state"].get("const")
+        == "MET_CONFIRMED"
+        and confirmed_truth_rule["then"]["properties"]["last_confirmed_submission_ref"].get("type")
+        == "string"
+        and confirmed_truth_rule["then"]["properties"]["authority_status_ref"].get("type")
+        == "string",
         "obligation_mirror authority_truth_state=CONFIRMED must force MET_CONFIRMED plus confirmed settlement anchors",
     )
 
     unknown_truth_rule = find_rule_by_const(schema["allOf"], "authority_truth_state", "UNKNOWN")
-    ensure(unknown_truth_rule is not None, "obligation_mirror missing authority_truth_state=UNKNOWN guard")
     ensure(
-        unknown_truth_rule["then"]["properties"]["reconciliation_control_contract_or_null"].get("type") == "object",
+        unknown_truth_rule is not None,
+        "obligation_mirror missing authority_truth_state=UNKNOWN guard",
+    )
+    ensure(
+        unknown_truth_rule["then"]["properties"]["reconciliation_control_contract_or_null"].get(
+            "type"
+        )
+        == "object",
         "obligation_mirror authority_truth_state=UNKNOWN must require reconciliation_control_contract_or_null",
     )
 
-    out_of_band_truth_rule = find_rule_by_const(schema["allOf"], "authority_truth_state", "OUT_OF_BAND")
-    ensure(out_of_band_truth_rule is not None, "obligation_mirror missing authority_truth_state=OUT_OF_BAND guard")
+    out_of_band_truth_rule = find_rule_by_const(
+        schema["allOf"], "authority_truth_state", "OUT_OF_BAND"
+    )
     ensure(
-        out_of_band_truth_rule["then"]["properties"]["reconciliation_control_contract_or_null"].get("type")
+        out_of_band_truth_rule is not None,
+        "obligation_mirror missing authority_truth_state=OUT_OF_BAND guard",
+    )
+    ensure(
+        out_of_band_truth_rule["then"]["properties"]["reconciliation_control_contract_or_null"].get(
+            "type"
+        )
         == "object",
         "obligation_mirror authority_truth_state=OUT_OF_BAND must require reconciliation_control_contract_or_null",
     )
 
     open_due_rule = find_rule_by_enum(schema["allOf"], "lifecycle_state", ["OPEN", "DUE_SOON"])
-    ensure(open_due_rule is not None, "obligation_mirror missing OPEN/DUE_SOON readiness reset guard")
+    ensure(
+        open_due_rule is not None, "obligation_mirror missing OPEN/DUE_SOON readiness reset guard"
+    )
     ensure(
         open_due_rule["then"]["properties"]["ready_manifest_ref"].get("type") == "null",
         "obligation_mirror OPEN/DUE_SOON states must null ready_manifest_ref until all gates pass",
@@ -26612,11 +30349,22 @@ def check_obligation_mirror() -> None:
     unconfirmed_rule = find_rule_by_enum(
         schema["allOf"],
         "lifecycle_state",
-        ["NOT_YET_OPEN", "OPEN", "DUE_SOON", "READY_TO_FILE", "SUBMITTED_PENDING", "LATE_UNMET", "NO_LONGER_RELEVANT"],
+        [
+            "NOT_YET_OPEN",
+            "OPEN",
+            "DUE_SOON",
+            "READY_TO_FILE",
+            "SUBMITTED_PENDING",
+            "LATE_UNMET",
+            "NO_LONGER_RELEVANT",
+        ],
     )
-    ensure(unconfirmed_rule is not None, "obligation_mirror missing non-met submission-lineage guard")
     ensure(
-        unconfirmed_rule["then"]["properties"]["last_confirmed_submission_ref"].get("type") == "null",
+        unconfirmed_rule is not None, "obligation_mirror missing non-met submission-lineage guard"
+    )
+    ensure(
+        unconfirmed_rule["then"]["properties"]["last_confirmed_submission_ref"].get("type")
+        == "null",
         "obligation_mirror non-met states must null last_confirmed_submission_ref",
     )
 
@@ -26648,7 +30396,10 @@ def check_filing_case() -> None:
         "filing_case",
         expected_object_family="FILING_CASE",
     )
-    ensure("readiness_context_ref" in schema["required"], "filing_case must require `readiness_context_ref`.")
+    ensure(
+        "readiness_context_ref" in schema["required"],
+        "filing_case must require `readiness_context_ref`.",
+    )
     ensure(
         "trust_invalidation_dependency_refs" in schema["required"],
         "filing_case must require `trust_invalidation_dependency_refs`.",
@@ -26698,11 +30449,18 @@ def check_filing_case() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("current_packet_ref", {}).get("type") == "null"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("current_packet_ref", {})
+            .get("type")
+            == "null"
         ),
         None,
     )
-    ensure(packet_ref_null_rule is not None, "filing_case missing current_packet_ref=null reverse guard")
+    ensure(
+        packet_ref_null_rule is not None,
+        "filing_case missing current_packet_ref=null reverse guard",
+    )
     ensure(
         packet_ref_null_rule["then"]["properties"]["packet_state"].get("type") == "null",
         "filing_case current_packet_ref=null must force packet_state=null",
@@ -26712,11 +30470,14 @@ def check_filing_case() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("packet_state", {}).get("type") == "null"
+            if candidate.get("if", {}).get("properties", {}).get("packet_state", {}).get("type")
+            == "null"
         ),
         None,
     )
-    ensure(packet_state_null_rule is not None, "filing_case missing packet_state=null reverse guard")
+    ensure(
+        packet_state_null_rule is not None, "filing_case missing packet_state=null reverse guard"
+    )
     ensure(
         packet_state_null_rule["then"]["properties"]["current_packet_ref"].get("type") == "null",
         "filing_case packet_state=null must force current_packet_ref=null",
@@ -26735,7 +30496,10 @@ def check_filing_case() -> None:
     )
 
     approved_packet_rule = find_rule_by_const(schema["allOf"], "packet_state", "APPROVED_TO_SUBMIT")
-    ensure(approved_packet_rule is not None, "filing_case missing APPROVED_TO_SUBMIT packet-state guard")
+    ensure(
+        approved_packet_rule is not None,
+        "filing_case missing APPROVED_TO_SUBMIT packet-state guard",
+    )
     approved_packet_then = approved_packet_rule["then"]["properties"]
     ensure(
         approved_packet_then["lifecycle_state"].get("const") == "READY_TO_SUBMIT",
@@ -26768,7 +30532,10 @@ def check_filing_case() -> None:
         ),
         None,
     )
-    ensure(void_or_superseded_rule is not None, "filing_case missing VOID/SUPERSEDED packet-state guard")
+    ensure(
+        void_or_superseded_rule is not None,
+        "filing_case missing VOID/SUPERSEDED packet-state guard",
+    )
     ensure(
         void_or_superseded_rule["then"]["properties"]["lifecycle_state"].get("enum")
         == ["PREPARING", "READY_REVIEW"],
@@ -26787,9 +30554,12 @@ def check_filing_case() -> None:
         ),
         None,
     )
-    ensure(calculation_lineage_rule is not None, "filing_case missing readiness-context lineage guard")
     ensure(
-        calculation_lineage_rule["then"]["properties"]["readiness_context_ref"].get("type") == "string",
+        calculation_lineage_rule is not None, "filing_case missing readiness-context lineage guard"
+    )
+    ensure(
+        calculation_lineage_rule["then"]["properties"]["readiness_context_ref"].get("type")
+        == "string",
         "filing_case calculation lineage must require non-null readiness_context_ref",
     )
 
@@ -26809,7 +30579,12 @@ def check_filing_case() -> None:
     closed_rule = find_rule_by_const(schema["allOf"], "lifecycle_state", "CLOSED")
     ensure(closed_rule is not None, "filing_case missing CLOSED terminal-state guard")
     closed_then = closed_rule["then"]["properties"]
-    for field in ["current_submission_ref", "current_packet_ref", "amendment_case_ref", "controlling_proof_bundle_ref"]:
+    for field in [
+        "current_submission_ref",
+        "current_packet_ref",
+        "amendment_case_ref",
+        "controlling_proof_bundle_ref",
+    ]:
         ensure(
             closed_then[field].get("type") == "string" and closed_then[field].get("minLength") == 1,
             f"filing_case CLOSED must require a non-empty {field}",
@@ -26830,14 +30605,16 @@ def check_filing_case() -> None:
     recalc_rule = find_rule_by_const(schema["allOf"], "trust_currency_state", "RECALC_REQUIRED")
     ensure(recalc_rule is not None, "filing_case missing RECALC_REQUIRED trust-currency guard")
     ensure(
-        recalc_rule["then"]["properties"]["trust_invalidation_dependency_refs"].get("minItems") == 1,
+        recalc_rule["then"]["properties"]["trust_invalidation_dependency_refs"].get("minItems")
+        == 1,
         "filing_case trust_currency_state=RECALC_REQUIRED must require trust_invalidation_dependency_refs",
     )
 
     current_rule = find_rule_by_const(schema["allOf"], "trust_currency_state", "CURRENT")
     ensure(current_rule is not None, "filing_case missing CURRENT trust-currency guard")
     ensure(
-        current_rule["then"]["properties"]["trust_invalidation_dependency_refs"].get("maxItems") == 0,
+        current_rule["then"]["properties"]["trust_invalidation_dependency_refs"].get("maxItems")
+        == 0,
         "filing_case trust_currency_state=CURRENT must clear trust_invalidation_dependency_refs",
     )
 
@@ -26885,24 +30662,35 @@ def check_filing_packet() -> None:
             candidate
             for candidate in schema["allOf"]
             if candidate.get("if", {}).get("anyOf")
-            and candidate.get("then", {}).get("properties", {}).get("readiness_context_ref", {}).get("type") == "string"
+            and candidate.get("then", {})
+            .get("properties", {})
+            .get("readiness_context_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(calculation_lineage_rule is not None, "filing_packet missing readiness-context lineage guard")
+    ensure(
+        calculation_lineage_rule is not None,
+        "filing_packet missing readiness-context lineage guard",
+    )
 
     proof_null_rule = next(
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("controlling_proof_bundle_ref", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("controlling_proof_bundle_ref", {})
+            .get("type")
             == "null"
         ),
         None,
     )
     ensure(proof_null_rule is not None, "filing_packet missing proof-bundle null reverse guard")
     ensure(
-        proof_null_rule["then"]["properties"]["proof_closure_state"].get("const") == "NOT_APPLICABLE",
+        proof_null_rule["then"]["properties"]["proof_closure_state"].get("const")
+        == "NOT_APPLICABLE",
         "filing_packet null proof bundle must force proof_closure_state=NOT_APPLICABLE",
     )
 
@@ -26910,14 +30698,18 @@ def check_filing_packet() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("proof_closure_state", {}).get("enum")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("proof_closure_state", {})
+            .get("enum")
             == ["OPEN", "CLOSED"]
         ),
         None,
     )
     ensure(proof_present_rule is not None, "filing_packet missing proof-closure reverse guard")
     ensure(
-        proof_present_rule["then"]["properties"]["controlling_proof_bundle_ref"].get("type") == "string",
+        proof_present_rule["then"]["properties"]["controlling_proof_bundle_ref"].get("type")
+        == "string",
         "filing_packet OPEN or CLOSED proof posture must require controlling_proof_bundle_ref",
     )
 
@@ -26925,11 +30717,18 @@ def check_filing_packet() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("notice_resolution_ref", {}).get("type") == "string"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("notice_resolution_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(notice_resolution_rule is not None, "filing_packet missing notice_resolution_ref pairing guard")
+    ensure(
+        notice_resolution_rule is not None,
+        "filing_packet missing notice_resolution_ref pairing guard",
+    )
     ensure(
         notice_resolution_rule["then"]["properties"]["notice_step_refs"].get("minItems") == 1,
         "filing_packet notice_resolution_ref must require non-empty notice_step_refs",
@@ -26939,7 +30738,11 @@ def check_filing_packet() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("notice_step_refs", {}).get("maxItems") == 0
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("notice_step_refs", {})
+            .get("maxItems")
+            == 0
         ),
         None,
     )
@@ -26973,7 +30776,8 @@ def check_filing_packet() -> None:
         "filing_packet APPROVED_TO_SUBMIT must keep resolved approval_state",
     )
     ensure(
-        approved_then["declared_basis_ack_state"].get("enum") == ["NOT_REQUIRED", "SATISFIED"],
+        approved_then["declared_basis_ack_state"].get("enum")
+        == ["NOT_APPLICABLE", "NOT_REQUIRED", "SATISFIED"],
         "filing_packet APPROVED_TO_SUBMIT must keep resolved declared_basis_ack_state",
     )
     ensure(
@@ -27039,7 +30843,10 @@ def check_submission_record() -> None:
         expected_scope_class="SUBMISSION_RECORD",
         nullable=True,
     )
-    ensure("request_identity_contract" in schema["required"], "submission_record must require request_identity_contract")
+    ensure(
+        "request_identity_contract" in schema["required"],
+        "submission_record must require request_identity_contract",
+    )
     request_identity_contract = schema["properties"]["request_identity_contract"]["anyOf"][0]
     ensure(
         schema_uses_ref(
@@ -27049,7 +30856,8 @@ def check_submission_record() -> None:
         "submission_record.request_identity_contract must stay bound to authority_request_identity_contract.schema.json",
     )
     ensure(
-        request_identity_contract["allOf"][1]["properties"]["binding_scope_class"].get("const") == "SUBMISSION_RECORD",
+        request_identity_contract["allOf"][1]["properties"]["binding_scope_class"].get("const")
+        == "SUBMISSION_RECORD",
         "submission_record.request_identity_contract must force binding_scope_class=SUBMISSION_RECORD",
     )
     for field in ["identity_namespace_hash", "duplicate_meaning_key"]:
@@ -27075,24 +30883,37 @@ def check_submission_record() -> None:
         ),
         None,
     )
-    ensure(authority_baseline_rule is not None, "submission_record missing authority baseline reverse guard")
     ensure(
-        authority_baseline_rule["then"]["properties"]["lifecycle_state"].get("const") == "CONFIRMED",
+        authority_baseline_rule is not None,
+        "submission_record missing authority baseline reverse guard",
+    )
+    ensure(
+        authority_baseline_rule["then"]["properties"]["lifecycle_state"].get("const")
+        == "CONFIRMED",
         "submission_record authority-grounded baseline types must force lifecycle_state=CONFIRMED",
     )
     ensure(
-        authority_baseline_rule["then"]["properties"]["temporal_propagation_event_refs"].get("minItems") == 1,
+        authority_baseline_rule["then"]["properties"]["temporal_propagation_event_refs"].get(
+            "minItems"
+        )
+        == 1,
         "submission_record authority-corrected baseline types must require temporal_propagation_event_refs",
     )
 
     out_of_band_baseline_rule = find_rule_by_const(schema["allOf"], "baseline_type", "OUT_OF_BAND")
-    ensure(out_of_band_baseline_rule is not None, "submission_record missing OUT_OF_BAND reverse guard")
     ensure(
-        out_of_band_baseline_rule["then"]["properties"]["lifecycle_state"].get("const") == "OUT_OF_BAND",
+        out_of_band_baseline_rule is not None, "submission_record missing OUT_OF_BAND reverse guard"
+    )
+    ensure(
+        out_of_band_baseline_rule["then"]["properties"]["lifecycle_state"].get("const")
+        == "OUT_OF_BAND",
         "submission_record baseline_type=OUT_OF_BAND must force lifecycle_state=OUT_OF_BAND",
     )
     ensure(
-        out_of_band_baseline_rule["then"]["properties"]["temporal_propagation_event_refs"].get("minItems") == 1,
+        out_of_band_baseline_rule["then"]["properties"]["temporal_propagation_event_refs"].get(
+            "minItems"
+        )
+        == 1,
         "submission_record baseline_type=OUT_OF_BAND must require temporal_propagation_event_refs",
     )
 
@@ -27100,13 +30921,21 @@ def check_submission_record() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("reconciliation_deadline_at", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("reconciliation_deadline_at", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(deadline_rule is not None, "submission_record missing reconciliation_deadline_at reverse guard")
     ensure(
-        deadline_rule["then"]["properties"]["lifecycle_state"].get("enum") == ["PENDING_ACK", "UNKNOWN"],
+        deadline_rule is not None,
+        "submission_record missing reconciliation_deadline_at reverse guard",
+    )
+    ensure(
+        deadline_rule["then"]["properties"]["lifecycle_state"].get("enum")
+        == ["PENDING_ACK", "UNKNOWN"],
         "submission_record non-null reconciliation_deadline_at must force lifecycle_state in PENDING_ACK or UNKNOWN",
     )
 
@@ -27114,11 +30943,17 @@ def check_submission_record() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("rejection_reason_codes", {}).get("minItems") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("rejection_reason_codes", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
-    ensure(rejection_rule is not None, "submission_record missing rejection_reason_codes reverse guard")
+    ensure(
+        rejection_rule is not None, "submission_record missing rejection_reason_codes reverse guard"
+    )
     ensure(
         rejection_rule["then"]["properties"]["lifecycle_state"].get("const") == "REJECTED",
         "submission_record non-empty rejection_reason_codes must force lifecycle_state=REJECTED",
@@ -27128,12 +30963,18 @@ def check_submission_record() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("superseded_by_submission_id", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("superseded_by_submission_id", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(superseded_rule is not None, "submission_record missing superseded_by_submission_id reverse guard")
+    ensure(
+        superseded_rule is not None,
+        "submission_record missing superseded_by_submission_id reverse guard",
+    )
     ensure(
         superseded_rule["then"]["properties"]["lifecycle_state"].get("const") == "SUPERSEDED",
         "submission_record non-null superseded_by_submission_id must force lifecycle_state=SUPERSEDED",
@@ -27161,18 +31002,34 @@ def check_submission_record() -> None:
             rule
             for rule in schema["allOf"]
             if rule.get("if", {}).get("properties", {}).get("lifecycle_state", {}).get("enum")
-            == ["TRANSMIT_PENDING", "TRANSMITTED", "PENDING_ACK", "CONFIRMED", "REJECTED", "UNKNOWN", "SUPERSEDED"]
+            == [
+                "TRANSMIT_PENDING",
+                "TRANSMITTED",
+                "PENDING_ACK",
+                "CONFIRMED",
+                "REJECTED",
+                "UNKNOWN",
+                "SUPERSEDED",
+            ]
         ),
         None,
     )
-    ensure(request_backed_rule is not None, "submission_record missing request-backed lifecycle guard")
     ensure(
-        request_backed_rule["then"]["properties"]["request_identity_contract"].get("type") == "object",
+        request_backed_rule is not None, "submission_record missing request-backed lifecycle guard"
+    )
+    ensure(
+        request_backed_rule["then"]["properties"]["request_identity_contract"].get("type")
+        == "object",
         "submission_record request-backed lifecycles must require request_identity_contract",
     )
 
-    out_of_band_lifecycle_rule = find_rule_by_const(schema["allOf"], "lifecycle_state", "OUT_OF_BAND")
-    ensure(out_of_band_lifecycle_rule is not None, "submission_record missing lifecycle_state=OUT_OF_BAND guard")
+    out_of_band_lifecycle_rule = find_rule_by_const(
+        schema["allOf"], "lifecycle_state", "OUT_OF_BAND"
+    )
+    ensure(
+        out_of_band_lifecycle_rule is not None,
+        "submission_record missing lifecycle_state=OUT_OF_BAND guard",
+    )
     out_of_band_then = out_of_band_lifecycle_rule["then"]["properties"]
     ensure(
         out_of_band_then["request_identity_contract"].get("type") == "null",
@@ -27195,8 +31052,12 @@ def check_late_data_temporal_contract() -> None:
         "late_data_temporal_contract replay_lineage_policy must freeze HISTORICAL_LINEAGE_ONLY",
     )
 
-    unproved_rule = find_rule_by_const(schema["allOf"], "temporal_classification", "TEMPORALLY_UNPROVED")
-    ensure(unproved_rule is not None, "late_data_temporal_contract missing TEMPORALLY_UNPROVED guard")
+    unproved_rule = find_rule_by_const(
+        schema["allOf"], "temporal_classification", "TEMPORALLY_UNPROVED"
+    )
+    ensure(
+        unproved_rule is not None, "late_data_temporal_contract missing TEMPORALLY_UNPROVED guard"
+    )
     ensure(
         unproved_rule["then"]["properties"]["temporal_certainty_state"].get("const") == "UNPROVED"
         and unproved_rule["then"]["properties"]["legal_effect_basis"].get("const") == "UNKNOWN"
@@ -27206,15 +31067,26 @@ def check_late_data_temporal_contract() -> None:
         "late_data_temporal_contract TEMPORALLY_UNPROVED must fail closed on certainty and downstream invalidation posture",
     )
 
-    authority_lag_rule = find_rule_by_const(schema["allOf"], "temporal_classification", "AUTHORITY_POSTING_LAG")
-    ensure(authority_lag_rule is not None, "late_data_temporal_contract missing AUTHORITY_POSTING_LAG guard")
+    authority_lag_rule = find_rule_by_const(
+        schema["allOf"], "temporal_classification", "AUTHORITY_POSTING_LAG"
+    )
     ensure(
-        authority_lag_rule["then"]["properties"]["legal_effect_basis"].get("const") == "AUTHORITY_PUBLICATION_TIME",
+        authority_lag_rule is not None,
+        "late_data_temporal_contract missing AUTHORITY_POSTING_LAG guard",
+    )
+    ensure(
+        authority_lag_rule["then"]["properties"]["legal_effect_basis"].get("const")
+        == "AUTHORITY_PUBLICATION_TIME",
         "late_data_temporal_contract AUTHORITY_POSTING_LAG must force AUTHORITY_PUBLICATION_TIME",
     )
 
-    prior_chain_rule = find_rule_by_const(schema["allOf"], "baseline_scope_class", "PRIOR_SUBMISSION_CHAIN")
-    ensure(prior_chain_rule is not None, "late_data_temporal_contract missing PRIOR_SUBMISSION_CHAIN guard")
+    prior_chain_rule = find_rule_by_const(
+        schema["allOf"], "baseline_scope_class", "PRIOR_SUBMISSION_CHAIN"
+    )
+    ensure(
+        prior_chain_rule is not None,
+        "late_data_temporal_contract missing PRIOR_SUBMISSION_CHAIN guard",
+    )
     ensure(
         prior_chain_rule["then"]["properties"]["retroactive_impact_required"].get("const") is True,
         "late_data_temporal_contract PRIOR_SUBMISSION_CHAIN must force retroactive impact",
@@ -27224,16 +31096,25 @@ def check_late_data_temporal_contract() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("filing_critical_baseline_touch", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("filing_critical_baseline_touch", {})
+            .get("const")
             is True
         ),
         None,
     )
-    ensure(filing_critical_rule is not None, "late_data_temporal_contract missing filing-critical baseline-touch guard")
     ensure(
-        filing_critical_rule["then"]["properties"]["trust_invalidation_required"].get("const") is True
-        and filing_critical_rule["then"]["properties"]["proof_staleness_required"].get("const") is True
-        and filing_critical_rule["then"]["properties"]["amendment_reuse_invalidated"].get("const") is True,
+        filing_critical_rule is not None,
+        "late_data_temporal_contract missing filing-critical baseline-touch guard",
+    )
+    ensure(
+        filing_critical_rule["then"]["properties"]["trust_invalidation_required"].get("const")
+        is True
+        and filing_critical_rule["then"]["properties"]["proof_staleness_required"].get("const")
+        is True
+        and filing_critical_rule["then"]["properties"]["amendment_reuse_invalidated"].get("const")
+        is True,
         "late_data_temporal_contract filing-critical baseline touch must force trust, proof, and amendment invalidation",
     )
 
@@ -27253,15 +31134,25 @@ def check_late_data_consequence_summary() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("temporally_unproved_count", {}).get("minimum") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("temporally_unproved_count", {})
+            .get("minimum")
+            == 1
         ),
         None,
     )
-    ensure(uncertainty_rule is not None, "late_data_consequence_summary missing temporally-unproved guard")
+    ensure(
+        uncertainty_rule is not None,
+        "late_data_consequence_summary missing temporally-unproved guard",
+    )
     ensure(
         uncertainty_rule["then"]["properties"]["highest_legal_consequence"].get("const")
         == "TEMPORAL_UNCERTAINTY_BLOCK"
-        and uncertainty_rule["then"]["properties"]["blocking_temporal_uncertainty_present"].get("const") is True,
+        and uncertainty_rule["then"]["properties"]["blocking_temporal_uncertainty_present"].get(
+            "const"
+        )
+        is True,
         "late_data_consequence_summary temporally unproved posture must force temporal uncertainty blocking",
     )
 
@@ -27319,33 +31210,50 @@ def check_temporal_propagation_event() -> None:
     ensure(late_rule is not None, "temporal_propagation_event missing LATE_DATA_INVALIDATION guard")
     ensure(
         late_rule["then"]["properties"]["trust_effect"].get("const") == "RECALC_REQUIRED"
-        and late_rule["then"]["properties"]["proof_effect"].get("const") == "STALE_REVALIDATION_REQUIRED"
-        and late_rule["then"]["properties"]["replay_effect"].get("const") == "HISTORICAL_EVENT_REQUIRED",
+        and late_rule["then"]["properties"]["proof_effect"].get("const")
+        == "STALE_REVALIDATION_REQUIRED"
+        and late_rule["then"]["properties"]["replay_effect"].get("const")
+        == "HISTORICAL_EVENT_REQUIRED",
         "temporal_propagation_event LATE_DATA_INVALIDATION must force trust/proof invalidation and historical replay reuse",
     )
 
     authority_rule = find_rule_by_const(schema["allOf"], "event_class", "AUTHORITY_CORRECTION")
-    ensure(authority_rule is not None, "temporal_propagation_event missing AUTHORITY_CORRECTION guard")
     ensure(
-        authority_rule["then"]["properties"]["baseline_effect"].get("const") == "SCOPE_SLICED_REBUILD_REQUIRED"
-        and authority_rule["then"]["properties"]["mirror_reopen_effect"].get("const") == "REOPEN_REQUIRED",
+        authority_rule is not None, "temporal_propagation_event missing AUTHORITY_CORRECTION guard"
+    )
+    ensure(
+        authority_rule["then"]["properties"]["baseline_effect"].get("const")
+        == "SCOPE_SLICED_REBUILD_REQUIRED"
+        and authority_rule["then"]["properties"]["mirror_reopen_effect"].get("const")
+        == "REOPEN_REQUIRED",
         "temporal_propagation_event AUTHORITY_CORRECTION must force baseline rebuild and mirror reopen",
     )
 
     out_of_band_rule = find_rule_by_const(schema["allOf"], "event_class", "OUT_OF_BAND_DISCOVERY")
-    ensure(out_of_band_rule is not None, "temporal_propagation_event missing OUT_OF_BAND_DISCOVERY guard")
+    ensure(
+        out_of_band_rule is not None,
+        "temporal_propagation_event missing OUT_OF_BAND_DISCOVERY guard",
+    )
     ensure(
         out_of_band_rule["then"]["properties"]["trust_effect"].get("const") == "RECALC_REQUIRED"
-        and out_of_band_rule["then"]["properties"]["proof_effect"].get("const") == "STALE_REVALIDATION_REQUIRED"
-        and out_of_band_rule["then"]["properties"]["amendment_effect"].get("const") == "RECONCILE_FIRST",
+        and out_of_band_rule["then"]["properties"]["proof_effect"].get("const")
+        == "STALE_REVALIDATION_REQUIRED"
+        and out_of_band_rule["then"]["properties"]["amendment_effect"].get("const")
+        == "RECONCILE_FIRST",
         "temporal_propagation_event OUT_OF_BAND_DISCOVERY must force trust/proof invalidation and reconcile-first amendment posture",
     )
 
-    uncertainty_rule = find_rule_by_const(schema["allOf"], "event_class", "TEMPORAL_UNCERTAINTY_BLOCK")
-    ensure(uncertainty_rule is not None, "temporal_propagation_event missing TEMPORAL_UNCERTAINTY_BLOCK guard")
+    uncertainty_rule = find_rule_by_const(
+        schema["allOf"], "event_class", "TEMPORAL_UNCERTAINTY_BLOCK"
+    )
+    ensure(
+        uncertainty_rule is not None,
+        "temporal_propagation_event missing TEMPORAL_UNCERTAINTY_BLOCK guard",
+    )
     ensure(
         uncertainty_rule["then"]["properties"]["amendment_effect"].get("const") == "RECONCILE_FIRST"
-        and uncertainty_rule["then"]["properties"]["replay_effect"].get("const") == "LIMITED_COMPARISON_ONLY",
+        and uncertainty_rule["then"]["properties"]["replay_effect"].get("const")
+        == "LIMITED_COMPARISON_ONLY",
         "temporal_propagation_event TEMPORAL_UNCERTAINTY_BLOCK must force reconcile-first amendment posture and limited replay",
     )
 
@@ -27395,13 +31303,21 @@ def check_late_data_finding() -> None:
             (
                 candidate
                 for candidate in schema["allOf"]
-                if candidate.get("if", {}).get("properties", {}).get("severity", {}).get("const") == severity
-                and candidate.get("if", {}).get("not", {}).get("properties", {}).get("finding_state", {}).get("const")
+                if candidate.get("if", {}).get("properties", {}).get("severity", {}).get("const")
+                == severity
+                and candidate.get("if", {})
+                .get("not", {})
+                .get("properties", {})
+                .get("finding_state", {})
+                .get("const")
                 == "SUPERSEDED"
             ),
             None,
         )
-        ensure(rule is not None, f"late_data_finding missing non-superseded active-effect guard for {severity}")
+        ensure(
+            rule is not None,
+            f"late_data_finding missing non-superseded active-effect guard for {severity}",
+        )
         ensure(
             rule["then"]["properties"]["active_manifest_effect"].get("const") == effect,
             f"late_data_finding {severity} findings must map to {effect} until they are superseded",
@@ -27411,14 +31327,20 @@ def check_late_data_finding() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("temporal_classification_contract", {}).get("properties", {})
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("temporal_classification_contract", {})
+            .get("properties", {})
             .get("retroactive_impact_required", {})
             .get("const")
             is True
         ),
         None,
     )
-    ensure(retro_rule is not None, "late_data_finding missing retroactive-impact temporal-contract guard")
+    ensure(
+        retro_rule is not None,
+        "late_data_finding missing retroactive-impact temporal-contract guard",
+    )
     ensure(
         retro_rule["then"]["properties"]["reason_codes"].get("minItems") == 1,
         "late_data_finding retroactive-impact posture must require reason_codes",
@@ -27462,7 +31384,9 @@ def check_late_data_monitor_result() -> None:
         "late_data_monitor_result NO_LATE_DATA must still require latest_indicator_set_ref",
     )
     ensure(
-        no_late_rule["then"]["properties"]["temporal_consequence_summary"]["properties"]["highest_legal_consequence"].get("const")
+        no_late_rule["then"]["properties"]["temporal_consequence_summary"]["properties"][
+            "highest_legal_consequence"
+        ].get("const")
         == "NONE",
         "late_data_monitor_result NO_LATE_DATA must force temporal_consequence_summary.highest_legal_consequence=NONE",
     )
@@ -27471,11 +31395,17 @@ def check_late_data_monitor_result() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("child_manifest_required_count", {}).get("const") == 0
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("child_manifest_required_count", {})
+            .get("const")
+            == 0
         ),
         None,
     )
-    ensure(child_zero_rule is not None, "late_data_monitor_result missing child-count reverse guard")
+    ensure(
+        child_zero_rule is not None, "late_data_monitor_result missing child-count reverse guard"
+    )
     ensure(
         child_zero_rule["then"]["properties"]["child_manifest_refs"].get("maxItems") == 0,
         "late_data_monitor_result zero child-manifest count must force empty child_manifest_refs",
@@ -27500,12 +31430,19 @@ def check_risk_report() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("flags", {}).get("not", {}).get("contains", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("flags", {})
+            .get("not", {})
+            .get("contains", {})
+            .get("const")
             == "RISK_WEIGHT_PROFILE_INVALID"
         ),
         None,
     )
-    ensure(normal_profile_rule is not None, "risk_report missing normal-profile feature-count guard")
+    ensure(
+        normal_profile_rule is not None, "risk_report missing normal-profile feature-count guard"
+    )
     ensure(
         normal_profile_rule["then"]["properties"]["feature_scores"].get("minItems") == 1,
         "risk_report non-invalid profiles must require at least one feature score",
@@ -27515,12 +31452,18 @@ def check_risk_report() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("flags", {}).get("contains", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("flags", {})
+            .get("contains", {})
+            .get("const")
             == "RISK_WEIGHT_PROFILE_INVALID"
         ),
         None,
     )
-    ensure(invalid_profile_rule is not None, "risk_report missing RISK_WEIGHT_PROFILE_INVALID guard")
+    ensure(
+        invalid_profile_rule is not None, "risk_report missing RISK_WEIGHT_PROFILE_INVALID guard"
+    )
     invalid_then = invalid_profile_rule["then"]["properties"]
     ensure(
         invalid_then["feature_scores"].get("maxItems") == 0,
@@ -27531,23 +31474,34 @@ def check_risk_report() -> None:
         "risk_report invalid profiles must force unresolved_blocking_risk_flag false",
     )
 
-    unresolved_material_rule = find_rule_by_const(schema["allOf"], "unresolved_material_blocking_risk_flag", True)
-    ensure(unresolved_material_rule is not None, "risk_report missing unresolved material/blocking reverse guard")
+    unresolved_material_rule = find_rule_by_const(
+        schema["allOf"], "unresolved_material_blocking_risk_flag", True
+    )
+    ensure(
+        unresolved_material_rule is not None,
+        "risk_report missing unresolved material/blocking reverse guard",
+    )
     any_of = unresolved_material_rule["then"].get("anyOf", [])
     ensure(
         len(any_of) == 2,
         "risk_report unresolved material/blocking guard must require either invalid-profile posture or unresolved features",
     )
 
-    unresolved_blocking_false_rule = find_rule_by_const(schema["allOf"], "unresolved_blocking_risk_flag", False)
-    ensure(unresolved_blocking_false_rule is not None, "risk_report missing non-blocking reverse guard")
+    unresolved_blocking_false_rule = find_rule_by_const(
+        schema["allOf"], "unresolved_blocking_risk_flag", False
+    )
+    ensure(
+        unresolved_blocking_false_rule is not None, "risk_report missing non-blocking reverse guard"
+    )
     blocking_false_props = unresolved_blocking_false_rule["then"]["properties"]
     ensure(
         blocking_false_props["flags"]["not"]["contains"]["const"] == "BLOCKING_RISK_UNRESOLVED",
         "risk_report non-blocking posture must reject BLOCKING_RISK_UNRESOLVED flags",
     )
     ensure(
-        blocking_false_props["feature_scores"]["not"]["contains"]["properties"]["flag_state"].get("const")
+        blocking_false_props["feature_scores"]["not"]["contains"]["properties"]["flag_state"].get(
+            "const"
+        )
         == "BLOCKING_UNRESOLVED",
         "risk_report non-blocking posture must reject BLOCKING_UNRESOLVED feature states",
     )
@@ -27587,13 +31541,15 @@ def check_compute_result() -> None:
         "compute_result.effective_partition_scope_refs must require at least one exact partition scope ref",
     )
     ensure(
-        schema["properties"]["reporting_scope"].get("enum") == ["year_end", "quarterly_update", "estimate_only"],
+        schema["properties"]["reporting_scope"].get("enum")
+        == ["year_end", "quarterly_update", "estimate_only"],
         "compute_result.reporting_scope must stay limited to reporting-scope tokens only",
     )
     periodic_rule = find_rule_by_const(schema["allOf"], "reporting_scope", "quarterly_update")
     ensure(periodic_rule is not None, "compute_result missing quarterly reporting-scope guard")
     ensure(
-        periodic_rule["then"]["properties"]["adjustment_inclusion_policy"].get("const") == "RECORD_ONLY",
+        periodic_rule["then"]["properties"]["adjustment_inclusion_policy"].get("const")
+        == "RECORD_ONLY",
         "compute_result quarterly reporting must force adjustment_inclusion_policy=RECORD_ONLY",
     )
     compliance_rule = find_rule_by_const(schema["allOf"], "execution_mode", "COMPLIANCE")
@@ -27619,11 +31575,13 @@ def check_forecast_set() -> None:
     point_forecast = schema["$defs"]["pointForecast"]["properties"]
     scenario_value = schema["$defs"]["scenarioValue"]["properties"]
     ensure(
-        point_forecast["point_value"].get("$ref") == "./schema_bundle.schema.json#/$defs/moneyValue",
+        point_forecast["point_value"].get("$ref")
+        == "./schema_bundle.schema.json#/$defs/moneyValue",
         "forecast_set pointForecast.point_value must use canonical money strings",
     )
     ensure(
-        scenario_value["simulated_value"].get("$ref") == "./schema_bundle.schema.json#/$defs/moneyValue",
+        scenario_value["simulated_value"].get("$ref")
+        == "./schema_bundle.schema.json#/$defs/moneyValue",
         "forecast_set scenarioValue.simulated_value must use canonical money strings",
     )
 
@@ -27684,7 +31642,9 @@ def check_parity_result() -> None:
             f"parity_result.fieldDelta must require {field}",
         )
 
-    comparable_rule = find_rule_by_const(schema["$defs"]["fieldDelta"]["allOf"], "comparison_input_state", "COMPARABLE")
+    comparable_rule = find_rule_by_const(
+        schema["$defs"]["fieldDelta"]["allOf"], "comparison_input_state", "COMPARABLE"
+    )
     ensure(comparable_rule is not None, "parity_result fieldDelta missing COMPARABLE guard")
     comparable_props = comparable_rule["then"]["properties"]
     for field in ["internal_value", "authority_value", "delta_signed", "delta_abs"]:
@@ -27711,7 +31671,9 @@ def check_parity_result() -> None:
         "parity_result VALID comparison sets must publish deterministic ordered_field_codes",
     )
 
-    material_rule = find_rule_by_const(schema["allOf"], "parity_classification", "MATERIAL_DIFFERENCE")
+    material_rule = find_rule_by_const(
+        schema["allOf"], "parity_classification", "MATERIAL_DIFFERENCE"
+    )
     ensure(material_rule is not None, "parity_result missing MATERIAL_DIFFERENCE guard")
     ensure(
         material_rule["then"]["properties"]["critical_blocking_field_count"].get("const") == 0,
@@ -27788,7 +31750,8 @@ def check_drift_record() -> None:
         "drift_record.money_profile must stay bound to schema_bundle moneyProfile",
     )
     ensure(
-        schema["properties"]["tax_delta_abs"].get("$ref") == "./schema_bundle.schema.json#/$defs/moneyValue",
+        schema["properties"]["tax_delta_abs"].get("$ref")
+        == "./schema_bundle.schema.json#/$defs/moneyValue",
         "drift_record.tax_delta_abs must use canonical money strings",
     )
     ensure(
@@ -27881,7 +31844,10 @@ def check_client_upload_session() -> None:
     )
 
     integrity_failed_rule = find_rule_by_const(schema["allOf"], "integrity_state", "FAILED")
-    ensure(integrity_failed_rule is not None, "client_upload_session missing integrity-failed score cap")
+    ensure(
+        integrity_failed_rule is not None,
+        "client_upload_session missing integrity-failed score cap",
+    )
     ensure(
         integrity_failed_rule["then"]["properties"]["upload_confidence_score"].get("const") == 0,
         "client_upload_session integrity failure must force upload_confidence_score=0",
@@ -27910,23 +31876,33 @@ def check_client_upload_session() -> None:
         ),
         None,
     )
-    ensure(none_recovery_rule is not None, "client_upload_session missing no-recovery next-action guard")
+    ensure(
+        none_recovery_rule is not None,
+        "client_upload_session missing no-recovery next-action guard",
+    )
     ensure(
         none_recovery_rule["then"]["properties"]["recovery_posture"].get("const") == "NONE",
         "client_upload_session NONE or CONFIRM_ATTACHMENT must clear recovery posture",
     )
 
     resume_recovery_rule = find_rule_by_const(schema["allOf"], "next_action_code", "RESUME_UPLOAD")
-    ensure(resume_recovery_rule is not None, "client_upload_session missing RESUME_UPLOAD recovery guard")
     ensure(
-        resume_recovery_rule["then"]["properties"]["recovery_posture"].get("const") == "INLINE_RESUME",
+        resume_recovery_rule is not None,
+        "client_upload_session missing RESUME_UPLOAD recovery guard",
+    )
+    ensure(
+        resume_recovery_rule["then"]["properties"]["recovery_posture"].get("const")
+        == "INLINE_RESUME",
         "client_upload_session RESUME_UPLOAD must force INLINE_RESUME recovery posture",
     )
     reconfirm_binding_rule = next(
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("request_binding_state", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("request_binding_state", {})
+            .get("const")
             == "RECONFIRMATION_REQUIRED"
             and rule.get("if", {}).get("properties", {}).get("transfer_state", {}).get("const")
             == "ACCEPTED"
@@ -27938,16 +31914,22 @@ def check_client_upload_session() -> None:
         "client_upload_session missing RECONFIRMATION_REQUIRED+ACCEPTED binding guard",
     )
     ensure(
-        reconfirm_binding_rule["then"]["properties"]["attachment_state"].get("const") == "REBIND_REQUIRED"
-        and reconfirm_binding_rule["then"]["properties"]["next_action_code"].get("const") == "RECONFIRM_REQUEST"
-        and reconfirm_binding_rule["then"]["properties"]["recovery_posture"].get("const") == "RECONFIRM_INLINE",
+        reconfirm_binding_rule["then"]["properties"]["attachment_state"].get("const")
+        == "REBIND_REQUIRED"
+        and reconfirm_binding_rule["then"]["properties"]["next_action_code"].get("const")
+        == "RECONFIRM_REQUEST"
+        and reconfirm_binding_rule["then"]["properties"]["recovery_posture"].get("const")
+        == "RECONFIRM_INLINE",
         "client_upload_session RECONFIRMATION_REQUIRED must force rebind posture and inline reconfirm recovery",
     )
     superseded_binding_rule = next(
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("request_binding_state", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("request_binding_state", {})
+            .get("const")
             == "SUPERSEDED"
             and rule.get("if", {}).get("properties", {}).get("transfer_state", {}).get("const")
             == "ACCEPTED"
@@ -27959,9 +31941,12 @@ def check_client_upload_session() -> None:
         "client_upload_session missing SUPERSEDED+ACCEPTED binding guard",
     )
     ensure(
-        superseded_binding_rule["then"]["properties"]["attachment_state"].get("const") == "REBIND_REQUIRED"
-        and superseded_binding_rule["then"]["properties"]["next_action_code"].get("const") == "RECONFIRM_REQUEST"
-        and superseded_binding_rule["then"]["properties"]["recovery_posture"].get("const") == "STALE_REVIEW_REQUIRED",
+        superseded_binding_rule["then"]["properties"]["attachment_state"].get("const")
+        == "REBIND_REQUIRED"
+        and superseded_binding_rule["then"]["properties"]["next_action_code"].get("const")
+        == "RECONFIRM_REQUEST"
+        and superseded_binding_rule["then"]["properties"]["recovery_posture"].get("const")
+        == "STALE_REVIEW_REQUIRED",
         "client_upload_session SUPERSEDED must force rebind posture and stale-review recovery",
     )
 
@@ -27994,7 +31979,9 @@ def check_portal_help_request() -> None:
     )
 
     contextual_rule = find_rule_by_const(schema["allOf"], "support_channel", "CONTEXTUAL_REQUEST")
-    ensure(contextual_rule is not None, "portal_help_request missing CONTEXTUAL_REQUEST route guard")
+    ensure(
+        contextual_rule is not None, "portal_help_request missing CONTEXTUAL_REQUEST route guard"
+    )
     contextual_then = contextual_rule["then"]["properties"]
     ensure(
         contextual_then["source_route"].get("const") == "REQUEST_DETAIL",
@@ -28009,11 +31996,14 @@ def check_portal_help_request() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("request_info_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("request_info_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(request_info_rule is not None, "portal_help_request missing request_info_ref reverse guard")
+    ensure(
+        request_info_rule is not None, "portal_help_request missing request_info_ref reverse guard"
+    )
     request_info_then = request_info_rule["then"]["properties"]
     ensure(
         request_info_then["source_route"].get("const") == "REQUEST_DETAIL",
@@ -28029,7 +32019,9 @@ def check_portal_help_request() -> None:
     )
 
     request_detail_rule = find_rule_by_const(schema["allOf"], "source_route", "REQUEST_DETAIL")
-    ensure(request_detail_rule is not None, "portal_help_request missing REQUEST_DETAIL anchor guard")
+    ensure(
+        request_detail_rule is not None, "portal_help_request missing REQUEST_DETAIL anchor guard"
+    )
     request_detail_then = request_detail_rule["then"]["properties"]
     ensure(
         request_detail_then["item_id"].get("minLength") == 1,
@@ -28042,7 +32034,8 @@ def check_portal_help_request() -> None:
     access_help_rule = find_rule_by_const(schema["allOf"], "reason_family", "ACCESS_HELP")
     ensure(access_help_rule is not None, "portal_help_request missing ACCESS_HELP route guard")
     ensure(
-        access_help_rule["then"]["properties"]["source_route"].get("enum") == ["HELP", "ONBOARDING"],
+        access_help_rule["then"]["properties"]["source_route"].get("enum")
+        == ["HELP", "ONBOARDING"],
         "portal_help_request ACCESS_HELP must stay aligned with HELP or ONBOARDING source routes",
     )
     general_help_rule = find_rule_by_const(schema["allOf"], "reason_family", "GENERAL_HELP")
@@ -28157,7 +32150,8 @@ def check_experience_delta() -> None:
 
     reason_item = schema["$defs"]["reasonItem"]["properties"]
     ensure(
-        reason_item["reason_code"].get("minLength") == 1 and reason_item["label"].get("minLength") == 1,
+        reason_item["reason_code"].get("minLength") == 1
+        and reason_item["label"].get("minLength") == 1,
         "experience_delta.reasonItem reason_code and label must reject empty strings",
     )
 
@@ -28183,7 +32177,9 @@ def check_experience_delta() -> None:
         "experience_delta.actionStripPayload WAITING state must require non-empty waiting and blocking copy",
     )
     blocked_rule = find_rule_by_const(action_strip["allOf"], "action_state", "NO_SAFE_ACTION")
-    ensure(blocked_rule is not None, "experience_delta.actionStripPayload missing NO_SAFE_ACTION guard")
+    ensure(
+        blocked_rule is not None, "experience_delta.actionStripPayload missing NO_SAFE_ACTION guard"
+    )
     ensure(
         blocked_rule["then"]["properties"]["blocking_reason"].get("minLength") == 1,
         "experience_delta.actionStripPayload NO_SAFE_ACTION state must require a non-empty blocking_reason",
@@ -28246,7 +32242,9 @@ def check_low_noise_experience_frame() -> None:
         expected_support_surfaces=["DETAIL_DRAWER"],
     )
     check_shell_state_taxonomy_contract_binding(schema, "low_noise_experience_frame")
-    check_cross_device_continuity_contract_binding(schema, "low_noise_experience_frame", "MANIFEST_ROUTE")
+    check_cross_device_continuity_contract_binding(
+        schema, "low_noise_experience_frame", "MANIFEST_ROUTE"
+    )
     check_cache_isolation_contract_binding(
         schema,
         "low_noise_experience_frame",
@@ -28316,7 +32314,11 @@ def check_low_noise_experience_frame() -> None:
         (
             rule
             for rule in attention_policy["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("detail_entry_points", {}).get("minItems") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("detail_entry_points", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
@@ -28334,7 +32336,10 @@ def check_low_noise_experience_frame() -> None:
         (
             rule
             for rule in attention_policy["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("default_detail_module_code", {}).get("$ref")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("default_detail_module_code", {})
+            .get("$ref")
             == "#/$defs/detailModuleCode"
         ),
         None,
@@ -28443,7 +32448,8 @@ def check_native_operator_workspace_scene() -> None:
 
     leading_sidebar = schema["$defs"]["leadingSidebar"]
     ensure(
-        leading_sidebar["properties"]["selection_family"].get("enum") == ["MANIFEST_QUEUE", "WORK_QUEUE"],
+        leading_sidebar["properties"]["selection_family"].get("enum")
+        == ["MANIFEST_QUEUE", "WORK_QUEUE"],
         "native_operator_workspace_scene.leadingSidebar.selection_family must keep the manifest/work queue vocabulary",
     )
     ensure(
@@ -28464,7 +32470,8 @@ def check_native_operator_workspace_scene() -> None:
         "native_operator_workspace_scene.primaryCanvas.surface_order must keep the calm-shell reading order",
     )
     ensure(
-        primary_canvas["properties"]["authoritative_action_surface_code"].get("const") == "ACTION_STRIP",
+        primary_canvas["properties"]["authoritative_action_surface_code"].get("const")
+        == "ACTION_STRIP",
         "native_operator_workspace_scene.primaryCanvas.authoritative_action_surface_code must stay pinned to ACTION_STRIP",
     )
 
@@ -28479,21 +32486,30 @@ def check_native_operator_workspace_scene() -> None:
         "native_operator_workspace_scene.trailingInspector.support_surface_code must stay pinned to DETAIL_DRAWER",
     )
     ensure(
-        trailing_inspector["properties"]["authoritative_action_strip_present"].get("const") is False,
+        trailing_inspector["properties"]["authoritative_action_strip_present"].get("const")
+        is False,
         "native_operator_workspace_scene.trailingInspector must remain support-only",
     )
 
-    collapsed_rule = find_rule_by_const(trailing_inspector["allOf"], "presentation_mode", "COLLAPSED")
-    ensure(collapsed_rule is not None, "native_operator_workspace_scene missing collapsed inspector guard")
+    collapsed_rule = find_rule_by_const(
+        trailing_inspector["allOf"], "presentation_mode", "COLLAPSED"
+    )
+    ensure(
+        collapsed_rule is not None,
+        "native_operator_workspace_scene missing collapsed inspector guard",
+    )
     ensure(
         collapsed_rule["then"]["properties"]["bound_object_ref_or_null"].get("type") == "string"
         and collapsed_rule["then"]["properties"]["focus_anchor_ref_or_null"].get("type") == "null"
-        and collapsed_rule["then"]["properties"]["detached_scene_ref_or_null"].get("type") == "null",
+        and collapsed_rule["then"]["properties"]["detached_scene_ref_or_null"].get("type")
+        == "null",
         "native_operator_workspace_scene collapsed inspectors must stay object-bound while clearing focus and detached scene refs",
     )
 
     docked_rule = find_rule_by_const(trailing_inspector["allOf"], "presentation_mode", "DOCKED")
-    ensure(docked_rule is not None, "native_operator_workspace_scene missing docked inspector guard")
+    ensure(
+        docked_rule is not None, "native_operator_workspace_scene missing docked inspector guard"
+    )
     ensure(
         docked_rule["then"]["properties"]["bound_object_ref_or_null"].get("type") == "string"
         and docked_rule["then"]["properties"]["detached_scene_ref_or_null"].get("type") == "null",
@@ -28501,10 +32517,14 @@ def check_native_operator_workspace_scene() -> None:
     )
 
     detached_rule = find_rule_by_const(trailing_inspector["allOf"], "presentation_mode", "DETACHED")
-    ensure(detached_rule is not None, "native_operator_workspace_scene missing detached inspector guard")
+    ensure(
+        detached_rule is not None,
+        "native_operator_workspace_scene missing detached inspector guard",
+    )
     ensure(
         detached_rule["then"]["properties"]["bound_object_ref_or_null"].get("type") == "string"
-        and detached_rule["then"]["properties"]["detached_scene_ref_or_null"].get("type") == "string",
+        and detached_rule["then"]["properties"]["detached_scene_ref_or_null"].get("type")
+        == "string",
         "native_operator_workspace_scene detached inspectors must keep both bound object and detached scene refs",
     )
 
@@ -28535,7 +32555,8 @@ def check_native_operator_workspace_scene() -> None:
         "native_operator_workspace_scene.sceneIdentity.stability_contract must stay bound to route_stability_contract.schema.json",
     )
     ensure(
-        scene_identity["properties"]["access_binding_hash_or_null"].get("type") == ["string", "null"],
+        scene_identity["properties"]["access_binding_hash_or_null"].get("type")
+        == ["string", "null"],
         "native_operator_workspace_scene.sceneIdentity.access_binding_hash_or_null must stay string-or-null",
     )
     ensure(
@@ -28573,12 +32594,19 @@ def check_native_operator_workspace_scene() -> None:
         ],
         "native_operator_workspace_scene.sceneRestoration.invalid_reason_codes must retain ACCESS_BINDING_CHANGE and the native invalidation vocabulary",
     )
-    restorable_rule = find_rule_by_const(scene_restoration["allOf"], "restoration_state", "RESTORABLE")
-    ensure(restorable_rule is not None, "native_operator_workspace_scene missing RESTORABLE restoration guard")
+    restorable_rule = find_rule_by_const(
+        scene_restoration["allOf"], "restoration_state", "RESTORABLE"
+    )
+    ensure(
+        restorable_rule is not None,
+        "native_operator_workspace_scene missing RESTORABLE restoration guard",
+    )
     ensure(
         restorable_rule["then"]["properties"]["invalid_reason_codes"].get("maxItems") == 0
-        and restorable_rule["then"]["properties"]["restoration_anchor_ref_or_null"].get("type") == "string"
-        and restorable_rule["then"]["properties"]["resume_token_ref_or_null"].get("type") == "string",
+        and restorable_rule["then"]["properties"]["restoration_anchor_ref_or_null"].get("type")
+        == "string"
+        and restorable_rule["then"]["properties"]["resume_token_ref_or_null"].get("type")
+        == "string",
         "native_operator_workspace_scene RESTORABLE scenes must keep anchor and resume token while clearing invalid reasons",
     )
     fresh_rule = find_rule_by_const(
@@ -28590,18 +32618,22 @@ def check_native_operator_workspace_scene() -> None:
     )
     ensure(
         fresh_rule["then"]["properties"]["invalid_reason_codes"].get("maxItems") == 0
-        and fresh_rule["then"]["properties"]["restoration_anchor_ref_or_null"].get("type") == "string"
+        and fresh_rule["then"]["properties"]["restoration_anchor_ref_or_null"].get("type")
+        == "string"
         and fresh_rule["then"]["properties"]["resume_token_ref_or_null"].get("type") == "null",
         "native_operator_workspace_scene FRESH_SNAPSHOT_REQUIRED scenes must keep anchor and clear resume token",
     )
-    invalidated_rule = find_rule_by_const(scene_restoration["allOf"], "restoration_state", "INVALIDATED")
+    invalidated_rule = find_rule_by_const(
+        scene_restoration["allOf"], "restoration_state", "INVALIDATED"
+    )
     ensure(
         invalidated_rule is not None,
         "native_operator_workspace_scene missing INVALIDATED restoration guard",
     )
     ensure(
         invalidated_rule["then"]["properties"]["invalid_reason_codes"].get("minItems") == 1
-        and invalidated_rule["then"]["properties"]["resume_token_ref_or_null"].get("type") == "null",
+        and invalidated_rule["then"]["properties"]["resume_token_ref_or_null"].get("type")
+        == "null",
         "native_operator_workspace_scene INVALIDATED scenes must require reasons and clear resume token",
     )
 
@@ -28630,36 +32662,63 @@ def check_native_operator_workspace_scene() -> None:
         "native_operator_workspace_scene.shortcutPosture.menu_command_surface_state must keep primary actions mirrored into menu commands",
     )
     ensure(
-        shortcut_posture["properties"]["focus_restore_policy"].get("const") == "RETURN_TO_LAST_OBJECT_ANCHOR",
+        shortcut_posture["properties"]["focus_restore_policy"].get("const")
+        == "RETURN_TO_LAST_OBJECT_ANCHOR",
         "native_operator_workspace_scene.shortcutPosture.focus_restore_policy must stay pinned to RETURN_TO_LAST_OBJECT_ANCHOR",
     )
 
-    manifest_rule = find_rule_by_const(schema["allOf"], "backing_read_model_type", "LowNoiseExperienceFrame")
-    ensure(manifest_rule is not None, "native_operator_workspace_scene missing LowNoiseExperienceFrame branch")
+    manifest_rule = find_rule_by_const(
+        schema["allOf"], "backing_read_model_type", "LowNoiseExperienceFrame"
+    )
+    ensure(
+        manifest_rule is not None,
+        "native_operator_workspace_scene missing LowNoiseExperienceFrame branch",
+    )
     ensure(
         manifest_rule["then"]["properties"]["object_family"].get("const") == "MANIFEST"
-        and manifest_rule["then"]["properties"]["leading_sidebar"]["properties"]["selection_family"].get("const")
+        and manifest_rule["then"]["properties"]["leading_sidebar"]["properties"][
+            "selection_family"
+        ].get("const")
         == "MANIFEST_QUEUE"
-        and manifest_rule["then"]["properties"]["scene_identity"]["properties"]["workspace_version_or_null"].get("type")
+        and manifest_rule["then"]["properties"]["scene_identity"]["properties"][
+            "workspace_version_or_null"
+        ].get("type")
         == "null"
-        and manifest_rule["then"]["properties"]["scene_identity"]["properties"]["manifest_id_or_null"].get("type")
+        and manifest_rule["then"]["properties"]["scene_identity"]["properties"][
+            "manifest_id_or_null"
+        ].get("type")
         == "string"
-        and manifest_rule["then"]["properties"]["scene_identity"]["properties"]["work_item_id_or_null"].get("type")
+        and manifest_rule["then"]["properties"]["scene_identity"]["properties"][
+            "work_item_id_or_null"
+        ].get("type")
         == "null",
         "native_operator_workspace_scene LowNoiseExperienceFrame scenes must stay manifest-scoped",
     )
 
-    workspace_rule = find_rule_by_const(schema["allOf"], "backing_read_model_type", "WorkspaceSnapshot")
-    ensure(workspace_rule is not None, "native_operator_workspace_scene missing WorkspaceSnapshot branch")
+    workspace_rule = find_rule_by_const(
+        schema["allOf"], "backing_read_model_type", "WorkspaceSnapshot"
+    )
+    ensure(
+        workspace_rule is not None,
+        "native_operator_workspace_scene missing WorkspaceSnapshot branch",
+    )
     ensure(
         workspace_rule["then"]["properties"]["object_family"].get("const") == "WORK_ITEM"
-        and workspace_rule["then"]["properties"]["leading_sidebar"]["properties"]["selection_family"].get("const")
+        and workspace_rule["then"]["properties"]["leading_sidebar"]["properties"][
+            "selection_family"
+        ].get("const")
         == "WORK_QUEUE"
-        and workspace_rule["then"]["properties"]["scene_identity"]["properties"]["workspace_version_or_null"].get("type")
+        and workspace_rule["then"]["properties"]["scene_identity"]["properties"][
+            "workspace_version_or_null"
+        ].get("type")
         == "integer"
-        and workspace_rule["then"]["properties"]["scene_identity"]["properties"]["manifest_id_or_null"].get("type")
+        and workspace_rule["then"]["properties"]["scene_identity"]["properties"][
+            "manifest_id_or_null"
+        ].get("type")
         == "null"
-        and workspace_rule["then"]["properties"]["scene_identity"]["properties"]["work_item_id_or_null"].get("type")
+        and workspace_rule["then"]["properties"]["scene_identity"]["properties"][
+            "work_item_id_or_null"
+        ].get("type")
         == "string",
         "native_operator_workspace_scene WorkspaceSnapshot scenes must stay work-item-scoped",
     )
@@ -28668,14 +32727,24 @@ def check_native_operator_workspace_scene() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("shortcut_posture", {}).get("properties", {}).get("focused_region", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("shortcut_posture", {})
+            .get("properties", {})
+            .get("focused_region", {})
+            .get("const")
             == "TRAILING_INSPECTOR"
         ),
         None,
     )
-    ensure(docked_focus_rule is not None, "native_operator_workspace_scene missing docked inspector focus guard")
     ensure(
-        docked_focus_rule["then"]["properties"]["trailing_inspector"]["properties"]["presentation_mode"].get("const")
+        docked_focus_rule is not None,
+        "native_operator_workspace_scene missing docked inspector focus guard",
+    )
+    ensure(
+        docked_focus_rule["then"]["properties"]["trailing_inspector"]["properties"][
+            "presentation_mode"
+        ].get("const")
         == "DOCKED",
         "native_operator_workspace_scene focused_region=TRAILING_INSPECTOR must force presentation_mode=DOCKED",
     )
@@ -28684,7 +32753,12 @@ def check_native_operator_workspace_scene() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("shortcut_posture", {}).get("properties", {}).get("focused_region", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("shortcut_posture", {})
+            .get("properties", {})
+            .get("focused_region", {})
+            .get("const")
             == "DETACHED_INSPECTOR"
         ),
         None,
@@ -28694,7 +32768,9 @@ def check_native_operator_workspace_scene() -> None:
         "native_operator_workspace_scene missing detached inspector focus guard",
     )
     ensure(
-        detached_focus_rule["then"]["properties"]["trailing_inspector"]["properties"]["presentation_mode"].get("const")
+        detached_focus_rule["then"]["properties"]["trailing_inspector"]["properties"][
+            "presentation_mode"
+        ].get("const")
         == "DETACHED",
         "native_operator_workspace_scene focused_region=DETACHED_INSPECTOR must force presentation_mode=DETACHED",
     )
@@ -28828,7 +32904,10 @@ def check_native_operator_secondary_window_scene() -> None:
         "native_operator_secondary_window_scene.summaryLoading.historical_navigation_state must freeze the bounded history vocabulary",
     )
     loading_rule = find_rule_by_const(summary_loading["allOf"], "detail_state", "LOADING")
-    ensure(loading_rule is not None, "native_operator_secondary_window_scene missing detail_state=LOADING guard")
+    ensure(
+        loading_rule is not None,
+        "native_operator_secondary_window_scene missing detail_state=LOADING guard",
+    )
     ensure(
         loading_rule["then"]["properties"]["summary_state"].get("const") == "VISIBLE_LOADING_DETAIL"
         and loading_rule["then"]["properties"]["historical_navigation_state"].get("const")
@@ -28836,7 +32915,10 @@ def check_native_operator_secondary_window_scene() -> None:
         "native_operator_secondary_window_scene detail_state=LOADING must force visible summary loading and hide history until requested",
     )
     ready_rule = find_rule_by_const(summary_loading["allOf"], "detail_state", "READY")
-    ensure(ready_rule is not None, "native_operator_secondary_window_scene missing detail_state=READY guard")
+    ensure(
+        ready_rule is not None,
+        "native_operator_secondary_window_scene missing detail_state=READY guard",
+    )
     ensure(
         ready_rule["then"]["properties"]["summary_state"].get("const") == "VISIBLE_READY",
         "native_operator_secondary_window_scene detail_state=READY must force summary_state=VISIBLE_READY",
@@ -28886,7 +32968,8 @@ def check_native_operator_secondary_window_scene() -> None:
         "native_operator_secondary_window_scene.sceneIdentity.stability_contract must stay bound to route_stability_contract.schema.json",
     )
     ensure(
-        scene_identity["properties"]["access_binding_hash_or_null"].get("type") == ["string", "null"],
+        scene_identity["properties"]["access_binding_hash_or_null"].get("type")
+        == ["string", "null"],
         "native_operator_secondary_window_scene.sceneIdentity.access_binding_hash_or_null must stay string-or-null",
     )
     ensure(
@@ -28925,15 +33008,19 @@ def check_native_operator_secondary_window_scene() -> None:
         ],
         "native_operator_secondary_window_scene.sceneRestoration.invalid_reason_codes must retain PARENT_WINDOW_CLOSED and the native invalidation vocabulary",
     )
-    restorable_rule = find_rule_by_const(scene_restoration["allOf"], "restoration_state", "RESTORABLE")
+    restorable_rule = find_rule_by_const(
+        scene_restoration["allOf"], "restoration_state", "RESTORABLE"
+    )
     ensure(
         restorable_rule is not None,
         "native_operator_secondary_window_scene missing RESTORABLE restoration guard",
     )
     ensure(
         restorable_rule["then"]["properties"]["invalid_reason_codes"].get("maxItems") == 0
-        and restorable_rule["then"]["properties"]["restoration_anchor_ref_or_null"].get("type") == "string"
-        and restorable_rule["then"]["properties"]["resume_token_ref_or_null"].get("type") == "string",
+        and restorable_rule["then"]["properties"]["restoration_anchor_ref_or_null"].get("type")
+        == "string"
+        and restorable_rule["then"]["properties"]["resume_token_ref_or_null"].get("type")
+        == "string",
         "native_operator_secondary_window_scene RESTORABLE windows must retain anchor and resume token while clearing invalid reasons",
     )
     fresh_rule = find_rule_by_const(
@@ -28945,49 +33032,69 @@ def check_native_operator_secondary_window_scene() -> None:
     )
     ensure(
         fresh_rule["then"]["properties"]["invalid_reason_codes"].get("maxItems") == 0
-        and fresh_rule["then"]["properties"]["restoration_anchor_ref_or_null"].get("type") == "string"
+        and fresh_rule["then"]["properties"]["restoration_anchor_ref_or_null"].get("type")
+        == "string"
         and fresh_rule["then"]["properties"]["resume_token_ref_or_null"].get("type") == "null",
         "native_operator_secondary_window_scene FRESH_SNAPSHOT_REQUIRED windows must keep anchor and clear resume token",
     )
-    invalidated_rule = find_rule_by_const(scene_restoration["allOf"], "restoration_state", "INVALIDATED")
+    invalidated_rule = find_rule_by_const(
+        scene_restoration["allOf"], "restoration_state", "INVALIDATED"
+    )
     ensure(
         invalidated_rule is not None,
         "native_operator_secondary_window_scene missing INVALIDATED restoration guard",
     )
     ensure(
         invalidated_rule["then"]["properties"]["invalid_reason_codes"].get("minItems") == 1
-        and invalidated_rule["then"]["properties"]["resume_token_ref_or_null"].get("type") == "null",
+        and invalidated_rule["then"]["properties"]["resume_token_ref_or_null"].get("type")
+        == "null",
         "native_operator_secondary_window_scene INVALIDATED windows must require reasons and clear resume token",
     )
 
-    manifest_rule = find_rule_by_const(schema["allOf"], "parent_backing_read_model_type", "LowNoiseExperienceFrame")
+    manifest_rule = find_rule_by_const(
+        schema["allOf"], "parent_backing_read_model_type", "LowNoiseExperienceFrame"
+    )
     ensure(
         manifest_rule is not None,
         "native_operator_secondary_window_scene missing LowNoiseExperienceFrame branch",
     )
     ensure(
         manifest_rule["then"]["properties"]["parent_object_family"].get("const") == "MANIFEST"
-        and manifest_rule["then"]["properties"]["scene_identity"]["properties"]["workspace_version_or_null"].get("type")
+        and manifest_rule["then"]["properties"]["scene_identity"]["properties"][
+            "workspace_version_or_null"
+        ].get("type")
         == "null"
-        and manifest_rule["then"]["properties"]["scene_identity"]["properties"]["manifest_id_or_null"].get("type")
+        and manifest_rule["then"]["properties"]["scene_identity"]["properties"][
+            "manifest_id_or_null"
+        ].get("type")
         == "string"
-        and manifest_rule["then"]["properties"]["scene_identity"]["properties"]["work_item_id_or_null"].get("type")
+        and manifest_rule["then"]["properties"]["scene_identity"]["properties"][
+            "work_item_id_or_null"
+        ].get("type")
         == "null",
         "native_operator_secondary_window_scene LowNoiseExperienceFrame windows must stay manifest-scoped",
     )
 
-    workspace_rule = find_rule_by_const(schema["allOf"], "parent_backing_read_model_type", "WorkspaceSnapshot")
+    workspace_rule = find_rule_by_const(
+        schema["allOf"], "parent_backing_read_model_type", "WorkspaceSnapshot"
+    )
     ensure(
         workspace_rule is not None,
         "native_operator_secondary_window_scene missing WorkspaceSnapshot branch",
     )
     ensure(
         workspace_rule["then"]["properties"]["parent_object_family"].get("const") == "WORK_ITEM"
-        and workspace_rule["then"]["properties"]["scene_identity"]["properties"]["workspace_version_or_null"].get("type")
+        and workspace_rule["then"]["properties"]["scene_identity"]["properties"][
+            "workspace_version_or_null"
+        ].get("type")
         == "integer"
-        and workspace_rule["then"]["properties"]["scene_identity"]["properties"]["manifest_id_or_null"].get("type")
+        and workspace_rule["then"]["properties"]["scene_identity"]["properties"][
+            "manifest_id_or_null"
+        ].get("type")
         == "null"
-        and workspace_rule["then"]["properties"]["scene_identity"]["properties"]["work_item_id_or_null"].get("type")
+        and workspace_rule["then"]["properties"]["scene_identity"]["properties"][
+            "work_item_id_or_null"
+        ].get("type")
         == "string",
         "native_operator_secondary_window_scene WorkspaceSnapshot windows must stay work-item-scoped",
     )
@@ -28998,13 +33105,16 @@ def check_native_operator_secondary_window_scene() -> None:
         "AUDIT_FOCUS": "FOCUS_LENS",
         "EVIDENCE_PREVIEW": "EVIDENCE_TIDE",
     }.items():
-        kind_rule = find_rule_by_const(schema["allOf"], "secondary_window_kind", secondary_window_kind)
+        kind_rule = find_rule_by_const(
+            schema["allOf"], "secondary_window_kind", secondary_window_kind
+        )
         ensure(
             kind_rule is not None,
             f"native_operator_secondary_window_scene missing {secondary_window_kind} source-module guard",
         )
         ensure(
-            kind_rule["then"]["properties"]["source_module_code"].get("const") == expected_source_module_code,
+            kind_rule["then"]["properties"]["source_module_code"].get("const")
+            == expected_source_module_code,
             f"native_operator_secondary_window_scene {secondary_window_kind} must force source_module_code={expected_source_module_code}",
         )
 
@@ -29012,7 +33122,12 @@ def check_native_operator_secondary_window_scene() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("focus_handoff", {}).get("properties", {}).get("window_focus_target", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("focus_handoff", {})
+            .get("properties", {})
+            .get("window_focus_target", {})
+            .get("const")
             == "DETAIL_BODY"
         ),
         None,
@@ -29022,7 +33137,9 @@ def check_native_operator_secondary_window_scene() -> None:
         "native_operator_secondary_window_scene missing DETAIL_BODY focus guard",
     )
     ensure(
-        detail_focus_rule["then"]["properties"]["summary_loading"]["properties"]["detail_state"].get("const")
+        detail_focus_rule["then"]["properties"]["summary_loading"]["properties"][
+            "detail_state"
+        ].get("const")
         == "READY",
         "native_operator_secondary_window_scene DETAIL_BODY focus must force summary_loading.detail_state=READY",
     )
@@ -29081,7 +33198,8 @@ def check_command_envelope() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("manifest_id", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("manifest_id", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -29097,11 +33215,14 @@ def check_command_envelope() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("governance_target_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("governance_target_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(governance_rule is not None, "command_envelope missing governance_target_ref reverse guard")
+    ensure(
+        governance_rule is not None, "command_envelope missing governance_target_ref reverse guard"
+    )
     ensure(
         governance_rule["then"]["properties"]["target_scope_class"].get("const") == "GOVERNANCE",
         "command_envelope non-null governance_target_ref must force target_scope_class=GOVERNANCE",
@@ -29111,7 +33232,8 @@ def check_command_envelope() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("work_item_id", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("work_item_id", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -29132,7 +33254,10 @@ def check_command_envelope() -> None:
     )
     ensure(client_null_rule is not None, "command_envelope missing client_id=null reverse guard")
     ensure(
-        client_null_rule["then"]["properties"]["if_match_client_portal_workspace_version"].get("type") == "null",
+        client_null_rule["then"]["properties"]["if_match_client_portal_workspace_version"].get(
+            "type"
+        )
+        == "null",
         "command_envelope null client_id must null if_match_client_portal_workspace_version",
     )
 
@@ -29140,7 +33265,10 @@ def check_command_envelope() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("if_match_client_portal_workspace_version", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("if_match_client_portal_workspace_version", {})
+            .get("type")
             == "integer"
         ),
         None,
@@ -29165,15 +33293,23 @@ def check_command_envelope() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("if_match_request_state_version", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("if_match_request_state_version", {})
+            .get("type")
             == "integer"
         ),
         None,
     )
-    ensure(request_state_rule is not None, "command_envelope missing if_match_request_state_version reverse guard")
     ensure(
-        request_state_rule["then"]["properties"]["command_type"].get("const") == "RESPOND_TO_REQUEST_INFO"
-        and request_state_rule["then"]["properties"]["target_scope_class"].get("const") == "WORK_ITEM",
+        request_state_rule is not None,
+        "command_envelope missing if_match_request_state_version reverse guard",
+    )
+    ensure(
+        request_state_rule["then"]["properties"]["command_type"].get("const")
+        == "RESPOND_TO_REQUEST_INFO"
+        and request_state_rule["then"]["properties"]["target_scope_class"].get("const")
+        == "WORK_ITEM",
         "command_envelope non-null if_match_request_state_version must bind RESPOND_TO_REQUEST_INFO on WORK_ITEM scope",
     )
 
@@ -29181,7 +33317,10 @@ def check_command_envelope() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("if_match_dependency_topology_hash", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("if_match_dependency_topology_hash", {})
+            .get("type")
             == "string"
         ),
         None,
@@ -29192,7 +33331,8 @@ def check_command_envelope() -> None:
     )
     ensure(
         dependency_rule["then"]["properties"]["target_scope_class"].get("const") == "GOVERNANCE"
-        and dependency_rule["then"]["properties"]["if_match_policy_snapshot_hash"].get("type") == "string",
+        and dependency_rule["then"]["properties"]["if_match_policy_snapshot_hash"].get("type")
+        == "string",
         "command_envelope non-null if_match_dependency_topology_hash must force governance scope and policy snapshot binding",
     )
 
@@ -29200,14 +33340,18 @@ def check_command_envelope() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("simulation_basis_hash", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("simulation_basis_hash", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(simulation_rule is not None, "command_envelope missing simulation_basis_hash reverse guard")
+    ensure(
+        simulation_rule is not None, "command_envelope missing simulation_basis_hash reverse guard"
+    )
     ensure(
         simulation_rule["then"]["properties"]["target_scope_class"].get("const") == "GOVERNANCE"
-        and simulation_rule["then"]["properties"]["if_match_policy_snapshot_hash"].get("type") == "string"
+        and simulation_rule["then"]["properties"]["if_match_policy_snapshot_hash"].get("type")
+        == "string"
         and simulation_rule["then"]["properties"]["if_match_dependency_topology_hash"].get("type")
         == "string"
         and schema_uses_ref(
@@ -29221,7 +33365,11 @@ def check_command_envelope() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("mutation_basis_contract", {}).get("type") == "object"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("mutation_basis_contract", {})
+            .get("type")
+            == "object"
         ),
         None,
     )
@@ -29230,12 +33378,18 @@ def check_command_envelope() -> None:
         "command_envelope missing mutation_basis_contract reverse guard",
     )
     ensure(
-        mutation_basis_object_rule["then"]["properties"]["target_scope_class"].get("const") == "GOVERNANCE"
-        and mutation_basis_object_rule["then"]["properties"]["if_match_policy_snapshot_hash"].get("type")
+        mutation_basis_object_rule["then"]["properties"]["target_scope_class"].get("const")
+        == "GOVERNANCE"
+        and mutation_basis_object_rule["then"]["properties"]["if_match_policy_snapshot_hash"].get(
+            "type"
+        )
         == "string"
-        and mutation_basis_object_rule["then"]["properties"]["if_match_dependency_topology_hash"].get("type")
+        and mutation_basis_object_rule["then"]["properties"][
+            "if_match_dependency_topology_hash"
+        ].get("type")
         == "string"
-        and mutation_basis_object_rule["then"]["properties"]["simulation_basis_hash"].get("type") == "string",
+        and mutation_basis_object_rule["then"]["properties"]["simulation_basis_hash"].get("type")
+        == "string",
         "command_envelope non-null mutation_basis_contract must force governance scope and the full reviewed simulation basis",
     )
 
@@ -29248,11 +33402,17 @@ def check_command_envelope() -> None:
         ),
         None,
     )
-    ensure(non_governance_rule is not None, "command_envelope missing non-governance simulation-hash reset guard")
     ensure(
-        non_governance_rule["then"]["properties"]["if_match_dependency_topology_hash"].get("type") == "null"
-        and non_governance_rule["then"]["properties"]["mutation_basis_contract"].get("type") == "null"
-        and non_governance_rule["then"]["properties"]["simulation_basis_hash"].get("type") == "null",
+        non_governance_rule is not None,
+        "command_envelope missing non-governance simulation-hash reset guard",
+    )
+    ensure(
+        non_governance_rule["then"]["properties"]["if_match_dependency_topology_hash"].get("type")
+        == "null"
+        and non_governance_rule["then"]["properties"]["mutation_basis_contract"].get("type")
+        == "null"
+        and non_governance_rule["then"]["properties"]["simulation_basis_hash"].get("type")
+        == "null",
         "command_envelope non-governance targets must clear simulation-basis and mutation-basis guards",
     )
 
@@ -29276,10 +33436,13 @@ def check_command_envelope() -> None:
         == "string"
         and portal_approval_rule["then"]["properties"]["if_match_shell_stability_token"].get("type")
         == "string"
-        and portal_approval_rule["then"]["properties"]["if_match_frame_epoch"].get("type") == "integer"
+        and portal_approval_rule["then"]["properties"]["if_match_frame_epoch"].get("type")
+        == "integer"
         and portal_approval_rule["then"]["properties"]["if_match_approval_pack_hash"].get("type")
         == "string"
-        and portal_approval_rule["then"]["properties"]["if_match_client_portal_workspace_version"].get("type")
+        and portal_approval_rule["then"]["properties"][
+            "if_match_client_portal_workspace_version"
+        ].get("type")
         == "null",
         "command_envelope portal approval-pack commands must target MANIFEST, retain manifest/frame/shell/pack guards, and clear if_match_client_portal_workspace_version",
     )
@@ -29337,7 +33500,8 @@ def check_problem_envelope() -> None:
             for rule in schema["allOf"]
             if rule.get("if", {}).get("anyOf")
             and any(
-                candidate.get("properties", {}).get("latest_decision_bundle_ref", {}).get("type") == "string"
+                candidate.get("properties", {}).get("latest_decision_bundle_ref", {}).get("type")
+                == "string"
                 for candidate in rule["if"]["anyOf"]
             )
         ),
@@ -29349,7 +33513,10 @@ def check_problem_envelope() -> None:
         "problem_envelope non-null rebase refs must force rebase_required=true",
     )
     rebase_true_rule = find_rule_by_const(schema["allOf"], "rebase_required", True)
-    ensure(rebase_true_rule is not None, "problem_envelope missing rebase_required=true stability-contract guard")
+    ensure(
+        rebase_true_rule is not None,
+        "problem_envelope missing rebase_required=true stability-contract guard",
+    )
     ensure(
         schema_uses_ref(
             rebase_true_rule["then"]["properties"]["latest_stability_contract_or_null"],
@@ -29366,14 +33533,19 @@ def check_problem_envelope() -> None:
     )
 
     rebase_false_rule = find_rule_by_const(schema["allOf"], "rebase_required", False)
-    ensure(rebase_false_rule is not None, "problem_envelope missing rebase_required=false stale-guard reset guard")
+    ensure(
+        rebase_false_rule is not None,
+        "problem_envelope missing rebase_required=false stale-guard reset guard",
+    )
     ensure(
         rebase_false_rule["then"]["properties"]["stale_guard_family"].get("type") == "null"
-        and rebase_false_rule["then"]["properties"]["latest_stale_guard_value"].get("type") == "null",
+        and rebase_false_rule["then"]["properties"]["latest_stale_guard_value"].get("type")
+        == "null",
         "problem_envelope rebase_required=false must clear stale_guard_family and latest_stale_guard_value",
     )
     ensure(
-        rebase_false_rule["then"]["properties"]["latest_stability_contract_or_null"].get("type") == "null",
+        rebase_false_rule["then"]["properties"]["latest_stability_contract_or_null"].get("type")
+        == "null",
         "problem_envelope rebase_required=false must clear latest_stability_contract_or_null",
     )
     ensure(
@@ -29386,7 +33558,11 @@ def check_problem_envelope() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("suggested_detail_surface_code", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("suggested_detail_surface_code", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
@@ -29400,18 +33576,27 @@ def check_problem_envelope() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("latest_workspace_snapshot_ref", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("latest_workspace_snapshot_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(collaboration_rule is not None, "problem_envelope missing collaboration recovery exclusivity guard")
+    ensure(
+        collaboration_rule is not None,
+        "problem_envelope missing collaboration recovery exclusivity guard",
+    )
     ensure(
         collaboration_rule["then"]["properties"]["latest_client_portal_workspace_ref"].get("type")
         == "null"
-        and collaboration_rule["then"]["properties"]["latest_approval_pack_ref"].get("type") == "null"
-        and collaboration_rule["then"]["properties"]["latest_upload_session_ref"].get("type") == "null"
-        and collaboration_rule["then"]["properties"]["latest_policy_snapshot_ref"].get("type") == "null",
+        and collaboration_rule["then"]["properties"]["latest_approval_pack_ref"].get("type")
+        == "null"
+        and collaboration_rule["then"]["properties"]["latest_upload_session_ref"].get("type")
+        == "null"
+        and collaboration_rule["then"]["properties"]["latest_policy_snapshot_ref"].get("type")
+        == "null",
         "problem_envelope collaboration recovery must clear portal and governance recovery refs",
     )
 
@@ -29421,19 +33606,28 @@ def check_problem_envelope() -> None:
             for rule in schema["allOf"]
             if rule.get("if", {}).get("anyOf")
             and any(
-                candidate.get("properties", {}).get("latest_client_portal_workspace_ref", {}).get("type")
+                candidate.get("properties", {})
+                .get("latest_client_portal_workspace_ref", {})
+                .get("type")
                 == "string"
                 for candidate in rule["if"]["anyOf"]
             )
-            and rule.get("then", {}).get("properties", {}).get("latest_workspace_snapshot_ref", {}).get("type")
+            and rule.get("then", {})
+            .get("properties", {})
+            .get("latest_workspace_snapshot_ref", {})
+            .get("type")
             == "null"
         ),
         None,
     )
-    ensure(portal_family_rule is not None, "problem_envelope missing portal-family exclusivity guard")
     ensure(
-        portal_family_rule["then"]["properties"]["latest_workspace_snapshot_ref"].get("type") == "null"
-        and portal_family_rule["then"]["properties"]["latest_policy_snapshot_ref"].get("type") == "null",
+        portal_family_rule is not None, "problem_envelope missing portal-family exclusivity guard"
+    )
+    ensure(
+        portal_family_rule["then"]["properties"]["latest_workspace_snapshot_ref"].get("type")
+        == "null"
+        and portal_family_rule["then"]["properties"]["latest_policy_snapshot_ref"].get("type")
+        == "null",
         "problem_envelope portal recovery must clear collaboration and governance refs",
     )
 
@@ -29441,17 +33635,25 @@ def check_problem_envelope() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("stale_guard_family", {}).get("type") == "null"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("stale_guard_family", {})
+            .get("type")
+            == "null"
         ),
         None,
     )
-    ensure(stale_null_rule is not None, "problem_envelope missing stale_guard_family=null reverse guard")
+    ensure(
+        stale_null_rule is not None,
+        "problem_envelope missing stale_guard_family=null reverse guard",
+    )
     ensure(
         stale_null_rule["then"]["properties"]["latest_stale_guard_value"].get("type") == "null",
         "problem_envelope null stale_guard_family must clear latest_stale_guard_value",
     )
     ensure(
-        stale_null_rule["then"]["properties"]["latest_stability_contract_or_null"].get("type") == "null",
+        stale_null_rule["then"]["properties"]["latest_stability_contract_or_null"].get("type")
+        == "null",
         "problem_envelope null stale_guard_family must clear latest_stability_contract_or_null",
     )
 
@@ -29459,7 +33661,10 @@ def check_problem_envelope() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("stale_guard_family", {}).get("enum")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("stale_guard_family", {})
+            .get("enum")
             == [
                 "DECISION_BUNDLE_HASH",
                 "SHELL_STABILITY_TOKEN",
@@ -29472,10 +33677,14 @@ def check_problem_envelope() -> None:
         ),
         None,
     )
-    ensure(stale_string_rule is not None, "problem_envelope missing string stale_guard_family reverse guard")
+    ensure(
+        stale_string_rule is not None,
+        "problem_envelope missing string stale_guard_family reverse guard",
+    )
     ensure(
         stale_string_rule["then"]["properties"]["rebase_required"].get("const") is True
-        and stale_string_rule["then"]["properties"]["latest_stale_guard_value"].get("type") == "string",
+        and stale_string_rule["then"]["properties"]["latest_stale_guard_value"].get("type")
+        == "string",
         "problem_envelope string stale_guard_family must force rebase_required=true and string latest_stale_guard_value",
     )
     ensure(
@@ -29490,7 +33699,10 @@ def check_problem_envelope() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("stale_guard_family", {}).get("enum")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("stale_guard_family", {})
+            .get("enum")
             == [
                 "FRAME_EPOCH",
                 "WORK_ITEM_VERSION",
@@ -29502,10 +33714,14 @@ def check_problem_envelope() -> None:
         ),
         None,
     )
-    ensure(stale_integer_rule is not None, "problem_envelope missing integer stale_guard_family reverse guard")
+    ensure(
+        stale_integer_rule is not None,
+        "problem_envelope missing integer stale_guard_family reverse guard",
+    )
     ensure(
         stale_integer_rule["then"]["properties"]["rebase_required"].get("const") is True
-        and stale_integer_rule["then"]["properties"]["latest_stale_guard_value"].get("type") == "integer",
+        and stale_integer_rule["then"]["properties"]["latest_stale_guard_value"].get("type")
+        == "integer",
         "problem_envelope integer stale_guard_family must force rebase_required=true and integer latest_stale_guard_value",
     )
     ensure(
@@ -29520,12 +33736,18 @@ def check_problem_envelope() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("latest_stale_guard_value", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("latest_stale_guard_value", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(string_value_rule is not None, "problem_envelope missing string latest_stale_guard_value reverse guard")
+    ensure(
+        string_value_rule is not None,
+        "problem_envelope missing string latest_stale_guard_value reverse guard",
+    )
     ensure(
         string_value_rule["then"]["properties"]["rebase_required"].get("const") is True
         and string_value_rule["then"]["properties"]["stale_guard_family"].get("enum")
@@ -29545,12 +33767,18 @@ def check_problem_envelope() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("latest_stale_guard_value", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("latest_stale_guard_value", {})
+            .get("type")
             == "integer"
         ),
         None,
     )
-    ensure(integer_value_rule is not None, "problem_envelope missing integer latest_stale_guard_value reverse guard")
+    ensure(
+        integer_value_rule is not None,
+        "problem_envelope missing integer latest_stale_guard_value reverse guard",
+    )
     ensure(
         integer_value_rule["then"]["properties"]["rebase_required"].get("const") is True
         and integer_value_rule["then"]["properties"]["stale_guard_family"].get("enum")
@@ -29566,21 +33794,34 @@ def check_problem_envelope() -> None:
     )
 
     for field, other_fields in [
-        ("latest_client_portal_workspace_ref", ["latest_approval_pack_ref", "latest_upload_session_ref"]),
-        ("latest_approval_pack_ref", ["latest_client_portal_workspace_ref", "latest_upload_session_ref"]),
-        ("latest_upload_session_ref", ["latest_client_portal_workspace_ref", "latest_approval_pack_ref"]),
+        (
+            "latest_client_portal_workspace_ref",
+            ["latest_approval_pack_ref", "latest_upload_session_ref"],
+        ),
+        (
+            "latest_approval_pack_ref",
+            ["latest_client_portal_workspace_ref", "latest_upload_session_ref"],
+        ),
+        (
+            "latest_upload_session_ref",
+            ["latest_client_portal_workspace_ref", "latest_approval_pack_ref"],
+        ),
     ]:
         rule = next(
             (
                 candidate
                 for candidate in schema["allOf"]
-                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type") == "string"
+                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type")
+                == "string"
             ),
             None,
         )
         ensure(rule is not None, f"problem_envelope missing portal specificity guard for {field}")
         ensure(
-            all(rule["then"]["properties"][other_field].get("type") == "null" for other_field in other_fields),
+            all(
+                rule["then"]["properties"][other_field].get("type") == "null"
+                for other_field in other_fields
+            ),
             f"problem_envelope {field} must clear the other portal recovery refs",
         )
 
@@ -29597,11 +33838,7 @@ def check_proof_closure_contract() -> None:
     )
 
     degraded_rule = next(
-        (
-            rule
-            for rule in schema["allOf"]
-            if rule.get("if", {}).get("anyOf")
-        ),
+        (rule for rule in schema["allOf"] if rule.get("if", {}).get("anyOf")),
         None,
     )
     ensure(
@@ -29614,11 +33851,7 @@ def check_proof_closure_contract() -> None:
     )
 
     closed_rule = next(
-        (
-            rule
-            for rule in schema["allOf"]
-            if rule.get("if", {}).get("allOf")
-        ),
+        (rule for rule in schema["allOf"] if rule.get("if", {}).get("allOf")),
         None,
     )
     ensure(closed_rule is not None, "proof_closure_contract missing fully-closed reverse guard")
@@ -29699,11 +33932,15 @@ def check_provenance_path() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("manifest_refs", {}).get("minItems") == 2
+            if rule.get("if", {}).get("properties", {}).get("manifest_refs", {}).get("minItems")
+            == 2
         ),
         None,
     )
-    ensure(cross_manifest_rule is not None, "provenance_path missing cross-manifest lineage-boundary guard")
+    ensure(
+        cross_manifest_rule is not None,
+        "provenance_path missing cross-manifest lineage-boundary guard",
+    )
     ensure(
         cross_manifest_rule["then"]["properties"]["lineage_boundary_refs"].get("minItems") == 1,
         "provenance_path cross-manifest paths must require lineage_boundary_refs",
@@ -29713,11 +33950,18 @@ def check_provenance_path() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("lineage_boundary_refs", {}).get("minItems") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("lineage_boundary_refs", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
-    ensure(lineage_reverse_rule is not None, "provenance_path missing lineage_boundary_refs reverse guard")
+    ensure(
+        lineage_reverse_rule is not None,
+        "provenance_path missing lineage_boundary_refs reverse guard",
+    )
     ensure(
         lineage_reverse_rule["then"]["properties"]["manifest_refs"].get("minItems") == 2,
         "provenance_path lineage_boundary_refs must force cross-manifest manifest_refs",
@@ -29727,7 +33971,10 @@ def check_provenance_path() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("decisive_lineage_boundary_refs", {}).get("minItems")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("decisive_lineage_boundary_refs", {})
+            .get("minItems")
             == 1
         ),
         None,
@@ -29808,25 +34055,31 @@ def check_proof_bundle() -> None:
         "proof_bundle.retention_binding.limitation_behavior must freeze the expanded retention vocabulary",
     )
 
-    primary_path_rule = next(
+    closed_path_rule = next(
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("primary_path_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("closure_state", {}).get("const")
+            == "CLOSED"
         ),
         None,
     )
-    ensure(primary_path_rule is not None, "proof_bundle missing primary_path_ref reverse guard")
+    ensure(closed_path_rule is not None, "proof_bundle missing closure_state=CLOSED path guard")
     ensure(
-        primary_path_rule["then"]["properties"]["closure_state"].get("const") == "CLOSED",
-        "proof_bundle non-null primary_path_ref must force closure_state=CLOSED",
+        closed_path_rule["then"]["properties"]["primary_path_ref"].get("type") == "string"
+        and closed_path_rule["then"]["properties"]["decisive_path_refs"].get("minItems") == 1,
+        "proof_bundle CLOSED closure must require a primary path and non-empty decisive paths",
     )
 
     contradiction_rule = next(
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("contradiction_refs", {}).get("minItems") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("contradiction_refs", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
@@ -29840,7 +34093,11 @@ def check_proof_bundle() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("stale_reason_codes", {}).get("minItems") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("stale_reason_codes", {})
+            .get("minItems")
+            == 1
             and "anyOf" in rule.get("then", {})
         ),
         None,
@@ -29859,13 +34116,18 @@ def check_proof_bundle() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("lifecycle_state", {}).get("const") == "STALE"
+            if rule.get("if", {}).get("properties", {}).get("lifecycle_state", {}).get("const")
+            == "STALE"
         ),
         None,
     )
-    ensure(stale_dependency_rule is not None, "proof_bundle missing lifecycle_state=STALE dependency guard")
     ensure(
-        stale_dependency_rule["then"]["properties"]["staleness_dependency_refs"].get("minItems") == 1,
+        stale_dependency_rule is not None,
+        "proof_bundle missing lifecycle_state=STALE dependency guard",
+    )
+    ensure(
+        stale_dependency_rule["then"]["properties"]["staleness_dependency_refs"].get("minItems")
+        == 1,
         "proof_bundle STALE lifecycle must require staleness_dependency_refs",
     )
 
@@ -29873,7 +34135,11 @@ def check_proof_bundle() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("superseded_by_bundle_ref", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("superseded_by_bundle_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
@@ -29905,7 +34171,9 @@ def check_proof_bundle() -> None:
     supported_rule = find_rule_by_const(schema["allOf"], "support_state", "SUPPORTED")
     ensure(supported_rule is not None, "proof_bundle missing SUPPORTED closure guard")
     ensure(
-        supported_rule["then"]["properties"]["replay_recipe"]["properties"]["replayable"].get("const")
+        supported_rule["then"]["properties"]["replay_recipe"]["properties"]["replayable"].get(
+            "const"
+        )
         is True,
         "proof_bundle SUPPORTED must force replay_recipe.replayable=true",
     )
@@ -29925,17 +34193,23 @@ def check_proof_bundle() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("manifest_refs", {}).get("minItems") == 2
+            if rule.get("if", {}).get("properties", {}).get("manifest_refs", {}).get("minItems")
+            == 2
         ),
         None,
     )
-    ensure(cross_manifest_rule is not None, "proof_bundle missing cross-manifest lineage-boundary guard")
+    ensure(
+        cross_manifest_rule is not None,
+        "proof_bundle missing cross-manifest lineage-boundary guard",
+    )
     ensure(
         cross_manifest_rule["then"]["properties"]["lineage_boundary_refs"].get("minItems") == 1,
         "proof_bundle cross-manifest bundles must require lineage_boundary_refs",
     )
     ensure(
-        cross_manifest_rule["then"]["properties"]["replay_recipe"]["properties"]["lineage_boundary_refs"].get("minItems")
+        cross_manifest_rule["then"]["properties"]["replay_recipe"]["properties"][
+            "lineage_boundary_refs"
+        ].get("minItems")
         == 1,
         "proof_bundle cross-manifest bundles must require replay_recipe.lineage_boundary_refs",
     )
@@ -29944,11 +34218,17 @@ def check_proof_bundle() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("lineage_boundary_refs", {}).get("minItems") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("lineage_boundary_refs", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
-    ensure(lineage_reverse_rule is not None, "proof_bundle missing lineage_boundary_refs reverse guard")
+    ensure(
+        lineage_reverse_rule is not None, "proof_bundle missing lineage_boundary_refs reverse guard"
+    )
     ensure(
         lineage_reverse_rule["then"]["properties"]["manifest_refs"].get("minItems") == 2,
         "proof_bundle lineage_boundary_refs must force cross-manifest manifest_refs",
@@ -29958,7 +34238,10 @@ def check_proof_bundle() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("decisive_lineage_boundary_refs", {}).get("minItems")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("decisive_lineage_boundary_refs", {})
+            .get("minItems")
             == 1
         ),
         None,
@@ -29976,16 +34259,21 @@ def check_proof_bundle() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("render_refs", {}).get("properties", {}).get(
-                "explanation_status", {}
-            ).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("render_refs", {})
+            .get("properties", {})
+            .get("explanation_status", {})
+            .get("const")
             == "AVAILABLE"
         ),
         None,
     )
     ensure(available_rule is not None, "proof_bundle missing AVAILABLE explanation guard")
     ensure(
-        available_rule["then"]["properties"]["retention_binding"]["properties"]["limitation_behavior"].get("const")
+        available_rule["then"]["properties"]["retention_binding"]["properties"][
+            "limitation_behavior"
+        ].get("const")
         == "FULL",
         "proof_bundle AVAILABLE explanation_status must force retention_binding.limitation_behavior=FULL",
     )
@@ -30008,9 +34296,13 @@ def check_proof_bundle() -> None:
         ),
         None,
     )
-    ensure(limited_binding_rule is not None, "proof_bundle missing retention-limited explanation guard")
     ensure(
-        limited_binding_rule["then"]["properties"]["render_refs"]["properties"]["explanation_status"].get("enum")
+        limited_binding_rule is not None, "proof_bundle missing retention-limited explanation guard"
+    )
+    ensure(
+        limited_binding_rule["then"]["properties"]["render_refs"]["properties"][
+            "explanation_status"
+        ].get("enum")
         == ["LIMITED", "FAILED"],
         "proof_bundle limited/tombstoned/pseudonymised retention must forbid AVAILABLE explanation_status",
     )
@@ -30070,7 +34362,8 @@ def check_evidence_graph() -> None:
         "evidence_graph targetAssessment must require rejected_path_refs, staleness_dependency_refs, temporal_propagation_event_refs, and closure_failure_reason_codes",
     )
     ensure(
-        target_assessment["properties"]["temporal_propagation_event_refs"]["items"].get("minLength") == 1,
+        target_assessment["properties"]["temporal_propagation_event_refs"]["items"].get("minLength")
+        == 1,
         "evidence_graph targetAssessment.temporal_propagation_event_refs items must reject empty strings",
     )
 
@@ -30086,7 +34379,9 @@ def check_evidence_graph() -> None:
     )
 
     contradicted_rule = find_rule_by_const(target_rules, "support_state", "CONTRADICTED")
-    ensure(contradicted_rule is not None, "evidence_graph targetAssessment missing CONTRADICTED guard")
+    ensure(
+        contradicted_rule is not None, "evidence_graph targetAssessment missing CONTRADICTED guard"
+    )
     ensure(
         contradicted_rule["then"]["properties"]["contradiction_refs"].get("minItems") == 1,
         "evidence_graph CONTRADICTED target assessments must require contradiction_refs",
@@ -30107,11 +34402,18 @@ def check_evidence_graph() -> None:
         (
             rule
             for rule in target_rules
-            if rule.get("if", {}).get("properties", {}).get("stale_reason_codes", {}).get("minItems") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("stale_reason_codes", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
-    ensure(stale_reverse_rule is not None, "evidence_graph targetAssessment missing stale_reason_codes reverse guard")
+    ensure(
+        stale_reverse_rule is not None,
+        "evidence_graph targetAssessment missing stale_reason_codes reverse guard",
+    )
     ensure(
         stale_reverse_rule["then"]["properties"]["staleness_dependency_refs"].get("minItems") == 1,
         "evidence_graph stale_reason_codes must require staleness_dependency_refs",
@@ -30121,7 +34423,8 @@ def check_evidence_graph() -> None:
         (
             rule
             for rule in target_rules
-            if rule.get("if", {}).get("properties", {}).get("proof_bundle_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("proof_bundle_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -30135,10 +34438,16 @@ def check_evidence_graph() -> None:
         "evidence_graph non-null proof_bundle_ref must force a supported, contradicted, or stale target posture",
     )
 
-    rebuild_required_rule = find_rule_by_const(schema["allOf"], "lifecycle_state", "REBUILD_REQUIRED")
-    ensure(rebuild_required_rule is not None, "evidence_graph missing REBUILD_REQUIRED reverse guard")
+    rebuild_required_rule = find_rule_by_const(
+        schema["allOf"], "lifecycle_state", "REBUILD_REQUIRED"
+    )
     ensure(
-        rebuild_required_rule["then"]["properties"]["integrity_summary"]["properties"]["rebuild_required"].get("const")
+        rebuild_required_rule is not None, "evidence_graph missing REBUILD_REQUIRED reverse guard"
+    )
+    ensure(
+        rebuild_required_rule["then"]["properties"]["integrity_summary"]["properties"][
+            "rebuild_required"
+        ].get("const")
         is True,
         "evidence_graph REBUILD_REQUIRED lifecycle must force integrity_summary.rebuild_required=true",
     )
@@ -30147,11 +34456,15 @@ def check_evidence_graph() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("manifest_refs", {}).get("minItems") == 2
+            if rule.get("if", {}).get("properties", {}).get("manifest_refs", {}).get("minItems")
+            == 2
         ),
         None,
     )
-    ensure(cross_manifest_rule is not None, "evidence_graph missing cross-manifest lineage-boundary guard")
+    ensure(
+        cross_manifest_rule is not None,
+        "evidence_graph missing cross-manifest lineage-boundary guard",
+    )
     ensure(
         cross_manifest_rule["then"]["properties"]["lineage_boundaries"].get("minItems") == 1,
         "evidence_graph cross-manifest graphs must require lineage_boundaries",
@@ -30161,11 +34474,17 @@ def check_evidence_graph() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("lineage_boundaries", {}).get("minItems") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("lineage_boundaries", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
-    ensure(lineage_reverse_rule is not None, "evidence_graph missing lineage_boundaries reverse guard")
+    ensure(
+        lineage_reverse_rule is not None, "evidence_graph missing lineage_boundaries reverse guard"
+    )
     ensure(
         lineage_reverse_rule["then"]["properties"]["manifest_refs"].get("minItems") == 2,
         "evidence_graph lineage_boundaries must force cross-manifest manifest_refs",
@@ -30175,7 +34494,11 @@ def check_evidence_graph() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("then", {}).get("properties", {}).get("limitation_notes", {}).get("minItems") == 1
+            if rule.get("then", {})
+            .get("properties", {})
+            .get("limitation_notes", {})
+            .get("minItems")
+            == 1
             and rule.get("then", {}).get("properties", {}).get("lifecycle_state", {}).get("enum")
             == ["LIMITED", "STALE", "REBUILD_REQUIRED"]
         ),
@@ -30232,13 +34555,16 @@ def check_enquiry_pack() -> None:
     available_rule = find_rule_by_const(schema["allOf"], "explanation_status", "AVAILABLE")
     ensure(available_rule is not None, "enquiry_pack missing AVAILABLE render guard")
     ensure(
-        available_rule["then"]["properties"]["retention_binding"]["properties"]["limitation_behavior"].get("const")
+        available_rule["then"]["properties"]["retention_binding"]["properties"][
+            "limitation_behavior"
+        ].get("const")
         == "FULL",
         "enquiry_pack AVAILABLE explanation_status must force retention_binding.limitation_behavior=FULL",
     )
     for field in ["operator_render_ref", "reviewer_render_ref", "filing_artifact_ref"]:
         ensure(
-            available_rule["then"]["properties"]["render_contract"]["properties"][field].get("type") == "string",
+            available_rule["then"]["properties"]["render_contract"]["properties"][field].get("type")
+            == "string",
             f"enquiry_pack AVAILABLE explanation_status must require render_contract.{field}",
         )
 
@@ -30253,7 +34579,8 @@ def check_enquiry_pack() -> None:
     ensure(failed_rule is not None, "enquiry_pack missing FAILED render guard")
     for field in ["operator_render_ref", "reviewer_render_ref", "filing_artifact_ref"]:
         ensure(
-            failed_rule["then"]["properties"]["render_contract"]["properties"][field].get("type") == "null",
+            failed_rule["then"]["properties"]["render_contract"]["properties"][field].get("type")
+            == "null",
             f"enquiry_pack FAILED explanation_status must clear render_contract.{field}",
         )
 
@@ -30261,11 +34588,15 @@ def check_enquiry_pack() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("manifest_refs", {}).get("minItems") == 2
+            if rule.get("if", {}).get("properties", {}).get("manifest_refs", {}).get("minItems")
+            == 2
         ),
         None,
     )
-    ensure(cross_manifest_rule is not None, "enquiry_pack missing cross-manifest lineage-boundary guard")
+    ensure(
+        cross_manifest_rule is not None,
+        "enquiry_pack missing cross-manifest lineage-boundary guard",
+    )
     ensure(
         cross_manifest_rule["then"]["properties"]["lineage_boundaries"].get("minItems") == 1,
         "enquiry_pack cross-manifest packs must require lineage_boundaries",
@@ -30275,11 +34606,17 @@ def check_enquiry_pack() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("lineage_boundaries", {}).get("minItems") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("lineage_boundaries", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
-    ensure(lineage_reverse_rule is not None, "enquiry_pack missing lineage_boundaries reverse guard")
+    ensure(
+        lineage_reverse_rule is not None, "enquiry_pack missing lineage_boundaries reverse guard"
+    )
     ensure(
         lineage_reverse_rule["then"]["properties"]["manifest_refs"].get("minItems") == 2,
         "enquiry_pack lineage_boundaries must force cross-manifest manifest_refs",
@@ -30301,7 +34638,8 @@ def check_enquiry_pack() -> None:
     )
     ensure(limited_binding_rule is not None, "enquiry_pack missing retention-limited export guard")
     ensure(
-        limited_binding_rule["then"]["properties"]["explanation_status"].get("enum") == ["LIMITED", "FAILED"],
+        limited_binding_rule["then"]["properties"]["explanation_status"].get("enum")
+        == ["LIMITED", "FAILED"],
         "enquiry_pack limited/tombstoned/pseudonymised retention must forbid AVAILABLE explanation_status",
     )
     ensure(
@@ -30348,7 +34686,10 @@ def check_twin_state_snapshot() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("subject_key_collision_refs", {}).get("minItems")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("subject_key_collision_refs", {})
+            .get("minItems")
             == 1
         ),
         None,
@@ -30363,7 +34704,9 @@ def check_twin_state_snapshot() -> None:
         "twin_state_snapshot subject_key_collision_refs must force assembly_state=CONTRADICTORY",
     )
 
-    contradictory_state_rule = find_rule_by_const(schema["allOf"], "assembly_state", "CONTRADICTORY")
+    contradictory_state_rule = find_rule_by_const(
+        schema["allOf"], "assembly_state", "CONTRADICTORY"
+    )
     ensure(contradictory_state_rule is not None, "twin_state_snapshot missing CONTRADICTORY guard")
     contradictory_any_of = contradictory_state_rule["then"].get("anyOf", [])
     ensure(
@@ -30375,7 +34718,10 @@ def check_twin_state_snapshot() -> None:
         "twin_state_snapshot CONTRADICTORY must require limitation_codes",
     )
     ensure(
-        contradictory_state_rule["then"]["properties"]["non_comparable_subject_count"].get("minimum") == 1,
+        contradictory_state_rule["then"]["properties"]["non_comparable_subject_count"].get(
+            "minimum"
+        )
+        == 1,
         "twin_state_snapshot CONTRADICTORY must require non_comparable_subject_count>=1",
     )
 
@@ -30383,7 +34729,10 @@ def check_twin_state_snapshot() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("contradictory_component_refs", {}).get("minItems")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("contradictory_component_refs", {})
+            .get("minItems")
             == 1
         ),
         None,
@@ -30393,7 +34742,8 @@ def check_twin_state_snapshot() -> None:
         "twin_state_snapshot missing contradictory_component_refs reverse guard",
     )
     ensure(
-        contradictory_refs_rule["then"]["properties"]["assembly_state"].get("const") == "CONTRADICTORY",
+        contradictory_refs_rule["then"]["properties"]["assembly_state"].get("const")
+        == "CONTRADICTORY",
         "twin_state_snapshot contradictory_component_refs must force assembly_state=CONTRADICTORY",
     )
     ensure(
@@ -30406,7 +34756,8 @@ def check_twin_state_snapshot() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("baseline_ref", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("baseline_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -30451,7 +34802,8 @@ def check_twin_view() -> None:
         "twin_view delta_precedence_profile_code must freeze TWIN_DELTA_PRECEDENCE_V1",
     )
     ensure(
-        schema["properties"]["mismatch_ranking_profile_code"].get("const") == "TWIN_MISMATCH_SORT_V1",
+        schema["properties"]["mismatch_ranking_profile_code"].get("const")
+        == "TWIN_MISMATCH_SORT_V1",
         "twin_view mismatch_ranking_profile_code must freeze TWIN_MISMATCH_SORT_V1",
     )
 
@@ -30488,7 +34840,8 @@ def check_twin_view() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("superseded_at", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("superseded_at", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -30530,8 +34883,11 @@ def check_twin_delta_arc() -> None:
             (
                 candidate
                 for candidate in schema["allOf"]
-                if candidate.get("if", {}).get("properties", {}).get("delta_class", {}).get("const") == delta_class
-                and collect_nested_properties(candidate.get("then", {})).get("delta_precedence_rank", {}).get("const")
+                if candidate.get("if", {}).get("properties", {}).get("delta_class", {}).get("const")
+                == delta_class
+                and collect_nested_properties(candidate.get("then", {}))
+                .get("delta_precedence_rank", {})
+                .get("const")
                 == expected_rank
             ),
             None,
@@ -30548,16 +34904,20 @@ def check_twin_delta_arc() -> None:
     waiting_rule = find_rule_by_const(schema["allOf"], "delta_class", "ACK_PENDING")
     ensure(waiting_rule is not None, "twin_delta_arc missing ACK_PENDING comparability guard")
     ensure(
-        waiting_rule["then"]["properties"]["comparability_state"].get("const") == "WAITING_ON_AUTHORITY"
-        and waiting_rule["then"]["properties"]["comparability_reason_code"].get("const") == "ACK_PENDING",
+        waiting_rule["then"]["properties"]["comparability_state"].get("const")
+        == "WAITING_ON_AUTHORITY"
+        and waiting_rule["then"]["properties"]["comparability_reason_code"].get("const")
+        == "ACK_PENDING",
         "twin_delta_arc ACK_PENDING must freeze waiting-on-authority comparability",
     )
 
     partial_rule = find_rule_by_const(schema["allOf"], "delta_class", "ACK_PARTIAL")
     ensure(partial_rule is not None, "twin_delta_arc missing ACK_PARTIAL comparability guard")
     ensure(
-        partial_rule["then"]["properties"]["comparability_state"].get("const") == "PARTIALLY_COMPARABLE"
-        and partial_rule["then"]["properties"]["comparability_reason_code"].get("const") == "ACK_PARTIAL",
+        partial_rule["then"]["properties"]["comparability_state"].get("const")
+        == "PARTIALLY_COMPARABLE"
+        and partial_rule["then"]["properties"]["comparability_reason_code"].get("const")
+        == "ACK_PARTIAL",
         "twin_delta_arc ACK_PARTIAL must freeze partial comparability",
     )
 
@@ -30574,7 +34934,10 @@ def check_twin_delta_arc() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("contradiction_component_refs", {}).get("minItems")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("contradiction_component_refs", {})
+            .get("minItems")
             == 1
         ),
         None,
@@ -30584,7 +34947,8 @@ def check_twin_delta_arc() -> None:
         "twin_delta_arc missing contradiction_component_refs reverse guard",
     )
     ensure(
-        contradiction_rule["then"]["properties"]["comparability_state"].get("const") == "CONTRADICTORY",
+        contradiction_rule["then"]["properties"]["comparability_state"].get("const")
+        == "CONTRADICTORY",
         "twin_delta_arc contradiction_component_refs must force comparability_state=CONTRADICTORY",
     )
 
@@ -30639,7 +35003,8 @@ def check_twin_mismatch_summary() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("mismatch_count", {}).get("minimum") == 1
+            if rule.get("if", {}).get("properties", {}).get("mismatch_count", {}).get("minimum")
+            == 1
         ),
         None,
     )
@@ -30697,7 +35062,10 @@ def check_twin_readiness_state() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("non_comparable_mismatch_refs", {}).get("minItems")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("non_comparable_mismatch_refs", {})
+            .get("minItems")
             == 1
         ),
         None,
@@ -30716,7 +35084,10 @@ def check_twin_readiness_state() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("authority_posture", {}).get("enum")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("authority_posture", {})
+            .get("enum")
             == ["PARTIAL", "STALE", "UNKNOWN", "OUT_OF_BAND"]
         ),
         None,
@@ -30754,13 +35125,16 @@ def check_twin_reconciliation_state() -> None:
         "twin_reconciliation_state NOT_REQUIRED must clear next_action_owner",
     )
 
-    waiting_authority_rule = find_rule_by_const(schema["allOf"], "lifecycle_state", "WAITING_ON_AUTHORITY")
+    waiting_authority_rule = find_rule_by_const(
+        schema["allOf"], "lifecycle_state", "WAITING_ON_AUTHORITY"
+    )
     ensure(
         waiting_authority_rule is not None,
         "twin_reconciliation_state missing WAITING_ON_AUTHORITY guard",
     )
     ensure(
-        waiting_authority_rule["then"]["properties"]["next_action_owner"].get("const") == "AUTHORITY",
+        waiting_authority_rule["then"]["properties"]["next_action_owner"].get("const")
+        == "AUTHORITY",
         "twin_reconciliation_state WAITING_ON_AUTHORITY must force next_action_owner=AUTHORITY",
     )
     ensure(
@@ -30768,7 +35142,9 @@ def check_twin_reconciliation_state() -> None:
         "twin_reconciliation_state WAITING_ON_AUTHORITY must require next_action_due_at",
     )
 
-    waiting_operator_rule = find_rule_by_const(schema["allOf"], "lifecycle_state", "WAITING_ON_OPERATOR")
+    waiting_operator_rule = find_rule_by_const(
+        schema["allOf"], "lifecycle_state", "WAITING_ON_OPERATOR"
+    )
     ensure(
         waiting_operator_rule is not None,
         "twin_reconciliation_state missing WAITING_ON_OPERATOR guard",
@@ -30804,16 +35180,22 @@ def check_twin_interpretation_state() -> None:
         ensure(field in schema["required"], f"twin_interpretation_state must require `{field}`")
 
     ready_rule = find_rule_by_const(schema["allOf"], "dominant_attention_state", "READY")
-    ensure(ready_rule is not None, "twin_interpretation_state missing READY dominant-attention guard")
+    ensure(
+        ready_rule is not None, "twin_interpretation_state missing READY dominant-attention guard"
+    )
     ensure(
         ready_rule["then"]["properties"]["dominant_delta_arc_ref_or_null"].get("type") == "null"
-        and ready_rule["then"]["properties"]["dominant_reconciliation_state_ref_or_null"].get("type")
+        and ready_rule["then"]["properties"]["dominant_reconciliation_state_ref_or_null"].get(
+            "type"
+        )
         == "null",
         "twin_interpretation_state READY dominant attention must clear dominant refs",
     )
 
     audit_first_rule = find_rule_by_const(schema["allOf"], "summary_priority_mode", "AUDIT_FIRST")
-    ensure(audit_first_rule is not None, "twin_interpretation_state missing AUDIT_FIRST reverse guard")
+    ensure(
+        audit_first_rule is not None, "twin_interpretation_state missing AUDIT_FIRST reverse guard"
+    )
     ensure(
         audit_first_rule["then"]["properties"]["dominant_attention_state"].get("const") == "READY",
         "twin_interpretation_state AUDIT_FIRST must be allowed only when dominant_attention_state=READY",
@@ -30823,7 +35205,10 @@ def check_twin_interpretation_state() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("dominant_attention_state", {}).get("enum")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("dominant_attention_state", {})
+            .get("enum")
             == ["WAITING_ON_AUTHORITY", "RECONCILIATION_REQUIRED", "OUT_OF_BAND", "CONTRADICTORY"]
         ),
         None,
@@ -30833,7 +35218,8 @@ def check_twin_interpretation_state() -> None:
         "twin_interpretation_state missing reconciliation-dominant focus guard",
     )
     ensure(
-        reconciliation_focus_rule["then"]["properties"]["authority_first_summary"].get("const") is True,
+        reconciliation_focus_rule["then"]["properties"]["authority_first_summary"].get("const")
+        is True,
         "twin_interpretation_state reconciliation-dominant views must force authority_first_summary=true",
     )
 
@@ -30868,9 +35254,14 @@ def check_nightly_batch_run() -> None:
     recovery_trigger_rule = find_rule_by_const(
         schema["allOf"], "trigger_class", "RECOVERY_RECLAIM_WINDOW"
     )
-    ensure(recovery_trigger_rule is not None, "nightly_batch_run missing recovery-trigger predecessor guard")
     ensure(
-        recovery_trigger_rule["then"]["properties"]["reclaimed_predecessor_batch_run_ref"].get("type")
+        recovery_trigger_rule is not None,
+        "nightly_batch_run missing recovery-trigger predecessor guard",
+    )
+    ensure(
+        recovery_trigger_rule["then"]["properties"]["reclaimed_predecessor_batch_run_ref"].get(
+            "type"
+        )
         == "string"
         and recovery_trigger_rule["then"]["properties"]["recovery_resume_state"].get("enum")
         == [
@@ -30884,7 +35275,11 @@ def check_nightly_batch_run() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("reclaimed_predecessor_batch_run_ref", {}).get("type") == "string"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("reclaimed_predecessor_batch_run_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
@@ -30907,9 +35302,13 @@ def check_nightly_batch_run() -> None:
         ),
         None,
     )
-    ensure(scheduled_manual_rule is not None, "nightly_batch_run missing non-recovery resume reverse guard")
     ensure(
-        scheduled_manual_rule["then"]["properties"]["recovery_resume_state"].get("const") == "NOT_APPLICABLE",
+        scheduled_manual_rule is not None,
+        "nightly_batch_run missing non-recovery resume reverse guard",
+    )
+    ensure(
+        scheduled_manual_rule["then"]["properties"]["recovery_resume_state"].get("const")
+        == "NOT_APPLICABLE",
         "nightly_batch_run scheduled/manual triggers must keep recovery_resume_state=NOT_APPLICABLE",
     )
     completed_digest_rule = next(
@@ -30921,9 +35320,14 @@ def check_nightly_batch_run() -> None:
         ),
         None,
     )
-    ensure(completed_digest_rule is not None, "nightly_batch_run missing completed-state digest publication guard")
     ensure(
-        completed_digest_rule["then"]["properties"]["operator_digest_publication_state"].get("const")
+        completed_digest_rule is not None,
+        "nightly_batch_run missing completed-state digest publication guard",
+    )
+    ensure(
+        completed_digest_rule["then"]["properties"]["operator_digest_publication_state"].get(
+            "const"
+        )
         == "PUBLISHED_COMPLETE",
         "nightly_batch_run completed states must force operator_digest_publication_state=PUBLISHED_COMPLETE",
     )
@@ -30936,7 +35340,9 @@ def check_nightly_batch_run() -> None:
     )
     ensure(
         digest_published_rule["then"]["properties"]["operator_digest_ref"].get("type") == "string"
-        and digest_published_rule["then"]["properties"]["operator_digest_derivation_contract_or_null"].get("type")
+        and digest_published_rule["then"]["properties"][
+            "operator_digest_derivation_contract_or_null"
+        ].get("type")
         == "object",
         "nightly_batch_run digest-published state must require operator_digest_ref plus non-null derivation contract",
     )
@@ -30944,7 +35350,10 @@ def check_nightly_batch_run() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("operator_digest_publication_state", {}).get("enum")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("operator_digest_publication_state", {})
+            .get("enum")
             == ["NOT_READY", "WORKFLOW_PUBLICATION_PENDING", "NOTIFICATION_PUBLICATION_PENDING"]
         ),
         None,
@@ -30955,7 +35364,9 @@ def check_nightly_batch_run() -> None:
     )
     ensure(
         digest_pending_rule["then"]["properties"]["operator_digest_ref"].get("type") == "null"
-        and digest_pending_rule["then"]["properties"]["operator_digest_derivation_contract_or_null"].get("type")
+        and digest_pending_rule["then"]["properties"][
+            "operator_digest_derivation_contract_or_null"
+        ].get("type")
         == "null",
         "nightly_batch_run pending digest-publication states must keep digest ref and derivation contract null",
     )
@@ -30963,11 +35374,30 @@ def check_nightly_batch_run() -> None:
     for field, allowed_states in [
         (
             "selection_started_at",
-            ["SELECTING", "PLANNED", "RUNNING", "QUIESCING", "COMPLETED", "COMPLETED_WITH_FAILURES", "BLOCKED", "FAILED", "ABANDONED"],
+            [
+                "SELECTING",
+                "PLANNED",
+                "RUNNING",
+                "QUIESCING",
+                "COMPLETED",
+                "COMPLETED_WITH_FAILURES",
+                "BLOCKED",
+                "FAILED",
+                "ABANDONED",
+            ],
         ),
         (
             "selection_completed_at",
-            ["PLANNED", "RUNNING", "QUIESCING", "COMPLETED", "COMPLETED_WITH_FAILURES", "BLOCKED", "FAILED", "ABANDONED"],
+            [
+                "PLANNED",
+                "RUNNING",
+                "QUIESCING",
+                "COMPLETED",
+                "COMPLETED_WITH_FAILURES",
+                "BLOCKED",
+                "FAILED",
+                "ABANDONED",
+            ],
         ),
         ("quiesced_at", ["QUIESCING", "COMPLETED", "COMPLETED_WITH_FAILURES"]),
         ("completed_at", ["COMPLETED", "COMPLETED_WITH_FAILURES"]),
@@ -30977,7 +35407,8 @@ def check_nightly_batch_run() -> None:
             (
                 candidate
                 for candidate in schema["allOf"]
-                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type") == "string"
+                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type")
+                == "string"
             ),
             None,
         )
@@ -30992,7 +35423,8 @@ def check_nightly_batch_run() -> None:
             (
                 candidate
                 for candidate in schema["allOf"]
-                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type") == "string"
+                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type")
+                == "string"
             ),
             None,
         )
@@ -31011,7 +35443,10 @@ def check_nightly_batch_run() -> None:
         "priority_tuple",
         "predecessor_selection_entry_ref_or_null",
     ]:
-        ensure(field in selection_entry["required"], f"nightly_batch_run selectionEntry must require `{field}`")
+        ensure(
+            field in selection_entry["required"],
+            f"nightly_batch_run selectionEntry must require `{field}`",
+        )
     ensure(
         selection_entry["properties"]["candidate_identity_hash"].get("minLength") == 1,
         "nightly_batch_run selectionEntry.candidate_identity_hash must reject empty strings",
@@ -31032,7 +35467,9 @@ def check_nightly_batch_run() -> None:
         "nightly_batch_run continuation children must require prior_manifest_ref",
     )
     ensure(
-        continuation_rule["then"]["properties"]["predecessor_selection_entry_ref_or_null"].get("type")
+        continuation_rule["then"]["properties"]["predecessor_selection_entry_ref_or_null"].get(
+            "type"
+        )
         == "string",
         "nightly_batch_run continuation children must require predecessor_selection_entry_ref_or_null",
     )
@@ -31045,7 +35482,9 @@ def check_nightly_batch_run() -> None:
     execute_new_rule = find_rule_by_const(
         selection_entry["allOf"], "selection_disposition", "EXECUTE_NEW_MANIFEST"
     )
-    ensure(execute_new_rule is not None, "nightly_batch_run selectionEntry missing execute-new guard")
+    ensure(
+        execute_new_rule is not None, "nightly_batch_run selectionEntry missing execute-new guard"
+    )
     ensure(
         execute_new_rule["then"]["properties"]["active_attempt_resolution_state"].get("const")
         == "NO_ACTIVE_ATTEMPT",
@@ -31075,9 +35514,14 @@ def check_nightly_batch_run() -> None:
     active_attempt_defer_rule = find_rule_by_const(
         selection_entry["allOf"], "selection_disposition", "DEFER_ACTIVE_ATTEMPT"
     )
-    ensure(active_attempt_defer_rule is not None, "nightly_batch_run selectionEntry missing active-attempt defer guard")
     ensure(
-        active_attempt_defer_rule["then"]["properties"]["active_attempt_resolution_state"].get("const")
+        active_attempt_defer_rule is not None,
+        "nightly_batch_run selectionEntry missing active-attempt defer guard",
+    )
+    ensure(
+        active_attempt_defer_rule["then"]["properties"]["active_attempt_resolution_state"].get(
+            "const"
+        )
         == "ACTIVE_ATTEMPT_DEFERRED",
         "nightly_batch_run active-attempt deferrals must freeze active_attempt_resolution_state=ACTIVE_ATTEMPT_DEFERRED",
     )
@@ -31087,7 +35531,10 @@ def check_nightly_batch_run() -> None:
             rule
             for rule in selection_entry["allOf"]
             if set(
-                rule.get("if", {}).get("properties", {}).get("selection_disposition", {}).get("enum", [])
+                rule.get("if", {})
+                .get("properties", {})
+                .get("selection_disposition", {})
+                .get("enum", [])
             )
             == {"DEFER_ACTIVE_ATTEMPT", "DEFER_RETRY_WINDOW"}
         ),
@@ -31133,7 +35580,9 @@ def check_nightly_batch_run() -> None:
         "nightly_batch_run escalation entries must keep shard_key null",
     )
 
-    skip_rule = find_rule_by_const(selection_entry["allOf"], "selection_disposition", "SKIP_INELIGIBLE")
+    skip_rule = find_rule_by_const(
+        selection_entry["allOf"], "selection_disposition", "SKIP_INELIGIBLE"
+    )
     ensure(skip_rule is not None, "nightly_batch_run selectionEntry missing skip guard")
     ensure(
         skip_rule["then"]["properties"]["manifest_ref"].get("type") == "null",
@@ -31154,7 +35603,10 @@ def check_nightly_batch_run() -> None:
         ("SKIPPED", {"const": "SKIP_INELIGIBLE"}),
     ]:
         rule = find_rule_by_const(selection_entry["allOf"], "outcome_bucket", outcome)
-        ensure(rule is not None, f"nightly_batch_run selectionEntry missing outcome reverse guard for {outcome}")
+        ensure(
+            rule is not None,
+            f"nightly_batch_run selectionEntry missing outcome reverse guard for {outcome}",
+        )
         ensure(
             rule["then"]["properties"]["selection_disposition"] == expected,
             f"nightly_batch_run selectionEntry outcome_bucket={outcome} must map back to selection_disposition",
@@ -31162,7 +35614,10 @@ def check_nightly_batch_run() -> None:
 
     shard_plan_entry = schema["$defs"]["shardPlanEntry"]
     for field in ["shard_state", "blocked_entry_refs", "failure_reason_codes"]:
-        ensure(field in shard_plan_entry["required"], f"nightly_batch_run shardPlanEntry must require `{field}`")
+        ensure(
+            field in shard_plan_entry["required"],
+            f"nightly_batch_run shardPlanEntry must require `{field}`",
+        )
     ensure(
         shard_plan_entry["properties"]["shard_state"].get("enum")
         == [
@@ -31185,7 +35640,10 @@ def check_nightly_batch_run() -> None:
         ),
         None,
     )
-    ensure(failure_shard_rule is not None, "nightly_batch_run shardPlanEntry missing failure-state guard")
+    ensure(
+        failure_shard_rule is not None,
+        "nightly_batch_run shardPlanEntry missing failure-state guard",
+    )
     ensure(
         failure_shard_rule["then"]["properties"]["failure_reason_codes"].get("minItems") == 1,
         "nightly_batch_run failure or reclaim shard states must require failure_reason_codes",
@@ -31247,13 +35705,21 @@ def check_restore_drill_result() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("failure_reason_codes", {}).get("minItems") == 1
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("failure_reason_codes", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
-    ensure(failure_codes_rule is not None, "restore_drill_result missing failure_reason_codes reverse guard")
     ensure(
-        failure_codes_rule["then"]["properties"]["outcome"].get("enum") == ["FAILED", "QUARANTINED"],
+        failure_codes_rule is not None,
+        "restore_drill_result missing failure_reason_codes reverse guard",
+    )
+    ensure(
+        failure_codes_rule["then"]["properties"]["outcome"].get("enum")
+        == ["FAILED", "QUARANTINED"],
         "restore_drill_result non-empty failure_reason_codes must force FAILED or QUARANTINED",
     )
 
@@ -31263,15 +35729,20 @@ def check_restore_drill_result() -> None:
             for rule in schema["allOf"]
             if rule.get("if", {}).get("anyOf")
             and any(
-                candidate.get("properties", {}).get("audit_continuity_verified", {}).get("const") is False
+                candidate.get("properties", {}).get("audit_continuity_verified", {}).get("const")
+                is False
                 for candidate in rule["if"]["anyOf"]
             )
         ),
         None,
     )
-    ensure(failed_verification_rule is not None, "restore_drill_result missing failed-verification reverse guard")
     ensure(
-        failed_verification_rule["then"]["properties"]["outcome"].get("enum") == ["FAILED", "QUARANTINED"],
+        failed_verification_rule is not None,
+        "restore_drill_result missing failed-verification reverse guard",
+    )
+    ensure(
+        failed_verification_rule["then"]["properties"]["outcome"].get("enum")
+        == ["FAILED", "QUARANTINED"],
         "restore_drill_result failed verification flags must force FAILED or QUARANTINED",
     )
     failed_verification_fields = {
@@ -31296,18 +35767,38 @@ def check_restore_drill_result() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("audit_continuity_verified", {}).get("const") is True
-            and rule.get("if", {}).get("properties", {}).get("privacy_reconciliation_verified", {}).get("const")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("audit_continuity_verified", {})
+            .get("const")
             is True
-            and rule.get("if", {}).get("properties", {}).get("queue_rebuild_verified", {}).get("const") is True
-            and rule.get("if", {}).get("properties", {}).get("authority_rebuild_verified", {}).get("const")
+            and rule.get("if", {})
+            .get("properties", {})
+            .get("privacy_reconciliation_verified", {})
+            .get("const")
             is True
-            and rule.get("if", {}).get("properties", {}).get("authority_binding_revalidation_verified", {}).get("const")
+            and rule.get("if", {})
+            .get("properties", {})
+            .get("queue_rebuild_verified", {})
+            .get("const")
+            is True
+            and rule.get("if", {})
+            .get("properties", {})
+            .get("authority_rebuild_verified", {})
+            .get("const")
+            is True
+            and rule.get("if", {})
+            .get("properties", {})
+            .get("authority_binding_revalidation_verified", {})
+            .get("const")
             is True
         ),
         None,
     )
-    ensure(all_verified_rule is not None, "restore_drill_result missing all-verifications-passed reverse guard")
+    ensure(
+        all_verified_rule is not None,
+        "restore_drill_result missing all-verifications-passed reverse guard",
+    )
     ensure(
         all_verified_rule["then"]["properties"]["outcome"].get("const") == "PASSED",
         "restore_drill_result all verification booleans true must force PASSED",
@@ -31450,7 +35941,10 @@ def check_authority_sandbox_coverage_contract() -> None:
         "authority_sandbox_coverage_contract negativePathCoverageEntry.case_code must freeze the six required controlled-edge cases",
     )
     token_rotation_rule = find_rule_by_const(negative_entry["allOf"], "case_code", "TOKEN_ROTATION")
-    ensure(token_rotation_rule is not None, "authority_sandbox_coverage_contract missing TOKEN_ROTATION guard")
+    ensure(
+        token_rotation_rule is not None,
+        "authority_sandbox_coverage_contract missing TOKEN_ROTATION guard",
+    )
     ensure(
         token_rotation_rule["then"]["properties"]["expected_fail_closed_posture"].get("const")
         == "SEND_BLOCKED",
@@ -31464,8 +35958,11 @@ def check_authority_sandbox_coverage_contract() -> None:
         "authority_sandbox_coverage_contract missing AMBIGUOUS_INGRESS_QUARANTINE guard",
     )
     ensure(
-        ambiguous_ingress_rule["then"]["properties"]["ingress_receipt_ref_or_null"].get("type") == "string"
-        and ambiguous_ingress_rule["then"]["properties"]["expected_fail_closed_posture"].get("const")
+        ambiguous_ingress_rule["then"]["properties"]["ingress_receipt_ref_or_null"].get("type")
+        == "string"
+        and ambiguous_ingress_rule["then"]["properties"]["expected_fail_closed_posture"].get(
+            "const"
+        )
         == "INGRESS_QUARANTINED",
         "authority_sandbox_coverage_contract ambiguous ingress must require ingress_receipt_ref_or_null and INGRESS_QUARANTINED posture",
     )
@@ -31477,18 +35974,23 @@ def check_authority_sandbox_coverage_contract() -> None:
         "authority_sandbox_coverage_contract missing DUPLICATE_BUCKET_CHANGE guard",
     )
     ensure(
-        duplicate_bucket_rule["then"]["properties"]["duplicate_bucket_hash_or_null"].get("type") == "string"
+        duplicate_bucket_rule["then"]["properties"]["duplicate_bucket_hash_or_null"].get("type")
+        == "string"
         and duplicate_bucket_rule["then"]["properties"]["expected_fail_closed_posture"].get("const")
         == "DUPLICATE_SUPPRESSED",
         "authority_sandbox_coverage_contract duplicate bucket change must require duplicate_bucket_hash_or_null and DUPLICATE_SUPPRESSED posture",
     )
-    fraud_header_rule = find_rule_by_const(negative_entry["allOf"], "case_code", "FRAUD_HEADER_VALIDATION")
+    fraud_header_rule = find_rule_by_const(
+        negative_entry["allOf"], "case_code", "FRAUD_HEADER_VALIDATION"
+    )
     ensure(
         fraud_header_rule is not None,
         "authority_sandbox_coverage_contract missing FRAUD_HEADER_VALIDATION guard",
     )
     ensure(
-        fraud_header_rule["then"]["properties"]["request_identity_namespace_hash_or_null"].get("type")
+        fraud_header_rule["then"]["properties"]["request_identity_namespace_hash_or_null"].get(
+            "type"
+        )
         == "string",
         "authority_sandbox_coverage_contract fraud-header validation must retain request identity namespace lineage",
     )
@@ -31500,9 +36002,13 @@ def check_authority_sandbox_coverage_contract() -> None:
         "authority_sandbox_coverage_contract missing RECONCILIATION_BUDGET_EXHAUSTION guard",
     )
     ensure(
-        reconciliation_budget_rule["then"]["properties"]["interaction_record_ref_or_null"].get("type")
+        reconciliation_budget_rule["then"]["properties"]["interaction_record_ref_or_null"].get(
+            "type"
+        )
         == "string"
-        and reconciliation_budget_rule["then"]["properties"]["expected_fail_closed_posture"].get("const")
+        and reconciliation_budget_rule["then"]["properties"]["expected_fail_closed_posture"].get(
+            "const"
+        )
         == "REVIEW_ESCALATED",
         "authority_sandbox_coverage_contract reconciliation-budget exhaustion must require interaction_record_ref_or_null and REVIEW_ESCALATED posture",
     )
@@ -31529,7 +36035,9 @@ def check_verification_suite_result() -> None:
         "verification_suite_result AUTHORITY_SANDBOX must require enabled_provider_profile_refs",
     )
     ensure(
-        authority_rule["then"]["properties"]["authority_sandbox_coverage_contract_or_null"].get("type")
+        authority_rule["then"]["properties"]["authority_sandbox_coverage_contract_or_null"].get(
+            "type"
+        )
         == "object",
         "verification_suite_result AUTHORITY_SANDBOX must require authority_sandbox_coverage_contract_or_null",
     )
@@ -31542,7 +36050,9 @@ def check_verification_suite_result() -> None:
     )
 
     migration_rule = find_rule_by_const(schema["allOf"], "suite_family", "MIGRATION_VERIFICATION")
-    ensure(migration_rule is not None, "verification_suite_result missing migration verification guard")
+    ensure(
+        migration_rule is not None, "verification_suite_result missing migration verification guard"
+    )
     ensure(
         migration_rule["then"]["properties"]["migration_plan_ref"].get("type") == "string",
         "verification_suite_result MIGRATION_VERIFICATION must require migration_plan_ref",
@@ -31582,11 +36092,14 @@ def check_verification_suite_result() -> None:
             (
                 candidate
                 for candidate in schema["allOf"]
-                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type") == "string"
+                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type")
+                == "string"
             ),
             None,
         )
-        ensure(reverse_rule is not None, f"verification_suite_result missing reverse guard for {field}")
+        ensure(
+            reverse_rule is not None, f"verification_suite_result missing reverse guard for {field}"
+        )
         ensure(
             reverse_rule["then"]["properties"]["suite_family"].get("const") == "RESTORE_DRILL",
             f"verification_suite_result non-null {field} must force suite_family=RESTORE_DRILL",
@@ -31638,7 +36151,9 @@ def check_verification_suite_result() -> None:
         "verification_suite_result non-null authority_sandbox_coverage_contract_or_null must force suite_family=AUTHORITY_SANDBOX",
     )
     ensure(
-        authority_reverse_rule["then"]["properties"]["enabled_provider_profile_refs"].get("minItems")
+        authority_reverse_rule["then"]["properties"]["enabled_provider_profile_refs"].get(
+            "minItems"
+        )
         == 1,
         "verification_suite_result non-null authority_sandbox_coverage_contract_or_null must force enabled provider profiles",
     )
@@ -31647,19 +36162,23 @@ def check_verification_suite_result() -> None:
 def check_build_artifact() -> None:
     schema = load_schema("build_artifact.schema.json")
 
-    desktop_rule = find_rule_by_contains_const(schema["allOf"], "distribution_targets", "MACOS_DESKTOP")
+    desktop_rule = find_rule_by_contains_const(
+        schema["allOf"], "distribution_targets", "MACOS_DESKTOP"
+    )
     ensure(desktop_rule is not None, "build_artifact missing MACOS_DESKTOP evidence guard")
     ensure(
         desktop_rule["then"]["properties"]["desktop_notarization_ref"].get("type") == "string",
         "build_artifact MACOS_DESKTOP must require desktop_notarization_ref",
     )
     ensure(
-        desktop_rule["then"]["properties"]["hardened_runtime_attestation_ref"].get("type") == "string",
+        desktop_rule["then"]["properties"]["hardened_runtime_attestation_ref"].get("type")
+        == "string",
         "build_artifact MACOS_DESKTOP must require hardened_runtime_attestation_ref",
     )
     ensure(
         desktop_rule["else"]["properties"]["desktop_notarization_ref"].get("type") == "null"
-        and desktop_rule["else"]["properties"]["hardened_runtime_attestation_ref"].get("type") == "null",
+        and desktop_rule["else"]["properties"]["hardened_runtime_attestation_ref"].get("type")
+        == "null",
         "build_artifact non-desktop targets must clear desktop-only evidence refs",
     )
 
@@ -31668,7 +36187,8 @@ def check_build_artifact() -> None:
             (
                 candidate
                 for candidate in schema["allOf"]
-                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type") == "string"
+                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type")
+                == "string"
             ),
             None,
         )
@@ -31727,8 +36247,13 @@ def check_authority_ingress_receipt() -> None:
             f"authority_ingress_receipt BOUND correlation must require {field}",
         )
 
-    weak_bind_rule = find_rule_by_const(schema["allOf"], "correlation_status", "BOUND_WITH_AUTHORITY_REFERENCE_ONLY")
-    ensure(weak_bind_rule is not None, "authority_ingress_receipt missing BOUND_WITH_AUTHORITY_REFERENCE_ONLY guard")
+    weak_bind_rule = find_rule_by_const(
+        schema["allOf"], "correlation_status", "BOUND_WITH_AUTHORITY_REFERENCE_ONLY"
+    )
+    ensure(
+        weak_bind_rule is not None,
+        "authority_ingress_receipt missing BOUND_WITH_AUTHORITY_REFERENCE_ONLY guard",
+    )
     weak_then = weak_bind_rule["then"]["properties"]
     ensure(
         weak_then["authority_reference"].get("type") == "string"
@@ -31751,12 +36276,18 @@ def check_authority_ingress_receipt() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("correlation_status", {}).get("enum")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("correlation_status", {})
+            .get("enum")
             == ["BOUND_WITH_AUTHORITY_REFERENCE_ONLY", "AMBIGUOUS", "UNBOUND"]
         ),
         None,
     )
-    ensure(weak_state_rule is not None, "authority_ingress_receipt missing weak-correlation state guard")
+    ensure(
+        weak_state_rule is not None,
+        "authority_ingress_receipt missing weak-correlation state guard",
+    )
     ensure(
         weak_state_rule["then"]["properties"]["receipt_state"].get("enum")
         == ["QUARANTINED", "DUPLICATE_SUPPRESSED"],
@@ -31768,7 +36299,10 @@ def check_authority_ingress_receipt() -> None:
     )
 
     failed_auth_rule = find_rule_by_const(schema["allOf"], "authenticated_channel_state", "FAILED")
-    ensure(failed_auth_rule is not None, "authority_ingress_receipt missing FAILED authentication guard")
+    ensure(
+        failed_auth_rule is not None,
+        "authority_ingress_receipt missing FAILED authentication guard",
+    )
     ensure(
         failed_auth_rule["then"]["properties"]["receipt_state"].get("const") == "QUARANTINED",
         "authority_ingress_receipt authenticated_channel_state=FAILED must force receipt_state=QUARANTINED",
@@ -31805,7 +36339,9 @@ def check_authority_ingress_receipt() -> None:
     )
 
     quarantined_rule = find_rule_by_const(schema["allOf"], "receipt_state", "QUARANTINED")
-    ensure(quarantined_rule is not None, "authority_ingress_receipt missing QUARANTINED state guard")
+    ensure(
+        quarantined_rule is not None, "authority_ingress_receipt missing QUARANTINED state guard"
+    )
     quarantined_then = quarantined_rule["then"]["properties"]
     ensure(
         quarantined_then["canonical_ingress_receipt_ref"].get("type") == "null",
@@ -31818,7 +36354,10 @@ def check_authority_ingress_receipt() -> None:
     )
 
     duplicate_rule = find_rule_by_const(schema["allOf"], "receipt_state", "DUPLICATE_SUPPRESSED")
-    ensure(duplicate_rule is not None, "authority_ingress_receipt missing DUPLICATE_SUPPRESSED state guard")
+    ensure(
+        duplicate_rule is not None,
+        "authority_ingress_receipt missing DUPLICATE_SUPPRESSED state guard",
+    )
     duplicate_then = duplicate_rule["then"]["properties"]
     ensure(
         duplicate_then["authenticated_channel_state"].get("const") == "AUTHENTICATED",
@@ -31839,12 +36378,18 @@ def check_authority_ingress_receipt() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("normalized_response_ref", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("normalized_response_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(normalized_ref_rule is not None, "authority_ingress_receipt missing normalized_response_ref reverse guard")
+    ensure(
+        normalized_ref_rule is not None,
+        "authority_ingress_receipt missing normalized_response_ref reverse guard",
+    )
     ensure(
         normalized_ref_rule["then"]["properties"]["receipt_state"].get("const") == "NORMALIZED",
         "authority_ingress_receipt non-null normalized_response_ref must force receipt_state=NORMALIZED",
@@ -31854,11 +36399,15 @@ def check_authority_ingress_receipt() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("quarantined_at", {}).get("type") == "string"
+            if candidate.get("if", {}).get("properties", {}).get("quarantined_at", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(quarantined_at_rule is not None, "authority_ingress_receipt missing quarantined_at reverse guard")
+    ensure(
+        quarantined_at_rule is not None,
+        "authority_ingress_receipt missing quarantined_at reverse guard",
+    )
     ensure(
         quarantined_at_rule["then"]["properties"]["receipt_state"].get("const") == "QUARANTINED",
         "authority_ingress_receipt non-null quarantined_at must force receipt_state=QUARANTINED",
@@ -31868,11 +36417,18 @@ def check_authority_ingress_receipt() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("quarantine_reason_codes", {}).get("minItems") == 1
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("quarantine_reason_codes", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
-    ensure(quarantine_reason_rule is not None, "authority_ingress_receipt missing quarantine_reason_codes reverse guard")
+    ensure(
+        quarantine_reason_rule is not None,
+        "authority_ingress_receipt missing quarantine_reason_codes reverse guard",
+    )
     ensure(
         quarantine_reason_rule["then"]["properties"]["receipt_state"].get("const") == "QUARANTINED",
         "authority_ingress_receipt non-empty quarantine_reason_codes must force receipt_state=QUARANTINED",
@@ -31882,14 +36438,21 @@ def check_authority_ingress_receipt() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("canonical_ingress_receipt_ref", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("canonical_ingress_receipt_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(canonical_ref_rule is not None, "authority_ingress_receipt missing canonical_ingress_receipt_ref reverse guard")
     ensure(
-        canonical_ref_rule["then"]["properties"]["receipt_state"].get("const") == "DUPLICATE_SUPPRESSED",
+        canonical_ref_rule is not None,
+        "authority_ingress_receipt missing canonical_ingress_receipt_ref reverse guard",
+    )
+    ensure(
+        canonical_ref_rule["then"]["properties"]["receipt_state"].get("const")
+        == "DUPLICATE_SUPPRESSED",
         "authority_ingress_receipt non-null canonical_ingress_receipt_ref must force receipt_state=DUPLICATE_SUPPRESSED",
     )
 
@@ -31897,21 +36460,34 @@ def check_authority_ingress_receipt() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("reconciliation_owner_ref", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("reconciliation_owner_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(reconciliation_owner_rule is not None, "authority_ingress_receipt missing reconciliation_owner_ref reverse guard")
     ensure(
-        reconciliation_owner_rule["then"]["properties"]["receipt_state"].get("const") == "QUARANTINED",
+        reconciliation_owner_rule is not None,
+        "authority_ingress_receipt missing reconciliation_owner_ref reverse guard",
+    )
+    ensure(
+        reconciliation_owner_rule["then"]["properties"]["receipt_state"].get("const")
+        == "QUARANTINED",
         "authority_ingress_receipt non-null reconciliation_owner_ref must force receipt_state=QUARANTINED",
     )
 
-    response_body_hash_none_rule = find_rule_by_const(schema["allOf"], "response_body_hash", "<NONE>")
-    ensure(response_body_hash_none_rule is not None, "authority_ingress_receipt missing <NONE> response_body_hash reverse guard")
+    response_body_hash_none_rule = find_rule_by_const(
+        schema["allOf"], "response_body_hash", "<NONE>"
+    )
     ensure(
-        response_body_hash_none_rule["then"]["properties"]["response_body_ref"].get("type") == "null",
+        response_body_hash_none_rule is not None,
+        "authority_ingress_receipt missing <NONE> response_body_hash reverse guard",
+    )
+    ensure(
+        response_body_hash_none_rule["then"]["properties"]["response_body_ref"].get("type")
+        == "null",
         "authority_ingress_receipt response_body_hash=<NONE> must force response_body_ref=null",
     )
 
@@ -31919,13 +36495,21 @@ def check_authority_ingress_receipt() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("response_body_ref", {}).get("type") == "null"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("response_body_ref", {})
+            .get("type")
+            == "null"
         ),
         None,
     )
-    ensure(response_body_ref_null_rule is not None, "authority_ingress_receipt missing response_body_ref null reverse guard")
     ensure(
-        response_body_ref_null_rule["then"]["properties"]["response_body_hash"].get("const") == "<NONE>",
+        response_body_ref_null_rule is not None,
+        "authority_ingress_receipt missing response_body_ref null reverse guard",
+    )
+    ensure(
+        response_body_ref_null_rule["then"]["properties"]["response_body_hash"].get("const")
+        == "<NONE>",
         "authority_ingress_receipt response_body_ref=null must force response_body_hash=<NONE>",
     )
 
@@ -31937,13 +36521,16 @@ def check_authority_ingress_investigation_snapshot() -> None:
         "authority_ingress_investigation_snapshot",
         expected_scope_class="AUTHORITY_INGRESS_RECEIPT",
     )
-    check_authority_ingress_correlation_contract_binding(schema, "authority_ingress_investigation_snapshot")
+    check_authority_ingress_correlation_contract_binding(
+        schema, "authority_ingress_investigation_snapshot"
+    )
     ensure(
         schema.get("additionalProperties") is False,
         "authority_ingress_investigation_snapshot must stay closed to ungoverned fields",
     )
     ensure(
-        schema["properties"]["artifact_type"].get("const") == "AuthorityIngressInvestigationSnapshot",
+        schema["properties"]["artifact_type"].get("const")
+        == "AuthorityIngressInvestigationSnapshot",
         "authority_ingress_investigation_snapshot.artifact_type must stay pinned",
     )
     ensure(
@@ -31964,14 +36551,21 @@ def check_authority_ingress_investigation_snapshot() -> None:
     )
 
     quarantined_rule = find_rule_by_const(schema["allOf"], "receipt_state", "QUARANTINED")
-    ensure(quarantined_rule is not None, "authority_ingress_investigation_snapshot missing QUARANTINED rule")
     ensure(
-        quarantined_rule["then"]["properties"]["normalized_response_ref_or_null"].get("type") == "null",
+        quarantined_rule is not None,
+        "authority_ingress_investigation_snapshot missing QUARANTINED rule",
+    )
+    ensure(
+        quarantined_rule["then"]["properties"]["normalized_response_ref_or_null"].get("type")
+        == "null",
         "authority_ingress_investigation_snapshot QUARANTINED posture must clear normalized_response_ref_or_null",
     )
 
     duplicate_rule = find_rule_by_const(schema["allOf"], "receipt_state", "DUPLICATE_SUPPRESSED")
-    ensure(duplicate_rule is not None, "authority_ingress_investigation_snapshot missing DUPLICATE_SUPPRESSED rule")
+    ensure(
+        duplicate_rule is not None,
+        "authority_ingress_investigation_snapshot missing DUPLICATE_SUPPRESSED rule",
+    )
     duplicate_then = duplicate_rule["then"]["properties"]
     ensure(
         duplicate_then["authenticated_channel_state"].get("const") == "AUTHENTICATED",
@@ -31982,13 +36576,16 @@ def check_authority_ingress_investigation_snapshot() -> None:
         "authority_ingress_investigation_snapshot DUPLICATE_SUPPRESSED posture must clear normalized_response_ref_or_null",
     )
 
-    response_body_hash_none_rule = find_rule_by_const(schema["allOf"], "response_body_hash", "<NONE>")
+    response_body_hash_none_rule = find_rule_by_const(
+        schema["allOf"], "response_body_hash", "<NONE>"
+    )
     ensure(
         response_body_hash_none_rule is not None,
         "authority_ingress_investigation_snapshot missing <NONE> response_body_hash reverse guard",
     )
     ensure(
-        response_body_hash_none_rule["then"]["properties"]["response_body_ref"].get("type") == "null",
+        response_body_hash_none_rule["then"]["properties"]["response_body_ref"].get("type")
+        == "null",
         "authority_ingress_investigation_snapshot response_body_hash=<NONE> must force response_body_ref=null",
     )
 
@@ -32027,22 +36624,30 @@ def check_deployment_release() -> None:
         "deployment_release PIN_BASELINE must clear canary_fraction",
     )
 
-    fail_forward_rule = find_rule_by_const(schema["allOf"], "rollout_strategy", "FAIL_FORWARD_COMPENSATING")
-    ensure(fail_forward_rule is not None, "deployment_release missing FAIL_FORWARD_COMPENSATING strategy guard")
+    fail_forward_rule = find_rule_by_const(
+        schema["allOf"], "rollout_strategy", "FAIL_FORWARD_COMPENSATING"
+    )
+    ensure(
+        fail_forward_rule is not None,
+        "deployment_release missing FAIL_FORWARD_COMPENSATING strategy guard",
+    )
     ensure(
         fail_forward_rule["then"]["properties"]["rollout_state"].get("const") == "FAILED_FORWARD",
         "deployment_release FAIL_FORWARD_COMPENSATING must force rollout_state=FAILED_FORWARD",
     )
     ensure(
-        fail_forward_rule["then"]["properties"]["rollback_boundary_state"].get("const") == "FAIL_FORWARD_ONLY",
+        fail_forward_rule["then"]["properties"]["rollback_boundary_state"].get("const")
+        == "FAIL_FORWARD_ONLY",
         "deployment_release FAIL_FORWARD_COMPENSATING must force rollback_boundary_state=FAIL_FORWARD_ONLY",
     )
     ensure(
-        fail_forward_rule["then"]["properties"]["compensating_release_id_or_null"].get("type") == "string",
+        fail_forward_rule["then"]["properties"]["compensating_release_id_or_null"].get("type")
+        == "string",
         "deployment_release FAIL_FORWARD_COMPENSATING must require compensating_release_id_or_null",
     )
     ensure(
-        fail_forward_rule["then"]["properties"]["fail_forward_owner_ref_or_null"].get("type") == "string",
+        fail_forward_rule["then"]["properties"]["fail_forward_owner_ref_or_null"].get("type")
+        == "string",
         "deployment_release FAIL_FORWARD_COMPENSATING must require fail_forward_owner_ref_or_null",
     )
 
@@ -32061,11 +36666,14 @@ def check_deployment_release() -> None:
         "deployment_release ABORTED must clear rollback_of_release_id",
     )
     ensure(
-        aborted_rule["then"]["properties"]["rollback_boundary_state"].get("const") == "ROLLBACK_ALLOWED",
+        aborted_rule["then"]["properties"]["rollback_boundary_state"].get("const")
+        == "ROLLBACK_ALLOWED",
         "deployment_release ABORTED must force rollback_boundary_state=ROLLBACK_ALLOWED",
     )
     ensure(
-        aborted_rule["then"]["properties"]["schema_bundle_compatibility_gate_contract"]["properties"]["rollback_boundary_state"].get("const")
+        aborted_rule["then"]["properties"]["schema_bundle_compatibility_gate_contract"][
+            "properties"
+        ]["rollback_boundary_state"].get("const")
         == "ROLLBACK_ALLOWED",
         "deployment_release ABORTED must keep schema_bundle_compatibility_gate_contract.rollback_boundary_state=ROLLBACK_ALLOWED",
     )
@@ -32079,22 +36687,30 @@ def check_deployment_release() -> None:
     )
 
     failed_forward_rule = find_rule_by_const(schema["allOf"], "rollout_state", "FAILED_FORWARD")
-    ensure(failed_forward_rule is not None, "deployment_release missing FAILED_FORWARD rollout-state guard")
     ensure(
-        failed_forward_rule["then"]["properties"]["rollback_boundary_state"].get("const") == "FAIL_FORWARD_ONLY",
+        failed_forward_rule is not None,
+        "deployment_release missing FAILED_FORWARD rollout-state guard",
+    )
+    ensure(
+        failed_forward_rule["then"]["properties"]["rollback_boundary_state"].get("const")
+        == "FAIL_FORWARD_ONLY",
         "deployment_release FAILED_FORWARD must force rollback_boundary_state=FAIL_FORWARD_ONLY",
     )
     ensure(
-        failed_forward_rule["then"]["properties"]["schema_bundle_compatibility_gate_contract"]["properties"]["rollback_boundary_state"].get("const")
+        failed_forward_rule["then"]["properties"]["schema_bundle_compatibility_gate_contract"][
+            "properties"
+        ]["rollback_boundary_state"].get("const")
         == "FAIL_FORWARD_ONLY",
         "deployment_release FAILED_FORWARD must keep schema_bundle_compatibility_gate_contract.rollback_boundary_state=FAIL_FORWARD_ONLY",
     )
     ensure(
-        failed_forward_rule["then"]["properties"]["compensating_release_id_or_null"].get("type") == "string",
+        failed_forward_rule["then"]["properties"]["compensating_release_id_or_null"].get("type")
+        == "string",
         "deployment_release FAILED_FORWARD must require compensating_release_id_or_null",
     )
     ensure(
-        failed_forward_rule["then"]["properties"]["fail_forward_owner_ref_or_null"].get("type") == "string",
+        failed_forward_rule["then"]["properties"]["fail_forward_owner_ref_or_null"].get("type")
+        == "string",
         "deployment_release FAILED_FORWARD must require fail_forward_owner_ref_or_null",
     )
     ensure(
@@ -32103,13 +36719,18 @@ def check_deployment_release() -> None:
     )
 
     rolled_back_rule = find_rule_by_const(schema["allOf"], "rollout_state", "ROLLED_BACK")
-    ensure(rolled_back_rule is not None, "deployment_release missing ROLLED_BACK rollback-boundary guard")
+    ensure(
+        rolled_back_rule is not None,
+        "deployment_release missing ROLLED_BACK rollback-boundary guard",
+    )
     ensure(
         rolled_back_rule["then"]["properties"]["rollback_of_release_id"].get("type") == "string",
         "deployment_release ROLLED_BACK must require rollback_of_release_id",
     )
     ensure(
-        rolled_back_rule["then"]["properties"]["schema_reader_window_contract"]["properties"]["window_state"].get("enum")
+        rolled_back_rule["then"]["properties"]["schema_reader_window_contract"]["properties"][
+            "window_state"
+        ].get("enum")
         == [
             "EXPAND_ONLY_PREVIOUS_READERS_SUPPORTED",
             "BACKFILL_IN_PROGRESS_PREVIOUS_READERS_SUPPORTED",
@@ -32118,20 +36739,25 @@ def check_deployment_release() -> None:
         "deployment_release ROLLED_BACK must stay limited to still-open schema reader windows",
     )
     ensure(
-        rolled_back_rule["then"]["properties"]["rollback_boundary_state"].get("const") == "ROLLBACK_ALLOWED",
+        rolled_back_rule["then"]["properties"]["rollback_boundary_state"].get("const")
+        == "ROLLBACK_ALLOWED",
         "deployment_release ROLLED_BACK must force rollback_boundary_state=ROLLBACK_ALLOWED",
     )
     ensure(
-        rolled_back_rule["then"]["properties"]["schema_bundle_compatibility_gate_contract"]["properties"]["rollback_boundary_state"].get("const")
+        rolled_back_rule["then"]["properties"]["schema_bundle_compatibility_gate_contract"][
+            "properties"
+        ]["rollback_boundary_state"].get("const")
         == "ROLLBACK_ALLOWED",
         "deployment_release ROLLED_BACK must keep schema_bundle_compatibility_gate_contract.rollback_boundary_state=ROLLBACK_ALLOWED",
     )
     ensure(
-        rolled_back_rule["then"]["properties"]["compensating_release_id_or_null"].get("type") == "null",
+        rolled_back_rule["then"]["properties"]["compensating_release_id_or_null"].get("type")
+        == "null",
         "deployment_release ROLLED_BACK must clear compensating_release_id_or_null",
     )
     ensure(
-        rolled_back_rule["then"]["properties"]["fail_forward_owner_ref_or_null"].get("type") == "null",
+        rolled_back_rule["then"]["properties"]["fail_forward_owner_ref_or_null"].get("type")
+        == "null",
         "deployment_release ROLLED_BACK must clear fail_forward_owner_ref_or_null",
     )
 
@@ -32139,12 +36765,18 @@ def check_deployment_release() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("compensating_release_id_or_null", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("compensating_release_id_or_null", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(compensating_rule is not None, "deployment_release missing compensating_release_id_or_null reverse guard")
+    ensure(
+        compensating_rule is not None,
+        "deployment_release missing compensating_release_id_or_null reverse guard",
+    )
     ensure(
         compensating_rule["then"]["properties"]["rollout_state"].get("const") == "FAILED_FORWARD",
         "deployment_release non-null compensating_release_id_or_null must force rollout_state=FAILED_FORWARD",
@@ -32154,12 +36786,18 @@ def check_deployment_release() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("fail_forward_owner_ref_or_null", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("fail_forward_owner_ref_or_null", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(owner_rule is not None, "deployment_release missing fail_forward_owner_ref_or_null reverse guard")
+    ensure(
+        owner_rule is not None,
+        "deployment_release missing fail_forward_owner_ref_or_null reverse guard",
+    )
     ensure(
         owner_rule["then"]["properties"]["rollout_state"].get("const") == "FAILED_FORWARD",
         "deployment_release non-null fail_forward_owner_ref_or_null must force rollout_state=FAILED_FORWARD",
@@ -32179,9 +36817,13 @@ def check_deployment_release() -> None:
         ),
         None,
     )
-    ensure(closed_window_rule is not None, "deployment_release missing closed-reader-window fail-forward guard")
     ensure(
-        closed_window_rule["then"]["properties"]["rollback_boundary_state"].get("const") == "FAIL_FORWARD_ONLY",
+        closed_window_rule is not None,
+        "deployment_release missing closed-reader-window fail-forward guard",
+    )
+    ensure(
+        closed_window_rule["then"]["properties"]["rollback_boundary_state"].get("const")
+        == "FAIL_FORWARD_ONLY",
         "deployment_release closed reader windows must force rollback_boundary_state=FAIL_FORWARD_ONLY",
     )
 
@@ -32204,7 +36846,8 @@ def check_deployment_release() -> None:
         "deployment_release missing schema_bundle_compatibility_gate_contract fail-forward reverse guard",
     )
     ensure(
-        gate_closed_rule["then"]["properties"]["rollback_boundary_state"].get("const") == "FAIL_FORWARD_ONLY",
+        gate_closed_rule["then"]["properties"]["rollback_boundary_state"].get("const")
+        == "FAIL_FORWARD_ONLY",
         "deployment_release schema_bundle_compatibility_gate_contract FAIL_FORWARD_ONLY must force rollback_boundary_state=FAIL_FORWARD_ONLY",
     )
 
@@ -32212,11 +36855,17 @@ def check_deployment_release() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("emergency_override_ref", {}).get("type") == "string"
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("emergency_override_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(override_rule is not None, "deployment_release missing emergency_override_ref reverse guard")
+    ensure(
+        override_rule is not None, "deployment_release missing emergency_override_ref reverse guard"
+    )
     ensure(
         override_rule["then"]["properties"]["rollout_strategy"].get("const") == "EMERGENCY_PROMOTE",
         "deployment_release non-null emergency_override_ref must force EMERGENCY_PROMOTE",
@@ -32227,9 +36876,12 @@ def check_authority_link() -> None:
     schema = load_schema("authority_link.schema.json")
 
     mismatch_rule = find_rule_by_const(schema["allOf"], "binding_health", "CLIENT_BINDING_MISMATCH")
-    ensure(mismatch_rule is not None, "authority_link missing CLIENT_BINDING_MISMATCH reverse guard")
     ensure(
-        mismatch_rule["then"]["properties"]["token_client_binding_state"].get("const") == "MISMATCH",
+        mismatch_rule is not None, "authority_link missing CLIENT_BINDING_MISMATCH reverse guard"
+    )
+    ensure(
+        mismatch_rule["then"]["properties"]["token_client_binding_state"].get("const")
+        == "MISMATCH",
         "authority_link binding_health=CLIENT_BINDING_MISMATCH must force token_client_binding_state=MISMATCH",
     )
 
@@ -32237,13 +36889,18 @@ def check_authority_link() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("delegation_grant_ref", {}).get("type") == "null"
+            if rule.get("if", {}).get("properties", {}).get("delegation_grant_ref", {}).get("type")
+            == "null"
         ),
         None,
     )
-    ensure(delegation_null_rule is not None, "authority_link missing delegation_grant_ref=null reverse guard")
     ensure(
-        delegation_null_rule["then"]["properties"]["delegation_state"].get("const") == "NOT_REQUIRED",
+        delegation_null_rule is not None,
+        "authority_link missing delegation_grant_ref=null reverse guard",
+    )
+    ensure(
+        delegation_null_rule["then"]["properties"]["delegation_state"].get("const")
+        == "NOT_REQUIRED",
         "authority_link null delegation_grant_ref must force delegation_state=NOT_REQUIRED",
     )
 
@@ -32265,18 +36922,25 @@ def check_authority_link() -> None:
         "authority_link binding_health=LIMITED_SCOPE must force lifecycle_state=AUTHORISED_LIMITED",
     )
 
-    active_health_rule = find_rule_by_enum(schema["allOf"], "binding_health", ["HEALTHY", "EXPIRING_SOON"])
-    ensure(active_health_rule is not None, "authority_link missing healthy-or-expiring reverse guard")
+    active_health_rule = find_rule_by_enum(
+        schema["allOf"], "binding_health", ["HEALTHY", "EXPIRING_SOON"]
+    )
     ensure(
-        active_health_rule["then"]["properties"]["lifecycle_state"].get("const") == "AUTHORISED_ACTIVE",
+        active_health_rule is not None, "authority_link missing healthy-or-expiring reverse guard"
+    )
+    ensure(
+        active_health_rule["then"]["properties"]["lifecycle_state"].get("const")
+        == "AUTHORISED_ACTIVE",
         "authority_link healthy-or-expiring binding health must force lifecycle_state=AUTHORISED_ACTIVE",
     )
     ensure(
-        active_health_rule["then"]["properties"]["token_client_binding_state"].get("const") == "BOUND",
+        active_health_rule["then"]["properties"]["token_client_binding_state"].get("const")
+        == "BOUND",
         "authority_link healthy-or-expiring binding health must force token_client_binding_state=BOUND",
     )
     ensure(
-        active_health_rule["then"]["properties"]["delegation_state"].get("enum") == ["NOT_REQUIRED", "SATISFIED"],
+        active_health_rule["then"]["properties"]["delegation_state"].get("enum")
+        == ["NOT_REQUIRED", "SATISFIED"],
         "authority_link healthy-or-expiring binding health must force delegation_state in NOT_REQUIRED or SATISFIED",
     )
 
@@ -32287,7 +36951,9 @@ def check_authority_link() -> None:
         ("EXPIRED", "EXPIRED"),
     ]:
         rule = find_rule_by_const(schema["allOf"], "binding_health", health)
-        ensure(rule is not None, f"authority_link missing reverse guard for binding_health={health}")
+        ensure(
+            rule is not None, f"authority_link missing reverse guard for binding_health={health}"
+        )
         ensure(
             rule["then"]["properties"]["lifecycle_state"].get("const") == state,
             f"authority_link binding_health={health} must force lifecycle_state={state}",
@@ -32297,7 +36963,8 @@ def check_authority_link() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("revoked_at", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("revoked_at", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -32311,7 +36978,8 @@ def check_authority_link() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("superseded_by_link_id", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("superseded_by_link_id", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -32326,7 +36994,9 @@ def check_connector_binding() -> None:
     schema = load_schema("connector_binding.schema.json")
 
     mismatch_rule = find_rule_by_const(schema["allOf"], "health_state", "CLIENT_BINDING_MISMATCH")
-    ensure(mismatch_rule is not None, "connector_binding missing CLIENT_BINDING_MISMATCH reverse guard")
+    ensure(
+        mismatch_rule is not None, "connector_binding missing CLIENT_BINDING_MISMATCH reverse guard"
+    )
     ensure(
         mismatch_rule["then"]["properties"]["client_binding_state"].get("const") == "MISMATCH",
         "connector_binding health_state=CLIENT_BINDING_MISMATCH must force client_binding_state=MISMATCH",
@@ -32357,7 +37027,8 @@ def check_connector_binding() -> None:
         "connector_binding healthy-or-expiring health_state must force client_binding_state=BOUND",
     )
     ensure(
-        active_rule["then"]["properties"]["delegation_state"].get("enum") == ["NOT_REQUIRED", "SATISFIED"],
+        active_rule["then"]["properties"]["delegation_state"].get("enum")
+        == ["NOT_REQUIRED", "SATISFIED"],
         "connector_binding healthy-or-expiring health_state must force delegation_state in NOT_REQUIRED or SATISFIED",
     )
 
@@ -32365,7 +37036,8 @@ def check_connector_binding() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("revoked_at", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("revoked_at", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -32379,7 +37051,10 @@ def check_connector_binding() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("superseded_by_binding_id", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("superseded_by_binding_id", {})
+            .get("type")
             == "string"
         ),
         None,
@@ -32403,14 +37078,18 @@ def check_delegation_grant() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("basis_type", {}).get("const") == "CLIENT_GRANTED"
+            if rule.get("if", {}).get("properties", {}).get("basis_type", {}).get("const")
+            == "CLIENT_GRANTED"
             and "imported_evidence_fresh_until" in rule.get("then", {}).get("properties", {})
         ),
         None,
     )
-    ensure(non_import_rule is not None, "delegation_grant missing non-import freshness-clearing guard")
     ensure(
-        non_import_rule["then"]["properties"]["imported_evidence_fresh_until"].get("type") == "null",
+        non_import_rule is not None, "delegation_grant missing non-import freshness-clearing guard"
+    )
+    ensure(
+        non_import_rule["then"]["properties"]["imported_evidence_fresh_until"].get("type")
+        == "null",
         "delegation_grant CLIENT_GRANTED basis must clear imported_evidence_fresh_until",
     )
 
@@ -32418,12 +37097,18 @@ def check_delegation_grant() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("imported_evidence_fresh_until", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("imported_evidence_fresh_until", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(imported_reverse_rule is not None, "delegation_grant missing imported freshness reverse guard")
+    ensure(
+        imported_reverse_rule is not None,
+        "delegation_grant missing imported freshness reverse guard",
+    )
     ensure(
         imported_reverse_rule["then"]["properties"]["basis_type"].get("enum")
         == ["SELF_ASSESSMENT_IMPORTED", "DIGITAL_HANDSHAKE"],
@@ -32434,7 +37119,8 @@ def check_delegation_grant() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("revoked_at", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("revoked_at", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -32448,7 +37134,10 @@ def check_delegation_grant() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("superseded_by_grant_id", {}).get("type")
+            if rule.get("if", {})
+            .get("properties", {})
+            .get("superseded_by_grant_id", {})
+            .get("type")
             == "string"
         ),
         None,
@@ -32487,7 +37176,8 @@ def check_exceptional_authority_grant() -> None:
         (
             rule
             for rule in schema["allOf"]
-            if rule.get("if", {}).get("properties", {}).get("revoked_at", {}).get("type") == "string"
+            if rule.get("if", {}).get("properties", {}).get("revoked_at", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -32497,8 +37187,13 @@ def check_exceptional_authority_grant() -> None:
         "exceptional_authority_grant non-null revoked_at must force lifecycle_state=REVOKED",
     )
 
-    active_family_rule = find_rule_by_enum(schema["allOf"], "lifecycle_state", ["ACTIVE", "EXHAUSTED", "EXPIRED"])
-    ensure(active_family_rule is not None, "exceptional_authority_grant missing activated lifecycle guard")
+    active_family_rule = find_rule_by_enum(
+        schema["allOf"], "lifecycle_state", ["ACTIVE", "EXHAUSTED", "EXPIRED"]
+    )
+    ensure(
+        active_family_rule is not None,
+        "exceptional_authority_grant missing activated lifecycle guard",
+    )
     ensure(
         active_family_rule["then"]["properties"]["activated_at"].get("type") == "string",
         "exceptional_authority_grant ACTIVE/EXHAUSTED/EXPIRED must require activated_at",
@@ -32522,7 +37217,10 @@ def check_authority_operation_profile() -> None:
     fraud_rule = schema["allOf"][0]
 
     ensure("oneOf" in fraud_rule, "authority_operation_profile fraud-header rule must use oneOf")
-    ensure("anyOf" not in fraud_rule, "authority_operation_profile fraud-header rule must not use anyOf")
+    ensure(
+        "anyOf" not in fraud_rule,
+        "authority_operation_profile fraud-header rule must not use anyOf",
+    )
     ensure(
         len(fraud_rule["oneOf"]) == 2,
         "authority_operation_profile fraud-header rule must have exactly two branches",
@@ -32532,7 +37230,8 @@ def check_authority_operation_profile() -> None:
         "authority_operation_profile fraud-header profile branch must require fraud_header_profile_ref",
     )
     ensure(
-        fraud_rule["oneOf"][1]["properties"]["fraud_header_exemption_reason"].get("type") == "string",
+        fraud_rule["oneOf"][1]["properties"]["fraud_header_exemption_reason"].get("type")
+        == "string",
         "authority_operation_profile fraud-header exemption branch must require fraud_header_exemption_reason",
     )
 
@@ -32551,11 +37250,18 @@ def check_authority_operation_profile() -> None:
         ),
         None,
     )
-    ensure(none_method_rule is not None, "authority_operation_profile missing reconciliation_rules.method=NONE guard")
     ensure(
-        none_method_rule["then"]["properties"]["reconciliation_rules"]["properties"]["max_auto_reconciliation_attempts"].get("const")
+        none_method_rule is not None,
+        "authority_operation_profile missing reconciliation_rules.method=NONE guard",
+    )
+    ensure(
+        none_method_rule["then"]["properties"]["reconciliation_rules"]["properties"][
+            "max_auto_reconciliation_attempts"
+        ].get("const")
         == 0
-        and none_method_rule["then"]["properties"]["reconciliation_rules"]["properties"]["cadence_seconds"].get("type")
+        and none_method_rule["then"]["properties"]["reconciliation_rules"]["properties"][
+            "cadence_seconds"
+        ].get("type")
         == "null",
         "authority_operation_profile method=NONE must force zero auto attempts and null cadence",
     )
@@ -32575,11 +37281,18 @@ def check_authority_operation_profile() -> None:
         ),
         None,
     )
-    ensure(manual_method_rule is not None, "authority_operation_profile missing reconciliation_rules.method=MANUAL_ONLY guard")
     ensure(
-        manual_method_rule["then"]["properties"]["reconciliation_rules"]["properties"]["max_auto_reconciliation_attempts"].get("const")
+        manual_method_rule is not None,
+        "authority_operation_profile missing reconciliation_rules.method=MANUAL_ONLY guard",
+    )
+    ensure(
+        manual_method_rule["then"]["properties"]["reconciliation_rules"]["properties"][
+            "max_auto_reconciliation_attempts"
+        ].get("const")
         == 0
-        and manual_method_rule["then"]["properties"]["reconciliation_rules"]["properties"]["cadence_seconds"].get("type")
+        and manual_method_rule["then"]["properties"]["reconciliation_rules"]["properties"][
+            "cadence_seconds"
+        ].get("type")
         == "null",
         "authority_operation_profile method=MANUAL_ONLY must force zero auto attempts and null cadence",
     )
@@ -32598,11 +37311,18 @@ def check_authority_operation_profile() -> None:
         ),
         None,
     )
-    ensure(auto_method_rule is not None, "authority_operation_profile missing automatic reconciliation-method guard")
     ensure(
-        auto_method_rule["then"]["properties"]["reconciliation_rules"]["properties"]["max_auto_reconciliation_attempts"].get("minimum")
+        auto_method_rule is not None,
+        "authority_operation_profile missing automatic reconciliation-method guard",
+    )
+    ensure(
+        auto_method_rule["then"]["properties"]["reconciliation_rules"]["properties"][
+            "max_auto_reconciliation_attempts"
+        ].get("minimum")
         == 1
-        and auto_method_rule["then"]["properties"]["reconciliation_rules"]["properties"]["cadence_seconds"].get("type")
+        and auto_method_rule["then"]["properties"]["reconciliation_rules"]["properties"][
+            "cadence_seconds"
+        ].get("type")
         == "integer",
         "authority_operation_profile automatic reconciliation methods must require positive auto budget and cadence",
     )
@@ -32622,11 +37342,18 @@ def check_authority_operation_profile() -> None:
         ),
         None,
     )
-    ensure(none_pending_rule is not None, "authority_operation_profile missing pending_unknown_rules guard for method=NONE")
     ensure(
-        none_pending_rule["then"]["properties"]["pending_unknown_rules"]["properties"]["retry_class"].get("enum")
+        none_pending_rule is not None,
+        "authority_operation_profile missing pending_unknown_rules guard for method=NONE",
+    )
+    ensure(
+        none_pending_rule["then"]["properties"]["pending_unknown_rules"]["properties"][
+            "retry_class"
+        ].get("enum")
         == ["HUMAN_REVIEW_THEN_RETRY", "MANUAL_INTERVENTION_REQUIRED"]
-        and none_pending_rule["then"]["properties"]["pending_unknown_rules"]["properties"]["escalation_required"].get("const")
+        and none_pending_rule["then"]["properties"]["pending_unknown_rules"]["properties"][
+            "escalation_required"
+        ].get("const")
         is True,
         "authority_operation_profile method=NONE must keep unresolved retry posture manual-review-owned and escalation-required",
     )
@@ -32646,11 +37373,18 @@ def check_authority_operation_profile() -> None:
         ),
         None,
     )
-    ensure(manual_pending_rule is not None, "authority_operation_profile missing pending_unknown_rules guard for method=MANUAL_ONLY")
     ensure(
-        manual_pending_rule["then"]["properties"]["pending_unknown_rules"]["properties"]["retry_class"].get("enum")
+        manual_pending_rule is not None,
+        "authority_operation_profile missing pending_unknown_rules guard for method=MANUAL_ONLY",
+    )
+    ensure(
+        manual_pending_rule["then"]["properties"]["pending_unknown_rules"]["properties"][
+            "retry_class"
+        ].get("enum")
         == ["HUMAN_REVIEW_THEN_RETRY", "MANUAL_INTERVENTION_REQUIRED"]
-        and manual_pending_rule["then"]["properties"]["pending_unknown_rules"]["properties"]["escalation_required"].get("const")
+        and manual_pending_rule["then"]["properties"]["pending_unknown_rules"]["properties"][
+            "escalation_required"
+        ].get("const")
         is True,
         "authority_operation_profile method=MANUAL_ONLY must keep unresolved retry posture manual-review-owned and escalation-required",
     )
@@ -32670,11 +37404,18 @@ def check_authority_operation_profile() -> None:
         ),
         None,
     )
-    ensure(auto_pending_rule is not None, "authority_operation_profile missing pending_unknown_rules guard for automatic reconciliation methods")
     ensure(
-        auto_pending_rule["then"]["properties"]["pending_unknown_rules"]["properties"]["retry_class"].get("enum")
+        auto_pending_rule is not None,
+        "authority_operation_profile missing pending_unknown_rules guard for automatic reconciliation methods",
+    )
+    ensure(
+        auto_pending_rule["then"]["properties"]["pending_unknown_rules"]["properties"][
+            "retry_class"
+        ].get("enum")
         == ["RECONCILE_THEN_RETRY", "HUMAN_REVIEW_THEN_RETRY", "MANUAL_INTERVENTION_REQUIRED"]
-        and auto_pending_rule["then"]["properties"]["pending_unknown_rules"]["properties"]["escalation_required"].get("const")
+        and auto_pending_rule["then"]["properties"]["pending_unknown_rules"]["properties"][
+            "escalation_required"
+        ].get("const")
         is True,
         "authority_operation_profile automatic reconciliation methods must keep unresolved retry posture reconciliation-owned and escalation-required",
     )
@@ -32721,7 +37462,10 @@ def check_canary_health_summary() -> None:
         ),
         None,
     )
-    ensure(green_reverse_rule is not None, "canary_health_summary missing all-within-budget reverse guard")
+    ensure(
+        green_reverse_rule is not None,
+        "canary_health_summary missing all-within-budget reverse guard",
+    )
     ensure(
         green_reverse_rule["then"]["properties"]["health_gate_state"].get("const") == "GREEN",
         "canary_health_summary all budgets within budget must force GREEN",
@@ -32768,7 +37512,8 @@ def check_recovery_checkpoint() -> None:
             (
                 candidate
                 for candidate in schema["allOf"]
-                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type") == "null"
+                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type")
+                == "null"
             ),
             None,
         )
@@ -32782,11 +37527,18 @@ def check_recovery_checkpoint() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("quarantine_reason_code", {}).get("type") == "string"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("quarantine_reason_code", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(quarantine_rule is not None, "recovery_checkpoint missing quarantine_reason_code reverse guard")
+    ensure(
+        quarantine_rule is not None,
+        "recovery_checkpoint missing quarantine_reason_code reverse guard",
+    )
     ensure(
         quarantine_rule["then"]["properties"]["checkpoint_state"].get("const") == "QUARANTINED",
         "recovery_checkpoint non-null quarantine_reason_code must force checkpoint_state=QUARANTINED",
@@ -32796,17 +37548,25 @@ def check_recovery_checkpoint() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("restore_drill_ref", {}).get("type") == "string"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("restore_drill_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(restore_drill_rule is not None, "recovery_checkpoint missing restore_drill_ref pairing guard")
+    ensure(
+        restore_drill_rule is not None,
+        "recovery_checkpoint missing restore_drill_ref pairing guard",
+    )
     ensure(
         restore_drill_rule["then"]["properties"]["restore_tested_at"].get("type") == "string",
         "recovery_checkpoint non-null restore_drill_ref must require restore_tested_at",
     )
     ensure(
-        restore_drill_rule["then"]["properties"]["restore_verification_hash"].get("type") == "string",
+        restore_drill_rule["then"]["properties"]["restore_verification_hash"].get("type")
+        == "string",
         "recovery_checkpoint non-null restore_drill_ref must require restore_verification_hash",
     )
 
@@ -32814,12 +37574,18 @@ def check_recovery_checkpoint() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("restore_verification_hash", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("restore_verification_hash", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(verification_hash_rule is not None, "recovery_checkpoint missing restore_verification_hash pairing guard")
+    ensure(
+        verification_hash_rule is not None,
+        "recovery_checkpoint missing restore_verification_hash pairing guard",
+    )
     ensure(
         verification_hash_rule["then"]["properties"]["restore_drill_ref"].get("type") == "string",
         "recovery_checkpoint non-null restore_verification_hash must require restore_drill_ref",
@@ -32833,7 +37599,8 @@ def check_recovery_checkpoint() -> None:
         "recovery_checkpoint REQUESTED must force reopen_readiness_state=BLOCKED_PENDING_CHECKPOINT_CREATION",
     )
     ensure(
-        requested_rule["then"]["properties"]["privacy_reconciliation_contract"].get("type") == "null",
+        requested_rule["then"]["properties"]["privacy_reconciliation_contract"].get("type")
+        == "null",
         "recovery_checkpoint REQUESTED must clear privacy_reconciliation_contract",
     )
 
@@ -32859,7 +37626,8 @@ def check_recovery_checkpoint() -> None:
     verified_rule = find_rule_by_const(schema["allOf"], "checkpoint_state", "VERIFIED")
     ensure(verified_rule is not None, "recovery_checkpoint missing VERIFIED guard")
     ensure(
-        verified_rule["then"]["properties"]["privacy_reconciliation_outcome_ref"].get("type") == "string",
+        verified_rule["then"]["properties"]["privacy_reconciliation_outcome_ref"].get("type")
+        == "string",
         "recovery_checkpoint VERIFIED must require privacy_reconciliation_outcome_ref",
     )
     verified_privacy_then = verified_rule["then"]["properties"]["privacy_reconciliation_contract"]
@@ -32873,10 +37641,14 @@ def check_recovery_checkpoint() -> None:
         "recovery_checkpoint VERIFIED must require a final privacy reconciliation state",
     )
     ensure(
-        verified_privacy_then["properties"]["audit_chain_continuity_state"].get("const") == "VERIFIED"
-        and verified_privacy_then["properties"]["replay_limitation_state"].get("const") == "VERIFIED"
-        and verified_privacy_then["properties"]["enquiry_limitation_state"].get("const") == "VERIFIED"
-        and verified_privacy_then["properties"]["reopen_access_state"].get("const") == "READY_FOR_REOPEN",
+        verified_privacy_then["properties"]["audit_chain_continuity_state"].get("const")
+        == "VERIFIED"
+        and verified_privacy_then["properties"]["replay_limitation_state"].get("const")
+        == "VERIFIED"
+        and verified_privacy_then["properties"]["enquiry_limitation_state"].get("const")
+        == "VERIFIED"
+        and verified_privacy_then["properties"]["reopen_access_state"].get("const")
+        == "READY_FOR_REOPEN",
         "recovery_checkpoint VERIFIED must require verified audit and limitation posture with ready reopen access",
     )
     for field in [
@@ -32890,7 +37662,8 @@ def check_recovery_checkpoint() -> None:
             f"recovery_checkpoint VERIFIED must force {field}=true",
         )
     ensure(
-        verified_rule["then"]["properties"]["reopen_readiness_state"].get("const") == "READY_FOR_REOPEN",
+        verified_rule["then"]["properties"]["reopen_readiness_state"].get("const")
+        == "READY_FOR_REOPEN",
         "recovery_checkpoint VERIFIED must force reopen_readiness_state=READY_FOR_REOPEN",
     )
 
@@ -32901,11 +37674,13 @@ def check_recovery_checkpoint() -> None:
         "recovery_checkpoint QUARANTINED must require restore_verification_hash",
     )
     ensure(
-        quarantined_rule["then"]["properties"]["privacy_reconciliation_contract"].get("type") == "object",
+        quarantined_rule["then"]["properties"]["privacy_reconciliation_contract"].get("type")
+        == "object",
         "recovery_checkpoint QUARANTINED must retain object privacy_reconciliation_contract",
     )
     ensure(
-        quarantined_rule["then"]["properties"]["reopen_readiness_state"].get("const") == "QUARANTINED",
+        quarantined_rule["then"]["properties"]["reopen_readiness_state"].get("const")
+        == "QUARANTINED",
         "recovery_checkpoint QUARANTINED must force reopen_readiness_state=QUARANTINED",
     )
 
@@ -32932,7 +37707,9 @@ def check_gate_admissibility_record() -> None:
         ensure(field in schema["required"], f"gate_admissibility_record must require {field}")
 
     migration_rule = find_rule_by_const(schema["allOf"], "suite_family", "MIGRATION_VERIFICATION")
-    ensure(migration_rule is not None, "gate_admissibility_record missing MIGRATION_VERIFICATION guard")
+    ensure(
+        migration_rule is not None, "gate_admissibility_record missing MIGRATION_VERIFICATION guard"
+    )
     ensure(
         migration_rule["then"]["properties"]["migration_plan_ref"].get("type") == "string",
         "gate_admissibility_record MIGRATION_VERIFICATION must require migration_plan_ref",
@@ -32973,7 +37750,9 @@ def check_gate_admissibility_record() -> None:
     authority_rule = find_rule_by_const(schema["allOf"], "suite_family", "AUTHORITY_SANDBOX")
     ensure(authority_rule is not None, "gate_admissibility_record missing AUTHORITY_SANDBOX guard")
     ensure(
-        authority_rule["then"]["properties"]["authority_sandbox_coverage_contract_or_null"].get("type")
+        authority_rule["then"]["properties"]["authority_sandbox_coverage_contract_or_null"].get(
+            "type"
+        )
         == "object",
         "gate_admissibility_record AUTHORITY_SANDBOX must require authority_sandbox_coverage_contract_or_null",
     )
@@ -32986,11 +37765,14 @@ def check_gate_admissibility_record() -> None:
             (
                 candidate
                 for candidate in schema["allOf"]
-                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type") == "string"
+                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type")
+                == "string"
             ),
             None,
         )
-        ensure(reverse_rule is not None, f"gate_admissibility_record missing reverse guard for {field}")
+        ensure(
+            reverse_rule is not None, f"gate_admissibility_record missing reverse guard for {field}"
+        )
         ensure(
             reverse_rule["then"]["properties"]["suite_family"].get("const") == "RESTORE_DRILL",
             f"gate_admissibility_record non-null {field} must force suite_family=RESTORE_DRILL",
@@ -33049,7 +37831,10 @@ def check_gate_admissibility_record() -> None:
         "rerun_scope_preserved",
     ]:
         false_rule = find_rule_by_const(schema["allOf"], field, False)
-        ensure(false_rule is not None, f"gate_admissibility_record missing reverse guard for {field}=false")
+        ensure(
+            false_rule is not None,
+            f"gate_admissibility_record missing reverse guard for {field}=false",
+        )
         ensure(
             false_rule["then"]["properties"]["admissibility_state"].get("const") == "INADMISSIBLE",
             f"gate_admissibility_record {field}=false must force INADMISSIBLE",
@@ -33063,7 +37848,8 @@ def check_gate_admissibility_record() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("reason_codes", {}).get("minItems") == 1
+            if candidate.get("if", {}).get("properties", {}).get("reason_codes", {}).get("minItems")
+            == 1
         ),
         None,
     )
@@ -33086,7 +37872,9 @@ def check_client_compatibility_matrix() -> None:
     green_rule = find_rule_by_const(schema["allOf"], "matrix_state", "GREEN")
     ensure(green_rule is not None, "client_compatibility_matrix missing GREEN native-window guard")
     ensure(
-        green_rule["then"]["properties"]["schema_bundle_compatibility_gate_contract"]["properties"]["native_client_window_state"].get("const")
+        green_rule["then"]["properties"]["schema_bundle_compatibility_gate_contract"]["properties"][
+            "native_client_window_state"
+        ].get("const")
         == "VERIFIED_COMPATIBLE",
         "client_compatibility_matrix GREEN posture must force native_client_window_state=VERIFIED_COMPATIBLE",
     )
@@ -33094,7 +37882,9 @@ def check_client_compatibility_matrix() -> None:
     red_rule = find_rule_by_const(schema["allOf"], "matrix_state", "RED")
     ensure(red_rule is not None, "client_compatibility_matrix missing RED native-window guard")
     ensure(
-        red_rule["then"]["properties"]["schema_bundle_compatibility_gate_contract"]["properties"]["native_client_window_state"].get("const")
+        red_rule["then"]["properties"]["schema_bundle_compatibility_gate_contract"]["properties"][
+            "native_client_window_state"
+        ].get("const")
         == "BLOCKED",
         "client_compatibility_matrix RED posture must force native_client_window_state=BLOCKED",
     )
@@ -33104,14 +37894,21 @@ def check_client_compatibility_matrix() -> None:
             (
                 candidate
                 for candidate in schema["allOf"]
-                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("contains", {}).get("properties", {})
+                if candidate.get("if", {})
+                .get("properties", {})
+                .get(field, {})
+                .get("contains", {})
+                .get("properties", {})
                 .get("outcome", {})
                 .get("const")
                 == "INCOMPATIBLE"
             ),
             None,
         )
-        ensure(incompatible_rule is not None, f"client_compatibility_matrix missing {field} incompatible reverse guard")
+        ensure(
+            incompatible_rule is not None,
+            f"client_compatibility_matrix missing {field} incompatible reverse guard",
+        )
         ensure(
             incompatible_rule["then"]["properties"]["matrix_state"].get("const") == "RED",
             f"client_compatibility_matrix incompatible {field} rows must force RED",
@@ -33157,11 +37954,14 @@ def check_schema_migration_ledger() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("verified_at", {}).get("type") == "string"
+            if candidate.get("if", {}).get("properties", {}).get("verified_at", {}).get("type")
+            == "string"
         ),
         None,
     )
-    ensure(verified_at_rule is not None, "schema_migration_ledger missing verified_at reverse guard")
+    ensure(
+        verified_at_rule is not None, "schema_migration_ledger missing verified_at reverse guard"
+    )
     ensure(
         verified_at_rule["then"]["properties"]["phase_state"].get("enum")
         == ["VERIFIED", "CONTRACTING", "CONTRACTED", "SUPERSEDED"],
@@ -33172,7 +37972,8 @@ def check_schema_migration_ledger() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("halted_subphase", {}).get("type") == "string"
+            if candidate.get("if", {}).get("properties", {}).get("halted_subphase", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -33186,7 +37987,8 @@ def check_schema_migration_ledger() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("failure_ref", {}).get("type") == "string"
+            if candidate.get("if", {}).get("properties", {}).get("failure_ref", {}).get("type")
+            == "string"
         ),
         None,
     )
@@ -33197,17 +37999,34 @@ def check_schema_migration_ledger() -> None:
     )
 
     contract_optional_rule = find_rule_by_const(schema["allOf"], "contract_phase_required", False)
-    ensure(contract_optional_rule is not None, "schema_migration_ledger missing contract_phase_required=false guard")
+    ensure(
+        contract_optional_rule is not None,
+        "schema_migration_ledger missing contract_phase_required=false guard",
+    )
     ensure(
         contract_optional_rule["then"]["properties"]["phase_state"].get("enum")
-        == ["PLANNED", "APPLYING", "APPLIED", "VERIFYING", "VERIFIED", "HALTED", "FAILED", "SUPERSEDED"],
+        == [
+            "PLANNED",
+            "APPLYING",
+            "APPLIED",
+            "VERIFYING",
+            "VERIFIED",
+            "HALTED",
+            "FAILED",
+            "SUPERSEDED",
+        ],
         "schema_migration_ledger contract_phase_required=false must exclude contract-phase states",
     )
 
     verified_window_rule = find_rule_by_const(schema["allOf"], "phase_state", "VERIFIED")
-    ensure(verified_window_rule is not None, "schema_migration_ledger missing VERIFIED reader-window guard")
     ensure(
-        verified_window_rule["then"]["properties"]["schema_reader_window_contract"]["properties"]["window_state"].get("const")
+        verified_window_rule is not None,
+        "schema_migration_ledger missing VERIFIED reader-window guard",
+    )
+    ensure(
+        verified_window_rule["then"]["properties"]["schema_reader_window_contract"]["properties"][
+            "window_state"
+        ].get("const")
         == "VERIFIED_PREVIOUS_READERS_SUPPORTED",
         "schema_migration_ledger VERIFIED must keep previous readers supported until contract begins",
     )
@@ -33222,14 +38041,20 @@ def check_schema_migration_ledger() -> None:
         ),
         None,
     )
-    ensure(contract_window_rule is not None, "schema_migration_ledger missing contract-phase window-closure guard")
     ensure(
-        contract_window_rule["then"]["properties"]["schema_reader_window_contract"]["properties"]["window_state"].get("const")
+        contract_window_rule is not None,
+        "schema_migration_ledger missing contract-phase window-closure guard",
+    )
+    ensure(
+        contract_window_rule["then"]["properties"]["schema_reader_window_contract"]["properties"][
+            "window_state"
+        ].get("const")
         == "CONTRACT_ELIGIBLE_WINDOW_CLOSED",
         "schema_migration_ledger contract and supersession phases must force a closed reader window",
     )
     ensure(
-        contract_window_rule["then"]["properties"]["rollback_class"].get("const") == "FAIL_FORWARD_ONLY",
+        contract_window_rule["then"]["properties"]["rollback_class"].get("const")
+        == "FAIL_FORWARD_ONLY",
         "schema_migration_ledger contract and supersession phases must force FAIL_FORWARD_ONLY",
     )
 
@@ -33237,15 +38062,23 @@ def check_schema_migration_ledger() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("compatibility_window_closed_at", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("compatibility_window_closed_at", {})
+            .get("type")
             == "string"
             and "schema_reader_window_contract" in candidate.get("then", {}).get("properties", {})
         ),
         None,
     )
-    ensure(closed_at_rule is not None, "schema_migration_ledger missing compatibility_window_closed_at reverse guard")
     ensure(
-        closed_at_rule["then"]["properties"]["schema_reader_window_contract"]["properties"]["window_state"].get("const")
+        closed_at_rule is not None,
+        "schema_migration_ledger missing compatibility_window_closed_at reverse guard",
+    )
+    ensure(
+        closed_at_rule["then"]["properties"]["schema_reader_window_contract"]["properties"][
+            "window_state"
+        ].get("const")
         == "CONTRACT_ELIGIBLE_WINDOW_CLOSED",
         "schema_migration_ledger non-null compatibility_window_closed_at must force CONTRACT_ELIGIBLE_WINDOW_CLOSED",
     )
@@ -33269,9 +38102,13 @@ def check_schema_migration_ledger() -> None:
         ),
         None,
     )
-    ensure(closed_window_rule is not None, "schema_migration_ledger missing closed-window rollback guard")
     ensure(
-        closed_window_rule["then"]["properties"]["rollback_class"].get("const") == "FAIL_FORWARD_ONLY",
+        closed_window_rule is not None,
+        "schema_migration_ledger missing closed-window rollback guard",
+    )
+    ensure(
+        closed_window_rule["then"]["properties"]["rollback_class"].get("const")
+        == "FAIL_FORWARD_ONLY",
         "schema_migration_ledger CONTRACT_ELIGIBLE_WINDOW_CLOSED must force FAIL_FORWARD_ONLY",
     )
 
@@ -33291,9 +38128,14 @@ def check_schema_migration_ledger() -> None:
         ),
         None,
     )
-    ensure(no_backfill_expand_rule is not None, "schema_migration_ledger missing no-backfill expand-phase guard")
     ensure(
-        no_backfill_expand_rule["then"]["properties"]["schema_reader_window_contract"]["properties"]["window_state"].get("const")
+        no_backfill_expand_rule is not None,
+        "schema_migration_ledger missing no-backfill expand-phase guard",
+    )
+    ensure(
+        no_backfill_expand_rule["then"]["properties"]["schema_reader_window_contract"][
+            "properties"
+        ]["window_state"].get("const")
         == "EXPAND_ONLY_PREVIOUS_READERS_SUPPORTED",
         "schema_migration_ledger no-backfill pre-verification phases must force EXPAND_ONLY_PREVIOUS_READERS_SUPPORTED",
     )
@@ -33312,9 +38154,14 @@ def check_schema_migration_ledger() -> None:
         ),
         None,
     )
-    ensure(active_backfill_rule is not None, "schema_migration_ledger missing active-backfill reader-window guard")
     ensure(
-        active_backfill_rule["then"]["properties"]["schema_reader_window_contract"]["properties"]["window_state"].get("const")
+        active_backfill_rule is not None,
+        "schema_migration_ledger missing active-backfill reader-window guard",
+    )
+    ensure(
+        active_backfill_rule["then"]["properties"]["schema_reader_window_contract"]["properties"][
+            "window_state"
+        ].get("const")
         == "BACKFILL_IN_PROGRESS_PREVIOUS_READERS_SUPPORTED",
         "schema_migration_ledger unfinished backfill must force BACKFILL_IN_PROGRESS_PREVIOUS_READERS_SUPPORTED",
     )
@@ -33335,9 +38182,14 @@ def check_schema_migration_ledger() -> None:
         ),
         None,
     )
-    ensure(post_backfill_rule is not None, "schema_migration_ledger missing post-backfill completion guard")
     ensure(
-        post_backfill_rule["then"]["properties"]["backfill_execution_contract"]["properties"]["execution_state"].get("const")
+        post_backfill_rule is not None,
+        "schema_migration_ledger missing post-backfill completion guard",
+    )
+    ensure(
+        post_backfill_rule["then"]["properties"]["backfill_execution_contract"]["properties"][
+            "execution_state"
+        ].get("const")
         == "COMPLETE",
         "schema_migration_ledger post-backfill verification or contract phases must require COMPLETE backfill execution",
     )
@@ -33361,7 +38213,8 @@ def check_secret_version() -> None:
             (
                 candidate
                 for candidate in schema["allOf"]
-                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type") == "string"
+                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type")
+                == "string"
             ),
             None,
         )
@@ -33382,7 +38235,8 @@ def check_secret_version() -> None:
             (
                 candidate
                 for candidate in schema["allOf"]
-                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type") == "string"
+                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type")
+                == "string"
             ),
             None,
         )
@@ -33431,14 +38285,20 @@ def check_authority_calculation_readiness_context() -> None:
         ("AmendmentCase", "AMENDMENT_INTENT"),
     ]:
         rule = find_rule_by_const(schema["allOf"], "owner_artifact_type", owner_type)
-        ensure(rule is not None, f"authority_calculation_readiness_context missing reverse guard for {owner_type}")
+        ensure(
+            rule is not None,
+            f"authority_calculation_readiness_context missing reverse guard for {owner_type}",
+        )
         ensure(
             rule["then"]["properties"]["context_scope"].get("const") == scope,
             f"authority_calculation_readiness_context owner_artifact_type={owner_type} must force context_scope={scope}",
         )
 
     amend_rule = find_rule_by_const(schema["allOf"], "calculation_type", "intent-to-amend")
-    ensure(amend_rule is not None, "authority_calculation_readiness_context missing intent-to-amend reverse guard")
+    ensure(
+        amend_rule is not None,
+        "authority_calculation_readiness_context missing intent-to-amend reverse guard",
+    )
     ensure(
         amend_rule["then"]["properties"]["context_scope"].get("const") == "AMENDMENT_INTENT",
         "authority_calculation_readiness_context calculation_type=intent-to-amend must force AMENDMENT_INTENT",
@@ -33453,7 +38313,10 @@ def check_authority_calculation_readiness_context() -> None:
         ),
         None,
     )
-    ensure(filing_rule is not None, "authority_calculation_readiness_context missing filing calculation reverse guard")
+    ensure(
+        filing_rule is not None,
+        "authority_calculation_readiness_context missing filing calculation reverse guard",
+    )
     ensure(
         filing_rule["then"]["properties"]["context_scope"].get("const") == "FILING_PREPARATION",
         "authority_calculation_readiness_context filing calculation types must force FILING_PREPARATION",
@@ -33463,28 +38326,38 @@ def check_authority_calculation_readiness_context() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("reason_codes", {}).get("maxItems") == 0
+            if candidate.get("if", {}).get("properties", {}).get("reason_codes", {}).get("maxItems")
+            == 0
         ),
         None,
     )
-    ensure(empty_reason_rule is not None, "authority_calculation_readiness_context missing empty reason reverse guard")
+    ensure(
+        empty_reason_rule is not None,
+        "authority_calculation_readiness_context missing empty reason reverse guard",
+    )
     ensure(
         empty_reason_rule["then"]["properties"]["validation_outcome"].get("const") == "PASS",
         "authority_calculation_readiness_context empty reason_codes must force validation_outcome=PASS",
     )
 
-    pass_with_notice_rule = find_rule_by_const(schema["allOf"], "validation_outcome", "PASS_WITH_NOTICE")
+    pass_with_notice_rule = find_rule_by_const(
+        schema["allOf"], "validation_outcome", "PASS_WITH_NOTICE"
+    )
     ensure(
         pass_with_notice_rule is not None,
         "authority_calculation_readiness_context missing PASS_WITH_NOTICE retrieved-confirmed guard",
     )
     ensure(
-        pass_with_notice_rule["then"]["properties"]["confirmation_state"].get("const") == "CONFIRMED",
+        pass_with_notice_rule["then"]["properties"]["confirmation_state"].get("const")
+        == "CONFIRMED",
         "authority_calculation_readiness_context PASS_WITH_NOTICE must retain confirmed confirmation posture",
     )
 
     modeled_rule = find_rule_by_const(schema["allOf"], "live_authority_call_executed", False)
-    ensure(modeled_rule is not None, "authority_calculation_readiness_context missing modeled reverse guard")
+    ensure(
+        modeled_rule is not None,
+        "authority_calculation_readiness_context missing modeled reverse guard",
+    )
     ensure(
         modeled_rule["then"]["properties"]["request_state"].get("const") == "MODELED_ONLY"
         and modeled_rule["then"]["properties"]["result_state"].get("const") == "MODELED",
@@ -33495,18 +38368,28 @@ def check_authority_calculation_readiness_context() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("calculation_basis_ref", {}).get("type") == "string"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("calculation_basis_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(basis_ref_rule is not None, "authority_calculation_readiness_context missing basis-ref guard")
+    ensure(
+        basis_ref_rule is not None,
+        "authority_calculation_readiness_context missing basis-ref guard",
+    )
     ensure(
         basis_ref_rule["then"]["properties"]["basis_hash"].get("type") == "string",
         "authority_calculation_readiness_context basis refs must require basis_hash",
     )
 
     confirmation_rule = find_rule_by_const(schema["allOf"], "confirmation_state", "CONFIRMED")
-    ensure(confirmation_rule is not None, "authority_calculation_readiness_context missing confirmation reverse guard")
+    ensure(
+        confirmation_rule is not None,
+        "authority_calculation_readiness_context missing confirmation reverse guard",
+    )
     ensure(
         confirmation_rule["then"]["properties"]["basis_status"].get("const") == "CONFIRMED",
         "authority_calculation_readiness_context confirmed confirmation must force basis_status=CONFIRMED",
@@ -33517,11 +38400,18 @@ def check_authority_calculation_readiness_context() -> None:
             candidate
             for candidate in schema["allOf"]
             if candidate.get("if", {}).get("anyOf")
-            and candidate.get("then", {}).get("properties", {}).get("confirmation_state", {}).get("const") == "CONFIRMED"
+            and candidate.get("then", {})
+            .get("properties", {})
+            .get("confirmation_state", {})
+            .get("const")
+            == "CONFIRMED"
         ),
         None,
     )
-    ensure(reusable_rule is not None, "authority_calculation_readiness_context missing reusable reverse guard")
+    ensure(
+        reusable_rule is not None,
+        "authority_calculation_readiness_context missing reusable reverse guard",
+    )
 
 
 def check_filing_notice_resolution() -> None:
@@ -33538,13 +38428,21 @@ def check_filing_notice_resolution() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("unresolved_reason_codes", {}).get("minItems") == 1
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("unresolved_reason_codes", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
-    ensure(unresolved_some_rule is not None, "filing_notice_resolution missing unresolved reverse guard")
     ensure(
-        unresolved_some_rule["then"]["properties"]["notice_requirements_satisfied"].get("const") is False,
+        unresolved_some_rule is not None,
+        "filing_notice_resolution missing unresolved reverse guard",
+    )
+    ensure(
+        unresolved_some_rule["then"]["properties"]["notice_requirements_satisfied"].get("const")
+        is False,
         "filing_notice_resolution non-empty unresolved_reason_codes must force notice_requirements_satisfied=false",
     )
 
@@ -33552,13 +38450,20 @@ def check_filing_notice_resolution() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("unresolved_reason_codes", {}).get("maxItems") == 0
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("unresolved_reason_codes", {})
+            .get("maxItems")
+            == 0
         ),
         None,
     )
-    ensure(unresolved_none_rule is not None, "filing_notice_resolution missing resolved reverse guard")
     ensure(
-        unresolved_none_rule["then"]["properties"]["notice_requirements_satisfied"].get("const") is True,
+        unresolved_none_rule is not None, "filing_notice_resolution missing resolved reverse guard"
+    )
+    ensure(
+        unresolved_none_rule["then"]["properties"]["notice_requirements_satisfied"].get("const")
+        is True,
         "filing_notice_resolution empty unresolved_reason_codes must force notice_requirements_satisfied=true",
     )
 
@@ -33575,7 +38480,9 @@ def check_release_verification_manifest() -> None:
         "release_verification_manifest",
         expected_object_family="RELEASE_VERIFICATION_MANIFEST",
     )
-    check_release_verification_manifest_assembly_contract_binding(schema, "release_verification_manifest")
+    check_release_verification_manifest_assembly_contract_binding(
+        schema, "release_verification_manifest"
+    )
     check_schema_reader_window_contract_binding(schema, "release_verification_manifest")
     check_schema_bundle_compatibility_gate_contract_binding(schema, "release_verification_manifest")
     ensure(
@@ -33587,11 +38494,18 @@ def check_release_verification_manifest() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("migration_plan_ref", {}).get("type") == "null"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("migration_plan_ref", {})
+            .get("type")
+            == "null"
         ),
         None,
     )
-    ensure(plan_null_rule is not None, "release_verification_manifest missing migration_plan_ref=null reverse guard")
+    ensure(
+        plan_null_rule is not None,
+        "release_verification_manifest missing migration_plan_ref=null reverse guard",
+    )
     ensure(
         plan_null_rule["then"]["properties"]["migration_mode"].get("const") == "NO_MIGRATION",
         "release_verification_manifest null migration_plan_ref must force migration_mode=NO_MIGRATION",
@@ -33601,13 +38515,20 @@ def check_release_verification_manifest() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("migration_ledger_refs", {}).get("minItems") == 1
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("migration_ledger_refs", {})
+            .get("minItems")
+            == 1
         ),
         None,
     )
-    ensure(ledger_some_rule is not None, "release_verification_manifest missing ledger reverse guard")
     ensure(
-        ledger_some_rule["then"]["properties"]["migration_mode"].get("const") == "MIGRATION_REQUIRED",
+        ledger_some_rule is not None, "release_verification_manifest missing ledger reverse guard"
+    )
+    ensure(
+        ledger_some_rule["then"]["properties"]["migration_mode"].get("const")
+        == "MIGRATION_REQUIRED",
         "release_verification_manifest non-empty migration_ledger_refs must force migration_mode=MIGRATION_REQUIRED",
     )
 
@@ -33615,11 +38536,18 @@ def check_release_verification_manifest() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("migration_ledger_refs", {}).get("maxItems") == 0
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("migration_ledger_refs", {})
+            .get("maxItems")
+            == 0
         ),
         None,
     )
-    ensure(ledger_none_rule is not None, "release_verification_manifest missing empty-ledger reverse guard")
+    ensure(
+        ledger_none_rule is not None,
+        "release_verification_manifest missing empty-ledger reverse guard",
+    )
     ensure(
         ledger_none_rule["then"]["properties"]["migration_mode"].get("const") == "NO_MIGRATION",
         "release_verification_manifest empty migration_ledger_refs must force migration_mode=NO_MIGRATION",
@@ -33630,7 +38558,8 @@ def check_release_verification_manifest() -> None:
             (
                 candidate
                 for candidate in schema["allOf"]
-                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type") == "string"
+                if candidate.get("if", {}).get("properties", {}).get(field, {}).get("type")
+                == "string"
             ),
             None,
         )
@@ -33644,12 +38573,18 @@ def check_release_verification_manifest() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("superseded_by_verification_manifest_ref", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("superseded_by_verification_manifest_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(superseded_rule is not None, "release_verification_manifest missing superseded reverse guard")
+    ensure(
+        superseded_rule is not None,
+        "release_verification_manifest missing superseded reverse guard",
+    )
     ensure(
         superseded_rule["then"]["properties"]["decision_state"].get("const") == "SUPERSEDED",
         "release_verification_manifest non-null superseded_by_verification_manifest_ref must force SUPERSEDED",
@@ -33685,22 +38620,30 @@ def check_release_verification_manifest() -> None:
         compatibility_hash_rule is not None,
         "release_verification_manifest gateResult missing compatibility-gate hash family guard",
     )
-    authority_hash_rule = find_rule_by_const(gate_result["allOf"], "suite_family", "AUTHORITY_SANDBOX")
+    authority_hash_rule = find_rule_by_const(
+        gate_result["allOf"], "suite_family", "AUTHORITY_SANDBOX"
+    )
     ensure(
         authority_hash_rule is not None,
         "release_verification_manifest gateResult missing authority sandbox coverage-hash guard",
     )
     ensure(
-        authority_hash_rule["then"]["properties"]["authority_sandbox_coverage_hash_or_null"].get("type")
+        authority_hash_rule["then"]["properties"]["authority_sandbox_coverage_hash_or_null"].get(
+            "type"
+        )
         == "string",
         "release_verification_manifest authority sandbox gate rows must require authority_sandbox_coverage_hash_or_null",
     )
     ensure(
-        compatibility_hash_rule["then"]["properties"]["compatibility_gate_hash_or_null"].get("type") == "string",
+        compatibility_hash_rule["then"]["properties"]["compatibility_gate_hash_or_null"].get("type")
+        == "string",
         "release_verification_manifest schema, migration, and operator-client gate rows must require compatibility_gate_hash_or_null",
     )
     green_gate_rule = find_rule_by_const(gate_result["allOf"], "status", "GREEN")
-    ensure(green_gate_rule is not None, "release_verification_manifest gateResult missing GREEN posture guard")
+    ensure(
+        green_gate_rule is not None,
+        "release_verification_manifest gateResult missing GREEN posture guard",
+    )
     ensure(
         green_gate_rule["then"]["properties"]["admissibility_state"].get("const") == "ADMISSIBLE",
         "release_verification_manifest gateResult GREEN must force admissibility_state=ADMISSIBLE",
@@ -33718,11 +38661,18 @@ def check_release_verification_manifest() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("restore_drill_ref", {}).get("type") == "string"
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("restore_drill_ref", {})
+            .get("type")
+            == "string"
         ),
         None,
     )
-    ensure(restore_ref_rule is not None, "release_verification_manifest missing restore_drill_ref pairing guard")
+    ensure(
+        restore_ref_rule is not None,
+        "release_verification_manifest missing restore_drill_ref pairing guard",
+    )
     ensure(
         restore_ref_rule["then"]["properties"]["restore_checkpoint_ref"].get("type") == "string",
         "release_verification_manifest non-null restore_drill_ref must require restore_checkpoint_ref",
@@ -33732,12 +38682,18 @@ def check_release_verification_manifest() -> None:
         (
             candidate
             for candidate in schema["allOf"]
-            if candidate.get("if", {}).get("properties", {}).get("restore_checkpoint_ref", {}).get("type")
+            if candidate.get("if", {})
+            .get("properties", {})
+            .get("restore_checkpoint_ref", {})
+            .get("type")
             == "string"
         ),
         None,
     )
-    ensure(restore_checkpoint_rule is not None, "release_verification_manifest missing restore_checkpoint_ref pairing guard")
+    ensure(
+        restore_checkpoint_rule is not None,
+        "release_verification_manifest missing restore_checkpoint_ref pairing guard",
+    )
     ensure(
         restore_checkpoint_rule["then"]["properties"]["restore_drill_ref"].get("type") == "string",
         "release_verification_manifest non-null restore_checkpoint_ref must require restore_drill_ref",
@@ -33746,17 +38702,23 @@ def check_release_verification_manifest() -> None:
     approved_rule = find_rule_by_const(schema["allOf"], "decision_state", "APPROVED")
     ensure(approved_rule is not None, "release_verification_manifest missing APPROVED guard")
     ensure(
-        approved_rule["then"]["properties"]["schema_bundle_compatibility_gate_contract"]["properties"]["historical_manifest_guard_state"].get("const")
+        approved_rule["then"]["properties"]["schema_bundle_compatibility_gate_contract"][
+            "properties"
+        ]["historical_manifest_guard_state"].get("const")
         == "PROTECTED",
         "release_verification_manifest APPROVED must force historical_manifest_guard_state=PROTECTED",
     )
     ensure(
-        approved_rule["then"]["properties"]["schema_bundle_compatibility_gate_contract"]["properties"]["replay_restore_guard_state"].get("const")
+        approved_rule["then"]["properties"]["schema_bundle_compatibility_gate_contract"][
+            "properties"
+        ]["replay_restore_guard_state"].get("const")
         == "PROTECTED",
         "release_verification_manifest APPROVED must force replay_restore_guard_state=PROTECTED",
     )
     ensure(
-        approved_rule["then"]["properties"]["manifest_assembly_contract"]["properties"]["decision_state"].get("const")
+        approved_rule["then"]["properties"]["manifest_assembly_contract"]["properties"][
+            "decision_state"
+        ].get("const")
         == "APPROVED",
         "release_verification_manifest APPROVED must force manifest_assembly_contract.decision_state=APPROVED",
     )
@@ -33774,9 +38736,13 @@ def check_release_verification_manifest() -> None:
         "release_verification_manifest missing pending/blocked manifest-assembly reverse guard",
     )
     ensure(
-        pending_blocked_rule["then"]["properties"]["manifest_assembly_contract"]["properties"]["approval_ref_or_null"].get("type")
+        pending_blocked_rule["then"]["properties"]["manifest_assembly_contract"]["properties"][
+            "approval_ref_or_null"
+        ].get("type")
         == "null"
-        and pending_blocked_rule["then"]["properties"]["manifest_assembly_contract"]["properties"]["deployment_release_ref_or_null"].get("type")
+        and pending_blocked_rule["then"]["properties"]["manifest_assembly_contract"]["properties"][
+            "deployment_release_ref_or_null"
+        ].get("type")
         == "null",
         "release_verification_manifest PENDING/BLOCKED must clear approval and deployment refs inside manifest_assembly_contract",
     )
@@ -33836,9 +38802,9 @@ def check_release_verification_manifest() -> None:
         "release_verification_manifest non-null deterministic_golden_pack_ref must force a GREEN deterministic gate",
     )
     ensure(
-        deterministic_reverse_rule["then"]["properties"]["manifest_assembly_contract"]["properties"][
-            "deterministic_golden_pack_ref_or_null"
-        ].get("type")
+        deterministic_reverse_rule["then"]["properties"]["manifest_assembly_contract"][
+            "properties"
+        ]["deterministic_golden_pack_ref_or_null"].get("type")
         == "string",
         "release_verification_manifest non-null deterministic_golden_pack_ref must force deterministic_golden_pack_ref_or_null inside manifest_assembly_contract",
     )
@@ -33922,6 +38888,7 @@ def run_guard_checks() -> list[str]:
         check_conflict_set,
         check_schema_bundle,
         check_config_freeze,
+        check_feature_flag_snapshot,
         check_preseal_gate_evaluation_contract,
         check_manifest_start_claim_contract,
         check_run_manifest,

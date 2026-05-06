@@ -1,0 +1,123 @@
+{
+  "contract_version": "STORAGE_RETENTION_METADATA_HOOK_POLICY_V1",
+  "policy_id": "retention_metadata_hook_policy",
+  "basis_statement": "Storage writes and lifecycle transitions attach retention-tag and artifact-retention lineage immediately so later expiry, legal-hold, and erasure decisions do not depend on object-store tags alone.",
+  "source_lineage": [
+    {
+      "source_file": "Algorithm/retention_and_privacy.md",
+      "source_heading_or_logical_block": "RetentionTag and ArtifactRetention",
+      "rationale": "Retention governance remains a durable semantic contract, not a storage-only housekeeping rule."
+    },
+    {
+      "source_file": "Algorithm/state_machines.md",
+      "source_heading_or_logical_block": "ArtifactRetention.lifecycle_state",
+      "rationale": "Retention lifecycle changes must remain explicit and chronologically ordered."
+    }
+  ],
+  "hook_rows": [
+    {
+      "hook_ref": "STAGE_WRITE",
+      "lifecycle_state": "STAGED",
+      "anchor_event": "OBJECT_STAGE_WRITE",
+      "artifact_retention_state": "ACTIVE",
+      "erasure_eligibility": "BLOCKED_STATUTORY_MINIMUM",
+      "limitation_behavior": "NONE",
+      "default_checkpoint_offset_hours": 24,
+      "applies_to_object_classes": [
+        "UPLOAD_SESSION_SOURCE",
+        "QUARANTINED_SOURCE"
+      ],
+      "notes": [
+        "Stage-time hooks make resumable upload lineage and later erasure review auditable from the first durable write."
+      ]
+    },
+    {
+      "hook_ref": "PUBLISH",
+      "lifecycle_state": "PUBLISHED",
+      "anchor_event": "OBJECT_PUBLISHED",
+      "artifact_retention_state": "ACTIVE",
+      "erasure_eligibility": "BLOCKED_STATUTORY_MINIMUM",
+      "limitation_behavior": "NONE",
+      "default_checkpoint_offset_hours": 72,
+      "applies_to_object_classes": [
+        "UPLOAD_SESSION_SOURCE",
+        "RETAINED_EVIDENCE_CURRENT",
+        "CUSTOMER_SAFE_DERIVATIVE",
+        "MASKED_EXPORT_BUNDLE",
+        "RESTRICTED_EXPORT_BUNDLE"
+      ],
+      "notes": [
+        "Publication records the durable retention basis before any delivery handle is minted."
+      ]
+    },
+    {
+      "hook_ref": "QUARANTINE",
+      "lifecycle_state": "QUARANTINED",
+      "anchor_event": "OBJECT_QUARANTINED",
+      "artifact_retention_state": "ACTIVE",
+      "erasure_eligibility": "BLOCKED_PROOF_PRESERVATION",
+      "limitation_behavior": "SURVIVE_WITH_LIMITATION_NOTES",
+      "default_checkpoint_offset_hours": 48,
+      "applies_to_object_classes": [
+        "UPLOAD_SESSION_SOURCE",
+        "QUARANTINED_SOURCE",
+        "RETAINED_EVIDENCE_CURRENT",
+        "CUSTOMER_SAFE_DERIVATIVE"
+      ],
+      "notes": [
+        "Quarantine keeps the object bound to proof-preservation posture even when it is no longer deliverable."
+      ]
+    },
+    {
+      "hook_ref": "RETAIN_HOLD",
+      "lifecycle_state": "RETAINED",
+      "anchor_event": "RETENTION_HOLD_APPLIED",
+      "artifact_retention_state": "LEGAL_HOLD",
+      "erasure_eligibility": "BLOCKED_LEGAL_HOLD",
+      "limitation_behavior": "NONE",
+      "default_checkpoint_offset_hours": 168,
+      "applies_to_object_classes": [
+        "RETAINED_EVIDENCE_CURRENT",
+        "QUARANTINED_SOURCE",
+        "RESTRICTED_EXPORT_BUNDLE"
+      ],
+      "notes": [
+        "Legal-hold posture stays on the canonical ArtifactRetention object rather than on provider lock metadata alone."
+      ]
+    },
+    {
+      "hook_ref": "ERASURE_REQUEST",
+      "lifecycle_state": "ERASURE_PENDING",
+      "anchor_event": "ERASURE_REQUEST_ACCEPTED",
+      "artifact_retention_state": "ERASURE_PENDING",
+      "erasure_eligibility": "ELIGIBLE",
+      "limitation_behavior": "PSEUDONYMISED_SURVIVAL",
+      "default_checkpoint_offset_hours": 24,
+      "applies_to_object_classes": [
+        "RETAINED_EVIDENCE_CURRENT",
+        "CUSTOMER_SAFE_DERIVATIVE",
+        "MASKED_EXPORT_BUNDLE"
+      ],
+      "notes": [
+        "Erasure-pending posture remains explicit even when the object is eligible for pseudonymised survival before final delete."
+      ]
+    },
+    {
+      "hook_ref": "ERASURE_COMPLETE",
+      "lifecycle_state": "ERASED",
+      "anchor_event": "ERASURE_COMPLETED",
+      "artifact_retention_state": "ERASED",
+      "erasure_eligibility": "ELIGIBLE",
+      "limitation_behavior": "EXPIRED_PLACEHOLDER_ONLY",
+      "default_checkpoint_offset_hours": 24,
+      "applies_to_object_classes": [
+        "RETAINED_EVIDENCE_CURRENT",
+        "CUSTOMER_SAFE_DERIVATIVE",
+        "MASKED_EXPORT_BUNDLE"
+      ],
+      "notes": [
+        "Erasure completion leaves only placeholder-safe lineage and proof refs."
+      ]
+    }
+  ]
+}

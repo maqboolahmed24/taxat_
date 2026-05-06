@@ -3,11 +3,7 @@ export const idpTopologyAtlasRoute = {
   title: "IdP Topology Atlas",
   purpose:
     "Render an architectural atlas of the external OIDC control plane, including provider tenants, interactive clients, machine clients, callback bindings, and vault-safe secret posture without exposing live secrets.",
-  focusOrder: [
-    "environment-rail",
-    "topology-canvas",
-    "topology-inspector",
-  ],
+  focusOrder: ["environment-rail", "topology-canvas", "topology-inspector"],
   sections: [
     "Provider tenant",
     "Interactive clients",

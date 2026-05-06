@@ -1,0 +1,159 @@
+{
+  "contract_version": "1.0",
+  "matrix_id": "provider_environment_matrix",
+  "basis_statement": "Environment family, provider binding, namespace scope, and callback-host posture remain explicit so runtime code cannot point sandbox handles at production endpoints or vice versa.",
+  "environment_rows": [
+    {
+      "environment_ref": "env_local_authoring",
+      "environment_label": "Local authoring",
+      "provider_environment_ref": "NONE",
+      "allowed_consumer_refs": ["CLI", "PYTHON", "BROWSER_BUILD"],
+      "allowed_namespace_refs": ["sec_local_authoring"],
+      "hmrc_base_url_patterns": [],
+      "browser_public_origin_patterns": ["http://127.0.0.1:*", "http://localhost:*"],
+      "stable_callback_host_required": false,
+      "frozen_config_required": false,
+      "local_bootstrap_allowed": true,
+      "notes": [
+        "This environment is for repo-local tooling and deterministic analysis only.",
+        "Sandbox or production authority credentials must not be mixed into local authoring."
+      ]
+    },
+    {
+      "environment_ref": "env_local_provisioning_workstation",
+      "environment_label": "Local provisioning workstation",
+      "provider_environment_ref": "sandbox",
+      "allowed_consumer_refs": ["CLI", "PYTHON", "PLAYWRIGHT"],
+      "allowed_namespace_refs": ["sec_local_provisioning_sandbox"],
+      "hmrc_base_url_patterns": ["https://test-api.service.hmrc.gov.uk"],
+      "browser_public_origin_patterns": ["http://127.0.0.1:*", "http://localhost:*"],
+      "stable_callback_host_required": false,
+      "frozen_config_required": false,
+      "local_bootstrap_allowed": true,
+      "notes": [
+        "Local provisioning may talk only to sandbox provider surfaces and never to production endpoints.",
+        "Operator-attended sessions and short-lived injected handles are allowed here."
+      ]
+    },
+    {
+      "environment_ref": "env_ci_ephemeral_validation",
+      "environment_label": "CI ephemeral validation",
+      "provider_environment_ref": "NONE",
+      "allowed_consumer_refs": ["CLI", "PYTHON", "BROWSER_BUILD", "PLAYWRIGHT"],
+      "allowed_namespace_refs": ["sec_ci_ephemeral"],
+      "hmrc_base_url_patterns": [],
+      "browser_public_origin_patterns": ["https://*.review.taxat.example"],
+      "stable_callback_host_required": false,
+      "frozen_config_required": false,
+      "local_bootstrap_allowed": false,
+      "notes": [
+        "CI validation stays candidate-bound and may not adopt stable provider callback posture.",
+        "Runtime API and worker secret material are intentionally absent here."
+      ]
+    },
+    {
+      "environment_ref": "env_ephemeral_review_preview",
+      "environment_label": "Ephemeral review preview",
+      "provider_environment_ref": "NONE",
+      "allowed_consumer_refs": ["BROWSER_BUILD", "PLAYWRIGHT"],
+      "allowed_namespace_refs": ["sec_ephemeral_review"],
+      "hmrc_base_url_patterns": [],
+      "browser_public_origin_patterns": ["https://*.review.taxat.example"],
+      "stable_callback_host_required": false,
+      "frozen_config_required": false,
+      "local_bootstrap_allowed": false,
+      "notes": [
+        "Preview hosts are browser-only and may never inherit provider or runtime secret namespaces.",
+        "Provider callback registration on ephemeral review hosts is forbidden."
+      ]
+    },
+    {
+      "environment_ref": "env_shared_sandbox_integration",
+      "environment_label": "Shared sandbox integration",
+      "provider_environment_ref": "sandbox",
+      "allowed_consumer_refs": [
+        "API",
+        "WORKER",
+        "CLI",
+        "PYTHON",
+        "PLAYWRIGHT",
+        "BROWSER_BUILD",
+        "NATIVE"
+      ],
+      "allowed_namespace_refs": [
+        "sec_sandbox_runtime",
+        "sec_sandbox_web_authority",
+        "sec_sandbox_desktop_authority",
+        "sec_sandbox_batch_authority"
+      ],
+      "hmrc_base_url_patterns": ["https://test-api.service.hmrc.gov.uk"],
+      "browser_public_origin_patterns": [
+        "https://operator-sandbox.taxat.example",
+        "https://portal-sandbox.taxat.example"
+      ],
+      "stable_callback_host_required": true,
+      "frozen_config_required": true,
+      "local_bootstrap_allowed": false,
+      "notes": [
+        "Sandbox is the first stable provider-enabled environment and therefore requires frozen config for runtime consumers.",
+        "Only sandbox namespaces and sandbox HMRC endpoints are lawful here."
+      ]
+    },
+    {
+      "environment_ref": "env_preproduction_verification",
+      "environment_label": "Pre-production verification",
+      "provider_environment_ref": "sandbox",
+      "allowed_consumer_refs": [
+        "API",
+        "WORKER",
+        "CLI",
+        "PYTHON",
+        "PLAYWRIGHT",
+        "BROWSER_BUILD",
+        "NATIVE"
+      ],
+      "allowed_namespace_refs": [
+        "sec_preprod_runtime",
+        "sec_preprod_web_authority",
+        "sec_preprod_desktop_authority",
+        "sec_preprod_batch_authority"
+      ],
+      "hmrc_base_url_patterns": ["https://test-api.service.hmrc.gov.uk"],
+      "browser_public_origin_patterns": [
+        "https://operator-preprod.taxat.example",
+        "https://portal-preprod.taxat.example"
+      ],
+      "stable_callback_host_required": true,
+      "frozen_config_required": true,
+      "local_bootstrap_allowed": false,
+      "notes": [
+        "Pre-production is production-like internally but still sandbox-bound for provider traffic until promotion.",
+        "It may never mix sandbox shared-runtime namespaces with production namespaces."
+      ]
+    },
+    {
+      "environment_ref": "env_production",
+      "environment_label": "Production runtime",
+      "provider_environment_ref": "production",
+      "allowed_consumer_refs": ["API", "WORKER", "PLAYWRIGHT", "BROWSER_BUILD", "NATIVE"],
+      "allowed_namespace_refs": [
+        "sec_production_runtime",
+        "sec_production_web_authority",
+        "sec_production_desktop_authority",
+        "sec_production_batch_authority"
+      ],
+      "hmrc_base_url_patterns": ["https://api.service.hmrc.gov.uk"],
+      "browser_public_origin_patterns": [
+        "https://operator.taxat.example",
+        "https://portal.taxat.example"
+      ],
+      "stable_callback_host_required": true,
+      "frozen_config_required": true,
+      "local_bootstrap_allowed": false,
+      "notes": [
+        "Production runtime is fail-closed and requires ConfigFreeze, exact namespace binding, and production endpoint posture.",
+        "Local bootstrap files and sandbox namespaces are forbidden."
+      ]
+    }
+  ]
+}

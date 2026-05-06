@@ -1,0 +1,586 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/manifest_start_claim_contract.schema.json",
+  "title": "ManifestStartClaimContract",
+  "description": "Authoritative manifest start-claim and lease contract. This schema freezes the single-writer claim state, the current legal claim outcome, the durable claim token, the first post-seal publication batch, and the stale-reclaim posture so retries, queue replay, recovery children, and nightly successor reclaim cannot reinterpret manifest start from timestamps or broker side effects alone.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_class",
+    "manifest_id",
+    "manifest_hash",
+    "execution_basis_hash",
+    "access_binding_hash",
+    "attempt_lineage_ref",
+    "claim_state",
+    "claim_status_code",
+    "claim_epoch",
+    "claim_holder_ref_or_null",
+    "claim_token_or_null",
+    "claim_acquired_at_or_null",
+    "claim_expires_at_or_null",
+    "claim_released_at_or_null",
+    "claim_release_reason_code_or_null",
+    "stale_reclaim_reason_code_or_null",
+    "publication_state",
+    "stage_dag_ref_or_null",
+    "outbox_batch_ref_or_null",
+    "first_publication_committed_at_or_null",
+    "concurrency_policy",
+    "claim_publication_atomicity",
+    "stale_reclaim_policy",
+    "recovery_child_policy",
+    "nightly_reclaim_policy"
+  ],
+  "properties": {
+    "contract_class": {
+      "const": "MANIFEST_START_CLAIM"
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_basis_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "access_binding_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "attempt_lineage_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "claim_state": {
+      "type": "string",
+      "enum": [
+        "UNCLAIMED_SEALED",
+        "ACTIVE_LEASED",
+        "STALE_RECLAIM_REQUIRED",
+        "TERMINAL_RESULT_RECORDED"
+      ]
+    },
+    "claim_status_code": {
+      "type": "string",
+      "enum": [
+        "CLAIMABLE",
+        "ALREADY_ACTIVE",
+        "STALE_RECLAIM_REQUIRED",
+        "ALREADY_TERMINAL"
+      ]
+    },
+    "claim_epoch": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "claim_holder_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "claim_token_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "claim_acquired_at_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "claim_expires_at_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "claim_released_at_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "claim_release_reason_code_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "COMPLETED",
+        "FAILED",
+        "BLOCKED",
+        "SUPERSEDED",
+        "REPLAY_ONLY",
+        "RETIRED",
+        null
+      ]
+    },
+    "stale_reclaim_reason_code_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "LEASE_EXPIRED_OWNER_UNHEALTHY",
+        "SUCCESSOR_RECOVERY_AFTER_CRASH",
+        "SUCCESSOR_RECOVERY_AFTER_BROKER_LOSS",
+        "NIGHTLY_RECLAIM_SUCCESSOR_VERIFIED",
+        null
+      ]
+    },
+    "publication_state": {
+      "type": "string",
+      "enum": [
+        "NOT_PUBLISHED",
+        "PUBLISHED_WITH_ACTIVE_LEASE",
+        "PUBLISHED_STALE_RECLAIM_REQUIRED",
+        "PUBLISHED_TERMINAL"
+      ]
+    },
+    "stage_dag_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "outbox_batch_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "first_publication_committed_at_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "concurrency_policy": {
+      "const": "SINGLE_WRITER_LEASED_START_ONLY"
+    },
+    "claim_publication_atomicity": {
+      "const": "CLAIM_AND_FIRST_PUBLICATION_COMMIT_TOGETHER"
+    },
+    "stale_reclaim_policy": {
+      "const": "EXPLICIT_SUCCESSOR_PROOF_REQUIRED"
+    },
+    "recovery_child_policy": {
+      "const": "FORBID_WHILE_ACTIVE_LEASE"
+    },
+    "nightly_reclaim_policy": {
+      "const": "DEFER_DUPLICATE_START_WHILE_ACTIVE_LEASE"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "claim_state": {
+            "const": "UNCLAIMED_SEALED"
+          }
+        },
+        "required": [
+          "claim_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "claim_status_code": {
+            "const": "CLAIMABLE"
+          },
+          "claim_epoch": {
+            "const": 0
+          },
+          "claim_holder_ref_or_null": {
+            "type": "null"
+          },
+          "claim_token_or_null": {
+            "type": "null"
+          },
+          "claim_acquired_at_or_null": {
+            "type": "null"
+          },
+          "claim_expires_at_or_null": {
+            "type": "null"
+          },
+          "claim_released_at_or_null": {
+            "type": "null"
+          },
+          "claim_release_reason_code_or_null": {
+            "type": "null"
+          },
+          "stale_reclaim_reason_code_or_null": {
+            "type": "null"
+          },
+          "publication_state": {
+            "const": "NOT_PUBLISHED"
+          },
+          "stage_dag_ref_or_null": {
+            "type": "null"
+          },
+          "outbox_batch_ref_or_null": {
+            "type": "null"
+          },
+          "first_publication_committed_at_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "claim_state": {
+            "const": "ACTIVE_LEASED"
+          }
+        },
+        "required": [
+          "claim_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "claim_status_code": {
+            "const": "ALREADY_ACTIVE"
+          },
+          "claim_epoch": {
+            "minimum": 1
+          },
+          "claim_holder_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "claim_token_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "claim_acquired_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "claim_expires_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "claim_released_at_or_null": {
+            "type": "null"
+          },
+          "claim_release_reason_code_or_null": {
+            "type": "null"
+          },
+          "stale_reclaim_reason_code_or_null": {
+            "type": "null"
+          },
+          "publication_state": {
+            "const": "PUBLISHED_WITH_ACTIVE_LEASE"
+          },
+          "stage_dag_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "outbox_batch_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "first_publication_committed_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "claim_state": {
+            "const": "STALE_RECLAIM_REQUIRED"
+          }
+        },
+        "required": [
+          "claim_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "claim_status_code": {
+            "const": "STALE_RECLAIM_REQUIRED"
+          },
+          "claim_epoch": {
+            "minimum": 1
+          },
+          "claim_holder_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "claim_token_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "claim_acquired_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "claim_expires_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "claim_released_at_or_null": {
+            "type": "null"
+          },
+          "claim_release_reason_code_or_null": {
+            "type": "null"
+          },
+          "stale_reclaim_reason_code_or_null": {
+            "type": "string",
+            "enum": [
+              "LEASE_EXPIRED_OWNER_UNHEALTHY",
+              "SUCCESSOR_RECOVERY_AFTER_CRASH",
+              "SUCCESSOR_RECOVERY_AFTER_BROKER_LOSS",
+              "NIGHTLY_RECLAIM_SUCCESSOR_VERIFIED"
+            ]
+          },
+          "publication_state": {
+            "const": "PUBLISHED_STALE_RECLAIM_REQUIRED"
+          },
+          "stage_dag_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "outbox_batch_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "first_publication_committed_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "claim_state": {
+            "const": "TERMINAL_RESULT_RECORDED"
+          }
+        },
+        "required": [
+          "claim_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "claim_status_code": {
+            "const": "ALREADY_TERMINAL"
+          },
+          "claim_epoch": {
+            "minimum": 1
+          },
+          "claim_holder_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "claim_token_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "claim_acquired_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "claim_expires_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "claim_released_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "claim_release_reason_code_or_null": {
+            "type": "string",
+            "enum": [
+              "COMPLETED",
+              "FAILED",
+              "BLOCKED",
+              "SUPERSEDED",
+              "REPLAY_ONLY",
+              "RETIRED"
+            ]
+          },
+          "stale_reclaim_reason_code_or_null": {
+            "type": "null"
+          },
+          "publication_state": {
+            "const": "PUBLISHED_TERMINAL"
+          },
+          "stage_dag_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "outbox_batch_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "first_publication_committed_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "claim_token_or_null": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "claim_token_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "claim_holder_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "claim_acquired_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "claim_expires_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "claim_holder_ref_or_null",
+          "claim_acquired_at_or_null",
+          "claim_expires_at_or_null"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "claim_released_at_or_null": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "claim_released_at_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "claim_release_reason_code_or_null": {
+            "type": "string",
+            "enum": [
+              "COMPLETED",
+              "FAILED",
+              "BLOCKED",
+              "SUPERSEDED",
+              "REPLAY_ONLY",
+              "RETIRED"
+            ]
+          }
+        },
+        "required": [
+          "claim_release_reason_code_or_null"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "stale_reclaim_reason_code_or_null": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "stale_reclaim_reason_code_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "claim_state": {
+            "const": "STALE_RECLAIM_REQUIRED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "stage_dag_ref_or_null": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "stage_dag_ref_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "outbox_batch_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "first_publication_committed_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "outbox_batch_ref_or_null",
+          "first_publication_committed_at_or_null"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outbox_batch_ref_or_null": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "outbox_batch_ref_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "stage_dag_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "first_publication_committed_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "stage_dag_ref_or_null",
+          "first_publication_committed_at_or_null"
+        ]
+      }
+    }
+  ]
+}

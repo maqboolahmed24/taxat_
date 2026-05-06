@@ -1,0 +1,1606 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/authority_interaction_record.schema.json",
+  "title": "AuthorityInteractionRecord",
+  "description": "Durable authority-exchange linkage contract. This contract freezes request lineage, mandatory send-time revalidation evidence, full response-observation history, current admissible response meaning, profile-derived reconciliation budget state, grouped reconciliation-control economics, resend-control posture, explicit authority-versus-internal truth separation, and explicit resolution or abandonment basis across the authority interaction lifecycle.",
+  "type": "object",
+  "required": [
+    "interaction_id",
+    "manifest_id",
+    "operation_id",
+    "request_id",
+    "authority_operation_profile_ref",
+    "request_identity_contract",
+    "binding_drift_sentinel_contract",
+    "request_hash",
+    "idempotency_key",
+    "identity_namespace_hash",
+    "duplicate_meaning_key",
+    "authority_ingress_proof_contract",
+    "authority_binding_ref",
+    "authority_link_ref",
+    "binding_lineage_ref",
+    "access_binding_hash",
+    "policy_snapshot_hash",
+    "truth_boundary_contract",
+    "authority_truth_contract",
+    "lifecycle_state",
+    "created_at",
+    "last_status_at",
+    "active_response_id",
+    "response_history_ids",
+    "meaning_resolution_state",
+    "submission_record_ref",
+    "dispatch_ref",
+    "send_revalidation_state",
+    "send_revalidated_at",
+    "send_authorized_token_version_ref",
+    "send_revalidation_reason_codes",
+    "reconciliation_method",
+    "max_auto_reconciliation_attempts",
+    "reconciliation_cadence_seconds",
+    "reconciliation_budget_state",
+    "next_reconciliation_at",
+    "reconciliation_attempt_count",
+    "reconciliation_deadline_at",
+    "reconciliation_escalated_at",
+    "reconciliation_workflow_item_ref",
+    "resend_legality_state",
+    "resend_control_reason_codes",
+    "reconciliation_control_contract",
+    "audit_refs",
+    "provenance_refs",
+    "resolution_basis",
+    "abandonment_reason_code"
+  ],
+  "properties": {
+    "interaction_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority_operation_profile_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_identity_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/authority_request_identity_contract.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "binding_scope_class": {
+              "const": "AUTHORITY_INTERACTION_RECORD"
+            }
+          }
+        }
+      ]
+    },
+    "binding_drift_sentinel_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/authority_binding_drift_sentinel_contract.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "binding_scope_class": {
+              "const": "AUTHORITY_INTERACTION_RECORD"
+            }
+          }
+        }
+      ]
+    },
+    "request_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "identity_namespace_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "duplicate_meaning_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority_ingress_proof_contract": {
+      "anyOf": [
+        {
+          "allOf": [
+            {
+              "$ref": "https://taxat.dev/schemas/authority_ingress_proof_contract.schema.json"
+            },
+            {
+              "properties": {
+                "binding_scope_class": {
+                  "const": "AUTHORITY_INTERACTION_RECORD"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "authority_binding_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority_link_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "binding_lineage_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "access_binding_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_snapshot_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "truth_boundary_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/command_truth_boundary_contract.schema.json"
+        },
+        {
+          "properties": {
+            "artifact_role": {
+              "const": "COMMAND_SIDE_AUTHORITY"
+            },
+            "authoritative_record_families": {
+              "const": [
+                "RUN_MANIFEST",
+                "AUTHORITY_INTERACTION_RECORD",
+                "AUDIT_EVENT"
+              ]
+            },
+            "observable_projection_families": {
+              "const": []
+            }
+          }
+        }
+      ]
+    },
+    "authority_truth_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/authority_truth_contract.schema.json"
+        },
+        {
+          "properties": {
+            "boundary_scope": {
+              "const": "AUTHORITY_INTERACTION_RECORD"
+            },
+            "truth_surface_role": {
+              "const": "AUTHORITY_RUNTIME_LEDGER"
+            },
+            "surface_specific_binding_policy": {
+              "const": "INTERACTION_RESPONSE_MEANING_CONTROLS_SETTLEMENT"
+            }
+          }
+        }
+      ]
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "REQUEST_REGISTERED",
+        "DISPATCH_READY",
+        "TRANSMIT_IN_FLIGHT",
+        "RESPONSE_CAPTURED",
+        "RECONCILING",
+        "RESOLVED",
+        "ABANDONED"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_status_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "active_response_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "response_history_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "meaning_resolution_state": {
+      "type": "string",
+      "enum": [
+        "NO_RESPONSE",
+        "PROVISIONAL_TIMEOUT",
+        "ACTIVE_DIRECT",
+        "ACTIVE_CORROBORATED",
+        "RECONCILIATION_REQUIRED",
+        "RECONCILIATION_RESOLVED"
+      ]
+    },
+    "submission_record_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "dispatch_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "send_revalidation_state": {
+      "type": "string",
+      "enum": [
+        "NOT_PERFORMED",
+        "CLEAR_TO_SEND",
+        "BLOCKED"
+      ]
+    },
+    "send_revalidated_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "send_authorized_token_version_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "send_revalidation_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "SEALED_TOKEN_VERSION_REUSED",
+          "TOKEN_ROTATED_WITHIN_LINEAGE",
+          "SEND_CLAIM_CONFLICT",
+          "TOKEN_VERSION_NOT_USABLE",
+          "BINDING_LINEAGE_DRIFT",
+          "AUTHORITY_LINK_NOT_ACTIVE",
+          "CLIENT_SUBJECT_SCOPE_DRIFT",
+          "PROVIDER_CONTRACT_DRIFT",
+          "ACCESS_BINDING_HASH_DRIFT",
+          "POLICY_SNAPSHOT_HASH_DRIFT",
+          "STEP_UP_OR_APPROVAL_DRIFT",
+          "DUPLICATE_BUCKET_CHANGED",
+          "STRONGER_EXTERNAL_TRUTH_PRESENT",
+          "BODY_COLLISION_PRESENT"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "reconciliation_method": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "READ_AFTER_WRITE",
+        "POLL_STATUS",
+        "POLL_OBLIGATIONS",
+        "MANUAL_ONLY"
+      ]
+    },
+    "max_auto_reconciliation_attempts": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reconciliation_cadence_seconds": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "reconciliation_budget_state": {
+      "type": "string",
+      "enum": [
+        "NOT_OPENED",
+        "ACTIVE",
+        "EXHAUSTED",
+        "ESCALATED",
+        "CLOSED"
+      ]
+    },
+    "next_reconciliation_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "reconciliation_attempt_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reconciliation_deadline_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "reconciliation_escalated_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "reconciliation_workflow_item_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "resend_legality_state": {
+      "type": "string",
+      "enum": [
+        "UNASSESSED",
+        "IDEMPOTENT_RECOVERY_ONLY",
+        "FOLLOW_UP_READ_ONLY",
+        "BLOCKED_BY_RECONCILIATION",
+        "BLOCKED_BY_ESCALATION",
+        "CLOSED_NO_RESEND"
+      ]
+    },
+    "resend_control_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "IN_FLIGHT_REQUEST_LINEAGE_EXISTS",
+          "QUEUE_REBUILD_REQUIRES_IDEMPOTENT_RECOVERY",
+          "PENDING_OR_UNKNOWN_REQUIRES_RECONCILIATION",
+          "TIMEOUT_PLACEHOLDER_REQUIRES_RECONCILIATION",
+          "AUTO_RECONCILIATION_BUDGET_EXHAUSTED",
+          "RECONCILIATION_DEADLINE_EXPIRED",
+          "CONTRADICTORY_AUTHORITY_EVIDENCE",
+          "OUT_OF_BAND_AUTHORITY_STATE_PRESENT",
+          "DUPLICATE_BUCKET_OCCUPIED",
+          "STRONGER_EXTERNAL_TRUTH_PRESENT",
+          "TERMINAL_AUTHORITY_STATE_RECORDED",
+          "INTERACTION_FINALIZED_NO_RESEND"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "reconciliation_control_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/authority_reconciliation_control_contract.schema.json"
+        },
+        {
+          "properties": {
+            "binding_scope_class": {
+              "const": "AUTHORITY_INTERACTION_RECORD"
+            }
+          }
+        }
+      ]
+    },
+    "audit_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "provenance_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "resolution_basis": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "TERMINAL_RESPONSE",
+        "RECONCILIATION_RESULT",
+        null
+      ]
+    },
+    "abandonment_reason_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "reconciliation_method": {
+            "const": "NONE"
+          }
+        },
+        "required": [
+          "reconciliation_method"
+        ]
+      },
+      "then": {
+        "properties": {
+          "max_auto_reconciliation_attempts": {
+            "const": 0
+          },
+          "reconciliation_cadence_seconds": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_method": {
+            "const": "MANUAL_ONLY"
+          }
+        },
+        "required": [
+          "reconciliation_method"
+        ]
+      },
+      "then": {
+        "properties": {
+          "max_auto_reconciliation_attempts": {
+            "const": 0
+          },
+          "reconciliation_cadence_seconds": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_method": {
+            "enum": [
+              "READ_AFTER_WRITE",
+              "POLL_STATUS",
+              "POLL_OBLIGATIONS"
+            ]
+          }
+        },
+        "required": [
+          "reconciliation_method"
+        ]
+      },
+      "then": {
+        "properties": {
+          "max_auto_reconciliation_attempts": {
+            "minimum": 1
+          },
+          "reconciliation_cadence_seconds": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "send_revalidation_state": {
+            "const": "NOT_PERFORMED"
+          }
+        },
+        "required": [
+          "send_revalidation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "send_revalidated_at": {
+            "type": "null"
+          },
+          "send_authorized_token_version_ref": {
+            "type": "null"
+          },
+          "binding_drift_sentinel_contract": {
+            "type": "object",
+            "properties": {
+              "decision_state": {
+                "const": "NOT_EVALUATED"
+              }
+            }
+          },
+          "send_revalidation_reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "send_revalidation_state": {
+            "const": "CLEAR_TO_SEND"
+          }
+        },
+        "required": [
+          "send_revalidation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "send_revalidated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "send_authorized_token_version_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "binding_drift_sentinel_contract": {
+            "type": "object",
+            "properties": {
+              "checked_action_class": {
+                "const": "TRANSMIT_MUTATION"
+              },
+              "decision_state": {
+                "const": "CLEAR_TO_PROCEED"
+              }
+            }
+          },
+          "send_revalidation_reason_codes": {
+            "minItems": 1,
+            "maxItems": 1,
+            "items": {
+              "type": "string",
+              "enum": [
+                "SEALED_TOKEN_VERSION_REUSED",
+                "TOKEN_ROTATED_WITHIN_LINEAGE"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "send_revalidation_state": {
+            "const": "BLOCKED"
+          }
+        },
+        "required": [
+          "send_revalidation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "send_revalidated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "send_authorized_token_version_ref": {
+            "type": "null"
+          },
+          "binding_drift_sentinel_contract": {
+            "type": "object",
+            "properties": {
+              "checked_action_class": {
+                "const": "TRANSMIT_MUTATION"
+              },
+              "decision_state": {
+                "const": "BLOCKED"
+              }
+            }
+          },
+          "send_revalidation_reason_codes": {
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "enum": [
+                "SEND_CLAIM_CONFLICT",
+                "TOKEN_VERSION_NOT_USABLE",
+                "BINDING_LINEAGE_DRIFT",
+                "AUTHORITY_LINK_NOT_ACTIVE",
+                "CLIENT_SUBJECT_SCOPE_DRIFT",
+                "PROVIDER_CONTRACT_DRIFT",
+                "ACCESS_BINDING_HASH_DRIFT",
+                "POLICY_SNAPSHOT_HASH_DRIFT",
+                "STEP_UP_OR_APPROVAL_DRIFT",
+                "DUPLICATE_BUCKET_CHANGED",
+                "STRONGER_EXTERNAL_TRUTH_PRESENT",
+                "BODY_COLLISION_PRESENT"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "REQUEST_REGISTERED",
+              "DISPATCH_READY"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "active_response_id": {
+            "type": "null"
+          },
+          "response_history_ids": {
+            "maxItems": 0
+          },
+          "reconciliation_budget_state": {
+            "const": "NOT_OPENED"
+          },
+          "next_reconciliation_at": {
+            "type": "null"
+          },
+          "reconciliation_escalated_at": {
+            "type": "null"
+          },
+          "reconciliation_workflow_item_ref": {
+            "type": "null"
+          },
+          "resend_legality_state": {
+            "const": "UNASSESSED"
+          },
+          "resend_control_reason_codes": {
+            "maxItems": 0
+          },
+          "meaning_resolution_state": {
+            "const": "NO_RESPONSE"
+          },
+          "reconciliation_attempt_count": {
+            "const": 0
+          },
+          "reconciliation_deadline_at": {
+            "type": "null"
+          },
+          "resolution_basis": {
+            "type": "null"
+          },
+          "abandonment_reason_code": {
+            "type": "null"
+          },
+          "binding_drift_sentinel_contract": {
+            "type": "object",
+            "properties": {
+              "decision_state": {
+                "const": "NOT_EVALUATED"
+              }
+            }
+          },
+          "send_revalidation_state": {
+            "const": "NOT_PERFORMED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "TRANSMIT_IN_FLIGHT"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "active_response_id": {
+            "type": "null"
+          },
+          "response_history_ids": {
+            "maxItems": 0
+          },
+          "reconciliation_budget_state": {
+            "const": "NOT_OPENED"
+          },
+          "next_reconciliation_at": {
+            "type": "null"
+          },
+          "reconciliation_escalated_at": {
+            "type": "null"
+          },
+          "reconciliation_workflow_item_ref": {
+            "type": "null"
+          },
+          "resend_legality_state": {
+            "const": "IDEMPOTENT_RECOVERY_ONLY"
+          },
+          "resend_control_reason_codes": {
+            "minItems": 1
+          },
+          "meaning_resolution_state": {
+            "const": "NO_RESPONSE"
+          },
+          "reconciliation_attempt_count": {
+            "const": 0
+          },
+          "reconciliation_deadline_at": {
+            "type": "null"
+          },
+          "resolution_basis": {
+            "type": "null"
+          },
+          "abandonment_reason_code": {
+            "type": "null"
+          },
+          "binding_drift_sentinel_contract": {
+            "type": "object",
+            "properties": {
+              "checked_action_class": {
+                "const": "TRANSMIT_MUTATION"
+              },
+              "decision_state": {
+                "const": "CLEAR_TO_PROCEED"
+              }
+            }
+          },
+          "send_revalidation_state": {
+            "const": "CLEAR_TO_SEND"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "RESPONSE_CAPTURED",
+              "RECONCILING",
+              "RESOLVED"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "active_response_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "response_history_ids": {
+            "minItems": 1
+          },
+          "reconciliation_budget_state": {
+            "enum": [
+              "ACTIVE",
+              "EXHAUSTED",
+              "ESCALATED",
+              "CLOSED"
+            ]
+          },
+          "resend_legality_state": {
+            "enum": [
+              "FOLLOW_UP_READ_ONLY",
+              "BLOCKED_BY_RECONCILIATION",
+              "BLOCKED_BY_ESCALATION",
+              "CLOSED_NO_RESEND"
+            ]
+          },
+          "resend_control_reason_codes": {
+            "minItems": 1
+          },
+          "meaning_resolution_state": {
+            "enum": [
+              "PROVISIONAL_TIMEOUT",
+              "ACTIVE_DIRECT",
+              "ACTIVE_CORROBORATED",
+              "RECONCILIATION_REQUIRED",
+              "RECONCILIATION_RESOLVED"
+            ]
+          },
+          "abandonment_reason_code": {
+            "type": "null"
+          },
+          "send_revalidation_state": {
+            "const": "CLEAR_TO_SEND"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "RESPONSE_CAPTURED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "meaning_resolution_state": {
+            "enum": [
+              "PROVISIONAL_TIMEOUT",
+              "ACTIVE_DIRECT",
+              "ACTIVE_CORROBORATED",
+              "RECONCILIATION_REQUIRED"
+            ]
+          },
+          "resolution_basis": {
+            "type": "null"
+          },
+          "reconciliation_attempt_count": {
+            "const": 0
+          },
+          "send_revalidation_state": {
+            "const": "CLEAR_TO_SEND"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "RECONCILING"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "meaning_resolution_state": {
+            "const": "RECONCILIATION_REQUIRED"
+          },
+          "reconciliation_budget_state": {
+            "enum": [
+              "ACTIVE",
+              "EXHAUSTED",
+              "ESCALATED"
+            ]
+          },
+          "resend_legality_state": {
+            "enum": [
+              "FOLLOW_UP_READ_ONLY",
+              "BLOCKED_BY_RECONCILIATION",
+              "BLOCKED_BY_ESCALATION"
+            ]
+          },
+          "reconciliation_attempt_count": {
+            "minimum": 1
+          },
+          "reconciliation_deadline_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolution_basis": {
+            "type": "null"
+          },
+          "send_revalidation_state": {
+            "const": "CLEAR_TO_SEND"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "RESOLVED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "meaning_resolution_state": {
+            "enum": [
+              "ACTIVE_DIRECT",
+              "ACTIVE_CORROBORATED",
+              "RECONCILIATION_RESOLVED"
+            ]
+          },
+          "reconciliation_budget_state": {
+            "const": "CLOSED"
+          },
+          "next_reconciliation_at": {
+            "type": "null"
+          },
+          "resend_legality_state": {
+            "const": "CLOSED_NO_RESEND"
+          },
+          "resend_control_reason_codes": {
+            "minItems": 1
+          },
+          "reconciliation_attempt_count": {
+            "minimum": 0
+          },
+          "reconciliation_deadline_at": {
+            "type": "null"
+          },
+          "resolution_basis": {
+            "type": "string",
+            "enum": [
+              "TERMINAL_RESPONSE",
+              "RECONCILIATION_RESULT"
+            ]
+          },
+          "abandonment_reason_code": {
+            "type": "null"
+          },
+          "send_revalidation_state": {
+            "const": "CLEAR_TO_SEND"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "RESOLVED"
+          },
+          "resolution_basis": {
+            "const": "TERMINAL_RESPONSE"
+          }
+        },
+        "required": [
+          "lifecycle_state",
+          "resolution_basis"
+        ]
+      },
+      "then": {
+        "properties": {
+          "meaning_resolution_state": {
+            "enum": [
+              "ACTIVE_DIRECT",
+              "ACTIVE_CORROBORATED"
+            ]
+          },
+          "reconciliation_attempt_count": {
+            "const": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "RESOLVED"
+          },
+          "resolution_basis": {
+            "const": "RECONCILIATION_RESULT"
+          }
+        },
+        "required": [
+          "lifecycle_state",
+          "resolution_basis"
+        ]
+      },
+      "then": {
+        "properties": {
+          "meaning_resolution_state": {
+            "const": "RECONCILIATION_RESOLVED"
+          },
+          "reconciliation_attempt_count": {
+            "minimum": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resolution_basis": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "resolution_basis"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "RESOLVED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "ABANDONED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "active_response_id": {
+            "type": "null"
+          },
+          "response_history_ids": {
+            "maxItems": 0
+          },
+          "reconciliation_budget_state": {
+            "const": "NOT_OPENED"
+          },
+          "next_reconciliation_at": {
+            "type": "null"
+          },
+          "reconciliation_escalated_at": {
+            "type": "null"
+          },
+          "reconciliation_workflow_item_ref": {
+            "type": "null"
+          },
+          "resend_legality_state": {
+            "const": "CLOSED_NO_RESEND"
+          },
+          "resend_control_reason_codes": {
+            "minItems": 1
+          },
+          "meaning_resolution_state": {
+            "const": "NO_RESPONSE"
+          },
+          "reconciliation_attempt_count": {
+            "const": 0
+          },
+          "reconciliation_deadline_at": {
+            "type": "null"
+          },
+          "resolution_basis": {
+            "type": "null"
+          },
+          "abandonment_reason_code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "send_revalidation_state": {
+            "enum": [
+              "CLEAR_TO_SEND",
+              "BLOCKED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "abandonment_reason_code": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "abandonment_reason_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "ABANDONED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "next_reconciliation_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "next_reconciliation_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reconciliation_budget_state": {
+            "const": "ACTIVE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_escalated_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reconciliation_escalated_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reconciliation_budget_state": {
+            "enum": [
+              "ESCALATED",
+              "CLOSED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_workflow_item_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reconciliation_workflow_item_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reconciliation_budget_state": {
+            "enum": [
+              "ESCALATED",
+              "CLOSED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_budget_state": {
+            "const": "ACTIVE"
+          }
+        },
+        "required": [
+          "reconciliation_budget_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "RESPONSE_CAPTURED",
+              "RECONCILING"
+            ]
+          },
+          "next_reconciliation_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resend_legality_state": {
+            "const": "FOLLOW_UP_READ_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_budget_state": {
+            "const": "EXHAUSTED"
+          }
+        },
+        "required": [
+          "reconciliation_budget_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "RESPONSE_CAPTURED",
+              "RECONCILING"
+            ]
+          },
+          "next_reconciliation_at": {
+            "type": "null"
+          },
+          "resend_legality_state": {
+            "const": "BLOCKED_BY_RECONCILIATION"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_budget_state": {
+            "const": "ESCALATED"
+          }
+        },
+        "required": [
+          "reconciliation_budget_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "RESPONSE_CAPTURED",
+              "RECONCILING"
+            ]
+          },
+          "next_reconciliation_at": {
+            "type": "null"
+          },
+          "reconciliation_escalated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reconciliation_workflow_item_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resend_legality_state": {
+            "const": "BLOCKED_BY_ESCALATION"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reconciliation_budget_state": {
+            "const": "CLOSED"
+          }
+        },
+        "required": [
+          "reconciliation_budget_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "RESPONSE_CAPTURED",
+              "RESOLVED"
+            ]
+          },
+          "next_reconciliation_at": {
+            "type": "null"
+          },
+          "resend_legality_state": {
+            "const": "CLOSED_NO_RESEND"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resend_legality_state": {
+            "const": "UNASSESSED"
+          }
+        },
+        "required": [
+          "resend_legality_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "REQUEST_REGISTERED",
+              "DISPATCH_READY"
+            ]
+          },
+          "resend_control_reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resend_legality_state": {
+            "const": "IDEMPOTENT_RECOVERY_ONLY"
+          }
+        },
+        "required": [
+          "resend_legality_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "TRANSMIT_IN_FLIGHT"
+          },
+          "resend_control_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resend_legality_state": {
+            "const": "FOLLOW_UP_READ_ONLY"
+          }
+        },
+        "required": [
+          "resend_legality_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reconciliation_budget_state": {
+            "const": "ACTIVE"
+          },
+          "resend_control_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resend_legality_state": {
+            "const": "BLOCKED_BY_RECONCILIATION"
+          }
+        },
+        "required": [
+          "resend_legality_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reconciliation_budget_state": {
+            "const": "EXHAUSTED"
+          },
+          "resend_control_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resend_legality_state": {
+            "const": "BLOCKED_BY_ESCALATION"
+          }
+        },
+        "required": [
+          "resend_legality_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reconciliation_budget_state": {
+            "const": "ESCALATED"
+          },
+          "reconciliation_workflow_item_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reconciliation_escalated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resend_control_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resend_legality_state": {
+            "const": "CLOSED_NO_RESEND"
+          }
+        },
+        "required": [
+          "resend_legality_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "RESPONSE_CAPTURED",
+              "RESOLVED",
+              "ABANDONED"
+            ]
+          },
+          "resend_control_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "active_response_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "active_response_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_history_ids": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "meaning_resolution_state": {
+            "const": "NO_RESPONSE"
+          }
+        },
+        "required": [
+          "meaning_resolution_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "active_response_id": {
+            "type": "null"
+          },
+          "response_history_ids": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "meaning_resolution_state": {
+            "const": "PROVISIONAL_TIMEOUT"
+          }
+        },
+        "required": [
+          "meaning_resolution_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "RESPONSE_CAPTURED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "meaning_resolution_state": {
+            "const": "ACTIVE_CORROBORATED"
+          }
+        },
+        "required": [
+          "meaning_resolution_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "response_history_ids": {
+            "minItems": 2
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "meaning_resolution_state": {
+            "const": "RECONCILIATION_REQUIRED"
+          }
+        },
+        "required": [
+          "meaning_resolution_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "RESPONSE_CAPTURED",
+              "RECONCILING"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "meaning_resolution_state": {
+            "const": "RECONCILIATION_RESOLVED"
+          }
+        },
+        "required": [
+          "meaning_resolution_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "RESOLVED"
+          },
+          "resolution_basis": {
+            "const": "RECONCILIATION_RESULT"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

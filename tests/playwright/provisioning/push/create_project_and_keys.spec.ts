@@ -19,8 +19,7 @@ function fixtureEntryUrls(
   scenario: "fresh" | "existing" | "apns-missing",
 ): DeviceMessagingProjectEntryUrls {
   return {
-    controlPlane:
-      `/automation/provisioning/tests/fixtures/firebase_push_console.html?scenario=${scenario}`,
+    controlPlane: `/automation/provisioning/tests/fixtures/firebase_push_console.html?scenario=${scenario}`,
   };
 }
 
@@ -54,12 +53,11 @@ async function runFixtureFlow(
     entryUrls: fixtureEntryUrls(scenario),
   });
 
-  const [projectInventoryRaw, keyLineageRaw, evidenceManifestRaw] =
-    await Promise.all([
-      readFile(projectInventoryPath, "utf8"),
-      readFile(keyLineagePath, "utf8"),
-      readFile(result.evidenceManifestPath, "utf8"),
-    ]);
+  const [projectInventoryRaw, keyLineageRaw, evidenceManifestRaw] = await Promise.all([
+    readFile(projectInventoryPath, "utf8"),
+    readFile(keyLineagePath, "utf8"),
+    readFile(result.evidenceManifestPath, "utf8"),
+  ]);
 
   return {
     result,
@@ -95,7 +93,7 @@ test("fresh fixture bootstrap creates the native-only messaging topology without
   expect(flow.result.continuityMatrix.continuity_rows).toHaveLength(4);
   expect(flow.projectInventoryRaw).not.toContain("-----BEGIN PRIVATE KEY-----");
   expect(flow.projectInventoryRaw).not.toContain(".p8");
-  expect(flow.keyLineageRaw).not.toContain("\"private_key\"");
+  expect(flow.keyLineageRaw).not.toContain('"private_key"');
   expect(flow.keyLineageRaw).not.toContain("AIza");
   expect(flow.evidenceManifestRaw).toContain(
     "Persisted sanitized push inventory and key lineage without raw service-account or APNs material.",
@@ -137,9 +135,7 @@ test("missing APNs binding blocks policy acceptance instead of silently downgrad
   expect(flow.result.steps[2]?.status).toBe("BLOCKED_BY_POLICY");
   expect(flow.result.steps[5]?.status).toBe("SUCCEEDED");
   expect(flow.result.notes).toEqual(
-    expect.arrayContaining([
-      expect.stringContaining("APNs binding must remain present"),
-    ]),
+    expect.arrayContaining([expect.stringContaining("APNs binding must remain present")]),
   );
   expect(flow.evidenceManifestRaw).toContain(
     "APNs drift was surfaced explicitly and blocked instead of being silently accepted.",
@@ -179,15 +175,11 @@ test("device messaging topology board renders semantic lanes, continuity targets
   );
 
   await expect(page.locator("html")).toHaveAttribute("data-motion", "reduce");
-  await expect(
-    page.getByRole("navigation", { name: "Device messaging channels" }),
-  ).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Device messaging channels" })).toBeVisible();
   await expect(page.locator("#main-title")).toHaveText("Local fixture sink");
   await expect(page.getByRole("heading", { name: "Product notification families" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Provider channels" })).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Shell/route continuity targets" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Shell/route continuity targets" })).toBeVisible();
 
   await page
     .locator(".push-channel-rail-list button")

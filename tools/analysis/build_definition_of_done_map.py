@@ -48,9 +48,7 @@ TODAY = "2026-04-18"
 CONTRACT_VERSION = "1.0"
 
 TASK_RE = re.compile(r"- \[([ X-])\] `(pc_\d+)` ([^ ]+) ")
-PARALLEL_RE = re.compile(
-    r"phase_(\d{2})_parallel_wave_(\d{2})_track_(.+?)_(\d{3})_(.+)"
-)
+PARALLEL_RE = re.compile(r"phase_(\d{2})_parallel_wave_(\d{2})_track_(.+?)_(\d{3})_(.+)")
 SEQUENTIAL_RE = re.compile(r"phase_(\d{2})_seq_(\d{3})_(.+)")
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.*)$")
 SHARED_CONTRACT_RE = re.compile(r"\.\./(shared_operating_contract_[^)\]]+\.md)")
@@ -93,7 +91,13 @@ TRACK_BLUEPRINT_GROUPS = {
     "testing_schema_contract": ["execution_core", "system_pass_chain"],
     "testing_engine_modules": ["execution_core"],
     "testing_state_machine_model": ["execution_core"],
-    "testing_api_northbound": ["portal", "collaboration", "governance", "operator", "execution_core"],
+    "testing_api_northbound": [
+        "portal",
+        "collaboration",
+        "governance",
+        "operator",
+        "execution_core",
+    ],
     "testing_authority_integration": ["execution_core", "collaboration", "governance", "operator"],
     "testing_frontend_regression": ["portal", "collaboration", "governance", "operator"],
     "testing_performance_failure_security": ["execution_core", "system_pass_chain"],
@@ -250,9 +254,7 @@ def md_escape(value: Any) -> str:
 def markdown_table(headers: list[str], rows: list[list[Any]]) -> str:
     head = "| " + " | ".join(headers) + " |"
     div = "| " + " | ".join("---" for _ in headers) + " |"
-    body = [
-        "| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows
-    ]
+    body = ["| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows]
     return "\n".join([head, div, *body])
 
 
@@ -397,9 +399,7 @@ def parse_explicit_test_vector_refs(slug: str) -> list[str]:
     refs: list[str] = []
     consumed: list[tuple[int, int]] = []
     for match in TV_RANGE_RE.finditer(slug):
-        refs.append(
-            f"{normalize_tv_token(match.group(1))}..{normalize_tv_token(match.group(2))}"
-        )
+        refs.append(f"{normalize_tv_token(match.group(1))}..{normalize_tv_token(match.group(2))}")
         consumed.append(match.span())
     for match in TV_SERIES_RE.finditer(slug):
         refs.append(f"{normalize_tv_token(match.group(1))}_SERIES")
@@ -423,9 +423,7 @@ def humanize_slug(task: Task) -> str:
     if task.protocol_mode == "sequential":
         slug = re.sub(r"^phase_\d{2}_seq_\d{3}_", "", slug)
     else:
-        slug = re.sub(
-            r"^phase_\d{2}_parallel_wave_\d{2}_track_[^_]+(?:_[^_]+)*_\d{3}_", "", slug
-        )
+        slug = re.sub(r"^phase_\d{2}_parallel_wave_\d{2}_track_[^_]+(?:_[^_]+)*_\d{3}_", "", slug)
     return slug.replace("_", " ").strip()
 
 
@@ -560,13 +558,42 @@ def infer_blueprint_group_ids(task: Task) -> list[str]:
     groups: list[str] = []
 
     if task.phase == "phase_00":
-        if task.task_id in {"pc_0001", "pc_0002", "pc_0003", "pc_0004", "pc_0019", "pc_0028", "pc_0029", "pc_0030"}:
+        if task.task_id in {
+            "pc_0001",
+            "pc_0002",
+            "pc_0003",
+            "pc_0004",
+            "pc_0019",
+            "pc_0028",
+            "pc_0029",
+            "pc_0030",
+        }:
             groups.append("system_pass_chain")
-        if any(token in slug for token in ["frontend", "surface", "route", "shell", "web_frontend"]):
+        if any(
+            token in slug for token in ["frontend", "surface", "route", "shell", "web_frontend"]
+        ):
             groups.extend(["portal", "collaboration", "governance", "operator"])
         if "native" in slug:
             groups.append("operator")
-        if any(token in slug for token in ["authority", "run_engine", "gate", "formula", "replay", "release", "retention", "security", "observability", "state_machine", "module", "entity", "dependency", "projection"]):
+        if any(
+            token in slug
+            for token in [
+                "authority",
+                "run_engine",
+                "gate",
+                "formula",
+                "replay",
+                "release",
+                "retention",
+                "security",
+                "observability",
+                "state_machine",
+                "module",
+                "entity",
+                "dependency",
+                "projection",
+            ]
+        ):
             groups.append("execution_core")
         if "portal" in slug:
             groups.append("portal")
@@ -577,7 +604,9 @@ def infer_blueprint_group_ids(task: Task) -> list[str]:
         if "macos" in slug:
             groups.append("operator")
     elif task.phase == "phase_01":
-        if any(token in slug for token in ["hmrc", "authority", "fraud_prevention", "provider_profile"]):
+        if any(
+            token in slug for token in ["hmrc", "authority", "fraud_prevention", "provider_profile"]
+        ):
             groups.append("execution_core")
         if any(token in slug for token in ["oidc", "identity", "roles_scopes", "mfa", "session"]):
             groups.extend(["portal", "collaboration", "governance", "operator"])
@@ -585,18 +614,37 @@ def infer_blueprint_group_ids(task: Task) -> list[str]:
             groups.extend(["portal", "collaboration", "governance", "operator"])
         if any(token in slug for token in ["ocr", "document_extraction", "malware", "upload"]):
             groups.extend(["portal", "collaboration", "execution_core"])
-        if any(token in slug for token in ["secrets_manager", "postgresql", "object_storage", "queue", "cache", "telemetry", "container_registry", "dns", "ci_cd", "credential", "environment"]):
+        if any(
+            token in slug
+            for token in [
+                "secrets_manager",
+                "postgresql",
+                "object_storage",
+                "queue",
+                "cache",
+                "telemetry",
+                "container_registry",
+                "dns",
+                "ci_cd",
+                "credential",
+                "environment",
+            ]
+        ):
             groups.extend(["execution_core", "system_pass_chain"])
         if "smoke_validation" in slug:
-            groups.extend(
-                ["portal", "collaboration", "governance", "operator", "execution_core"]
-            )
+            groups.extend(["portal", "collaboration", "governance", "operator", "execution_core"])
     elif task.phase == "phase_02":
         groups.extend(["execution_core", "system_pass_chain"])
-        if any(token in slug for token in ["northbound", "upload", "streaming", "cache", "access_control"]):
+        if any(
+            token in slug
+            for token in ["northbound", "upload", "streaming", "cache", "access_control"]
+        ):
             groups.extend(["portal", "collaboration", "governance", "operator"])
     elif task.phase == "phase_07":
-        if any(token in slug for token in ["web_frontends", "client_portal", "onboarding_copy", "help_content"]):
+        if any(
+            token in slug
+            for token in ["web_frontends", "client_portal", "onboarding_copy", "help_content"]
+        ):
             groups.extend(["portal", "collaboration", "governance", "operator"])
         if "native_macos" in slug or "native_distribution" in slug:
             groups.append("operator")
@@ -604,11 +652,44 @@ def infer_blueprint_group_ids(task: Task) -> list[str]:
             groups.extend(["portal", "collaboration", "governance", "operator"])
         if any(token in slug for token in ["ocr", "malware", "quarantine"]):
             groups.extend(["portal", "collaboration", "execution_core"])
-        if any(token in slug for token in ["release_candidate", "rollout", "migrations", "restore", "disaster_recovery", "security", "retention", "observability", "queue_rebuild", "reader_windows", "pilot", "launch"]):
+        if any(
+            token in slug
+            for token in [
+                "release_candidate",
+                "rollout",
+                "migrations",
+                "restore",
+                "disaster_recovery",
+                "security",
+                "retention",
+                "observability",
+                "queue_rebuild",
+                "reader_windows",
+                "pilot",
+                "launch",
+            ]
+        ):
             groups.extend(
-                ["portal", "collaboration", "governance", "operator", "execution_core", "system_pass_chain"]
+                [
+                    "portal",
+                    "collaboration",
+                    "governance",
+                    "operator",
+                    "execution_core",
+                    "system_pass_chain",
+                ]
             )
-        if any(token in slug for token in ["config", "secrets", "schema", "projection", "build_pipeline", "compatibility_matrix"]):
+        if any(
+            token in slug
+            for token in [
+                "config",
+                "secrets",
+                "schema",
+                "projection",
+                "build_pipeline",
+                "compatibility_matrix",
+            ]
+        ):
             groups.extend(["execution_core", "system_pass_chain"])
 
     if not groups:
@@ -655,23 +736,95 @@ def infer_release_gate_refs(task: Task) -> list[str]:
         "ARTIFACT_INTEGRITY_AND_NOTARIZATION",
         "SUITE_ADMISSIBILITY",
     ]
-    if any(token in slug for token in ["schema", "contract", "reader_window", "compatibility", "migration"]):
+    if any(
+        token in slug
+        for token in ["schema", "contract", "reader_window", "compatibility", "migration"]
+    ):
         gates.extend(["SCHEMA_COMPATIBILITY", "MIGRATION_VERIFICATION"])
-    if any(token in slug for token in ["deterministic", "formula", "compute", "parity", "trust", "state_machine", "module", "run_engine", "gate_logic"]):
+    if any(
+        token in slug
+        for token in [
+            "deterministic",
+            "formula",
+            "compute",
+            "parity",
+            "trust",
+            "state_machine",
+            "module",
+            "run_engine",
+            "gate_logic",
+        ]
+    ):
         gates.append("DETERMINISTIC_AND_STATE_MACHINE")
-    if any(token in slug for token in ["northbound", "api", "receipt", "snapshot", "stream", "session", "focus_restoration", "selector", "shell", "frontend", "web_frontends"]):
+    if any(
+        token in slug
+        for token in [
+            "northbound",
+            "api",
+            "receipt",
+            "snapshot",
+            "stream",
+            "session",
+            "focus_restoration",
+            "selector",
+            "shell",
+            "frontend",
+            "web_frontends",
+        ]
+    ):
         gates.extend(["NORTHBOUND_API", "OPERATOR_CLIENT"])
-    if any(token in slug for token in ["authority", "hmrc", "fraud_prevention", "provider_profile", "reconciliation"]):
+    if any(
+        token in slug
+        for token in ["authority", "hmrc", "fraud_prevention", "provider_profile", "reconciliation"]
+    ):
         gates.append("AUTHORITY_SANDBOX")
-    if any(token in slug for token in ["security", "secret", "step_up", "csrf", "waf", "scope_widening", "redaction"]):
+    if any(
+        token in slug
+        for token in ["security", "secret", "step_up", "csrf", "waf", "scope_widening", "redaction"]
+    ):
         gates.append("SECURITY")
-    if any(token in slug for token in ["performance", "canary", "load_test", "soak", "chaos", "queue_backlog", "burst", "failover", "failback"]):
+    if any(
+        token in slug
+        for token in [
+            "performance",
+            "canary",
+            "load_test",
+            "soak",
+            "chaos",
+            "queue_backlog",
+            "burst",
+            "failover",
+            "failback",
+        ]
+    ):
         gates.append("PERFORMANCE_CANARY")
-    if any(token in slug for token in ["restore", "recovery", "checkpoint", "drill", "rebuild", "disaster_recovery"]):
+    if any(
+        token in slug
+        for token in ["restore", "recovery", "checkpoint", "drill", "rebuild", "disaster_recovery"]
+    ):
         gates.append("RESTORE_DRILL")
-    if any(token in slug for token in ["release_candidate", "release_verification_manifest", "promotion", "signoff", "admissibility", "definition_of_done"]):
+    if any(
+        token in slug
+        for token in [
+            "release_candidate",
+            "release_verification_manifest",
+            "promotion",
+            "signoff",
+            "admissibility",
+            "definition_of_done",
+        ]
+    ):
         gates.append("SUITE_ADMISSIBILITY")
-    if any(token in slug for token in ["signed", "notarized", "distribution_artifacts", "artifact_attestation", "build_pipeline"]):
+    if any(
+        token in slug
+        for token in [
+            "signed",
+            "notarized",
+            "distribution_artifacts",
+            "artifact_attestation",
+            "build_pipeline",
+        ]
+    ):
         gates.append("ARTIFACT_INTEGRITY_AND_NOTARIZATION")
     if task.phase == "phase_06" and "testing_release_acceptance" in slug:
         gates.append("SUITE_ADMISSIBILITY")
@@ -686,7 +839,9 @@ def infer_release_gate_refs(task: Task) -> list[str]:
         ]
     ):
         gates.extend(full_release_gate_stack)
-    if task.phase == "phase_07" and any(token in slug for token in ["rollout", "promotion", "launch", "release"]):
+    if task.phase == "phase_07" and any(
+        token in slug for token in ["rollout", "promotion", "launch", "release"]
+    ):
         gates.extend(full_release_gate_stack)
     return ordered_unique(gates)
 
@@ -704,7 +859,9 @@ def shared_contract_gap_for_task(task: Task) -> str | None:
     return f"{shared_path.stem}_missing"
 
 
-def build_typed_findings(tasks: list[Task], dag_typed_findings: list[dict[str, Any]]) -> tuple[dict[str, dict[str, Any]], dict[str, list[str]]]:
+def build_typed_findings(
+    tasks: list[Task], dag_typed_findings: list[dict[str, Any]]
+) -> tuple[dict[str, dict[str, Any]], dict[str, list[str]]]:
     finding_by_id: dict[str, dict[str, Any]] = {
         finding["finding_id"]: finding for finding in dag_typed_findings
     }
@@ -751,7 +908,11 @@ def build_validator_catalog() -> list[dict[str, Any]]:
             "label": "Contract self-test",
             "command": "python3 Algorithm/scripts/validate_contracts.py --self-test",
             "source_refs": [
-                contains_ref(README_PATH, "`python3 Algorithm/scripts/validate_contracts.py --self-test`", "readme_contract_self_test"),
+                contains_ref(
+                    README_PATH,
+                    "`python3 Algorithm/scripts/validate_contracts.py --self-test`",
+                    "readme_contract_self_test",
+                ),
                 contains_ref(
                     IMPLEMENTATION_CONVENTIONS_PATH,
                     "Algorithm/scripts/validate_contracts.py --self-test",
@@ -764,7 +925,11 @@ def build_validator_catalog() -> list[dict[str, Any]]:
             "label": "Forensic contract guard",
             "command": "python3 Algorithm/tools/forensic_contract_guard.py",
             "source_refs": [
-                contains_ref(README_PATH, "`python3 Algorithm/tools/forensic_contract_guard.py`", "readme_forensic_guard"),
+                contains_ref(
+                    README_PATH,
+                    "`python3 Algorithm/tools/forensic_contract_guard.py`",
+                    "readme_forensic_guard",
+                ),
             ],
         },
         {
@@ -816,9 +981,7 @@ def build_task_rows() -> dict[str, Any]:
     protocol_snapshot = compute_protocol_snapshot(tasks)
     dag = load_json(DAG_PATH)
     dag_nodes = {node["task_id"]: node for node in dag["nodes"]}
-    package_rows = {
-        row["task_id"]: row for row in load_json(PACKAGE_MAP_PATH)["rows"]
-    }
+    package_rows = {row["task_id"]: row for row in load_json(PACKAGE_MAP_PATH)["rows"]}
     constraints = load_json(CONSTRAINT_REGISTER_PATH)["entries"]
     test_families = {
         row["family_id"]: row for row in load_json(TEST_FAMILY_MATRIX_PATH)["test_families"]
@@ -850,12 +1013,12 @@ def build_task_rows() -> dict[str, Any]:
 
         explicit_test_vectors = parse_explicit_test_vector_refs(task.task_slug)
         derived_test_vectors = ordered_unique(
-            ref
-            for group_id in group_ids
-            for ref in blueprint_groups[group_id]["test_vector_refs"]
+            ref for group_id in group_ids for ref in blueprint_groups[group_id]["test_vector_refs"]
         )
         test_vector_refs = explicit_test_vectors or derived_test_vectors
-        if any(token in task.task_slug for token in ["hmrc", "authority_sandbox", "provider_profile"]):
+        if any(
+            token in task.task_slug for token in ["hmrc", "authority_sandbox", "provider_profile"]
+        ):
             test_vector_refs = ordered_unique(test_vector_refs + ["TV-91", "TV-91A"])
 
         constraint_refs = ordered_unique(
@@ -901,7 +1064,9 @@ def build_task_rows() -> dict[str, Any]:
         )
 
         group_labels = [blueprint_groups[group_id]["label"] for group_id in group_ids]
-        gate_label_summary = ", ".join(release_gate_refs[:3]) if release_gate_refs else "no direct release gate"
+        gate_label_summary = (
+            ", ".join(release_gate_refs[:3]) if release_gate_refs else "no direct release gate"
+        )
         definition_of_done_summary = (
             f"Deliver `{primary_deliverable_class}` evidence for {task.task_id}, "
             f"advance {', '.join(group_labels[:3])}, and bind acceptance proof through {gate_label_summary}."
@@ -989,7 +1154,9 @@ def build_task_rows() -> dict[str, Any]:
     }
 
 
-def build_phase_exit_rows(task_rows: list[dict[str, Any]], protocol_snapshot: dict[str, Any]) -> dict[str, Any]:
+def build_phase_exit_rows(
+    task_rows: list[dict[str, Any]], protocol_snapshot: dict[str, Any]
+) -> dict[str, Any]:
     phase_to_tasks: dict[str, list[dict[str, Any]]] = defaultdict(list)
     wave_to_tasks: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in task_rows:
@@ -1005,7 +1172,9 @@ def build_phase_exit_rows(task_rows: list[dict[str, Any]], protocol_snapshot: di
                 "phase_label": PHASE_LABELS[phase_id],
                 "task_count": len(rows),
                 "task_ids": [row["task_id"] for row in rows],
-                "protocol_mode": rows[0]["protocol_mode"] if len({row["protocol_mode"] for row in rows}) == 1 else "mixed",
+                "protocol_mode": rows[0]["protocol_mode"]
+                if len({row["protocol_mode"] for row in rows}) == 1
+                else "mixed",
                 "roadmap_exit_rule": (
                     "Every task in the phase is `[X]`, and AGENT first-incomplete law exposes the next boundary."
                 ),
@@ -1031,12 +1200,20 @@ def build_phase_exit_rows(task_rows: list[dict[str, Any]], protocol_snapshot: di
                     ref for row in rows for ref in row["blocking_gap_refs"]
                 ),
                 "current_open_task_id": next(
-                    (row["task_id"] for row in rows if row["task_id"] == protocol_snapshot["first_incomplete_task_id"]),
+                    (
+                        row["task_id"]
+                        for row in rows
+                        if row["task_id"] == protocol_snapshot["first_incomplete_task_id"]
+                    ),
                     None,
                 ),
                 "source_refs": [
                     heading_ref(AGENT_PATH, "## Eligibility Rules", "agent_eligibility_rules"),
-                    heading_ref(README_PATH, "## Blueprint Coverage And Acceptance Map", "blueprint_coverage_and_acceptance_map"),
+                    heading_ref(
+                        README_PATH,
+                        "## Blueprint Coverage And Acceptance Map",
+                        "blueprint_coverage_and_acceptance_map",
+                    ),
                     heading_ref(RELEASE_GATES_PATH, "## 2. Release gate", "release_gate"),
                 ],
             }
@@ -1091,7 +1268,9 @@ def build_phase_exit_rows(task_rows: list[dict[str, Any]], protocol_snapshot: di
     return {"phase_rows": phase_rows, "wave_rows": wave_rows}
 
 
-def build_execution_plan(task_rows: list[dict[str, Any]], protocol_snapshot: dict[str, Any]) -> list[dict[str, Any]]:
+def build_execution_plan(
+    task_rows: list[dict[str, Any]], protocol_snapshot: dict[str, Any]
+) -> list[dict[str, Any]]:
     units: list[dict[str, Any]] = []
     grouped: list[tuple[str, list[dict[str, Any]]]] = []
     current_key: str | None = None
@@ -1157,7 +1336,9 @@ def build_execution_plan(task_rows: list[dict[str, Any]], protocol_snapshot: dic
                 "source_refs": [
                     heading_ref(AGENT_PATH, "## Sequential Protocol", "sequential_protocol")
                     if first["protocol_mode"] == "sequential"
-                    else heading_ref(AGENT_PATH, "## Parallel Wave Protocol", "parallel_wave_protocol"),
+                    else heading_ref(
+                        AGENT_PATH, "## Parallel Wave Protocol", "parallel_wave_protocol"
+                    ),
                     heading_ref(AGENT_PATH, "## Eligibility Rules", "eligibility_rules"),
                 ],
             }
@@ -1219,8 +1400,16 @@ def build_bundle_inventory(
             "advanced_by_task_ids": roadmap_task_ids,
             "validator_commands": [row["command"] for row in validator_catalog[:2]],
             "source_refs": [
-                heading_ref(README_PATH, "## Blueprint Coverage And Acceptance Map", "blueprint_coverage_and_acceptance_map"),
-                heading_ref(TEST_VECTORS_PATH, "## Prompt-stage ownership by range", "prompt_stage_ownership_by_range"),
+                heading_ref(
+                    README_PATH,
+                    "## Blueprint Coverage And Acceptance Map",
+                    "blueprint_coverage_and_acceptance_map",
+                ),
+                heading_ref(
+                    TEST_VECTORS_PATH,
+                    "## Prompt-stage ownership by range",
+                    "prompt_stage_ownership_by_range",
+                ),
                 line_ref(CONSTRAINT_REGISTER_PATH, 1, "constraint_traceability_register"),
             ],
         },
@@ -1296,7 +1485,9 @@ def build_main_doc(
 
     return f"""# Definition Of Done Acceptance Map And Wave Plan
 
-Generated on `{TODAY}` from the live checklist, the execution DAG, the acceptance-law corpus, and the release evidence contracts.
+Generated on `{
+        TODAY
+    }` from the live checklist, the execution DAG, the acceptance-law corpus, and the release evidence contracts.
 
 ## Summary
 
@@ -1320,24 +1511,30 @@ Generated on `{TODAY}` from the live checklist, the execution DAG, the acceptanc
 
 ## Phase Exit Overview
 
-{markdown_table(
-    ["Phase", "Tasks", "Blueprint Refs", "Gate Families", "Current Open"],
-    phase_table_rows,
-)}
+{
+        markdown_table(
+            ["Phase", "Tasks", "Blueprint Refs", "Gate Families", "Current Open"],
+            phase_table_rows,
+        )
+    }
 
 ## Parallel Wave Overview
 
-{markdown_table(
-    ["Wave", "Tasks", "Tracks", "State", "Gate Sample"],
-    wave_table_rows,
-)}
+{
+        markdown_table(
+            ["Wave", "Tasks", "Tracks", "State", "Gate Sample"],
+            wave_table_rows,
+        )
+    }
 
 ## Task Matrix Sample
 
-{markdown_table(
-    ["Task", "Phase", "Deliverable", "Blueprint Groups", "Vector Sample", "Gate Sample"],
-    sample_rows,
-)}
+{
+        markdown_table(
+            ["Task", "Phase", "Deliverable", "Blueprint Groups", "Vector Sample", "Gate Sample"],
+            sample_rows,
+        )
+    }
 
 ## Bundle Inventory
 
@@ -1361,9 +1558,7 @@ def build_guide_doc(
     validator_rows = [
         [row["validator_id"], row["label"], row["command"]] for row in validator_catalog
     ]
-    gate_rows = [
-        [row["gate_id"], row["label"], row["description"]] for row in gate_catalog
-    ]
+    gate_rows = [[row["gate_id"], row["label"], row["description"]] for row in gate_catalog]
     bundle_rows = [
         [
             row["bundle_id"],
@@ -1408,12 +1603,8 @@ def build_mermaid(execution_units: list[dict[str, Any]], protocol_snapshot: dict
         right = execution_units[index + 1]["execution_unit_id"].replace("::", "_")
         lines.append(f"  {left} --> {right}")
     if protocol_snapshot["first_incomplete_task_id"]:
-        lines.append(
-            f'  active["Active gate\\n{protocol_snapshot["first_incomplete_task_id"]}"]'
-        )
-        lines.append(
-            f'  {execution_units[0]["execution_unit_id"].replace("::", "_")} -.-> active'
-        )
+        lines.append(f'  active["Active gate\\n{protocol_snapshot["first_incomplete_task_id"]}"]')
+        lines.append(f"  {execution_units[0]['execution_unit_id'].replace('::', '_')} -.-> active")
     return "\n".join(lines) + "\n"
 
 
@@ -1438,7 +1629,9 @@ def build_outputs() -> dict[str, Any]:
         "summary": {
             "task_count": len(task_rows),
             "phase_count": len({row["phase"] for row in task_rows}),
-            "parallel_wave_block_count": len({row["wave_id"] for row in task_rows if row["wave_id"]}),
+            "parallel_wave_block_count": len(
+                {row["wave_id"] for row in task_rows if row["wave_id"]}
+            ),
             "gapped_task_count": sum(1 for row in task_rows if row["blocking_gap_refs"]),
             "release_bound_task_count": sum(1 for row in task_rows if row["release_gate_refs"]),
         },

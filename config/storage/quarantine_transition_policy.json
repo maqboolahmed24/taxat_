@@ -1,0 +1,89 @@
+{
+  "contract_version": "STORAGE_QUARANTINE_TRANSITION_POLICY_V1",
+  "policy_id": "quarantine_transition_policy",
+  "basis_statement": "Quarantine stays explicit across upload, scan, publish, and later re-scan posture so delivery can be revoked without pretending the raw object ever became lawful customer truth.",
+  "source_lineage": [
+    {
+      "source_file": "config/uploads/quarantine_lifecycle_policy.json",
+      "source_heading_or_logical_block": "lifecycle_rows",
+      "rationale": "Upload intake already separates transfer, scan, validation, and customer-visible publication."
+    },
+    {
+      "source_file": "config/object_storage/quarantine_isolation_policy.json",
+      "source_heading_or_logical_block": "rule_rows",
+      "rationale": "Object storage quarantine already forbids preview, download, and direct URL shortcuts."
+    }
+  ],
+  "transition_rows": [
+    {
+      "transition_ref": "TRANSFER_SETTLED_SCAN_PENDING",
+      "trigger_ref": "BYTES_TRANSFERRED_AWAITING_VERDICT",
+      "from_lifecycle_state": "STAGED",
+      "to_lifecycle_state": "SCANNING",
+      "malware_scan_state": "PENDING",
+      "publication_posture": "NOT_PUBLISHED",
+      "customer_delivery_effect": "KEEP_UNAVAILABLE",
+      "required_reason_codes": ["SCAN_PENDING"],
+      "history_mode": "PRESERVE_SOURCE_VERSION",
+      "notes": [
+        "Transfer success alone does not unlock preview or attachment confirmation."
+      ]
+    },
+    {
+      "transition_ref": "SCAN_CLEAN_READY_FOR_PUBLICATION",
+      "trigger_ref": "SCAN_VERDICT_CLEAN",
+      "from_lifecycle_state": "SCANNING",
+      "to_lifecycle_state": "PUBLISHED",
+      "malware_scan_state": "CLEAN",
+      "publication_posture": "INTERNAL_ONLY",
+      "customer_delivery_effect": "REQUIRES_EXPLICIT_BIND",
+      "required_reason_codes": ["SCAN_CLEAN"],
+      "history_mode": "PRESERVE_SOURCE_VERSION",
+      "notes": [
+        "Clean scan clears the security gate only; delivery still requires explicit publication and binding."
+      ]
+    },
+    {
+      "transition_ref": "SCAN_BLOCKS_ATTACHMENT_AND_DELIVERY",
+      "trigger_ref": "SCAN_VERDICT_QUARANTINED",
+      "from_lifecycle_state": "SCANNING",
+      "to_lifecycle_state": "QUARANTINED",
+      "malware_scan_state": "QUARANTINED",
+      "publication_posture": "NOT_PUBLISHED",
+      "customer_delivery_effect": "REVOKE_OR_KEEP_UNAVAILABLE",
+      "required_reason_codes": ["SCAN_QUARANTINED"],
+      "history_mode": "COPY_TO_QUARANTINE_NAMESPACE",
+      "notes": [
+        "Malicious or policy-blocked verdicts keep the upload visible only as typed safe status."
+      ]
+    },
+    {
+      "transition_ref": "LATE_RESCAN_REVOKES_PUBLISHED_DELIVERY",
+      "trigger_ref": "POST_PUBLICATION_RESCAN_QUARANTINE",
+      "from_lifecycle_state": "DELIVERABLE",
+      "to_lifecycle_state": "QUARANTINED",
+      "malware_scan_state": "QUARANTINED",
+      "publication_posture": "DELIVERY_REVOKED",
+      "customer_delivery_effect": "REVOKE_PREVIEW_AND_DOWNLOAD",
+      "required_reason_codes": ["LATE_RESCAN_QUARANTINE"],
+      "history_mode": "PRESERVE_EXISTING_BINDING_HISTORY",
+      "notes": [
+        "A previously published artifact can become unavailable later without deleting prior lineage."
+      ]
+    },
+    {
+      "transition_ref": "FALSE_POSITIVE_RELEASE_COPIES_FORWARD",
+      "trigger_ref": "MANUAL_RELEASE_WITH_EVIDENCE",
+      "from_lifecycle_state": "QUARANTINED",
+      "to_lifecycle_state": "PUBLISHED",
+      "malware_scan_state": "CLEAN",
+      "publication_posture": "INTERNAL_ONLY",
+      "customer_delivery_effect": "NEW_OBJECT_BOUNDARY_REQUIRED",
+      "required_reason_codes": ["FALSE_POSITIVE_RELEASE"],
+      "history_mode": "COPY_FORWARD_DO_NOT_MUTATE_QUARANTINED_BODY",
+      "notes": [
+        "Release from quarantine must create a clean successor object and preserve the quarantined source body."
+      ]
+    }
+  ]
+}

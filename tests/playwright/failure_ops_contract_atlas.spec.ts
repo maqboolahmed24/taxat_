@@ -30,8 +30,11 @@ test("atlas renders signal, audit, and failure pages from the domain rail", asyn
 
 test("signal model screenshot baseline", async ({ page }) => {
   await gotoAtlas(page);
-  await expect(page.getByTestId("failure-ops-contract-atlas")).toHaveScreenshot("failure-ops-contract-atlas-signal-model.png", {
-    animations: "disabled",
-    fullPage: true,
-  });
+  await expect(page.getByTestId("failure-ops-contract-atlas")).toHaveScreenshot(
+    "failure-ops-contract-atlas-signal-model.png",
+    {
+      animations: "disabled",
+      fullPage: true,
+    },
+  );
 });

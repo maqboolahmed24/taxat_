@@ -1,0 +1,149 @@
+{
+  "$schema": "./identifier_family_catalog.schema.json",
+  "contract_version": "1.0",
+  "catalog_id": "canonical_identifier_family_catalog",
+  "basis_statement": "Identifiers remain schema-permitted strings with lightweight branding so IDs, refs, hashes, and route tokens cannot drift into one undifferentiated string bag.",
+  "source_lineage": [
+    {
+      "source_file": "data_model.md",
+      "source_heading_or_logical_block": "object-family naming patterns and canonical field suffixes",
+      "rationale": "The corpus standardizes *_id, *_ref, *_hash, and route-token usage across artifacts."
+    },
+    {
+      "source_file": "implementation_conventions.md",
+      "source_heading_or_logical_block": "deterministic serialization and replay-safe runtime conventions",
+      "rationale": "Primitive helpers must preserve lawful values rather than add ad hoc narrowing."
+    },
+    {
+      "source_file": "modules.md",
+      "source_heading_or_logical_block": "authority and runtime boundary modules",
+      "rationale": "Identifier families need stable distinctions at service, API, worker, and viewer seams."
+    }
+  ],
+  "identifier_families": [
+    {
+      "family_ref": "ID",
+      "label": "Identifiers",
+      "brand_suffix": "id",
+      "helper_ref": "asTaxatId",
+      "schema_suffixes": ["_id"],
+      "allowed_shape": "NON_EMPTY_STRING",
+      "summary": "Opaque entity identifiers keep family meaning without regex invention.",
+      "notes": [
+        "Do not impose slug-only or UUID-only assumptions unless a specific schema requires them.",
+        "Identifiers stay serializable as plain strings at contract boundaries."
+      ],
+      "example_fields": [
+        {
+          "field_name": "tenant_id",
+          "family": "tenant",
+          "literal": "tenant.shared-sandbox/2026-04",
+          "note": "Punctuation remains lawful because the helper only rejects empty or non-string input."
+        },
+        {
+          "field_name": "api_command_id",
+          "family": "api_command",
+          "literal": "cmd.2026-04-23/0001",
+          "note": "Command IDs remain opaque replay keys rather than parsed routing strings."
+        }
+      ],
+      "forbidden_shortcuts": [
+        "Do not coerce numbers into identifier strings.",
+        "Do not add family-specific regexes inside the shared primitive layer."
+      ]
+    },
+    {
+      "family_ref": "REF",
+      "label": "References",
+      "brand_suffix": "ref",
+      "helper_ref": "asTaxatRef",
+      "schema_suffixes": ["_ref"],
+      "allowed_shape": "NON_EMPTY_STRING",
+      "summary": "References point to external or cross-artifact linkage without collapsing into IDs.",
+      "notes": [
+        "Refs often carry lineage or locator meaning and must stay distinguishable from entity IDs.",
+        "Schema families may permit provider-flavored values that the shared layer must not over-constrain."
+      ],
+      "example_fields": [
+        {
+          "field_name": "config_freeze_ref",
+          "family": "config_freeze",
+          "literal": "cfg.freeze/2026-04-23/sandbox",
+          "note": "Freeze references remain opaque execution-basis locators."
+        },
+        {
+          "field_name": "binding_lineage_ref",
+          "family": "binding_lineage",
+          "literal": "binding-lineage/authority/hmrc-web",
+          "note": "Lineage refs can contain path-like tokens and still remain lawful."
+        }
+      ],
+      "forbidden_shortcuts": [
+        "Do not strip separators from refs for cosmetic normalization.",
+        "Do not assume refs can be used interchangeably with IDs."
+      ]
+    },
+    {
+      "family_ref": "HASH",
+      "label": "Hashes",
+      "brand_suffix": "hash",
+      "helper_ref": "asTaxatHash",
+      "schema_suffixes": ["_hash"],
+      "allowed_shape": "NON_EMPTY_STRING",
+      "summary": "Digest strings keep hash meaning explicit at replay, release, and policy boundaries.",
+      "notes": [
+        "Hash branding distinguishes digest artifacts from plain refs or IDs even though the wire type remains string.",
+        "The shared layer does not assume a prefix like sha256: unless a contract says so."
+      ],
+      "example_fields": [
+        {
+          "field_name": "request_hash",
+          "family": "authority_request",
+          "literal": "c782c57046a9a4804646c55daab8d63f3587bf1853061219495f8f5cd1d5ce65",
+          "note": "Digest values remain lowercase hex under the canonical hash profile."
+        },
+        {
+          "field_name": "config_surface_hash",
+          "family": "config_surface",
+          "literal": "sha256:config-surface-hash",
+          "note": "Some contracts retain provider-specific prefixes and the helper must not reject them."
+        }
+      ],
+      "forbidden_shortcuts": [
+        "Do not derive digests from locale-formatted or whitespace-rich stringification.",
+        "Do not treat any non-empty hash string as proof of canonicality without using the hash helpers."
+      ]
+    },
+    {
+      "family_ref": "ROUTE_TOKEN",
+      "label": "Route Tokens",
+      "brand_suffix": "route-token",
+      "helper_ref": "asTaxatRouteToken",
+      "schema_suffixes": ["_route_token", "_token"],
+      "allowed_shape": "NON_EMPTY_STRING",
+      "summary": "Route tokens are browser-visible locators and must not be confused with IDs or mutable labels.",
+      "notes": [
+        "Route tokens remain legal strings because atlas and shell routes are path-bearing by design.",
+        "The shared layer brands them without claiming ownership of router-specific parsing."
+      ],
+      "example_fields": [
+        {
+          "field_name": "internal_route_token",
+          "family": "internal_surface",
+          "literal": "internal/canonical-primitives-atlas",
+          "note": "Slash-bearing route tokens remain valid."
+        },
+        {
+          "field_name": "preview_route_token",
+          "family": "preview_surface",
+          "literal": "preview/pr-42/operator-web",
+          "note": "Preview locators remain route tokens rather than identifiers."
+        }
+      ],
+      "forbidden_shortcuts": [
+        "Do not derive authority from breadcrumbs or human labels.",
+        "Do not normalize away routing punctuation that a router or storage boundary preserves."
+      ]
+    }
+  ]
+}

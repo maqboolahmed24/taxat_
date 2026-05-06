@@ -16,9 +16,7 @@ test("renders the resume isolation atlas with semantic zones and reduced-motion 
   await expect(
     page.getByRole("heading", { name: "Partition Identity", exact: true }),
   ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Resume Binding", exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Resume Binding", exact: true })).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Invalidation / Rebase", exact: true }),
   ).toBeVisible();
@@ -66,7 +64,5 @@ test("supports keyboard selection across families, invalidation triggers, and lo
 
   await expect(page.locator("#drawer-title")).toHaveText("Raw resume token");
   await expect(page.locator("#drawer-body")).toContainText("FORBIDDEN_AT_REST");
-  await expect(page.locator("#drawer-body")).toContainText(
-    "transport material only",
-  );
+  await expect(page.locator("#drawer-body")).toContainText("transport material only");
 });

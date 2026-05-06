@@ -1,0 +1,473 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/schema_drift_report.schema.json",
+  "title": "SchemaDriftReport",
+  "description": "Deterministic report artifact describing schema drift, migration readiness posture, compatibility-gate materialization, and the exact reason codes that admit or block a release candidate.",
+  "type": "object",
+  "required": [
+    "report_version",
+    "report_id",
+    "basis_statement",
+    "baseline_bundle",
+    "candidate_bundle",
+    "historical_protected_window",
+    "candidate_identity_contract",
+    "readiness_verdict",
+    "drift_summary",
+    "parity_state",
+    "deltas",
+    "compatibility_gate_materialization",
+    "source_lineage"
+  ],
+  "properties": {
+    "report_version": {
+      "const": "SCHEMA_DRIFT_REPORT_V1"
+    },
+    "report_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "basis_statement": {
+      "type": "string",
+      "minLength": 1
+    },
+    "baseline_bundle": {
+      "type": "object",
+      "required": [
+        "bundle_ref",
+        "schema_bundle_hash",
+        "schema_source_map_hash",
+        "sample_binding_map_hash"
+      ],
+      "properties": {
+        "bundle_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_bundle_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_source_map_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sample_binding_map_hash": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "candidate_bundle": {
+      "type": "object",
+      "required": [
+        "bundle_ref",
+        "schema_bundle_hash",
+        "schema_source_map_hash",
+        "sample_binding_map_hash"
+      ],
+      "properties": {
+        "bundle_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_bundle_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_source_map_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sample_binding_map_hash": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "historical_protected_window": {
+      "type": "object",
+      "required": [
+        "compatibility_window_ref",
+        "writer_schema_bundle_hash",
+        "supported_reader_schema_bundle_hashes",
+        "protected_historical_schema_bundle_hashes"
+      ],
+      "properties": {
+        "compatibility_window_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "writer_schema_bundle_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "supported_reader_schema_bundle_hashes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "protected_historical_schema_bundle_hashes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "candidate_identity_contract": {
+      "$ref": "https://taxat.dev/schemas/release_candidate_identity_contract.schema.json"
+    },
+    "readiness_verdict": {
+      "type": "object",
+      "required": [
+        "verdict_ref",
+        "admissibility_state",
+        "rollback_boundary_state",
+        "destructive_contract_state",
+        "reason_codes",
+        "blocking_delta_refs",
+        "recommended_actions"
+      ],
+      "properties": {
+        "verdict_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "admissibility_state": {
+          "type": "string",
+          "enum": [
+            "ADMISSIBLE",
+            "BLOCKED"
+          ]
+        },
+        "rollback_boundary_state": {
+          "type": "string",
+          "enum": [
+            "ROLLBACK_ALLOWED",
+            "FAIL_FORWARD_ONLY"
+          ]
+        },
+        "destructive_contract_state": {
+          "type": "string",
+          "enum": [
+            "BLOCKED_UNTIL_WINDOW_CLOSE",
+            "ELIGIBLE_AFTER_WINDOW_CLOSE"
+          ]
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "blocking_delta_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "recommended_actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "action_ref",
+              "summary",
+              "required_artifact_refs"
+            ],
+            "properties": {
+              "action_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "summary": {
+                "type": "string",
+                "minLength": 1
+              },
+              "required_artifact_refs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "drift_summary": {
+      "type": "object",
+      "required": [
+        "total_delta_count",
+        "blocking_delta_count",
+        "counts_by_group"
+      ],
+      "properties": {
+        "total_delta_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blocking_delta_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "counts_by_group": {
+          "type": "object",
+          "required": [
+            "ADDITIVE",
+            "NARROWING",
+            "DESTRUCTIVE",
+            "DOC_DRIFT",
+            "BINDING_DRIFT",
+            "MIGRATION_GAP"
+          ],
+          "properties": {
+            "ADDITIVE": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "NARROWING": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "DESTRUCTIVE": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "DOC_DRIFT": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "BINDING_DRIFT": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "MIGRATION_GAP": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "parity_state": {
+      "type": "object",
+      "required": [
+        "documentation_state",
+        "generated_binding_state",
+        "sample_binding_state"
+      ],
+      "properties": {
+        "documentation_state": {
+          "type": "string",
+          "enum": [
+            "IN_SYNC",
+            "DRIFT"
+          ]
+        },
+        "generated_binding_state": {
+          "type": "string",
+          "enum": [
+            "IN_SYNC",
+            "DRIFT"
+          ]
+        },
+        "sample_binding_state": {
+          "type": "string",
+          "enum": [
+            "IN_SYNC",
+            "DRIFT"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "deltas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "delta_ref",
+          "atlas_group_ref",
+          "severity_ref",
+          "phase_ref",
+          "schema_name",
+          "schema_path",
+          "summary",
+          "readiness_impact_ref",
+          "migration_requirement",
+          "sealed_manifest_impact",
+          "reason_codes",
+          "affected_artifacts",
+          "baseline_value_or_null",
+          "candidate_value_or_null",
+          "source_lineage"
+        ],
+        "properties": {
+          "delta_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "atlas_group_ref": {
+            "type": "string",
+            "enum": [
+              "ADDITIVE",
+              "NARROWING",
+              "DESTRUCTIVE",
+              "DOC_DRIFT",
+              "BINDING_DRIFT",
+              "MIGRATION_GAP"
+            ]
+          },
+          "severity_ref": {
+            "type": "string",
+            "enum": [
+              "NOTICE",
+              "WARNING",
+              "BLOCKING"
+            ]
+          },
+          "phase_ref": {
+            "type": "string",
+            "enum": [
+              "EXPAND",
+              "BACKFILL",
+              "VERIFY",
+              "CONTRACT"
+            ]
+          },
+          "schema_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "schema_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "readiness_impact_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "migration_requirement": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sealed_manifest_impact": {
+            "type": "boolean"
+          },
+          "reason_codes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          },
+          "affected_artifacts": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "baseline_value_or_null": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "candidate_value_or_null": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source_lineage": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "compatibility_gate_materialization": {
+      "type": "object",
+      "required": [
+        "state",
+        "outputPathOrNull",
+        "compatibilityGateHashOrNull",
+        "reasonCodes",
+        "contractOrNull"
+      ],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "MATERIALIZED",
+            "BLOCKED"
+          ]
+        },
+        "outputPathOrNull": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "compatibilityGateHashOrNull": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reasonCodes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "contractOrNull": {
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "source_lineage": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "additionalProperties": false
+}

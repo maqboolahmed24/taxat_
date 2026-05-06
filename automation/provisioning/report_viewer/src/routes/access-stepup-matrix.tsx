@@ -3,17 +3,8 @@ export const accessStepupMatrixRoute = {
   title: "Access and Step-up Matrix",
   purpose:
     "Render a governance-density policy atlas for coarse IdP roles, requestable scopes, step-up triggers, approval gates, and session posture without implying that the provider decides final Taxat legality.",
-  focusOrder: [
-    "policy-rail",
-    "policy-matrix",
-    "policy-inspector",
-  ],
-  sections: [
-    "Roles and scopes",
-    "Action-family matrix",
-    "Session profiles",
-    "Inspector",
-  ],
+  focusOrder: ["policy-rail", "policy-matrix", "policy-inspector"],
+  sections: ["Roles and scopes", "Action-family matrix", "Session profiles", "Inspector"],
   palette: {
     background: "#F5F6F4",
     surface: "#FFFFFF",

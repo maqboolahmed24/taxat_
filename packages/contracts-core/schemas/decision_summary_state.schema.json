@@ -1,0 +1,488 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/decision_summary_state.schema.json",
+  "title": "DecisionSummaryState",
+  "description": "Low-noise primary posture surface contract. This schema freezes the bounded visible reason set, plain explanation, limitation handling, and blocking posture for the default shell summary.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "surface_code",
+    "source_module_codes",
+    "headline",
+    "primary_issue_ref",
+    "attention_state",
+    "visible_warning_count",
+    "visible_reasons",
+    "additional_reason_count",
+    "plain_explanation",
+    "uncertainty_statement",
+    "limitation_state",
+    "state_reason_code_or_null",
+    "limitation_reason_codes",
+    "limitation_statement",
+    "blocking_reason",
+    "machine_reason_codes",
+    "full_text_ref"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "DecisionSummaryState"
+    },
+    "surface_code": {
+      "const": "DECISION_SUMMARY"
+    },
+    "source_module_codes": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "const": "DECISION_CONSTELLATION"
+        },
+        {
+          "const": "GATE_LATTICE"
+        },
+        {
+          "const": "TRUST_PRISM"
+        }
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "headline": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 96
+    },
+    "primary_issue_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "attention_state": {
+      "type": "string",
+      "enum": [
+        "CALM",
+        "NOTICE",
+        "REVIEW",
+        "BLOCKED",
+        "WAITING",
+        "LIMITED"
+      ]
+    },
+    "visible_warning_count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "visible_reasons": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/visibleReason"
+      },
+      "maxItems": 3,
+      "uniqueItems": true
+    },
+    "additional_reason_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "plain_explanation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240
+    },
+    "uncertainty_statement": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "limitation_state": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "NOT_REQUESTED",
+        "NOT_YET_MATERIALIZED",
+        "LIMITED",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "state_reason_code_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "REQUEST_NOT_TRIGGERED",
+        "MATERIALIZATION_PENDING",
+        "NOT_APPLICABLE_TO_CONTEXT",
+        null
+      ]
+    },
+    "limitation_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "limitation_statement": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "blocking_reason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "machine_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "full_text_ref": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "visibleReason": {
+      "type": "object",
+      "required": [
+        "reason_code",
+        "label",
+        "severity"
+      ],
+      "properties": {
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "NOTICE",
+            "REVIEW",
+            "BLOCKED",
+            "WAITING",
+            "LIMITED"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "additional_reason_count": {
+            "minimum": 1
+          }
+        },
+        "required": [
+          "additional_reason_count"
+        ]
+      },
+      "then": {
+        "properties": {
+          "visible_reasons": {
+            "minItems": 3,
+            "maxItems": 3
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "attention_state": {
+            "const": "CALM"
+          }
+        },
+        "required": [
+          "attention_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "primary_issue_ref": {
+            "type": "null"
+          },
+          "visible_reasons": {
+            "maxItems": 0
+          },
+          "visible_warning_count": {
+            "const": 0
+          },
+          "blocking_reason": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "attention_state": {
+            "not": {
+              "const": "CALM"
+            }
+          }
+        },
+        "required": [
+          "attention_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "primary_issue_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "visible_reasons": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "attention_state": {
+            "const": "BLOCKED"
+          }
+        },
+        "required": [
+          "attention_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "blocking_reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "attention_state": {
+            "not": {
+              "const": "BLOCKED"
+            }
+          }
+        },
+        "required": [
+          "attention_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "blocking_reason": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "limitation_state": {
+            "const": "NONE"
+          }
+        },
+        "required": [
+          "limitation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "limitation_statement": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "limitation_state": {
+            "not": {
+              "const": "NONE"
+            }
+          }
+        },
+        "required": [
+          "limitation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "limitation_statement": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "limitation_state": {
+            "const": "NONE"
+          }
+        },
+        "required": [
+          "limitation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "state_reason_code_or_null": {
+            "type": "null"
+          },
+          "limitation_reason_codes": {
+            "maxItems": 0
+          },
+          "limitation_statement": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "limitation_state": {
+            "const": "LIMITED"
+          }
+        },
+        "required": [
+          "limitation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "state_reason_code_or_null": {
+            "type": "null"
+          },
+          "limitation_reason_codes": {
+            "minItems": 1
+          },
+          "limitation_statement": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "limitation_reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "limitation_state": {
+            "const": "NOT_REQUESTED"
+          }
+        },
+        "required": [
+          "limitation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "state_reason_code_or_null": {
+            "const": "REQUEST_NOT_TRIGGERED"
+          },
+          "limitation_statement": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "limitation_state": {
+            "const": "NOT_YET_MATERIALIZED"
+          }
+        },
+        "required": [
+          "limitation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "state_reason_code_or_null": {
+            "const": "MATERIALIZATION_PENDING"
+          },
+          "limitation_statement": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "limitation_state": {
+            "const": "NOT_APPLICABLE"
+          }
+        },
+        "required": [
+          "limitation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "state_reason_code_or_null": {
+            "const": "NOT_APPLICABLE_TO_CONTEXT"
+          },
+          "limitation_statement": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

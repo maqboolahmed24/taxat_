@@ -1,0 +1,924 @@
+{
+  "contract_version": "NORTHBOUND_COMMAND_FAMILY_MATRIX_V1",
+  "matrix_id": "northbound-command-family-matrix",
+  "basis_statement": "Northbound write admission is driven by explicit command family policy so every endpoint reuses the same scope, stale-guard, truth-boundary, and duplicate-handling posture instead of hand-rolling parse logic.",
+  "command_family_rows": [
+    {
+      "command_type": "SUBMIT_RETURN",
+      "display_name": "Submit return",
+      "family_group": "MANIFEST",
+      "target_scope_class": "MANIFEST",
+      "route_scope_class": "MANIFEST_EXPERIENCE",
+      "projection_stream_class": "MANIFEST_EXPERIENCE",
+      "dispatch_posture": "ASYNC_MANIFEST_PIPELINE",
+      "requires_client_id": true,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "FOCUS_LENS",
+      "default_recovery_ref_family": "DECISION_BUNDLE",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Filing-capable manifest commands stay bound to the current decision bundle, shell token, and live frame epoch.",
+        "The durable receipt is the legal retry anchor even when downstream filing execution is still pending."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "MANIFEST_RENDER_FRAME",
+        "target_scope_classes": ["MANIFEST", "WORK_ITEM"],
+        "required_guard_fields": [
+          "if_match_decision_bundle_hash",
+          "if_match_shell_stability_token",
+          "if_match_frame_epoch"
+        ],
+        "stale_guard_families": [
+          "DECISION_BUNDLE_HASH",
+          "SHELL_STABILITY_TOKEN",
+          "FRAME_EPOCH"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "AMEND_RETURN",
+      "display_name": "Amend return",
+      "family_group": "MANIFEST",
+      "target_scope_class": "MANIFEST",
+      "route_scope_class": "MANIFEST_EXPERIENCE",
+      "projection_stream_class": "MANIFEST_EXPERIENCE",
+      "dispatch_posture": "ASYNC_MANIFEST_PIPELINE",
+      "requires_client_id": true,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "FOCUS_LENS",
+      "default_recovery_ref_family": "DECISION_BUNDLE",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Amendment intent remains a manifest command and must not outlive the rendered decision bundle basis."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "MANIFEST_RENDER_FRAME",
+        "target_scope_classes": ["MANIFEST", "WORK_ITEM"],
+        "required_guard_fields": [
+          "if_match_decision_bundle_hash",
+          "if_match_shell_stability_token",
+          "if_match_frame_epoch"
+        ],
+        "stale_guard_families": [
+          "DECISION_BUNDLE_HASH",
+          "SHELL_STABILITY_TOKEN",
+          "FRAME_EPOCH"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "CLIENT_PORTAL_COMPLETE_ONBOARDING_STEP",
+      "display_name": "Complete onboarding step",
+      "family_group": "CLIENT_PORTAL",
+      "target_scope_class": "MANIFEST",
+      "route_scope_class": "CLIENT_PORTAL_ROUTE",
+      "projection_stream_class": "MANIFEST_EXPERIENCE",
+      "dispatch_posture": "ASYNC_PORTAL_ROUTE_MUTATION",
+      "requires_client_id": true,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "CUSTOMER_ACTIVITY",
+      "default_recovery_ref_family": "CLIENT_PORTAL_WORKSPACE",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Portal route mutations bind the customer-visible workspace version instead of borrowing collaboration thread guards."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "CLIENT_PORTAL_ROUTE_MUTATION",
+        "target_scope_classes": ["MANIFEST", "WORK_ITEM"],
+        "required_guard_fields": ["if_match_client_portal_workspace_version"],
+        "stale_guard_families": ["CLIENT_PORTAL_WORKSPACE_VERSION"],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "CLIENT_PORTAL_FINALIZE_UPLOAD",
+      "display_name": "Finalize upload",
+      "family_group": "CLIENT_PORTAL",
+      "target_scope_class": "MANIFEST",
+      "route_scope_class": "CLIENT_PORTAL_ROUTE",
+      "projection_stream_class": "NONE",
+      "dispatch_posture": "ASYNC_UPLOAD_FINALIZATION",
+      "requires_client_id": true,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "FILES",
+      "default_recovery_ref_family": "UPLOAD_SESSION",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Upload finalization shares the command scaffold but keeps recovery anchored to the governed upload session rather than raw file bytes."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "CLIENT_PORTAL_ROUTE_MUTATION",
+        "target_scope_classes": ["MANIFEST", "WORK_ITEM"],
+        "required_guard_fields": ["if_match_client_portal_workspace_version"],
+        "stale_guard_families": ["CLIENT_PORTAL_WORKSPACE_VERSION"],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "CLIENT_PORTAL_REQUEST_HELP",
+      "display_name": "Request help",
+      "family_group": "CLIENT_PORTAL",
+      "target_scope_class": "WORK_ITEM",
+      "route_scope_class": "CLIENT_PORTAL_ROUTE",
+      "projection_stream_class": "WORKSPACE",
+      "dispatch_posture": "ASYNC_HELP_REQUEST_AND_WORKSPACE_APPEND",
+      "requires_client_id": true,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "CUSTOMER_ACTIVITY",
+      "default_recovery_ref_family": "CLIENT_PORTAL_WORKSPACE",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Portal help requests may allocate both a portal-facing help request and the linked collaboration request-for-info record."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "CLIENT_PORTAL_ROUTE_MUTATION",
+        "target_scope_classes": ["MANIFEST", "WORK_ITEM"],
+        "required_guard_fields": ["if_match_client_portal_workspace_version"],
+        "stale_guard_families": ["CLIENT_PORTAL_WORKSPACE_VERSION"],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "CLIENT_PORTAL_ACKNOWLEDGE_APPROVAL_PACK",
+      "display_name": "Acknowledge approval pack",
+      "family_group": "CLIENT_PORTAL",
+      "target_scope_class": "MANIFEST",
+      "route_scope_class": "MANIFEST_EXPERIENCE",
+      "projection_stream_class": "MANIFEST_EXPERIENCE",
+      "dispatch_posture": "ASYNC_APPROVAL_ACKNOWLEDGEMENT",
+      "requires_client_id": true,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "CUSTOMER_ACTIVITY",
+      "default_recovery_ref_family": "APPROVAL_PACK",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Approval-pack acknowledgement must bind to the exact reviewed pack and the exact render frame the client saw."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "MANIFEST_APPROVAL_PACK_REVIEW",
+        "target_scope_classes": ["MANIFEST"],
+        "required_guard_fields": [
+          "if_match_decision_bundle_hash",
+          "if_match_shell_stability_token",
+          "if_match_frame_epoch",
+          "if_match_approval_pack_hash"
+        ],
+        "stale_guard_families": [
+          "DECISION_BUNDLE_HASH",
+          "SHELL_STABILITY_TOKEN",
+          "FRAME_EPOCH",
+          "APPROVAL_PACK_HASH"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": false
+      }
+    },
+    {
+      "command_type": "CLIENT_PORTAL_SIGN_APPROVAL_PACK",
+      "display_name": "Sign approval pack",
+      "family_group": "CLIENT_PORTAL",
+      "target_scope_class": "MANIFEST",
+      "route_scope_class": "MANIFEST_EXPERIENCE",
+      "projection_stream_class": "MANIFEST_EXPERIENCE",
+      "dispatch_posture": "ASYNC_APPROVAL_SIGNATURE",
+      "requires_client_id": true,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "CUSTOMER_ACTIVITY",
+      "default_recovery_ref_family": "APPROVAL_PACK",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Signature commands reuse the approval-pack review profile and remain stale-closed when pack or shell posture drifted."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "MANIFEST_APPROVAL_PACK_REVIEW",
+        "target_scope_classes": ["MANIFEST"],
+        "required_guard_fields": [
+          "if_match_decision_bundle_hash",
+          "if_match_shell_stability_token",
+          "if_match_frame_epoch",
+          "if_match_approval_pack_hash"
+        ],
+        "stale_guard_families": [
+          "DECISION_BUNDLE_HASH",
+          "SHELL_STABILITY_TOKEN",
+          "FRAME_EPOCH",
+          "APPROVAL_PACK_HASH"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": false
+      }
+    },
+    {
+      "command_type": "ASSIGN_WORK_ITEM",
+      "display_name": "Assign work item",
+      "family_group": "COLLABORATION",
+      "target_scope_class": "WORK_ITEM",
+      "route_scope_class": "WORKSPACE",
+      "projection_stream_class": "WORKSPACE",
+      "dispatch_posture": "ASYNC_WORKSPACE_STATE_MUTATION",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "INTERNAL_ACTIVITY",
+      "default_recovery_ref_family": "WORKSPACE_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "State-changing collaboration mutations bind the current workspace version and shell token."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "WORK_ITEM_STATE_MUTATION",
+        "target_scope_classes": ["WORK_ITEM"],
+        "required_guard_fields": [
+          "if_match_work_item_version",
+          "if_match_shell_stability_token"
+        ],
+        "stale_guard_families": [
+          "WORK_ITEM_VERSION",
+          "SHELL_STABILITY_TOKEN"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "REASSIGN_WORK_ITEM",
+      "display_name": "Reassign work item",
+      "family_group": "COLLABORATION",
+      "target_scope_class": "WORK_ITEM",
+      "route_scope_class": "WORKSPACE",
+      "projection_stream_class": "WORKSPACE",
+      "dispatch_posture": "ASYNC_WORKSPACE_STATE_MUTATION",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "INTERNAL_ACTIVITY",
+      "default_recovery_ref_family": "WORKSPACE_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Reassignment shares the same concurrency profile as other work-item state changes."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "WORK_ITEM_STATE_MUTATION",
+        "target_scope_classes": ["WORK_ITEM"],
+        "required_guard_fields": [
+          "if_match_work_item_version",
+          "if_match_shell_stability_token"
+        ],
+        "stale_guard_families": [
+          "WORK_ITEM_VERSION",
+          "SHELL_STABILITY_TOKEN"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "ESCALATE_WORK_ITEM",
+      "display_name": "Escalate work item",
+      "family_group": "COLLABORATION",
+      "target_scope_class": "WORK_ITEM",
+      "route_scope_class": "WORKSPACE",
+      "projection_stream_class": "WORKSPACE",
+      "dispatch_posture": "ASYNC_WORKSPACE_STATE_MUTATION",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "INTERNAL_ACTIVITY",
+      "default_recovery_ref_family": "WORKSPACE_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Escalations remain stale-closed and must not allocate duplicate activity on retry."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "WORK_ITEM_STATE_MUTATION",
+        "target_scope_classes": ["WORK_ITEM"],
+        "required_guard_fields": [
+          "if_match_work_item_version",
+          "if_match_shell_stability_token"
+        ],
+        "stale_guard_families": [
+          "WORK_ITEM_VERSION",
+          "SHELL_STABILITY_TOKEN"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "CHANGE_WORK_ITEM_STATUS",
+      "display_name": "Change work item status",
+      "family_group": "COLLABORATION",
+      "target_scope_class": "WORK_ITEM",
+      "route_scope_class": "WORKSPACE",
+      "projection_stream_class": "WORKSPACE",
+      "dispatch_posture": "ASYNC_WORKSPACE_STATE_MUTATION",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "INTERNAL_ACTIVITY",
+      "default_recovery_ref_family": "WORKSPACE_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Status changes use the common work-item mutation profile."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "WORK_ITEM_STATE_MUTATION",
+        "target_scope_classes": ["WORK_ITEM"],
+        "required_guard_fields": [
+          "if_match_work_item_version",
+          "if_match_shell_stability_token"
+        ],
+        "stale_guard_families": [
+          "WORK_ITEM_VERSION",
+          "SHELL_STABILITY_TOKEN"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "SET_WORK_ITEM_DUE_DATES",
+      "display_name": "Set work item due dates",
+      "family_group": "COLLABORATION",
+      "target_scope_class": "WORK_ITEM",
+      "route_scope_class": "WORKSPACE",
+      "projection_stream_class": "WORKSPACE",
+      "dispatch_posture": "ASYNC_WORKSPACE_STATE_MUTATION",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "INTERNAL_ACTIVITY",
+      "default_recovery_ref_family": "WORKSPACE_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Due-date changes remain ordinary collaboration state mutations."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "WORK_ITEM_STATE_MUTATION",
+        "target_scope_classes": ["WORK_ITEM"],
+        "required_guard_fields": [
+          "if_match_work_item_version",
+          "if_match_shell_stability_token"
+        ],
+        "stale_guard_families": [
+          "WORK_ITEM_VERSION",
+          "SHELL_STABILITY_TOKEN"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "ADD_INTERNAL_NOTE",
+      "display_name": "Add internal note",
+      "family_group": "COLLABORATION",
+      "target_scope_class": "WORK_ITEM",
+      "route_scope_class": "WORKSPACE",
+      "projection_stream_class": "WORKSPACE",
+      "dispatch_posture": "ASYNC_INTERNAL_APPEND",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "INTERNAL_ACTIVITY",
+      "default_recovery_ref_family": "WORKSPACE_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Internal append commands use the internal head sequence and must never drift onto the customer lane."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "WORK_ITEM_INTERNAL_APPEND",
+        "target_scope_classes": ["WORK_ITEM"],
+        "required_guard_fields": [
+          "if_match_work_item_version",
+          "if_match_shell_stability_token",
+          "if_match_internal_head_sequence"
+        ],
+        "stale_guard_families": [
+          "WORK_ITEM_VERSION",
+          "SHELL_STABILITY_TOKEN",
+          "INTERNAL_THREAD_HEAD"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": false
+      }
+    },
+    {
+      "command_type": "ADD_CUSTOMER_COMMENT",
+      "display_name": "Add customer comment",
+      "family_group": "COLLABORATION",
+      "target_scope_class": "WORK_ITEM",
+      "route_scope_class": "WORKSPACE",
+      "projection_stream_class": "WORKSPACE",
+      "dispatch_posture": "ASYNC_CUSTOMER_APPEND",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "CUSTOMER_ACTIVITY",
+      "default_recovery_ref_family": "WORKSPACE_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Customer-visible append commands use the customer thread head and remain stale-closed on workspace drift."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "WORK_ITEM_CUSTOMER_APPEND",
+        "target_scope_classes": ["WORK_ITEM"],
+        "required_guard_fields": [
+          "if_match_work_item_version",
+          "if_match_customer_head_sequence",
+          "if_match_shell_stability_token"
+        ],
+        "stale_guard_families": [
+          "WORK_ITEM_VERSION",
+          "CUSTOMER_THREAD_HEAD",
+          "SHELL_STABILITY_TOKEN"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "REQUEST_CUSTOMER_INFO",
+      "display_name": "Request customer info",
+      "family_group": "COLLABORATION",
+      "target_scope_class": "WORK_ITEM",
+      "route_scope_class": "WORKSPACE",
+      "projection_stream_class": "WORKSPACE",
+      "dispatch_posture": "ASYNC_CUSTOMER_APPEND_AND_REQUEST_STATE",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "CUSTOMER_ACTIVITY",
+      "default_recovery_ref_family": "WORKSPACE_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Request-for-info commands stay on the customer-visible lane and open a governed request-state lineage."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "WORK_ITEM_CUSTOMER_APPEND",
+        "target_scope_classes": ["WORK_ITEM"],
+        "required_guard_fields": [
+          "if_match_work_item_version",
+          "if_match_customer_head_sequence",
+          "if_match_shell_stability_token"
+        ],
+        "stale_guard_families": [
+          "WORK_ITEM_VERSION",
+          "CUSTOMER_THREAD_HEAD",
+          "SHELL_STABILITY_TOKEN"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "RESPOND_TO_REQUEST_INFO",
+      "display_name": "Respond to request info",
+      "family_group": "COLLABORATION",
+      "target_scope_class": "WORK_ITEM",
+      "route_scope_class": "WORKSPACE",
+      "projection_stream_class": "WORKSPACE",
+      "dispatch_posture": "ASYNC_REQUEST_STATE_MUTATION",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "CUSTOMER_ACTIVITY",
+      "default_recovery_ref_family": "WORKSPACE_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Request-info responses carry both the customer head and the durable request-state version so stale replies fail closed."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "WORK_ITEM_REQUEST_RESPONSE",
+        "target_scope_classes": ["WORK_ITEM"],
+        "required_guard_fields": [
+          "if_match_work_item_version",
+          "if_match_customer_head_sequence",
+          "if_match_request_state_version",
+          "if_match_shell_stability_token"
+        ],
+        "stale_guard_families": [
+          "WORK_ITEM_VERSION",
+          "CUSTOMER_THREAD_HEAD",
+          "REQUEST_STATE_VERSION",
+          "SHELL_STABILITY_TOKEN"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "ADMIN_UPDATE_TENANT_SETTINGS",
+      "display_name": "Update tenant settings",
+      "family_group": "GOVERNANCE",
+      "target_scope_class": "GOVERNANCE",
+      "route_scope_class": "GOVERNANCE_ROUTE",
+      "projection_stream_class": "NONE",
+      "dispatch_posture": "ASYNC_GOVERNANCE_WRITE",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "AUDIT_TRAIL",
+      "default_recovery_ref_family": "POLICY_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Tenant-wide settings remain stale-closed on the current policy snapshot."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "GOVERNANCE_POLICY_MUTATION",
+        "target_scope_classes": ["GOVERNANCE"],
+        "required_guard_fields": ["if_match_policy_snapshot_hash"],
+        "stale_guard_families": ["POLICY_SNAPSHOT_HASH"],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "ADMIN_STAGE_POLICY_CHANGE",
+      "display_name": "Stage policy change",
+      "family_group": "GOVERNANCE",
+      "target_scope_class": "GOVERNANCE",
+      "route_scope_class": "GOVERNANCE_ROUTE",
+      "projection_stream_class": "NONE",
+      "dispatch_posture": "ASYNC_GOVERNANCE_WRITE",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": true,
+      "default_problem_detail_surface_code": "AUDIT_TRAIL",
+      "default_recovery_ref_family": "POLICY_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Simulation-backed policy staging must keep topology, simulation basis, and mutation basis contract aligned."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "GOVERNANCE_SIMULATION_COMMIT",
+        "target_scope_classes": ["GOVERNANCE"],
+        "required_guard_fields": [
+          "if_match_policy_snapshot_hash",
+          "if_match_dependency_topology_hash",
+          "simulation_basis_hash"
+        ],
+        "stale_guard_families": [
+          "POLICY_SNAPSHOT_HASH",
+          "DEPENDENCY_TOPOLOGY_HASH",
+          "SIMULATION_BASIS_HASH",
+          "MUTATION_BASIS_CONTRACT_HASH"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "ADMIN_ASSIGN_PRINCIPAL_ROLE",
+      "display_name": "Assign principal role",
+      "family_group": "GOVERNANCE",
+      "target_scope_class": "GOVERNANCE",
+      "route_scope_class": "GOVERNANCE_ROUTE",
+      "projection_stream_class": "NONE",
+      "dispatch_posture": "ASYNC_GOVERNANCE_WRITE",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": true,
+      "default_problem_detail_surface_code": "AUDIT_TRAIL",
+      "default_recovery_ref_family": "POLICY_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Role assignment is governance-scope and may rely on a prior simulation cut."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "GOVERNANCE_SIMULATION_COMMIT",
+        "target_scope_classes": ["GOVERNANCE"],
+        "required_guard_fields": [
+          "if_match_policy_snapshot_hash",
+          "if_match_dependency_topology_hash",
+          "simulation_basis_hash"
+        ],
+        "stale_guard_families": [
+          "POLICY_SNAPSHOT_HASH",
+          "DEPENDENCY_TOPOLOGY_HASH",
+          "SIMULATION_BASIS_HASH",
+          "MUTATION_BASIS_CONTRACT_HASH"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "ADMIN_REMOVE_PRINCIPAL_ROLE",
+      "display_name": "Remove principal role",
+      "family_group": "GOVERNANCE",
+      "target_scope_class": "GOVERNANCE",
+      "route_scope_class": "GOVERNANCE_ROUTE",
+      "projection_stream_class": "NONE",
+      "dispatch_posture": "ASYNC_GOVERNANCE_WRITE",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": true,
+      "default_problem_detail_surface_code": "AUDIT_TRAIL",
+      "default_recovery_ref_family": "POLICY_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Role removal stays on the same simulation-backed governance posture."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "GOVERNANCE_SIMULATION_COMMIT",
+        "target_scope_classes": ["GOVERNANCE"],
+        "required_guard_fields": [
+          "if_match_policy_snapshot_hash",
+          "if_match_dependency_topology_hash",
+          "simulation_basis_hash"
+        ],
+        "stale_guard_families": [
+          "POLICY_SNAPSHOT_HASH",
+          "DEPENDENCY_TOPOLOGY_HASH",
+          "SIMULATION_BASIS_HASH",
+          "MUTATION_BASIS_CONTRACT_HASH"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "ADMIN_SET_PRINCIPAL_ATTRIBUTES",
+      "display_name": "Set principal attributes",
+      "family_group": "GOVERNANCE",
+      "target_scope_class": "GOVERNANCE",
+      "route_scope_class": "GOVERNANCE_ROUTE",
+      "projection_stream_class": "NONE",
+      "dispatch_posture": "ASYNC_GOVERNANCE_WRITE",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "AUDIT_TRAIL",
+      "default_recovery_ref_family": "POLICY_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Principal attribute mutation requires the current policy snapshot even when no simulation cut is reused."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "GOVERNANCE_POLICY_MUTATION",
+        "target_scope_classes": ["GOVERNANCE"],
+        "required_guard_fields": ["if_match_policy_snapshot_hash"],
+        "stale_guard_families": ["POLICY_SNAPSHOT_HASH"],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "ADMIN_LINK_AUTHORITY",
+      "display_name": "Link authority",
+      "family_group": "GOVERNANCE",
+      "target_scope_class": "GOVERNANCE",
+      "route_scope_class": "GOVERNANCE_ROUTE",
+      "projection_stream_class": "NONE",
+      "dispatch_posture": "ASYNC_GOVERNANCE_WRITE",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": true,
+      "default_problem_detail_surface_code": "AUDIT_TRAIL",
+      "default_recovery_ref_family": "POLICY_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Authority-link changes remain stale-closed and may require the reviewed simulation basis."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "GOVERNANCE_SIMULATION_COMMIT",
+        "target_scope_classes": ["GOVERNANCE"],
+        "required_guard_fields": [
+          "if_match_policy_snapshot_hash",
+          "if_match_dependency_topology_hash",
+          "simulation_basis_hash"
+        ],
+        "stale_guard_families": [
+          "POLICY_SNAPSHOT_HASH",
+          "DEPENDENCY_TOPOLOGY_HASH",
+          "SIMULATION_BASIS_HASH",
+          "MUTATION_BASIS_CONTRACT_HASH"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "ADMIN_RELINK_AUTHORITY",
+      "display_name": "Relink authority",
+      "family_group": "GOVERNANCE",
+      "target_scope_class": "GOVERNANCE",
+      "route_scope_class": "GOVERNANCE_ROUTE",
+      "projection_stream_class": "NONE",
+      "dispatch_posture": "ASYNC_GOVERNANCE_WRITE",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": true,
+      "default_problem_detail_surface_code": "AUDIT_TRAIL",
+      "default_recovery_ref_family": "POLICY_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Relinking authority scope is simulation-backed because blast radius and approval posture may shift."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "GOVERNANCE_SIMULATION_COMMIT",
+        "target_scope_classes": ["GOVERNANCE"],
+        "required_guard_fields": [
+          "if_match_policy_snapshot_hash",
+          "if_match_dependency_topology_hash",
+          "simulation_basis_hash"
+        ],
+        "stale_guard_families": [
+          "POLICY_SNAPSHOT_HASH",
+          "DEPENDENCY_TOPOLOGY_HASH",
+          "SIMULATION_BASIS_HASH",
+          "MUTATION_BASIS_CONTRACT_HASH"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "ADMIN_UNLINK_AUTHORITY",
+      "display_name": "Unlink authority",
+      "family_group": "GOVERNANCE",
+      "target_scope_class": "GOVERNANCE",
+      "route_scope_class": "GOVERNANCE_ROUTE",
+      "projection_stream_class": "NONE",
+      "dispatch_posture": "ASYNC_GOVERNANCE_WRITE",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "AUDIT_TRAIL",
+      "default_recovery_ref_family": "POLICY_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Unlink flows still require the live policy snapshot but can skip topology/simulation reuse when staged on fresh truth."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "GOVERNANCE_POLICY_MUTATION",
+        "target_scope_classes": ["GOVERNANCE"],
+        "required_guard_fields": ["if_match_policy_snapshot_hash"],
+        "stale_guard_families": ["POLICY_SNAPSHOT_HASH"],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "ADMIN_APPLY_RETENTION_POLICY",
+      "display_name": "Apply retention policy",
+      "family_group": "GOVERNANCE",
+      "target_scope_class": "GOVERNANCE",
+      "route_scope_class": "GOVERNANCE_ROUTE",
+      "projection_stream_class": "NONE",
+      "dispatch_posture": "ASYNC_GOVERNANCE_WRITE",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": true,
+      "default_problem_detail_surface_code": "AUDIT_TRAIL",
+      "default_recovery_ref_family": "POLICY_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Retention mutations are simulation-backed because blast radius, approval, and downstream legal effect all depend on the reviewed basis."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "GOVERNANCE_SIMULATION_COMMIT",
+        "target_scope_classes": ["GOVERNANCE"],
+        "required_guard_fields": [
+          "if_match_policy_snapshot_hash",
+          "if_match_dependency_topology_hash",
+          "simulation_basis_hash"
+        ],
+        "stale_guard_families": [
+          "POLICY_SNAPSHOT_HASH",
+          "DEPENDENCY_TOPOLOGY_HASH",
+          "SIMULATION_BASIS_HASH",
+          "MUTATION_BASIS_CONTRACT_HASH"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "ADMIN_APPLY_LEGAL_HOLD",
+      "display_name": "Apply legal hold",
+      "family_group": "GOVERNANCE",
+      "target_scope_class": "GOVERNANCE",
+      "route_scope_class": "GOVERNANCE_ROUTE",
+      "projection_stream_class": "NONE",
+      "dispatch_posture": "ASYNC_GOVERNANCE_WRITE",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": true,
+      "default_problem_detail_surface_code": "AUDIT_TRAIL",
+      "default_recovery_ref_family": "POLICY_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Legal holds are simulation-backed and stale-closed."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "GOVERNANCE_SIMULATION_COMMIT",
+        "target_scope_classes": ["GOVERNANCE"],
+        "required_guard_fields": [
+          "if_match_policy_snapshot_hash",
+          "if_match_dependency_topology_hash",
+          "simulation_basis_hash"
+        ],
+        "stale_guard_families": [
+          "POLICY_SNAPSHOT_HASH",
+          "DEPENDENCY_TOPOLOGY_HASH",
+          "SIMULATION_BASIS_HASH",
+          "MUTATION_BASIS_CONTRACT_HASH"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "ADMIN_RELEASE_LEGAL_HOLD",
+      "display_name": "Release legal hold",
+      "family_group": "GOVERNANCE",
+      "target_scope_class": "GOVERNANCE",
+      "route_scope_class": "GOVERNANCE_ROUTE",
+      "projection_stream_class": "NONE",
+      "dispatch_posture": "ASYNC_GOVERNANCE_WRITE",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": true,
+      "default_problem_detail_surface_code": "AUDIT_TRAIL",
+      "default_recovery_ref_family": "POLICY_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Legal-hold release remains a governance simulation commit because the reviewed approval posture matters."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "GOVERNANCE_SIMULATION_COMMIT",
+        "target_scope_classes": ["GOVERNANCE"],
+        "required_guard_fields": [
+          "if_match_policy_snapshot_hash",
+          "if_match_dependency_topology_hash",
+          "simulation_basis_hash"
+        ],
+        "stale_guard_families": [
+          "POLICY_SNAPSHOT_HASH",
+          "DEPENDENCY_TOPOLOGY_HASH",
+          "SIMULATION_BASIS_HASH",
+          "MUTATION_BASIS_CONTRACT_HASH"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "ADMIN_EXECUTE_ERASURE",
+      "display_name": "Execute erasure",
+      "family_group": "GOVERNANCE",
+      "target_scope_class": "GOVERNANCE",
+      "route_scope_class": "GOVERNANCE_ROUTE",
+      "projection_stream_class": "NONE",
+      "dispatch_posture": "ASYNC_GOVERNANCE_WRITE",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": true,
+      "default_problem_detail_surface_code": "AUDIT_TRAIL",
+      "default_recovery_ref_family": "POLICY_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Irreversible erasure must never outrun the reviewed governance basis."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "GOVERNANCE_SIMULATION_COMMIT",
+        "target_scope_classes": ["GOVERNANCE"],
+        "required_guard_fields": [
+          "if_match_policy_snapshot_hash",
+          "if_match_dependency_topology_hash",
+          "simulation_basis_hash"
+        ],
+        "stale_guard_families": [
+          "POLICY_SNAPSHOT_HASH",
+          "DEPENDENCY_TOPOLOGY_HASH",
+          "SIMULATION_BASIS_HASH",
+          "MUTATION_BASIS_CONTRACT_HASH"
+        ],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    },
+    {
+      "command_type": "ADMIN_EXPORT_AUDIT_SLICE",
+      "display_name": "Export audit slice",
+      "family_group": "GOVERNANCE",
+      "target_scope_class": "GOVERNANCE",
+      "route_scope_class": "GOVERNANCE_ROUTE",
+      "projection_stream_class": "NONE",
+      "dispatch_posture": "ASYNC_GOVERNANCE_EXPORT",
+      "requires_client_id": false,
+      "requires_governance_simulation_basis": false,
+      "default_problem_detail_surface_code": "AUDIT_TRAIL",
+      "default_recovery_ref_family": "POLICY_SNAPSHOT",
+      "exact_duplicate_policy": "RETURN_EXISTING_RECEIPT",
+      "notes": [
+        "Audit export is still a governance command and reuses the shared receipt/problem boundary."
+      ],
+      "mutation_precondition_binding": {
+        "profile_code": "GOVERNANCE_POLICY_MUTATION",
+        "target_scope_classes": ["GOVERNANCE"],
+        "required_guard_fields": ["if_match_policy_snapshot_hash"],
+        "stale_guard_families": ["POLICY_SNAPSHOT_HASH"],
+        "requires_live_freshness": true,
+        "invalidates_on_visibility_shift": true
+      }
+    }
+  ],
+  "source_lineage": [
+    {
+      "source_file": "Algorithm/northbound_api_and_session_contract.md",
+      "source_ref": "sections_3_through_6"
+    },
+    {
+      "source_file": "Algorithm/schemas/command_envelope.schema.json",
+      "source_ref": "target_scope_and_guard_all_of_rules"
+    }
+  ]
+}

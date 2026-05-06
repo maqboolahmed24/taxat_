@@ -1,0 +1,461 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/client_document_request.schema.json",
+  "title": "ClientDocumentRequest",
+  "description": "Client-facing document-request projection and persistence contract for the portal. This is a client-safe read and workflow artifact; it must never expose internal-only review or audit content.",
+  "type": "object",
+  "required": [
+    "request_id",
+    "artifact_type",
+    "tenant_id",
+    "client_id",
+    "manifest_id",
+    "category",
+    "title",
+    "description_ref",
+    "requested_file_types",
+    "due_at",
+    "lifecycle_state",
+    "required_count",
+    "request_version_ref",
+    "upload_refs",
+    "latest_upload_ref",
+    "current_request_upload_ref_or_null",
+    "review_outcome",
+    "assistance_mode",
+    "language_contract",
+    "customer_safe_projection",
+    "externalization_governance_contract",
+    "artifact_selection",
+    "artifact_affordance"
+  ],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_type": {
+      "const": "ClientDocumentRequest"
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "client_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "IDENTITY",
+        "BANK_STATEMENT",
+        "INVOICE",
+        "RECEIPT",
+        "AUTHORITY_LETTER",
+        "OTHER"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 72
+    },
+    "description_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requested_file_types": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "due_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "UPLOAD_IN_PROGRESS",
+        "SUBMITTED",
+        "UNDER_REVIEW",
+        "ACCEPTED",
+        "REJECTED",
+        "WITHDRAWN",
+        "EXPIRED"
+      ]
+    },
+    "required_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "request_version_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "upload_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "latest_upload_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "current_request_upload_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "review_outcome": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "assistance_mode": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "language_contract": {
+      "$ref": "https://taxat.dev/schemas/portal_language_contract.schema.json"
+    },
+    "customer_safe_projection": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/customer_safe_projection_contract.schema.json"
+        },
+        {
+          "properties": {
+            "boundary_scope": {
+              "const": "CLIENT_DOCUMENT_REQUEST"
+            },
+            "projection_audience": {
+              "const": "CLIENT_PORTAL"
+            }
+          }
+        }
+      ]
+    },
+    "externalization_governance_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/externalization_governance_contract.schema.json"
+        },
+        {
+          "properties": {
+            "boundary_scope": {
+              "const": "CLIENT_DOCUMENT_REQUEST"
+            }
+          }
+        }
+      ]
+    },
+    "artifact_selection": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/artifact_selection_contract.schema.json"
+        },
+        {
+          "properties": {
+            "selection_scope": {
+              "const": "CLIENT_DOCUMENT_REQUEST"
+            }
+          }
+        }
+      ]
+    },
+    "artifact_affordance": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/artifact_affordance_contract.schema.json"
+        },
+        {
+          "properties": {
+            "affordance_scope": {
+              "const": "CLIENT_DOCUMENT_REQUEST"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "UPLOAD_IN_PROGRESS"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "upload_refs": {
+            "minItems": 1
+          },
+          "latest_upload_ref": {
+            "type": "string"
+          },
+          "current_request_upload_ref_or_null": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "SUBMITTED",
+              "UNDER_REVIEW",
+              "ACCEPTED",
+              "REJECTED"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "upload_refs": {
+            "minItems": 1
+          },
+          "latest_upload_ref": {
+            "type": "string"
+          },
+          "current_request_upload_ref_or_null": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "current_request_upload_ref_or_null": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "current_request_upload_ref_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "upload_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "latest_upload_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "latest_upload_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "upload_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "upload_refs": {
+            "maxItems": 0
+          }
+        },
+        "required": [
+          "upload_refs"
+        ]
+      },
+      "then": {
+        "properties": {
+          "latest_upload_ref": {
+            "type": "null"
+          },
+          "current_request_upload_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "WITHDRAWN"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "upload_refs": {
+            "maxItems": 0
+          },
+          "latest_upload_ref": {
+            "type": "null"
+          },
+          "current_request_upload_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "EXPIRED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "due_at": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "OPEN",
+              "REJECTED",
+              "EXPIRED"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "current_request_upload_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "ACCEPTED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "review_outcome": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "REJECTED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "review_outcome": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "not": {
+              "enum": [
+                "ACCEPTED",
+                "REJECTED"
+              ]
+            }
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "review_outcome": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

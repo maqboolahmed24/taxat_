@@ -19,14 +19,11 @@ function fixtureEntryUrls(
   scenario: "not-selected" | "selected-with-gaps",
 ): SupportProviderEntryUrls {
   return {
-    controlPlane:
-      `/automation/provisioning/tests/fixtures/support_selection_console.html?scenario=${scenario}`,
+    controlPlane: `/automation/provisioning/tests/fixtures/support_selection_console.html?scenario=${scenario}`,
   };
 }
 
-function fixtureRunContext(
-  executionMode: "fixture" | "sandbox" = "fixture",
-) {
+function fixtureRunContext(executionMode: "fixture" | "sandbox" = "fixture") {
   return createRunContext({
     runId: `support-selection-${executionMode}-2026-04-18`,
     providerId: SUPPORT_PROVIDER_ID,
@@ -62,12 +59,11 @@ async function runFixtureFlow(
     entryUrls: fixtureEntryUrls(scenario),
   });
 
-  const [selectionRecordRaw, fieldMappingRaw, evidenceManifestRaw] =
-    await Promise.all([
-      readFile(selectionRecordPath, "utf8"),
-      readFile(fieldMappingPath, "utf8"),
-      readFile(result.evidenceManifestPath, "utf8"),
-    ]);
+  const [selectionRecordRaw, fieldMappingRaw, evidenceManifestRaw] = await Promise.all([
+    readFile(selectionRecordPath, "utf8"),
+    readFile(fieldMappingPath, "utf8"),
+    readFile(result.evidenceManifestPath, "utf8"),
+  ]);
 
   return {
     result,
@@ -118,15 +114,11 @@ test("selected-with-gaps fixture flow records a future vendor-binding posture wi
   expect(flow.result.outcome).toBe("SUPPORT_INTEGRATION_SELECTED_WITH_GAPS");
   expectSuccessfulStatuses(flow.result);
   expect(flow.selectionRecord.selection_status).toBe("SELECTED_WITH_GAPS");
-  expect(flow.selectionRecord.selected_vendor_adapter_or_null).toBe(
-    "ZENDESK_COMPATIBLE_BASELINE",
-  );
+  expect(flow.selectionRecord.selected_vendor_adapter_or_null).toBe("ZENDESK_COMPATIBLE_BASELINE");
   expect(flow.selectionRecord.selected_vendor_label_or_null).toContain("Zendesk-compatible");
   expect(flow.fieldMapping.selection_status).toBe("SELECTED_WITH_GAPS");
   expect(flow.result.notes).toEqual(
-    expect.arrayContaining([
-      expect.stringContaining("selected conceptually"),
-    ]),
+    expect.arrayContaining([expect.stringContaining("selected conceptually")]),
   );
 });
 
@@ -139,10 +131,7 @@ test("live-provider execution remains blocked unless explicitly enabled when a s
     createSupportWorkspaceIfSelected({
       page,
       runContext: fixtureRunContext("sandbox"),
-      selectionRecordPath: path.join(
-        rootDir,
-        "support_workspace_selection_record.template.json",
-      ),
+      selectionRecordPath: path.join(rootDir, "support_workspace_selection_record.template.json"),
       fieldMappingPath: path.join(rootDir, "support_field_mapping.template.json"),
       entryUrls: fixtureEntryUrls("selected-with-gaps"),
       selectionOverride: "SELECTED_WITH_GAPS",
@@ -159,16 +148,10 @@ test("support context mapping board renders scenario switching, persistent inspe
   );
 
   await expect(page.locator("html")).toHaveAttribute("data-motion", "reduce");
-  await expect(
-    page.getByRole("navigation", { name: "Support mapping scenarios" }),
-  ).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Support mapping scenarios" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Portal Context" })).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "External Ticket Fields" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Return/Mirror Rules" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "External Ticket Fields" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Return/Mirror Rules" })).toBeVisible();
   await expect(page.locator("#drawer-title")).toHaveText("Contextual request help");
 
   await page

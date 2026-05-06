@@ -39,7 +39,9 @@ def load_csv(path: Path) -> list[dict[str, str]]:
     return list(csv.DictReader(path.open()))
 
 
-def first_diff(expected_rows: list[dict[str, Any]], actual_rows: list[dict[str, Any]]) -> tuple[int, Any, Any] | None:
+def first_diff(
+    expected_rows: list[dict[str, Any]], actual_rows: list[dict[str, Any]]
+) -> tuple[int, Any, Any] | None:
     max_len = max(len(expected_rows), len(actual_rows))
     for index in range(max_len):
         expected = expected_rows[index] if index < len(expected_rows) else None
@@ -69,14 +71,18 @@ def main() -> int:
         fail("gate_registry.json drifted from the canonical builder output.")
 
     actual_gate_order = load_csv(builder.GATE_ORDER_PATH)
-    if actual_gate_order != [{key: str(value) for key, value in row.items()} for row in expected_gate_order]:
+    if actual_gate_order != [
+        {key: str(value) for key, value in row.items()} for row in expected_gate_order
+    ]:
         fail("gate_order.csv drifted from the canonical builder output.")
 
     actual_reason_codes = load_jsonl(builder.REASON_CODE_PATH)
     diff = first_diff(expected_reason_codes, actual_reason_codes)
     if diff is not None:
         index, expected, actual = diff
-        fail(f"gate_reason_code_registry.jsonl drifted at row {index}. Expected {expected}, got {actual}")
+        fail(
+            f"gate_reason_code_registry.jsonl drifted at row {index}. Expected {expected}, got {actual}"
+        )
 
     actual_override = load_json(builder.OVERRIDE_MATRIX_PATH)
     if actual_override != expected_override:
@@ -91,11 +97,17 @@ def main() -> int:
         fail("gate_terminalization_paths.json drifted from the canonical builder output.")
 
     if builder.GATE_DOC_PATH.read_text() != expected_docs[0]:
-        fail("10_gate_order_reason_codes_and_override_rules.md drifted from the canonical builder render.")
+        fail(
+            "10_gate_order_reason_codes_and_override_rules.md drifted from the canonical builder render."
+        )
     if builder.PROGRESSION_DOC_PATH.read_text() != expected_docs[1]:
-        fail("10_gate_progression_and_terminalization_matrix.md drifted from the canonical builder render.")
+        fail(
+            "10_gate_progression_and_terminalization_matrix.md drifted from the canonical builder render."
+        )
     if builder.EXPLAINABILITY_DOC_PATH.read_text() != expected_docs[2]:
-        fail("10_gate_explainability_and_reason_code_usage.md drifted from the canonical builder render.")
+        fail(
+            "10_gate_explainability_and_reason_code_usage.md drifted from the canonical builder render."
+        )
     if builder.MERMAID_PATH.read_text() != expected_mermaid:
         fail("10_gate_chain.mmd drifted from the canonical builder render.")
 
@@ -111,7 +123,9 @@ def main() -> int:
         if row["gate_class"] not in {"access", "non_access"}:
             fail(f"Gate `{row['gate_code']}` has invalid gate_class `{row['gate_class']}`.")
         if row["overrideability"] not in builder.OVERRIDEABILITY_ENUM:
-            fail(f"Gate `{row['gate_code']}` has invalid overrideability `{row['overrideability']}`.")
+            fail(
+                f"Gate `{row['gate_code']}` has invalid overrideability `{row['overrideability']}`."
+            )
         if row["evaluation_order_index"] != expected_gate_codes.index(row["gate_code"]) + 1:
             fail(f"Gate `{row['gate_code']}` has invalid evaluation order index.")
         if not row["source_refs"]:
@@ -120,7 +134,9 @@ def main() -> int:
             if row["decision_enum"] != builder.NON_ACCESS_DECISIONS:
                 fail(f"Non-access gate `{row['gate_code']}` drifted from the shared decision enum.")
             if row["severity_model"]["decision_to_severity"] != builder.NON_ACCESS_SEVERITY_MAPPING:
-                fail(f"Non-access gate `{row['gate_code']}` drifted from the shared severity mapping.")
+                fail(
+                    f"Non-access gate `{row['gate_code']}` drifted from the shared severity mapping."
+                )
         else:
             if row["decision_enum"] != builder.ACCESS_DECISIONS:
                 fail("ACCESS_GATE drifted from the access decision enum.")
@@ -140,7 +156,9 @@ def main() -> int:
         fail("Shared overrideability enum drifted from section 7.1.")
 
     declared_families = actual_registry["reason_code_family_declarations"]
-    if declared_families != [f"{prefix}_*" for prefix in builder.REASON_CODE_FAMILY_PREFIXES.values()]:
+    if declared_families != [
+        f"{prefix}_*" for prefix in builder.REASON_CODE_FAMILY_PREFIXES.values()
+    ]:
         fail(f"Reason-code family declarations drifted: {declared_families}")
     if actual_registry["summary"]["missing_reason_code_families"] != ["ACCESS_*"]:
         fail("Expected ACCESS_* to remain the only declared-but-unenumerated reason-code family.")
@@ -160,9 +178,13 @@ def main() -> int:
     for gate_code, reason_codes in reason_codes_by_gate.items():
         if gate_code == "ACCESS_GATE":
             if reason_codes:
-                fail("ACCESS_GATE should not have explicit reason codes until the source enumerates them.")
+                fail(
+                    "ACCESS_GATE should not have explicit reason codes until the source enumerates them."
+                )
             continue
-        registry_codes = [row["reason_code"] for row in reason_code_rows if row["gate_code"] == gate_code]
+        registry_codes = [
+            row["reason_code"] for row in reason_code_rows if row["gate_code"] == gate_code
+        ]
         if registry_codes != reason_codes:
             fail(f"Reason-code registry drifted for `{gate_code}`.")
 
@@ -188,7 +210,9 @@ def main() -> int:
                 fail("ACCESS_GATE phase bindings are missing AUTHORIZE.")
         else:
             if row["gate_code"] not in module_names:
-                fail(f"Gate `{row['gate_code']}` phase bindings are missing the gate module itself.")
+                fail(
+                    f"Gate `{row['gate_code']}` phase bindings are missing the gate module itself."
+                )
 
     terminal_rows = actual_terminalization["rows"]
     if len(terminal_rows) != actual_terminalization["summary"]["row_count"]:
@@ -198,8 +222,13 @@ def main() -> int:
         fail("Duplicate gate/decision terminalization rows detected.")
     for row in terminal_rows:
         gate_row = next(gate for gate in gate_rows if gate["gate_code"] == row["gate_code"])
-        if row["decision"] not in gate_row["decision_table"]["branches"][0]["header"] and row["decision"] not in gate_row["decision_enum"]:
-            fail(f"Terminalization row `{row['gate_code']}:{row['decision']}` is inconsistent with the gate decision enum.")
+        if (
+            row["decision"] not in gate_row["decision_table"]["branches"][0]["header"]
+            and row["decision"] not in gate_row["decision_enum"]
+        ):
+            fail(
+                f"Terminalization row `{row['gate_code']}:{row['decision']}` is inconsistent with the gate decision enum."
+            )
 
     if "# Gate Order, Reason Codes, and Override Rules" not in expected_docs[0]:
         fail("Main gate doc title is missing.")

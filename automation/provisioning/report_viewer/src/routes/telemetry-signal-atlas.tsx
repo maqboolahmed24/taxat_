@@ -3,17 +3,8 @@ export const telemetrySignalAtlasRoute = {
   title: "Telemetry Signal Atlas",
   purpose:
     "Render a premium observability atlas for signal families, collector tiers, backend ownership, and telemetry-to-audit joins without collapsing into a metrics dashboard or vendor console clone.",
-  focusOrder: [
-    "telemetry-family-rail",
-    "telemetry-atlas-canvas",
-    "telemetry-atlas-inspector",
-  ],
-  sections: [
-    "Emission",
-    "Collector / Processors",
-    "Backends / Sinks",
-    "Correlation To Audit",
-  ],
+  focusOrder: ["telemetry-family-rail", "telemetry-atlas-canvas", "telemetry-atlas-inspector"],
+  sections: ["Emission", "Collector / Processors", "Backends / Sinks", "Correlation To Audit"],
   palette: {
     background: "#F5F6F4",
     surface: "#FFFFFF",

@@ -61,11 +61,15 @@ function updateHash(replace = false) {
 
 function syncStateFromHash() {
   const next = parseHash();
-  state.pageId = atlasData.pages.some((page) => page.page_id === next.pageId) ? next.pageId : DEFAULT_PAGE;
+  state.pageId = atlasData.pages.some((page) => page.page_id === next.pageId)
+    ? next.pageId
+    : DEFAULT_PAGE;
   state.auditGroupId = atlasData.audit_groups.some((group) => group.group_id === next.auditGroupId)
     ? next.auditGroupId
     : "identity_authority";
-  state.lineageStateId = atlasData.failure_lifecycle.states.some((item) => item.state_id === next.lineageStateId)
+  state.lineageStateId = atlasData.failure_lifecycle.states.some(
+    (item) => item.state_id === next.lineageStateId,
+  )
     ? next.lineageStateId
     : "open_failure";
   render();
@@ -199,7 +203,10 @@ function renderSignalModel() {
   fragment.append(diagram);
 
   const laws = createElement("section", "panel");
-  laws.append(createElement("p", "micro", "Separation laws"), createElement("h3", "panel-title", "What must never be conflated"));
+  laws.append(
+    createElement("p", "micro", "Separation laws"),
+    createElement("h3", "panel-title", "What must never be conflated"),
+  );
   const list = document.createElement("ul");
   list.className = "inspector-list";
   atlasData.signal_laws.forEach((law) => {
@@ -358,7 +365,10 @@ function renderQueryContracts() {
       createElement("p", "body", query.notes),
     );
     const pills = createElement("div", "pill-row");
-    pills.append(createElement("span", "pill", query.domain), createElement("span", "pill mono", query.ordering_basis));
+    pills.append(
+      createElement("span", "pill", query.domain),
+      createElement("span", "pill mono", query.ordering_basis),
+    );
     card.append(pills);
     const deps = createElement("p", "body mono", query.correlation_keys.slice(0, 8).join(" • "));
     card.append(deps);
@@ -412,7 +422,11 @@ function renderInspector() {
   top.append(
     createElement("p", "micro", "Selected page"),
     createElement("h3", "query-title", page.title),
-    createElement("p", "body", "The inspector summarizes the currently selected domain, ledger, or lineage state without becoming a second dashboard."),
+    createElement(
+      "p",
+      "body",
+      "The inspector summarizes the currently selected domain, ledger, or lineage state without becoming a second dashboard.",
+    ),
   );
   inspectorRoot.append(top);
 
@@ -420,7 +434,11 @@ function renderInspector() {
     const card = createElement("section", "inspector-card");
     card.append(
       createElement("p", "micro", "Signal laws"),
-      createElement("p", "body", atlasData.design_influences.map((item) => `${item.source}: ${item.insight}`).join(" ")),
+      createElement(
+        "p",
+        "body",
+        atlasData.design_influences.map((item) => `${item.source}: ${item.insight}`).join(" "),
+      ),
     );
     inspectorRoot.append(card);
   }
@@ -467,7 +485,11 @@ function renderInspector() {
     const card = createElement("section", "inspector-card");
     card.append(
       createElement("p", "micro", "Catalog law"),
-      createElement("p", "body", "Every query contract states its ordering basis and integrity posture explicitly; no query widens visibility beyond the tightest contributing surface."),
+      createElement(
+        "p",
+        "body",
+        "Every query contract states its ordering basis and integrity posture explicitly; no query widens visibility beyond the tightest contributing surface.",
+      ),
     );
     inspectorRoot.append(card);
   }
@@ -476,7 +498,11 @@ function renderInspector() {
     const card = createElement("section", "inspector-card");
     card.append(
       createElement("p", "micro", "Limitation posture"),
-      createElement("p", "body", "Retention-limited visibility stays explicit. Audit proof, typed failures, and lawful absence remain distinguishable even when payloads age out."),
+      createElement(
+        "p",
+        "body",
+        "Retention-limited visibility stays explicit. Audit proof, typed failures, and lawful absence remain distinguishable even when payloads age out.",
+      ),
     );
     inspectorRoot.append(card);
   }

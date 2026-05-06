@@ -1,0 +1,148 @@
+{
+  "contract_version": "DEAD_LETTER_RESOLUTION_POLICY_V1",
+  "policy_id": "dead_letter_resolution_policy",
+  "basis_statement": "Dead-letter posture is explicit and typed. Resolution paths distinguish safe replay, rebuild, reconcile, operator review, and terminal no-retry instead of leaving queue failure to ad hoc operations folklore.",
+  "resolution_rows": [
+    {
+      "resolution_ref": "stage.safe-replay",
+      "display_name": "Stage work safe replay",
+      "queue_family_refs": ["STAGE_WORK"],
+      "retry_classes": ["SAFE_RETRY"],
+      "budget_states": ["EXHAUSTED", "NEGATIVE_EXPECTED_GAIN"],
+      "resend_legality_states": ["NOT_APPLICABLE"],
+      "send_revalidation_states": ["NOT_APPLICABLE"],
+      "reason_codes_any": ["WORKER_TIMEOUT", "VISIBILITY_TIMEOUT_EXPIRED", "RETRY_EXPECTED_GAIN_NON_POSITIVE"],
+      "resolution_class": "SAFE_REPLAY_FROM_DURABLE_TRUTH",
+      "operator_action": "Republish only from durable workset or outbox truth after confirming effect proof was not already persisted.",
+      "dead_letter_queue_ref": "dlq.stage-work",
+      "notes": [
+        "Replay remains lawful because durable stage truth can prove whether the task already completed.",
+        "The broker packet itself is never the replay basis."
+      ]
+    },
+    {
+      "resolution_ref": "authority.reconcile",
+      "display_name": "Authority transmit reconcile before retry",
+      "queue_family_refs": ["AUTHORITY_TRANSMIT"],
+      "retry_classes": ["SAFE_RETRY"],
+      "budget_states": ["PRECONDITION_BLOCKED", "BLOCKED_BY_EXTERNAL_LEGALITY"],
+      "resend_legality_states": ["QUEUED_UNASSESSED", "IDEMPOTENT_RECOVERY_ONLY", "BLOCKED_BY_RECONCILIATION"],
+      "send_revalidation_states": ["BLOCKED", "CLEAR_TO_SEND"],
+      "reason_codes_any": [
+        "SEND_TIME_REVALIDATION_BLOCKED",
+        "BINDING_LINEAGE_DRIFT",
+        "EXTERNAL_TRUTH_AMBIGUITY_TOO_HIGH",
+        "RESEND_LEGALITY_BLOCKS_AUTOMATIC_RETRY"
+      ],
+      "resolution_class": "RECONCILE_THEN_RETRY",
+      "operator_action": "Persist reconciliation workflow or stronger external truth before any new authority retry is considered.",
+      "dead_letter_queue_ref": "dlq.authority-transmit",
+      "notes": [
+        "Authority failures that drift binding or duplicate truth must reconcile from persisted interaction and ingress evidence.",
+        "Queue recovery must not re-send a live mutation while legality is blocked."
+      ]
+    },
+    {
+      "resolution_ref": "authority.operator-review",
+      "display_name": "Authority transmit operator review",
+      "queue_family_refs": ["AUTHORITY_TRANSMIT"],
+      "retry_classes": ["SAFE_RETRY"],
+      "budget_states": ["EXHAUSTED", "NEGATIVE_EXPECTED_GAIN"],
+      "resend_legality_states": ["ANY"],
+      "send_revalidation_states": ["ANY"],
+      "reason_codes_any": [],
+      "resolution_class": "OPERATOR_REVIEW_REQUIRED",
+      "operator_action": "Open operator review with interaction, dispatch, inbox, and audit lineage attached; do not redrive automatically.",
+      "dead_letter_queue_ref": "dlq.authority-transmit",
+      "notes": [
+        "Exhausted authority retry posture requires explicit review even if the broker packet still exists.",
+        "Operator review remains distinct from reconciliation-owned read-only follow-up."
+      ]
+    },
+    {
+      "resolution_ref": "reconciliation.operator-review",
+      "display_name": "Reconciliation follow-up operator review",
+      "queue_family_refs": ["RECONCILIATION_FOLLOW_UP"],
+      "retry_classes": ["SAFE_RETRY"],
+      "budget_states": ["EXHAUSTED", "NEGATIVE_EXPECTED_GAIN"],
+      "resend_legality_states": ["FOLLOW_UP_READ_ONLY", "BLOCKED_BY_ESCALATION", "BLOCKED_BY_RECONCILIATION"],
+      "send_revalidation_states": ["NOT_APPLICABLE"],
+      "reason_codes_any": [],
+      "resolution_class": "OPERATOR_REVIEW_REQUIRED",
+      "operator_action": "Escalate the persisted reconciliation workflow with canonical ingress and response-history lineage.",
+      "dead_letter_queue_ref": "dlq.reconciliation-follow-up",
+      "notes": [
+        "Read-only follow-up may stop automatically, but it must not silently vanish.",
+        "Dead-letter records still retain enough refs and hashes for investigation without raw payload dumps."
+      ]
+    },
+    {
+      "resolution_ref": "projection.rebuild",
+      "display_name": "Projection refresh rebuild",
+      "queue_family_refs": ["PROJECTION_REFRESH"],
+      "retry_classes": ["REBUILD_THEN_RETRY"],
+      "budget_states": ["PRECONDITION_BLOCKED", "EXHAUSTED"],
+      "resend_legality_states": ["NOT_APPLICABLE"],
+      "send_revalidation_states": ["NOT_APPLICABLE"],
+      "reason_codes_any": ["BROKER_STATE_LOST", "PROJECTION_SNAPSHOT_MISSING"],
+      "resolution_class": "REBUILD_FROM_DURABLE_TRUTH",
+      "operator_action": "Rebuild projection dispatch from persisted manifests, receipts, and audit evidence, then retry from the rebuilt source of truth.",
+      "dead_letter_queue_ref": "dlq.projection-refresh",
+      "notes": [
+        "Projection rebuild is safe because command-side truth persists independently of broker state.",
+        "Projection dead-letter never licenses mutation of manifest core."
+      ]
+    },
+    {
+      "resolution_ref": "recovery.rebuild",
+      "display_name": "Recovery job rebuild",
+      "queue_family_refs": ["RECOVERY_JOB"],
+      "retry_classes": ["REBUILD_THEN_RETRY"],
+      "budget_states": ["PRECONDITION_BLOCKED", "EXHAUSTED"],
+      "resend_legality_states": ["NOT_APPLICABLE"],
+      "send_revalidation_states": ["NOT_APPLICABLE"],
+      "reason_codes_any": ["BROKER_STATE_LOST", "RETRY_BUDGET_EXHAUSTED"],
+      "resolution_class": "REBUILD_FROM_DURABLE_TRUTH",
+      "operator_action": "Rebuild the delivery fabric from checkpoint, outbox, inbox, interaction, and audit truth before another recovery attempt.",
+      "dead_letter_queue_ref": "dlq.recovery-job",
+      "notes": [
+        "Recovery jobs prove rebuild posture and must never promote queue state into checkpoint truth.",
+        "A failed recovery job should surface missing durable evidence explicitly."
+      ]
+    },
+    {
+      "resolution_ref": "terminal.no-retry",
+      "display_name": "Terminal no retry",
+      "queue_family_refs": [
+        "STAGE_WORK",
+        "AUTHORITY_TRANSMIT",
+        "RECONCILIATION_FOLLOW_UP",
+        "PROJECTION_REFRESH",
+        "RECOVERY_JOB"
+      ],
+      "retry_classes": ["NO_RETRY", "HUMAN_REVIEW_THEN_RETRY"],
+      "budget_states": ["NO_RETRY"],
+      "resend_legality_states": ["ANY"],
+      "send_revalidation_states": ["ANY"],
+      "reason_codes_any": [],
+      "resolution_class": "TERMINAL_NO_RETRY",
+      "operator_action": "Preserve dead-letter evidence and stop autonomous redrive for this queue packet.",
+      "dead_letter_queue_ref": "dlq.terminal",
+      "notes": [
+        "Terminal posture remains explicit so broker retention does not masquerade as an active retry path."
+      ]
+    }
+  ],
+  "source_lineage": [
+    {
+      "rationale": "Retry exhaustion, reconcile-before-retry, rebuild-before-retry, and terminal no-retry semantics.",
+      "source_file": "Algorithm/error_model_and_remediation_model.md",
+      "source_heading_or_logical_block": "## 13.6 Retry model"
+    },
+    {
+      "rationale": "Queue rebuild and authority resend must remain subordinate to persisted resend legality and interaction truth.",
+      "source_file": "Algorithm/deployment_and_resilience_contract.md",
+      "source_heading_or_logical_block": "## 8. Operational invariants"
+    }
+  ]
+}

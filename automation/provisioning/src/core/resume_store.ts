@@ -103,16 +103,10 @@ export class FileResumeStore {
       throw new Error(`No resume snapshot found for run ${runId}`);
     }
     if (!snapshot.checkpoint || snapshot.checkpoint.checkpointId !== checkpointId) {
-      throw new Error(
-        `Run ${runId} does not have open checkpoint ${checkpointId}`,
-      );
+      throw new Error(`Run ${runId} does not have open checkpoint ${checkpointId}`);
     }
 
-    const resumedCheckpoint = resumeManualCheckpoint(
-      snapshot.checkpoint,
-      resumedByAlias,
-      note,
-    );
+    const resumedCheckpoint = resumeManualCheckpoint(snapshot.checkpoint, resumedByAlias, note);
     const updatedSteps = snapshot.steps.map((step) => {
       if (step.stepId !== resumedCheckpoint.stepId) {
         return step;

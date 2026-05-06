@@ -11,9 +11,7 @@ test("blocked portal resume policy covers every required reason code with explic
 
   REQUIRED_MANUAL_CHECKPOINT_REASON_CODES.forEach((reasonCode) => {
     expect(
-      resumePolicy.policy_rows.some((row) =>
-        row.applies_to_reason_codes.includes(reasonCode),
-      ),
+      resumePolicy.policy_rows.some((row) => row.applies_to_reason_codes.includes(reasonCode)),
     ).toBe(true);
   });
 
@@ -28,18 +26,12 @@ test("checkpoint redaction policy suppresses traces and keeps browser storage re
   const redactionPolicy = createCheckpointRedactionPolicy();
 
   expect(
-    redactionPolicy.rule_rows.find(
-      (row) => row.artifact_kind === "TRACE_REFERENCE",
-    )?.capture_mode,
+    redactionPolicy.rule_rows.find((row) => row.artifact_kind === "TRACE_REFERENCE")?.capture_mode,
   ).toBe("SUPPRESSED");
   expect(
-    redactionPolicy.rule_rows.find(
-      (row) => row.artifact_kind === "BROWSER_STORAGE",
-    )?.capture_mode,
+    redactionPolicy.rule_rows.find((row) => row.artifact_kind === "BROWSER_STORAGE")?.capture_mode,
   ).toBe("REFERENCE_ONLY");
   expect(
-    redactionPolicy.rule_rows.find(
-      (row) => row.artifact_kind === "DOM_SNAPSHOT",
-    )?.capture_mode,
+    redactionPolicy.rule_rows.find((row) => row.artifact_kind === "DOM_SNAPSHOT")?.capture_mode,
   ).toBe("HASH_ONLY");
 });

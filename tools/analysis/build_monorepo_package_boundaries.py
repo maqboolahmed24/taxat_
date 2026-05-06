@@ -42,9 +42,7 @@ NATIVE_TOPOLOGY_PATH = DATA_ANALYSIS_DIR / "native_scene_and_window_topology.jso
 RELEASE_MATRIX_PATH = DATA_ANALYSIS_DIR / "release_evidence_artifact_matrix.json"
 
 DOC_PATH = DOCS_ARCH_DIR / "monorepo-package-boundaries-and-team-ownership-map.md"
-COMPARISON_PATH = (
-    DOCS_ARCH_DIR / "monorepo-package-boundaries-and-team-ownership-map-comparison.md"
-)
+COMPARISON_PATH = DOCS_ARCH_DIR / "monorepo-package-boundaries-and-team-ownership-map-comparison.md"
 PACKAGE_BOUNDARY_MATRIX_PATH = DATA_ANALYSIS_DIR / "package_boundary_matrix.json"
 PACKAGE_DEPENDENCY_RULES_PATH = DATA_ANALYSIS_DIR / "package_dependency_rules.json"
 TEAM_OWNERSHIP_MAP_PATH = DATA_ANALYSIS_DIR / "team_ownership_map.json"
@@ -116,9 +114,7 @@ def md_escape(value: Any) -> str:
 def markdown_table(headers: list[str], rows: list[list[Any]]) -> str:
     header_line = "| " + " | ".join(headers) + " |"
     divider_line = "| " + " | ".join("---" for _ in headers) + " |"
-    body_lines = [
-        "| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows
-    ]
+    body_lines = ["| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows]
     return "\n".join([header_line, divider_line, *body_lines])
 
 
@@ -136,12 +132,8 @@ def build_supporting_context() -> dict[str, Any]:
         "canonical_module_count": module_catalog["summary"]["canonical_module_count"],
         "dependency_edge_count": module_catalog["summary"]["dependency_edge_count"],
         "read_model_count": read_models["summary"]["read_model_count"],
-        "route_bound_read_model_count": read_models["summary"][
-            "route_bound_read_model_count"
-        ],
-        "authority_operation_family_count": authority_catalog["summary"][
-            "operation_family_count"
-        ],
+        "route_bound_read_model_count": read_models["summary"]["route_bound_read_model_count"],
+        "authority_operation_family_count": authority_catalog["summary"]["operation_family_count"],
         "browser_route_count": web_topology["summary"]["browser_route_count"],
         "web_shared_package_count": web_topology["summary"]["shared_package_count"],
         "native_scene_count": native_topology["summary"]["scene_count"],
@@ -149,7 +141,9 @@ def build_supporting_context() -> dict[str, Any]:
         "release_artifact_count": release_matrix["summary"]["artifact_count"],
         "test_family_count": test_matrix["summary"]["family_count"],
         "later_task_count": len(later_tasks),
-        "later_phase_counts": {f"phase_{phase:02d}": phase_counts[phase] for phase in sorted(phase_counts)},
+        "later_phase_counts": {
+            f"phase_{phase:02d}": phase_counts[phase] for phase in sorted(phase_counts)
+        },
     }
 
 
@@ -176,7 +170,11 @@ def build_criteria() -> list[dict[str, Any]]:
             "source_refs": [
                 heading_ref(README_PATH, "Blueprint Coverage And Acceptance Map"),
                 heading_ref(MODULES_PATH, "## AUTHORIZE(...)", "AUTHORIZE"),
-                heading_ref(MODULES_PATH, "## ASSEMBLE_RELEASE_VERIFICATION_MANIFEST(...)", "ASSEMBLE_RELEASE_VERIFICATION_MANIFEST"),
+                heading_ref(
+                    MODULES_PATH,
+                    "## ASSEMBLE_RELEASE_VERIFICATION_MANIFEST(...)",
+                    "ASSEMBLE_RELEASE_VERIFICATION_MANIFEST",
+                ),
             ],
         },
         {
@@ -188,7 +186,9 @@ def build_criteria() -> list[dict[str, Any]]:
             "source_refs": [
                 heading_ref(COHERENCE_PATH, "0. Foundation spine coherence"),
                 heading_ref(COHERENCE_PATH, "5. Frontend shell and interaction coherence"),
-                heading_ref(CONTRACT_INTEGRITY_PATH, "Experience and presentation contract integrity"),
+                heading_ref(
+                    CONTRACT_INTEGRITY_PATH, "Experience and presentation contract integrity"
+                ),
             ],
         },
         {
@@ -247,7 +247,11 @@ def build_criteria() -> list[dict[str, Any]]:
             "rationale": "A later implementation agent should be able to pick a destination package from the task wording alone, without re-arguing structure.",
             "source_refs": [
                 heading_ref(README_PATH, "Blueprint Coverage And Acceptance Map"),
-                heading_ref(MODULES_PATH, "## BUILD_PRESEAL_GATE_EVALUATION(...)", "BUILD_PRESEAL_GATE_EVALUATION"),
+                heading_ref(
+                    MODULES_PATH,
+                    "## BUILD_PRESEAL_GATE_EVALUATION(...)",
+                    "BUILD_PRESEAL_GATE_EVALUATION",
+                ),
                 heading_ref(NORTHBOUND_PATH, "2. Required northbound surfaces"),
             ],
         },
@@ -611,7 +615,11 @@ def build_packages() -> list[dict[str, Any]]:
                 heading_ref(NORTHBOUND_PATH, "3. Command envelope"),
             ],
             "allowed_dependencies": ["contracts-core", "generated-models"],
-            "forbidden_dependency_classes": ["all_app_packages", "all_ui_packages", "projectors_and_apps"],
+            "forbidden_dependency_classes": [
+                "all_app_packages",
+                "all_ui_packages",
+                "projectors_and_apps",
+            ],
             "future_task_clusters": [
                 "phase_02_seq_063",
                 "phase_02_seq_064",
@@ -663,11 +671,17 @@ def build_packages() -> list[dict[str, Any]]:
             "generated_boundary_policy": "Consumes generated-model authority types but must stay renderer-free and transport-agnostic.",
             "source_refs": [
                 heading_ref(MODULES_PATH, "## EVALUATE_GATE_CHAIN(...)", "EVALUATE_GATE_CHAIN"),
-                heading_ref(CONTRACT_INTEGRITY_PATH, "Compute, trust, and amendment logic integrity"),
+                heading_ref(
+                    CONTRACT_INTEGRITY_PATH, "Compute, trust, and amendment logic integrity"
+                ),
                 heading_ref(COHERENCE_PATH, "0. Foundation spine coherence"),
             ],
             "allowed_dependencies": ["generated-models", "runtime-foundation"],
-            "forbidden_dependency_classes": ["all_app_packages", "all_ui_packages", "transport_edges"],
+            "forbidden_dependency_classes": [
+                "all_app_packages",
+                "all_ui_packages",
+                "transport_edges",
+            ],
             "future_task_clusters": ["phase_02_seq_064", "phase_02_seq_065"],
         },
         {
@@ -684,7 +698,11 @@ def build_packages() -> list[dict[str, Any]]:
             "generated_boundary_policy": "May consume generated security/session contracts; must not import web or native UI runtimes.",
             "source_refs": [
                 heading_ref(MODULES_PATH, "## AUTHORIZE(...)", "AUTHORIZE"),
-                heading_ref(MODULES_PATH, "## VALIDATE_EFFECTIVE_SCOPE_BINDING(...)", "VALIDATE_EFFECTIVE_SCOPE_BINDING"),
+                heading_ref(
+                    MODULES_PATH,
+                    "## VALIDATE_EFFECTIVE_SCOPE_BINDING(...)",
+                    "VALIDATE_EFFECTIVE_SCOPE_BINDING",
+                ),
                 heading_ref(NORTHBOUND_PATH, "8. Session, browser, and native-client rules"),
             ],
             "allowed_dependencies": [
@@ -693,7 +711,11 @@ def build_packages() -> list[dict[str, Any]]:
                 "observability-audit",
                 "domain-kernel",
             ],
-            "forbidden_dependency_classes": ["all_app_packages", "all_ui_packages", "authority_transport_through_browser"],
+            "forbidden_dependency_classes": [
+                "all_app_packages",
+                "all_ui_packages",
+                "authority_transport_through_browser",
+            ],
             "future_task_clusters": ["phase_02_seq_083", "backend_access"],
         },
         {
@@ -719,7 +741,11 @@ def build_packages() -> list[dict[str, Any]]:
                 "observability-audit",
                 "domain-kernel",
             ],
-            "forbidden_dependency_classes": ["all_app_packages", "all_ui_packages", "read_side_only_packages"],
+            "forbidden_dependency_classes": [
+                "all_app_packages",
+                "all_ui_packages",
+                "read_side_only_packages",
+            ],
             "future_task_clusters": ["backend_manifest", "backend_recovery"],
         },
         {
@@ -735,9 +761,16 @@ def build_packages() -> list[dict[str, Any]]:
             ],
             "generated_boundary_policy": "Consumes generated source/evidence contracts; must not import projectors or UI runtimes.",
             "source_refs": [
-                heading_ref(MODULES_PATH, "## PLAN_SOURCE_COLLECTION(...)", "PLAN_SOURCE_COLLECTION"),
-                heading_ref(MODULES_PATH, "## EXTRACT_CANDIDATE_FACTS(...)", "EXTRACT_CANDIDATE_FACTS"),
-                heading_ref(CONTRACT_INTEGRITY_PATH, "Decision artifacts, evidence, and data-model integrity"),
+                heading_ref(
+                    MODULES_PATH, "## PLAN_SOURCE_COLLECTION(...)", "PLAN_SOURCE_COLLECTION"
+                ),
+                heading_ref(
+                    MODULES_PATH, "## EXTRACT_CANDIDATE_FACTS(...)", "EXTRACT_CANDIDATE_FACTS"
+                ),
+                heading_ref(
+                    CONTRACT_INTEGRITY_PATH,
+                    "Decision artifacts, evidence, and data-model integrity",
+                ),
             ],
             "allowed_dependencies": [
                 "generated-models",
@@ -746,7 +779,11 @@ def build_packages() -> list[dict[str, Any]]:
                 "domain-kernel",
                 "manifest-replay",
             ],
-            "forbidden_dependency_classes": ["all_app_packages", "all_ui_packages", "read_side_only_packages"],
+            "forbidden_dependency_classes": [
+                "all_app_packages",
+                "all_ui_packages",
+                "read_side_only_packages",
+            ],
             "future_task_clusters": ["backend_collection"],
         },
         {
@@ -763,8 +800,12 @@ def build_packages() -> list[dict[str, Any]]:
             "generated_boundary_policy": "Consumes generated compute and proof contracts; must not import apps or renderer-specific concerns.",
             "source_refs": [
                 heading_ref(MODULES_PATH, "## EVALUATE_GATE_CHAIN(...)", "EVALUATE_GATE_CHAIN"),
-                heading_ref(MODULES_PATH, "## PERSIST_DECISION_BUNDLE(...)", "PERSIST_DECISION_BUNDLE"),
-                heading_ref(CONTRACT_INTEGRITY_PATH, "Compute, trust, and amendment logic integrity"),
+                heading_ref(
+                    MODULES_PATH, "## PERSIST_DECISION_BUNDLE(...)", "PERSIST_DECISION_BUNDLE"
+                ),
+                heading_ref(
+                    CONTRACT_INTEGRITY_PATH, "Compute, trust, and amendment logic integrity"
+                ),
             ],
             "allowed_dependencies": [
                 "generated-models",
@@ -774,7 +815,11 @@ def build_packages() -> list[dict[str, Any]]:
                 "manifest-replay",
                 "collection-intake",
             ],
-            "forbidden_dependency_classes": ["all_app_packages", "all_ui_packages", "transport_edges"],
+            "forbidden_dependency_classes": [
+                "all_app_packages",
+                "all_ui_packages",
+                "transport_edges",
+            ],
             "future_task_clusters": ["backend_compute"],
         },
         {
@@ -802,7 +847,11 @@ def build_packages() -> list[dict[str, Any]]:
                 "access-session",
                 "manifest-replay",
             ],
-            "forbidden_dependency_classes": ["all_app_packages", "all_ui_packages", "read_side_only_packages"],
+            "forbidden_dependency_classes": [
+                "all_app_packages",
+                "all_ui_packages",
+                "read_side_only_packages",
+            ],
             "future_task_clusters": ["backend_authority"],
         },
         {
@@ -831,7 +880,11 @@ def build_packages() -> list[dict[str, Any]]:
                 "manifest-replay",
                 "authority-gateway",
             ],
-            "forbidden_dependency_classes": ["all_app_packages", "all_ui_packages", "read_side_only_packages"],
+            "forbidden_dependency_classes": [
+                "all_app_packages",
+                "all_ui_packages",
+                "read_side_only_packages",
+            ],
             "future_task_clusters": ["backend_workflow"],
         },
         {
@@ -848,7 +901,11 @@ def build_packages() -> list[dict[str, Any]]:
             "generated_boundary_policy": "Consumes generated read-model contracts; must not import web or native renderer code.",
             "source_refs": [
                 heading_ref(FRONTEND_SHELL_PATH, "2. Route continuity and shell stability"),
-                heading_ref(PORTAL_PATH, "479:## Read-model and API translation requirements".split(":",1)[1], "Read-model and API translation requirements"),
+                heading_ref(
+                    PORTAL_PATH,
+                    "479:## Read-model and API translation requirements".split(":", 1)[1],
+                    "Read-model and API translation requirements",
+                ),
                 heading_ref(GOVERNANCE_PATH, "7. Frontend systems architecture"),
             ],
             "allowed_dependencies": [
@@ -863,7 +920,11 @@ def build_packages() -> list[dict[str, Any]]:
                 "authority-gateway",
                 "workflow-collaboration",
             ],
-            "forbidden_dependency_classes": ["all_app_packages", "all_ui_packages", "authority_transport_edges"],
+            "forbidden_dependency_classes": [
+                "all_app_packages",
+                "all_ui_packages",
+                "authority_transport_edges",
+            ],
             "future_task_clusters": [
                 "backend_low_noise",
                 "backend_portal",
@@ -900,7 +961,11 @@ def build_packages() -> list[dict[str, Any]]:
                 "workflow-collaboration",
                 "read-model-projectors",
             ],
-            "forbidden_dependency_classes": ["all_app_packages", "all_ui_packages", "testing_as_runtime"],
+            "forbidden_dependency_classes": [
+                "all_app_packages",
+                "all_ui_packages",
+                "testing_as_runtime",
+            ],
             "future_task_clusters": ["backend_northbound"],
         },
         {
@@ -916,12 +981,18 @@ def build_packages() -> list[dict[str, Any]]:
             ],
             "generated_boundary_policy": "Consumes generated models and route/selector contracts; may not import backend domain, projector, or authority packages.",
             "source_refs": [
-                heading_ref(FRONTEND_SHELL_PATH, "10. Automation anchors and UI observability fencing"),
+                heading_ref(
+                    FRONTEND_SHELL_PATH, "10. Automation anchors and UI observability fencing"
+                ),
                 heading_ref(FRONTEND_SHELL_PATH, "8. Accessibility, focus, and motion"),
                 heading_ref(README_PATH, "Shared Spine Vocabulary"),
             ],
             "allowed_dependencies": ["contracts-core", "generated-models", "runtime-foundation"],
-            "forbidden_dependency_classes": ["all_backend_domain_packages", "apps_control_plane_api", "native_platform"],
+            "forbidden_dependency_classes": [
+                "all_backend_domain_packages",
+                "apps_control_plane_api",
+                "native_platform",
+            ],
             "future_task_clusters": ["frontend_shared"],
         },
         {
@@ -942,7 +1013,11 @@ def build_packages() -> list[dict[str, Any]]:
                 heading_ref(MACOS_BLUEPRINT_PATH, "8. Persistence model"),
             ],
             "allowed_dependencies": ["contracts-core", "generated-models", "runtime-foundation"],
-            "forbidden_dependency_classes": ["all_backend_domain_packages", "web_platform", "browser_ui_packages"],
+            "forbidden_dependency_classes": [
+                "all_backend_domain_packages",
+                "web_platform",
+                "browser_ui_packages",
+            ],
             "future_task_clusters": ["frontend_native"],
         },
         {
@@ -971,8 +1046,17 @@ def build_packages() -> list[dict[str, Any]]:
                 "authority-gateway",
                 "northbound-runtime",
             ],
-            "forbidden_dependency_classes": ["all_app_packages", "all_ui_packages", "testing_as_runtime"],
-            "future_task_clusters": ["backend_release_resilience", "phase_02_seq_066", "phase_02_seq_080", "phase_02_seq_084"],
+            "forbidden_dependency_classes": [
+                "all_app_packages",
+                "all_ui_packages",
+                "testing_as_runtime",
+            ],
+            "future_task_clusters": [
+                "backend_release_resilience",
+                "phase_02_seq_066",
+                "phase_02_seq_080",
+                "phase_02_seq_084",
+            ],
         },
         {
             "package_id": "testing-harnesses",
@@ -988,7 +1072,9 @@ def build_packages() -> list[dict[str, Any]]:
             "generated_boundary_policy": "May consume generated contracts and exported public APIs from any package or app; production packages may never depend on it.",
             "source_refs": [
                 heading_ref(README_PATH, "Validation"),
-                heading_ref(FRONTEND_SHELL_PATH, "10. Automation anchors and UI observability fencing"),
+                heading_ref(
+                    FRONTEND_SHELL_PATH, "10. Automation anchors and UI observability fencing"
+                ),
                 heading_ref(DEPLOYMENT_PATH, "2. Promotion pipeline"),
             ],
             "allowed_dependencies": [
@@ -1014,7 +1100,16 @@ def build_packages() -> list[dict[str, Any]]:
                 "release-tooling",
             ],
             "forbidden_dependency_classes": ["no_production_importers"],
-            "future_task_clusters": ["testing_schema_contract", "testing_engine_modules", "testing_state_machine_model", "testing_api_northbound", "testing_authority_integration", "testing_frontend_regression", "testing_performance_failure_security", "testing_release_acceptance"],
+            "future_task_clusters": [
+                "testing_schema_contract",
+                "testing_engine_modules",
+                "testing_state_machine_model",
+                "testing_api_northbound",
+                "testing_authority_integration",
+                "testing_frontend_regression",
+                "testing_performance_failure_security",
+                "testing_release_acceptance",
+            ],
         },
         {
             "package_id": "workspace-devx",
@@ -1057,7 +1152,13 @@ def build_packages() -> list[dict[str, Any]]:
                 "apps/internal-operator-macos",
             ],
             "forbidden_dependency_classes": ["no_production_importers"],
-            "future_task_clusters": ["phase_02_seq_059", "phase_02_seq_062", "phase_02_seq_078", "phase_02_seq_079", "phase_02_seq_082"],
+            "future_task_clusters": [
+                "phase_02_seq_059",
+                "phase_02_seq_062",
+                "phase_02_seq_078",
+                "phase_02_seq_079",
+                "phase_02_seq_082",
+            ],
         },
         {
             "package_id": "apps/control-plane-api",
@@ -1091,7 +1192,12 @@ def build_packages() -> list[dict[str, Any]]:
                 "northbound-runtime",
                 "release-tooling",
             ],
-            "forbidden_dependency_classes": ["other_apps", "web_platform", "native_platform", "testing_as_runtime"],
+            "forbidden_dependency_classes": [
+                "other_apps",
+                "web_platform",
+                "native_platform",
+                "testing_as_runtime",
+            ],
             "future_task_clusters": ["backend_northbound", "backend_release_resilience"],
         },
         {
@@ -1112,8 +1218,17 @@ def build_packages() -> list[dict[str, Any]]:
                 heading_ref(COLLABORATION_PATH, "2. Screen map"),
             ],
             "allowed_dependencies": ["generated-models", "web-platform"],
-            "forbidden_dependency_classes": ["all_backend_domain_packages", "control_plane_app", "client_portal_app", "native_platform"],
-            "future_task_clusters": ["frontend_low_noise", "frontend_collaboration", "frontend_governance"],
+            "forbidden_dependency_classes": [
+                "all_backend_domain_packages",
+                "control_plane_app",
+                "client_portal_app",
+                "native_platform",
+            ],
+            "future_task_clusters": [
+                "frontend_low_noise",
+                "frontend_collaboration",
+                "frontend_governance",
+            ],
         },
         {
             "package_id": "apps/client-portal-web",
@@ -1133,7 +1248,12 @@ def build_packages() -> list[dict[str, Any]]:
                 heading_ref(PORTAL_PATH, "Read-model and API translation requirements"),
             ],
             "allowed_dependencies": ["generated-models", "web-platform"],
-            "forbidden_dependency_classes": ["all_backend_domain_packages", "control_plane_app", "operator_web_app", "native_platform"],
+            "forbidden_dependency_classes": [
+                "all_backend_domain_packages",
+                "control_plane_app",
+                "operator_web_app",
+                "native_platform",
+            ],
             "future_task_clusters": ["frontend_portal"],
         },
         {
@@ -1154,7 +1274,12 @@ def build_packages() -> list[dict[str, Any]]:
                 heading_ref(MACOS_BLUEPRINT_PATH, "13. Delivery sequencing"),
             ],
             "allowed_dependencies": ["generated-models", "native-platform"],
-            "forbidden_dependency_classes": ["all_backend_domain_packages", "web_platform", "other_apps", "testing_as_runtime"],
+            "forbidden_dependency_classes": [
+                "all_backend_domain_packages",
+                "web_platform",
+                "other_apps",
+                "testing_as_runtime",
+            ],
             "future_task_clusters": ["frontend_native"],
         },
     ]
@@ -1262,18 +1387,107 @@ def infer_packages_for_task(task: dict[str, Any]) -> list[str]:
 
     # Keyword-based secondaries keep track-level mapping deterministic without exploding package count.
     keyword_rules = [
-        (["release_candidate", "deployment_release", "restore_drill", "client_compatibility_matrix", "schema_bundle_compatibility", "release_verification_manifest"], ["release-tooling"]),
-        (["audit_", "trace_", "metric_", "failure_", "operator_morning_digest", "erasure", "secret_version", "security_"], ["observability-audit"]),
-        (["cache_isolation", "native_cache_hydration", "cross_device_continuity", "shell_continuity", "semantic_accessibility", "focus_restore", "upload_session_recovery"], ["testing-harnesses"]),
-        (["workflow", "collaboration", "customer_safe_projection", "request_info", "work_item", "queue_health"], ["workflow-collaboration"]),
-        (["authority_", "hmrc_", "fraud_prevention", "reconciliation", "submission_truth"], ["authority-gateway"]),
-        (["manifest_", "replay", "nightly_", "continuity", "checkpoint", "schema_reader_window"], ["manifest-replay"]),
-        (["compute_", "parity", "trust_", "provenance", "proof_bundle", "twin_"], ["compute-engine"]),
-        (["portal_", "customer_request", "approval_pack", "onboarding", "help_handoff"], ["apps/client-portal-web"]),
-        (["governance_", "role_template", "principal_access", "authority_links", "retention_route", "audit_investigation"], ["apps/operator-web"]),
-        (["native_", "swiftui", "appkit", "xcode_workspace", "system_browser_authentication"], ["native-platform", "apps/internal-operator-macos"]),
-        (["command_receipt", "snapshot_endpoint", "stream_", "sse_", "problem_envelope", "post_commands", "upload_session_allocate"], ["northbound-runtime"]),
-        (["low_noise", "interaction_layer", "selector", "reduced_motion", "focus_", "same_object"], ["web-platform"]),
+        (
+            [
+                "release_candidate",
+                "deployment_release",
+                "restore_drill",
+                "client_compatibility_matrix",
+                "schema_bundle_compatibility",
+                "release_verification_manifest",
+            ],
+            ["release-tooling"],
+        ),
+        (
+            [
+                "audit_",
+                "trace_",
+                "metric_",
+                "failure_",
+                "operator_morning_digest",
+                "erasure",
+                "secret_version",
+                "security_",
+            ],
+            ["observability-audit"],
+        ),
+        (
+            [
+                "cache_isolation",
+                "native_cache_hydration",
+                "cross_device_continuity",
+                "shell_continuity",
+                "semantic_accessibility",
+                "focus_restore",
+                "upload_session_recovery",
+            ],
+            ["testing-harnesses"],
+        ),
+        (
+            [
+                "workflow",
+                "collaboration",
+                "customer_safe_projection",
+                "request_info",
+                "work_item",
+                "queue_health",
+            ],
+            ["workflow-collaboration"],
+        ),
+        (
+            ["authority_", "hmrc_", "fraud_prevention", "reconciliation", "submission_truth"],
+            ["authority-gateway"],
+        ),
+        (
+            ["manifest_", "replay", "nightly_", "continuity", "checkpoint", "schema_reader_window"],
+            ["manifest-replay"],
+        ),
+        (
+            ["compute_", "parity", "trust_", "provenance", "proof_bundle", "twin_"],
+            ["compute-engine"],
+        ),
+        (
+            ["portal_", "customer_request", "approval_pack", "onboarding", "help_handoff"],
+            ["apps/client-portal-web"],
+        ),
+        (
+            [
+                "governance_",
+                "role_template",
+                "principal_access",
+                "authority_links",
+                "retention_route",
+                "audit_investigation",
+            ],
+            ["apps/operator-web"],
+        ),
+        (
+            ["native_", "swiftui", "appkit", "xcode_workspace", "system_browser_authentication"],
+            ["native-platform", "apps/internal-operator-macos"],
+        ),
+        (
+            [
+                "command_receipt",
+                "snapshot_endpoint",
+                "stream_",
+                "sse_",
+                "problem_envelope",
+                "post_commands",
+                "upload_session_allocate",
+            ],
+            ["northbound-runtime"],
+        ),
+        (
+            [
+                "low_noise",
+                "interaction_layer",
+                "selector",
+                "reduced_motion",
+                "focus_",
+                "same_object",
+            ],
+            ["web-platform"],
+        ),
     ]
     for needles, package_ids in keyword_rules:
         if any(needle in slug for needle in needles):
@@ -1711,12 +1925,16 @@ def build_main_doc(
         key=lambda row: (-row["primary_task_count"], row["package_id"]),
     )[:8]
     top_package_rows = [
-        [row["package_id"], row["primary_task_count"], row["secondary_task_count"], ", ".join(row["future_task_clusters"][:3])]
+        [
+            row["package_id"],
+            row["primary_task_count"],
+            row["secondary_task_count"],
+            ", ".join(row["future_task_clusters"][:3]),
+        ]
         for row in top_packages
     ]
     ranking_rows = [
-        [item["rank"], item["label"], item["weighted_total"]]
-        for item in scorecard["alternatives"]
+        [item["rank"], item["label"], item["weighted_total"]] for item in scorecard["alternatives"]
     ]
     deferred_rows = [
         f"- `{row['id']}` ({row['type']}): {row['summary']}"
@@ -1784,7 +2002,7 @@ Every phase 02-06 task maps to at least one owning package and one owning team. 
 The draft ownership surface is intentionally package-first:
 
 - package-specific globs: `{len([rule for rule in codeowners_draft["rules"] if "/packages/" in rule["path_glob"] or "/apps/" in rule["path_glob"] or "/tools/" in rule["path_glob"]])}`
-- repo-level globs: `{len([rule for rule in codeowners_draft["rules"] if rule["path_glob"].startswith('/PROMPT') or rule["path_glob"].startswith('/docs') or rule["path_glob"].startswith('/Algorithm')])}`
+- repo-level globs: `{len([rule for rule in codeowners_draft["rules"] if rule["path_glob"].startswith("/PROMPT") or rule["path_glob"].startswith("/docs") or rule["path_glob"].startswith("/Algorithm")])}`
 
 This keeps review boundaries aligned with the package map instead of relying on ad hoc team memory.
 

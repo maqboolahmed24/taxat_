@@ -1,0 +1,459 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/nightly_portfolio_what_if_simulation.schema.json",
+  "title": "NightlyPortfolioWhatIfSimulation",
+  "description": "Non-mutating nightly portfolio what-if artifact. This schema freezes one modeled-only nightly counterfactual comparison, including baseline versus simulated selection or outcome counts, per-entry bucket and ordering diffs, and digest highlight movement, so operators can inspect policy, capacity, retry, release, or authority changes without mutating live overnight control state.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "simulation_id",
+    "tenant_id",
+    "nightly_window_key",
+    "execution_mode_boundary_contract",
+    "basis_contract",
+    "baseline_digest_ref_or_null",
+    "baseline_summary_counts",
+    "simulated_summary_counts",
+    "baseline_backlog_pressure",
+    "simulated_backlog_pressure",
+    "baseline_portfolio_tail_risk",
+    "simulated_portfolio_tail_risk",
+    "baseline_stability_state",
+    "simulated_stability_state",
+    "baseline_highlighted_selection_entry_refs",
+    "simulated_highlighted_selection_entry_refs",
+    "entry_diffs",
+    "highlight_diffs",
+    "simulated_by_principal_ref",
+    "simulated_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "NightlyPortfolioWhatIfSimulation"
+    },
+    "simulation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nightly_window_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_mode_boundary_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/execution_mode_boundary_contract.schema.json"
+        },
+        {
+          "properties": {
+            "run_kind": {
+              "const": "NIGHTLY"
+            },
+            "execution_mode": {
+              "const": "ANALYSIS"
+            },
+            "analysis_only": {
+              "const": true
+            },
+            "execution_posture": {
+              "const": "LIVE_ANALYSIS"
+            },
+            "legal_effect_boundary": {
+              "const": "MODELED_READ_ONLY"
+            }
+          }
+        }
+      ]
+    },
+    "basis_contract": {
+      "$ref": "https://taxat.dev/schemas/nightly_portfolio_simulation_basis_contract.schema.json"
+    },
+    "baseline_digest_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "baseline_summary_counts": {
+      "$ref": "#/$defs/summaryCounts"
+    },
+    "simulated_summary_counts": {
+      "$ref": "#/$defs/summaryCounts"
+    },
+    "baseline_backlog_pressure": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "simulated_backlog_pressure": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "baseline_portfolio_tail_risk": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "simulated_portfolio_tail_risk": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "baseline_stability_state": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "NORMAL",
+        "SOFT_THROTTLE",
+        "HARD_THROTTLE",
+        null
+      ]
+    },
+    "simulated_stability_state": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "NORMAL",
+        "SOFT_THROTTLE",
+        "HARD_THROTTLE",
+        null
+      ]
+    },
+    "baseline_highlighted_selection_entry_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "simulated_highlighted_selection_entry_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "entry_diffs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/entryDiff"
+      },
+      "minItems": 1
+    },
+    "highlight_diffs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/highlightDiff"
+      },
+      "default": []
+    },
+    "simulated_by_principal_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "simulated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "summaryCounts": {
+      "type": "object",
+      "required": [
+        "auto_completed",
+        "waiting_on_authority",
+        "waiting_on_late_data",
+        "review_required",
+        "request_client_info",
+        "blocked_internal",
+        "failed_retryable",
+        "failed_non_retryable",
+        "reused_result",
+        "deferred",
+        "skipped"
+      ],
+      "properties": {
+        "auto_completed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "waiting_on_authority": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "waiting_on_late_data": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "review_required": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "request_client_info": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blocked_internal": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed_retryable": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed_non_retryable": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reused_result": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "deferred": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skipped": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "entryDiff": {
+      "type": "object",
+      "required": [
+        "selection_entry_ref",
+        "candidate_identity_hash",
+        "baseline_selection_basis_hash",
+        "baseline_selection_disposition",
+        "simulated_selection_disposition",
+        "baseline_outcome_bucket",
+        "simulated_outcome_bucket",
+        "baseline_execution_rank_or_null",
+        "simulated_execution_rank_or_null",
+        "baseline_highlight_rank_or_null",
+        "simulated_highlight_rank_or_null",
+        "baseline_priority_score_or_null",
+        "simulated_priority_score_or_null",
+        "baseline_reason_codes",
+        "simulated_reason_codes",
+        "movement_reason_codes"
+      ],
+      "properties": {
+        "selection_entry_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidate_identity_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "baseline_selection_basis_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "baseline_selection_disposition": {
+          "$ref": "#/$defs/selectionDisposition"
+        },
+        "simulated_selection_disposition": {
+          "$ref": "#/$defs/selectionDisposition"
+        },
+        "baseline_outcome_bucket": {
+          "$ref": "#/$defs/outcomeBucket"
+        },
+        "simulated_outcome_bucket": {
+          "$ref": "#/$defs/outcomeBucket"
+        },
+        "baseline_execution_rank_or_null": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "simulated_execution_rank_or_null": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "baseline_highlight_rank_or_null": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "simulated_highlight_rank_or_null": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "baseline_priority_score_or_null": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "simulated_priority_score_or_null": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "baseline_reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "simulated_reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "movement_reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "highlightDiff": {
+      "type": "object",
+      "required": [
+        "selection_entry_ref",
+        "diff_state",
+        "baseline_highlight_rank_or_null",
+        "simulated_highlight_rank_or_null",
+        "baseline_entry_loss_score_or_null",
+        "simulated_entry_loss_score_or_null",
+        "reason_codes"
+      ],
+      "properties": {
+        "selection_entry_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "diff_state": {
+          "type": "string",
+          "enum": [
+            "UNCHANGED",
+            "ADDED",
+            "REMOVED",
+            "RANK_RAISED",
+            "RANK_LOWERED",
+            "SCORE_CHANGED"
+          ]
+        },
+        "baseline_highlight_rank_or_null": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "simulated_highlight_rank_or_null": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "baseline_entry_loss_score_or_null": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "simulated_entry_loss_score_or_null": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "selectionDisposition": {
+      "type": "string",
+      "enum": [
+        "EXECUTE_NEW_MANIFEST",
+        "EXECUTE_CONTINUATION_CHILD",
+        "REUSE_EXISTING_TERMINAL_RESULT",
+        "DEFER_ACTIVE_ATTEMPT",
+        "DEFER_RETRY_WINDOW",
+        "ESCALATE_ONLY",
+        "SKIP_INELIGIBLE"
+      ]
+    },
+    "outcomeBucket": {
+      "type": "string",
+      "enum": [
+        "AUTO_COMPLETED",
+        "WAITING_ON_AUTHORITY",
+        "WAITING_ON_LATE_DATA",
+        "REVIEW_REQUIRED",
+        "REQUEST_CLIENT_INFO",
+        "BLOCKED_INTERNAL",
+        "FAILED_RETRYABLE",
+        "FAILED_NON_RETRYABLE",
+        "REUSED_RESULT",
+        "DEFERRED",
+        "SKIPPED"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

@@ -39,9 +39,7 @@ async function runFixtureFlow(
   page: Parameters<typeof captureManualCheckpointEvidence>[0]["page"],
   scenario: string,
 ) {
-  const rootDir = await mkdtemp(
-    path.join(os.tmpdir(), "taxat-portal-checkpoint-"),
-  );
+  const rootDir = await mkdtemp(path.join(os.tmpdir(), "taxat-portal-checkpoint-"));
   const checkpointRecordPath = path.join(rootDir, "manual_checkpoint_record.json");
   const evidencePackPath = path.join(rootDir, "manual_checkpoint_evidence_pack.json");
   const resumeRoot = path.join(rootDir, "resume");
@@ -69,12 +67,11 @@ async function runFixtureFlow(
     browserStorageStateRef: "vault://browser-state/fixture/current",
   });
 
-  const [checkpointRecordRaw, evidencePackRaw, evidenceManifestRaw] =
-    await Promise.all([
-      readFile(checkpointRecordPath, "utf8"),
-      readFile(evidencePackPath, "utf8"),
-      readFile(result.evidenceManifestPath, "utf8"),
-    ]);
+  const [checkpointRecordRaw, evidencePackRaw, evidenceManifestRaw] = await Promise.all([
+    readFile(checkpointRecordPath, "utf8"),
+    readFile(evidencePackPath, "utf8"),
+    readFile(result.evidenceManifestPath, "utf8"),
+  ]);
 
   return {
     rootDir,
@@ -88,11 +85,7 @@ async function runFixtureFlow(
 
 function expectCheckpointStatuses(result: CaptureManualCheckpointEvidenceResult) {
   const statuses = result.steps.slice(-3).map((step) => step.status);
-  expect(statuses).toEqual([
-    "SUCCEEDED",
-    "MANUAL_CHECKPOINT_REQUIRED",
-    "SUCCEEDED",
-  ]);
+  expect(statuses).toEqual(["SUCCEEDED", "MANUAL_CHECKPOINT_REQUIRED", "SUCCEEDED"]);
 }
 
 test("fixture checkpoint flow persists sanitized evidence and resume state for MFA-like blocks", async ({
@@ -127,9 +120,9 @@ test("fixture checkpoint flow persists sanitized evidence and resume state for M
     "Human completed the MFA factor.",
   );
   expect(resumed.checkpoint?.status).toBe("RESUMED");
-  expect(
-    flow.result.checkpointRecord.resume_requirements.safe_noop_verification_step,
-  ).toContain("Re-read portal heading");
+  expect(flow.result.checkpointRecord.resume_requirements.safe_noop_verification_step).toContain(
+    "Re-read portal heading",
+  );
 });
 
 test("portal checkpoint atlas renders the timeline and persistent inspector for blocked-portal families", async ({
@@ -146,18 +139,12 @@ test("portal checkpoint atlas renders the timeline and persistent inspector for 
       name: "Checkpoint families and portal runs",
     }),
   ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Automation Path", exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Automation Path", exact: true })).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Checkpoint Encountered", exact: true }),
   ).toBeVisible();
-  await expect(page.locator("#drawer-title")).toHaveText(
-    "HMRC sign-in 2-step verification",
-  );
-  await expect(page.getByTestId("checkpoint-reason-chip")).toHaveText(
-    "MFA_REQUIRED",
-  );
+  await expect(page.locator("#drawer-title")).toHaveText("HMRC sign-in 2-step verification");
+  await expect(page.getByTestId("checkpoint-reason-chip")).toHaveText("MFA_REQUIRED");
   await expect(page.getByTestId("resume-preconditions-list")).toBeVisible();
   await expect(page.getByTestId("evidence-list")).toBeVisible();
 
@@ -165,16 +152,8 @@ test("portal checkpoint atlas renders the timeline and persistent inspector for 
     .locator(".portal-checkpoint-rail-list button")
     .filter({ hasText: "Provider policy or rate-limit block" })
     .click();
-  await expect(page.locator("#main-title")).toHaveText(
-    "Provider policy or rate-limit block",
-  );
-  await expect(page.locator("#drawer-title")).toHaveText(
-    "Provider policy or rate-limit block",
-  );
-  await expect(page.getByTestId("checkpoint-reason-chip")).toHaveText(
-    "PORTAL_POLICY_BLOCK",
-  );
-  await expect(
-    page.getByText("Policy block is cleared.", { exact: false }),
-  ).toBeVisible();
+  await expect(page.locator("#main-title")).toHaveText("Provider policy or rate-limit block");
+  await expect(page.locator("#drawer-title")).toHaveText("Provider policy or rate-limit block");
+  await expect(page.getByTestId("checkpoint-reason-chip")).toHaveText("PORTAL_POLICY_BLOCK");
+  await expect(page.getByText("Policy block is cleared.", { exact: false })).toBeVisible();
 });

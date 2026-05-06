@@ -1,0 +1,115 @@
+# Code Quality Runbook
+
+- Status: Accepted repository guardrail baseline
+- Card: `pc_0062`
+- Scope: root JS and Python quality stack, staged hook orchestration, coverage matrix enforcement, generated-path policy, and the internal `code-quality-atlas`
+
+## Tool Roles
+
+| Responsibility | Default tool | Why this tool owns it |
+| --- | --- | --- |
+| JS / TS / JSON / CSS / HTML formatting | `Biome` | One formatter and one linter own the authored browser and TypeScript surface so formatting and lint rules do not drift apart. |
+| JS / TS / JSON / CSS / HTML linting | `Biome` | The repo does not need an additional JS linter when the chosen formatter already owns parser-aware lint coverage for the same files. |
+| Python formatting and linting | `Ruff` | Ruff keeps authored Python fast enough for staged hooks and CI without splitting formatting and import/correctness checks across separate tools. |
+| Python type checking | `Pyright` | Pyright provides one explicit type checker with strictness set by execution environment rather than a blanket repo-wide mode. |
+| Native compile smoke | `swift test --package-path native/TaxatOperator` | Native code is an explicit repo boundary and must not pretend to be covered by JS tooling. |
+| Hook orchestration | `pre-commit` | `pre-commit` is the outer runner so staged file scoping and ordered hook execution stay deterministic across macOS and Linux. |
+| Playwright locator discipline | `tools/repository/lint_playwright_locator_policy.ts` | Repo-specific browser rules need to block brittle selectors and force-click escapes before they become a testing culture. |
+
+## Stage Policy
+
+| Stage | What runs | What deliberately does not run |
+| --- | --- | --- |
+| `SAVE` | Editor-driven or manual `Biome` / `Ruff` formatting on governed source | Full browser suites, cross-language replay checks, or native compile smoke |
+| `STAGED` | `pre-commit-hooks`, staged `Biome` checks, staged `Ruff` checks, generated-path guard, coverage drift guard | Full repo `tsc`, `Pyright`, `swift test`, or browser runs |
+| `COMMIT` | Root `lint`, `typecheck`, `validate-contracts`, and the coverage verifier when run intentionally by the developer | CI-only browser suites or heavyweight provisioning viewers |
+| `CI` | Root `check`, internal atlas browser regressions, native smoke, contract sync, generator sync, and release-facing validation | Any silent local-only bypass or implicit broad ignore |
+
+The machine-readable source of truth is [code_quality_matrix.json](/Users/test/Code/taxat_/config/tooling/code_quality_matrix.json:1). New packages, Python modules, or internal atlas routes must be added there before the verifier will pass.
+
+Current rule severity posture:
+
+- `noDebugger` stays blocking in `Biome` because it is a clear correctness and release-risk issue.
+- `noUnusedImports` and `noUnusedVariables` are currently ratcheted warnings in `Biome` because earlier cards already introduced legacy drift across authored JS and TS surfaces. They remain visible in local and CI output, but they are not yet a commit-blocking gate.
+- `Ruff` is currently scoped to blocking parse and undefined-name style defects (`E9`, `F63`, `F7`, `F82`) while broader import-order, modernization, and unused-symbol cleanup remains deferred until the legacy Python analysis corpus is normalized.
+- The canonical `Algorithm` validator bundle and the imported `packages/contracts-core/python` validator mirrors are intentionally exempt from generic `Ruff` rewrites. Their integrity is guarded by import hash lineage plus the explicit validator self-tests so formatter convenience cannot silently corrupt mirror parity.
+- Repository `tsc` is currently a blocking gate for root tooling, operator-web internal atlas metadata, and repository atlas/quality tests. Broader app/package/test TypeScript ownership is still declared in the matrix, but those legacy surfaces are explicitly non-blocking until their historical generator and test drift is repaired.
+- `Pyright` is currently blocking for `python/validators` only. The imported `packages/contracts-core/python` validator mirrors and the canonical `Algorithm` validator bundle are instead governed by contract hash lineage plus validator self-tests, while the wider analysis and security helper scripts remain formatter- and linter-governed but statically non-blocking until that backlog is intentionally repaired.
+
+## Generated And Imported Path Posture
+
+Generated bindings, the generated contracts-core schema catalog, imported schema mirrors, imported validator mirrors, atlas data, Playwright artifacts, and local-only caches are intentionally not treated like hand-authored source. Their posture is declared in [generated_fixture_and_external_code_policy.json](/Users/test/Code/taxat_/config/tooling/generated_fixture_and_external_code_policy.json:1).
+
+- `REGENERATE_ONLY` means the staged guard blocks direct edits and points back to the owning generator.
+- `SYNC_ONLY` means imported mirrors must be refreshed from the canonical source instead of hand-edited in place.
+- `EPHEMERAL_DO_NOT_STAGE` and `LOCAL_ONLY_DO_NOT_STAGE` keep screenshots, reports, caches, and secrets out of commits and out of atlas datasets.
+
+The contracts-core Python validator entrypoints and the generated `packages/contracts-core/src/schemaCatalog.ts` module are treated exactly like other import-owned artifacts: they are sync-owned, exempt from generic formatter or linter rewrites, and validated through import/hash parity plus `pnpm run validate-contracts`.
+
+This separation is required by the corpus contracts that say schemas, examples, prose, and validators must move together instead of being independently reformatted.
+
+## Root Commands
+
+| Command | Purpose |
+| --- | --- |
+| `pnpm run format` | Apply `Biome` and `Ruff` formatting to governed authored source. |
+| `pnpm run format:check` | Fail if authored source is not already formatted. |
+| `pnpm run lint` | Run `Biome`, `Ruff`, and the Playwright locator policy over governed source. |
+| `pnpm run typecheck` | Run repo `tsc`, provisioning `tsc`, `Pyright`, native smoke, contract import/hash sync, binding generator sync, and the code-quality coverage verifier. |
+| `pnpm run validate-contracts` | Run the algorithm validator self-test, the contracts-core adapter self-test, and the forensic contract guard. |
+| `pnpm run check` | Run the deterministic full quality stack used for CI admission. |
+| `pnpm run generate` | Regenerate imported contracts, language bindings, atlas data, and the internal topology/quality datasets. |
+| `pnpm run hooks:install` | Install the `pre-commit` hook entrypoint. |
+| `pnpm run hooks:run` | Run the full hook suite across all files. |
+
+## Hook Ordering
+
+The hook order in [.pre-commit-config.yaml](/Users/test/Code/taxat_/.pre-commit-config.yaml:1) is intentional:
+
+1. File hygiene hooks run first because merge markers, trailing whitespace, and broken EOF state are cheap to fix and contaminate later tool output.
+2. `Ruff` runs before repo JS tooling because Python fixes are staged-file-safe and independent.
+3. `Biome` runs after the Python pass so authored JS/TS/HTML/CSS/JSON files are rewritten only once.
+4. The generated-path guard runs after autofix hooks so immutable paths still fail closed even if a formatter tried to touch them.
+5. The Playwright locator policy and coverage verifier run last because they are policy checks, not formatting passes.
+
+## Playwright Guardrails
+
+The repo-wide locator policy blocks the patterns that most often hide test fragility:
+
+- `force: true`
+- `page.$()` and `page.$$()`
+- `waitForTimeout()`
+- xpath selectors
+- `css=` prefixed selectors
+- chained selector syntax using `>>`
+- `:nth-child(...)` selector dependence
+
+This is intentionally narrower than a full semantic-locator rewrite. Existing suites already contain some id- and class-based selectors, so the first blocking line is the brittle or actionability-bypassing patterns that cause the biggest regressions.
+
+## Temporary Suppressions
+
+There is no repo-level “disable hooks” escape hatch in the declared policy. Temporary suppressions must be explicit and local:
+
+- Use tool-native inline ignores only on authored source.
+- Include the rule id and a concrete reason in the surrounding comment.
+- Remove the suppression once the blocker is resolved; do not add broad ignore globs to side-step one broken file.
+
+If a new path family truly needs different treatment, update the machine-readable matrix or generated-path policy instead of hiding it in ad-hoc local config.
+
+## Internal Atlas
+
+The internal quality surface lives at [code-quality-atlas](/Users/test/Code/taxat_/apps/operator-web/public/internal/code-quality-atlas/index.html:1) and is powered by generated data from [verify_code_quality_coverage.ts](/Users/test/Code/taxat_/tools/repository/verify_code_quality_coverage.ts:1). It is read-only by design and exists to let later cards inspect:
+
+- which tool family owns a path class
+- which stages a tool participates in
+- which generated or imported policy refs are intentionally ignored
+- which commands and blocking policies matter at release time
+
+## Corpus Mapping
+
+- `Algorithm/README.md`, `Algorithm/implementation_conventions.md`, and `Algorithm/contract_integrity_requirements.md`: schema, prose, sample, and validator parity
+- `Algorithm/modules.md` and `Algorithm/data_model.md`: type-sensitive naming, decimal posture, and downstream codegen implications
+- `Algorithm/frontend_shell_and_interaction_law.md`, `Algorithm/customer_client_portal_experience_contract.md`, and `Algorithm/collaboration_workspace_contract.md`: browser semantics and interaction stability
+- `Algorithm/verification_and_release_gates.md`, `Algorithm/deployment_and_resilience_contract.md`, and `Algorithm/security_and_runtime_hardening_contract.md`: deterministic release admission and fail-closed guardrails
+
+The code-quality stack is there to make those corpus expectations executable at the repo boundary rather than leaving them as prose alone.

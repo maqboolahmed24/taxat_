@@ -1,0 +1,52 @@
+{
+  "contract_version": "SESSION_LIFECYCLE_POLICY_V1",
+  "basis_statement": "ActorSession is a durable control object rather than transient framework state. Browser sessions keep anti-CSRF posture explicit, native sessions keep device binding explicit, step-up completion rotates the binding hash, revocation classes stay queryable, and hot-path last-seen writes remain monotonic and cadence-bound.",
+  "issue_policy": {
+    "browser": {
+      "anti_csrf_binding_required": true,
+      "max_ttl_minutes": 720,
+      "principal_class": "HUMAN",
+      "transition_reason_code": "SESSION_ISSUED_BROWSER"
+    },
+    "native": {
+      "allowed_device_binding_states": ["BOUND", "UNVERIFIED"],
+      "max_ttl_minutes": 1440,
+      "principal_class": "HUMAN",
+      "transition_reason_code": "SESSION_ISSUED_NATIVE"
+    },
+    "automation": {
+      "allowed_principal_classes": ["SERVICE", "EXTERNAL"],
+      "max_ttl_minutes": 240,
+      "transition_reason_code": "SESSION_ISSUED_AUTOMATION"
+    }
+  },
+  "last_seen_policy": {
+    "minimum_update_interval_seconds": 60,
+    "monotonic_write_policy": "GREATEST_ONLY"
+  },
+  "step_up_policy": {
+    "authn_level_after_completion": "STEP_UP",
+    "completion_reason_code": "STEP_UP_SATISFIED",
+    "completion_requires_binding_rotation": true
+  },
+  "device_binding_policy": {
+    "invalidated_reason_code": "DEVICE_BINDING_INVALIDATED",
+    "surface_state": "DEVICE_INVALIDATED"
+  },
+  "revocation_policy": {
+    "admin_reason_codes": ["ADMIN_REVOKED", "TENANT_DISABLED", "TENANT_MISSING"],
+    "compromise_reason_codes": ["COMPROMISE_RESPONSE"],
+    "expiry_reason_code": "SESSION_EXPIRED",
+    "state_precedence": ["DEVICE_INVALIDATED", "REVOKED", "EXPIRED"],
+    "user_initiated_reason_codes": ["USER_LOGOUT"]
+  },
+  "sensitive_material_policy": {
+    "persist_posture": "REFERENCES_AND_HASHES_ONLY",
+    "prohibited_field_patterns": [
+      "raw_*token",
+      "*refresh*token",
+      "*authority*credential*",
+      "opaque*secret"
+    ]
+  }
+}

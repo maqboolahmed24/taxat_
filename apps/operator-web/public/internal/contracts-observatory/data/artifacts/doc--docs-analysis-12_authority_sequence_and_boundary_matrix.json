@@ -1,0 +1,182 @@
+{
+  "artifactVersion": "CONTRACT_OBSERVATORY_ARTIFACT_V1",
+  "artifactSlug": "doc--docs-analysis-12_authority_sequence_and_boundary_matrix",
+  "artifactKind": "MARKDOWN",
+  "sectionRef": "SUPPORT_DOCS",
+  "authorityLevel": "SUPPORTING_REFERENCE",
+  "sourceTruthBadge": "Support Documentation",
+  "tone": "slate",
+  "title": "12 Authority Sequence And Boundary Matrix",
+  "subtitle": "docs/analysis/12_authority_sequence_and_boundary_matrix.md",
+  "summary": "",
+  "canonicalPath": "docs/analysis/12_authority_sequence_and_boundary_matrix.md",
+  "sourceLineage": [
+    "docs/analysis/12_authority_sequence_and_boundary_matrix.md"
+  ],
+  "headingCount": 4,
+  "headings": [
+    {
+      "level": 1,
+      "text": "12 Authority Sequence And Boundary Matrix",
+      "slug": "12-authority-sequence-and-boundary-matrix"
+    },
+    {
+      "level": 2,
+      "text": "Sequence Ledger",
+      "slug": "sequence-ledger"
+    },
+    {
+      "level": 2,
+      "text": "Truth And Projection Boundaries",
+      "slug": "truth-and-projection-boundaries"
+    },
+    {
+      "level": 2,
+      "text": "Northbound Guardrails",
+      "slug": "northbound-guardrails"
+    }
+  ],
+  "proseSections": [
+    {
+      "headingSlug": "12-authority-sequence-and-boundary-matrix",
+      "headingText": "12 Authority Sequence And Boundary Matrix",
+      "level": 1,
+      "lines": [
+        ""
+      ],
+      "plainText": "",
+      "excerpt": "",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "sequence-ledger",
+      "headingText": "Sequence Ledger",
+      "level": 2,
+      "lines": [
+        "",
+        "| Step | Stage | Module | Purpose |",
+        "| --- | --- | --- | --- |",
+        "| `AUTHORITY_PREFLIGHT` | `preflight` | `AUTHORITY_PREFLIGHT` | Re-authorize the action, check manifest state, and require a live authority-safe control posture before any canonical request work begins. |",
+        "| `RESOLVE_AUTHORITY_OPERATION` | `preflight` | `RESOLVE_AUTHORITY_OPERATION` | Freeze AuthorityOperation with requested_scope[], runtime_scope[], attempt lineage, provider contract, and executable partition scope. |",
+        "| `RESOLVE_AUTHORITY_BINDING` | `preflight` | `RESOLVE_AUTHORITY_BINDING` | Resolve one concrete connector, delegation, authority-link, and token lineage that exactly matches the operation tuple. |",
+        "| `CANONICALIZE_REQUEST` | `request_identity` | `CANONICALIZE_AUTHORITY_REQUEST` | Render canonical path, query, payload bytes, and header profile refs from the frozen operation and binding. |",
+        "| `DERIVE_REQUEST_HASHES` | `request_identity` | `DERIVE_AUTHORITY_REQUEST_HASHES` | Compute request_body_hash, identity_namespace_hash, duplicate_meaning_key, request_hash, and idempotency_key. |",
+        "| `BUILD_REQUEST_ENVELOPE` | `request_identity` | `BUILD_AUTHORITY_REQUEST_ENVELOPE` | Create AuthorityRequestEnvelope and grouped request_identity_contract only after identity completion and human-gate satisfaction. |",
+        "| `BEGIN_REQUEST_LINEAGE` | `settlement_pre_send` | `BEGIN_SUBMISSION_RECORD` | Persist initial SubmissionRecord in INTENT_RECORDED before the request leaves the process. |",
+        "| `CHECK_DUPLICATE_PENDING_BUCKET` | `settlement_pre_send` | `EXISTING_SUBMISSIONS` | Load existing submission lineage for the same duplicate_meaning_key and route resend-versus-reconcile decisions before transmit. |",
+        "| `SUBMISSION_GATE` | `settlement_pre_send` | `SUBMISSION_GATE` | Block malformed, duplicate, pending, amendment-ineligible, or legally unsafe sends before transport mutation. |",
+        "| `SEND_TIME_REVALIDATION` | `transmit` | `SUBMIT_TO_AUTHORITY` | Take the exclusive send claim and re-check binding lineage, duplicate truth, approvals, and provider contract immediately before bytes leave the process. |",
+        "| `SUBMIT_TO_AUTHORITY` | `transmit` | `SUBMIT_TO_AUTHORITY` | Transmit the sealed request through the controlled gateway and move resend posture into recovery-only or follow-up-read-only as appropriate. |",
+        "| `CHECKPOINT_AUTHORITY_INGRESS` | `ingress` | `CHECKPOINT_AUTHORITY_INGRESS` | Authenticate callback, poll, inbox, or recovery payloads, dedupe them, and persist AuthorityIngressReceipt before any legal-state mutation. |",
+        "| `PROJECT_AUTHORITY_INGRESS_INVESTIGATION` | `ingress` | `PROJECT_AUTHORITY_INGRESS_INVESTIGATION` | Build a read-only investigation snapshot for quarantined or duplicate-suppressed ingress without mutating legal truth. |",
+        "| `NORMALIZE_AUTHORITY_RESPONSE` | `normalization` | `NORMALIZE_AUTHORITY_RESPONSE` | Normalize inline and async provider observations into protocol response classes with explicit correlation and legal-effect posture. |",
+        "| `MERGE_AUTHORITY_RESPONSE_OBSERVATION` | `normalization` | `MERGE_AUTHORITY_RESPONSE_OBSERVATION` | Append every normalized response to history, classify its derivation posture, and update active meaning only when legally admissible. |",
+        "| `RECORD_AUTHORITY_INTERACTION` | `runtime_ledger` | `RECORD_AUTHORITY_INTERACTION` | Persist the runtime ledger linking operation, request, responses, submission lineage, drift sentinel, and reconciliation posture. |",
+        "| `PERSIST_RECONCILIATION_CONTROL` | `reconciliation` | `PERSIST_AUTHORITY_RECONCILIATION_CONTROL` | Persist grouped reconciliation budget, resend legality, deadline, escalation ownership, and analytics outcome class. |",
+        "| `RECOVER_SUBMISSION_ATTEMPT` | `reconciliation` | `RECOVER_SUBMISSION_ATTEMPT` | Reuse exact request/response lineage for safe idempotent recovery while honoring resend_legality_state and resend_control_reason_codes[]. |",
+        "| `RECONCILE_AUTHORITY_STATE` | `reconciliation` | `RECONCILE_AUTHORITY_STATE` | Resolve pending, unknown, out-of-band, and conflicting states from authenticated evidence, preserved response history, and quantitative thresholds. |",
+        "| `UPSERT_OBLIGATION_MIRROR` | `projection` | `UPSERT_OBLIGATION_MIRROR` | Persist authority-grounded mirror state without collapsing pending, confirmed, unknown, rejected, or out-of-band posture into one anchor. |",
+        "| `EMIT_RECONCILIATION_ANALYTICS` | `analytics` | `EMIT_AUTHORITY_RECONCILIATION_ANALYTICS` | Emit replay-safe tuning and escalation analytics only from persisted reconciliation control contracts. |",
+        ""
+      ],
+      "plainText": "| Step | Stage | Module | Purpose | | | | | | | AUTHORITY PREFLIGHT | preflight | AUTHORITY PREFLIGHT | Re authorize the action, check manifest state, and require a live authority safe control posture before any canonical request work begins. | | RESOLVE AUTHORITY OPERATION | preflight | RESOLVE AUTHORITY OPERATION | Freeze AuthorityOperation with requested scope[], runtime scope[], attempt lineage, provider contract, and executable partition scope. | | RESOLVE AUTHORITY BINDING | preflight | RESOLVE AUTHORITY BINDING | Resolve one concrete connector, delegation, authority link, and token lineage that exactly matches the operation tuple. | | CANONICALIZE REQUEST | request identity | CANONICALIZE AUTHORITY REQUEST | Render canonical path, query, payload bytes, and header profile refs from the frozen operation and binding. | | DERIVE REQUEST HASHES | request identity | DERIVE AUTHORITY REQUEST HASHES | Compute request body hash, identity namespace hash, duplicate meaning key, request hash, and idempotency key. | | BUILD REQUEST ENVELOPE | request identity | BUILD AUTHORITY REQUEST ENVELOPE | Create AuthorityRequestEnvelope and grouped request identity contract only after identity completion and human gate satisfaction. | | BEGIN REQUEST LINEAGE | settlement pre send | BEGIN SUBMISSION RECORD | Persist initial SubmissionRecord in INTENT RECORDED before the request leaves the process. | | CHECK DUPLICATE PENDING BUCKET | settlement pre send | EXISTING SUBMISSIONS | Load existing submission lineage for the same duplicate meaning key and route resend versus reconcile decisions before transmit. | | SUBMISSION GATE | settlement pre send | SUBMISSION GATE | Block malformed, duplicate, pending, amendment ineligible, or legally unsafe sends before transport mutation. | | SEND TIME REVALIDATION | transmit | SUBMIT TO AUTHORITY | Take the exclusive send claim and re check binding lineage, duplicate truth, approvals, and provider contract immediately before bytes leave the process. | | SUBMIT TO AUTHORITY | transmit | SUBMIT TO AUTHORITY | Transmit the sealed request through the controlled gateway and move resend posture into recovery only or follow up read only as appropriate. | | CHECKPOINT AUTHORITY INGRESS | ingress | CHECKPOINT AUTHORITY INGRESS | Authenticate callback, poll, inbox, or recovery payloads, dedupe them, and persist AuthorityIngressReceipt before any legal state mutation. | | PROJECT AUTHORITY INGRESS INVESTIGATION | ingress | PROJECT AUTHORITY INGRESS INVESTIGATION | Build a read only investigation snapshot for quarantined or duplicate suppressed ingress without mutating legal truth. | | NORMALIZE AUTHORITY RESPONSE | normalization | NORMALIZE AUTHORITY RESPONSE | Normalize inline and async provider observations into protocol response classes with explicit correlation and legal effect posture. | | MERGE AUTHORITY RESPONSE OBSERVATION | normalization | MERGE AUTHORITY RESPONSE OBSERVATION | Append every normalized response to history, classify its derivation posture, and update active meaning only when legally admissible. | | RECORD AUTHORITY INTERACTION | runtime ledger | RECORD AUTHORITY INTERACTION | Persist the runtime ledger linking operation, request, responses, submission lineage, drift sentinel, and reconciliation posture. | | PERSIST RECONCILIATION CONTROL | reconciliation | PERSIST AUTHORITY RECONCILIATION CONTROL | Persist grouped reconciliation budget, resend legality, deadline, escalation ownership, and analytics outcome class. | | RECOVER SUBMISSION ATTEMPT | reconciliation | RECOVER SUBMISSION ATTEMPT | Reuse exact request/response lineage for safe idempotent recovery while honoring resend legality state and resend control reason codes[]. | | RECONCILE AUTHORITY STATE | reconciliation | RECONCILE AUTHORITY STATE | Resolve pending, unknown, out of band, and conflicting states from authenticated evidence, preserved response history, and quantitative thresholds. | | UPSERT OBLIGATION MIRROR | projection | UPSERT OBLIGATION MIRROR | Persist authority grounded mirror state without collapsing pending, confirmed, unknown, rejected, or out of band posture into one anchor. | | EMIT RECONCILIATION ANALYTICS | analytics | EMIT AUTHORITY RECONCILIATION ANALYTICS | Emit replay safe tuning and escalation analytics only from persisted reconciliation control contracts. |",
+      "excerpt": "| Step | Stage | Module | Purpose | | | | | | | AUTHORITY PREFLIGHT | preflight | AUTHORITY PREFLIGHT | Re authorize the action, check manifest state, and require a live authority…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "truth-and-projection-boundaries",
+      "headingText": "Truth And Projection Boundaries",
+      "level": 2,
+      "lines": [
+        "",
+        "| Surface role | Artifact | Allowed authority states | Forbidden promotion |",
+        "| --- | --- | --- | --- |",
+        "| `AUTHORITY_RUNTIME_LEDGER` | `AuthorityInteractionRecord` | `NOT_REQUESTED`, `UNKNOWN`, `PENDING_ACK`, `CONFIRMED`, `REJECTED`, `OUT_OF_BAND` | must not be rendered as confirmed customer truth merely because a response exists |",
+        "| `AUTHORITY_INGRESS_CHECKPOINT` | `AuthorityIngressReceipt` | `NOT_APPLICABLE`, `UNKNOWN` | cannot settle legal truth before strong binding and normalization complete |",
+        "| `AUTHORITY_SETTLEMENT_LEDGER` | `SubmissionRecord` | `UNKNOWN`, `PENDING_ACK`, `CONFIRMED`, `REJECTED`, `OUT_OF_BAND` | no internal optimism or workflow completion may write CONFIRMED |",
+        "| `INTERNAL_OBLIGATION_MIRROR` | `ObligationMirror` | `NOT_REQUESTED`, `UNKNOWN`, `PENDING_ACK`, `CONFIRMED`, `REJECTED`, `OUT_OF_BAND` | cannot reuse confirmed anchors for unknown, rejected, or out-of-band posture |",
+        "| `INTERNAL_WORKFLOW_COORDINATION` | `WorkflowItem` | `NOT_APPLICABLE`, `UNKNOWN`, `PENDING_ACK`, `CONFIRMED`, `REJECTED`, `OUT_OF_BAND` | workflow DONE may not imply resolved authority truth while settlement remains pending, unknown, or out-of-band |",
+        "| `CUSTOMER_SAFE_STATUS_PROJECTION` | `ClientTimelineEvent` | `NOT_APPLICABLE`, `UNKNOWN`, `PENDING_ACK`, `CONFIRMED`, `REJECTED`, `OUT_OF_BAND` | cannot render pending, unknown, or out-of-band posture as resolved reassurance |",
+        ""
+      ],
+      "plainText": "| Surface role | Artifact | Allowed authority states | Forbidden promotion | | | | | | | AUTHORITY RUNTIME LEDGER | AuthorityInteractionRecord | NOT REQUESTED, UNKNOWN, PENDING ACK, CONFIRMED, REJECTED, OUT OF BAND | must not be rendered as confirmed customer truth merely because a response exists | | AUTHORITY INGRESS CHECKPOINT | AuthorityIngressReceipt | NOT APPLICABLE, UNKNOWN | cannot settle legal truth before strong binding and normalization complete | | AUTHORITY SETTLEMENT LEDGER | SubmissionRecord | UNKNOWN, PENDING ACK, CONFIRMED, REJECTED, OUT OF BAND | no internal optimism or workflow completion may write CONFIRMED | | INTERNAL OBLIGATION MIRROR | ObligationMirror | NOT REQUESTED, UNKNOWN, PENDING ACK, CONFIRMED, REJECTED, OUT OF BAND | cannot reuse confirmed anchors for unknown, rejected, or out of band posture | | INTERNAL WORKFLOW COORDINATION | WorkflowItem | NOT APPLICABLE, UNKNOWN, PENDING ACK, CONFIRMED, REJECTED, OUT OF BAND | workflow DONE may not imply resolved authority truth while settlement remains pending, unknown, or out of band | | CUSTOMER SAFE STATUS PROJECTION | ClientTimelineEvent | NOT APPLICABLE, UNKNOWN, PENDING ACK, CONFIRMED, REJECTED, OUT OF BAND | cannot render pending, unknown, or out of band posture as resolved reassurance |",
+      "excerpt": "| Surface role | Artifact | Allowed authority states | Forbidden promotion | | | | | | | AUTHORITY RUNTIME LEDGER | AuthorityInteractionRecord | NOT REQUESTED, UNKNOWN, PENDING AC…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "northbound-guardrails",
+      "headingText": "Northbound Guardrails",
+      "level": 2,
+      "lines": [
+        "",
+        "- Commands do not carry authority tokens, raw audit signatures, or client-derived legal-state flags.",
+        "- Recovery and retry semantics stay bound to durable ids and receipts, not read-side projection identity.",
+        "- Customer-safe surfaces may only render confirmed authority state from the settlement ledger or a downstream authority-grounded mirror update.",
+        ""
+      ],
+      "plainText": "Commands do not carry authority tokens, raw audit signatures, or client derived legal state flags. Recovery and retry semantics stay bound to durable ids and receipts, not read side projection identity. Customer safe surfaces may only render confirmed authority state from the settlement ledger or a downstream authority grounded mirror update.",
+      "excerpt": "Commands do not carry authority tokens, raw audit signatures, or client derived legal state flags. Recovery and retry semantics stay bound to durable ids and receipts, not read si…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    }
+  ],
+  "schemaIdentityOrNull": null,
+  "schemaFields": [],
+  "samplePointers": [],
+  "sampleIdentityOrNull": null,
+  "bindingIdentityOrNull": null,
+  "validatorIdentityOrNull": null,
+  "driftIdentityOrNull": null,
+  "headerStrip": {
+    "kind": "PROSE",
+    "badgeLabel": "Support Documentation",
+    "metricPairs": [
+      {
+        "label": "Headings",
+        "value": "4"
+      },
+      {
+        "label": "Schemas",
+        "value": "0"
+      },
+      {
+        "label": "Tasks",
+        "value": "0"
+      }
+    ]
+  },
+  "relationships": {
+    "schemas": [],
+    "samples": [],
+    "bindings": [],
+    "validators": [],
+    "docs": [],
+    "tasks": []
+  },
+  "sourceTruthStack": {
+    "file": [
+      "docs/analysis/12_authority_sequence_and_boundary_matrix.md"
+    ],
+    "headings": [
+      "12 Authority Sequence And Boundary Matrix",
+      "Sequence Ledger",
+      "Truth And Projection Boundaries",
+      "Northbound Guardrails"
+    ],
+    "schemaRefs": [],
+    "sampleRefs": [],
+    "bindingRefs": [],
+    "validatorRefs": [],
+    "driftRefs": [],
+    "taskRefs": []
+  },
+  "fieldCrosslinks": [],
+  "taskRefs": []
+}

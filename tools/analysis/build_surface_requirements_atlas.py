@@ -297,48 +297,92 @@ SHARED_LAWS = [
         "law_key": "SAME_OBJECT_SAME_SHELL",
         "statement": "A stable object keeps the same shell family or embodiment frame across refresh, reconnect, and deep-link return.",
         "source_refs": [
-            ref(FRONTEND_LAW, "1. Shell families and object ownership", "Cross-surface shell law is authoritative."),
-            ref(NATIVE, "4. Platform translation map", "Native scenes embody browser shell law rather than replacing it."),
+            ref(
+                FRONTEND_LAW,
+                "1. Shell families and object ownership",
+                "Cross-surface shell law is authoritative.",
+            ),
+            ref(
+                NATIVE,
+                "4. Platform translation map",
+                "Native scenes embody browser shell law rather than replacing it.",
+            ),
         ],
     },
     {
         "law_key": "ONE_PROMOTED_SUPPORT_REGION",
         "statement": "Each mounted route or scene gets at most one promoted support region by default, even when dense detail or audit context is present.",
         "source_refs": [
-            ref(FRONTEND_LAW, "3. Layout topology and support-region promotion", "Support promotion is capped across shell families."),
-            ref(GOVERNANCE, "6. Shared interaction and mutation rules", "Governance sidecar promotion follows the same cap."),
+            ref(
+                FRONTEND_LAW,
+                "3. Layout topology and support-region promotion",
+                "Support promotion is capped across shell families.",
+            ),
+            ref(
+                GOVERNANCE,
+                "6. Shared interaction and mutation rules",
+                "Governance sidecar promotion follows the same cap.",
+            ),
         ],
     },
     {
         "law_key": "APPEND_ONLY_TRUTH_WITH_INLINE_RECOVERY",
         "statement": "Previously valid content stays mounted while stale, reconnect, or limited-read posture is explained inline and mutation surfaces fail closed.",
         "source_refs": [
-            ref(EMPTY_STATE, "Shared shell freshness and recovery vocabulary", "The shared taxonomy governs stale and degraded states."),
-            ref(COLLABORATION, "9. Stream events and notifications", "Workspace delta and activity events keep the shell mounted through rebase."),
+            ref(
+                EMPTY_STATE,
+                "Shared shell freshness and recovery vocabulary",
+                "The shared taxonomy governs stale and degraded states.",
+            ),
+            ref(
+                COLLABORATION,
+                "9. Stream events and notifications",
+                "Workspace delta and activity events keep the shell mounted through rebase.",
+            ),
         ],
     },
     {
         "law_key": "COMMAND_AND_READ_SEPARATION",
         "statement": "All durable product mutations travel through `POST /v1/commands`, except governed upload-session allocation for raw bytes, while route reads stay role-filtered projections.",
         "source_refs": [
-            ref(NORTHBOUND, "Command surface", "The northbound contract pins the command endpoint."),
-            ref(PORTAL, "Read-model and API translation requirements", "Portal projections stay customer-safe and role-filtered."),
+            ref(
+                NORTHBOUND, "Command surface", "The northbound contract pins the command endpoint."
+            ),
+            ref(
+                PORTAL,
+                "Read-model and API translation requirements",
+                "Portal projections stay customer-safe and role-filtered.",
+            ),
         ],
     },
     {
         "law_key": "VISIBILITY_BOUNDARIES_ARE_HARD",
         "statement": "Internal-only collaboration activity, masked governance slices, customer-safe portal projections, and native cached state remain explicitly partitioned and never inferred across surfaces.",
         "source_refs": [
-            ref(COLLABORATION, "1. Core invariants", "Customer-visible and internal activity are stored and streamed separately."),
-            ref(CACHE_ISOLATION, "Cache identity envelope", "Visibility and masking are part of cache legality."),
+            ref(
+                COLLABORATION,
+                "1. Core invariants",
+                "Customer-visible and internal activity are stored and streamed separately.",
+            ),
+            ref(
+                CACHE_ISOLATION,
+                "Cache identity envelope",
+                "Visibility and masking are part of cache legality.",
+            ),
         ],
     },
     {
         "law_key": "FOCUS_RETURN_IS_SERIALIZED",
         "statement": "Detail drawers, support panels, modals, detached windows, and external handoffs restore focus to a serialized parent anchor rather than forcing rediscovery.",
         "source_refs": [
-            ref(FOCUS_RESTORE, "Return targets", "Parent focus targets are contractually preserved."),
-            ref(NATIVE, "5. Preferred window and scene architecture", "Detached native windows restore focus to the parent scene."),
+            ref(
+                FOCUS_RESTORE, "Return targets", "Parent focus targets are contractually preserved."
+            ),
+            ref(
+                NATIVE,
+                "5. Preferred window and scene architecture",
+                "Detached native windows restore focus to the parent scene.",
+            ),
         ],
     },
 ]
@@ -433,28 +477,76 @@ ATLAS_PAGES = [
 
 PROFILE_REFS = {
     "COLLABORATION_STAFF_QUEUE_V1": [
-        ref(COLLABORATION, "3. Page layouts / Work inbox", "Staff queue anchors come directly from the inbox layout and validation plan."),
-        ref(SELECTOR_LAW, "LowNoiseExperienceFrame", "Shell-safe queue anchors participate in semantic accessibility."),
+        ref(
+            COLLABORATION,
+            "3. Page layouts / Work inbox",
+            "Staff queue anchors come directly from the inbox layout and validation plan.",
+        ),
+        ref(
+            SELECTOR_LAW,
+            "LowNoiseExperienceFrame",
+            "Shell-safe queue anchors participate in semantic accessibility.",
+        ),
     ],
     "COLLABORATION_WORKSPACE_V1": [
-        ref(COLLABORATION, "3. Page layouts / Work item workspace", "Workspace anchors reflect the ordered calm-shell stack and module picker."),
-        ref(SELECTOR_PACK, "Regression pack", "Workspace anchors must remain stable under rebase, reconnect, and stale mutation protection."),
+        ref(
+            COLLABORATION,
+            "3. Page layouts / Work item workspace",
+            "Workspace anchors reflect the ordered calm-shell stack and module picker.",
+        ),
+        ref(
+            SELECTOR_PACK,
+            "Regression pack",
+            "Workspace anchors must remain stable under rebase, reconnect, and stale mutation protection.",
+        ),
     ],
     "COLLABORATION_CUSTOMER_V1": [
-        ref(COLLABORATION, "2. Screen map / Customer routes", "Customer collaboration selectors stay customer-safe."),
-        ref(PORTAL, "Minimum semantic selectors", "Customer request detail borrows the portal-safe selector grammar."),
+        ref(
+            COLLABORATION,
+            "2. Screen map / Customer routes",
+            "Customer collaboration selectors stay customer-safe.",
+        ),
+        ref(
+            PORTAL,
+            "Minimum semantic selectors",
+            "Customer request detail borrows the portal-safe selector grammar.",
+        ),
     ],
     "PORTAL_SHELL_V1": [
-        ref(PORTAL, "Minimum semantic selectors", "The portal contract explicitly names these anchors."),
-        ref(SELECTOR_LAW, "ClientPortalWorkspace", "Portal semantic anchors are part of the route-safe accessibility contract."),
+        ref(
+            PORTAL,
+            "Minimum semantic selectors",
+            "The portal contract explicitly names these anchors.",
+        ),
+        ref(
+            SELECTOR_LAW,
+            "ClientPortalWorkspace",
+            "Portal semantic anchors are part of the route-safe accessibility contract.",
+        ),
     ],
     "GOVERNANCE_SEMANTIC_SELECTORS_V1": [
-        ref(GOVERNANCE, "10. Minimum semantic selectors", "Governance selectors are explicitly enumerated."),
-        ref(SELECTOR_LAW, "TenantGovernanceSnapshot", "Governance anchors participate in semantic accessibility and regression tests."),
+        ref(
+            GOVERNANCE,
+            "10. Minimum semantic selectors",
+            "Governance selectors are explicitly enumerated.",
+        ),
+        ref(
+            SELECTOR_LAW,
+            "TenantGovernanceSnapshot",
+            "Governance anchors participate in semantic accessibility and regression tests.",
+        ),
     ],
     "NATIVE_OPERATOR_SELECTORS_V1": [
-        ref(NATIVE, "5. Preferred window and scene architecture", "Native scene anchors mirror sidebar, canvas, inspector, and support-window topology."),
-        ref(SELECTOR_PACK, "SECONDARY_WINDOW_RETURN", "Detached windows need stable selector hooks for return-target regression checks."),
+        ref(
+            NATIVE,
+            "5. Preferred window and scene architecture",
+            "Native scene anchors mirror sidebar, canvas, inspector, and support-window topology.",
+        ),
+        ref(
+            SELECTOR_PACK,
+            "SECONDARY_WINDOW_RETURN",
+            "Detached windows need stable selector hooks for return-target regression checks.",
+        ),
     ],
 }
 
@@ -664,7 +756,11 @@ PORTAL_BASE = {
     "shell_family": "CLIENT_PORTAL_SHELL",
     "embodiment": "WEB",
     "promoted_support_region": "SUPPORT_PANEL",
-    "command_transport": ["POST /v1/commands", "POST /v1/uploads/sessions", "GET /v1/commands/{command_id}"],
+    "command_transport": [
+        "POST /v1/commands",
+        "POST /v1/uploads/sessions",
+        "GET /v1/commands/{command_id}",
+    ],
     "settlement_states": SHARED_SETTLEMENT_STATES,
     "recovery_postures": SHARED_RECOVERY_POSTURES,
     "cache_partition_basis": [
@@ -765,7 +861,9 @@ ROUTE_RECORDS = [
         stream_sources=["workspace.delta", "notification.badge", "heartbeat"],
         visibility_lanes=["CUSTOMER_VISIBLE summary facts", "INTERNAL_ONLY triage metadata"],
         artifact_posture="Queue rows summarize current state only; attachments stay subordinate until workspace entry.",
-        step_up_checkpoints=["Privileged reassignment or escalation may trigger inline step-up under northbound command law."],
+        step_up_checkpoints=[
+            "Privileged reassignment or escalation may trigger inline step-up under northbound command law."
+        ],
         stale_view_posture="Rows remain mounted while basis drift rebases inline and mutation affordances fail closed.",
         recovery_and_resume_rules=[
             "Refresh and reconnect preserve filters, row order, and the anchored row.",
@@ -778,8 +876,16 @@ ROUTE_RECORDS = [
         components=["WorkInboxRow", "StatusPill", "AssigneeChip", "SlaBadge", "EscalationBadge"],
         notes="The inbox is the staff collaboration queue root and must update in place.",
         source_refs=[
-            ref(COLLABORATION, "2. Screen map / Staff `/work`", "The route and queue semantics are explicit."),
-            ref(COLLABORATION, "12. Playwright scenarios", "Queue updates, escalation posture, and stale protection are explicitly testable."),
+            ref(
+                COLLABORATION,
+                "2. Screen map / Staff `/work`",
+                "The route and queue semantics are explicit.",
+            ),
+            ref(
+                COLLABORATION,
+                "12. Playwright scenarios",
+                "Queue updates, escalation posture, and stale protection are explicitly testable.",
+            ),
         ],
     ),
     route_record(
@@ -805,9 +911,15 @@ ROUTE_RECORDS = [
         ],
         command_semantics="AUTHORITATIVE_ENUM",
         stream_sources=["workspace.snapshot", "workspace.delta", "notification.badge", "heartbeat"],
-        visibility_lanes=["CUSTOMER_VISIBLE activity slice", "INTERNAL_ONLY activity slice", "AUDIT trail"],
+        visibility_lanes=[
+            "CUSTOMER_VISIBLE activity slice",
+            "INTERNAL_ONLY activity slice",
+            "AUDIT trail",
+        ],
         artifact_posture="Current artifacts, linked context, and history remain visibly distinct inside the same shell.",
-        step_up_checkpoints=["Risky status changes and authority-dependent actions stay inline and shell-local."],
+        step_up_checkpoints=[
+            "Risky status changes and authority-dependent actions stay inline and shell-local."
+        ],
         stale_view_posture="Keep the full calm-shell frame mounted and downgrade unsafe mutations to `NO_SAFE_ACTION` during rebase.",
         recovery_and_resume_rules=[
             "The ordered reading path remains `CONTEXT_BAR -> DECISION_SUMMARY -> ACTION_STRIP -> DETAIL_DRAWER`.",
@@ -828,8 +940,16 @@ ROUTE_RECORDS = [
         ],
         notes="This is the canonical calm-shell collaboration workspace and owns same-object/same-shell continuity for work items.",
         source_refs=[
-            ref(COLLABORATION, "3. Page layouts / Staff work-item workspace", "The four-surface order and module grammar are explicit."),
-            ref(LOW_NOISE, "LowNoiseExperienceFrame", "The calm-shell ordered reading path is shared law."),
+            ref(
+                COLLABORATION,
+                "3. Page layouts / Staff work-item workspace",
+                "The four-surface order and module grammar are explicit.",
+            ),
+            ref(
+                LOW_NOISE,
+                "LowNoiseExperienceFrame",
+                "The calm-shell ordered reading path is shared law.",
+            ),
         ],
     ),
     route_record(
@@ -852,7 +972,9 @@ ROUTE_RECORDS = [
         stream_sources=["activity.appended", "workspace.delta"],
         visibility_lanes=["CUSTOMER_VISIBLE"],
         artifact_posture="Only customer-visible activity and customer-safe attachment posture may appear here.",
-        step_up_checkpoints=["Sensitive outbound requests stay bound to the work-item stale-view guard."],
+        step_up_checkpoints=[
+            "Sensitive outbound requests stay bound to the work-item stale-view guard."
+        ],
         stale_view_posture="Preserve the thread and composer while invalidating only the unsafe submission path.",
         recovery_and_resume_rules=[
             "Customer-visible concurrency is visibility-scoped.",
@@ -864,8 +986,16 @@ ROUTE_RECORDS = [
         components=["CustomerActivityThread", "DetailDrawer", "ActionStrip"],
         notes="Customer-visible activity is a separate stream and cannot be contaminated by internal-only facts.",
         source_refs=[
-            ref(COLLABORATION, "1. Core invariants", "Customer-visible activity is separately stored and streamed."),
-            ref(COLLABORATION, "8. Command and read API additions", "The customer thread read surface and command surface are explicit."),
+            ref(
+                COLLABORATION,
+                "1. Core invariants",
+                "Customer-visible activity is separately stored and streamed.",
+            ),
+            ref(
+                COLLABORATION,
+                "8. Command and read API additions",
+                "The customer thread read surface and command surface are explicit.",
+            ),
         ],
     ),
     route_record(
@@ -900,8 +1030,16 @@ ROUTE_RECORDS = [
         components=["InternalActivityThread", "ProblemBanner", "NoSafeAction"],
         notes="This module is the hard internal/customer boundary inside collaboration.",
         source_refs=[
-            ref(COLLABORATION, "1. Core invariants", "Internal-only activity must never appear in customer-visible surfaces."),
-            ref(COLLABORATION, "12. Playwright scenarios", "The customer-visible omission and stale behavior are explicit regression scenarios."),
+            ref(
+                COLLABORATION,
+                "1. Core invariants",
+                "Internal-only activity must never appear in customer-visible surfaces.",
+            ),
+            ref(
+                COLLABORATION,
+                "12. Playwright scenarios",
+                "The customer-visible omission and stale behavior are explicit regression scenarios.",
+            ),
         ],
     ),
     route_record(
@@ -922,9 +1060,14 @@ ROUTE_RECORDS = [
         commands=[],
         command_semantics="READ_ONLY_ATTACHMENT_POSTURE",
         stream_sources=["workspace.delta"],
-        visibility_lanes=["CUSTOMER_VISIBLE shared artifacts", "INTERNAL_ONLY staff-only or quarantined artifacts"],
+        visibility_lanes=[
+            "CUSTOMER_VISIBLE shared artifacts",
+            "INTERNAL_ONLY staff-only or quarantined artifacts",
+        ],
         artifact_posture="Current-vs-history posture is explicit and quarantined files never masquerade as downloadable current artifacts.",
-        step_up_checkpoints=["Sensitive download or export posture remains policy-governed and may require step-up."],
+        step_up_checkpoints=[
+            "Sensitive download or export posture remains policy-governed and may require step-up."
+        ],
         stale_view_posture="Artifact rows stay visible as stale context but cannot be promoted to current on a drifted view.",
         recovery_and_resume_rules=[
             "Current and historical artifact anchors survive inline refresh.",
@@ -936,8 +1079,16 @@ ROUTE_RECORDS = [
         components=["FilesModule", "ProblemBanner"],
         notes="The files module is the collaboration truth surface for current-vs-history artifact posture.",
         source_refs=[
-            ref(COLLABORATION, "4. Key components / Files module", "The files module is a first-class workspace component."),
-            ref(COLLABORATION, "12. Playwright scenarios", "Current-vs-history and quarantined download posture are explicit scenarios."),
+            ref(
+                COLLABORATION,
+                "4. Key components / Files module",
+                "The files module is a first-class workspace component.",
+            ),
+            ref(
+                COLLABORATION,
+                "12. Playwright scenarios",
+                "Current-vs-history and quarantined download posture are explicit scenarios.",
+            ),
         ],
     ),
     route_record(
@@ -960,7 +1111,9 @@ ROUTE_RECORDS = [
         stream_sources=["manifest experience stream", "workspace.delta"],
         visibility_lanes=["CALM operator truth", "linked workflow visibility partition"],
         artifact_posture="Manifest truth remains primary while workflow context opens as linked support detail.",
-        step_up_checkpoints=["Manifest-local filing or approval step-up still stays route-local to the manifest shell."],
+        step_up_checkpoints=[
+            "Manifest-local filing or approval step-up still stays route-local to the manifest shell."
+        ],
         stale_view_posture="The manifest route remains mounted; linked workflow focus rebases inline or drops back to the manifest anchor.",
         recovery_and_resume_rules=[
             "Same object, same shell applies to the manifest route even when workflow focus is active.",
@@ -972,8 +1125,14 @@ ROUTE_RECORDS = [
         components=["LinkedContextPanel", "ContextBar", "DecisionSummary", "DetailDrawer"],
         notes="This route normalizes the explicit workflow focus deep link into the cross-surface atlas.",
         source_refs=[
-            ref(COLLABORATION, "2. Screen map", "The explicit manifest focus pattern is named here."),
-            ref(FRONTEND_LAW, "2. Route continuity and shell stability", "Focus jumps cannot invent a new shell identity."),
+            ref(
+                COLLABORATION, "2. Screen map", "The explicit manifest focus pattern is named here."
+            ),
+            ref(
+                FRONTEND_LAW,
+                "2. Route continuity and shell stability",
+                "Focus jumps cannot invent a new shell identity.",
+            ),
         ],
     ),
     route_record(
@@ -1005,8 +1164,16 @@ ROUTE_RECORDS = [
         components=["StatusHero", "TaskQueue", "RecentActivity"],
         notes="The customer request list is collaboration truth rendered through portal-safe language and visibility rules.",
         source_refs=[
-            ref(COLLABORATION, "2. Screen map / Customer `/portal/requests`", "The route is explicit."),
-            ref(PORTAL, "Shell continuity, support budget, and constrained layouts", "Client-shell continuity and return-target rules apply."),
+            ref(
+                COLLABORATION,
+                "2. Screen map / Customer `/portal/requests`",
+                "The route is explicit.",
+            ),
+            ref(
+                PORTAL,
+                "Shell continuity, support budget, and constrained layouts",
+                "Client-shell continuity and return-target rules apply.",
+            ),
         ],
     ),
     route_record(
@@ -1019,7 +1186,11 @@ ROUTE_RECORDS = [
         object_ownership="Customer-safe request-detail projection",
         dominant_question="What exactly is being asked of the client, and what is the safe next step?",
         dominant_action="Reply, upload, or acknowledge from the same request lane without surfacing staff-only state.",
-        read_models=["WorkspaceSnapshot", "CollaborationActivitySlice", "CollaborationAttachmentSlice"],
+        read_models=[
+            "WorkspaceSnapshot",
+            "CollaborationActivitySlice",
+            "CollaborationAttachmentSlice",
+        ],
         read_surfaces=[
             "Customer-visible request-detail projection",
             "GET /v1/work-items/{item_id}/activity?thread=customer&before_sequence=...",
@@ -1029,7 +1200,9 @@ ROUTE_RECORDS = [
         stream_sources=["activity.appended", "customer-safe request refresh"],
         visibility_lanes=["CUSTOMER_VISIBLE"],
         artifact_posture="Current artifact, history, and support handoff stay explicit and customer-safe.",
-        step_up_checkpoints=["Identity or authority verification stays inside the route rather than redirecting to a new shell."],
+        step_up_checkpoints=[
+            "Identity or authority verification stays inside the route rather than redirecting to a new shell."
+        ],
         stale_view_posture="The request card stays mounted with inline recovery and explicit no-safe-action language when needed.",
         recovery_and_resume_rules=[
             "Return from browser or authority handoff never implies completion until the request projection settles.",
@@ -1041,8 +1214,16 @@ ROUTE_RECORDS = [
         components=["PortalHeader", "SupportPanel", "DocumentHistory"],
         notes="This is the customer-safe collaboration detail route that shares portal shell law without inheriting staff-only vocabulary.",
         source_refs=[
-            ref(COLLABORATION, "2. Screen map / Customer `/portal/requests/{item_id}`", "The route is explicit."),
-            ref(PORTAL, "Accessibility and interaction rules", "Customer-safe return, handoff, and artifact posture rules are shared."),
+            ref(
+                COLLABORATION,
+                "2. Screen map / Customer `/portal/requests/{item_id}`",
+                "The route is explicit.",
+            ),
+            ref(
+                PORTAL,
+                "Accessibility and interaction rules",
+                "Customer-safe return, handoff, and artifact posture rules are shared.",
+            ),
         ],
     ),
     route_record(
@@ -1062,7 +1243,9 @@ ROUTE_RECORDS = [
         stream_sources=["role-filtered portal refresh", "cross_device_continuity_contract"],
         visibility_lanes=["CUSTOMER_SAFE_PROJECTION"],
         artifact_posture="Home uses summary-first current-state cards; artifacts stay subordinate to task selection.",
-        step_up_checkpoints=["Home may route into in-place step-up, but does not force a new top-level destination."],
+        step_up_checkpoints=[
+            "Home may route into in-place step-up, but does not force a new top-level destination."
+        ],
         stale_view_posture="The hero and task queue remain visible while stale or reconnect posture is explained inline.",
         recovery_and_resume_rules=[
             "Home must restore the pending task, upload, approval pack, or onboarding draft across devices.",
@@ -1103,7 +1286,9 @@ ROUTE_RECORDS = [
         stream_sources=["upload session progress", "role-filtered portal refresh"],
         visibility_lanes=["CUSTOMER_SAFE_PROJECTION"],
         artifact_posture="Transfer, scan, validation, accepted, rejected, superseded, and replacement-only states stay visibly distinct.",
-        step_up_checkpoints=["Sensitive uploads remain request-bound and may require route-local confirmation before final attachment."],
+        step_up_checkpoints=[
+            "Sensitive uploads remain request-bound and may require route-local confirmation before final attachment."
+        ],
         stale_view_posture="The request card stays mounted with request-version posture explicit during rebase or reconnect.",
         recovery_and_resume_rules=[
             "Resumed uploads preserve frozen tenant, client, request, and request-version identity.",
@@ -1115,8 +1300,16 @@ ROUTE_RECORDS = [
         components=["DocumentInbox", "UploadPanel", "UploadStatusList", "DocumentHistory"],
         notes="Upload action families are normalized from prose because the contract names the flow and the byte-session exception, not a complete command enum.",
         source_refs=[
-            ref(PORTAL, "Secure document-upload flow", "The upload phases and request-binding rules are explicit."),
-            ref(NORTHBOUND, "Binary transfer exception", "Upload session allocation is the sole non-command mutation surface for raw bytes."),
+            ref(
+                PORTAL,
+                "Secure document-upload flow",
+                "The upload phases and request-binding rules are explicit.",
+            ),
+            ref(
+                NORTHBOUND,
+                "Binary transfer exception",
+                "Upload session allocation is the sole non-command mutation surface for raw bytes.",
+            ),
         ],
     ),
     route_record(
@@ -1131,12 +1324,18 @@ ROUTE_RECORDS = [
         dominant_action="Review change digest, declaration, and sign-off inside one contained route.",
         read_models=["ClientPortalWorkspace", "ClientApprovalPack"],
         read_surfaces=["ClientPortalWorkspace route projection (approvals slice)"],
-        commands=["PORTAL_ACCEPT_APPROVAL", "PORTAL_DECLINE_APPROVAL", "PORTAL_ACKNOWLEDGE_CHANGE_DIGEST"],
+        commands=[
+            "PORTAL_ACCEPT_APPROVAL",
+            "PORTAL_DECLINE_APPROVAL",
+            "PORTAL_ACKNOWLEDGE_CHANGE_DIGEST",
+        ],
         command_semantics="NORMALIZED_ACTION_FAMILY",
         stream_sources=["approval pack refresh", "cross_device_continuity_contract"],
         visibility_lanes=["CUSTOMER_SAFE_PROJECTION"],
         artifact_posture="Current approval pack and signed receipt stay explicit; superseded packs remain historical only.",
-        step_up_checkpoints=["Step-up stays contained inside the route and must not route-switch the client into a different shell."],
+        step_up_checkpoints=[
+            "Step-up stays contained inside the route and must not route-switch the client into a different shell."
+        ],
         stale_view_posture="The approval pack remains visible while stale-signoff posture blocks unsafe commitment.",
         recovery_and_resume_rules=[
             "Return from external sign-off handoff never implies completion until the governed approval read model settles.",
@@ -1148,8 +1347,16 @@ ROUTE_RECORDS = [
         components=["ApprovalSummary", "ChangeDigest", "DeclarationPanel", "SignOffPanel"],
         notes="Approval command names are normalized from route-local action prose rather than a published command enum.",
         source_refs=[
-            ref(PORTAL, "Approval and sign-off flow", "Approval posture, step-up, and stale protection are explicit."),
-            ref(PORTAL, "Playwright validation minimum", "Rebased approval and historical pack posture are explicit scenarios."),
+            ref(
+                PORTAL,
+                "Approval and sign-off flow",
+                "Approval posture, step-up, and stale protection are explicit.",
+            ),
+            ref(
+                PORTAL,
+                "Playwright validation minimum",
+                "Rebased approval and historical pack posture are explicit scenarios.",
+            ),
         ],
     ),
     route_record(
@@ -1164,12 +1371,18 @@ ROUTE_RECORDS = [
         dominant_action="Advance the current onboarding step without losing entered answers, uploads, or support context.",
         read_models=["ClientPortalWorkspace", "ClientOnboardingJourney"],
         read_surfaces=["ClientPortalWorkspace route projection (onboarding slice)"],
-        commands=["PORTAL_SAVE_ONBOARDING_STEP", "PORTAL_ADVANCE_ONBOARDING", "PORTAL_OPEN_SUPPORT"],
+        commands=[
+            "PORTAL_SAVE_ONBOARDING_STEP",
+            "PORTAL_ADVANCE_ONBOARDING",
+            "PORTAL_OPEN_SUPPORT",
+        ],
         command_semantics="NORMALIZED_ACTION_FAMILY",
         stream_sources=["journey refresh", "cross_device_continuity_contract"],
         visibility_lanes=["CUSTOMER_SAFE_PROJECTION"],
         artifact_posture="Onboarding confirmations and route-local uploads stay subordinate to the active step workspace.",
-        step_up_checkpoints=["Identity and eligibility checks stay inside the journey step where they are relevant."],
+        step_up_checkpoints=[
+            "Identity and eligibility checks stay inside the journey step where they are relevant."
+        ],
         stale_view_posture="Previously entered answers and resumable draft posture stay visible during refresh, reconnect, and rebase.",
         recovery_and_resume_rules=[
             "Save-and-return preserves the current step, answers, and any in-progress upload sessions.",
@@ -1181,7 +1394,9 @@ ROUTE_RECORDS = [
         components=["WelcomePanel", "OnboardingStepper", "StepWorkspace", "SupportPanel"],
         notes="Onboarding continuity is route-local and must not be reinterpreted as a general portal dashboard state.",
         source_refs=[
-            ref(PORTAL, "Onboarding flow", "Step save-and-return and support posture are explicit."),
+            ref(
+                PORTAL, "Onboarding flow", "Step save-and-return and support posture are explicit."
+            ),
             ref(PORTAL, "Responsive fallback rules", "Mobile-width onboarding rules are explicit."),
         ],
     ),
@@ -1202,7 +1417,9 @@ ROUTE_RECORDS = [
         stream_sources=["help request refresh", "cross_device_continuity_contract"],
         visibility_lanes=["CUSTOMER_SAFE_PROJECTION"],
         artifact_posture="Support history and current case context stay explicit and subordinate to the active help action.",
-        step_up_checkpoints=["Escalated help flows may invoke route-local verification while preserving the case context panel."],
+        step_up_checkpoints=[
+            "Escalated help flows may invoke route-local verification while preserving the case context panel."
+        ],
         stale_view_posture="The case context panel stays mounted and makes hidden/unavailable states plain-language rather than implicit.",
         recovery_and_resume_rules=[
             "Help requests preserve route, reason family, and context bundle when resumed.",
@@ -1215,7 +1432,11 @@ ROUTE_RECORDS = [
         notes="Help is the only portal route where the support surface is allowed to foreground itself.",
         source_refs=[
             ref(PORTAL, "Route architecture / Help", "Help route modules are explicit."),
-            ref(NORTHBOUND, "Portal help request", "The durable `CLIENT_PORTAL_REQUEST_HELP` command is explicit."),
+            ref(
+                NORTHBOUND,
+                "Portal help request",
+                "The durable `CLIENT_PORTAL_REQUEST_HELP` command is explicit.",
+            ),
         ],
     ),
     route_record(
@@ -1235,7 +1456,9 @@ ROUTE_RECORDS = [
         stream_sources=["durable command receipts", "governance overview refresh"],
         visibility_lanes=["MASKED_GOVERNANCE slices", "role-limited overview counts"],
         artifact_posture="Overview is summary-first and never exports broader detail than the current filtered slice permits.",
-        step_up_checkpoints=["Risky follow-on routes may trigger inline step-up before mutation staging begins."],
+        step_up_checkpoints=[
+            "Risky follow-on routes may trigger inline step-up before mutation staging begins."
+        ],
         stale_view_posture="Overview cards stay mounted while stale basis or access drift is surfaced inline.",
         recovery_and_resume_rules=[
             "Selected object, dominant question, and filters survive responsive collapse and browser back.",
@@ -1244,10 +1467,20 @@ ROUTE_RECORDS = [
         focus_return_rule="Return to the overview attention summary row or pending change queue item that launched deeper work.",
         selector_profile="GOVERNANCE_SEMANTIC_SELECTORS_V1",
         responsive_fallback="On narrower widths the inventory rail compresses to a tray and the audit sidecar redocks beneath the canvas.",
-        components=["GovernanceContextBar", "SectionNav", "InventoryRail", "OverviewAttentionSummary", "GovernanceRiskLedger", "PendingChangeQueue", "AuditSidcar"],
+        components=[
+            "GovernanceContextBar",
+            "SectionNav",
+            "InventoryRail",
+            "OverviewAttentionSummary",
+            "GovernanceRiskLedger",
+            "PendingChangeQueue",
+            "AuditSidcar",
+        ],
         notes="Overview keeps the five-region governance grammar visible even when density collapses responsively.",
         source_refs=[
-            ref(GOVERNANCE, "4.1 `/governance`", "Overview widgets and route purpose are explicit."),
+            ref(
+                GOVERNANCE, "4.1 `/governance`", "Overview widgets and route purpose are explicit."
+            ),
             ref(NORTHBOUND, "Governance read surfaces", "The overview endpoint is explicit."),
         ],
     ),
@@ -1268,7 +1501,9 @@ ROUTE_RECORDS = [
         stream_sources=["durable command receipts", "policy snapshot refresh"],
         visibility_lanes=["MASKED_GOVERNANCE"],
         artifact_posture="Diffs, blast radius, and history are first-class and remain visible beside staged change posture.",
-        step_up_checkpoints=["Approval submission and any privilege-widening change remain inline and basis-hash guarded."],
+        step_up_checkpoints=[
+            "Approval submission and any privilege-widening change remain inline and basis-hash guarded."
+        ],
         stale_view_posture="The staged diff remains visible but cannot commit once policy snapshot or dependency topology drifts.",
         recovery_and_resume_rules=[
             "Change basket retains context across refresh, reconnect, and responsive collapse.",
@@ -1277,11 +1512,25 @@ ROUTE_RECORDS = [
         focus_return_rule="Return to the staged diff row, change basket item, or approval composer trigger.",
         selector_profile="GOVERNANCE_SEMANTIC_SELECTORS_V1",
         responsive_fallback="Sidecar redocks under the workspace and the basket remains visible before any history panel on narrow screens.",
-        components=["ChangeBasket", "ApprovalComposer", "BlastRadiusPanel", "ConfigHistoryTimeline", "WorkspaceCanvas"],
+        components=[
+            "ChangeBasket",
+            "ApprovalComposer",
+            "BlastRadiusPanel",
+            "ConfigHistoryTimeline",
+            "WorkspaceCanvas",
+        ],
         notes="Mutation families are normalized from the governance route prose; the northbound contract instead pins stale guards and basis hashes.",
         source_refs=[
-            ref(GOVERNANCE, "4.2 `/governance/tenant`", "Tenant config widgets and basket/approval posture are explicit."),
-            ref(NORTHBOUND, "Governance stale guards", "Policy snapshot and dependency topology hashes are explicit."),
+            ref(
+                GOVERNANCE,
+                "4.2 `/governance/tenant`",
+                "Tenant config widgets and basket/approval posture are explicit.",
+            ),
+            ref(
+                NORTHBOUND,
+                "Governance stale guards",
+                "Policy snapshot and dependency topology hashes are explicit.",
+            ),
         ],
     ),
     route_record(
@@ -1301,7 +1550,9 @@ ROUTE_RECORDS = [
         stream_sources=["durable command receipts", "principal inventory refresh"],
         visibility_lanes=["MASKED_GOVERNANCE"],
         artifact_posture="Principal detail, authority chain, and staged access changes remain side-by-side.",
-        step_up_checkpoints=["Any privilege-widening change must preserve simulation basis and step-up posture."],
+        step_up_checkpoints=[
+            "Any privilege-widening change must preserve simulation basis and step-up posture."
+        ],
         stale_view_posture="Principal detail stays visible while mutation controls fail closed when access basis drifts.",
         recovery_and_resume_rules=[
             "Roving selection preserves the selected principal under responsive collapse.",
@@ -1310,10 +1561,19 @@ ROUTE_RECORDS = [
         focus_return_rule="Return to the principal directory row or authority-chain invocation anchor.",
         selector_profile="GOVERNANCE_SEMANTIC_SELECTORS_V1",
         responsive_fallback="Directory compresses to a tray but selected principal context persists into the canvas.",
-        components=["PrincipalDirectory", "PrincipalAccessGrid", "AuthorityChainPanel", "AuditSidcar"],
+        components=[
+            "PrincipalDirectory",
+            "PrincipalAccessGrid",
+            "AuthorityChainPanel",
+            "AuditSidcar",
+        ],
         notes="This route preserves the governance five-layer access explanation stack in detail form.",
         source_refs=[
-            ref(GOVERNANCE, "4.3 `/governance/access/principals`", "Principal route purpose and detail are explicit."),
+            ref(
+                GOVERNANCE,
+                "4.3 `/governance/access/principals`",
+                "Principal route purpose and detail are explicit.",
+            ),
             ref(NORTHBOUND, "Governance read surfaces", "The principals endpoint is explicit."),
         ],
     ),
@@ -1334,7 +1594,9 @@ ROUTE_RECORDS = [
         stream_sources=["durable command receipts", "role matrix refresh"],
         visibility_lanes=["MASKED_GOVERNANCE"],
         artifact_posture="Role diffs, impact, and history remain visible before commit.",
-        step_up_checkpoints=["Role changes that widen authority preserve both topology and simulation basis hashes."],
+        step_up_checkpoints=[
+            "Role changes that widen authority preserve both topology and simulation basis hashes."
+        ],
         stale_view_posture="Matrix stays visible while mutation affordances fail closed on outdated basis.",
         recovery_and_resume_rules=[
             "Selected role and visible diff row survive refresh and browser back.",
@@ -1346,7 +1608,11 @@ ROUTE_RECORDS = [
         components=["WorkspaceCanvas", "ChangeBasket", "ApprovalComposer", "BlastRadiusPanel"],
         notes="The roles route is dense but never allowed to hide diff and blast-radius posture behind collapsible noise.",
         source_refs=[
-            ref(GOVERNANCE, "4.3 `/governance/access/roles`", "Role route purpose follows the access map."),
+            ref(
+                GOVERNANCE,
+                "4.3 `/governance/access/roles`",
+                "Role route purpose follows the access map.",
+            ),
             ref(NORTHBOUND, "Governance read surfaces", "The role matrix endpoint is explicit."),
         ],
     ),
@@ -1367,7 +1633,9 @@ ROUTE_RECORDS = [
         stream_sources=["durable command receipts", "simulation result refresh"],
         visibility_lanes=["MASKED_GOVERNANCE"],
         artifact_posture="Simulation basis, dependency topology, and potential blast radius are treated as first-class artifacts.",
-        step_up_checkpoints=["Committing a simulated change requires the exact simulation basis hash and any route-local step-up."],
+        step_up_checkpoints=[
+            "Committing a simulated change requires the exact simulation basis hash and any route-local step-up."
+        ],
         stale_view_posture="Simulation result remains visible but cannot be committed after basis or topology drift.",
         recovery_and_resume_rules=[
             "Simulation basis hash and dependency topology hash are preserved across receipts and retries.",
@@ -1379,8 +1647,14 @@ ROUTE_RECORDS = [
         components=["PolicySimulator", "ChangeBasket", "ApprovalComposer", "BlastRadiusPanel"],
         notes="The simulator route is the most explicit place where governance basis hashes become user-visible product law.",
         source_refs=[
-            ref(GOVERNANCE, "4.3 `/governance/access/simulator`", "The simulator route is explicit."),
-            ref(NORTHBOUND, "Access simulations", "The simulation endpoint and basis-hash rules are explicit."),
+            ref(
+                GOVERNANCE, "4.3 `/governance/access/simulator`", "The simulator route is explicit."
+            ),
+            ref(
+                NORTHBOUND,
+                "Access simulations",
+                "The simulation endpoint and basis-hash rules are explicit.",
+            ),
         ],
     ),
     route_record(
@@ -1400,7 +1674,9 @@ ROUTE_RECORDS = [
         stream_sources=["durable command receipts", "authority-link inventory refresh"],
         visibility_lanes=["MASKED_GOVERNANCE"],
         artifact_posture="Binding mismatch, delegation gap, and environment drift are distinct and remain inspectable as separate artifacts.",
-        step_up_checkpoints=["Repair commands stay basis-hash guarded and may demand step-up for authority-widening effects."],
+        step_up_checkpoints=[
+            "Repair commands stay basis-hash guarded and may demand step-up for authority-widening effects."
+        ],
         stale_view_posture="Health detail remains visible while repair actions fail closed on outdated inventory or topology basis.",
         recovery_and_resume_rules=[
             "The selected link item remains anchored through refresh and export eligibility checks.",
@@ -1409,11 +1685,20 @@ ROUTE_RECORDS = [
         focus_return_rule="Return to the selected authority-link row or detail expansion trigger.",
         selector_profile="GOVERNANCE_SEMANTIC_SELECTORS_V1",
         responsive_fallback="Inventory rows collapse into a tray while detail and health timeline stay accessible in the canvas.",
-        components=["AuthorityLinkInventory", "AuthorityLinkDetail", "BindingHealthTimeline", "AuditSidcar"],
+        components=[
+            "AuthorityLinkInventory",
+            "AuthorityLinkDetail",
+            "BindingHealthTimeline",
+            "AuditSidcar",
+        ],
         notes="Authority link health categories stay deliberately distinct to prevent semantic flattening in later UI work.",
         source_refs=[
-            ref(GOVERNANCE, "4.4 `/governance/authority-links`", "The route semantics are explicit."),
-            ref(NORTHBOUND, "Governance read surfaces", "The authority-links endpoint is explicit."),
+            ref(
+                GOVERNANCE, "4.4 `/governance/authority-links`", "The route semantics are explicit."
+            ),
+            ref(
+                NORTHBOUND, "Governance read surfaces", "The authority-links endpoint is explicit."
+            ),
         ],
     ),
     route_record(
@@ -1433,7 +1718,9 @@ ROUTE_RECORDS = [
         stream_sources=["durable command receipts", "retention frame refresh"],
         visibility_lanes=["MASKED_GOVERNANCE"],
         artifact_posture="Policy matrix and impact preview remain paired; export follows the active filtered slice only.",
-        step_up_checkpoints=["Lowering retention minimums or widening erase posture remains step-up and approval guarded."],
+        step_up_checkpoints=[
+            "Lowering retention minimums or widening erase posture remains step-up and approval guarded."
+        ],
         stale_view_posture="The matrix remains visible while commit actions fail closed on drifted retention frames.",
         recovery_and_resume_rules=[
             "Retention focus order is normalized from the shared governance shell law plus route-local workspaces.",
@@ -1442,7 +1729,12 @@ ROUTE_RECORDS = [
         focus_return_rule="Return to the selected policy row or impact preview toggle.",
         selector_profile="GOVERNANCE_SEMANTIC_SELECTORS_V1",
         responsive_fallback="Policy matrix compacts before impact preview disappears; sidecar redocks beneath the canvas.",
-        components=["RetentionPolicyMatrix", "RetentionImpactPreview", "ChangeBasket", "AuditSidcar"],
+        components=[
+            "RetentionPolicyMatrix",
+            "RetentionImpactPreview",
+            "ChangeBasket",
+            "AuditSidcar",
+        ],
         notes="This route uses a normalized landmark order because the contract names the workspace more strongly than exact landmark sequencing.",
         source_refs=[
             ref(GOVERNANCE, "4.5 `/governance/retention`", "Retention routes are explicit."),
@@ -1466,7 +1758,9 @@ ROUTE_RECORDS = [
         stream_sources=["durable command receipts", "retention frame refresh"],
         visibility_lanes=["MASKED_GOVERNANCE"],
         artifact_posture="Hold records, policy impacts, and downstream constraints remain visible together.",
-        step_up_checkpoints=["Opening or releasing a hold requires inline step-up and approval posture when policy demands it."],
+        step_up_checkpoints=[
+            "Opening or releasing a hold requires inline step-up and approval posture when policy demands it."
+        ],
         stale_view_posture="Register entries remain visible but irreversible actions fail closed on stale retention basis.",
         recovery_and_resume_rules=[
             "Legal hold selection and impact preview remain anchored under layout collapse.",
@@ -1479,7 +1773,11 @@ ROUTE_RECORDS = [
         notes="Legal holds remain explicitly distinct from broader retention policy edits.",
         source_refs=[
             ref(GOVERNANCE, "4.5 `/governance/retention/legal-holds`", "The route is explicit."),
-            ref(NORTHBOUND, "Governance read surfaces", "The retention frame is the northbound source for legal-hold slices."),
+            ref(
+                NORTHBOUND,
+                "Governance read surfaces",
+                "The retention frame is the northbound source for legal-hold slices.",
+            ),
         ],
     ),
     route_record(
@@ -1499,7 +1797,9 @@ ROUTE_RECORDS = [
         stream_sources=["durable command receipts", "retention frame refresh"],
         visibility_lanes=["MASKED_GOVERNANCE"],
         artifact_posture="Eligibility, blocking holds, and irreversible consequences are all first-class rows, not hidden edge cases.",
-        step_up_checkpoints=["Irreversible erasure actions are never accepted from a stale governance view."],
+        step_up_checkpoints=[
+            "Irreversible erasure actions are never accepted from a stale governance view."
+        ],
         stale_view_posture="Queue context remains visible while erase actions fail closed with typed stale-view errors.",
         recovery_and_resume_rules=[
             "Selected erasure row and blocker detail stay mounted across refresh and back.",
@@ -1512,7 +1812,11 @@ ROUTE_RECORDS = [
         notes="This route is the clearest example of the governance stale-view hard stop on irreversible action.",
         source_refs=[
             ref(GOVERNANCE, "4.5 `/governance/retention/erasure`", "The route is explicit."),
-            ref(NORTHBOUND, "Governance stale-view rules", "Unmasked audit export and irreversible retention actions cannot commit from stale views."),
+            ref(
+                NORTHBOUND,
+                "Governance stale-view rules",
+                "Unmasked audit export and irreversible retention actions cannot commit from stale views.",
+            ),
         ],
     ),
     route_record(
@@ -1532,7 +1836,9 @@ ROUTE_RECORDS = [
         stream_sources=["append-only event refresh", "durable command receipts"],
         visibility_lanes=["MASKED_GOVERNANCE", "audit-retention-visible receipts"],
         artifact_posture="Append-only event slices, correlation neighborhoods, and export eligibility remain explicit and non-destructive.",
-        step_up_checkpoints=["Export remains governed by the active filtered slice and masking/export posture."],
+        step_up_checkpoints=[
+            "Export remains governed by the active filtered slice and masking/export posture."
+        ],
         stale_view_posture="Investigation frames stay visible while export or follow-on actions fail closed when masking or basis drift.",
         recovery_and_resume_rules=[
             "Selected event, diff inspector state, and export eligibility panel survive refresh and responsive collapse.",
@@ -1541,11 +1847,21 @@ ROUTE_RECORDS = [
         focus_return_rule="Return to the selected event row or export eligibility trigger.",
         selector_profile="GOVERNANCE_SEMANTIC_SELECTORS_V1",
         responsive_fallback="The audit sidecar redocks but remains visible before export posture is obscured.",
-        components=["AuditInvestigationWorkbench", "AuditTape", "EventDiffInspector", "ExportEligibilityPanel", "AuditSidcar"],
+        components=[
+            "AuditInvestigationWorkbench",
+            "AuditTape",
+            "EventDiffInspector",
+            "ExportEligibilityPanel",
+            "AuditSidcar",
+        ],
         notes="This route is read-heavy and append-only, but still governed by the same return-target and support-region laws.",
         source_refs=[
             ref(GOVERNANCE, "4.6 `/governance/audit`", "Audit route purpose is explicit."),
-            ref(NORTHBOUND, "Governance read surfaces", "The audit-investigations endpoint is explicit."),
+            ref(
+                NORTHBOUND,
+                "Governance read surfaces",
+                "The audit-investigations endpoint is explicit.",
+            ),
         ],
     ),
     route_record(
@@ -1558,8 +1874,16 @@ ROUTE_RECORDS = [
         object_ownership="DecisionBundle + manifest experience state",
         dominant_question="What is the current manifest decision state, and what support detail belongs in the inspector or a detached window?",
         dominant_action="Operate on the same manifest object through sidebar, canvas, and inspector without violating browser truth.",
-        read_models=["DecisionBundle", "ExperienceCursor", "WorkspaceSnapshot (linked focus when present)"],
-        read_surfaces=["Manifest experience snapshot", "Manifest experience stream", "Local cache hydration envelope"],
+        read_models=[
+            "DecisionBundle",
+            "ExperienceCursor",
+            "WorkspaceSnapshot (linked focus when present)",
+        ],
+        read_surfaces=[
+            "Manifest experience snapshot",
+            "Manifest experience stream",
+            "Local cache hydration envelope",
+        ],
         commands=[
             "TOGGLE_SIDEBAR",
             "TOGGLE_INSPECTOR",
@@ -1569,9 +1893,14 @@ ROUTE_RECORDS = [
         ],
         command_semantics="LOCAL_NATIVE_COMMAND",
         stream_sources=["snapshot hydration", "stream resume", "manifest delta application"],
-        visibility_lanes=["NATIVE_CACHED_NON_AUTHORITATIVE", "CALM operator truth after northbound reconciliation"],
+        visibility_lanes=[
+            "NATIVE_CACHED_NON_AUTHORITATIVE",
+            "CALM operator truth after northbound reconciliation",
+        ],
         artifact_posture="Evidence preview, compare context, and pinned selections stay inside cache-safe native affordances.",
-        step_up_checkpoints=["Native step-up still delegates to governed backend/browser flows rather than inventing offline legal commands."],
+        step_up_checkpoints=[
+            "Native step-up still delegates to governed backend/browser flows rather than inventing offline legal commands."
+        ],
         stale_view_posture="Previously valid content stays mounted while inspector actions fail closed and refresh/rebase becomes explicit.",
         recovery_and_resume_rules=[
             "Scene restoration never reopens a manifest after tenant switch, privilege downgrade, or masking drift.",
@@ -1580,11 +1909,25 @@ ROUTE_RECORDS = [
         focus_return_rule="Return to the manifest sidebar row, canvas anchor, or inspector trigger that opened support detail.",
         selector_profile="NATIVE_OPERATOR_SELECTORS_V1",
         responsive_fallback="Sidebar and inspector collapse independently but the same object remains mounted in the center canvas.",
-        components=["NativeLeadingSidebar", "NativePrimaryCanvas", "NativeTrailingInspector", "NativeCommandSurface", "NativeSceneRestoreCapsule"],
+        components=[
+            "NativeLeadingSidebar",
+            "NativePrimaryCanvas",
+            "NativeTrailingInspector",
+            "NativeCommandSurface",
+            "NativeSceneRestoreCapsule",
+        ],
         notes="Native primary scenes embody calm-shell law; they do not define a fourth shell family.",
         source_refs=[
-            ref(NATIVE, "5. Preferred window and scene architecture", "The primary split-view scene is explicit."),
-            ref(CACHE_ISOLATION, "Native secondary windows and preview subjects", "Scene legality is cache-bound."),
+            ref(
+                NATIVE,
+                "5. Preferred window and scene architecture",
+                "The primary split-view scene is explicit.",
+            ),
+            ref(
+                CACHE_ISOLATION,
+                "Native secondary windows and preview subjects",
+                "Scene legality is cache-bound.",
+            ),
         ],
     ),
     route_record(
@@ -1610,9 +1953,14 @@ ROUTE_RECORDS = [
         ],
         command_semantics="LOCAL_NATIVE_COMMAND",
         stream_sources=["snapshot hydration", "stream resume", "workspace delta application"],
-        visibility_lanes=["NATIVE_CACHED_NON_AUTHORITATIVE", "CALM operator truth after northbound reconciliation"],
+        visibility_lanes=[
+            "NATIVE_CACHED_NON_AUTHORITATIVE",
+            "CALM operator truth after northbound reconciliation",
+        ],
         artifact_posture="Current workspace detail may be cached locally, but mutations still respect stale-view guards from the rendered surface.",
-        step_up_checkpoints=["No blind offline legal commands; backend stale-view guards still bind every mutation-capable affordance."],
+        step_up_checkpoints=[
+            "No blind offline legal commands; backend stale-view guards still bind every mutation-capable affordance."
+        ],
         stale_view_posture="The scene stays mounted but any stale command lane downgrades inline to read-only or refresh-required posture.",
         recovery_and_resume_rules=[
             "Reconnect and rebase must match the browser collaboration contract.",
@@ -1621,11 +1969,25 @@ ROUTE_RECORDS = [
         focus_return_rule="Return to the invoking sidebar item, selected module anchor, or inspector trigger.",
         selector_profile="NATIVE_OPERATOR_SELECTORS_V1",
         responsive_fallback="Scene collapses from three-pane to two-pane without replacing the work-item object or hiding the inspector law.",
-        components=["NativeLeadingSidebar", "NativePrimaryCanvas", "NativeTrailingInspector", "NativeCommandSurface", "QuickLookPreview"],
+        components=[
+            "NativeLeadingSidebar",
+            "NativePrimaryCanvas",
+            "NativeTrailingInspector",
+            "NativeCommandSurface",
+            "QuickLookPreview",
+        ],
         notes="The work-item scene is the native mirror of the collaboration workspace, with native command affordances layered on top.",
         source_refs=[
-            ref(NATIVE, "6. Data flow and synchronization model", "Work-item data flow and cursor/resume model are explicit."),
-            ref(NATIVE, "14. Acceptance criteria", "Rebase, stale-view, and scene-identity parity are explicit acceptance criteria."),
+            ref(
+                NATIVE,
+                "6. Data flow and synchronization model",
+                "Work-item data flow and cursor/resume model are explicit.",
+            ),
+            ref(
+                NATIVE,
+                "14. Acceptance criteria",
+                "Rebase, stale-view, and scene-identity parity are explicit acceptance criteria.",
+            ),
         ],
     ),
     route_record(
@@ -1639,7 +2001,10 @@ ROUTE_RECORDS = [
         dominant_question="How do two evidence or decision states compare without collapsing the parent scene context?",
         dominant_action="Inspect compare detail in a support-only window and return to the parent anchor.",
         read_models=["DecisionBundle comparison slice", "preview_subject_ref_or_null"],
-        read_surfaces=["Parent scene export to detached compare window", "Local cached compare payload"],
+        read_surfaces=[
+            "Parent scene export to detached compare window",
+            "Local cached compare payload",
+        ],
         commands=["FOCUS_PRIMARY_CANVAS", "CLOSE_SECONDARY_WINDOW", "COPY_IDENTIFIERS"],
         command_semantics="LOCAL_NATIVE_COMMAND",
         stream_sources=["parent scene refresh", "detached window restore payload"],
@@ -1654,11 +2019,23 @@ ROUTE_RECORDS = [
         focus_return_rule="Return to the exact parent compare trigger or selected evidence row.",
         selector_profile="NATIVE_OPERATOR_SELECTORS_V1",
         responsive_fallback="Secondary windows are native overlays; they do not collapse into browser route variants.",
-        components=["NativeSecondaryWindowHeader", "NativeCompareWindow", "NativeSceneRestoreCapsule"],
+        components=[
+            "NativeSecondaryWindowHeader",
+            "NativeCompareWindow",
+            "NativeSceneRestoreCapsule",
+        ],
         notes="Secondary windows are deliberately support-only overlays, not new shell families.",
         source_refs=[
-            ref(NATIVE, "5. Preferred window and scene architecture / Secondary windows", "Compare windows are explicit."),
-            ref(NATIVE, "11. Security and runtime posture", "Preview subject legality and temp-artifact purges are explicit."),
+            ref(
+                NATIVE,
+                "5. Preferred window and scene architecture / Secondary windows",
+                "Compare windows are explicit.",
+            ),
+            ref(
+                NATIVE,
+                "11. Security and runtime posture",
+                "Preview subject legality and temp-artifact purges are explicit.",
+            ),
         ],
     ),
     route_record(
@@ -1678,7 +2055,9 @@ ROUTE_RECORDS = [
         stream_sources=["parent scene refresh", "detached window restore payload"],
         visibility_lanes=["NATIVE_CACHED_NON_AUTHORITATIVE"],
         artifact_posture="Audit detail stays non-authoritative locally and must respect masking/export posture at open time and restore time.",
-        step_up_checkpoints=["Export or print remains governed by masking/export posture before any helper opens."],
+        step_up_checkpoints=[
+            "Export or print remains governed by masking/export posture before any helper opens."
+        ],
         stale_view_posture="Audit content may remain visible but any export or print action fails closed on drift.",
         recovery_and_resume_rules=[
             "Parent focus restoration is serialized and mandatory.",
@@ -1690,8 +2069,16 @@ ROUTE_RECORDS = [
         components=["NativeSecondaryWindowHeader", "NativeAuditWindow", "QuickLookPreview"],
         notes="Audit windows inherit native support-only rules and masking-aware restore envelopes.",
         source_refs=[
-            ref(NATIVE, "5. Preferred window and scene architecture / Secondary windows", "Audit windows are explicit."),
-            ref(NATIVE, "11. Security and runtime posture", "Quick Look and export legality are explicit."),
+            ref(
+                NATIVE,
+                "5. Preferred window and scene architecture / Secondary windows",
+                "Audit windows are explicit.",
+            ),
+            ref(
+                NATIVE,
+                "11. Security and runtime posture",
+                "Quick Look and export legality are explicit.",
+            ),
         ],
     ),
     route_record(
@@ -1711,7 +2098,9 @@ ROUTE_RECORDS = [
         stream_sources=["parent scene refresh", "detached window restore payload"],
         visibility_lanes=["NATIVE_CACHED_NON_AUTHORITATIVE"],
         artifact_posture="Print-preview and export staging are governed helpers, not independent truth surfaces.",
-        step_up_checkpoints=["Export and print helpers must recheck masking/export posture before opening or restoring."],
+        step_up_checkpoints=[
+            "Export and print helpers must recheck masking/export posture before opening or restoring."
+        ],
         stale_view_posture="Packet preview may persist visually while export controls fail closed on drift.",
         recovery_and_resume_rules=[
             "Temp artifacts purge when tenant, masking, or preview subject drift.",
@@ -1723,8 +2112,16 @@ ROUTE_RECORDS = [
         components=["NativeSecondaryWindowHeader", "NativeFilingPacketWindow", "QuickLookPreview"],
         notes="Packet review is explicitly support-only and inherits the parent scene legality envelope.",
         source_refs=[
-            ref(NATIVE, "5. Preferred window and scene architecture / Secondary windows", "Filing packet review/export windows are explicit."),
-            ref(NATIVE, "11. Security and runtime posture", "Temporary artifact purge rules are explicit."),
+            ref(
+                NATIVE,
+                "5. Preferred window and scene architecture / Secondary windows",
+                "Filing packet review/export windows are explicit.",
+            ),
+            ref(
+                NATIVE,
+                "11. Security and runtime posture",
+                "Temporary artifact purge rules are explicit.",
+            ),
         ],
     ),
     route_record(
@@ -1744,7 +2141,9 @@ ROUTE_RECORDS = [
         stream_sources=["parent scene refresh", "detached window restore payload"],
         visibility_lanes=["NATIVE_CACHED_NON_AUTHORITATIVE"],
         artifact_posture="Authority review stays tied to the invoking object and cannot survive into a broader context.",
-        step_up_checkpoints=["Any authority action still routes through governed backend or browser step-up paths."],
+        step_up_checkpoints=[
+            "Any authority action still routes through governed backend or browser step-up paths."
+        ],
         stale_view_posture="Authority review can stay visible, but action affordances fail closed when the parent basis drifts.",
         recovery_and_resume_rules=[
             "Detached authority review restores to the exact parent invocation anchor.",
@@ -1756,8 +2155,16 @@ ROUTE_RECORDS = [
         components=["NativeSecondaryWindowHeader", "NativeAuthorityReviewWindow"],
         notes="Authority review is support-only and parent-bound like the other detached native windows.",
         source_refs=[
-            ref(NATIVE, "5. Preferred window and scene architecture / Secondary windows", "Authority interaction review is explicit."),
-            ref(NATIVE, "7. Authentication and session strategy", "Authority work still uses governed browser/session flows when needed."),
+            ref(
+                NATIVE,
+                "5. Preferred window and scene architecture / Secondary windows",
+                "Authority interaction review is explicit.",
+            ),
+            ref(
+                NATIVE,
+                "7. Authentication and session strategy",
+                "Authority work still uses governed browser/session flows when needed.",
+            ),
         ],
     ),
     route_record(
@@ -1771,13 +2178,18 @@ ROUTE_RECORDS = [
         dominant_question="What external authority or identity task must complete before the parent scene can settle?",
         dominant_action="Leave the native scene temporarily, complete the external authority step, and resume the parent scene with the same return target.",
         read_models=["Return target envelope", "pending authority task binding"],
-        read_surfaces=["ASWebAuthenticationSession callback", "Parent scene refresh after settlement"],
+        read_surfaces=[
+            "ASWebAuthenticationSession callback",
+            "Parent scene refresh after settlement",
+        ],
         commands=["BEGIN_ASWEB_AUTH_SESSION", "RESUME_PARENT_SCENE"],
         command_semantics="LOCAL_NATIVE_AND_AUTH",
         stream_sources=["auth callback", "parent scene refresh"],
         visibility_lanes=["NATIVE_CACHED_NON_AUTHORITATIVE", "external authority truth"],
         artifact_posture="No external handoff implies completion until the parent governed read model confirms settlement.",
-        step_up_checkpoints=["The handoff itself is the step-up checkpoint and must serialize the parent return target."],
+        step_up_checkpoints=[
+            "The handoff itself is the step-up checkpoint and must serialize the parent return target."
+        ],
         stale_view_posture="Parent scene remains preserved behind the handoff and resumes only after legality checks and fresh read settlement.",
         recovery_and_resume_rules=[
             "Temporary external handoff is allowed but must restore the exact parent route/scene and focus anchor.",
@@ -1789,89 +2201,733 @@ ROUTE_RECORDS = [
         components=["NativeAuthHandoff", "NativeSceneRestoreCapsule"],
         notes="External handoff is a temporary escape hatch, not a shell transition.",
         source_refs=[
-            ref(NATIVE, "7. Authentication and session strategy", "ASWebAuthenticationSession is explicit."),
-            ref(FRONTEND_LAW, "2. Route continuity and shell stability", "External handoff must return to the same object and shell."),
+            ref(
+                NATIVE,
+                "7. Authentication and session strategy",
+                "ASWebAuthenticationSession is explicit.",
+            ),
+            ref(
+                FRONTEND_LAW,
+                "2. Route continuity and shell stability",
+                "External handoff must return to the same object and shell.",
+            ),
         ],
     ),
 ]
 
 
 COMPONENT_METADATA = {
-    "WorkInboxRow": ("COLLABORATION", "PRIMARY_ROW", "work-item-row", "A staff inbox row with identity, triage, and action bands.", [ref(COLLABORATION, "4. Key components", "Work inbox components are explicitly listed.")]),
-    "StatusPill": ("COLLABORATION", "STATUS", "work-item-status", "Typed lifecycle status chip for collaboration rows.", [ref(COLLABORATION, "4. Key components", "StatusPill is explicit.")]),
-    "AssigneeChip": ("COLLABORATION", "STATUS", "assignee-chip", "Current owner anchor for queue and workspace headers.", [ref(COLLABORATION, "4. Key components", "AssigneeChip is explicit.")]),
-    "SlaBadge": ("COLLABORATION", "STATUS", "sla-badge", "SLA timing posture attached to the inbox row.", [ref(COLLABORATION, "4. Key components", "SlaBadge is explicit.")]),
-    "EscalationBadge": ("COLLABORATION", "STATUS", "escalation-badge", "Escalation posture anchor for queues and summaries.", [ref(COLLABORATION, "4. Key components", "EscalationBadge is explicit.")]),
-    "ContextBar": ("COLLABORATION", "PRIMARY_CONTEXT", "context-bar", "Top calm-shell context anchor.", [ref(LOW_NOISE, "LowNoiseExperienceFrame", "Context bar is part of the calm-shell order.")]),
-    "DecisionSummary": ("COLLABORATION", "PRIMARY_SUMMARY", "decision-summary", "Decision summary block above the action strip.", [ref(LOW_NOISE, "LowNoiseExperienceFrame", "Decision summary is part of the calm-shell order.")]),
-    "ActionStrip": ("COLLABORATION", "PRIMARY_ACTION", "action-strip", "Action strip containing the dominant legal next step.", [ref(LOW_NOISE, "LowNoiseExperienceFrame", "Action strip is part of the calm-shell order.")]),
-    "DetailDrawer": ("COLLABORATION", "PROMOTED_SUPPORT", "detail-drawer", "The single promoted support region in calm-shell workspaces.", [ref(FRONTEND_LAW, "3. Layout topology and support-region promotion", "Only one promoted support region is allowed.")]),
-    "DominantQuestion": ("COLLABORATION", "PRIMARY_SUMMARY", "dominant-question", "The explicit top-level question the operator should answer now.", [ref(COLLABORATION, "1. Core invariants", "Every route keeps one dominant question.")]),
-    "SettlementPosture": ("COLLABORATION", "PRIMARY_SUMMARY", "settlement-posture", "Shared settlement-state surface for the current work item.", [ref(EMPTY_STATE, "Shared shell freshness and recovery vocabulary", "Settlement states are shared law.")]),
-    "NoSafeAction": ("COLLABORATION", "RECOVERY", "no-safe-action", "Fail-closed action state when stale or limited.", [ref(EMPTY_STATE, "Shared shell freshness and recovery vocabulary", "Unsafe mutation affordances fail closed.")]),
-    "CustomerActivityThread": ("COLLABORATION", "THREAD", "customer-activity", "Customer-visible activity thread.", [ref(COLLABORATION, "4. Key components", "Customer activity thread is explicit.")]),
-    "InternalActivityThread": ("COLLABORATION", "THREAD", "internal-activity", "Internal-only staff activity thread.", [ref(COLLABORATION, "4. Key components", "Internal activity thread is explicit.")]),
-    "ProblemBanner": ("COLLABORATION", "RECOVERY", "portal-inline-recovery", "Inline problem or limitation notice during stale/rebase posture.", [ref(COLLABORATION, "4. Key components", "ProblemBanner is explicit.")]),
-    "FilesModule": ("COLLABORATION", "ARTIFACT", "files-module", "Current-vs-history attachment and download posture module.", [ref(COLLABORATION, "4. Key components", "FilesModule is explicit.")]),
-    "LinkedContextPanel": ("COLLABORATION", "PROMOTED_SUPPORT", "linked-context-panel", "Linked manifest or external work context.", [ref(COLLABORATION, "4. Key components", "LinkedContextPanel is explicit.")]),
-    "AuditTape": ("COLLABORATION", "PROMOTED_SUPPORT", "audit-tape", "Append-only workspace-local audit stream.", [ref(COLLABORATION, "4. Key components", "AuditTape is explicit.")]),
-    "PortalHeader": ("PORTAL", "PRIMARY_CONTEXT", "portal-shell", "Top shell header for portal routes.", [ref(PORTAL, "Minimum semantic selectors", "Portal shell anchor is explicit.")]),
-    "StatusHero": ("PORTAL", "PRIMARY_SUMMARY", "portal-status-hero", "Home route summary and next-action frame.", [ref(PORTAL, "Route architecture / Home", "STATUS_HERO is explicit.")]),
-    "TaskQueue": ("PORTAL", "PRIMARY_ACTION", "portal-primary-action", "Task-first queue for portal home.", [ref(PORTAL, "Route architecture / Home", "TASK_QUEUE is explicit.")]),
-    "RecentActivity": ("PORTAL", "SECONDARY_CONTEXT", "portal-history-list", "Recent portal-safe activity timeline.", [ref(PORTAL, "Route architecture / Home", "RECENT_ACTIVITY is explicit.")]),
-    "DocumentInbox": ("PORTAL", "PRIMARY_CONTEXT", "portal-request-focus", "Document request list and grouping.", [ref(PORTAL, "Route architecture / Documents", "DOCUMENT_INBOX is explicit.")]),
-    "UploadPanel": ("PORTAL", "PRIMARY_ACTION", "portal-primary-action", "Upload controls and file selection entry.", [ref(PORTAL, "Route architecture / Documents", "UPLOAD_PANEL is explicit.")]),
-    "UploadStatusList": ("PORTAL", "PRIMARY_ACTION", "portal-inline-recovery", "Transfer/scan/validation/acceptance ribbon and rows.", [ref(PORTAL, "Secure document-upload flow", "Upload status posture is explicit.")]),
-    "DocumentHistory": ("PORTAL", "SECONDARY_CONTEXT", "portal-history-list", "Traceable accepted/rejected/superseded document history.", [ref(PORTAL, "Route architecture / Documents", "DOCUMENT_HISTORY is explicit.")]),
-    "ApprovalSummary": ("PORTAL", "PRIMARY_SUMMARY", "portal-request-focus", "Current approval pack summary.", [ref(PORTAL, "Route architecture / Approvals", "APPROVAL_SUMMARY is explicit.")]),
-    "ChangeDigest": ("PORTAL", "PRIMARY_CONTEXT", "portal-current-artifact", "Digest of pending changes to review.", [ref(PORTAL, "Route architecture / Approvals", "CHANGE_DIGEST is explicit.")]),
-    "DeclarationPanel": ("PORTAL", "PRIMARY_CONTEXT", "portal-workspace-posture", "Declaration copy and legal posture container.", [ref(PORTAL, "Route architecture / Approvals", "DECLARATION_PANEL is explicit.")]),
-    "SignOffPanel": ("PORTAL", "PRIMARY_ACTION", "portal-primary-action", "Sign-off action surface.", [ref(PORTAL, "Route architecture / Approvals", "SIGN_OFF_PANEL is explicit.")]),
-    "WelcomePanel": ("PORTAL", "PRIMARY_SUMMARY", "portal-request-focus", "Onboarding welcome or orientation panel.", [ref(PORTAL, "Route architecture / Onboarding", "WELCOME_PANEL is explicit.")]),
-    "OnboardingStepper": ("PORTAL", "PRIMARY_CONTEXT", "portal-route-tabs", "Onboarding step progression indicator.", [ref(PORTAL, "Route architecture / Onboarding", "ONBOARDING_STEPPER is explicit.")]),
-    "StepWorkspace": ("PORTAL", "PRIMARY_ACTION", "portal-workspace-posture", "Active onboarding step workspace.", [ref(PORTAL, "Route architecture / Onboarding", "STEP_WORKSPACE is explicit.")]),
-    "SupportPanel": ("PORTAL", "PROMOTED_SUPPORT", "portal-support-panel", "Single promoted support region in portal routes.", [ref(PORTAL, "Shell continuity, support budget, and constrained layouts", "Support budget is explicit.")]),
-    "HelpOptions": ("PORTAL", "PRIMARY_ACTION", "portal-support-entry", "Main help route support choices.", [ref(PORTAL, "Route architecture / Help", "HELP_OPTIONS is explicit.")]),
-    "TopQuestions": ("PORTAL", "SECONDARY_CONTEXT", "portal-history-list", "Top question or FAQ list.", [ref(PORTAL, "Route architecture / Help", "TOP_QUESTIONS is explicit.")]),
-    "CaseContextPanel": ("PORTAL", "PROMOTED_SUPPORT", "portal-support-panel", "Current support case context panel.", [ref(PORTAL, "Route architecture / Help", "CASE_CONTEXT_PANEL is explicit.")]),
-    "GovernanceContextBar": ("GOVERNANCE", "PRIMARY_CONTEXT", "governance-context-bar", "Top governance context bar.", [ref(GOVERNANCE, "4. Information architecture and route map", "Governance context bar is explicit.")]),
-    "SectionNav": ("GOVERNANCE", "NAVIGATION", "governance-section-nav", "Persistent section navigation rail.", [ref(GOVERNANCE, "4. Information architecture and route map", "Section nav is explicit.")]),
-    "InventoryRail": ("GOVERNANCE", "NAVIGATION", "governance-primary-worklist", "Persistent inventory or worklist rail.", [ref(GOVERNANCE, "4. Information architecture and route map", "Inventory rail is explicit.")]),
-    "WorkspaceCanvas": ("GOVERNANCE", "PRIMARY_CONTEXT", "governance-workspace-header", "Primary governance workspace area.", [ref(GOVERNANCE, "4. Information architecture and route map", "Workspace canvas is explicit.")]),
-    "AuditSidcar": ("GOVERNANCE", "PROMOTED_SUPPORT", "governance-support-sidecar", "Promoted audit sidecar.", [ref(GOVERNANCE, "4. Information architecture and route map", "Audit sidecar is explicit.")]),
-    "OverviewAttentionSummary": ("GOVERNANCE", "PRIMARY_SUMMARY", "overview-attention-summary", "Overview priority summary.", [ref(GOVERNANCE, "4.1 `/governance`", "OverviewAttentionSummary is explicit.")]),
-    "GovernanceRiskLedger": ("GOVERNANCE", "PRIMARY_CONTEXT", "governance-risk-ledger", "Risk ledger for overview.", [ref(GOVERNANCE, "4.1 `/governance`", "GovernanceRiskLedger is explicit.")]),
-    "PendingChangeQueue": ("GOVERNANCE", "PRIMARY_ACTION", "governance-primary-worklist", "Pending change queue on overview.", [ref(GOVERNANCE, "4.1 `/governance`", "PendingChangeQueue is explicit.")]),
-    "ChangeBasket": ("GOVERNANCE", "PRIMARY_ACTION", "change-basket", "Diff-first staging basket.", [ref(GOVERNANCE, "6. Shared interaction and mutation rules", "ChangeBasket is explicit.")]),
-    "ApprovalComposer": ("GOVERNANCE", "PROMOTED_SUPPORT", "approval-composer", "Approval and communication composer.", [ref(GOVERNANCE, "6. Shared interaction and mutation rules", "ApprovalComposer is explicit.")]),
-    "BlastRadiusPanel": ("GOVERNANCE", "PROMOTED_SUPPORT", "governance-dominant-question", "Blast-radius and downstream impact surface.", [ref(GOVERNANCE, "4.2 `/governance/tenant`", "BlastRadiusPanel is explicit.")]),
-    "ConfigHistoryTimeline": ("GOVERNANCE", "SECONDARY_CONTEXT", "governance-recovery-posture", "Configuration history timeline.", [ref(GOVERNANCE, "4.2 `/governance/tenant`", "ConfigHistoryTimeline is explicit.")]),
-    "PrincipalDirectory": ("GOVERNANCE", "NAVIGATION", "principal-directory", "Principal list and filters.", [ref(GOVERNANCE, "10. Minimum semantic selectors", "Principal directory selector is explicit.")]),
-    "PrincipalAccessGrid": ("GOVERNANCE", "PRIMARY_CONTEXT", "principal-access-grid", "Effective access detail grid.", [ref(GOVERNANCE, "10. Minimum semantic selectors", "Principal access grid selector is explicit.")]),
-    "AuthorityChainPanel": ("GOVERNANCE", "PROMOTED_SUPPORT", "authority-chain-panel", "Chain-of-authority inspection panel.", [ref(GOVERNANCE, "10. Minimum semantic selectors", "Authority chain panel selector is explicit.")]),
-    "PolicySimulator": ("GOVERNANCE", "PRIMARY_ACTION", "policy-simulator", "Simulation workspace and basis hash surface.", [ref(GOVERNANCE, "10. Minimum semantic selectors", "Policy simulator selector is explicit.")]),
-    "AuthorityLinkInventory": ("GOVERNANCE", "NAVIGATION", "authority-link-inventory", "Authority link inventory list.", [ref(GOVERNANCE, "10. Minimum semantic selectors", "Authority link inventory selector is explicit.")]),
-    "AuthorityLinkDetail": ("GOVERNANCE", "PRIMARY_CONTEXT", "authority-link-detail", "Selected authority link detail surface.", [ref(GOVERNANCE, "10. Minimum semantic selectors", "Authority link detail selector is explicit.")]),
-    "BindingHealthTimeline": ("GOVERNANCE", "PROMOTED_SUPPORT", "binding-health-timeline", "Timeline of binding health changes.", [ref(GOVERNANCE, "10. Minimum semantic selectors", "Binding health timeline selector is explicit.")]),
-    "RetentionPolicyMatrix": ("GOVERNANCE", "PRIMARY_CONTEXT", "retention-policy-matrix", "Retention policy matrix.", [ref(GOVERNANCE, "10. Minimum semantic selectors", "Retention policy matrix selector is explicit.")]),
-    "LegalHoldRegister": ("GOVERNANCE", "PRIMARY_CONTEXT", "legal-hold-register", "Legal hold list and filters.", [ref(GOVERNANCE, "10. Minimum semantic selectors", "Legal hold register selector is explicit.")]),
-    "ErasureQueue": ("GOVERNANCE", "PRIMARY_CONTEXT", "erasure-queue", "Erasure review queue.", [ref(GOVERNANCE, "10. Minimum semantic selectors", "Erasure queue selector is explicit.")]),
-    "RetentionImpactPreview": ("GOVERNANCE", "PROMOTED_SUPPORT", "retention-impact-preview", "Impact preview for retention changes.", [ref(GOVERNANCE, "10. Minimum semantic selectors", "Retention impact preview selector is explicit.")]),
-    "AuditInvestigationWorkbench": ("GOVERNANCE", "PRIMARY_CONTEXT", "audit-investigation-workbench", "Audit investigation workspace.", [ref(GOVERNANCE, "10. Minimum semantic selectors", "Audit investigation workbench selector is explicit.")]),
-    "EventDiffInspector": ("GOVERNANCE", "PROMOTED_SUPPORT", "event-diff-inspector", "Audit event diff inspector.", [ref(GOVERNANCE, "10. Minimum semantic selectors", "Event diff inspector selector is explicit.")]),
-    "ExportEligibilityPanel": ("GOVERNANCE", "PROMOTED_SUPPORT", "export-eligibility-panel", "Governed export eligibility surface.", [ref(GOVERNANCE, "10. Minimum semantic selectors", "Export eligibility panel selector is explicit.")]),
-    "NativeLeadingSidebar": ("NATIVE_OPERATOR", "NAVIGATION", "native-scene-sidebar", "Leading sidebar in primary native scenes.", [ref(NATIVE, "5. Preferred window and scene architecture", "Leading sidebar is explicit.")]),
-    "NativePrimaryCanvas": ("NATIVE_OPERATOR", "PRIMARY_CONTEXT", "native-scene-primary-canvas", "Central content area in primary native scenes.", [ref(NATIVE, "5. Preferred window and scene architecture", "Primary canvas is explicit.")]),
-    "NativeTrailingInspector": ("NATIVE_OPERATOR", "PROMOTED_SUPPORT", "native-scene-inspector", "Trailing inspector in primary native scenes.", [ref(NATIVE, "5. Preferred window and scene architecture", "Trailing inspector is explicit.")]),
-    "NativeSecondaryWindowHeader": ("NATIVE_OPERATOR", "PRIMARY_CONTEXT", "native-secondary-window", "Identity header for detached support windows.", [ref(NATIVE, "5. Preferred window and scene architecture / Secondary windows", "Secondary window header posture is explicit.")]),
-    "NativeCompareWindow": ("NATIVE_OPERATOR", "PRIMARY_CONTEXT", "native-secondary-window", "Detached compare window canvas.", [ref(NATIVE, "5. Preferred window and scene architecture / Secondary windows", "Compare windows are explicit.")]),
-    "NativeAuditWindow": ("NATIVE_OPERATOR", "PRIMARY_CONTEXT", "native-secondary-window", "Detached audit or provenance window canvas.", [ref(NATIVE, "5. Preferred window and scene architecture / Secondary windows", "Audit windows are explicit.")]),
-    "NativeFilingPacketWindow": ("NATIVE_OPERATOR", "PRIMARY_CONTEXT", "native-secondary-window", "Detached filing packet review/export canvas.", [ref(NATIVE, "5. Preferred window and scene architecture / Secondary windows", "Filing packet windows are explicit.")]),
-    "NativeAuthorityReviewWindow": ("NATIVE_OPERATOR", "PRIMARY_CONTEXT", "native-secondary-window", "Detached authority review canvas.", [ref(NATIVE, "5. Preferred window and scene architecture / Secondary windows", "Authority review windows are explicit.")]),
-    "NativeCommandSurface": ("NATIVE_OPERATOR", "PRIMARY_ACTION", "native-command-surface", "Keyboard-first command surface for native scenes.", [ref(NATIVE, "Commands / menus", "Native command vocabulary is explicit.")]),
-    "NativeAuthHandoff": ("NATIVE_OPERATOR", "PRIMARY_ACTION", "native-auth-handoff", "External browser auth handoff capsule.", [ref(NATIVE, "7. Authentication and session strategy", "ASWebAuthenticationSession is explicit.")]),
-    "NativeSceneRestoreCapsule": ("NATIVE_OPERATOR", "RECOVERY", "native-scene-restore", "Scene restoration metadata and return-target container.", [ref(NATIVE, "8. Persistence model", "Scene restoration payloads are explicit.")]),
-    "QuickLookPreview": ("NATIVE_OPERATOR", "ARTIFACT", "native-quicklook", "Quick Look / preview helper surface.", [ref(NATIVE, "10. Native UX opportunities", "Quick Look is explicit.")]),
+    "WorkInboxRow": (
+        "COLLABORATION",
+        "PRIMARY_ROW",
+        "work-item-row",
+        "A staff inbox row with identity, triage, and action bands.",
+        [ref(COLLABORATION, "4. Key components", "Work inbox components are explicitly listed.")],
+    ),
+    "StatusPill": (
+        "COLLABORATION",
+        "STATUS",
+        "work-item-status",
+        "Typed lifecycle status chip for collaboration rows.",
+        [ref(COLLABORATION, "4. Key components", "StatusPill is explicit.")],
+    ),
+    "AssigneeChip": (
+        "COLLABORATION",
+        "STATUS",
+        "assignee-chip",
+        "Current owner anchor for queue and workspace headers.",
+        [ref(COLLABORATION, "4. Key components", "AssigneeChip is explicit.")],
+    ),
+    "SlaBadge": (
+        "COLLABORATION",
+        "STATUS",
+        "sla-badge",
+        "SLA timing posture attached to the inbox row.",
+        [ref(COLLABORATION, "4. Key components", "SlaBadge is explicit.")],
+    ),
+    "EscalationBadge": (
+        "COLLABORATION",
+        "STATUS",
+        "escalation-badge",
+        "Escalation posture anchor for queues and summaries.",
+        [ref(COLLABORATION, "4. Key components", "EscalationBadge is explicit.")],
+    ),
+    "ContextBar": (
+        "COLLABORATION",
+        "PRIMARY_CONTEXT",
+        "context-bar",
+        "Top calm-shell context anchor.",
+        [ref(LOW_NOISE, "LowNoiseExperienceFrame", "Context bar is part of the calm-shell order.")],
+    ),
+    "DecisionSummary": (
+        "COLLABORATION",
+        "PRIMARY_SUMMARY",
+        "decision-summary",
+        "Decision summary block above the action strip.",
+        [
+            ref(
+                LOW_NOISE,
+                "LowNoiseExperienceFrame",
+                "Decision summary is part of the calm-shell order.",
+            )
+        ],
+    ),
+    "ActionStrip": (
+        "COLLABORATION",
+        "PRIMARY_ACTION",
+        "action-strip",
+        "Action strip containing the dominant legal next step.",
+        [
+            ref(
+                LOW_NOISE,
+                "LowNoiseExperienceFrame",
+                "Action strip is part of the calm-shell order.",
+            )
+        ],
+    ),
+    "DetailDrawer": (
+        "COLLABORATION",
+        "PROMOTED_SUPPORT",
+        "detail-drawer",
+        "The single promoted support region in calm-shell workspaces.",
+        [
+            ref(
+                FRONTEND_LAW,
+                "3. Layout topology and support-region promotion",
+                "Only one promoted support region is allowed.",
+            )
+        ],
+    ),
+    "DominantQuestion": (
+        "COLLABORATION",
+        "PRIMARY_SUMMARY",
+        "dominant-question",
+        "The explicit top-level question the operator should answer now.",
+        [ref(COLLABORATION, "1. Core invariants", "Every route keeps one dominant question.")],
+    ),
+    "SettlementPosture": (
+        "COLLABORATION",
+        "PRIMARY_SUMMARY",
+        "settlement-posture",
+        "Shared settlement-state surface for the current work item.",
+        [
+            ref(
+                EMPTY_STATE,
+                "Shared shell freshness and recovery vocabulary",
+                "Settlement states are shared law.",
+            )
+        ],
+    ),
+    "NoSafeAction": (
+        "COLLABORATION",
+        "RECOVERY",
+        "no-safe-action",
+        "Fail-closed action state when stale or limited.",
+        [
+            ref(
+                EMPTY_STATE,
+                "Shared shell freshness and recovery vocabulary",
+                "Unsafe mutation affordances fail closed.",
+            )
+        ],
+    ),
+    "CustomerActivityThread": (
+        "COLLABORATION",
+        "THREAD",
+        "customer-activity",
+        "Customer-visible activity thread.",
+        [ref(COLLABORATION, "4. Key components", "Customer activity thread is explicit.")],
+    ),
+    "InternalActivityThread": (
+        "COLLABORATION",
+        "THREAD",
+        "internal-activity",
+        "Internal-only staff activity thread.",
+        [ref(COLLABORATION, "4. Key components", "Internal activity thread is explicit.")],
+    ),
+    "ProblemBanner": (
+        "COLLABORATION",
+        "RECOVERY",
+        "portal-inline-recovery",
+        "Inline problem or limitation notice during stale/rebase posture.",
+        [ref(COLLABORATION, "4. Key components", "ProblemBanner is explicit.")],
+    ),
+    "FilesModule": (
+        "COLLABORATION",
+        "ARTIFACT",
+        "files-module",
+        "Current-vs-history attachment and download posture module.",
+        [ref(COLLABORATION, "4. Key components", "FilesModule is explicit.")],
+    ),
+    "LinkedContextPanel": (
+        "COLLABORATION",
+        "PROMOTED_SUPPORT",
+        "linked-context-panel",
+        "Linked manifest or external work context.",
+        [ref(COLLABORATION, "4. Key components", "LinkedContextPanel is explicit.")],
+    ),
+    "AuditTape": (
+        "COLLABORATION",
+        "PROMOTED_SUPPORT",
+        "audit-tape",
+        "Append-only workspace-local audit stream.",
+        [ref(COLLABORATION, "4. Key components", "AuditTape is explicit.")],
+    ),
+    "PortalHeader": (
+        "PORTAL",
+        "PRIMARY_CONTEXT",
+        "portal-shell",
+        "Top shell header for portal routes.",
+        [ref(PORTAL, "Minimum semantic selectors", "Portal shell anchor is explicit.")],
+    ),
+    "StatusHero": (
+        "PORTAL",
+        "PRIMARY_SUMMARY",
+        "portal-status-hero",
+        "Home route summary and next-action frame.",
+        [ref(PORTAL, "Route architecture / Home", "STATUS_HERO is explicit.")],
+    ),
+    "TaskQueue": (
+        "PORTAL",
+        "PRIMARY_ACTION",
+        "portal-primary-action",
+        "Task-first queue for portal home.",
+        [ref(PORTAL, "Route architecture / Home", "TASK_QUEUE is explicit.")],
+    ),
+    "RecentActivity": (
+        "PORTAL",
+        "SECONDARY_CONTEXT",
+        "portal-history-list",
+        "Recent portal-safe activity timeline.",
+        [ref(PORTAL, "Route architecture / Home", "RECENT_ACTIVITY is explicit.")],
+    ),
+    "DocumentInbox": (
+        "PORTAL",
+        "PRIMARY_CONTEXT",
+        "portal-request-focus",
+        "Document request list and grouping.",
+        [ref(PORTAL, "Route architecture / Documents", "DOCUMENT_INBOX is explicit.")],
+    ),
+    "UploadPanel": (
+        "PORTAL",
+        "PRIMARY_ACTION",
+        "portal-primary-action",
+        "Upload controls and file selection entry.",
+        [ref(PORTAL, "Route architecture / Documents", "UPLOAD_PANEL is explicit.")],
+    ),
+    "UploadStatusList": (
+        "PORTAL",
+        "PRIMARY_ACTION",
+        "portal-inline-recovery",
+        "Transfer/scan/validation/acceptance ribbon and rows.",
+        [ref(PORTAL, "Secure document-upload flow", "Upload status posture is explicit.")],
+    ),
+    "DocumentHistory": (
+        "PORTAL",
+        "SECONDARY_CONTEXT",
+        "portal-history-list",
+        "Traceable accepted/rejected/superseded document history.",
+        [ref(PORTAL, "Route architecture / Documents", "DOCUMENT_HISTORY is explicit.")],
+    ),
+    "ApprovalSummary": (
+        "PORTAL",
+        "PRIMARY_SUMMARY",
+        "portal-request-focus",
+        "Current approval pack summary.",
+        [ref(PORTAL, "Route architecture / Approvals", "APPROVAL_SUMMARY is explicit.")],
+    ),
+    "ChangeDigest": (
+        "PORTAL",
+        "PRIMARY_CONTEXT",
+        "portal-current-artifact",
+        "Digest of pending changes to review.",
+        [ref(PORTAL, "Route architecture / Approvals", "CHANGE_DIGEST is explicit.")],
+    ),
+    "DeclarationPanel": (
+        "PORTAL",
+        "PRIMARY_CONTEXT",
+        "portal-workspace-posture",
+        "Declaration copy and legal posture container.",
+        [ref(PORTAL, "Route architecture / Approvals", "DECLARATION_PANEL is explicit.")],
+    ),
+    "SignOffPanel": (
+        "PORTAL",
+        "PRIMARY_ACTION",
+        "portal-primary-action",
+        "Sign-off action surface.",
+        [ref(PORTAL, "Route architecture / Approvals", "SIGN_OFF_PANEL is explicit.")],
+    ),
+    "WelcomePanel": (
+        "PORTAL",
+        "PRIMARY_SUMMARY",
+        "portal-request-focus",
+        "Onboarding welcome or orientation panel.",
+        [ref(PORTAL, "Route architecture / Onboarding", "WELCOME_PANEL is explicit.")],
+    ),
+    "OnboardingStepper": (
+        "PORTAL",
+        "PRIMARY_CONTEXT",
+        "portal-route-tabs",
+        "Onboarding step progression indicator.",
+        [ref(PORTAL, "Route architecture / Onboarding", "ONBOARDING_STEPPER is explicit.")],
+    ),
+    "StepWorkspace": (
+        "PORTAL",
+        "PRIMARY_ACTION",
+        "portal-workspace-posture",
+        "Active onboarding step workspace.",
+        [ref(PORTAL, "Route architecture / Onboarding", "STEP_WORKSPACE is explicit.")],
+    ),
+    "SupportPanel": (
+        "PORTAL",
+        "PROMOTED_SUPPORT",
+        "portal-support-panel",
+        "Single promoted support region in portal routes.",
+        [
+            ref(
+                PORTAL,
+                "Shell continuity, support budget, and constrained layouts",
+                "Support budget is explicit.",
+            )
+        ],
+    ),
+    "HelpOptions": (
+        "PORTAL",
+        "PRIMARY_ACTION",
+        "portal-support-entry",
+        "Main help route support choices.",
+        [ref(PORTAL, "Route architecture / Help", "HELP_OPTIONS is explicit.")],
+    ),
+    "TopQuestions": (
+        "PORTAL",
+        "SECONDARY_CONTEXT",
+        "portal-history-list",
+        "Top question or FAQ list.",
+        [ref(PORTAL, "Route architecture / Help", "TOP_QUESTIONS is explicit.")],
+    ),
+    "CaseContextPanel": (
+        "PORTAL",
+        "PROMOTED_SUPPORT",
+        "portal-support-panel",
+        "Current support case context panel.",
+        [ref(PORTAL, "Route architecture / Help", "CASE_CONTEXT_PANEL is explicit.")],
+    ),
+    "GovernanceContextBar": (
+        "GOVERNANCE",
+        "PRIMARY_CONTEXT",
+        "governance-context-bar",
+        "Top governance context bar.",
+        [
+            ref(
+                GOVERNANCE,
+                "4. Information architecture and route map",
+                "Governance context bar is explicit.",
+            )
+        ],
+    ),
+    "SectionNav": (
+        "GOVERNANCE",
+        "NAVIGATION",
+        "governance-section-nav",
+        "Persistent section navigation rail.",
+        [ref(GOVERNANCE, "4. Information architecture and route map", "Section nav is explicit.")],
+    ),
+    "InventoryRail": (
+        "GOVERNANCE",
+        "NAVIGATION",
+        "governance-primary-worklist",
+        "Persistent inventory or worklist rail.",
+        [
+            ref(
+                GOVERNANCE,
+                "4. Information architecture and route map",
+                "Inventory rail is explicit.",
+            )
+        ],
+    ),
+    "WorkspaceCanvas": (
+        "GOVERNANCE",
+        "PRIMARY_CONTEXT",
+        "governance-workspace-header",
+        "Primary governance workspace area.",
+        [
+            ref(
+                GOVERNANCE,
+                "4. Information architecture and route map",
+                "Workspace canvas is explicit.",
+            )
+        ],
+    ),
+    "AuditSidcar": (
+        "GOVERNANCE",
+        "PROMOTED_SUPPORT",
+        "governance-support-sidecar",
+        "Promoted audit sidecar.",
+        [
+            ref(
+                GOVERNANCE,
+                "4. Information architecture and route map",
+                "Audit sidecar is explicit.",
+            )
+        ],
+    ),
+    "OverviewAttentionSummary": (
+        "GOVERNANCE",
+        "PRIMARY_SUMMARY",
+        "overview-attention-summary",
+        "Overview priority summary.",
+        [ref(GOVERNANCE, "4.1 `/governance`", "OverviewAttentionSummary is explicit.")],
+    ),
+    "GovernanceRiskLedger": (
+        "GOVERNANCE",
+        "PRIMARY_CONTEXT",
+        "governance-risk-ledger",
+        "Risk ledger for overview.",
+        [ref(GOVERNANCE, "4.1 `/governance`", "GovernanceRiskLedger is explicit.")],
+    ),
+    "PendingChangeQueue": (
+        "GOVERNANCE",
+        "PRIMARY_ACTION",
+        "governance-primary-worklist",
+        "Pending change queue on overview.",
+        [ref(GOVERNANCE, "4.1 `/governance`", "PendingChangeQueue is explicit.")],
+    ),
+    "ChangeBasket": (
+        "GOVERNANCE",
+        "PRIMARY_ACTION",
+        "change-basket",
+        "Diff-first staging basket.",
+        [ref(GOVERNANCE, "6. Shared interaction and mutation rules", "ChangeBasket is explicit.")],
+    ),
+    "ApprovalComposer": (
+        "GOVERNANCE",
+        "PROMOTED_SUPPORT",
+        "approval-composer",
+        "Approval and communication composer.",
+        [
+            ref(
+                GOVERNANCE,
+                "6. Shared interaction and mutation rules",
+                "ApprovalComposer is explicit.",
+            )
+        ],
+    ),
+    "BlastRadiusPanel": (
+        "GOVERNANCE",
+        "PROMOTED_SUPPORT",
+        "governance-dominant-question",
+        "Blast-radius and downstream impact surface.",
+        [ref(GOVERNANCE, "4.2 `/governance/tenant`", "BlastRadiusPanel is explicit.")],
+    ),
+    "ConfigHistoryTimeline": (
+        "GOVERNANCE",
+        "SECONDARY_CONTEXT",
+        "governance-recovery-posture",
+        "Configuration history timeline.",
+        [ref(GOVERNANCE, "4.2 `/governance/tenant`", "ConfigHistoryTimeline is explicit.")],
+    ),
+    "PrincipalDirectory": (
+        "GOVERNANCE",
+        "NAVIGATION",
+        "principal-directory",
+        "Principal list and filters.",
+        [
+            ref(
+                GOVERNANCE,
+                "10. Minimum semantic selectors",
+                "Principal directory selector is explicit.",
+            )
+        ],
+    ),
+    "PrincipalAccessGrid": (
+        "GOVERNANCE",
+        "PRIMARY_CONTEXT",
+        "principal-access-grid",
+        "Effective access detail grid.",
+        [
+            ref(
+                GOVERNANCE,
+                "10. Minimum semantic selectors",
+                "Principal access grid selector is explicit.",
+            )
+        ],
+    ),
+    "AuthorityChainPanel": (
+        "GOVERNANCE",
+        "PROMOTED_SUPPORT",
+        "authority-chain-panel",
+        "Chain-of-authority inspection panel.",
+        [
+            ref(
+                GOVERNANCE,
+                "10. Minimum semantic selectors",
+                "Authority chain panel selector is explicit.",
+            )
+        ],
+    ),
+    "PolicySimulator": (
+        "GOVERNANCE",
+        "PRIMARY_ACTION",
+        "policy-simulator",
+        "Simulation workspace and basis hash surface.",
+        [
+            ref(
+                GOVERNANCE,
+                "10. Minimum semantic selectors",
+                "Policy simulator selector is explicit.",
+            )
+        ],
+    ),
+    "AuthorityLinkInventory": (
+        "GOVERNANCE",
+        "NAVIGATION",
+        "authority-link-inventory",
+        "Authority link inventory list.",
+        [
+            ref(
+                GOVERNANCE,
+                "10. Minimum semantic selectors",
+                "Authority link inventory selector is explicit.",
+            )
+        ],
+    ),
+    "AuthorityLinkDetail": (
+        "GOVERNANCE",
+        "PRIMARY_CONTEXT",
+        "authority-link-detail",
+        "Selected authority link detail surface.",
+        [
+            ref(
+                GOVERNANCE,
+                "10. Minimum semantic selectors",
+                "Authority link detail selector is explicit.",
+            )
+        ],
+    ),
+    "BindingHealthTimeline": (
+        "GOVERNANCE",
+        "PROMOTED_SUPPORT",
+        "binding-health-timeline",
+        "Timeline of binding health changes.",
+        [
+            ref(
+                GOVERNANCE,
+                "10. Minimum semantic selectors",
+                "Binding health timeline selector is explicit.",
+            )
+        ],
+    ),
+    "RetentionPolicyMatrix": (
+        "GOVERNANCE",
+        "PRIMARY_CONTEXT",
+        "retention-policy-matrix",
+        "Retention policy matrix.",
+        [
+            ref(
+                GOVERNANCE,
+                "10. Minimum semantic selectors",
+                "Retention policy matrix selector is explicit.",
+            )
+        ],
+    ),
+    "LegalHoldRegister": (
+        "GOVERNANCE",
+        "PRIMARY_CONTEXT",
+        "legal-hold-register",
+        "Legal hold list and filters.",
+        [
+            ref(
+                GOVERNANCE,
+                "10. Minimum semantic selectors",
+                "Legal hold register selector is explicit.",
+            )
+        ],
+    ),
+    "ErasureQueue": (
+        "GOVERNANCE",
+        "PRIMARY_CONTEXT",
+        "erasure-queue",
+        "Erasure review queue.",
+        [ref(GOVERNANCE, "10. Minimum semantic selectors", "Erasure queue selector is explicit.")],
+    ),
+    "RetentionImpactPreview": (
+        "GOVERNANCE",
+        "PROMOTED_SUPPORT",
+        "retention-impact-preview",
+        "Impact preview for retention changes.",
+        [
+            ref(
+                GOVERNANCE,
+                "10. Minimum semantic selectors",
+                "Retention impact preview selector is explicit.",
+            )
+        ],
+    ),
+    "AuditInvestigationWorkbench": (
+        "GOVERNANCE",
+        "PRIMARY_CONTEXT",
+        "audit-investigation-workbench",
+        "Audit investigation workspace.",
+        [
+            ref(
+                GOVERNANCE,
+                "10. Minimum semantic selectors",
+                "Audit investigation workbench selector is explicit.",
+            )
+        ],
+    ),
+    "EventDiffInspector": (
+        "GOVERNANCE",
+        "PROMOTED_SUPPORT",
+        "event-diff-inspector",
+        "Audit event diff inspector.",
+        [
+            ref(
+                GOVERNANCE,
+                "10. Minimum semantic selectors",
+                "Event diff inspector selector is explicit.",
+            )
+        ],
+    ),
+    "ExportEligibilityPanel": (
+        "GOVERNANCE",
+        "PROMOTED_SUPPORT",
+        "export-eligibility-panel",
+        "Governed export eligibility surface.",
+        [
+            ref(
+                GOVERNANCE,
+                "10. Minimum semantic selectors",
+                "Export eligibility panel selector is explicit.",
+            )
+        ],
+    ),
+    "NativeLeadingSidebar": (
+        "NATIVE_OPERATOR",
+        "NAVIGATION",
+        "native-scene-sidebar",
+        "Leading sidebar in primary native scenes.",
+        [ref(NATIVE, "5. Preferred window and scene architecture", "Leading sidebar is explicit.")],
+    ),
+    "NativePrimaryCanvas": (
+        "NATIVE_OPERATOR",
+        "PRIMARY_CONTEXT",
+        "native-scene-primary-canvas",
+        "Central content area in primary native scenes.",
+        [ref(NATIVE, "5. Preferred window and scene architecture", "Primary canvas is explicit.")],
+    ),
+    "NativeTrailingInspector": (
+        "NATIVE_OPERATOR",
+        "PROMOTED_SUPPORT",
+        "native-scene-inspector",
+        "Trailing inspector in primary native scenes.",
+        [
+            ref(
+                NATIVE,
+                "5. Preferred window and scene architecture",
+                "Trailing inspector is explicit.",
+            )
+        ],
+    ),
+    "NativeSecondaryWindowHeader": (
+        "NATIVE_OPERATOR",
+        "PRIMARY_CONTEXT",
+        "native-secondary-window",
+        "Identity header for detached support windows.",
+        [
+            ref(
+                NATIVE,
+                "5. Preferred window and scene architecture / Secondary windows",
+                "Secondary window header posture is explicit.",
+            )
+        ],
+    ),
+    "NativeCompareWindow": (
+        "NATIVE_OPERATOR",
+        "PRIMARY_CONTEXT",
+        "native-secondary-window",
+        "Detached compare window canvas.",
+        [
+            ref(
+                NATIVE,
+                "5. Preferred window and scene architecture / Secondary windows",
+                "Compare windows are explicit.",
+            )
+        ],
+    ),
+    "NativeAuditWindow": (
+        "NATIVE_OPERATOR",
+        "PRIMARY_CONTEXT",
+        "native-secondary-window",
+        "Detached audit or provenance window canvas.",
+        [
+            ref(
+                NATIVE,
+                "5. Preferred window and scene architecture / Secondary windows",
+                "Audit windows are explicit.",
+            )
+        ],
+    ),
+    "NativeFilingPacketWindow": (
+        "NATIVE_OPERATOR",
+        "PRIMARY_CONTEXT",
+        "native-secondary-window",
+        "Detached filing packet review/export canvas.",
+        [
+            ref(
+                NATIVE,
+                "5. Preferred window and scene architecture / Secondary windows",
+                "Filing packet windows are explicit.",
+            )
+        ],
+    ),
+    "NativeAuthorityReviewWindow": (
+        "NATIVE_OPERATOR",
+        "PRIMARY_CONTEXT",
+        "native-secondary-window",
+        "Detached authority review canvas.",
+        [
+            ref(
+                NATIVE,
+                "5. Preferred window and scene architecture / Secondary windows",
+                "Authority review windows are explicit.",
+            )
+        ],
+    ),
+    "NativeCommandSurface": (
+        "NATIVE_OPERATOR",
+        "PRIMARY_ACTION",
+        "native-command-surface",
+        "Keyboard-first command surface for native scenes.",
+        [ref(NATIVE, "Commands / menus", "Native command vocabulary is explicit.")],
+    ),
+    "NativeAuthHandoff": (
+        "NATIVE_OPERATOR",
+        "PRIMARY_ACTION",
+        "native-auth-handoff",
+        "External browser auth handoff capsule.",
+        [
+            ref(
+                NATIVE,
+                "7. Authentication and session strategy",
+                "ASWebAuthenticationSession is explicit.",
+            )
+        ],
+    ),
+    "NativeSceneRestoreCapsule": (
+        "NATIVE_OPERATOR",
+        "RECOVERY",
+        "native-scene-restore",
+        "Scene restoration metadata and return-target container.",
+        [ref(NATIVE, "8. Persistence model", "Scene restoration payloads are explicit.")],
+    ),
+    "QuickLookPreview": (
+        "NATIVE_OPERATOR",
+        "ARTIFACT",
+        "native-quicklook",
+        "Quick Look / preview helper surface.",
+        [ref(NATIVE, "10. Native UX opportunities", "Quick Look is explicit.")],
+    ),
 }
 
 
@@ -1879,7 +2935,9 @@ def build_component_inventory(route_records: list[dict[str, Any]]) -> dict[str, 
     inventory_map: dict[tuple[str, str], dict[str, Any]] = {}
     for route in route_records:
         for component_key in route["components"]:
-            surface_family, region_kind, selector_anchor, notes, source_refs = COMPONENT_METADATA[component_key]
+            surface_family, region_kind, selector_anchor, notes, source_refs = COMPONENT_METADATA[
+                component_key
+            ]
             key = (surface_family, component_key)
             if key not in inventory_map:
                 inventory_map[key] = {
@@ -1931,7 +2989,11 @@ def build_read_model_api_binding(route_records: list[dict[str, Any]]) -> dict[st
             "binary_transfer_exception": "POST /v1/uploads/sessions allocates resumable upload sessions; attachment finalization still returns to POST /v1/commands.",
             "source_refs": [
                 ref(NORTHBOUND, "Command surface", "Command and receipt surfaces are explicit."),
-                ref(NORTHBOUND, "Binary transfer exception", "The upload-session exception is explicit."),
+                ref(
+                    NORTHBOUND,
+                    "Binary transfer exception",
+                    "The upload-session exception is explicit.",
+                ),
             ],
         },
         "bindings": bindings,
@@ -1970,8 +3032,16 @@ def build_state_visibility_matrix(route_records: list[dict[str, Any]]) -> dict[s
             "recovery_postures": SHARED_RECOVERY_POSTURES,
             "cache_isolation_keys": CACHE_ENVELOPE_KEYS,
             "source_refs": [
-                ref(EMPTY_STATE, "Shared shell freshness and recovery vocabulary", "Shared stale/recovery vocabulary is authoritative."),
-                ref(CACHE_ISOLATION, "Cache identity envelope", "Cache legality envelope is authoritative."),
+                ref(
+                    EMPTY_STATE,
+                    "Shared shell freshness and recovery vocabulary",
+                    "Shared stale/recovery vocabulary is authoritative.",
+                ),
+                ref(
+                    CACHE_ISOLATION,
+                    "Cache identity envelope",
+                    "Cache legality envelope is authoritative.",
+                ),
             ],
         },
         "rows": rows,
@@ -1988,8 +3058,16 @@ CONTINUITY_SCENARIOS = [
         "invalidated": ["none if the object remains legal"],
         "focus_return_rule": "Return to the originating work-item row.",
         "source_refs": [
-            ref(COLLABORATION, "9. Stream events and notifications", "Notification return targets are explicit."),
-            ref(FOCUS_RESTORE, "Return targets", "The narrowest surviving list target is authoritative."),
+            ref(
+                COLLABORATION,
+                "9. Stream events and notifications",
+                "Notification return targets are explicit.",
+            ),
+            ref(
+                FOCUS_RESTORE,
+                "Return targets",
+                "The narrowest surviving list target is authoritative.",
+            ),
         ],
     },
     {
@@ -2001,8 +3079,16 @@ CONTINUITY_SCENARIOS = [
         "invalidated": ["unsafe mutation affordances"],
         "focus_return_rule": "Return to the invoking action or route-local anchor after the recovery explanation closes.",
         "source_refs": [
-            ref(EMPTY_STATE, "Shared shell freshness and recovery vocabulary", "Inline rebase and fail-closed mutation posture are explicit."),
-            ref(STREAM_RESUME, "Resume and catch-up ordering", "Rebase-required and access-rebind postures are explicit."),
+            ref(
+                EMPTY_STATE,
+                "Shared shell freshness and recovery vocabulary",
+                "Inline rebase and fail-closed mutation posture are explicit.",
+            ),
+            ref(
+                STREAM_RESUME,
+                "Resume and catch-up ordering",
+                "Rebase-required and access-rebind postures are explicit.",
+            ),
         ],
     },
     {
@@ -2014,8 +3100,16 @@ CONTINUITY_SCENARIOS = [
         "invalidated": ["any stale assumption that transfer success equals acceptance"],
         "focus_return_rule": "Return to the current upload row or the request card upload trigger.",
         "source_refs": [
-            ref(PORTAL, "Secure document-upload flow", "Upload request-binding and resumability posture are explicit."),
-            ref(PORTAL, "Playwright validation minimum", "Mobile upload reconnect is an explicit scenario."),
+            ref(
+                PORTAL,
+                "Secure document-upload flow",
+                "Upload request-binding and resumability posture are explicit.",
+            ),
+            ref(
+                PORTAL,
+                "Playwright validation minimum",
+                "Mobile upload reconnect is an explicit scenario.",
+            ),
         ],
     },
     {
@@ -2027,8 +3121,16 @@ CONTINUITY_SCENARIOS = [
         "invalidated": ["commit affordance"],
         "focus_return_rule": "Return to the staged diff or simulation result that requires refresh.",
         "source_refs": [
-            ref(NORTHBOUND, "Governance stale guards", "Governance basis-hash requirements are explicit."),
-            ref(GOVERNANCE, "6. Shared interaction and mutation rules", "Change basket retention is explicit."),
+            ref(
+                NORTHBOUND,
+                "Governance stale guards",
+                "Governance basis-hash requirements are explicit.",
+            ),
+            ref(
+                GOVERNANCE,
+                "6. Shared interaction and mutation rules",
+                "Change basket retention is explicit.",
+            ),
         ],
     },
     {
@@ -2053,8 +3155,14 @@ CONTINUITY_SCENARIOS = [
         "invalidated": ["any assumption of completion before the governing read model settles"],
         "focus_return_rule": "Return to the invoking action after fresh settlement confirms completion.",
         "source_refs": [
-            ref(PORTAL, "Artifact, print, and browser-handoff rules", "Portal external handoff return law is explicit."),
-            ref(NATIVE, "7. Authentication and session strategy", "Native auth handoff is explicit."),
+            ref(
+                PORTAL,
+                "Artifact, print, and browser-handoff rules",
+                "Portal external handoff return law is explicit.",
+            ),
+            ref(
+                NATIVE, "7. Authentication and session strategy", "Native auth handoff is explicit."
+            ),
         ],
     },
     {
@@ -2066,8 +3174,16 @@ CONTINUITY_SCENARIOS = [
         "invalidated": ["none; only the spatial presentation changes"],
         "focus_return_rule": "Return to the same support anchor after the drawer, sidecar, or inspector redocks.",
         "source_refs": [
-            ref(FRONTEND_LAW, "3. Layout topology and support-region promotion", "Support redocking remains same-shell."),
-            ref(GOVERNANCE, "8. Accessibility and responsive requirements", "Governance sidecar redocking is explicit."),
+            ref(
+                FRONTEND_LAW,
+                "3. Layout topology and support-region promotion",
+                "Support redocking remains same-shell.",
+            ),
+            ref(
+                GOVERNANCE,
+                "8. Accessibility and responsive requirements",
+                "Governance sidecar redocking is explicit.",
+            ),
         ],
     },
     {
@@ -2079,15 +3195,25 @@ CONTINUITY_SCENARIOS = [
         "invalidated": ["ornamental transitions"],
         "focus_return_rule": "Focus anchors remain unchanged; only animation posture changes.",
         "source_refs": [
-            ref(PORTAL, "Accessibility and interaction rules", "Portal flows must remain operable with reduced motion."),
-            ref(FRONTEND_LAW, "Accessibility and motion", "Motion is subordinate to continuity and semantic hierarchy."),
+            ref(
+                PORTAL,
+                "Accessibility and interaction rules",
+                "Portal flows must remain operable with reduced motion.",
+            ),
+            ref(
+                FRONTEND_LAW,
+                "Accessibility and motion",
+                "Motion is subordinate to continuity and semantic hierarchy.",
+            ),
         ],
     },
 ]
 
 
 def build_native_topology(route_records: list[dict[str, Any]]) -> dict[str, Any]:
-    native_routes = [route for route in route_records if route["surface_family"] == "NATIVE_OPERATOR"]
+    native_routes = [
+        route for route in route_records if route["surface_family"] == "NATIVE_OPERATOR"
+    ]
     primary_scenes = [
         {
             "scene_key": route["route_or_scene_key"],
@@ -2132,7 +3258,11 @@ def build_native_topology(route_records: list[dict[str, Any]]) -> dict[str, Any]
             "resume_rule": "Completion never implies settlement until the governed parent read model refreshes and the return target is still legal.",
             "source_refs": [
                 ref(NATIVE, "7. Authentication and session strategy", "Auth strategy is explicit."),
-                ref(FRONTEND_LAW, "2. Route continuity and shell stability", "External handoff returns to the same shell."),
+                ref(
+                    FRONTEND_LAW,
+                    "2. Route continuity and shell stability",
+                    "External handoff returns to the same shell.",
+                ),
             ],
         },
         "command_surfaces": [
@@ -2169,7 +3299,9 @@ def build_native_topology(route_records: list[dict[str, Any]]) -> dict[str, Any]
             ],
             "source_refs": [
                 ref(NATIVE, "8. Persistence model", "Persistence and purge rules are explicit."),
-                ref(CACHE_ISOLATION, "Cache identity envelope", "The legality envelope is explicit."),
+                ref(
+                    CACHE_ISOLATION, "Cache identity envelope", "The legality envelope is explicit."
+                ),
             ],
         },
         "performance_strategy": [
@@ -2195,7 +3327,13 @@ def build_gap_register() -> dict[str, Any]:
             "status": "open" if not shared_contract_path.exists() else "closed",
             "summary": "The card references `shared_operating_contract_0014_to_0021.md`, but that file is not present in the prompt directory.",
             "impact": "Implementation had to ground directly in the authoritative `Algorithm/` contracts and adjacent completed cards.",
-            "source_refs": [ref("PROMPT/CARDS/pc_0014.md", "Working Notes / Autonomous Coding Prompt", "The missing shared contract path is referenced here.")],
+            "source_refs": [
+                ref(
+                    "PROMPT/CARDS/pc_0014.md",
+                    "Working Notes / Autonomous Coding Prompt",
+                    "The missing shared contract path is referenced here.",
+                )
+            ],
         },
         {
             "gap_key": "PORTAL_READ_PATH_LITERALS_NOT_FULLY_ENUMERATED",
@@ -2204,8 +3342,16 @@ def build_gap_register() -> dict[str, Any]:
             "summary": "The portal contract fully enumerates route semantics and read models, but does not publish every literal northbound path per route.",
             "impact": "The atlas records route-local portal reads as governed projections and calls out the missing literal path enumeration instead of inventing stable URLs.",
             "source_refs": [
-                ref(PORTAL, "Read-model and API translation requirements", "Read models are explicit."),
-                ref(NORTHBOUND, "Portal read surfaces", "The northbound contract describes portal projections more than literal per-route URLs."),
+                ref(
+                    PORTAL,
+                    "Read-model and API translation requirements",
+                    "Read models are explicit.",
+                ),
+                ref(
+                    NORTHBOUND,
+                    "Portal read surfaces",
+                    "The northbound contract describes portal projections more than literal per-route URLs.",
+                ),
             ],
         },
         {
@@ -2215,8 +3361,16 @@ def build_gap_register() -> dict[str, Any]:
             "summary": "Portal flow documents describe upload, approval, onboarding, and support action families more strongly than a literal complete command enum.",
             "impact": "The atlas uses normalized action-family names where the source is semantic rather than enum-complete, while preserving exact transport law.",
             "source_refs": [
-                ref(PORTAL, "Secure document-upload flow / Approval and sign-off flow / Onboarding flow", "Flow semantics are explicit."),
-                ref(NORTHBOUND, "Command surface", "Transport law is explicit even where route-local enums are not."),
+                ref(
+                    PORTAL,
+                    "Secure document-upload flow / Approval and sign-off flow / Onboarding flow",
+                    "Flow semantics are explicit.",
+                ),
+                ref(
+                    NORTHBOUND,
+                    "Command surface",
+                    "Transport law is explicit even where route-local enums are not.",
+                ),
             ],
         },
         {
@@ -2226,8 +3380,16 @@ def build_gap_register() -> dict[str, Any]:
             "summary": "Governance routes define staged mutations, basis hashes, and approval posture explicitly, but not a complete per-route mutation enum.",
             "impact": "The atlas names normalized governance action families while preserving the exact stale-guard and basis-hash contract.",
             "source_refs": [
-                ref(GOVERNANCE, "6. Shared interaction and mutation rules", "Mutation semantics are explicit."),
-                ref(NORTHBOUND, "Governance stale guards", "Stale-view and basis-hash rules are explicit."),
+                ref(
+                    GOVERNANCE,
+                    "6. Shared interaction and mutation rules",
+                    "Mutation semantics are explicit.",
+                ),
+                ref(
+                    NORTHBOUND,
+                    "Governance stale guards",
+                    "Stale-view and basis-hash rules are explicit.",
+                ),
             ],
         },
         {
@@ -2238,7 +3400,11 @@ def build_gap_register() -> dict[str, Any]:
             "impact": "The atlas keeps the explicit focus-jump form and avoids inventing additional manifest shell families.",
             "source_refs": [
                 ref(COLLABORATION, "2. Screen map", "The explicit focus-jump form is named here."),
-                ref(FRONTEND_LAW, "2. Route continuity and shell stability", "Focus jumps still obey shell stability law."),
+                ref(
+                    FRONTEND_LAW,
+                    "2. Route continuity and shell stability",
+                    "Focus jumps still obey shell stability law.",
+                ),
             ],
         },
         {
@@ -2248,8 +3414,16 @@ def build_gap_register() -> dict[str, Any]:
             "summary": "Detached native support windows are not browser routes and must not be treated as a fourth shell family.",
             "impact": "The atlas models them as scene overlays bound to the parent object, focus target, and preview subject envelope.",
             "source_refs": [
-                ref(NATIVE, "5. Preferred window and scene architecture / Secondary windows", "Detached windows are explicit."),
-                ref(FRONTEND_LAW, "1. Shell families and object ownership", "Native is an embodiment, not a new shell family."),
+                ref(
+                    NATIVE,
+                    "5. Preferred window and scene architecture / Secondary windows",
+                    "Detached windows are explicit.",
+                ),
+                ref(
+                    FRONTEND_LAW,
+                    "1. Shell families and object ownership",
+                    "Native is an embodiment, not a new shell family.",
+                ),
             ],
         },
     ]
@@ -2296,8 +3470,11 @@ def build_atlas_data(
         page_route_defaults[page["page_id"]] = next(
             route["route_or_scene_key"]
             for route in route_records
-            if route["surface_family"] == next(
-                family["surface_family"] for family in SURFACE_FAMILIES if family["page_id"] == page["page_id"]
+            if route["surface_family"]
+            == next(
+                family["surface_family"]
+                for family in SURFACE_FAMILIES
+                if family["page_id"] == page["page_id"]
             )
         )
     return {
@@ -2354,16 +3531,16 @@ def build_native_topology_mermaid(native_topology: dict[str, Any]) -> str:
         '  AUDIT["Audit window"]',
         '  PACKET["Filing packet window"]',
         '  AUTHORITY["Authority review window"]',
-        '  PRIMARY --> SIDEBAR',
-        '  PRIMARY --> CANVAS',
-        '  PRIMARY --> INSPECTOR',
-        '  PRIMARY --> SECONDARY',
-        '  PRIMARY --> AUTH',
-        '  PRIMARY --> CACHE',
-        '  SECONDARY --> COMPARE',
-        '  SECONDARY --> AUDIT',
-        '  SECONDARY --> PACKET',
-        '  SECONDARY --> AUTHORITY',
+        "  PRIMARY --> SIDEBAR",
+        "  PRIMARY --> CANVAS",
+        "  PRIMARY --> INSPECTOR",
+        "  PRIMARY --> SECONDARY",
+        "  PRIMARY --> AUTH",
+        "  PRIMARY --> CACHE",
+        "  SECONDARY --> COMPARE",
+        "  SECONDARY --> AUDIT",
+        "  SECONDARY --> PACKET",
+        "  SECONDARY --> AUTHORITY",
     ]
     return "\n".join(lines)
 
@@ -2401,7 +3578,9 @@ def write_multisurface_pack(
         "",
     ]
     for family in SURFACE_FAMILIES:
-        family_routes = [route for route in route_records if route["surface_family"] == family["surface_family"]]
+        family_routes = [
+            route for route in route_records if route["surface_family"] == family["surface_family"]
+        ]
         rows = [
             [
                 route["title"],
@@ -2425,7 +3604,15 @@ def write_multisurface_pack(
                 f"- Support-region law: {family['promoted_support_region_law']}",
                 "",
                 markdown_table(
-                    ["Route / Scene", "Pattern", "Shell", "Actors", "Dominant question", "Promoted support", "Selector profile"],
+                    [
+                        "Route / Scene",
+                        "Pattern",
+                        "Shell",
+                        "Actors",
+                        "Dominant question",
+                        "Promoted support",
+                        "Selector profile",
+                    ],
                     rows,
                 ),
                 "",
@@ -2502,7 +3689,10 @@ def write_uiux_spec(summary: dict[str, Any]) -> None:
         "",
         "## Family-Specific Composition",
         "",
-        markdown_table(["Family", "Visual responsibility", "Interaction signature", "Support-region law"], family_rows),
+        markdown_table(
+            ["Family", "Visual responsibility", "Interaction signature", "Support-region law"],
+            family_rows,
+        ),
         "",
         "## Atlas Page Composition",
         "",
@@ -2550,7 +3740,15 @@ def write_read_model_binding_doc(read_model_bindings: dict[str, Any]) -> None:
         "## Route / Scene Binding Matrix",
         "",
         markdown_table(
-            ["Route / Scene", "Shell", "Read models", "Read surfaces", "Commands", "Command semantics", "Streams / live updates"],
+            [
+                "Route / Scene",
+                "Shell",
+                "Read models",
+                "Read surfaces",
+                "Commands",
+                "Command semantics",
+                "Streams / live updates",
+            ],
             rows,
         ),
     ]
@@ -2588,7 +3786,9 @@ def write_native_scene_spec(native_topology: dict[str, Any]) -> None:
         "",
         "## Primary Scenes",
         "",
-        markdown_table(["Scene", "Layout regions", "Read models", "Recovery and restore rules"], primary_rows),
+        markdown_table(
+            ["Scene", "Layout regions", "Read models", "Recovery and restore rules"], primary_rows
+        ),
         "",
         "## Secondary Windows",
         "",

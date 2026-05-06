@@ -1,12 +1,7 @@
 import { test, expect } from "@playwright/test";
 
-import {
-  createDefaultRedactionRules,
-  redactStructuredValue,
-} from "../../src/core/redaction.js";
-import {
-  assertNoRawCredentialPersistence,
-} from "../../src/providers/hmrc/flows/export_client_credentials_to_vault.js";
+import { createDefaultRedactionRules, redactStructuredValue } from "../../src/core/redaction.js";
+import { assertNoRawCredentialPersistence } from "../../src/providers/hmrc/flows/export_client_credentials_to_vault.js";
 
 test("structured redaction removes raw HMRC client identifiers and one-time secrets", () => {
   const rawClientId = "taxat_sandbox_income_tax_sandbox_client_id";
@@ -34,9 +29,7 @@ test("structured redaction removes raw HMRC client identifiers and one-time secr
     },
   });
   expect(result.notes).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({ category: "SECRET", matchCount: 1 }),
-    ]),
+    expect.arrayContaining([expect.objectContaining({ category: "SECRET", matchCount: 1 })]),
   );
 });
 
@@ -57,8 +50,7 @@ test("raw credential persistence guard permits alias and vault-ref only outputs"
     assertNoRawCredentialPersistence(
       {
         clientIdAlias: "hmrc-client-id-taxat-sandbox-income-tax",
-        fingerprint:
-          "sha256:95bbf17cb6d7a3f6338584dc5af41fedf830f7af406f3c91b43a46af1427dcdd",
+        fingerprint: "sha256:95bbf17cb6d7a3f6338584dc5af41fedf830f7af406f3c91b43a46af1427dcdd",
         vaultRef:
           "vault://kv/taxat/sandbox/authority/web_app_via_server/hmrc-client-secret/hmrc/taxat-sandbox-income-tax/client-secret/secver-taxat-sandbox-income-tax-001",
       },

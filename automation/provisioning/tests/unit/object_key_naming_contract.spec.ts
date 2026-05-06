@@ -14,18 +14,10 @@ import {
   type StorageBucketTopologyBoardViewModel,
 } from "../../../../infra/object_storage/bootstrap/provision_buckets_for_evidence_artifacts_exports_and_quarantine.js";
 
-const repoRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "..",
-  "..",
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
 
 async function readJson<T>(segments: string[]): Promise<T> {
-  return JSON.parse(
-    await readFile(path.join(repoRoot, ...segments), "utf8"),
-  ) as T;
+  return JSON.parse(await readFile(path.join(repoRoot, ...segments), "utf8")) as T;
 }
 
 test("checked-in object key naming artifacts and storage viewer payload match the builder", async () => {
@@ -41,19 +33,11 @@ test("checked-in object key naming artifacts and storage viewer payload match th
   ]);
   const sampleRun = await readJson<{
     storageBucketTopologyBoard: StorageBucketTopologyBoardViewModel;
-  }>([
-    "automation",
-    "provisioning",
-    "report_viewer",
-    "data",
-    "sample_run.json",
-  ]);
+  }>(["automation", "provisioning", "report_viewer", "data", "sample_run.json"]);
 
   expect(persistedContract).toEqual(createObjectKeyNamingContract());
   expect(persistedInventory).toEqual(createObjectStorageInventoryTemplate());
-  expect(sampleRun.storageBucketTopologyBoard).toEqual(
-    createStorageBucketTopologyBoardViewModel(),
-  );
+  expect(sampleRun.storageBucketTopologyBoard).toEqual(createStorageBucketTopologyBoardViewModel());
 });
 
 test("object key families stay lineage-rich, version-bound, and export-segmented", () => {
@@ -92,9 +76,7 @@ test("object key families stay lineage-rich, version-bound, and export-segmented
     (row) => row.key_family_ref === "key_family.export_restricted_bundle",
   );
   expect(masked?.preview_or_masking_dimension_or_null).toBe("masking_posture");
-  expect(restricted?.preview_or_masking_dimension_or_null).toBe(
-    "masking_posture",
-  );
+  expect(restricted?.preview_or_masking_dimension_or_null).toBe("masking_posture");
   expect(masked?.key_template).not.toBe(restricted?.key_template);
   expect(masked?.key_template).toContain("/masking/{masking_posture}/");
   expect(restricted?.key_template).toContain("/step-up/{step_up_binding_ref}/");
@@ -112,9 +94,6 @@ test("object key families stay lineage-rich, version-bound, and export-segmented
     ]),
   );
   expect(quarantine?.forbidden_shortcuts).toEqual(
-    expect.arrayContaining([
-      "quarantine/{filename}",
-      "clean-or-quarantine-shared-path",
-    ]),
+    expect.arrayContaining(["quarantine/{filename}", "clean-or-quarantine-shared-path"]),
   );
 });

@@ -18,9 +18,7 @@ test("resume policy keeps raw tokens transport-only and binds route or legality 
   expect(policy.binding_rows).toHaveLength(5);
   expect(
     policy.binding_rows.every(
-      (row) =>
-        row.raw_resume_token_policy ===
-        "TRANSPORT_ONLY_NEVER_PERSIST_RAW_TOKEN",
+      (row) => row.raw_resume_token_policy === "TRANSPORT_ONLY_NEVER_PERSIST_RAW_TOKEN",
     ),
   ).toBe(true);
 
@@ -65,9 +63,7 @@ test("ttl coverage, invalidation triggers, forbidden cache classes, and contract
 
   expect(ttlMatrix.family_ttl_rows).toHaveLength(5);
   expect(ttlMatrix.invalidation_rows).toHaveLength(10);
-  expect(
-    ttlMatrix.invalidation_rows.map((row) => row.trigger_ref),
-  ).toEqual(
+  expect(ttlMatrix.invalidation_rows.map((row) => row.trigger_ref)).toEqual(
     expect.arrayContaining([
       "trigger.tenant_switch",
       "trigger.masking_tightening",

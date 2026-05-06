@@ -1,0 +1,337 @@
+{
+  "artifactVersion": "CONTRACT_OBSERVATORY_ARTIFACT_V1",
+  "artifactSlug": "doc--docs-provisioning-edge_boundary_runbook",
+  "artifactKind": "MARKDOWN",
+  "sectionRef": "SUPPORT_DOCS",
+  "authorityLevel": "SUPPORTING_REFERENCE",
+  "sourceTruthBadge": "Support Documentation",
+  "tone": "slate",
+  "title": "Edge Boundary Runbook",
+  "subtitle": "docs/provisioning/edge_boundary_runbook.md",
+  "summary": "",
+  "canonicalPath": "docs/provisioning/edge_boundary_runbook.md",
+  "sourceLineage": [
+    "docs/provisioning/edge_boundary_runbook.md"
+  ],
+  "headingCount": 9,
+  "headings": [
+    {
+      "level": 1,
+      "text": "Edge Boundary Runbook",
+      "slug": "edge-boundary-runbook"
+    },
+    {
+      "level": 2,
+      "text": "Purpose",
+      "slug": "purpose"
+    },
+    {
+      "level": 2,
+      "text": "Provider Posture",
+      "slug": "provider-posture"
+    },
+    {
+      "level": 2,
+      "text": "Host And Origin Matrix",
+      "slug": "host-and-origin-matrix"
+    },
+    {
+      "level": 2,
+      "text": "Certificates",
+      "slug": "certificates"
+    },
+    {
+      "level": 2,
+      "text": "WAF And Rate Limits",
+      "slug": "waf-and-rate-limits"
+    },
+    {
+      "level": 2,
+      "text": "Cache And Delivery Binding",
+      "slug": "cache-and-delivery-binding"
+    },
+    {
+      "level": 2,
+      "text": "Callback And Webhook Boundaries",
+      "slug": "callback-and-webhook-boundaries"
+    },
+    {
+      "level": 2,
+      "text": "Operating Rules",
+      "slug": "operating-rules"
+    }
+  ],
+  "proseSections": [
+    {
+      "headingSlug": "edge-boundary-runbook",
+      "headingText": "Edge Boundary Runbook",
+      "level": 1,
+      "lines": [
+        ""
+      ],
+      "plainText": "",
+      "excerpt": "",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "purpose",
+      "headingText": "Purpose",
+      "level": 2,
+      "lines": [
+        "",
+        "This runbook freezes Taxat's public edge law for DNS, TLS, WAF, cache, preview domains, and callback origins.",
+        "It exists so later browser and API work cannot improvise delivery posture or widen cache visibility by accident.",
+        ""
+      ],
+      "plainText": "This runbook freezes Taxat's public edge law for DNS, TLS, WAF, cache, preview domains, and callback origins. It exists so later browser and API work cannot improvise delivery posture or widen cache visibility by accident.",
+      "excerpt": "This runbook freezes Taxat's public edge law for DNS, TLS, WAF, cache, preview domains, and callback origins. It exists so later browser and API work cannot improvise delivery pos…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "provider-posture",
+      "headingText": "Provider Posture",
+      "level": 2,
+      "lines": [
+        "",
+        "- Selected provider family: `CLOUDFLARE_DNS_SSL_WAF_CACHE_RULES`",
+        "- Selection status: `PROVIDER_DEFAULT_APPLIED`",
+        "- Unified default rationale: unresolved upstream provider choice was normalized into one declarative default platform instead of leaving DNS/TLS/WAF/cache posture implicit.",
+        ""
+      ],
+      "plainText": "Selected provider family: CLOUDFLARE DNS SSL WAF CACHE RULES Selection status: PROVIDER DEFAULT APPLIED Unified default rationale: unresolved upstream provider choice was normalized into one declarative default platform instead of leaving DNS/TLS/WAF/cache posture implicit.",
+      "excerpt": "Selected provider family: CLOUDFLARE DNS SSL WAF CACHE RULES Selection status: PROVIDER DEFAULT APPLIED Unified default rationale: unresolved upstream provider choice was normaliz…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "host-and-origin-matrix",
+      "headingText": "Host And Origin Matrix",
+      "level": 2,
+      "lines": [
+        "",
+        "- `operator.sandbox.taxat.example/*` -> `https://origin.operator-web.sandbox.svc.taxat.internal` (OPERATOR_WEB, TLS tls.sandbox.core, WAF waf.operator-web, cache cache.operator-shell)",
+        "- `portal.sandbox.taxat.example/*` -> `https://origin.client-portal.sandbox.svc.taxat.internal` (CLIENT_PORTAL, TLS tls.sandbox.core, WAF waf.client-portal, cache cache.client-portal-shell)",
+        "- `api.sandbox.taxat.example/api/*` -> `https://origin.northbound-api.sandbox.svc.taxat.internal` (API, TLS tls.sandbox.core, WAF waf.api, cache cache.api-json)",
+        "- `api.sandbox.taxat.example/api/stream/*` -> `https://origin.northbound-api.sandbox.svc.taxat.internal` (API, TLS tls.sandbox.core, WAF waf.api, cache cache.api-stream)",
+        "- `api.sandbox.taxat.example/downloads/*` -> `https://origin.northbound-api.sandbox.svc.taxat.internal` (API, TLS tls.sandbox.core, WAF waf.api, cache cache.signed-delivery-no-store)",
+        "- `auth.sandbox.taxat.example/oauth/hmrc/callback` -> `https://origin.northbound-api.sandbox.svc.taxat.internal` (CALLBACKS, TLS tls.sandbox.core, WAF waf.callbacks, cache cache.callback-no-store)",
+        "- `authority-ingress.sandbox.taxat.example/hmrc/inbox` -> `https://origin.authority-gateway.sandbox.svc.taxat.internal` (CALLBACKS, TLS tls.sandbox.ingress, WAF waf.callbacks, cache cache.callback-no-store)",
+        "- `notification-ingress.sandbox.taxat.example/webhooks/email/postmark/*` -> `https://origin.notification-ingress.sandbox.svc.taxat.internal` (CALLBACKS, TLS tls.sandbox.ingress, WAF waf.callbacks, cache cache.callback-no-store)",
+        "- `assets.sandbox.taxat.example/assets/*` -> `object://assets-sandbox` (ASSETS, TLS tls.sandbox.core, WAF waf.assets, cache cache.immutable-assets)",
+        "- `updates.sandbox.taxat.example/macos/channel/manifest.json` -> `object://native-updates-sandbox` (UPDATE_FEEDS, TLS tls.sandbox.core, WAF waf.update-feeds, cache cache.update-manifest)",
+        "- `updates.sandbox.taxat.example/macos/packages/*` -> `object://native-updates-sandbox` (UPDATE_FEEDS, TLS tls.sandbox.core, WAF waf.update-feeds, cache cache.update-package)",
+        "- `operator.preprod.taxat.example/*` -> `https://origin.operator-web.preprod.svc.taxat.internal` (OPERATOR_WEB, TLS tls.preprod.core, WAF waf.operator-web, cache cache.operator-shell)",
+        "- `portal.preprod.taxat.example/*` -> `https://origin.client-portal.preprod.svc.taxat.internal` (CLIENT_PORTAL, TLS tls.preprod.core, WAF waf.client-portal, cache cache.client-portal-shell)",
+        "- `api.preprod.taxat.example/api/*` -> `https://origin.northbound-api.preprod.svc.taxat.internal` (API, TLS tls.preprod.core, WAF waf.api, cache cache.api-json)",
+        "- `api.preprod.taxat.example/api/stream/*` -> `https://origin.northbound-api.preprod.svc.taxat.internal` (API, TLS tls.preprod.core, WAF waf.api, cache cache.api-stream)",
+        "- `api.preprod.taxat.example/downloads/*` -> `https://origin.northbound-api.preprod.svc.taxat.internal` (API, TLS tls.preprod.core, WAF waf.api, cache cache.signed-delivery-no-store)",
+        "- `auth.preprod.taxat.example/oauth/hmrc/callback` -> `https://origin.northbound-api.preprod.svc.taxat.internal` (CALLBACKS, TLS tls.preprod.core, WAF waf.callbacks, cache cache.callback-no-store)",
+        "- `authority-ingress.preprod.taxat.example/hmrc/inbox` -> `https://origin.authority-gateway.preprod.svc.taxat.internal` (CALLBACKS, TLS tls.preprod.ingress, WAF waf.callbacks, cache cache.callback-no-store)",
+        "- `notification-ingress.preprod.taxat.example/webhooks/email/postmark/*` -> `https://origin.notification-ingress.preprod.svc.taxat.internal` (CALLBACKS, TLS tls.preprod.ingress, WAF waf.callbacks, cache cache.callback-no-store)",
+        "- `assets.preprod.taxat.example/assets/*` -> `object://assets-preprod` (ASSETS, TLS tls.preprod.core, WAF waf.assets, cache cache.immutable-assets)",
+        "- `updates.preprod.taxat.example/macos/channel/manifest.json` -> `object://native-updates-preprod` (UPDATE_FEEDS, TLS tls.preprod.core, WAF waf.update-feeds, cache cache.update-manifest)",
+        "- `updates.preprod.taxat.example/macos/packages/*` -> `object://native-updates-preprod` (UPDATE_FEEDS, TLS tls.preprod.core, WAF waf.update-feeds, cache cache.update-package)",
+        "- `operator.production.taxat.example/*` -> `https://origin.operator-web.production.svc.taxat.internal` (OPERATOR_WEB, TLS tls.production.core, WAF waf.operator-web, cache cache.operator-shell)",
+        "- `portal.production.taxat.example/*` -> `https://origin.client-portal.production.svc.taxat.internal` (CLIENT_PORTAL, TLS tls.production.core, WAF waf.client-portal, cache cache.client-portal-shell)",
+        "- `api.production.taxat.example/api/*` -> `https://origin.northbound-api.production.svc.taxat.internal` (API, TLS tls.production.core, WAF waf.api, cache cache.api-json)",
+        "- `api.production.taxat.example/api/stream/*` -> `https://origin.northbound-api.production.svc.taxat.internal` (API, TLS tls.production.core, WAF waf.api, cache cache.api-stream)",
+        "- `api.production.taxat.example/downloads/*` -> `https://origin.northbound-api.production.svc.taxat.internal` (API, TLS tls.production.core, WAF waf.api, cache cache.signed-delivery-no-store)",
+        "- `auth.production.taxat.example/oauth/hmrc/callback` -> `https://origin.northbound-api.production.svc.taxat.internal` (CALLBACKS, TLS tls.production.core, WAF waf.callbacks, cache cache.callback-no-store)",
+        "- `authority-ingress.production.taxat.example/hmrc/inbox` -> `https://origin.authority-gateway.production.svc.taxat.internal` (CALLBACKS, TLS tls.production.ingress, WAF waf.callbacks, cache cache.callback-no-store)",
+        "- `notification-ingress.production.taxat.example/webhooks/email/postmark/*` -> `https://origin.notification-ingress.production.svc.taxat.internal` (CALLBACKS, TLS tls.production.ingress, WAF waf.callbacks, cache cache.callback-no-store)",
+        "- `assets.production.taxat.example/assets/*` -> `object://assets-production` (ASSETS, TLS tls.production.core, WAF waf.assets, cache cache.immutable-assets)",
+        "- `updates.production.taxat.example/macos/channel/manifest.json` -> `object://native-updates-production` (UPDATE_FEEDS, TLS tls.production.core, WAF waf.update-feeds, cache cache.update-manifest)",
+        "- `updates.production.taxat.example/macos/packages/*` -> `object://native-updates-production` (UPDATE_FEEDS, TLS tls.production.core, WAF waf.update-feeds, cache cache.update-package)",
+        "- `operator-preview-{preview_id}.review.taxat.example/*` -> `https://origin.review-web-shell.{preview_id}.svc.taxat.internal` (PREVIEW, TLS tls.preview.wildcard, WAF waf.preview, cache cache.preview-bypass)",
+        "- `portal-preview-{preview_id}.review.taxat.example/*` -> `https://origin.review-web-shell.{preview_id}.svc.taxat.internal` (PREVIEW, TLS tls.preview.wildcard, WAF waf.preview, cache cache.preview-bypass)",
+        "- `assets-preview-{preview_id}.review.taxat.example/assets/*` -> `object://review-assets-{preview_id}` (PREVIEW, TLS tls.preview.wildcard, WAF waf.preview, cache cache.preview-bypass)",
+        ""
+      ],
+      "plainText": "operator.sandbox.taxat.example/ https://origin.operator web.sandbox.svc.taxat.internal (OPERATOR WEB, TLS tls.sandbox.core, WAF waf.operator web, cache cache.operator shell) portal.sandbox.taxat.example/ https://origin.client portal.sandbox.svc.taxat.internal (CLIENT PORTAL, TLS tls.sandbox.core, WAF waf.client portal, cache cache.client portal shell) api.sandbox.taxat.example/api/ https://origin.northbound api.sandbox.svc.taxat.internal (API, TLS tls.sandbox.core, WAF waf.api, cache cache.api json) api.sandbox.taxat.example/api/stream/ https://origin.northbound api.sandbox.svc.taxat.internal (API, TLS tls.sandbox.core, WAF waf.api, cache cache.api stream) api.sandbox.taxat.example/downloads/ https://origin.northbound api.sandbox.svc.taxat.internal (API, TLS tls.sandbox.core, WAF waf.api, cache cache.signed delivery no store) auth.sandbox.taxat.example/oauth/hmrc/callback https://origin.northbound api.sandbox.svc.taxat.internal (CALLBACKS, TLS tls.sandbox.core, WAF waf.callbacks, cache cache.callback no store) authority ingress.sandbox.taxat.example/hmrc/inbox https://origin.authority gateway.sandbox.svc.taxat.internal (CALLBACKS, TLS tls.sandbox.ingress, WAF waf.callbacks, cache cache.callback no store) notification ingress.sandbox.taxat.example/webhooks/email/postmark/ https://origin.notification ingress.sandbox.svc.taxat.internal (CALLBACKS, TLS tls.sandbox.ingress, WAF waf.callbacks, cache cache.callback no store) assets.sandbox.taxat.example/assets/ object://assets sandbox (ASSETS, TLS tls.sandbox.core, WAF waf.assets, cache cache.immutable assets) updates.sandbox.taxat.example/macos/channel/manifest.json object://native updates sandbox (UPDATE FEEDS, TLS tls.sandbox.core, WAF waf.update feeds, cache cache.update manifest) updates.sandbox.taxat.example/macos/packages/ object://native updates sandbox (UPDATE FEEDS, TLS tls.sandbox.core, WAF waf.update feeds, cache cache.update package) operator.preprod.taxat.example/ https://origin.operator web.preprod.svc.taxat.internal (OPERATOR WEB, TLS tls.preprod.core, WAF waf.operator web, cache cache.operator shell) portal.preprod.taxat.example/ https://origin.client portal.preprod.svc.taxat.internal (CLIENT PORTAL, TLS tls.preprod.core, WAF waf.client portal, cache cache.client portal shell) api.preprod.taxat.example/api/ https://origin.northbound api.preprod.svc.taxat.internal (API, TLS tls.preprod.core, WAF waf.api, cache cache.api json) api.preprod.taxat.example/api/stream/ https://origin.northbound api.preprod.svc.taxat.internal (API, TLS tls.preprod.core, WAF waf.api, cache cache.api stream) api.preprod.taxat.example/downloads/ https://origin.northbound api.preprod.svc.taxat.internal (API, TLS tls.preprod.core, WAF waf.api, cache cache.signed delivery no store) auth.preprod.taxat.example/oauth/hmrc/callback https://origin.northbound api.preprod.svc.taxat.internal (CALLBACKS, TLS tls.preprod.core, WAF waf.callbacks, cache cache.callback no store) authority ingress.preprod.taxat.example/hmrc/inbox https://origin.authority gateway.preprod.svc.taxat.internal (CALLBACKS, TLS tls.preprod.ingress, WAF waf.callbacks, cache cache.callback no store) notification ingress.preprod.taxat.example/webhooks/email/postmark/ https://origin.notification ingress.preprod.svc.taxat.internal (CALLBACKS, TLS tls.preprod.ingress, WAF waf.callbacks, cache cache.callback no store) assets.preprod.taxat.example/assets/ object://assets preprod (ASSETS, TLS tls.preprod.core, WAF waf.assets, cache cache.immutable assets) updates.preprod.taxat.example/macos/channel/manifest.json object://native updates preprod (UPDATE FEEDS, TLS tls.preprod.core, WAF waf.update feeds, cache cache.update manifest) updates.preprod.taxat.example/macos/packages/ object://native updates preprod (UPDATE FEEDS, TLS tls.preprod.core, WAF waf.update feeds, cache cache.update package) operator.production.taxat.example/ https://origin.operator web.production.svc.taxat.internal (OPERATOR WEB, TLS tls.production.core, WAF waf.operator web, cache cache.operator shell) portal.production.taxat.example/ https://origin.client portal.production.svc.taxat.internal (CLIENT PORTAL, TLS tls.production.core, WAF waf.client portal, cache cache.client portal shell) api.production.taxat.example/api/ https://origin.northbound api.production.svc.taxat.internal (API, TLS tls.production.core, WAF waf.api, cache cache.api json) api.production.taxat.example/api/stream/ https://origin.northbound api.production.svc.taxat.internal (API, TLS tls.production.core, WAF waf.api, cache cache.api stream) api.production.taxat.example/downloads/ https://origin.northbound api.production.svc.taxat.internal (API, TLS tls.production.core, WAF waf.api, cache cache.signed delivery no store) auth.production.taxat.example/oauth/hmrc/callback https://origin.northbound api.production.svc.taxat.internal (CALLBACKS, TLS tls.production.core, WAF waf.callbacks, cache cache.callback no store) authority ingress.production.taxat.example/hmrc/inbox https://origin.authority gateway.production.svc.taxat.internal (CALLBACKS, TLS tls.production.ingress, WAF waf.callbacks, cache cache.callback no store) notification ingress.production.taxat.example/webhooks/email/postmark/ https://origin.notification ingress.production.svc.taxat.internal (CALLBACKS, TLS tls.production.ingress, WAF waf.callbacks, cache cache.callback no store) assets.production.taxat.example/assets/ object://assets production (ASSETS, TLS tls.production.core, WAF waf.assets, cache cache.immutable assets) updates.production.taxat.example/macos/channel/manifest.json object://native updates production (UPDATE FEEDS, TLS tls.production.core, WAF waf.update feeds, cache cache.update manifest) updates.production.taxat.example/macos/packages/ object://native updates production (UPDATE FEEDS, TLS tls.production.core, WAF waf.update feeds, cache cache.update package) operator preview {preview id}.review.taxat.example/ https://origin.review web shell.{preview id}.svc.taxat.internal (PREVIEW, TLS tls.preview.wildcard, WAF waf.preview, cache cache.preview bypass) portal preview {preview id}.review.taxat.example/ https://origin.review web shell.{preview id}.svc.taxat.internal (PREVIEW, TLS tls.preview.wildcard, WAF waf.preview, cache cache.preview bypass) assets preview {preview id}.review.taxat.example/assets/ object://review assets {preview id} (PREVIEW, TLS tls.preview.wildcard, WAF waf.preview, cache cache.preview bypass)",
+      "excerpt": "operator.sandbox.taxat.example/ https://origin.operator web.sandbox.svc.taxat.internal (OPERATOR WEB, TLS tls.sandbox.core, WAF waf.operator web, cache cache.operator shell) porta…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "certificates",
+      "headingText": "Certificates",
+      "level": 2,
+      "lines": [
+        "",
+        "- `tls.preview.wildcard`: *.review.taxat.example (ENABLED_NO_PRELOAD, WILDCARD_REQUIRED)",
+        "- `tls.sandbox.core`: operator.sandbox.taxat.example, portal.sandbox.taxat.example, api.sandbox.taxat.example, auth.sandbox.taxat.example, assets.sandbox.taxat.example, updates.sandbox.taxat.example (ENABLED_NO_PRELOAD, NO_WILDCARD)",
+        "- `tls.sandbox.ingress`: authority-ingress.sandbox.taxat.example, notification-ingress.sandbox.taxat.example (ENABLED_NO_PRELOAD, NO_WILDCARD)",
+        "- `tls.preprod.core`: operator.preprod.taxat.example, portal.preprod.taxat.example, api.preprod.taxat.example, auth.preprod.taxat.example, assets.preprod.taxat.example, updates.preprod.taxat.example (ENABLED_NO_PRELOAD, NO_WILDCARD)",
+        "- `tls.preprod.ingress`: authority-ingress.preprod.taxat.example, notification-ingress.preprod.taxat.example (ENABLED_NO_PRELOAD, NO_WILDCARD)",
+        "- `tls.production.core`: operator.production.taxat.example, portal.production.taxat.example, api.production.taxat.example, auth.production.taxat.example, assets.production.taxat.example, updates.production.taxat.example (ENABLED_INCLUDE_SUBDOMAINS_NO_PRELOAD, NO_WILDCARD)",
+        "- `tls.production.ingress`: authority-ingress.production.taxat.example, notification-ingress.production.taxat.example (ENABLED_NO_PRELOAD, NO_WILDCARD)",
+        ""
+      ],
+      "plainText": "tls.preview.wildcard: .review.taxat.example (ENABLED NO PRELOAD, WILDCARD REQUIRED) tls.sandbox.core: operator.sandbox.taxat.example, portal.sandbox.taxat.example, api.sandbox.taxat.example, auth.sandbox.taxat.example, assets.sandbox.taxat.example, updates.sandbox.taxat.example (ENABLED NO PRELOAD, NO WILDCARD) tls.sandbox.ingress: authority ingress.sandbox.taxat.example, notification ingress.sandbox.taxat.example (ENABLED NO PRELOAD, NO WILDCARD) tls.preprod.core: operator.preprod.taxat.example, portal.preprod.taxat.example, api.preprod.taxat.example, auth.preprod.taxat.example, assets.preprod.taxat.example, updates.preprod.taxat.example (ENABLED NO PRELOAD, NO WILDCARD) tls.preprod.ingress: authority ingress.preprod.taxat.example, notification ingress.preprod.taxat.example (ENABLED NO PRELOAD, NO WILDCARD) tls.production.core: operator.production.taxat.example, portal.production.taxat.example, api.production.taxat.example, auth.production.taxat.example, assets.production.taxat.example, updates.production.taxat.example (ENABLED INCLUDE SUBDOMAINS NO PRELOAD, NO WILDCARD) tls.production.ingress: authority ingress.production.taxat.example, notification ingress.production.taxat.example (ENABLED NO PRELOAD, NO WILDCARD)",
+      "excerpt": "tls.preview.wildcard: .review.taxat.example (ENABLED NO PRELOAD, WILDCARD REQUIRED) tls.sandbox.core: operator.sandbox.taxat.example, portal.sandbox.taxat.example, api.sandbox.tax…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "waf-and-rate-limits",
+      "headingText": "WAF And Rate Limits",
+      "level": 2,
+      "lines": [
+        "",
+        "- `waf.operator-web`: MANAGED_CHALLENGE; allowlists = allowlist.operator-reviewed-ranges",
+        "- `waf.client-portal`: MANAGED_CHALLENGE; allowlists = none",
+        "- `waf.api`: BLOCK; allowlists = none",
+        "- `waf.callbacks`: ALLOWLIST_AND_NO_BROWSER_CHALLENGE; allowlists = allowlist.hmrc-or-relay-egress, allowlist.postmark-webhooks",
+        "- `waf.assets`: MANAGED_CHALLENGE; allowlists = none",
+        "- `waf.preview`: ACCESS_POLICY_REQUIRED; allowlists = allowlist.reviewers",
+        "- `waf.update-feeds`: BLOCK; allowlists = none",
+        "",
+        "- `rate.operator-step-up`: 40 req / 60s -> MANAGED_CHALLENGE",
+        "- `rate.portal-auth`: 30 req / 60s -> MANAGED_CHALLENGE",
+        "- `rate.api-mutations`: 120 req / 60s -> BLOCK",
+        "- `rate.api-stream-handshake`: 30 req / 60s -> LOG_ONLY",
+        "- `rate.authority-callbacks`: 300 req / 60s -> BLOCK",
+        "- `rate.notification-webhooks`: 180 req / 60s -> BLOCK",
+        "- `rate.preview-shell`: 60 req / 60s -> MANAGED_CHALLENGE",
+        "- `rate.assets`: 600 req / 60s -> MANAGED_CHALLENGE",
+        "- `rate.update-feeds`: 120 req / 60s -> BLOCK",
+        ""
+      ],
+      "plainText": "waf.operator web: MANAGED CHALLENGE; allowlists = allowlist.operator reviewed ranges waf.client portal: MANAGED CHALLENGE; allowlists = none waf.api: BLOCK; allowlists = none waf.callbacks: ALLOWLIST AND NO BROWSER CHALLENGE; allowlists = allowlist.hmrc or relay egress, allowlist.postmark webhooks waf.assets: MANAGED CHALLENGE; allowlists = none waf.preview: ACCESS POLICY REQUIRED; allowlists = allowlist.reviewers waf.update feeds: BLOCK; allowlists = none rate.operator step up: 40 req / 60s MANAGED CHALLENGE rate.portal auth: 30 req / 60s MANAGED CHALLENGE rate.api mutations: 120 req / 60s BLOCK rate.api stream handshake: 30 req / 60s LOG ONLY rate.authority callbacks: 300 req / 60s BLOCK rate.notification webhooks: 180 req / 60s BLOCK rate.preview shell: 60 req / 60s MANAGED CHALLENGE rate.assets: 600 req / 60s MANAGED CHALLENGE rate.update feeds: 120 req / 60s BLOCK",
+      "excerpt": "waf.operator web: MANAGED CHALLENGE; allowlists = allowlist.operator reviewed ranges waf.client portal: MANAGED CHALLENGE; allowlists = none waf.api: BLOCK; allowlists = none waf.…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "cache-and-delivery-binding",
+      "headingText": "Cache And Delivery Binding",
+      "level": 2,
+      "lines": [
+        "",
+        "- `cache.operator-shell`: BYPASS_EDGE_CACHE; signed delivery = no; delivery binding hash = not required",
+        "- `cache.client-portal-shell`: BYPASS_EDGE_CACHE; signed delivery = no; delivery binding hash = not required",
+        "- `cache.api-json`: BYPASS_EDGE_CACHE; signed delivery = no; delivery binding hash = not required",
+        "- `cache.api-stream`: BYPASS_EDGE_CACHE; signed delivery = no; delivery binding hash = not required",
+        "- `cache.signed-delivery-no-store`: BYPASS_EDGE_CACHE; signed delivery = yes; delivery binding hash = required",
+        "- `cache.callback-no-store`: BYPASS_EDGE_CACHE; signed delivery = no; delivery binding hash = not required",
+        "- `cache.immutable-assets`: IMMUTABLE_EDGE_CACHE; signed delivery = no; delivery binding hash = not required",
+        "- `cache.preview-bypass`: BYPASS_EDGE_CACHE; signed delivery = no; delivery binding hash = not required",
+        "- `cache.update-manifest`: BYPASS_EDGE_CACHE; signed delivery = yes; delivery binding hash = not required",
+        "- `cache.update-package`: SIGNED_DELIVERY_DIGEST_PINNED_EDGE_CACHE; signed delivery = yes; delivery binding hash = not required",
+        ""
+      ],
+      "plainText": "cache.operator shell: BYPASS EDGE CACHE; signed delivery = no; delivery binding hash = not required cache.client portal shell: BYPASS EDGE CACHE; signed delivery = no; delivery binding hash = not required cache.api json: BYPASS EDGE CACHE; signed delivery = no; delivery binding hash = not required cache.api stream: BYPASS EDGE CACHE; signed delivery = no; delivery binding hash = not required cache.signed delivery no store: BYPASS EDGE CACHE; signed delivery = yes; delivery binding hash = required cache.callback no store: BYPASS EDGE CACHE; signed delivery = no; delivery binding hash = not required cache.immutable assets: IMMUTABLE EDGE CACHE; signed delivery = no; delivery binding hash = not required cache.preview bypass: BYPASS EDGE CACHE; signed delivery = no; delivery binding hash = not required cache.update manifest: BYPASS EDGE CACHE; signed delivery = yes; delivery binding hash = not required cache.update package: SIGNED DELIVERY DIGEST PINNED EDGE CACHE; signed delivery = yes; delivery binding hash = not required",
+      "excerpt": "cache.operator shell: BYPASS EDGE CACHE; signed delivery = no; delivery binding hash = not required cache.client portal shell: BYPASS EDGE CACHE; signed delivery = no; delivery bi…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "callback-and-webhook-boundaries",
+      "headingText": "Callback And Webhook Boundaries",
+      "level": 2,
+      "lines": [
+        "",
+        "- `sandbox.hmrc-oauth-redirect`: auth.sandbox.taxat.example/oauth/hmrc/callback; auth = STATE_NONCE_AND_PKCE_REQUIRED; allowlist = n/a",
+        "- `sandbox.authority-callback-ingress`: authority-ingress.sandbox.taxat.example/hmrc/inbox; auth = EDGE_SHARED_SECRET_OR_PROVIDER_SIGNATURE_REQUIRED_BEFORE_INBOX_ACCEPT; allowlist = allowlist.hmrc-or-relay-egress",
+        "- `sandbox.notification-webhooks`: notification-ingress.sandbox.taxat.example/webhooks/email/postmark/*; auth = BASIC_AUTH_AND_SHARED_HEADER_SECRET_REQUIRED; allowlist = allowlist.postmark-webhooks",
+        "- `preprod.hmrc-oauth-redirect`: auth.preprod.taxat.example/oauth/hmrc/callback; auth = STATE_NONCE_AND_PKCE_REQUIRED; allowlist = n/a",
+        "- `preprod.authority-callback-ingress`: authority-ingress.preprod.taxat.example/hmrc/inbox; auth = EDGE_SHARED_SECRET_OR_PROVIDER_SIGNATURE_REQUIRED_BEFORE_INBOX_ACCEPT; allowlist = allowlist.hmrc-or-relay-egress",
+        "- `preprod.notification-webhooks`: notification-ingress.preprod.taxat.example/webhooks/email/postmark/*; auth = BASIC_AUTH_AND_SHARED_HEADER_SECRET_REQUIRED; allowlist = allowlist.postmark-webhooks",
+        "- `production.hmrc-oauth-redirect`: auth.production.taxat.example/oauth/hmrc/callback; auth = STATE_NONCE_AND_PKCE_REQUIRED; allowlist = n/a",
+        "- `production.authority-callback-ingress`: authority-ingress.production.taxat.example/hmrc/inbox; auth = EDGE_SHARED_SECRET_OR_PROVIDER_SIGNATURE_REQUIRED_BEFORE_INBOX_ACCEPT; allowlist = allowlist.hmrc-or-relay-egress",
+        "- `production.notification-webhooks`: notification-ingress.production.taxat.example/webhooks/email/postmark/*; auth = BASIC_AUTH_AND_SHARED_HEADER_SECRET_REQUIRED; allowlist = allowlist.postmark-webhooks",
+        ""
+      ],
+      "plainText": "sandbox.hmrc oauth redirect: auth.sandbox.taxat.example/oauth/hmrc/callback; auth = STATE NONCE AND PKCE REQUIRED; allowlist = n/a sandbox.authority callback ingress: authority ingress.sandbox.taxat.example/hmrc/inbox; auth = EDGE SHARED SECRET OR PROVIDER SIGNATURE REQUIRED BEFORE INBOX ACCEPT; allowlist = allowlist.hmrc or relay egress sandbox.notification webhooks: notification ingress.sandbox.taxat.example/webhooks/email/postmark/ ; auth = BASIC AUTH AND SHARED HEADER SECRET REQUIRED; allowlist = allowlist.postmark webhooks preprod.hmrc oauth redirect: auth.preprod.taxat.example/oauth/hmrc/callback; auth = STATE NONCE AND PKCE REQUIRED; allowlist = n/a preprod.authority callback ingress: authority ingress.preprod.taxat.example/hmrc/inbox; auth = EDGE SHARED SECRET OR PROVIDER SIGNATURE REQUIRED BEFORE INBOX ACCEPT; allowlist = allowlist.hmrc or relay egress preprod.notification webhooks: notification ingress.preprod.taxat.example/webhooks/email/postmark/ ; auth = BASIC AUTH AND SHARED HEADER SECRET REQUIRED; allowlist = allowlist.postmark webhooks production.hmrc oauth redirect: auth.production.taxat.example/oauth/hmrc/callback; auth = STATE NONCE AND PKCE REQUIRED; allowlist = n/a production.authority callback ingress: authority ingress.production.taxat.example/hmrc/inbox; auth = EDGE SHARED SECRET OR PROVIDER SIGNATURE REQUIRED BEFORE INBOX ACCEPT; allowlist = allowlist.hmrc or relay egress production.notification webhooks: notification ingress.production.taxat.example/webhooks/email/postmark/ ; auth = BASIC AUTH AND SHARED HEADER SECRET REQUIRED; allowlist = allowlist.postmark webhooks",
+      "excerpt": "sandbox.hmrc oauth redirect: auth.sandbox.taxat.example/oauth/hmrc/callback; auth = STATE NONCE AND PKCE REQUIRED; allowlist = n/a sandbox.authority callback ingress: authority in…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "operating-rules",
+      "headingText": "Operating Rules",
+      "level": 2,
+      "lines": [
+        "",
+        "- Unknown host/path families fail closed.",
+        "- Browser shells, callbacks, webhooks, and streams bypass edge cache.",
+        "- Signed downloads require application-level access context and delivery binding, not broad CDN reuse.",
+        "- Preview hosts are synthetic and must not be provider-registered callback origins.",
+        "- Core public hosts and ingress hosts use separate certificate inventory rows to avoid hostname ambiguity across environments.",
+        ""
+      ],
+      "plainText": "Unknown host/path families fail closed. Browser shells, callbacks, webhooks, and streams bypass edge cache. Signed downloads require application level access context and delivery binding, not broad CDN reuse. Preview hosts are synthetic and must not be provider registered callback origins. Core public hosts and ingress hosts use separate certificate inventory rows to avoid hostname ambiguity across environments.",
+      "excerpt": "Unknown host/path families fail closed. Browser shells, callbacks, webhooks, and streams bypass edge cache. Signed downloads require application level access context and delivery…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    }
+  ],
+  "schemaIdentityOrNull": null,
+  "schemaFields": [],
+  "samplePointers": [],
+  "sampleIdentityOrNull": null,
+  "bindingIdentityOrNull": null,
+  "validatorIdentityOrNull": null,
+  "driftIdentityOrNull": null,
+  "headerStrip": {
+    "kind": "PROSE",
+    "badgeLabel": "Support Documentation",
+    "metricPairs": [
+      {
+        "label": "Headings",
+        "value": "9"
+      },
+      {
+        "label": "Schemas",
+        "value": "0"
+      },
+      {
+        "label": "Tasks",
+        "value": "0"
+      }
+    ]
+  },
+  "relationships": {
+    "schemas": [],
+    "samples": [],
+    "bindings": [],
+    "validators": [],
+    "docs": [],
+    "tasks": []
+  },
+  "sourceTruthStack": {
+    "file": [
+      "docs/provisioning/edge_boundary_runbook.md"
+    ],
+    "headings": [
+      "Edge Boundary Runbook",
+      "Purpose",
+      "Provider Posture",
+      "Host And Origin Matrix",
+      "Certificates",
+      "WAF And Rate Limits",
+      "Cache And Delivery Binding",
+      "Callback And Webhook Boundaries",
+      "Operating Rules"
+    ],
+    "schemaRefs": [],
+    "sampleRefs": [],
+    "bindingRefs": [],
+    "validatorRefs": [],
+    "driftRefs": [],
+    "taskRefs": []
+  },
+  "fieldCrosslinks": [],
+  "taskRefs": []
+}

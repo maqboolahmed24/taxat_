@@ -39,11 +39,17 @@ function getRoutesForPage(pageId) {
 }
 
 function getRecord(recordKey) {
-  return atlasData.route_records.find((route) => route.route_or_scene_key === recordKey) || atlasData.route_records[0];
+  return (
+    atlasData.route_records.find((route) => route.route_or_scene_key === recordKey) ||
+    atlasData.route_records[0]
+  );
 }
 
 function getScenario(scenarioId) {
-  return atlasData.continuity_scenarios.find((scenario) => scenario.scenario_id === scenarioId) || atlasData.continuity_scenarios[0];
+  return (
+    atlasData.continuity_scenarios.find((scenario) => scenario.scenario_id === scenarioId) ||
+    atlasData.continuity_scenarios[0]
+  );
 }
 
 function defaultRecordForPage(pageId) {
@@ -55,12 +61,21 @@ function syncStateFromHash(replace = false) {
   const page = getPage(next.pageId);
   state.pageId = page.page_id;
   const pageRoutes = getRoutesForPage(state.pageId);
-  const recordExists = atlasData.route_records.some((route) => route.route_or_scene_key === next.recordKey);
-  state.recordKey = recordExists ? next.recordKey : (pageRoutes[0]?.route_or_scene_key || atlasData.default_record);
-  const scenarioExists = atlasData.continuity_scenarios.some((scenario) => scenario.scenario_id === next.scenarioId);
+  const recordExists = atlasData.route_records.some(
+    (route) => route.route_or_scene_key === next.recordKey,
+  );
+  state.recordKey = recordExists
+    ? next.recordKey
+    : pageRoutes[0]?.route_or_scene_key || atlasData.default_record;
+  const scenarioExists = atlasData.continuity_scenarios.some(
+    (scenario) => scenario.scenario_id === next.scenarioId,
+  );
   state.scenarioId = scenarioExists ? next.scenarioId : atlasData.default_scenario;
   if (replace && !window.location.hash) {
-    updateHash({ pageId: state.pageId, recordKey: state.recordKey, scenarioId: state.scenarioId }, true);
+    updateHash(
+      { pageId: state.pageId, recordKey: state.recordKey, scenarioId: state.scenarioId },
+      true,
+    );
     return;
   }
   render();
@@ -97,23 +112,27 @@ function chips(values, klass = "") {
 
 function sourceRefList(sourceRefs) {
   return sourceRefs
-    .map((sourceRef) => `
+    .map(
+      (sourceRef) => `
       <li class="list-note">
         <span class="mono">${escapeHtml(sourceRef.source_file)}</span><br />
         ${escapeHtml(sourceRef.source_heading_or_logical_block)}
       </li>
-    `)
+    `,
+    )
     .join("");
 }
 
 function metricLines(items) {
   return items
-    .map(([label, value]) => `
+    .map(
+      ([label, value]) => `
       <div class="metric-line">
         <span>${escapeHtml(label)}</span>
         <strong>${escapeHtml(value)}</strong>
       </div>
-    `)
+    `,
+    )
     .join("");
 }
 
@@ -172,25 +191,30 @@ function routeCard(route) {
 }
 
 function selectorChips(record) {
-  const selectorRows = atlasData.selectors.filter((selector) => selector.selector_profile === record.selector_profile);
+  const selectorRows = atlasData.selectors.filter(
+    (selector) => selector.selector_profile === record.selector_profile,
+  );
   return selectorRows
-    .map((selector) => `
+    .map(
+      (selector) => `
       <span
         class="selector-pill mono"
         data-testid="selector-chip-${escapeHtml(selector.selector_id)}"
       >
         ${escapeHtml(selector.selector_id)}
       </span>
-    `)
+    `,
+    )
     .join("");
 }
 
 function componentCards(record) {
   const components = atlasData.component_inventory.filter((component) =>
-    component.route_or_scene_keys.includes(record.route_or_scene_key)
+    component.route_or_scene_keys.includes(record.route_or_scene_key),
   );
   return components
-    .map((component) => `
+    .map(
+      (component) => `
       <article class="component-card card">
         <p class="eyebrow">${escapeHtml(component.region_kind)}</p>
         <h3 class="card-title">${escapeHtml(component.label)}</h3>
@@ -199,7 +223,8 @@ function componentCards(record) {
           <span class="chip mono">${escapeHtml(component.selector_anchor)}</span>
         </div>
       </article>
-    `)
+    `,
+    )
     .join("");
 }
 
@@ -300,7 +325,9 @@ function renderCollaborationPage(record) {
         <span class="chip chip-accent">${record.selector_profile}</span>
       </div>
       <div class="route-grid">
-        ${getRoutesForPage("collaboration").map((route) => routeCard(route)).join("")}
+        ${getRoutesForPage("collaboration")
+          .map((route) => routeCard(route))
+          .join("")}
       </div>
     </section>
 
@@ -353,7 +380,9 @@ function renderPortalPage(record) {
 
     <section class="stage-panel panel">
       <div class="route-grid">
-        ${getRoutesForPage("portal").map((route) => routeCard(route)).join("")}
+        ${getRoutesForPage("portal")
+          .map((route) => routeCard(route))
+          .join("")}
       </div>
     </section>
 
@@ -398,7 +427,9 @@ function renderGovernancePage(record) {
 
     <section class="stage-panel panel">
       <div class="route-grid">
-        ${getRoutesForPage("governance").map((route) => routeCard(route)).join("")}
+        ${getRoutesForPage("governance")
+          .map((route) => routeCard(route))
+          .join("")}
       </div>
     </section>
 
@@ -435,14 +466,19 @@ function renderNativePage(record) {
           </div>
         </div>
         <div class="chip-row">
-          ${native.command_surfaces.slice(0, 6).map((command) => `<span class="chip mono">${escapeHtml(command)}</span>`).join("")}
+          ${native.command_surfaces
+            .slice(0, 6)
+            .map((command) => `<span class="chip mono">${escapeHtml(command)}</span>`)
+            .join("")}
         </div>
       </div>
     </section>
 
     <section class="stage-panel panel">
       <div class="route-grid">
-        ${getRoutesForPage("native").map((route) => routeCard(route)).join("")}
+        ${getRoutesForPage("native")
+          .map((route) => routeCard(route))
+          .join("")}
       </div>
     </section>
 
@@ -482,7 +518,9 @@ function renderContinuityPage(scenario) {
         </div>
       </div>
       <div class="scenario-grid" data-testid="continuity-scenario-list">
-        ${atlasData.continuity_scenarios.map((item) => `
+        ${atlasData.continuity_scenarios
+          .map(
+            (item) => `
           <button
             type="button"
             class="route-card"
@@ -494,7 +532,9 @@ function renderContinuityPage(scenario) {
             <h3 class="card-title">${escapeHtml(item.title)}</h3>
             <p class="copy">${escapeHtml(item.trigger)}</p>
           </button>
-        `).join("")}
+        `,
+          )
+          .join("")}
       </div>
     </section>
 
@@ -515,14 +555,18 @@ function renderContinuityPage(scenario) {
             <h3 class="card-title">Route and scene anchors persist</h3>
             <p class="copy">The parent surface keeps its dominant question and object anchor while support opens, redocks, or closes.</p>
           </div>
-          ${state.supportOpen ? `
+          ${
+            state.supportOpen
+              ? `
             <aside class="support-drawer" data-testid="support-demo-drawer">
               <p class="eyebrow">Promoted support region</p>
               <h3 class="card-title">Serialized return target</h3>
               <p class="copy">Closing this support region restores focus to the exact parent trigger rather than to an approximate container.</p>
               <button type="button" class="button inspector-close" data-action="close-support" data-testid="support-demo-close">Close support region</button>
             </aside>
-          ` : ""}
+          `
+              : ""
+          }
         </div>
       </div>
     </section>
@@ -617,7 +661,9 @@ function renderRail() {
           ])}
         </div>
         <div class="page-nav" role="tablist" aria-label="Atlas pages" data-testid="atlas-page-tabs">
-          ${atlasData.pages.map((page) => `
+          ${atlasData.pages
+            .map(
+              (page) => `
             <button
               type="button"
               class="page-tab"
@@ -631,7 +677,9 @@ function renderRail() {
             >
               ${escapeHtml(page.title)}
             </button>
-          `).join("")}
+          `,
+            )
+            .join("")}
         </div>
       </div>
     </aside>
@@ -738,8 +786,10 @@ function handleTabKeydown(event) {
   if (currentIndex === -1) return;
 
   let nextIndex = null;
-  if (event.key === "ArrowDown" || event.key === "ArrowRight") nextIndex = (currentIndex + 1) % tabs.length;
-  if (event.key === "ArrowUp" || event.key === "ArrowLeft") nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+  if (event.key === "ArrowDown" || event.key === "ArrowRight")
+    nextIndex = (currentIndex + 1) % tabs.length;
+  if (event.key === "ArrowUp" || event.key === "ArrowLeft")
+    nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
   if (event.key === "Home") nextIndex = 0;
   if (event.key === "End") nextIndex = tabs.length - 1;
   if (nextIndex === null) return;

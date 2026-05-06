@@ -13,13 +13,7 @@ import {
   type OcrOutputToCandidateFactMapping,
 } from "../../src/providers/ocr/flows/create_managed_document_extraction_project_or_record_self_host_decision.js";
 
-const repoRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "..",
-  "..",
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
 
 async function readJson<T>(segments: string[]): Promise<T> {
   const filePath = path.join(repoRoot, ...segments);
@@ -33,9 +27,7 @@ test("checked-in OCR mapping matches the builder and never targets canonical fac
     "ocr_output_to_candidate_fact_mapping.json",
   ]);
 
-  expect(persistedMapping).toEqual(
-    createRecommendedOcrOutputToCandidateFactMapping(),
-  );
+  expect(persistedMapping).toEqual(createRecommendedOcrOutputToCandidateFactMapping());
 
   validateOcrOutputToCandidateFactMapping(persistedMapping);
   assertOcrCandidateBoundary(persistedMapping);
@@ -47,9 +39,7 @@ test("OCR mapping stays aligned with the profile catalog and review-threshold co
   const mapping = createRecommendedOcrOutputToCandidateFactMapping();
 
   const profileRefs = new Set(profileCatalog.profiles.map((profile) => profile.profile_ref));
-  const thresholdRefs = new Set(
-    reviewThresholds.profile_rules.map((rule) => rule.profile_ref),
-  );
+  const thresholdRefs = new Set(reviewThresholds.profile_rules.map((rule) => rule.profile_ref));
 
   mapping.mapping_rows.forEach((row) => {
     expect(profileRefs.has(row.profile_ref)).toBe(true);

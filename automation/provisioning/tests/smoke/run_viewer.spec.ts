@@ -26,9 +26,7 @@ const portalCheckpointAtlasUrl =
 const secretRootTopologyLedgerUrl =
   "/report_viewer/index.html?fixture=./data/sample_run.json&page=secret-root-topology-ledger";
 
-test("renders run viewer landmarks and manual-checkpoint states", async ({
-  page,
-}) => {
+test("renders run viewer landmarks and manual-checkpoint states", async ({ page }) => {
   await page.goto(viewerUrl);
 
   await expect(page.getByRole("banner")).toBeVisible();
@@ -39,14 +37,10 @@ test("renders run viewer landmarks and manual-checkpoint states", async ({
   await expect(
     page.locator("#step-list .status-chip[data-status='MANUAL_CHECKPOINT_REQUIRED']"),
   ).toHaveCount(1);
-  await expect(
-    page.locator("#step-list .status-chip[data-status='FAILED']"),
-  ).toHaveCount(1);
+  await expect(page.locator("#step-list .status-chip[data-status='FAILED']")).toHaveCount(1);
 });
 
-test("supports keyboard-driven drawer inspection and escape-to-close", async ({
-  page,
-}) => {
+test("supports keyboard-driven drawer inspection and escape-to-close", async ({ page }) => {
   await page.goto(viewerUrl);
 
   const button = page.getByRole("button", { name: "View dom snapshot" });
@@ -63,9 +57,7 @@ test("supports keyboard-driven drawer inspection and escape-to-close", async ({
   await expect(button).toBeFocused();
 });
 
-test("renders reduced-motion mode without breaking the viewer", async ({
-  page,
-}) => {
+test("renders reduced-motion mode without breaking the viewer", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(viewerUrl);
 
@@ -73,14 +65,10 @@ test("renders reduced-motion mode without breaking the viewer", async ({
   await expect(page.getByRole("button", { name: "Inspect checkpoint" })).toBeVisible();
 });
 
-test("renders the credential-lineage ledger with safe-copy actions only", async ({
-  page,
-}) => {
+test("renders the credential-lineage ledger with safe-copy actions only", async ({ page }) => {
   await page.goto(credentialLedgerUrl);
 
-  await expect(
-    page.getByRole("navigation", { name: "Application partitions" }),
-  ).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Application partitions" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Identifiers" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Secret lineage" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Copy client alias" })).toBeVisible();
@@ -144,9 +132,7 @@ test("renders the email domain readiness board with a persistent inspector and r
   await page.goto(emailDomainReadinessBoardUrl);
 
   await expect(page.locator("html")).toHaveAttribute("data-motion", "reduce");
-  await expect(
-    page.getByRole("navigation", { name: "Sender domains and streams" }),
-  ).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Sender domains and streams" })).toBeVisible();
   await expect(page.locator("#main-title")).toHaveText("notify.sandbox.taxat.example");
   await expect(page.getByRole("heading", { name: "Workspace" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Domain Identity" })).toBeVisible();
@@ -196,21 +182,11 @@ test("renders the device messaging topology board with persistent inspector and 
   await page.goto(deviceMessagingTopologyBoardUrl);
 
   await expect(page.locator("html")).toHaveAttribute("data-motion", "reduce");
-  await expect(
-    page.getByRole("navigation", { name: "Device messaging channels" }),
-  ).toBeVisible();
-  await expect(page.locator("#run-title")).toHaveText(
-    "Local fixture sink",
-  );
-  await expect(
-    page.getByRole("heading", { name: "Product notification families" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Provider channels" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Shell/route continuity targets" }),
-  ).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Device messaging channels" })).toBeVisible();
+  await expect(page.locator("#run-title")).toHaveText("Local fixture sink");
+  await expect(page.getByRole("heading", { name: "Product notification families" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Provider channels" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Shell/route continuity targets" })).toBeVisible();
 
   await page
     .locator(".push-channel-rail-list button")
@@ -233,22 +209,19 @@ test("renders the secret root topology ledger with persistent inspector and redu
   await page.goto(secretRootTopologyLedgerUrl);
 
   await expect(page.locator("html")).toHaveAttribute("data-motion", "reduce");
-  await expect(
-    page.getByRole("navigation", { name: "Secret alias families" }),
-  ).toBeVisible();
-  await expect(page.locator("#main-title")).toHaveText(
-    "hmrc/client-secret/web-app-via-server",
-  );
+  await expect(page.getByRole("navigation", { name: "Secret alias families" })).toBeVisible();
+  await expect(page.locator("#main-title")).toHaveText("hmrc/client-secret/web-app-via-server");
   await expect(page.getByRole("heading", { name: "Alias Catalog" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Key Hierarchy" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Access Matrix" })).toBeVisible();
 
-  await page.locator(".secret-alias-rail-list button").filter({
-    hasText: "monitoring/sentry/ingest-dsn",
-  }).click();
-  await expect(page.locator("#drawer-title")).toHaveText(
-    "monitoring/sentry/ingest-dsn",
-  );
+  await page
+    .locator(".secret-alias-rail-list button")
+    .filter({
+      hasText: "monitoring/sentry/ingest-dsn",
+    })
+    .click();
+  await expect(page.locator("#drawer-title")).toHaveText("monitoring/sentry/ingest-dsn");
   await expect(page.getByText("BEGIN PRIVATE KEY")).toHaveCount(0);
 });
 
@@ -259,22 +232,16 @@ test("renders the signal governance board with a persistent inspector and safe r
   await page.goto(signalGovernanceBoardUrl);
 
   await expect(page.locator("html")).toHaveAttribute("data-motion", "reduce");
-  await expect(
-    page.getByRole("navigation", { name: "Monitoring projects" }),
-  ).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Monitoring projects" })).toBeVisible();
   await expect(page.locator("#run-title")).toHaveText("Sandbox Backend runtime");
   await expect(page.getByRole("heading", { name: "Projects", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Scrubbing", exact: true })).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Inbound Filters", exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Inbound Filters", exact: true })).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Alerts & Release Mapping", exact: true }),
   ).toBeVisible();
 
-  await page
-    .getByRole("button", { name: /^Production Client portal web\b/i })
-    .click();
+  await page.getByRole("button", { name: /^Production Client portal web\b/i }).click();
   await expect(page.locator("#main-title")).toHaveText("Production Client portal web");
   await expect(page.locator("#drawer-title")).toHaveText("Production Client portal web");
   await expect(
@@ -295,15 +262,9 @@ test("renders the document extraction governance board with environment switchin
     page.getByRole("navigation", { name: "Document extraction profiles" }),
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Source Artifact" })).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Normalized Extraction" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Candidate-Fact Boundary" }),
-  ).toBeVisible();
-  await expect(page.locator("#run-status")).toHaveText(
-    "Self-host decision required",
-  );
+  await expect(page.getByRole("heading", { name: "Normalized Extraction" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Candidate-Fact Boundary" })).toBeVisible();
+  await expect(page.locator("#run-status")).toHaveText("Self-host decision required");
   await expect(page.locator("#drawer-title")).toHaveText("EXPENSE RECEIPT");
 
   await page.selectOption("#environment-select", "env_production");
@@ -325,16 +286,10 @@ test("renders the support context mapping board with scenario switching and a pe
   await page.goto(supportContextMappingBoardUrl);
 
   await expect(page.locator("html")).toHaveAttribute("data-motion", "reduce");
-  await expect(
-    page.getByRole("navigation", { name: "Support mapping scenarios" }),
-  ).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Support mapping scenarios" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Portal Context" })).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "External Ticket Fields" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Return/Mirror Rules" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "External Ticket Fields" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Return/Mirror Rules" })).toBeVisible();
   await expect(page.locator("#drawer-title")).toHaveText("Contextual request help");
 
   await page
@@ -358,42 +313,22 @@ test("renders the upload intake safety board with scenario switching and a persi
   await page.goto(uploadIntakeSafetyBoardUrl);
 
   await expect(page.locator("html")).toHaveAttribute("data-motion", "reduce");
-  await expect(
-    page.getByRole("navigation", { name: "Upload intake scenarios" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Received", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Transferred", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Scan Pending", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Clean", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Rejected", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Quarantined", exact: true }),
-  ).toBeVisible();
-  await expect(page.locator("#run-status")).toHaveText(
-    "Self-host decision required",
-  );
+  await expect(page.getByRole("navigation", { name: "Upload intake scenarios" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Received", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Transferred", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Scan Pending", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Clean", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Rejected", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Quarantined", exact: true })).toBeVisible();
+  await expect(page.locator("#run-status")).toHaveText("Self-host decision required");
   await expect(page.locator("#drawer-title")).toHaveText("PORTAL PDF OR IMAGE");
 
   await page
     .locator(".upload-intake-scenario-rail-list button")
     .filter({ hasText: "ARCHIVE OR ENCRYPTED BINARY" })
     .click();
-  await expect(page.locator("#main-title")).toHaveText(
-    "ARCHIVE OR ENCRYPTED BINARY",
-  );
-  await expect(page.locator("#drawer-title")).toHaveText(
-    "ARCHIVE OR ENCRYPTED BINARY",
-  );
+  await expect(page.locator("#main-title")).toHaveText("ARCHIVE OR ENCRYPTED BINARY");
+  await expect(page.locator("#drawer-title")).toHaveText("ARCHIVE OR ENCRYPTED BINARY");
   await expect(
     page.getByText(
       "Password-protected archives and client-side encrypted blobs stay blocked by policy with next action UPLOAD_REPLACEMENT.",
@@ -411,18 +346,12 @@ test("renders the portal checkpoint atlas with scenario switching and a persiste
   await expect(
     page.getByRole("navigation", { name: "Checkpoint families and portal runs" }),
   ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Automation Path", exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Automation Path", exact: true })).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Checkpoint Encountered", exact: true }),
   ).toBeVisible();
-  await expect(page.locator("#drawer-title")).toHaveText(
-    "HMRC sign-in 2-step verification",
-  );
-  await expect(page.getByTestId("checkpoint-reason-chip")).toHaveText(
-    "MFA_REQUIRED",
-  );
+  await expect(page.locator("#drawer-title")).toHaveText("HMRC sign-in 2-step verification");
+  await expect(page.getByTestId("checkpoint-reason-chip")).toHaveText("MFA_REQUIRED");
   await expect(page.getByTestId("resume-preconditions-list")).toBeVisible();
   await expect(page.getByTestId("evidence-list")).toBeVisible();
 
@@ -430,13 +359,7 @@ test("renders the portal checkpoint atlas with scenario switching and a persiste
     .locator(".portal-checkpoint-rail-list button")
     .filter({ hasText: "Provider policy or rate-limit block" })
     .click();
-  await expect(page.locator("#main-title")).toHaveText(
-    "Provider policy or rate-limit block",
-  );
-  await expect(page.locator("#drawer-title")).toHaveText(
-    "Provider policy or rate-limit block",
-  );
-  await expect(page.getByTestId("checkpoint-reason-chip")).toHaveText(
-    "PORTAL_POLICY_BLOCK",
-  );
+  await expect(page.locator("#main-title")).toHaveText("Provider policy or rate-limit block");
+  await expect(page.locator("#drawer-title")).toHaveText("Provider policy or rate-limit block");
+  await expect(page.getByTestId("checkpoint-reason-chip")).toHaveText("PORTAL_POLICY_BLOCK");
 });

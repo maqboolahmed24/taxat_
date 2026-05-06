@@ -1,0 +1,286 @@
+{
+  "artifactVersion": "CONTRACT_OBSERVATORY_ARTIFACT_V1",
+  "artifactSlug": "doc--Algorithm-stream_resume_and_catch_up_ordering_contract",
+  "artifactKind": "MARKDOWN",
+  "sectionRef": "RUNTIME_CONTRACTS",
+  "authorityLevel": "AUTHORITATIVE",
+  "sourceTruthBadge": "Authoritative Algorithm Corpus",
+  "tone": "navy",
+  "title": "Stream Resume and Catch-Up Ordering Contract",
+  "subtitle": "Algorithm/stream_resume_and_catch_up_ordering_contract.md",
+  "summary": "",
+  "canonicalPath": "Algorithm/stream_resume_and_catch_up_ordering_contract.md",
+  "sourceLineage": [
+    "Algorithm/stream_resume_and_catch_up_ordering_contract.md"
+  ],
+  "headingCount": 6,
+  "headings": [
+    {
+      "level": 1,
+      "text": "Stream Resume and Catch-Up Ordering Contract",
+      "slug": "stream-resume-and-catch-up-ordering-contract"
+    },
+    {
+      "level": 2,
+      "text": "Purpose",
+      "slug": "purpose"
+    },
+    {
+      "level": 2,
+      "text": "Contract boundary",
+      "slug": "contract-boundary"
+    },
+    {
+      "level": 2,
+      "text": "Required rules",
+      "slug": "required-rules"
+    },
+    {
+      "level": 2,
+      "text": "Failure modes closed",
+      "slug": "failure-modes-closed"
+    },
+    {
+      "level": 2,
+      "text": "FE-75 Native Hydration Composition",
+      "slug": "fe-75-native-hydration-composition"
+    }
+  ],
+  "proseSections": [
+    {
+      "headingSlug": "stream-resume-and-catch-up-ordering-contract",
+      "headingText": "Stream Resume and Catch-Up Ordering Contract",
+      "level": 1,
+      "lines": [
+        ""
+      ],
+      "plainText": "",
+      "excerpt": "",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "purpose",
+      "headingText": "Purpose",
+      "level": 2,
+      "lines": [
+        "This contract closes stream-recovery ambiguity for manifest experience streams and collaboration",
+        "workspace streams. It freezes the route, subject, session, access binding, masking posture,",
+        "publication generation, epoch, published frontier, compaction floor, and resume-binding posture so",
+        "resume tokens cannot be replayed outside their lawful context and catch-up delivery cannot invent",
+        "ordering locally.",
+        ""
+      ],
+      "plainText": "This contract closes stream recovery ambiguity for manifest experience streams and collaboration workspace streams. It freezes the route, subject, session, access binding, masking posture, publication generation, epoch, published frontier, compaction floor, and resume binding posture so resume tokens cannot be replayed outside their lawful context and catch up delivery cannot invent ordering locally.",
+      "excerpt": "This contract closes stream recovery ambiguity for manifest experience streams and collaboration workspace streams. It freezes the route, subject, session, access binding, masking…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "contract-boundary",
+      "headingText": "Contract boundary",
+      "level": 2,
+      "lines": [
+        "Every live manifest frame, manifest stream event, persisted manifest cursor, collaboration",
+        "workspace snapshot, collaboration workspace stream event, and persisted collaboration cursor SHALL",
+        "publish one grouped `stream_recovery_contract` validated by",
+        "`schemas/stream_recovery_contract.schema.json`.",
+        "",
+        "That contract is authoritative for:",
+        "",
+        "- the stream scope (`MANIFEST_EXPERIENCE` or `WORKSPACE`)",
+        "- the exact route key and mounted subject the stream belongs to",
+        "- the shell-stability token for the current route generation",
+        "- the session and session-binding hash the resume posture belongs to",
+        "- the access-binding hash and masking-context hash that freeze visibility and scope",
+        "- the current publication generation, epoch, and published sequence frontier",
+        "- the earliest sequence still resumable after compaction",
+        "- whether the current delivery window is live-resumable, requires rebase, or requires access",
+        "  rebinding",
+        "- whether the published resume binding is a raw token or a persisted hash",
+        "- the fixed policies for monotonic apply, duplicate handling, catch-up ordering, and rebase triggers",
+        ""
+      ],
+      "plainText": "Every live manifest frame, manifest stream event, persisted manifest cursor, collaboration workspace snapshot, collaboration workspace stream event, and persisted collaboration cursor SHALL publish one grouped stream recovery contract validated by schemas/stream recovery contract.schema.json. That contract is authoritative for: the stream scope (MANIFEST EXPERIENCE or WORKSPACE) the exact route key and mounted subject the stream belongs to the shell stability token for the current route generation the session and session binding hash the resume posture belongs to the access binding hash and masking context hash that freeze visibility and scope the current publication generation, epoch, and published sequence frontier the earliest sequence still resumable after compaction whether the current delivery window is live resumable, requires rebase, or requires access rebinding whether the published resume binding is a raw token or a persisted hash the fixed policies for monotonic apply, duplicate handling, catch up ordering, and rebase triggers",
+      "excerpt": "Every live manifest frame, manifest stream event, persisted manifest cursor, collaboration workspace snapshot, collaboration workspace stream event, and persisted collaboration cu…",
+      "mentionedSchemaTokens": [
+        "stream_recovery_contract.schema.json"
+      ],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "required-rules",
+      "headingText": "Required rules",
+      "level": 2,
+      "lines": [
+        "- Resume bindings are exact-route objects, not transport hints. A token or token-hash SHALL bind to",
+        "  one stream scope, one route key, one mounted subject, one shell-stability token, one session,",
+        "  one access-binding hash, and one masking-context hash.",
+        "- Sequence application SHALL be strictly monotonic and gap-free within one epoch. Clients SHALL NOT",
+        "  reconstruct order from arrival time, activity timestamps, or payload type.",
+        "- Duplicate delivery is legal and SHALL be idempotent by `(stream_scope_class, subject_ref,",
+        "  frame_epoch, sequence)`. A duplicate delta or event SHALL never apply semantic side effects twice.",
+        "- Catch-up delivery SHALL complete before live delivery is treated as current. Clients SHALL NOT mix",
+        "  a newer live delta into state that still has an unfilled catch-up gap.",
+        "- `compaction_floor_sequence_or_null` is the earliest lawful resume point for the current delivery",
+        "  window. If a persisted cursor last acknowledged a smaller sequence, the server SHALL fail closed",
+        "  with explicit rebase posture rather than fabricating missed history.",
+        "- `delivery_window_state = REBASE_REQUIRED` is mandatory whenever epoch continuity, compaction",
+        "  continuity, shell stability, or route context continuity is broken for the current binding.",
+        "- `delivery_window_state = ACCESS_REBIND_REQUIRED` is mandatory whenever session binding, access",
+        "  binding, masking posture, or schema compatibility drifts underneath the cursor.",
+        "- Manifest and workspace streams SHALL obey the same recovery grammar even though they differ in",
+        "  subject identity and guard-vector composition.",
+        ""
+      ],
+      "plainText": "Resume bindings are exact route objects, not transport hints. A token or token hash SHALL bind to one stream scope, one route key, one mounted subject, one shell stability token, one session, one access binding hash, and one masking context hash. Sequence application SHALL be strictly monotonic and gap free within one epoch. Clients SHALL NOT reconstruct order from arrival time, activity timestamps, or payload type. Duplicate delivery is legal and SHALL be idempotent by (stream scope class, subject ref, frame epoch, sequence). A duplicate delta or event SHALL never apply semantic side effects twice. Catch up delivery SHALL complete before live delivery is treated as current. Clients SHALL NOT mix a newer live delta into state that still has an unfilled catch up gap. compaction floor sequence or null is the earliest lawful resume point for the current delivery window. If a persisted cursor last acknowledged a smaller sequence, the server SHALL fail closed with explicit rebase posture rather than fabricating missed history. delivery window state = REBASE REQUIRED is mandatory whenever epoch continuity, compaction continuity, shell stability, or route context continuity is broken for the current binding. delivery window state = ACCESS REBIND REQUIRED is mandatory whenever session binding, access binding, masking posture, or schema compatibility drifts underneath the cursor. Manifest and workspace streams SHALL obey the same recovery grammar even though they differ in subject identity and guard vector composition.",
+      "excerpt": "Resume bindings are exact route objects, not transport hints. A token or token hash SHALL bind to one stream scope, one route key, one mounted subject, one shell stability token,…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "failure-modes-closed",
+      "headingText": "Failure modes closed",
+      "level": 2,
+      "lines": [
+        "- resume tokens reused outside the session, route, scope, or masking context they were issued for",
+        "- out-of-order or cross-epoch event application after reconnect",
+        "- silent omission of `REBASE_REQUIRED` after history compaction",
+        "- duplicate deltas replaying non-idempotent meaning",
+        "- catch-up flows interleaving with live delivery and reconstructing the wrong state",
+        "- manifest and collaboration clients following different recovery semantics for the same class of",
+        "  stream defect",
+        ""
+      ],
+      "plainText": "resume tokens reused outside the session, route, scope, or masking context they were issued for out of order or cross epoch event application after reconnect silent omission of REBASE REQUIRED after history compaction duplicate deltas replaying non idempotent meaning catch up flows interleaving with live delivery and reconstructing the wrong state manifest and collaboration clients following different recovery semantics for the same class of stream defect",
+      "excerpt": "resume tokens reused outside the session, route, scope, or masking context they were issued for out of order or cross epoch event application after reconnect silent omission of RE…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "fe-75-native-hydration-composition",
+      "headingText": "FE-75 Native Hydration Composition",
+      "level": 2,
+      "lines": [
+        "",
+        "Persisted native cursors now pair `stream_recovery_contract` with `native_cache_hydration_contract`.",
+        "`stream_recovery_contract` decides whether a cursor is live-resumable, requires rebase, or requires",
+        "access rebinding. `native_cache_hydration_contract` decides whether cached native content may render",
+        "or restore before that stream posture is re-established.",
+        "",
+        "That split closes the previous gap where cache-only restoration could preserve a stale visual shell",
+        "or stale resume lineage even after the stream had already fallen into `REBASE_REQUIRED` or",
+        "`ACCESS_REBIND_REQUIRED`.",
+        ""
+      ],
+      "plainText": "Persisted native cursors now pair stream recovery contract with native cache hydration contract. stream recovery contract decides whether a cursor is live resumable, requires rebase, or requires access rebinding. native cache hydration contract decides whether cached native content may render or restore before that stream posture is re established. That split closes the previous gap where cache only restoration could preserve a stale visual shell or stale resume lineage even after the stream had already fallen into REBASE REQUIRED or ACCESS REBIND REQUIRED.",
+      "excerpt": "Persisted native cursors now pair stream recovery contract with native cache hydration contract. stream recovery contract decides whether a cursor is live resumable, requires reba…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    }
+  ],
+  "schemaIdentityOrNull": null,
+  "schemaFields": [],
+  "samplePointers": [],
+  "sampleIdentityOrNull": null,
+  "bindingIdentityOrNull": null,
+  "validatorIdentityOrNull": null,
+  "driftIdentityOrNull": null,
+  "headerStrip": {
+    "kind": "PROSE",
+    "badgeLabel": "Authoritative Algorithm Corpus",
+    "metricPairs": [
+      {
+        "label": "Headings",
+        "value": "6"
+      },
+      {
+        "label": "Schemas",
+        "value": "1"
+      },
+      {
+        "label": "Tasks",
+        "value": "0"
+      }
+    ]
+  },
+  "relationships": {
+    "schemas": [
+      {
+        "artifactSlug": "schema--stream_recovery_contract",
+        "title": "Stream Recovery Contract",
+        "kind": "SCHEMA",
+        "authorityLevel": "AUTHORITATIVE",
+        "sectionRef": "SCHEMAS",
+        "headingSlugOrNull": null,
+        "reason": "source truth stack includes this schema"
+      }
+    ],
+    "samples": [],
+    "bindings": [
+      {
+        "artifactSlug": "binding--typescript--domain_workflow_and_filing",
+        "title": "TYPESCRIPT · Domain Workflow & Filing",
+        "kind": "BINDING",
+        "authorityLevel": "GENERATED_COMPANION",
+        "sectionRef": "SUPPORT_DOCS",
+        "headingSlugOrNull": null,
+        "reason": "source truth stack includes this binding family"
+      },
+      {
+        "artifactSlug": "binding--python--domain_workflow_and_filing",
+        "title": "PYTHON · Domain Workflow & Filing",
+        "kind": "BINDING",
+        "authorityLevel": "GENERATED_COMPANION",
+        "sectionRef": "SUPPORT_DOCS",
+        "headingSlugOrNull": null,
+        "reason": "source truth stack includes this binding family"
+      },
+      {
+        "artifactSlug": "binding--swift--domain_workflow_and_filing",
+        "title": "SWIFT · Domain Workflow & Filing",
+        "kind": "BINDING",
+        "authorityLevel": "GENERATED_COMPANION",
+        "sectionRef": "SUPPORT_DOCS",
+        "headingSlugOrNull": null,
+        "reason": "source truth stack includes this binding family"
+      }
+    ],
+    "validators": [],
+    "docs": [],
+    "tasks": []
+  },
+  "sourceTruthStack": {
+    "file": [
+      "Algorithm/stream_resume_and_catch_up_ordering_contract.md"
+    ],
+    "headings": [
+      "Stream Resume and Catch-Up Ordering Contract",
+      "Purpose",
+      "Contract boundary",
+      "Required rules",
+      "Failure modes closed",
+      "FE-75 Native Hydration Composition"
+    ],
+    "schemaRefs": [
+      "stream_recovery_contract.schema.json"
+    ],
+    "sampleRefs": [],
+    "bindingRefs": [
+      "TYPESCRIPT:DOMAIN_WORKFLOW_AND_FILING",
+      "PYTHON:DOMAIN_WORKFLOW_AND_FILING",
+      "SWIFT:DOMAIN_WORKFLOW_AND_FILING"
+    ],
+    "validatorRefs": [],
+    "driftRefs": [],
+    "taskRefs": []
+  },
+  "fieldCrosslinks": [],
+  "taskRefs": []
+}

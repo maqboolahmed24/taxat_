@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "release_channel_matrix",
+  "policy_version": "RELEASE_CHANNEL_MATRIX_V1",
+  "release_channel_rows": [
+    {
+      "release_channel_ref": "PREVIEW",
+      "channel_slug": "preview",
+      "environment_ref": "env_preview",
+      "candidate_environment_ref": "candidate-env.preview.release",
+      "allowed_branch_family_refs": [
+        "MAINLINE",
+        "EXPERIMENTAL"
+      ],
+      "allowed_branch_role_refs": [
+        "INTEGRATION",
+        "EXPERIMENT"
+      ],
+      "allowed_rollout_strategy_refs": [
+        "STANDARD_CANARY"
+      ],
+      "promotion_mode": "NON_PROMOTABLE_LANE",
+      "compatibility_requirement": "INTERNAL_ONLY",
+      "rollback_expression": "PREVIEW_ARTIFACTS_ARE_DISPOSABLE_AND_NEVER_PRODUCTION_BASELINES"
+    },
+    {
+      "release_channel_ref": "SANDBOX",
+      "channel_slug": "sandbox",
+      "environment_ref": "env_sandbox",
+      "candidate_environment_ref": "candidate-env.sandbox.release",
+      "allowed_branch_family_refs": [
+        "MAINLINE",
+        "RELEASE_PREPARATION"
+      ],
+      "allowed_branch_role_refs": [
+        "INTEGRATION",
+        "BASELINE",
+        "STABILIZATION"
+      ],
+      "allowed_rollout_strategy_refs": [
+        "STANDARD_CANARY",
+        "PIN_BASELINE"
+      ],
+      "promotion_mode": "VERIFICATION_REHEARSAL",
+      "compatibility_requirement": "READER_WINDOW_AND_CANDIDATE_BINDING_REQUIRED",
+      "rollback_expression": "NON_PRODUCTION_ROLLBACK_ALLOWED_WHILE_DIGEST_IS_RETAINED"
+    },
+    {
+      "release_channel_ref": "PREPRODUCTION",
+      "channel_slug": "preprod",
+      "environment_ref": "env_preproduction",
+      "candidate_environment_ref": "candidate-env.preproduction.release",
+      "allowed_branch_family_refs": [
+        "MAINLINE",
+        "RELEASE_PREPARATION",
+        "HOTFIX"
+      ],
+      "allowed_branch_role_refs": [
+        "BASELINE",
+        "STABILIZATION",
+        "PATCH"
+      ],
+      "allowed_rollout_strategy_refs": [
+        "STANDARD_CANARY",
+        "PIN_BASELINE",
+        "FAIL_FORWARD_COMPENSATING"
+      ],
+      "promotion_mode": "PRODUCTION_CANDIDATE_SOURCE",
+      "compatibility_requirement": "FULL_COMPATIBILITY_GATE_REQUIRED",
+      "rollback_expression": "MATCHES_CURRENT_COMPATIBILITY_GATE_POSTURE"
+    },
+    {
+      "release_channel_ref": "PRODUCTION",
+      "channel_slug": "prod",
+      "environment_ref": "env_production",
+      "candidate_environment_ref": "candidate-env.production.release",
+      "allowed_branch_family_refs": [
+        "MAINLINE",
+        "RELEASE_PREPARATION",
+        "HOTFIX"
+      ],
+      "allowed_branch_role_refs": [
+        "BASELINE",
+        "STABILIZATION",
+        "PATCH"
+      ],
+      "allowed_rollout_strategy_refs": [
+        "STANDARD_CANARY",
+        "EMERGENCY_PROMOTE",
+        "PIN_BASELINE",
+        "FAIL_FORWARD_COMPENSATING"
+      ],
+      "promotion_mode": "ADMISSIBLE_AFTER_MANIFEST_APPROVAL",
+      "compatibility_requirement": "FULL_COMPATIBILITY_GATE_AND_SUPPORTED_CLIENT_WINDOW_REQUIRED",
+      "rollback_expression": "ROLLBACK_OR_FAIL_FORWARD_MUST_MATCH_DEPLOYMENT_RELEASE_CONTRACT"
+    }
+  ],
+  "rollout_strategy_rows": [
+    {
+      "rollout_strategy_ref": "STANDARD_CANARY",
+      "allowed_release_channel_refs": [
+        "PREVIEW",
+        "SANDBOX",
+        "PREPRODUCTION",
+        "PRODUCTION"
+      ],
+      "required_compatibility_verdict_refs": [
+        "ROLLBACK_SAFE"
+      ],
+      "required_metadata_refs": [],
+      "posture_marker": "canary",
+      "notes": [
+        "Standard canary is only lawful while the compatibility gate still allows rollback."
+      ]
+    },
+    {
+      "rollout_strategy_ref": "EMERGENCY_PROMOTE",
+      "allowed_release_channel_refs": [
+        "PRODUCTION"
+      ],
+      "required_compatibility_verdict_refs": [
+        "ROLLBACK_SAFE"
+      ],
+      "required_metadata_refs": [
+        "emergency_override_ref",
+        "emergency_override_expires_at"
+      ],
+      "posture_marker": "emergency",
+      "notes": [
+        "Emergency promotions still require typed override lineage and may not bypass candidate identity or evidence completeness."
+      ]
+    },
+    {
+      "rollout_strategy_ref": "PIN_BASELINE",
+      "allowed_release_channel_refs": [
+        "SANDBOX",
+        "PREPRODUCTION",
+        "PRODUCTION"
+      ],
+      "required_compatibility_verdict_refs": [
+        "ROLLBACK_SAFE"
+      ],
+      "required_metadata_refs": [
+        "pinned_baseline_release_id_or_null"
+      ],
+      "posture_marker": "pin",
+      "notes": [
+        "Pinned baselines re-promote a known compatible release after abort or instability without rewriting history."
+      ]
+    },
+    {
+      "rollout_strategy_ref": "FAIL_FORWARD_COMPENSATING",
+      "allowed_release_channel_refs": [
+        "PREPRODUCTION",
+        "PRODUCTION"
+      ],
+      "required_compatibility_verdict_refs": [
+        "FAIL_FORWARD_ONLY"
+      ],
+      "required_metadata_refs": [
+        "compensating_release_id_or_null",
+        "fail_forward_owner_ref_or_null"
+      ],
+      "posture_marker": "ffwd",
+      "notes": [
+        "Once the gate is fail-forward-only, promotion must expose the compensating release and owner explicitly."
+      ]
+    }
+  ],
+  "notes": [
+    "Branch family alone never grants admissibility; the matrix only expresses what combinations are even eligible for validation.",
+    "Production requires the supported client window and compatibility gate in addition to branch, channel, and naming compliance."
+  ]
+}

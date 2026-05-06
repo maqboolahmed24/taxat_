@@ -1,0 +1,368 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/principal_context.schema.json",
+  "title": "PrincipalContext",
+  "description": "Runtime principal-context contract. This schema freezes the authenticated actor type, requested and effective scope lineage, delegation basis, assurance level, and masking posture used to authorize one run or command path.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "principal_id",
+    "principal_type",
+    "effective_role_set",
+    "tenant_id",
+    "client_scope",
+    "requested_scope",
+    "partition_scope_refs",
+    "authn_level",
+    "subject_identity_assurance_level",
+    "session_id",
+    "service_identity_ref",
+    "delegation_basis",
+    "authorization_evaluated_at",
+    "policy_snapshot_hash",
+    "access_binding_hash",
+    "delegation_snapshot_refs",
+    "authority_link_refs",
+    "authority_link_snapshot_refs",
+    "masking_scope",
+    "approval_capabilities",
+    "client_portal_capabilities",
+    "run_kind_capabilities"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "PrincipalContext"
+    },
+    "principal_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "principal_type": {
+      "type": "string",
+      "enum": [
+        "HUMAN",
+        "SERVICE",
+        "EXTERNAL"
+      ]
+    },
+    "effective_role_set": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "client_scope": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "requested_scope": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "partition_scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "authn_level": {
+      "type": "string",
+      "enum": [
+        "BASIC",
+        "MFA",
+        "STEP_UP"
+      ]
+    },
+    "subject_identity_assurance_level": {
+      "type": "string",
+      "enum": [
+        "UNVERIFIED",
+        "VERIFIED",
+        "STEP_UP_VERIFIED"
+      ]
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "service_identity_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "delegation_basis": {
+      "type": "string",
+      "enum": [
+        "SELF_ACTING",
+        "CLIENT_GRANTED",
+        "SELF_ASSESSMENT_IMPORTED",
+        "DIGITAL_HANDSHAKE",
+        "TENANT_INTERNAL",
+        "SYSTEM_ASSIGNED"
+      ]
+    },
+    "authorization_evaluated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "policy_snapshot_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "access_binding_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "delegation_snapshot_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "authority_link_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "authority_link_snapshot_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "masking_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approval_capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "client_portal_capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "run_kind_capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "service_identity_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "service_identity_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "principal_type": {
+            "const": "SERVICE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "principal_type": {
+            "const": "SERVICE"
+          }
+        },
+        "required": [
+          "principal_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "service_identity_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "authn_level": {
+            "const": "BASIC"
+          },
+          "subject_identity_assurance_level": {
+            "const": "UNVERIFIED"
+          },
+          "delegation_basis": {
+            "enum": [
+              "TENANT_INTERNAL",
+              "SYSTEM_ASSIGNED"
+            ]
+          },
+          "approval_capabilities": {
+            "maxItems": 0
+          },
+          "client_portal_capabilities": {
+            "maxItems": 0
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "service_identity_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "delegation_basis": {
+            "enum": [
+              "SELF_ACTING",
+              "CLIENT_GRANTED",
+              "SELF_ASSESSMENT_IMPORTED",
+              "DIGITAL_HANDSHAKE"
+            ]
+          }
+        },
+        "required": [
+          "delegation_basis"
+        ]
+      },
+      "then": {
+        "properties": {
+          "client_scope": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "client_portal_capabilities": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "client_portal_capabilities"
+        ]
+      },
+      "then": {
+        "properties": {
+          "principal_type": {
+            "const": "HUMAN"
+          },
+          "client_scope": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "authority_link_refs": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "authority_link_refs"
+        ]
+      },
+      "then": {
+        "properties": {
+          "authority_link_snapshot_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "subject_identity_assurance_level": {
+            "const": "STEP_UP_VERIFIED"
+          }
+        },
+        "required": [
+          "subject_identity_assurance_level"
+        ]
+      },
+      "then": {
+        "properties": {
+          "authn_level": {
+            "const": "STEP_UP"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "authn_level": {
+            "const": "STEP_UP"
+          }
+        },
+        "required": [
+          "authn_level"
+        ]
+      },
+      "then": {
+        "properties": {
+          "subject_identity_assurance_level": {
+            "const": "STEP_UP_VERIFIED"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

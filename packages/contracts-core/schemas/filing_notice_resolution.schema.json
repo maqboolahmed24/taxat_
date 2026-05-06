@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/filing_notice_resolution.schema.json",
+  "title": "FilingNoticeResolution",
+  "description": "Packet-local notice resolution artifact. This schema freezes the result of resolving declaration-basis, disclaimer, and packet-local approval notices before a filing packet may advance to APPROVED_TO_SUBMIT.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "notice_resolution_id",
+    "manifest_id",
+    "packet_id",
+    "notice_step_refs",
+    "notice_requirements_satisfied",
+    "approval_state",
+    "declared_basis_ack_state",
+    "notice_refs",
+    "unresolved_reason_codes",
+    "resolved_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "FilingNoticeResolution"
+    },
+    "notice_resolution_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packet_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notice_step_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "notice_requirements_satisfied": {
+      "type": "boolean"
+    },
+    "approval_state": {
+      "type": "string",
+      "enum": [
+        "NOT_REQUIRED",
+        "SATISFIED",
+        "REQUIRED_PENDING",
+        "UNSATISFIABLE",
+        "DENIED"
+      ]
+    },
+    "declared_basis_ack_state": {
+      "type": "string",
+      "enum": [
+        "NOT_APPLICABLE",
+        "NOT_REQUIRED",
+        "SATISFIED",
+        "REQUIRED_PENDING",
+        "UNSATISFIABLE"
+      ]
+    },
+    "notice_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "unresolved_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "notice_requirements_satisfied": {
+            "const": true
+          }
+        },
+        "required": [
+          "notice_requirements_satisfied"
+        ]
+      },
+      "then": {
+        "properties": {
+          "approval_state": {
+            "enum": [
+              "NOT_REQUIRED",
+              "SATISFIED"
+            ]
+          },
+          "declared_basis_ack_state": {
+            "enum": [
+              "NOT_APPLICABLE",
+              "NOT_REQUIRED",
+              "SATISFIED"
+            ]
+          },
+          "unresolved_reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "notice_requirements_satisfied": {
+            "const": false
+          }
+        },
+        "required": [
+          "notice_requirements_satisfied"
+        ]
+      },
+      "then": {
+        "properties": {
+          "unresolved_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "anyOf": [
+          {
+            "properties": {
+              "approval_state": {
+                "enum": [
+                  "REQUIRED_PENDING",
+                  "UNSATISFIABLE",
+                  "DENIED"
+                ]
+              }
+            },
+            "required": [
+              "approval_state"
+            ]
+          },
+          {
+            "properties": {
+              "declared_basis_ack_state": {
+                "enum": [
+                  "REQUIRED_PENDING",
+                  "UNSATISFIABLE"
+                ]
+              }
+            },
+            "required": [
+              "declared_basis_ack_state"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "notice_requirements_satisfied": {
+            "const": false
+          },
+          "unresolved_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "unresolved_reason_codes": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "unresolved_reason_codes"
+        ]
+      },
+      "then": {
+        "properties": {
+          "notice_requirements_satisfied": {
+            "const": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "unresolved_reason_codes": {
+            "maxItems": 0
+          }
+        },
+        "required": [
+          "unresolved_reason_codes"
+        ]
+      },
+      "then": {
+        "properties": {
+          "notice_requirements_satisfied": {
+            "const": true
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,723 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/schema_migration_ledger.schema.json",
+  "title": "SchemaMigrationLedger",
+  "description": "Schema and datastore migration contract. This schema freezes expand, backfill, verify, and contract progression along with halt or failure posture, compatibility window closure, and rollback class.",
+  "type": "object",
+  "required": [
+    "migration_id",
+    "datastore_ref",
+    "target_version",
+    "target_schema_bundle_hash",
+    "compatibility_window_ref",
+    "contract_phase_required",
+    "phase_state",
+    "state_transition_contract",
+    "schema_reader_window_contract",
+    "backfill_execution_contract",
+    "applied_at",
+    "verified_at",
+    "rollback_class",
+    "verification_ref",
+    "halted_subphase",
+    "compatibility_window_closed_at",
+    "failure_ref"
+  ],
+  "properties": {
+    "migration_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "datastore_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_schema_bundle_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "compatibility_window_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_phase_required": {
+      "type": "boolean"
+    },
+    "phase_state": {
+      "type": "string",
+      "enum": [
+        "PLANNED",
+        "APPLYING",
+        "APPLIED",
+        "VERIFYING",
+        "VERIFIED",
+        "CONTRACTING",
+        "CONTRACTED",
+        "HALTED",
+        "FAILED",
+        "SUPERSEDED"
+      ]
+    },
+    "state_transition_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/state_transition_contract.schema.json"
+        },
+        {
+          "properties": {
+            "object_family": {
+              "const": "SCHEMA_MIGRATION_LEDGER"
+            },
+            "machine_code": {
+              "const": "SCHEMA_MIGRATION_LEDGER_PHASE_V1"
+            },
+            "state_field_name": {
+              "const": "phase_state"
+            }
+          }
+        }
+      ]
+    },
+    "schema_reader_window_contract": {
+      "$ref": "https://taxat.dev/schemas/schema_reader_window_contract.schema.json"
+    },
+    "backfill_execution_contract": {
+      "$ref": "https://taxat.dev/schemas/backfill_execution_contract.schema.json"
+    },
+    "applied_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "verified_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "rollback_class": {
+      "type": "string",
+      "enum": [
+        "ROLLBACK_SAFE",
+        "FAIL_FORWARD_ONLY"
+      ]
+    },
+    "verification_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "halted_subphase": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "APPLYING",
+        "VERIFYING",
+        "CONTRACTING",
+        null
+      ]
+    },
+    "compatibility_window_closed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "failure_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "phase_state": {
+            "enum": [
+              "APPLYING",
+              "APPLIED",
+              "VERIFYING",
+              "VERIFIED",
+              "CONTRACTING",
+              "CONTRACTED",
+              "HALTED",
+              "FAILED",
+              "SUPERSEDED"
+            ]
+          }
+        },
+        "required": [
+          "phase_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "applied_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "phase_state": {
+            "const": "PLANNED"
+          }
+        },
+        "required": [
+          "phase_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "applied_at": {
+            "type": "null"
+          },
+          "verified_at": {
+            "type": "null"
+          },
+          "verification_ref": {
+            "type": "null"
+          },
+          "halted_subphase": {
+            "type": "null"
+          },
+          "compatibility_window_closed_at": {
+            "type": "null"
+          },
+          "failure_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "phase_state": {
+            "enum": [
+              "VERIFYING",
+              "VERIFIED",
+              "CONTRACTING",
+              "CONTRACTED",
+              "SUPERSEDED"
+            ]
+          }
+        },
+        "required": [
+          "phase_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "verification_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "verified_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "verified_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "phase_state": {
+            "enum": [
+              "VERIFIED",
+              "CONTRACTING",
+              "CONTRACTED",
+              "SUPERSEDED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "halted_subphase": {
+            "type": "string",
+            "enum": [
+              "APPLYING",
+              "VERIFYING",
+              "CONTRACTING"
+            ]
+          }
+        },
+        "required": [
+          "halted_subphase"
+        ]
+      },
+      "then": {
+        "properties": {
+          "phase_state": {
+            "const": "HALTED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "failure_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "failure_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "phase_state": {
+            "enum": [
+              "HALTED",
+              "FAILED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "contract_phase_required": {
+            "const": false
+          }
+        },
+        "required": [
+          "contract_phase_required"
+        ]
+      },
+      "then": {
+        "properties": {
+          "phase_state": {
+            "enum": [
+              "PLANNED",
+              "APPLYING",
+              "APPLIED",
+              "VERIFYING",
+              "VERIFIED",
+              "HALTED",
+              "FAILED",
+              "SUPERSEDED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "phase_state": {
+            "enum": [
+              "VERIFIED",
+              "CONTRACTING",
+              "CONTRACTED",
+              "SUPERSEDED"
+            ]
+          }
+        },
+        "required": [
+          "phase_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "verified_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "phase_state": {
+            "const": "HALTED"
+          }
+        },
+        "required": [
+          "phase_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "halted_subphase": {
+            "type": "string",
+            "enum": [
+              "APPLYING",
+              "VERIFYING",
+              "CONTRACTING"
+            ]
+          },
+          "failure_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "phase_state": {
+            "const": "FAILED"
+          }
+        },
+        "required": [
+          "phase_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "failure_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "phase_state": {
+            "const": "FAILED"
+          }
+        },
+        "required": [
+          "phase_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "halted_subphase": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "phase_state": {
+            "enum": [
+              "CONTRACTING",
+              "CONTRACTED"
+            ]
+          }
+        },
+        "required": [
+          "phase_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "contract_phase_required": {
+            "const": true
+          },
+          "compatibility_window_closed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "compatibility_window_closed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "compatibility_window_closed_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "phase_state": {
+            "enum": [
+              "VERIFIED",
+              "CONTRACTING",
+              "CONTRACTED",
+              "SUPERSEDED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "phase_state": {
+            "const": "VERIFIED"
+          }
+        },
+        "required": [
+          "phase_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "schema_reader_window_contract": {
+            "properties": {
+              "window_state": {
+                "const": "VERIFIED_PREVIOUS_READERS_SUPPORTED"
+              }
+            },
+            "required": [
+              "window_state"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "phase_state": {
+            "enum": [
+              "CONTRACTING",
+              "CONTRACTED",
+              "SUPERSEDED"
+            ]
+          }
+        },
+        "required": [
+          "phase_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "schema_reader_window_contract": {
+            "properties": {
+              "window_state": {
+                "const": "CONTRACT_ELIGIBLE_WINDOW_CLOSED"
+              }
+            },
+            "required": [
+              "window_state"
+            ]
+          },
+          "rollback_class": {
+            "const": "FAIL_FORWARD_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "compatibility_window_closed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "compatibility_window_closed_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "schema_reader_window_contract": {
+            "properties": {
+              "window_state": {
+                "const": "CONTRACT_ELIGIBLE_WINDOW_CLOSED"
+              }
+            },
+            "required": [
+              "window_state"
+            ]
+          },
+          "rollback_class": {
+            "const": "FAIL_FORWARD_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "schema_reader_window_contract": {
+            "properties": {
+              "window_state": {
+                "const": "CONTRACT_ELIGIBLE_WINDOW_CLOSED"
+              }
+            },
+            "required": [
+              "window_state"
+            ]
+          }
+        },
+        "required": [
+          "schema_reader_window_contract"
+        ]
+      },
+      "then": {
+        "properties": {
+          "rollback_class": {
+            "const": "FAIL_FORWARD_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "backfill_execution_contract": {
+            "properties": {
+              "execution_requirement": {
+                "const": "NO_BACKFILL_REQUIRED"
+              }
+            },
+            "required": [
+              "execution_requirement"
+            ]
+          },
+          "phase_state": {
+            "enum": [
+              "PLANNED",
+              "APPLYING",
+              "APPLIED"
+            ]
+          }
+        },
+        "required": [
+          "backfill_execution_contract",
+          "phase_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "schema_reader_window_contract": {
+            "properties": {
+              "window_state": {
+                "const": "EXPAND_ONLY_PREVIOUS_READERS_SUPPORTED"
+              }
+            },
+            "required": [
+              "window_state"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "backfill_execution_contract": {
+            "properties": {
+              "execution_requirement": {
+                "const": "IDEMPOTENT_BACKFILL_REQUIRED"
+              },
+              "execution_state": {
+                "enum": [
+                  "PLANNED",
+                  "IN_PROGRESS",
+                  "HALTED",
+                  "FAILED"
+                ]
+              }
+            },
+            "required": [
+              "execution_requirement",
+              "execution_state"
+            ]
+          }
+        },
+        "required": [
+          "backfill_execution_contract"
+        ]
+      },
+      "then": {
+        "properties": {
+          "schema_reader_window_contract": {
+            "properties": {
+              "window_state": {
+                "const": "BACKFILL_IN_PROGRESS_PREVIOUS_READERS_SUPPORTED"
+              }
+            },
+            "required": [
+              "window_state"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "backfill_execution_contract": {
+            "properties": {
+              "execution_requirement": {
+                "const": "IDEMPOTENT_BACKFILL_REQUIRED"
+              }
+            },
+            "required": [
+              "execution_requirement"
+            ]
+          },
+          "phase_state": {
+            "enum": [
+              "VERIFYING",
+              "VERIFIED",
+              "CONTRACTING",
+              "CONTRACTED",
+              "SUPERSEDED"
+            ]
+          }
+        },
+        "required": [
+          "backfill_execution_contract",
+          "phase_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "backfill_execution_contract": {
+            "properties": {
+              "execution_state": {
+                "const": "COMPLETE"
+              }
+            },
+            "required": [
+              "execution_state"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

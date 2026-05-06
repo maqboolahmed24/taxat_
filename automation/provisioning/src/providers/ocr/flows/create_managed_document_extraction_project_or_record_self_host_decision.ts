@@ -25,8 +25,7 @@ import {
 } from "../../../core/selector_contract.js";
 
 export const OCR_PROVIDER_ID = "document-extraction-control-plane";
-export const DOCUMENT_EXTRACTION_FLOW_ID =
-  "managed-document-extraction-project-selection";
+export const DOCUMENT_EXTRACTION_FLOW_ID = "managed-document-extraction-project-selection";
 export const OCR_PROVIDER_DISPLAY_NAME = "Document Extraction Control Plane";
 export const OCR_POLICY_VERSION = "1.0";
 export const OCR_POLICY_GENERATED_ON = "2026-04-18";
@@ -36,8 +35,7 @@ export const DOCUMENT_EXTRACTION_STEP_IDS = {
   recordSelection: "ocr.control-plane.record-selection",
   validateProfiles: "ocr.control-plane.validate-document-profiles",
   validateThresholds: "ocr.control-plane.validate-review-thresholds",
-  validateCandidateBoundary:
-    "ocr.control-plane.validate-candidate-fact-boundary",
+  validateCandidateBoundary: "ocr.control-plane.validate-candidate-fact-boundary",
   persistArtifacts: "ocr.control-plane.persist-artifacts",
 } as const;
 
@@ -141,19 +139,13 @@ export interface DocumentExtractionSelectionRecord {
     | "Managed provider selected"
     | "Not selected";
   processing_posture: "ASYNC_QUEUE_REQUIRED";
-  activation_gate_posture:
-    "STABLE_OBJECT_VERSION_AND_SCAN_ADOPTION_REQUIRED";
-  provider_inventory_ref:
-    "data/provisioning/document_extraction_provider_inventory.template.json";
+  activation_gate_posture: "STABLE_OBJECT_VERSION_AND_SCAN_ADOPTION_REQUIRED";
+  provider_inventory_ref: "data/provisioning/document_extraction_provider_inventory.template.json";
   profile_catalog_ref: "config/evidence/document_extraction_profile_catalog.json";
-  review_thresholds_ref:
-    "config/evidence/document_extraction_review_thresholds.json";
-  candidate_fact_mapping_ref:
-    "config/evidence/ocr_output_to_candidate_fact_mapping.json";
-  raw_output_retention_posture:
-    "PROVIDER_RAW_OUTPUT_SEPARATE_SHORT_LIVED_RESTRICTED";
-  normalized_output_retention_posture:
-    "NORMALIZED_EXTRACTION_JSON_RETAINED_WITH_EVIDENCE_LINEAGE";
+  review_thresholds_ref: "config/evidence/document_extraction_review_thresholds.json";
+  candidate_fact_mapping_ref: "config/evidence/ocr_output_to_candidate_fact_mapping.json";
+  raw_output_retention_posture: "PROVIDER_RAW_OUTPUT_SEPARATE_SHORT_LIVED_RESTRICTED";
+  normalized_output_retention_posture: "NORMALIZED_EXTRACTION_JSON_RETAINED_WITH_EVIDENCE_LINEAGE";
   candidate_fact_boundary_statement: string;
   provider_docs_urls: string[];
   source_refs: SourceRef[];
@@ -196,10 +188,7 @@ export interface ConfidenceBand {
   band_ref: string;
   min_inclusive: number;
   max_exclusive: number;
-  action: Exclude<
-    DocumentExtractionReviewAction,
-    "UNSUPPORTED_FORMAT" | "BLOCKED_BY_QUARANTINE"
-  >;
+  action: Exclude<DocumentExtractionReviewAction, "UNSUPPORTED_FORMAT" | "BLOCKED_BY_QUARANTINE">;
   summary: string;
 }
 
@@ -241,12 +230,7 @@ export interface OcrOutputToCandidateFactMappingRow {
   profile_ref: string;
   normalized_field_path: string;
   candidate_fact_family: string;
-  candidate_value_kind:
-    | "STRING"
-    | "DATE"
-    | "MONEY"
-    | "TABLE_ROW_SET"
-    | "TEXT_BLOCK";
+  candidate_value_kind: "STRING" | "DATE" | "MONEY" | "TABLE_ROW_SET" | "TEXT_BLOCK";
   promotion_guard: "CANDIDATE_ONLY_NEVER_CANONICAL";
   review_requirements: string[];
   prohibited_canonical_targets: string[];
@@ -445,14 +429,12 @@ function selectionTruthBoundary(): string {
 function sharedSourceRefs(): SourceRef[] {
   return [
     {
-      source_ref:
-        "PROMPT/shared_operating_contract_0046_to_0053.md::OCR / document extraction",
+      source_ref: "PROMPT/shared_operating_contract_0046_to_0053.md::OCR / document extraction",
       rationale:
         "The shared operating contract requires either a lawful managed workspace or an explicit self-host/not-selected decision with typed rationale.",
     },
     {
-      source_ref:
-        "data/analysis/dependency_register.json::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
+      source_ref: "data/analysis/dependency_register.json::OCR_DOCUMENT_EXTRACTION_CAPABILITY",
       rationale:
         "The dependency register marks OCR/document extraction as optional vendor selection rather than a preselected runtime dependency.",
     },
@@ -469,10 +451,8 @@ function sharedSourceRefs(): SourceRef[] {
         "Documentary evidence must retain source lineage and extraction metadata before any candidate facts can exist.",
     },
     {
-      source_ref:
-        "Algorithm/canonical_source_and_evidence_taxonomy.md::Prohibited promotion rules",
-      rationale:
-        "Raw OCR text or extracted key-values may not jump directly to canonical truth.",
+      source_ref: "Algorithm/canonical_source_and_evidence_taxonomy.md::Prohibited promotion rules",
+      rationale: "Raw OCR text or extracted key-values may not jump directly to canonical truth.",
     },
     {
       source_ref: "Algorithm/data_model.md::EvidenceItem",
@@ -497,8 +477,7 @@ function sharedSourceRefs(): SourceRef[] {
         "Transfer completion, scan, validation, and attachment confirmation remain distinct before extraction is admissible.",
     },
     {
-      source_ref:
-        "Algorithm/customer_client_portal_experience_contract.md::Secure upload flow",
+      source_ref: "Algorithm/customer_client_portal_experience_contract.md::Secure upload flow",
       rationale:
         "Portal upload posture must surface scan, validation, and attachment state distinctly instead of collapsing them into a generic uploaded state.",
     },
@@ -517,20 +496,11 @@ function sharedSourceRefs(): SourceRef[] {
 }
 
 function providerSelectionDocs(): string[] {
-  return [
-    ...GCP_DOCUMENT_AI_DOCS,
-    ...AWS_TEXTRACT_DOCS,
-    ...AZURE_DOCUMENT_INTELLIGENCE_DOCS,
-  ];
+  return [...GCP_DOCUMENT_AI_DOCS, ...AWS_TEXTRACT_DOCS, ...AZURE_DOCUMENT_INTELLIGENCE_DOCS];
 }
 
 function supportedMimeTypesPortableBaseline(): string[] {
-  return [
-    "application/pdf",
-    "image/jpeg",
-    "image/png",
-    "image/tiff",
-  ];
+  return ["application/pdf", "image/jpeg", "image/png", "image/tiff"];
 }
 
 function profileRows(): DocumentExtractionProfileRow[] {
@@ -546,13 +516,8 @@ function profileRows(): DocumentExtractionProfileRow[] {
       language_posture: "EN_PRIMARY_WITH_MIXED_LANGUAGE_REVIEW",
       handwriting_posture: "HANDWRITING_ALLOWED_WITH_REVIEW",
       extraction_family: "RECEIPT_FIELDS_AND_LAYOUT",
-      provider_feature_flags: [
-        "text_ocr",
-        "selection_marks",
-        "line_item_candidates",
-      ],
-      processor_version_pinning_posture:
-        "FROZEN_PROCESSOR_VERSION_REQUIRED",
+      provider_feature_flags: ["text_ocr", "selection_marks", "line_item_candidates"],
+      processor_version_pinning_posture: "FROZEN_PROCESSOR_VERSION_REQUIRED",
       candidate_fact_families: [
         "RECEIPT_SUPPLIER_NAME_CANDIDATE",
         "RECEIPT_TRANSACTION_DATE_CANDIDATE",
@@ -577,13 +542,8 @@ function profileRows(): DocumentExtractionProfileRow[] {
       language_posture: "EN_PRIMARY_WITH_MIXED_LANGUAGE_REVIEW",
       handwriting_posture: "HANDWRITING_ESCALATES_REVIEW",
       extraction_family: "INVOICE_FIELDS_AND_LAYOUT",
-      provider_feature_flags: [
-        "text_ocr",
-        "table_candidates",
-        "key_value_candidates",
-      ],
-      processor_version_pinning_posture:
-        "FROZEN_PROCESSOR_VERSION_REQUIRED",
+      provider_feature_flags: ["text_ocr", "table_candidates", "key_value_candidates"],
+      processor_version_pinning_posture: "FROZEN_PROCESSOR_VERSION_REQUIRED",
       candidate_fact_families: [
         "INVOICE_SUPPLIER_NAME_CANDIDATE",
         "INVOICE_NUMBER_CANDIDATE",
@@ -607,13 +567,8 @@ function profileRows(): DocumentExtractionProfileRow[] {
       language_posture: "EN_PRIMARY_WITH_MIXED_LANGUAGE_REVIEW",
       handwriting_posture: "HANDWRITING_ESCALATES_REVIEW",
       extraction_family: "STATEMENT_LAYOUT_AND_TABLES",
-      provider_feature_flags: [
-        "text_ocr",
-        "table_row_candidates",
-        "page_order_analysis",
-      ],
-      processor_version_pinning_posture:
-        "FROZEN_PROCESSOR_VERSION_REQUIRED",
+      provider_feature_flags: ["text_ocr", "table_row_candidates", "page_order_analysis"],
+      processor_version_pinning_posture: "FROZEN_PROCESSOR_VERSION_REQUIRED",
       candidate_fact_families: [
         "BANK_STATEMENT_PROVIDER_NAME_CANDIDATE",
         "BANK_STATEMENT_PERIOD_CANDIDATE",
@@ -637,13 +592,8 @@ function profileRows(): DocumentExtractionProfileRow[] {
       language_posture: "EN_PRIMARY_WITH_MIXED_LANGUAGE_REVIEW",
       handwriting_posture: "HANDWRITING_ESCALATES_REVIEW",
       extraction_family: "CORRESPONDENCE_LAYOUT_AND_REFERENCE_EXTRACTION",
-      provider_feature_flags: [
-        "text_ocr",
-        "reference_number_candidates",
-        "date_candidates",
-      ],
-      processor_version_pinning_posture:
-        "FROZEN_PROCESSOR_VERSION_REQUIRED",
+      provider_feature_flags: ["text_ocr", "reference_number_candidates", "date_candidates"],
+      processor_version_pinning_posture: "FROZEN_PROCESSOR_VERSION_REQUIRED",
       candidate_fact_families: [
         "CORRESPONDENCE_REFERENCE_CANDIDATE",
         "CORRESPONDENCE_DATE_CANDIDATE",
@@ -666,12 +616,8 @@ function profileRows(): DocumentExtractionProfileRow[] {
       language_posture: "EN_PRIMARY_WITH_MIXED_LANGUAGE_REVIEW",
       handwriting_posture: "HANDWRITING_ESCALATES_REVIEW",
       extraction_family: "SCREENSHOT_LAYOUT_TEXT_ONLY",
-      provider_feature_flags: [
-        "text_ocr",
-        "layout_regions",
-      ],
-      processor_version_pinning_posture:
-        "FROZEN_PROCESSOR_VERSION_REQUIRED",
+      provider_feature_flags: ["text_ocr", "layout_regions"],
+      processor_version_pinning_posture: "FROZEN_PROCESSOR_VERSION_REQUIRED",
       candidate_fact_families: [
         "SCREENSHOT_VISIBLE_TEXT_CANDIDATE",
         "SCREENSHOT_REFERENCE_NUMBER_CANDIDATE",
@@ -693,12 +639,8 @@ function profileRows(): DocumentExtractionProfileRow[] {
       language_posture: "EN_PRIMARY_WITH_MIXED_LANGUAGE_REVIEW",
       handwriting_posture: "HANDWRITING_ALLOWED_WITH_REVIEW",
       extraction_family: "HANDWRITING_LAYOUT_TEXT_ONLY",
-      provider_feature_flags: [
-        "text_ocr",
-        "language_detection",
-      ],
-      processor_version_pinning_posture:
-        "FROZEN_PROCESSOR_VERSION_REQUIRED",
+      provider_feature_flags: ["text_ocr", "language_detection"],
+      processor_version_pinning_posture: "FROZEN_PROCESSOR_VERSION_REQUIRED",
       candidate_fact_families: [
         "HANDWRITTEN_NOTE_TEXT_CANDIDATE",
         "HANDWRITTEN_NOTE_DATE_CANDIDATE",
@@ -721,11 +663,8 @@ function profileRows(): DocumentExtractionProfileRow[] {
       handwriting_posture: "NOT_ENABLED_IN_INITIAL_SCOPE",
       extraction_family: "HANDWRITING_LAYOUT_TEXT_ONLY",
       provider_feature_flags: ["document_splitter", "language_detection"],
-      processor_version_pinning_posture:
-        "PROVIDER_AND_MODEL_POLICY_NOT_FROZEN",
-      candidate_fact_families: [
-        "MIXED_LANGUAGE_TEXT_BLOCK_CANDIDATE",
-      ],
+      processor_version_pinning_posture: "PROVIDER_AND_MODEL_POLICY_NOT_FROZEN",
+      candidate_fact_families: ["MIXED_LANGUAGE_TEXT_BLOCK_CANDIDATE"],
       review_policy_ref: "document_extraction_review_thresholds",
       lineage_requirements: [...COMMON_LINEAGE_REQUIREMENTS],
       source_refs: sourceRefs,
@@ -887,7 +826,9 @@ function mappingRows(): OcrOutputToCandidateFactMappingRow[] {
       review_requirements: ["mixed_language", "handwriting", "merchant-name-drift"],
       prohibited_canonical_targets: ["supplier_name", "expense_counterparty_name"],
       source_refs: sourceRefs,
-      notes: ["Merchant or supplier naming remains candidate-only because alias normalization is downstream."],
+      notes: [
+        "Merchant or supplier naming remains candidate-only because alias normalization is downstream.",
+      ],
     },
     {
       mapping_ref: "ocr_map_receipt_date",
@@ -911,7 +852,9 @@ function mappingRows(): OcrOutputToCandidateFactMappingRow[] {
       review_requirements: ["currency-symbol-check", "multi-total-check"],
       prohibited_canonical_targets: ["money.total", "deductible_expense_total"],
       source_refs: sourceRefs,
-      notes: ["Receipt totals do not become trusted money values without downstream money-contract validation."],
+      notes: [
+        "Receipt totals do not become trusted money values without downstream money-contract validation.",
+      ],
     },
     {
       mapping_ref: "ocr_map_invoice_number",
@@ -935,7 +878,9 @@ function mappingRows(): OcrOutputToCandidateFactMappingRow[] {
       review_requirements: ["currency-consistency", "tax-line-split-check"],
       prohibited_canonical_targets: ["invoice_total", "filing_amount"],
       source_refs: sourceRefs,
-      notes: ["Totals remain candidates until later invoice-specific normalization and money validation."],
+      notes: [
+        "Totals remain candidates until later invoice-specific normalization and money validation.",
+      ],
     },
     {
       mapping_ref: "ocr_map_statement_provider",
@@ -959,7 +904,9 @@ function mappingRows(): OcrOutputToCandidateFactMappingRow[] {
       review_requirements: ["row-segmentation-check", "opening-closing-balance-check"],
       prohibited_canonical_targets: ["ledger_entry", "cashbook_line"],
       source_refs: sourceRefs,
-      notes: ["Transaction rows are especially vulnerable to table-boundary drift and therefore remain candidate-only."],
+      notes: [
+        "Transaction rows are especially vulnerable to table-boundary drift and therefore remain candidate-only.",
+      ],
     },
     {
       mapping_ref: "ocr_map_statement_balance",
@@ -971,7 +918,9 @@ function mappingRows(): OcrOutputToCandidateFactMappingRow[] {
       review_requirements: ["balance-reconciliation-check", "currency-check"],
       prohibited_canonical_targets: ["closing_balance", "cash_position"],
       source_refs: sourceRefs,
-      notes: ["Statement balance candidates require reconciliation with transaction rows before any downstream use."],
+      notes: [
+        "Statement balance candidates require reconciliation with transaction rows before any downstream use.",
+      ],
     },
     {
       mapping_ref: "ocr_map_correspondence_reference",
@@ -983,7 +932,9 @@ function mappingRows(): OcrOutputToCandidateFactMappingRow[] {
       review_requirements: ["multi-reference-check", "authority-surface-check"],
       prohibited_canonical_targets: ["authority_reference", "case_reference"],
       source_refs: sourceRefs,
-      notes: ["Authority references remain candidate-only until case and authority-link context align."],
+      notes: [
+        "Authority references remain candidate-only until case and authority-link context align.",
+      ],
     },
     {
       mapping_ref: "ocr_map_correspondence_date",
@@ -995,7 +946,9 @@ function mappingRows(): OcrOutputToCandidateFactMappingRow[] {
       review_requirements: ["date-format-check", "header-footer-noise-check"],
       prohibited_canonical_targets: ["authority_issue_date", "deadline_date"],
       source_refs: sourceRefs,
-      notes: ["Letter dates require contextual downstream interpretation before they can drive deadlines or workflow."],
+      notes: [
+        "Letter dates require contextual downstream interpretation before they can drive deadlines or workflow.",
+      ],
     },
     {
       mapping_ref: "ocr_map_correspondence_text",
@@ -1007,7 +960,9 @@ function mappingRows(): OcrOutputToCandidateFactMappingRow[] {
       review_requirements: ["sensitive-phrase-review", "semantic-interpretation-required"],
       prohibited_canonical_targets: ["authority_decision", "legal_position"],
       source_refs: sourceRefs,
-      notes: ["Free-text correspondence content is review material, not machine-trusted legal meaning."],
+      notes: [
+        "Free-text correspondence content is review material, not machine-trusted legal meaning.",
+      ],
     },
     {
       mapping_ref: "ocr_map_screenshot_text",
@@ -1019,7 +974,9 @@ function mappingRows(): OcrOutputToCandidateFactMappingRow[] {
       review_requirements: ["layout-only-default", "ui-context-required"],
       prohibited_canonical_targets: ["workflow_status", "portal_truth"],
       source_refs: sourceRefs,
-      notes: ["Screenshot-visible text is useful for review and debugging, not direct workflow truth."],
+      notes: [
+        "Screenshot-visible text is useful for review and debugging, not direct workflow truth.",
+      ],
     },
     {
       mapping_ref: "ocr_map_screenshot_reference",
@@ -1031,7 +988,9 @@ function mappingRows(): OcrOutputToCandidateFactMappingRow[] {
       review_requirements: ["human-surface-confirmation"],
       prohibited_canonical_targets: ["authority_reference", "request_reference"],
       source_refs: sourceRefs,
-      notes: ["References gleaned from screenshots must be confirmed against durable truth records."],
+      notes: [
+        "References gleaned from screenshots must be confirmed against durable truth records.",
+      ],
     },
     {
       mapping_ref: "ocr_map_handwritten_text",
@@ -1043,7 +1002,9 @@ function mappingRows(): OcrOutputToCandidateFactMappingRow[] {
       review_requirements: ["always-review", "legibility-check"],
       prohibited_canonical_targets: ["operator_note_truth", "customer_statement_truth"],
       source_refs: sourceRefs,
-      notes: ["Handwritten note text is review-only material and must never become workflow truth automatically."],
+      notes: [
+        "Handwritten note text is review-only material and must never become workflow truth automatically.",
+      ],
     },
     {
       mapping_ref: "ocr_map_handwritten_date",
@@ -1067,7 +1028,9 @@ function mappingRows(): OcrOutputToCandidateFactMappingRow[] {
       review_requirements: ["unsupported-in-initial-scope"],
       prohibited_canonical_targets: ["canonical_text", "language-normalized-fact"],
       source_refs: sourceRefs,
-      notes: ["This profile remains blocked until a future provider/runtime and multilingual review policy are frozen."],
+      notes: [
+        "This profile remains blocked until a future provider/runtime and multilingual review policy are frozen.",
+      ],
     },
   ];
 }
@@ -1104,8 +1067,7 @@ export function createRecommendedDocumentExtractionProviderInventory(
           "image/bmp",
           "image/webp",
         ],
-        processor_version_pinning_posture:
-          "FROZEN_PROCESSOR_VERSION_AVAILABLE_UP_TO_18_MONTHS",
+        processor_version_pinning_posture: "FROZEN_PROCESSOR_VERSION_AVAILABLE_UP_TO_18_MONTHS",
         execution_mode_summary:
           "Supports processor-based OCR with sync and long-running flows depending on document type and size.",
         page_limit_summary:
@@ -1115,8 +1077,7 @@ export function createRecommendedDocumentExtractionProviderInventory(
         source_refs: [
           ...sourceRefs,
           {
-            source_ref:
-              "https://docs.cloud.google.com/document-ai/docs/enterprise-document-ocr",
+            source_ref: "https://docs.cloud.google.com/document-ai/docs/enterprise-document-ocr",
             rationale:
               "Current official Document AI OCR docs confirm supported formats and frozen processor-version pinning posture.",
           },
@@ -1133,12 +1094,7 @@ export function createRecommendedDocumentExtractionProviderInventory(
         provider_label: "Amazon Textract Document Text Detection",
         selection_state: "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION",
         docs_urls: [...AWS_TEXTRACT_DOCS],
-        supported_mime_types: [
-          "application/pdf",
-          "image/jpeg",
-          "image/png",
-          "image/tiff",
-        ],
+        supported_mime_types: ["application/pdf", "image/jpeg", "image/png", "image/tiff"],
         processor_version_pinning_posture:
           "API_MODEL_VERSION_RETURNED_PER_RESPONSE_BUT_PLATFORM_NOT_SELECTED",
         execution_mode_summary:
@@ -1150,8 +1106,7 @@ export function createRecommendedDocumentExtractionProviderInventory(
         source_refs: [
           ...sourceRefs,
           {
-            source_ref:
-              "https://docs.aws.amazon.com/en_us/textract/latest/dg/limits-document.html",
+            source_ref: "https://docs.aws.amazon.com/en_us/textract/latest/dg/limits-document.html",
             rationale:
               "Current Textract quotas define supported formats, sync/async limits, language, and handwriting constraints.",
           },
@@ -1180,8 +1135,7 @@ export function createRecommendedDocumentExtractionProviderInventory(
           "application/vnd.openxmlformats-officedocument.presentationml.presentation",
           "text/html",
         ],
-        processor_version_pinning_posture:
-          "API_VERSION_AND_MODEL_FAMILY_MUST_BE_EXPLICITLY_FROZEN",
+        processor_version_pinning_posture: "API_VERSION_AND_MODEL_FAMILY_MUST_BE_EXPLICITLY_FROZEN",
         execution_mode_summary:
           "Analyze and batch APIs are available under the current GA API version with broad model coverage.",
         page_limit_summary:
@@ -1210,8 +1164,7 @@ export function createRecommendedDocumentExtractionProviderInventory(
         selection_state: "SELF_HOST_DECISION_REQUIRED",
         docs_urls: [],
         supported_mime_types: [...supportedMimeTypesPortableBaseline()],
-        processor_version_pinning_posture:
-          "MODEL_HASH_AND_CONTAINER_DIGEST_REQUIRED",
+        processor_version_pinning_posture: "MODEL_HASH_AND_CONTAINER_DIGEST_REQUIRED",
         execution_mode_summary:
           "Async-only queue worker with explicit model provenance, object-version pinning, and separate raw-output storage.",
         page_limit_summary:
@@ -1259,17 +1212,13 @@ export function createRecommendedDocumentExtractionSelectionRecord(
     self_host_runtime_family_or_null: null,
     selection_posture_label: "Self-host decision required",
     processing_posture: "ASYNC_QUEUE_REQUIRED",
-    activation_gate_posture:
-      "STABLE_OBJECT_VERSION_AND_SCAN_ADOPTION_REQUIRED",
+    activation_gate_posture: "STABLE_OBJECT_VERSION_AND_SCAN_ADOPTION_REQUIRED",
     provider_inventory_ref:
       "data/provisioning/document_extraction_provider_inventory.template.json",
     profile_catalog_ref: "config/evidence/document_extraction_profile_catalog.json",
-    review_thresholds_ref:
-      "config/evidence/document_extraction_review_thresholds.json",
-    candidate_fact_mapping_ref:
-      "config/evidence/ocr_output_to_candidate_fact_mapping.json",
-    raw_output_retention_posture:
-      "PROVIDER_RAW_OUTPUT_SEPARATE_SHORT_LIVED_RESTRICTED",
+    review_thresholds_ref: "config/evidence/document_extraction_review_thresholds.json",
+    candidate_fact_mapping_ref: "config/evidence/ocr_output_to_candidate_fact_mapping.json",
+    raw_output_retention_posture: "PROVIDER_RAW_OUTPUT_SEPARATE_SHORT_LIVED_RESTRICTED",
     normalized_output_retention_posture:
       "NORMALIZED_EXTRACTION_JSON_RETAINED_WITH_EVIDENCE_LINEAGE",
     candidate_fact_boundary_statement: selectionTruthBoundary(),
@@ -1333,21 +1282,24 @@ export function createRecommendedDocumentExtractionReviewThresholds(): DocumentE
         min_inclusive: 0.985,
         max_exclusive: 1.001,
         action: "AUTO_ACCEPT_TO_CANDIDATE",
-        summary: "Only bounded fields on low-ambiguity profiles may enter candidate facts automatically in this band.",
+        summary:
+          "Only bounded fields on low-ambiguity profiles may enter candidate facts automatically in this band.",
       },
       {
         band_ref: "confidence_review_required",
         min_inclusive: 0.9,
         max_exclusive: 0.985,
         action: "REVIEW_REQUIRED",
-        summary: "Human review is required before candidate-fact use for the affected field or profile.",
+        summary:
+          "Human review is required before candidate-fact use for the affected field or profile.",
       },
       {
         band_ref: "confidence_layout_only",
         min_inclusive: 0.75,
         max_exclusive: 0.9,
         action: "LAYOUT_ONLY_RETAIN",
-        summary: "Retain normalized extraction for evidence and review, but do not emit active candidate facts.",
+        summary:
+          "Retain normalized extraction for evidence and review, but do not emit active candidate facts.",
       },
       {
         band_ref: "confidence_quality_too_low",
@@ -1541,8 +1493,7 @@ export function createDocumentExtractionGovernanceBoardViewModel(): DocumentExtr
         lineage_rows: [
           {
             label: "Lineage strip",
-            detail:
-              "upload object version -> extraction run -> evidence item -> candidate facts",
+            detail: "upload object version -> extraction run -> evidence item -> candidate facts",
           },
           {
             label: "Duplicate handling",
@@ -1555,10 +1506,7 @@ export function createDocumentExtractionGovernanceBoardViewModel(): DocumentExtr
             detail: profile.lineage_requirements.join(", "),
           },
         ],
-        inspector_notes: [
-          ...profile.notes,
-          ...(profileThreshold?.notes ?? []),
-        ],
+        inspector_notes: [...profile.notes, ...(profileThreshold?.notes ?? [])],
         source_refs: profile.source_refs,
       };
     }),
@@ -1575,7 +1523,9 @@ export function validateDocumentExtractionSelectionRecord(
   record: DocumentExtractionSelectionRecord,
 ): void {
   if (record.selection_status !== "SELF_HOST_DECISION_REQUIRED") {
-    throw new Error("The canonical OCR posture must remain SELF_HOST_DECISION_REQUIRED until a provider/runtime is explicitly selected.");
+    throw new Error(
+      "The canonical OCR posture must remain SELF_HOST_DECISION_REQUIRED until a provider/runtime is explicitly selected.",
+    );
   }
   if (record.managed_default_status !== "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION") {
     throw new Error("The managed default must stay blocked until a cloud platform is selected.");
@@ -1589,11 +1539,15 @@ export function validateDocumentExtractionProviderInventory(
   inventory: DocumentExtractionProviderInventory,
 ): void {
   if (inventory.option_rows.length < 4) {
-    throw new Error("The OCR option matrix must compare at least three managed options plus one self-host path.");
+    throw new Error(
+      "The OCR option matrix must compare at least three managed options plus one self-host path.",
+    );
   }
   if (
     !inventory.option_rows.some(
-      (row) => row.option_kind === "SELF_HOST_STACK" && row.selection_state === "SELF_HOST_DECISION_REQUIRED",
+      (row) =>
+        row.option_kind === "SELF_HOST_STACK" &&
+        row.selection_state === "SELF_HOST_DECISION_REQUIRED",
     )
   ) {
     throw new Error("The OCR option matrix must keep a self-host decision row explicit.");
@@ -1604,13 +1558,13 @@ export function validateDocumentExtractionProfileCatalog(
   catalog: DocumentExtractionProfileCatalog,
 ): void {
   if (catalog.profiles.length < 6) {
-    throw new Error("The OCR profile catalog must cover the minimum documentary evidence families.");
+    throw new Error(
+      "The OCR profile catalog must cover the minimum documentary evidence families.",
+    );
   }
   if (
     catalog.profiles.some((profile) =>
-      profile.candidate_fact_families.some(
-        (family) => !family.endsWith("_CANDIDATE"),
-      ),
+      profile.candidate_fact_families.some((family) => !family.endsWith("_CANDIDATE")),
     )
   ) {
     throw new Error("Every OCR profile candidate family must remain candidate-only.");
@@ -1656,20 +1610,17 @@ export function validateOcrOutputToCandidateFactMapping(
   }
 }
 
-export function assertOcrCandidateBoundary(
-  mapping: OcrOutputToCandidateFactMapping,
-): void {
+export function assertOcrCandidateBoundary(mapping: OcrOutputToCandidateFactMapping): void {
   const serialized = JSON.stringify(mapping).toLowerCase();
-  [
-    "\"canonical_fact\"",
-    "\"filing_field\"",
-    "\"trusted_total\"",
-    "\"authority_truth\"",
-  ].forEach((marker) => {
-    if (serialized.includes(marker)) {
-      throw new Error(`OCR mapping must not contain direct canonical promotion markers (${marker}).`);
-    }
-  });
+  ['"canonical_fact"', '"filing_field"', '"trusted_total"', '"authority_truth"'].forEach(
+    (marker) => {
+      if (serialized.includes(marker)) {
+        throw new Error(
+          `OCR mapping must not contain direct canonical promotion markers (${marker}).`,
+        );
+      }
+    },
+  );
 }
 
 export function assertDocumentExtractionArtifactsSanitized(
@@ -1677,13 +1628,11 @@ export function assertDocumentExtractionArtifactsSanitized(
   record: DocumentExtractionSelectionRecord,
 ): void {
   const serialized = JSON.stringify({ inventory, record }).toLowerCase();
-  ["api_key", "client_secret", "bearer ", "authorization:", "access_token"].forEach(
-    (marker) => {
-      if (serialized.includes(marker)) {
-        throw new Error(`OCR artifacts must not persist raw credential material (${marker}).`);
-      }
-    },
-  );
+  ["api_key", "client_secret", "bearer ", "authorization:", "access_token"].forEach((marker) => {
+    if (serialized.includes(marker)) {
+      throw new Error(`OCR artifacts must not persist raw credential material (${marker}).`);
+    }
+  });
 }
 
 export function createDefaultDocumentExtractionEntryUrls(): DocumentExtractionProviderEntryUrls {
@@ -1694,10 +1643,7 @@ export function createDefaultDocumentExtractionEntryUrls(): DocumentExtractionPr
 }
 
 function evidenceManifestPathFor(selectionRecordPath: string): string {
-  return path.join(
-    path.dirname(selectionRecordPath),
-    "document_extraction_evidence_manifest.json",
-  );
+  return path.join(path.dirname(selectionRecordPath), "document_extraction_evidence_manifest.json");
 }
 
 async function persistJsonArtifact(filePath: string, payload: unknown): Promise<void> {
@@ -1710,9 +1656,7 @@ function locateSelector(page: Page, descriptor: SelectorDescriptor): Locator {
     case "ROLE":
       return page.getByRole(
         descriptor.value as Parameters<Page["getByRole"]>[0],
-        descriptor.accessibleName
-          ? { name: descriptor.accessibleName, exact: true }
-          : undefined,
+        descriptor.accessibleName ? { name: descriptor.accessibleName, exact: true } : undefined,
       );
     case "LABEL":
       return page.getByLabel(descriptor.value, { exact: true });
@@ -1756,17 +1700,12 @@ async function captureNoteEvidence(
   });
 }
 
-async function detectFixtureState(
-  page: Page,
-): Promise<DocumentExtractionFixtureState> {
+async function detectFixtureState(page: Page): Promise<DocumentExtractionFixtureState> {
   const scenario =
-    (await page.locator("body").getAttribute("data-scenario")) ??
-    "blocked-by-platform";
+    (await page.locator("body").getAttribute("data-scenario")) ?? "blocked-by-platform";
   return {
     provider_state:
-      scenario === "blocked-by-platform"
-        ? "blocked-by-platform"
-        : "blocked-by-platform",
+      scenario === "blocked-by-platform" ? "blocked-by-platform" : "blocked-by-platform",
   };
 }
 
@@ -1782,8 +1721,7 @@ export async function createManagedDocumentExtractionProjectOrRecordSelfHostDeci
   assertProviderFlowAllowed(options.runContext, provider, DOCUMENT_EXTRACTION_FLOW_ID);
 
   const manifest = await loadDocumentExtractionSelectorManifest();
-  const entryUrls =
-    options.entryUrls ?? createDefaultDocumentExtractionEntryUrls();
+  const entryUrls = options.entryUrls ?? createDefaultDocumentExtractionEntryUrls();
   const steps: StepContract[] = [
     createPendingStep({
       stepId: DOCUMENT_EXTRACTION_STEP_IDS.openDecisionSurface,
@@ -1847,15 +1785,13 @@ export async function createManagedDocumentExtractionProjectOrRecordSelfHostDeci
   );
 
   const fixtureState = await detectFixtureState(options.page);
-  const providerInventory =
-    createRecommendedDocumentExtractionProviderInventory(options.runContext);
-  const selectionRecord =
-    createRecommendedDocumentExtractionSelectionRecord(options.runContext);
+  const providerInventory = createRecommendedDocumentExtractionProviderInventory(
+    options.runContext,
+  );
+  const selectionRecord = createRecommendedDocumentExtractionSelectionRecord(options.runContext);
   const profileCatalog = createRecommendedDocumentExtractionProfileCatalog();
-  const reviewThresholds =
-    createRecommendedDocumentExtractionReviewThresholds();
-  const candidateFactMapping =
-    createRecommendedOcrOutputToCandidateFactMapping();
+  const reviewThresholds = createRecommendedDocumentExtractionReviewThresholds();
+  const candidateFactMapping = createRecommendedOcrOutputToCandidateFactMapping();
   const boardViewModel = createDocumentExtractionGovernanceBoardViewModel();
 
   validateDocumentExtractionProviderInventory(providerInventory);
@@ -1866,11 +1802,7 @@ export async function createManagedDocumentExtractionProjectOrRecordSelfHostDeci
   assertOcrCandidateBoundary(candidateFactMapping);
   assertDocumentExtractionArtifactsSanitized(providerInventory, selectionRecord);
 
-  steps[1] = transitionStep(
-    steps[1]!,
-    "RUNNING",
-    "Recording the explicit OCR decision posture.",
-  );
+  steps[1] = transitionStep(steps[1]!, "RUNNING", "Recording the explicit OCR decision posture.");
   steps[1] = transitionStep(
     steps[1]!,
     "SUCCEEDED",

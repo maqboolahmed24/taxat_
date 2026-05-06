@@ -24,10 +24,7 @@ function fixtureRunContext() {
 }
 
 function buildCatalog(mode: "fresh" | "existing" = "existing") {
-  return buildTemplateIdpArtifacts(
-    fixtureRunContext(),
-    createRecommendedFixtureState(mode),
-  );
+  return buildTemplateIdpArtifacts(fixtureRunContext(), createRecommendedFixtureState(mode));
 }
 
 test("template builder emits stable interactive and machine client catalogs for the recommended topology", () => {
@@ -55,9 +52,7 @@ test("template builder emits stable interactive and machine client catalogs for 
     (client) => client.surface_family !== "NATIVE_MACOS_OPERATOR",
   );
   expect(browserClients.every((client) => client.allowed_web_origins.length > 0)).toBe(true);
-  expect(browserClients.every((client) => client.secret_posture.requires_vault_secret)).toBe(
-    true,
-  );
+  expect(browserClients.every((client) => client.secret_posture.requires_vault_secret)).toBe(true);
 
   const machineAudiences = new Set(
     artifacts.machineClientInventory.machine_clients.map(
@@ -76,7 +71,9 @@ test("fresh topology catalogs never persist raw client secrets", () => {
   expect(serialized).not.toContain("sandbox-operator-secret");
   expect(serialized).not.toContain("preprod-operator-secret");
   expect(serialized).not.toContain("production-management-secret");
-  expect(serialized).toContain("vault-write://sec_sandbox_runtime/idp_client_operator_browser_sandbox");
+  expect(serialized).toContain(
+    "vault-write://sec_sandbox_runtime/idp_client_operator_browser_sandbox",
+  );
 });
 
 test("application catalog validator rejects browser clients without allowed origins", () => {
@@ -110,7 +107,7 @@ test("machine catalog validator rejects callback leakage onto machine clients", 
     "https://auth.sandbox.taxat.example/oauth/idp/operator/callback",
   ];
 
-  expect(() =>
-    validateIdpMachineClientInventory(brokenInventory, artifacts.tenantRecord),
-  ).toThrow(/must not carry callback or origin state/i);
+  expect(() => validateIdpMachineClientInventory(brokenInventory, artifacts.tenantRecord)).toThrow(
+    /must not carry callback or origin state/i,
+  );
 });

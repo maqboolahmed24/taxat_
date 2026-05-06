@@ -1,0 +1,127 @@
+{
+  "contract_version": "EPHEMERAL_RESET_SCOPE_POLICY_V1",
+  "policy_id": "ephemeral_reset_scope_policy",
+  "basis_statement": "Reset scopes must make queue, cache, object-prefix, upload-session, cursor, and audit consequences explicit. Disposable acceleration may purge freely inside one approved environment identity, while ephemeral truth rails are recreated and re-seeded only under the full-isolation scope.",
+  "reset_scope_rows": [
+    {
+      "reset_scope_ref": "FAST_DISPOSABLE_REUSE",
+      "reseed_required": false,
+      "touched_resource_classes": [
+        "QUEUE_NAMESPACE_SET",
+        "DLQ_NAMESPACE_SET",
+        "CACHE_NAMESPACE_SET",
+        "PROJECTION_NAMESPACE_SET",
+        "STREAM_CURSOR_SET",
+        "WORKER_LEASE_SET"
+      ],
+      "preserved_resource_classes": [
+        "CONTROL_SCHEMA",
+        "AUDIT_SCHEMA",
+        "OBJECT_PREFIX_STAGING",
+        "OBJECT_PREFIX_QUARANTINE",
+        "OBJECT_PREFIX_DERIVED",
+        "UPLOAD_SESSION_SET",
+        "AUDIT_STREAM_SET",
+        "RESET_EVIDENCE_ARTIFACT"
+      ],
+      "notes": [
+        "Use this when the deterministic truth basis should remain intact but caches, queues, projections, and cursors must be cleared between scenarios.",
+        "This scope never rewrites control, audit, or object truth rails."
+      ]
+    },
+    {
+      "reset_scope_ref": "FULL_TEST_ISOLATION",
+      "reseed_required": true,
+      "touched_resource_classes": [
+        "CONTROL_SCHEMA",
+        "AUDIT_SCHEMA",
+        "OBJECT_PREFIX_STAGING",
+        "OBJECT_PREFIX_QUARANTINE",
+        "OBJECT_PREFIX_DERIVED",
+        "QUEUE_NAMESPACE_SET",
+        "DLQ_NAMESPACE_SET",
+        "CACHE_NAMESPACE_SET",
+        "PROJECTION_NAMESPACE_SET",
+        "STREAM_CURSOR_SET",
+        "UPLOAD_SESSION_SET",
+        "WORKER_LEASE_SET",
+        "AUDIT_STREAM_SET"
+      ],
+      "preserved_resource_classes": [
+        "RESET_EVIDENCE_ARTIFACT"
+      ],
+      "notes": [
+        "Use this when a suite requires a fully recreated deterministic basis with fresh schemas, object prefixes, upload-session rails, and audit namespaces.",
+        "Even here, evidence artifacts persist so reset proof is not lost."
+      ]
+    }
+  ],
+  "reset_order_rows": [
+    {
+      "step_ref": "WORKER_LEASE_FENCE",
+      "action": "FENCE_OR_HALT",
+      "resource_class_refs": [
+        "WORKER_LEASE_SET"
+      ]
+    },
+    {
+      "step_ref": "QUEUE_AND_DLQ_PURGE",
+      "action": "PURGE_MESSAGES",
+      "resource_class_refs": [
+        "QUEUE_NAMESPACE_SET",
+        "DLQ_NAMESPACE_SET"
+      ]
+    },
+    {
+      "step_ref": "CACHE_AND_PROJECTION_PURGE",
+      "action": "PURGE_KEYS_AND_DERIVED_STATE",
+      "resource_class_refs": [
+        "CACHE_NAMESPACE_SET",
+        "PROJECTION_NAMESPACE_SET",
+        "STREAM_CURSOR_SET"
+      ]
+    },
+    {
+      "step_ref": "OBJECT_AND_UPLOAD_RECREATE",
+      "action": "RECREATE_PREFIXES_AND_UPLOAD_NAMESPACES",
+      "resource_class_refs": [
+        "OBJECT_PREFIX_STAGING",
+        "OBJECT_PREFIX_QUARANTINE",
+        "OBJECT_PREFIX_DERIVED",
+        "UPLOAD_SESSION_SET"
+      ]
+    },
+    {
+      "step_ref": "SCHEMA_AND_AUDIT_RECREATE",
+      "action": "RECREATE_SCHEMA_AND_AUDIT_NAMESPACE",
+      "resource_class_refs": [
+        "CONTROL_SCHEMA",
+        "AUDIT_SCHEMA",
+        "AUDIT_STREAM_SET"
+      ]
+    },
+    {
+      "step_ref": "DETERMINISTIC_RESEED",
+      "action": "LOAD_SEED_PROFILE_IF_REQUIRED",
+      "resource_class_refs": [
+        "CONTROL_SCHEMA",
+        "AUDIT_SCHEMA"
+      ]
+    },
+    {
+      "step_ref": "CLEANLINESS_PROOF",
+      "action": "VERIFY_ENVIRONMENT_MATCHES_DECLARED_BASIS",
+      "resource_class_refs": [
+        "QUEUE_NAMESPACE_SET",
+        "CACHE_NAMESPACE_SET",
+        "OBJECT_PREFIX_STAGING",
+        "OBJECT_PREFIX_QUARANTINE",
+        "OBJECT_PREFIX_DERIVED",
+        "CONTROL_SCHEMA",
+        "AUDIT_SCHEMA",
+        "UPLOAD_SESSION_SET",
+        "AUDIT_STREAM_SET"
+      ]
+    }
+  ]
+}

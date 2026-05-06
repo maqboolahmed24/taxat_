@@ -106,7 +106,9 @@ def render_mermaid(records: list[dict[str, Any]], edges: list[dict[str, Any]]) -
     for record in records:
         records_by_family.setdefault(record["module_family"], []).append(record)
     for family in builder.FAMILY_ORDER:
-        family_records = sorted(records_by_family.get(family, []), key=lambda record: record["module_name"])
+        family_records = sorted(
+            records_by_family.get(family, []), key=lambda record: record["module_name"]
+        )
         if not family_records:
             continue
         lines.append(f'  subgraph {family}["{family}"]')
@@ -147,7 +149,9 @@ def main() -> int:
     diff = first_diff(expected_callsites, actual_callsites)
     if diff is not None:
         index, expected, actual = diff
-        fail(f"module_callsite_index.jsonl drifted at row {index}. Expected {expected}, got {actual}")
+        fail(
+            f"module_callsite_index.jsonl drifted at row {index}. Expected {expected}, got {actual}"
+        )
 
     actual_side_effects = load_json(builder.SIDE_EFFECT_MATRIX_PATH)
     if actual_side_effects != expected_side_effects:
@@ -182,7 +186,13 @@ def main() -> int:
             fail(f"Module `{row['module_name']}` has unexpected family `{row['module_family']}`.")
         if row["purity_class"] not in builder.PURITY_ORDER:
             fail(f"Module `{row['module_name']}` has unexpected purity `{row['purity_class']}`.")
-        if row["external_boundary_crossing"] not in {"none", "authority", "browser_handoff", "notification", "storage"}:
+        if row["external_boundary_crossing"] not in {
+            "none",
+            "authority",
+            "browser_handoff",
+            "notification",
+            "storage",
+        }:
             fail(
                 f"Module `{row['module_name']}` has unexpected boundary `{row['external_boundary_crossing']}`."
             )
@@ -213,16 +223,27 @@ def main() -> int:
         if key in edge_keys:
             fail(f"Duplicate dependency edge detected: {key}")
         edge_keys.add(key)
-        if row["upstream_module"] not in catalog_name_set or row["downstream_module"] not in catalog_name_set:
+        if (
+            row["upstream_module"] not in catalog_name_set
+            or row["downstream_module"] not in catalog_name_set
+        ):
             fail(f"Dependency edge references unknown modules: {key}")
         if row["dependency_type"] not in builder.DEPENDENCY_TYPES:
-            fail(f"Dependency edge `{row['edge_id']}` has invalid dependency_type `{row['dependency_type']}`.")
+            fail(
+                f"Dependency edge `{row['edge_id']}` has invalid dependency_type `{row['dependency_type']}`."
+            )
         if len(row["rationale"].strip()) < 24:
             fail(f"Dependency edge `{row['edge_id']}` has underspecified rationale.")
-        if row["dependency_type"] == "artifact_availability_dependency" and not row["shared_artifacts"].strip():
+        if (
+            row["dependency_type"] == "artifact_availability_dependency"
+            and not row["shared_artifacts"].strip()
+        ):
             fail(f"Artifact edge `{row['edge_id']}` is missing shared_artifacts.")
         if row["dependency_type"] == "external_boundary_dependency":
-            if boundaries[row["upstream_module"]] == "none" and boundaries[row["downstream_module"]] == "none":
+            if (
+                boundaries[row["upstream_module"]] == "none"
+                and boundaries[row["downstream_module"]] == "none"
+            ):
                 fail(
                     f"External-boundary edge `{row['edge_id']}` has no authority/browser/notification boundary on "
                     "either endpoint."
@@ -231,7 +252,9 @@ def main() -> int:
     touchpoint_modules = {row["module_name"] for row in actual_touchpoints["rows"]}
     for row in actual_catalog["modules"]:
         if row["related_schemas"] and row["module_name"] not in touchpoint_modules:
-            fail(f"Module `{row['module_name']}` has related schemas but no schema touchpoint rows.")
+            fail(
+                f"Module `{row['module_name']}` has related schemas but no schema touchpoint rows."
+            )
 
     expected_mermaid = render_mermaid(actual_catalog["modules"], expected_edges)
     actual_mermaid = builder.MODULE_GRAPH_PATH.read_text()
@@ -254,7 +277,9 @@ def main() -> int:
         "dependency_edge_count": len(actual_edge_rows),
         "run_bound_module_count": actual_catalog["summary"]["run_bound_module_count"],
         "schema_touchpoint_row_count": actual_touchpoints["summary"]["touchpoint_row_count"],
-        "unresolved_helper_count": actual_unresolved["summary"]["unresolved_or_primitive_call_count"],
+        "unresolved_helper_count": actual_unresolved["summary"][
+            "unresolved_or_primitive_call_count"
+        ],
     }
     print(json.dumps(summary, indent=2, sort_keys=True))
     return 0

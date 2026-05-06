@@ -35,8 +35,7 @@ import {
   type SourceRef,
 } from "./create_email_account_and_sender_domain.js";
 
-export const EMAIL_TEMPLATE_FLOW_ID =
-  "email-templates-and-webhooks-configuration";
+export const EMAIL_TEMPLATE_FLOW_ID = "email-templates-and-webhooks-configuration";
 export const EMAIL_TEMPLATE_POLICY_VERSION = "1.0";
 
 export const EMAIL_TEMPLATE_STEP_IDS = {
@@ -59,15 +58,9 @@ export type EmailSenderIdentityProfileRef =
   | "customer_transactional_noreply"
   | "support_acknowledgement_help";
 
-export type TemplateSourceDisposition =
-  | "CREATED_DURING_RUN"
-  | "ADOPTED_EXISTING";
+export type TemplateSourceDisposition = "CREATED_DURING_RUN" | "ADOPTED_EXISTING";
 
-export type EmailTrackingLinksMode =
-  | "None"
-  | "HtmlAndText"
-  | "HtmlOnly"
-  | "TextOnly";
+export type EmailTrackingLinksMode = "None" | "HtmlAndText" | "HtmlOnly" | "TextOnly";
 
 export type EmailProviderEventType =
   | "Delivery"
@@ -84,11 +77,7 @@ export type EmailTemplateFlowOutcome =
 export interface SafeMergeVariableDefinition {
   variable_ref: string;
   label: string;
-  privacy_class:
-    | "CUSTOMER_SAFE_TEXT"
-    | "ROUTE_REF"
-    | "FOCUS_ANCHOR_REF"
-    | "DELIVERY_CORRELATION";
+  privacy_class: "CUSTOMER_SAFE_TEXT" | "ROUTE_REF" | "FOCUS_ANCHOR_REF" | "DELIVERY_CORRELATION";
   description: string;
   source_contract_ref: string;
 }
@@ -156,19 +145,14 @@ export interface EmailDeliveryEventRule {
   normalized_evidence_type: string;
   allowed_internal_updates: string[];
   prohibited_internal_updates: string[];
-  suppression_posture_effect:
-    | "NONE"
-    | "CREATE_SUPPRESSION_CANDIDATE"
-    | "CONFIRM_SUPPRESSION";
+  suppression_posture_effect: "NONE" | "CREATE_SUPPRESSION_CANDIDATE" | "CONFIRM_SUPPRESSION";
   retry_posture_effect:
     | "NONE"
     | "NO_RETRY_REQUIRED"
     | "STOP_AUTOMATIC_RETRY_PENDING_OPERATOR_REVIEW"
     | "HARD_BLOCK_RESEND";
   observability_counter_keys: string[];
-  privacy_capture_mode:
-    | "METADATA_ONLY"
-    | "METADATA_AND_REDACTED_REASON";
+  privacy_capture_mode: "METADATA_ONLY" | "METADATA_AND_REDACTED_REASON";
   source_refs: SourceRef[];
   notes: string[];
 }
@@ -213,8 +197,7 @@ export interface EmailWebhookEndpointRecord {
     basic_auth_password_ref: string;
     custom_header_name: "X-Taxat-Webhook-Secret";
     custom_header_secret_ref: string;
-    provider_signature_mode:
-      "NOT_SUPPORTED_PROVIDER_NATIVE_EQUIVALENT_AUTH";
+    provider_signature_mode: "NOT_SUPPORTED_PROVIDER_NATIVE_EQUIVALENT_AUTH";
   };
   replay_protection: {
     require_https: true;
@@ -226,9 +209,7 @@ export interface EmailWebhookEndpointRecord {
     ledger_ref: string;
     duplicate_effect: "RETURN_200_NO_DUPLICATE_EVIDENCE";
   };
-  enabled_event_types: Array<
-    "Delivery" | "Bounce" | "SpamComplaint" | "SubscriptionChange"
-  >;
+  enabled_event_types: Array<"Delivery" | "Bounce" | "SpamComplaint" | "SubscriptionChange">;
   disabled_event_types: Array<"Open" | "Click">;
   correlation_keys: string[];
   source_refs: SourceRef[];
@@ -252,10 +233,7 @@ export interface EmailTemplateDeploymentBinding {
     | "env_shared_sandbox_integration"
     | "env_preproduction_verification"
     | "env_production";
-  workspace_ref:
-    | "email_ws_sandbox"
-    | "email_ws_preprod"
-    | "email_ws_production";
+  workspace_ref: "email_ws_sandbox" | "email_ws_preprod" | "email_ws_production";
   sender_domain_ref:
     | "email_domain_notify_sandbox"
     | "email_domain_notify_preprod"
@@ -696,7 +674,8 @@ const TEMPLATE_SAMPLE_MODELS: Record<EmailNotificationFamily, Record<string, str
     item_period_label: "2025 to 2026",
     item_reference_label: "Request SA-001",
     customer_status_label: "In review",
-    staff_comment_preview: "We've checked the first upload and left one follow-up note in the portal.",
+    staff_comment_preview:
+      "We've checked the first upload and left one follow-up note in the portal.",
     detail_route_ref: "/portal/requests/wi_2025_26_001",
     focus_anchor_ref: "customer-comment-thread",
     return_route_ref: "/portal/requests/wi_2025_26_001",
@@ -742,7 +721,8 @@ const TEMPLATE_SAMPLE_MODELS: Record<EmailNotificationFamily, Record<string, str
     item_reference_label: "Request SA-001",
     help_request_id: "help_001",
     help_reason_label: "Question about the upload you requested",
-    case_context_summary: "Your help request is linked to the same filing request and upload panel.",
+    case_context_summary:
+      "Your help request is linked to the same filing request and upload panel.",
     detail_route_ref: "/portal/help/help_001",
     focus_anchor_ref: "portal-help-request-help_001",
     return_route_ref: "/portal/requests/wi_2025_26_001",
@@ -790,32 +770,27 @@ function createProviderSelectionRecord(): ProviderSelectionRecord {
     docs_urls: [...EMAIL_TEMPLATE_PROVIDER_DOCS],
     source_refs: [
       {
-        source_ref:
-          "Algorithm/collaboration_workspace_contract.md::L1838[Customer_notifications]",
+        source_ref: "Algorithm/collaboration_workspace_contract.md::L1838[Customer_notifications]",
         rationale:
           "Only explicit customer-visible collaboration events may fan out into optional customer email.",
       },
       {
-        source_ref:
-          "Algorithm/data_model.md::L195[WorkItemNotification]",
+        source_ref: "Algorithm/data_model.md::L195[WorkItemNotification]",
         rationale:
           "Notification routing, continuity, and customer-safe projection must remain explicit and typed.",
       },
       {
-        source_ref:
-          "Algorithm/data_model.md::L2240[PortalHelpRequest]",
+        source_ref: "Algorithm/data_model.md::L2240[PortalHelpRequest]",
         rationale:
           "Contextual help acknowledgements must preserve route and case context instead of becoming free-form tickets.",
       },
       {
-        source_ref:
-          "https://postmarkapp.com/developer/api/templates-api",
+        source_ref: "https://postmarkapp.com/developer/api/templates-api",
         rationale:
           "Current provider documentation exposes API-managed template aliases and server-scoped template records.",
       },
       {
-        source_ref:
-          "https://postmarkapp.com/developer/webhooks/webhooks-overview",
+        source_ref: "https://postmarkapp.com/developer/webhooks/webhooks-overview",
         rationale:
           "Current provider webhook posture is configured per server and authenticated with HTTPS, Basic Auth, and custom headers.",
       },
@@ -823,13 +798,8 @@ function createProviderSelectionRecord(): ProviderSelectionRecord {
   };
 }
 
-function continuityForTemplate(
-  family: EmailNotificationFamily,
-): EmailTemplateContinuityContract {
-  if (
-    family === "PORTAL_HELP_ACKNOWLEDGED" ||
-    family === "SUPPORT_CONTACT_ACKNOWLEDGED"
-  ) {
+function continuityForTemplate(family: EmailNotificationFamily): EmailTemplateContinuityContract {
+  if (family === "PORTAL_HELP_ACKNOWLEDGED" || family === "SUPPORT_CONTACT_ACKNOWLEDGED") {
     return {
       shell_family: "CLIENT_PORTAL_SHELL",
       object_anchor_ref_template: "portal-help/{{ help_request_id }}",
@@ -867,8 +837,7 @@ function buildTemplateRecords(): EmailTemplateRecord[] {
       sender_stream_ref: "email_stream_customer_transactional",
       sender_identity_profile_ref: "customer_transactional_noreply",
       subject_template: "Action needed for {{ item_title }}",
-      preheader_template:
-        "A new request for information is ready in your Taxat portal.",
+      preheader_template: "A new request for information is ready in your Taxat portal.",
       headline_template: "We need a little more information",
       body_template_paragraphs: [
         "We've added a request for information to your case for {{ item_title }}.",
@@ -914,15 +883,11 @@ function buildTemplateRecords(): EmailTemplateRecord[] {
       sample_render_model: TEMPLATE_SAMPLE_MODELS.REQUEST_INFO_CREATED,
       source_refs: [
         {
-          source_ref:
-            "Algorithm/collaboration_workspace_contract.md::L1846[new_request-for-info]",
-          rationale:
-            "New request-for-info is a notifyable customer event family.",
+          source_ref: "Algorithm/collaboration_workspace_contract.md::L1846[new_request-for-info]",
+          rationale: "New request-for-info is a notifyable customer event family.",
         },
       ],
-      notes: [
-        "Customer-safe projection fields only; no internal actor or gate context.",
-      ],
+      notes: ["Customer-safe projection fields only; no internal actor or gate context."],
     },
     {
       template_ref: "email_template_staff_customer_comment_created",
@@ -936,8 +901,7 @@ function buildTemplateRecords(): EmailTemplateRecord[] {
       sender_stream_ref: "email_stream_customer_transactional",
       sender_identity_profile_ref: "customer_transactional_noreply",
       subject_template: "New update on {{ item_title }}",
-      preheader_template:
-        "A Taxat reviewer shared a customer-visible update in the portal.",
+      preheader_template: "A Taxat reviewer shared a customer-visible update in the portal.",
       headline_template: "There is a new update on your case",
       body_template_paragraphs: [
         "A Taxat reviewer has shared a customer-visible comment on {{ item_title }}.",
@@ -980,13 +944,10 @@ function buildTemplateRecords(): EmailTemplateRecord[] {
         {
           source_ref:
             "Algorithm/collaboration_workspace_contract.md::L1847[new_staff_customer-visible_comment]",
-          rationale:
-            "Shared staff comments are explicitly notifyable to customers.",
+          rationale: "Shared staff comments are explicitly notifyable to customers.",
         },
       ],
-      notes: [
-        "Do not include individual staff identity when tenant policy masks it.",
-      ],
+      notes: ["Do not include individual staff identity when tenant policy masks it."],
     },
     {
       template_ref: "email_template_customer_due_date_changed",
@@ -1000,8 +961,7 @@ function buildTemplateRecords(): EmailTemplateRecord[] {
       sender_stream_ref: "email_stream_customer_transactional",
       sender_identity_profile_ref: "customer_transactional_noreply",
       subject_template: "Due date updated for {{ item_title }}",
-      preheader_template:
-        "The next due date in your Taxat portal has been created or updated.",
+      preheader_template: "The next due date in your Taxat portal has been created or updated.",
       headline_template: "A due date has changed",
       body_template_paragraphs: [
         "The next due date for {{ item_title }} has been set or updated in the portal.",
@@ -1048,9 +1008,7 @@ function buildTemplateRecords(): EmailTemplateRecord[] {
             "Customer due date creation or change is a notifyable family when the source contract allows it.",
         },
       ],
-      notes: [
-        "Do not turn overdue or escalation-only state into outbound copy.",
-      ],
+      notes: ["Do not turn overdue or escalation-only state into outbound copy."],
     },
     {
       template_ref: "email_template_item_resolved_or_closed",
@@ -1064,8 +1022,7 @@ function buildTemplateRecords(): EmailTemplateRecord[] {
       sender_stream_ref: "email_stream_customer_transactional",
       sender_identity_profile_ref: "customer_transactional_noreply",
       subject_template: "{{ item_title }} is complete",
-      preheader_template:
-        "A request in your Taxat portal is resolved or closed.",
+      preheader_template: "A request in your Taxat portal is resolved or closed.",
       headline_template: "This item is now complete",
       body_template_paragraphs: [
         "We've marked {{ item_title }} as resolved or closed in the portal.",
@@ -1108,8 +1065,7 @@ function buildTemplateRecords(): EmailTemplateRecord[] {
         {
           source_ref:
             "Algorithm/collaboration_workspace_contract.md::L1849[item_resolved_or_closed]",
-          rationale:
-            "Item resolved or closed is a notifyable customer event family.",
+          rationale: "Item resolved or closed is a notifyable customer event family.",
         },
       ],
       notes: [
@@ -1121,10 +1077,7 @@ function buildTemplateRecords(): EmailTemplateRecord[] {
       template_alias: "portal-help-acknowledged-v1",
       label: "Portal help acknowledged",
       notification_family: "PORTAL_HELP_ACKNOWLEDGED",
-      allowed_trigger_events: [
-        "CLIENT_PORTAL_REQUEST_HELP",
-        "PortalHelpRequestAllocated",
-      ],
+      allowed_trigger_events: ["CLIENT_PORTAL_REQUEST_HELP", "PortalHelpRequestAllocated"],
       visibility_class: "CUSTOMER_VISIBLE",
       customer_safe_projection_required: true,
       localization_posture: "EN_GB_ONLY",
@@ -1178,8 +1131,7 @@ function buildTemplateRecords(): EmailTemplateRecord[] {
         {
           source_ref:
             "Algorithm/northbound_api_and_session_contract.md::L431[CLIENT_PORTAL_REQUEST_HELP]",
-          rationale:
-            "Portal help allocation is a durable contextual-support event.",
+          rationale: "Portal help allocation is a durable contextual-support event.",
         },
         {
           source_ref:
@@ -1188,27 +1140,21 @@ function buildTemplateRecords(): EmailTemplateRecord[] {
             "Help acknowledgements must preserve route and case context rather than forcing blank restatement.",
         },
       ],
-      notes: [
-        "This is product-owned acknowledgement mail, not generic provider support mail.",
-      ],
+      notes: ["This is product-owned acknowledgement mail, not generic provider support mail."],
     },
     {
       template_ref: "email_template_support_contact_acknowledged",
       template_alias: "support-contact-acknowledged-v1",
       label: "Support contact acknowledged",
       notification_family: "SUPPORT_CONTACT_ACKNOWLEDGED",
-      allowed_trigger_events: [
-        "CLIENT_PORTAL_REQUEST_HELP",
-        "PortalHelpRequestAllocated",
-      ],
+      allowed_trigger_events: ["CLIENT_PORTAL_REQUEST_HELP", "PortalHelpRequestAllocated"],
       visibility_class: "CUSTOMER_VISIBLE",
       customer_safe_projection_required: true,
       localization_posture: "EN_GB_ONLY",
       sender_stream_ref: "email_stream_customer_transactional",
       sender_identity_profile_ref: "support_acknowledgement_help",
       subject_template: "Support message received for {{ item_title }}",
-      preheader_template:
-        "Your support contact was recorded with the same case context in Taxat.",
+      preheader_template: "Your support contact was recorded with the same case context in Taxat.",
       headline_template: "Your support message was received",
       body_template_paragraphs: [
         "We logged your support request through the {{ support_channel_label }} channel for {{ item_title }}.",
@@ -1255,13 +1201,10 @@ function buildTemplateRecords(): EmailTemplateRecord[] {
         {
           source_ref:
             "Algorithm/customer_client_portal_experience_contract.md::L666[context-preserving_help_submissions]",
-          rationale:
-            "Support-contact acknowledgements must preserve contextual case routing.",
+          rationale: "Support-contact acknowledgements must preserve contextual case routing.",
         },
       ],
-      notes: [
-        "This acknowledgement is customer-safe and channel-bounded.",
-      ],
+      notes: ["This acknowledgement is customer-safe and channel-bounded."],
     },
   ];
 }
@@ -1349,19 +1292,15 @@ export function createRecommendedEmailDeliveryEventMapping(): EmailDeliveryEvent
           {
             source_ref:
               "Algorithm/collaboration_workspace_contract.md::L1897[WorkItemNotificationDelivered]",
-            rationale:
-              "Delivered state belongs in audit evidence, not workflow mutation.",
+            rationale: "Delivered state belongs in audit evidence, not workflow mutation.",
           },
           {
-            source_ref:
-              "https://postmarkapp.com/developer/webhooks/delivery-webhook",
+            source_ref: "https://postmarkapp.com/developer/webhooks/delivery-webhook",
             rationale:
               "Current delivery webhook fields support message-level delivery evidence and metadata correlation.",
           },
         ],
-        notes: [
-          "Delivery confirmation may update notification evidence only.",
-        ],
+        notes: ["Delivery confirmation may update notification evidence only."],
       },
       {
         provider_event_type: "Bounce",
@@ -1380,15 +1319,11 @@ export function createRecommendedEmailDeliveryEventMapping(): EmailDeliveryEvent
         ],
         suppression_posture_effect: "CREATE_SUPPRESSION_CANDIDATE",
         retry_posture_effect: "STOP_AUTOMATIC_RETRY_PENDING_OPERATOR_REVIEW",
-        observability_counter_keys: [
-          "email.delivery.bounce",
-          "email.delivery.retry_blocked",
-        ],
+        observability_counter_keys: ["email.delivery.bounce", "email.delivery.retry_blocked"],
         privacy_capture_mode: "METADATA_AND_REDACTED_REASON",
         source_refs: [
           {
-            source_ref:
-              "https://postmarkapp.com/developer/webhooks/bounce-webhook",
+            source_ref: "https://postmarkapp.com/developer/webhooks/bounce-webhook",
             rationale:
               "Bounce webhook fields support bounce classification, metadata echo, and recipient-level suppression handling.",
           },
@@ -1418,15 +1353,12 @@ export function createRecommendedEmailDeliveryEventMapping(): EmailDeliveryEvent
         privacy_capture_mode: "METADATA_AND_REDACTED_REASON",
         source_refs: [
           {
-            source_ref:
-              "https://postmarkapp.com/developer/webhooks/spam-complaint-webhook",
+            source_ref: "https://postmarkapp.com/developer/webhooks/spam-complaint-webhook",
             rationale:
               "Spam complaint callbacks support complaint evidence and suppression posture.",
           },
         ],
-        notes: [
-          "Complaints force suppression posture and operator review, not workflow mutation.",
-        ],
+        notes: ["Complaints force suppression posture and operator review, not workflow mutation."],
       },
       {
         provider_event_type: "SubscriptionChange",
@@ -1448,15 +1380,11 @@ export function createRecommendedEmailDeliveryEventMapping(): EmailDeliveryEvent
         privacy_capture_mode: "METADATA_ONLY",
         source_refs: [
           {
-            source_ref:
-              "https://postmarkapp.com/developer/webhooks/subscription-change-webhook",
-            rationale:
-              "Subscription-change callbacks support opt-out suppression evidence only.",
+            source_ref: "https://postmarkapp.com/developer/webhooks/subscription-change-webhook",
+            rationale: "Subscription-change callbacks support opt-out suppression evidence only.",
           },
         ],
-        notes: [
-          "Unsubscribe state affects future send eligibility only.",
-        ],
+        notes: ["Unsubscribe state affects future send eligibility only."],
       },
       {
         provider_event_type: "Open",
@@ -1476,8 +1404,7 @@ export function createRecommendedEmailDeliveryEventMapping(): EmailDeliveryEvent
         privacy_capture_mode: "METADATA_ONLY",
         source_refs: [
           {
-            source_ref:
-              "https://postmarkapp.com/developer/webhooks/open-webhook",
+            source_ref: "https://postmarkapp.com/developer/webhooks/open-webhook",
             rationale:
               "Open callbacks exist at the provider boundary but remain disabled by Taxat's current privacy-minimizing posture.",
           },
@@ -1504,8 +1431,7 @@ export function createRecommendedEmailDeliveryEventMapping(): EmailDeliveryEvent
         privacy_capture_mode: "METADATA_ONLY",
         source_refs: [
           {
-            source_ref:
-              "https://postmarkapp.com/developer/webhooks/click-webhook",
+            source_ref: "https://postmarkapp.com/developer/webhooks/click-webhook",
             rationale:
               "Click callbacks exist at the provider boundary but remain disabled by Taxat's current privacy-minimizing posture.",
           },
@@ -1580,8 +1506,7 @@ export function createRecommendedEmailWebhookEndpointContract(): EmailWebhookEnd
         basic_auth_password_ref: `vault://metadata/${environment.secretNamespace}/email/webhooks/customer-transactional/basic-auth-password`,
         custom_header_name: "X-Taxat-Webhook-Secret",
         custom_header_secret_ref: `vault://metadata/${environment.secretNamespace}/email/webhooks/customer-transactional/header-secret`,
-        provider_signature_mode:
-          "NOT_SUPPORTED_PROVIDER_NATIVE_EQUIVALENT_AUTH",
+        provider_signature_mode: "NOT_SUPPORTED_PROVIDER_NATIVE_EQUIVALENT_AUTH",
       },
       replay_protection: {
         require_https: true,
@@ -1601,12 +1526,7 @@ export function createRecommendedEmailWebhookEndpointContract(): EmailWebhookEnd
         ledger_ref: `vault://metadata/${environment.secretNamespace}/email/webhooks/customer-transactional/idempotency-ledger`,
         duplicate_effect: "RETURN_200_NO_DUPLICATE_EVIDENCE",
       },
-      enabled_event_types: [
-        "Delivery",
-        "Bounce",
-        "SpamComplaint",
-        "SubscriptionChange",
-      ],
+      enabled_event_types: ["Delivery", "Bounce", "SpamComplaint", "SubscriptionChange"],
       disabled_event_types: ["Open", "Click"],
       correlation_keys: [
         "MessageID",
@@ -1618,14 +1538,12 @@ export function createRecommendedEmailWebhookEndpointContract(): EmailWebhookEnd
       ],
       source_refs: [
         {
-          source_ref:
-            "https://postmarkapp.com/developer/webhooks/webhooks-overview",
+          source_ref: "https://postmarkapp.com/developer/webhooks/webhooks-overview",
           rationale:
             "Webhook URLs, HTTPS enforcement, Basic Auth, and custom headers are current provider-supported controls.",
         },
         {
-          source_ref:
-            "Algorithm/retention_error_and_observability_contract.md::L1",
+          source_ref: "Algorithm/retention_error_and_observability_contract.md::L1",
           rationale:
             "Observed provider payloads must be normalized into evidence rather than promoted to business truth.",
         },
@@ -1646,10 +1564,7 @@ export function createRecommendedEmailWebhookEndpointContract(): EmailWebhookEnd
   };
 }
 
-function interpolateTemplate(
-  template: string,
-  model: Record<string, string>,
-): string {
+function interpolateTemplate(template: string, model: Record<string, string>): string {
   return template.replace(/\{\{\s*([a-z0-9_]+)\s*\}\}/giu, (_, key: string) => {
     const value = model[key];
     if (value === undefined) {
@@ -1664,31 +1579,19 @@ function escapeHtml(value: string): string {
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
-    .replaceAll("\"", "&quot;");
+    .replaceAll('"', "&quot;");
 }
 
 function renderPreview(record: EmailTemplateRecord) {
   return {
     subject: interpolateTemplate(record.subject_template, record.sample_render_model),
-    preheader: interpolateTemplate(
-      record.preheader_template,
-      record.sample_render_model,
-    ),
-    headline: interpolateTemplate(
-      record.headline_template,
-      record.sample_render_model,
-    ),
+    preheader: interpolateTemplate(record.preheader_template, record.sample_render_model),
+    headline: interpolateTemplate(record.headline_template, record.sample_render_model),
     body_paragraphs: record.body_template_paragraphs.map((paragraph) =>
       interpolateTemplate(paragraph, record.sample_render_model),
     ),
-    cta_label: interpolateTemplate(
-      record.cta_label_template,
-      record.sample_render_model,
-    ),
-    cta_route: interpolateTemplate(
-      record.cta_route_template,
-      record.sample_render_model,
-    ),
+    cta_label: interpolateTemplate(record.cta_label_template, record.sample_render_model),
+    cta_route: interpolateTemplate(record.cta_route_template, record.sample_render_model),
     footer_paragraphs: record.footer_template_paragraphs.map((paragraph) =>
       interpolateTemplate(paragraph, record.sample_render_model),
     ),
@@ -1704,7 +1607,7 @@ function compileProviderHtmlTemplate(record: EmailTemplateRecord): string {
     .join("");
   return [
     "<!doctype html>",
-    "<html lang=\"en-GB\">",
+    '<html lang="en-GB">',
     "<body>",
     `<span style="display:none;">${escapeHtml(record.preheader_template)}</span>`,
     `<h1>${escapeHtml(record.headline_template)}</h1>`,
@@ -1779,9 +1682,7 @@ function deploymentBindingsForTemplate(
   ];
 }
 
-export function createTemplateEmailInventory(
-  runContext: RunContext,
-): EmailTemplateInventory {
+export function createTemplateEmailInventory(runContext: RunContext): EmailTemplateInventory {
   const catalog = createRecommendedEmailTemplateCatalog();
   return {
     schema_version: "1.0",
@@ -1800,15 +1701,10 @@ export function createTemplateEmailInventory(
       provider_text_template: compileProviderTextTemplate(record),
       deployment_bindings: deploymentBindingsForTemplate(record),
       source_refs: [...record.source_refs],
-      notes: [
-        ...record.notes,
-        "Deployment bindings stay environment-scoped and callback-scoped.",
-      ],
+      notes: [...record.notes, "Deployment bindings stay environment-scoped and callback-scoped."],
     })),
-    webhook_contract_ref:
-      "config/notifications/email_webhook_endpoint_contract.json",
-    delivery_event_mapping_ref:
-      "config/notifications/email_delivery_event_mapping.json",
+    webhook_contract_ref: "config/notifications/email_webhook_endpoint_contract.json",
+    delivery_event_mapping_ref: "config/notifications/email_delivery_event_mapping.json",
     typed_gaps: [
       "shared_operating_contract_0038_to_0045.md was absent at execution time, so this inventory grounded itself directly in the named contracts and current provider documentation.",
     ],
@@ -1854,9 +1750,7 @@ export function validateEmailTemplateCatalog(catalog: EmailTemplateCatalog): voi
     }
     for (const event of record.allowed_trigger_events) {
       if (!allowedEvents.has(event as (typeof ALLOWED_NOTIFICATION_EVENTS)[number])) {
-        throw new Error(
-          `Template ${record.template_ref} references disallowed event ${event}.`,
-        );
+        throw new Error(`Template ${record.template_ref} references disallowed event ${event}.`);
       }
     }
     for (const variableRef of record.allowed_merge_variables) {
@@ -1882,9 +1776,7 @@ export function validateEmailTemplateCatalog(catalog: EmailTemplateCatalog): voi
   }
 }
 
-export function validateEmailDeliveryEventMapping(
-  mapping: EmailDeliveryEventMapping,
-): void {
+export function validateEmailDeliveryEventMapping(mapping: EmailDeliveryEventMapping): void {
   const eventTypes = new Set(mapping.event_mappings.map((row) => row.provider_event_type));
   const required = new Set<EmailProviderEventType>([
     "Delivery",
@@ -1959,9 +1851,7 @@ export function validateEmailTemplateInventory(
       throw new Error(`Inventory references unknown template ${record.template_ref}.`);
     }
     if (!record.provider_html_template.includes("<html")) {
-      throw new Error(
-        `Inventory record ${record.template_ref} must include HTML provider copy.`,
-      );
+      throw new Error(`Inventory record ${record.template_ref} must include HTML provider copy.`);
     }
     for (const binding of record.deployment_bindings) {
       if (!callbackRefs.has(binding.callback_ref)) {
@@ -2146,13 +2036,8 @@ export function createDefaultEmailTemplateProviderEntryUrls(): EmailTemplateProv
   };
 }
 
-function selectorById(
-  manifest: SelectorManifest,
-  selectorId: string,
-): SelectorDescriptor {
-  const selector = manifest.selectors.find(
-    (candidate) => candidate.selectorId === selectorId,
-  );
+function selectorById(manifest: SelectorManifest, selectorId: string): SelectorDescriptor {
+  const selector = manifest.selectors.find((candidate) => candidate.selectorId === selectorId);
   if (!selector) {
     throw new Error(`Selector ${selectorId} is missing from ${manifest.manifestId}`);
   }
@@ -2229,8 +2114,7 @@ export async function configureTemplatesAndWebhooks(
   assertProviderFlowAllowed(options.runContext, provider, EMAIL_TEMPLATE_FLOW_ID);
 
   const manifest = await loadEmailTemplateWebhookSelectorManifest();
-  const entryUrls =
-    options.entryUrls ?? createDefaultEmailTemplateProviderEntryUrls();
+  const entryUrls = options.entryUrls ?? createDefaultEmailTemplateProviderEntryUrls();
   const steps: StepContract[] = [
     createPendingStep({
       stepId: EMAIL_TEMPLATE_STEP_IDS.openControlPlane,
@@ -2294,19 +2178,9 @@ export async function configureTemplatesAndWebhooks(
 
   validateEmailTemplateCatalog(templateCatalog);
   validateEmailDeliveryEventMapping(deliveryEventMapping);
-  validateEmailWebhookEndpointContract(
-    webhookEndpointContract,
-    deliveryEventMapping,
-  );
-  validateEmailTemplateInventory(
-    templateInventory,
-    templateCatalog,
-    webhookEndpointContract,
-  );
-  assertEmailTemplateArtifactsSanitized(
-    templateInventory,
-    webhookEndpointContract,
-  );
+  validateEmailWebhookEndpointContract(webhookEndpointContract, deliveryEventMapping);
+  validateEmailTemplateInventory(templateInventory, templateCatalog, webhookEndpointContract);
+  assertEmailTemplateArtifactsSanitized(templateInventory, webhookEndpointContract);
 
   steps[1] = transitionStep(
     steps[1]!,
@@ -2358,8 +2232,7 @@ export async function configureTemplatesAndWebhooks(
     "Validating delivery-event mapping, telemetry defaults, and prohibited workflow mutations.",
   );
 
-  let outcome: EmailTemplateFlowOutcome =
-    "EMAIL_TEMPLATES_AND_CALLBACKS_READY";
+  let outcome: EmailTemplateFlowOutcome = "EMAIL_TEMPLATES_AND_CALLBACKS_READY";
   if (fixtureState.telemetryDriftDetected) {
     steps[3] = transitionStep(
       steps[3]!,
@@ -2391,11 +2264,7 @@ export async function configureTemplatesAndWebhooks(
     "Persisting sanitized template inventory and callback references.",
   );
   await persistJson(options.templateInventoryPath, templateInventory);
-  steps[4] = transitionStep(
-    steps[4]!,
-    "SUCCEEDED",
-    "Template inventory artifacts were persisted.",
-  );
+  steps[4] = transitionStep(steps[4]!, "SUCCEEDED", "Template inventory artifacts were persisted.");
   evidenceManifest = await captureNoteEvidence(
     evidenceManifest,
     steps[4].stepId,

@@ -2,9 +2,7 @@ import { randomUUID } from "node:crypto";
 
 export type ProviderEnvironment = "sandbox" | "production" | "fixture";
 export type ProvisioningExecutionMode = "fixture" | "sandbox" | "production";
-export type BrowserStorageStatePolicy =
-  | "FORBIDDEN_BY_DEFAULT"
-  | "SECRET_REFERENCE_ONLY";
+export type BrowserStorageStatePolicy = "FORBIDDEN_BY_DEFAULT" | "SECRET_REFERENCE_ONLY";
 export type EvidenceCaptureDefault = "STANDARD" | "REDACT" | "SUPPRESS";
 
 export interface RunContextInput {
@@ -56,8 +54,7 @@ export interface RunContextSummary {
   liveProviderExecutionAllowed: boolean;
 }
 
-const DEFAULT_STORAGE_POLICY: BrowserStorageStatePolicy =
-  "FORBIDDEN_BY_DEFAULT";
+const DEFAULT_STORAGE_POLICY: BrowserStorageStatePolicy = "FORBIDDEN_BY_DEFAULT";
 const DEFAULT_CAPTURE_MODE: EvidenceCaptureDefault = "REDACT";
 
 function nowIso(): string {
@@ -81,10 +78,8 @@ export function createRunContext(input: RunContextInput): RunContext {
     evidenceRoot: input.evidenceRoot,
     createdAt: nowIso(),
     liveProviderExecutionAllowed: Boolean(input.liveProviderExecutionAllowed),
-    browserStorageStatePolicy:
-      input.browserStorageStatePolicy ?? DEFAULT_STORAGE_POLICY,
-    evidenceCaptureDefault:
-      input.evidenceCaptureDefault ?? DEFAULT_CAPTURE_MODE,
+    browserStorageStatePolicy: input.browserStorageStatePolicy ?? DEFAULT_STORAGE_POLICY,
+    evidenceCaptureDefault: input.evidenceCaptureDefault ?? DEFAULT_CAPTURE_MODE,
     guardrails: {
       rawCredentialPersistenceForbidden: true,
       browserStorageStateIsSecretMaterial: true,

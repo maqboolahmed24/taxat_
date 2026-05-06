@@ -1,0 +1,824 @@
+{
+  "schema_version": "1.0",
+  "matrix_id": "pipeline_gate_matrix",
+  "selection_status": "PROVIDER_OVERRIDE_APPLIED",
+  "selected_platform_id": "GITHUB_ACTIONS_HYBRID_OIDC_ENVIRONMENTS",
+  "gate_rows": [
+    {
+      "gate_ref": "gate.build.verify",
+      "workflow_family_ref": "WF_BUILD_VERIFY",
+      "lane_ref": "BUILD",
+      "environment_ref": "env_ci_ephemeral_validation",
+      "required_runner_pool_refs": [
+        "runner.build-linux.standard"
+      ],
+      "required_identity_binding_refs": [],
+      "required_suites": [
+        "install-and-lockfile-integrity",
+        "typecheck",
+        "unit-and-contract-tests",
+        "deterministic-schema-self-test"
+      ],
+      "required_evidence_refs": [
+        "candidate_hash",
+        "schema_bundle_hash",
+        "artifact_digest_set"
+      ],
+      "required_approvals": [],
+      "candidate_scope": "HEAD_COMMIT_AND_SCHEMA_BUNDLE",
+      "concurrency_group_template": "${{ github.workflow }}-${{ github.ref }}-build",
+      "cancel_in_progress": true,
+      "artifact_retention_days": 14,
+      "trace_retention_days": 7,
+      "write_target_refs": [],
+      "manual_path_policy": "No manual bypass; rerun with the same candidate only.",
+      "notes": [
+        "Build gates verify deterministic candidate assembly before browser, security, preview, or release lanes proceed."
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "promotion pipeline",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::promotion_pipeline",
+          "rationale": "Promotion, rollback, and staged environment progression must remain candidate-bound and environment scoped."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "blocking suites and release verification manifest",
+          "source_ref": "Algorithm/verification_and_release_gates.md::blocking_suites_and_release_verification_manifest",
+          "rationale": "Release gates define required suites, evidence bundles, and candidate-binding expectations."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "secret handling and least privilege",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::secret_handling_and_least_privilege",
+          "rationale": "CI and preview lanes must minimize secrets, prefer short-lived identity, and keep privileged paths explicit."
+        },
+        {
+          "source_file": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md",
+          "source_heading_or_logical_block": "candidate identity and admissibility",
+          "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::candidate_identity_and_admissibility",
+          "rationale": "Gate results and promotions must bind to the exact tested candidate, not mutable branch state."
+        },
+        {
+          "source_file": "data/analysis/environment_catalog.json",
+          "source_heading_or_logical_block": "environment rows",
+          "source_ref": "data/analysis/environment_catalog.json::rows",
+          "rationale": "Environment posture for CI, preview, sandbox, preproduction, and production was already frozen earlier."
+        },
+        {
+          "source_file": "data/analysis/environment_secret_namespace_plan.json",
+          "source_heading_or_logical_block": "secret namespace rows",
+          "source_ref": "data/analysis/environment_secret_namespace_plan.json::secret_namespace_rows",
+          "rationale": "Secret namespaces and mixing rules must carry through to delivery automation without widening environment trust."
+        },
+        {
+          "source_file": "data/analysis/credential_secret_inventory.json",
+          "source_heading_or_logical_block": "credential rows",
+          "source_ref": "data/analysis/credential_secret_inventory.json::rows",
+          "rationale": "Runner registration, preview deploy tokens, and Apple-signing material are already identified as separate credential boundaries."
+        },
+        {
+          "source_file": "config/supplychain/release_admission_input_pack.json",
+          "source_heading_or_logical_block": "target profiles and evidence truth statement",
+          "source_ref": "config/supplychain/release_admission_input_pack.json::target_profiles",
+          "rationale": "Production promotion gates must reuse the machine-readable release admission contract authored in pc_0055."
+        },
+        {
+          "source_file": "config/edge/dns_and_origin_matrix.json",
+          "source_heading_or_logical_block": "preview host rows",
+          "source_ref": "config/edge/dns_and_origin_matrix.json::host_origin_rows",
+          "rationale": "Preview domain patterns and fail-closed edge bindings were already frozen in pc_0056 and must not drift here."
+        }
+      ]
+    },
+    {
+      "gate_ref": "gate.playwright.verify",
+      "workflow_family_ref": "WF_PLAYWRIGHT_VERIFY",
+      "lane_ref": "PLAYWRIGHT",
+      "environment_ref": "env_ci_ephemeral_validation",
+      "required_runner_pool_refs": [
+        "runner.playwright-linux.browser"
+      ],
+      "required_identity_binding_refs": [],
+      "required_suites": [
+        "browser-smoke",
+        "reduced-motion-parity",
+        "semantic-locator-stability",
+        "artifact-redaction-safe-diagnostics"
+      ],
+      "required_evidence_refs": [
+        "candidate_hash",
+        "playwright_report_hash",
+        "trace_bundle_hash_on_failure"
+      ],
+      "required_approvals": [],
+      "candidate_scope": "HEAD_COMMIT_AND_BUILT_BROWSER_ARTIFACTS",
+      "concurrency_group_template": "${{ github.workflow }}-${{ github.ref }}-playwright",
+      "cancel_in_progress": true,
+      "artifact_retention_days": 7,
+      "trace_retention_days": 7,
+      "write_target_refs": [],
+      "manual_path_policy": "No manual bypass; diagnostics may be inspected but not waived in-line.",
+      "notes": [
+        "Playwright evidence remains candidate-bound and cannot be reused across new browser artifact digests."
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "promotion pipeline",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::promotion_pipeline",
+          "rationale": "Promotion, rollback, and staged environment progression must remain candidate-bound and environment scoped."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "blocking suites and release verification manifest",
+          "source_ref": "Algorithm/verification_and_release_gates.md::blocking_suites_and_release_verification_manifest",
+          "rationale": "Release gates define required suites, evidence bundles, and candidate-binding expectations."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "secret handling and least privilege",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::secret_handling_and_least_privilege",
+          "rationale": "CI and preview lanes must minimize secrets, prefer short-lived identity, and keep privileged paths explicit."
+        },
+        {
+          "source_file": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md",
+          "source_heading_or_logical_block": "candidate identity and admissibility",
+          "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::candidate_identity_and_admissibility",
+          "rationale": "Gate results and promotions must bind to the exact tested candidate, not mutable branch state."
+        },
+        {
+          "source_file": "data/analysis/environment_catalog.json",
+          "source_heading_or_logical_block": "environment rows",
+          "source_ref": "data/analysis/environment_catalog.json::rows",
+          "rationale": "Environment posture for CI, preview, sandbox, preproduction, and production was already frozen earlier."
+        },
+        {
+          "source_file": "data/analysis/environment_secret_namespace_plan.json",
+          "source_heading_or_logical_block": "secret namespace rows",
+          "source_ref": "data/analysis/environment_secret_namespace_plan.json::secret_namespace_rows",
+          "rationale": "Secret namespaces and mixing rules must carry through to delivery automation without widening environment trust."
+        },
+        {
+          "source_file": "data/analysis/credential_secret_inventory.json",
+          "source_heading_or_logical_block": "credential rows",
+          "source_ref": "data/analysis/credential_secret_inventory.json::rows",
+          "rationale": "Runner registration, preview deploy tokens, and Apple-signing material are already identified as separate credential boundaries."
+        },
+        {
+          "source_file": "config/supplychain/release_admission_input_pack.json",
+          "source_heading_or_logical_block": "target profiles and evidence truth statement",
+          "source_ref": "config/supplychain/release_admission_input_pack.json::target_profiles",
+          "rationale": "Production promotion gates must reuse the machine-readable release admission contract authored in pc_0055."
+        },
+        {
+          "source_file": "config/edge/dns_and_origin_matrix.json",
+          "source_heading_or_logical_block": "preview host rows",
+          "source_ref": "config/edge/dns_and_origin_matrix.json::host_origin_rows",
+          "rationale": "Preview domain patterns and fail-closed edge bindings were already frozen in pc_0056 and must not drift here."
+        }
+      ]
+    },
+    {
+      "gate_ref": "gate.security.verify",
+      "workflow_family_ref": "WF_SECURITY_VERIFY",
+      "lane_ref": "SECURITY",
+      "environment_ref": "env_ci_ephemeral_validation",
+      "required_runner_pool_refs": [
+        "runner.security-linux.hardened"
+      ],
+      "required_identity_binding_refs": [],
+      "required_suites": [
+        "sbom-generation",
+        "vulnerability-scan",
+        "dependency-review",
+        "secret-scan"
+      ],
+      "required_evidence_refs": [
+        "candidate_hash",
+        "sbom_ref",
+        "vulnerability_report_ref",
+        "artifact_attestation_ref"
+      ],
+      "required_approvals": [],
+      "candidate_scope": "HEAD_COMMIT_AND_CANDIDATE_DIGEST",
+      "concurrency_group_template": "${{ github.workflow }}-${{ github.ref }}-security",
+      "cancel_in_progress": true,
+      "artifact_retention_days": 30,
+      "trace_retention_days": 7,
+      "write_target_refs": [],
+      "manual_path_policy": "Exceptions must be typed and attached to the candidate evidence bundle.",
+      "notes": [
+        "Security gates stay candidate-bound and cannot silently reuse old scan results after digest drift."
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "promotion pipeline",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::promotion_pipeline",
+          "rationale": "Promotion, rollback, and staged environment progression must remain candidate-bound and environment scoped."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "blocking suites and release verification manifest",
+          "source_ref": "Algorithm/verification_and_release_gates.md::blocking_suites_and_release_verification_manifest",
+          "rationale": "Release gates define required suites, evidence bundles, and candidate-binding expectations."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "secret handling and least privilege",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::secret_handling_and_least_privilege",
+          "rationale": "CI and preview lanes must minimize secrets, prefer short-lived identity, and keep privileged paths explicit."
+        },
+        {
+          "source_file": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md",
+          "source_heading_or_logical_block": "candidate identity and admissibility",
+          "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::candidate_identity_and_admissibility",
+          "rationale": "Gate results and promotions must bind to the exact tested candidate, not mutable branch state."
+        },
+        {
+          "source_file": "data/analysis/environment_catalog.json",
+          "source_heading_or_logical_block": "environment rows",
+          "source_ref": "data/analysis/environment_catalog.json::rows",
+          "rationale": "Environment posture for CI, preview, sandbox, preproduction, and production was already frozen earlier."
+        },
+        {
+          "source_file": "data/analysis/environment_secret_namespace_plan.json",
+          "source_heading_or_logical_block": "secret namespace rows",
+          "source_ref": "data/analysis/environment_secret_namespace_plan.json::secret_namespace_rows",
+          "rationale": "Secret namespaces and mixing rules must carry through to delivery automation without widening environment trust."
+        },
+        {
+          "source_file": "data/analysis/credential_secret_inventory.json",
+          "source_heading_or_logical_block": "credential rows",
+          "source_ref": "data/analysis/credential_secret_inventory.json::rows",
+          "rationale": "Runner registration, preview deploy tokens, and Apple-signing material are already identified as separate credential boundaries."
+        },
+        {
+          "source_file": "config/supplychain/release_admission_input_pack.json",
+          "source_heading_or_logical_block": "target profiles and evidence truth statement",
+          "source_ref": "config/supplychain/release_admission_input_pack.json::target_profiles",
+          "rationale": "Production promotion gates must reuse the machine-readable release admission contract authored in pc_0055."
+        },
+        {
+          "source_file": "config/edge/dns_and_origin_matrix.json",
+          "source_heading_or_logical_block": "preview host rows",
+          "source_ref": "config/edge/dns_and_origin_matrix.json::host_origin_rows",
+          "rationale": "Preview domain patterns and fail-closed edge bindings were already frozen in pc_0056 and must not drift here."
+        }
+      ]
+    },
+    {
+      "gate_ref": "gate.preview.deploy",
+      "workflow_family_ref": "WF_PREVIEW_DEPLOY",
+      "lane_ref": "PREVIEW",
+      "environment_ref": "env_ephemeral_review_preview",
+      "required_runner_pool_refs": [
+        "runner.preview-linux.deploy"
+      ],
+      "required_identity_binding_refs": [
+        "oidc.preview.broker"
+      ],
+      "required_suites": [
+        "build-verified",
+        "playwright-preview-smoke",
+        "review-domain-bind",
+        "synthetic-fixture-seed"
+      ],
+      "required_evidence_refs": [
+        "candidate_hash",
+        "preview_deploy_receipt",
+        "preview_domain_binding_ref",
+        "preview_audit_receipt"
+      ],
+      "required_approvals": [],
+      "candidate_scope": "HEAD_COMMIT_AND_PREVIEW_ID",
+      "concurrency_group_template": "preview-${{ github.event.pull_request.number || github.ref_name }}",
+      "cancel_in_progress": true,
+      "artifact_retention_days": 7,
+      "trace_retention_days": 7,
+      "write_target_refs": [
+        "env_ephemeral_review_preview"
+      ],
+      "manual_path_policy": "Manual preview redeploys are allowed only through auditable workflow_dispatch with the same candidate hash.",
+      "notes": [
+        "Preview deploys are synthetic-only, non-promotable, and canceled aggressively on pull-request churn."
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "promotion pipeline",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::promotion_pipeline",
+          "rationale": "Promotion, rollback, and staged environment progression must remain candidate-bound and environment scoped."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "blocking suites and release verification manifest",
+          "source_ref": "Algorithm/verification_and_release_gates.md::blocking_suites_and_release_verification_manifest",
+          "rationale": "Release gates define required suites, evidence bundles, and candidate-binding expectations."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "secret handling and least privilege",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::secret_handling_and_least_privilege",
+          "rationale": "CI and preview lanes must minimize secrets, prefer short-lived identity, and keep privileged paths explicit."
+        },
+        {
+          "source_file": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md",
+          "source_heading_or_logical_block": "candidate identity and admissibility",
+          "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::candidate_identity_and_admissibility",
+          "rationale": "Gate results and promotions must bind to the exact tested candidate, not mutable branch state."
+        },
+        {
+          "source_file": "data/analysis/environment_catalog.json",
+          "source_heading_or_logical_block": "environment rows",
+          "source_ref": "data/analysis/environment_catalog.json::rows",
+          "rationale": "Environment posture for CI, preview, sandbox, preproduction, and production was already frozen earlier."
+        },
+        {
+          "source_file": "data/analysis/environment_secret_namespace_plan.json",
+          "source_heading_or_logical_block": "secret namespace rows",
+          "source_ref": "data/analysis/environment_secret_namespace_plan.json::secret_namespace_rows",
+          "rationale": "Secret namespaces and mixing rules must carry through to delivery automation without widening environment trust."
+        },
+        {
+          "source_file": "data/analysis/credential_secret_inventory.json",
+          "source_heading_or_logical_block": "credential rows",
+          "source_ref": "data/analysis/credential_secret_inventory.json::rows",
+          "rationale": "Runner registration, preview deploy tokens, and Apple-signing material are already identified as separate credential boundaries."
+        },
+        {
+          "source_file": "config/supplychain/release_admission_input_pack.json",
+          "source_heading_or_logical_block": "target profiles and evidence truth statement",
+          "source_ref": "config/supplychain/release_admission_input_pack.json::target_profiles",
+          "rationale": "Production promotion gates must reuse the machine-readable release admission contract authored in pc_0055."
+        },
+        {
+          "source_file": "config/edge/dns_and_origin_matrix.json",
+          "source_heading_or_logical_block": "preview host rows",
+          "source_ref": "config/edge/dns_and_origin_matrix.json::host_origin_rows",
+          "rationale": "Preview domain patterns and fail-closed edge bindings were already frozen in pc_0056 and must not drift here."
+        }
+      ]
+    },
+    {
+      "gate_ref": "gate.sandbox.verify",
+      "workflow_family_ref": "WF_SANDBOX_DEPLOY_VERIFY",
+      "lane_ref": "STAGING",
+      "environment_ref": "env_shared_sandbox_integration",
+      "required_runner_pool_refs": [
+        "runner.release-linux.controlled"
+      ],
+      "required_identity_binding_refs": [
+        "oidc.sandbox.release-broker"
+      ],
+      "required_suites": [
+        "candidate-build-complete",
+        "sandbox-deploy",
+        "sandbox-authority-smoke",
+        "release-manifest-candidate-binding"
+      ],
+      "required_evidence_refs": [
+        "candidate_hash",
+        "schema_bundle_hash",
+        "sandbox_profile_set_ref",
+        "artifact_attestation_ref"
+      ],
+      "required_approvals": [],
+      "candidate_scope": "CANDIDATE_DIGEST_AND_SANDBOX_PROVIDER_PROFILE_SET",
+      "concurrency_group_template": "sandbox-${{ github.sha }}",
+      "cancel_in_progress": false,
+      "artifact_retention_days": 30,
+      "trace_retention_days": 7,
+      "write_target_refs": [
+        "env_shared_sandbox_integration"
+      ],
+      "manual_path_policy": "Emergency retries remain typed and auditable; no hidden human deploy path exists.",
+      "notes": [
+        "Sandbox is the first provider-enabled lane and must prove exact profile binding before preproduction."
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "promotion pipeline",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::promotion_pipeline",
+          "rationale": "Promotion, rollback, and staged environment progression must remain candidate-bound and environment scoped."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "blocking suites and release verification manifest",
+          "source_ref": "Algorithm/verification_and_release_gates.md::blocking_suites_and_release_verification_manifest",
+          "rationale": "Release gates define required suites, evidence bundles, and candidate-binding expectations."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "secret handling and least privilege",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::secret_handling_and_least_privilege",
+          "rationale": "CI and preview lanes must minimize secrets, prefer short-lived identity, and keep privileged paths explicit."
+        },
+        {
+          "source_file": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md",
+          "source_heading_or_logical_block": "candidate identity and admissibility",
+          "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::candidate_identity_and_admissibility",
+          "rationale": "Gate results and promotions must bind to the exact tested candidate, not mutable branch state."
+        },
+        {
+          "source_file": "data/analysis/environment_catalog.json",
+          "source_heading_or_logical_block": "environment rows",
+          "source_ref": "data/analysis/environment_catalog.json::rows",
+          "rationale": "Environment posture for CI, preview, sandbox, preproduction, and production was already frozen earlier."
+        },
+        {
+          "source_file": "data/analysis/environment_secret_namespace_plan.json",
+          "source_heading_or_logical_block": "secret namespace rows",
+          "source_ref": "data/analysis/environment_secret_namespace_plan.json::secret_namespace_rows",
+          "rationale": "Secret namespaces and mixing rules must carry through to delivery automation without widening environment trust."
+        },
+        {
+          "source_file": "data/analysis/credential_secret_inventory.json",
+          "source_heading_or_logical_block": "credential rows",
+          "source_ref": "data/analysis/credential_secret_inventory.json::rows",
+          "rationale": "Runner registration, preview deploy tokens, and Apple-signing material are already identified as separate credential boundaries."
+        },
+        {
+          "source_file": "config/supplychain/release_admission_input_pack.json",
+          "source_heading_or_logical_block": "target profiles and evidence truth statement",
+          "source_ref": "config/supplychain/release_admission_input_pack.json::target_profiles",
+          "rationale": "Production promotion gates must reuse the machine-readable release admission contract authored in pc_0055."
+        },
+        {
+          "source_file": "config/edge/dns_and_origin_matrix.json",
+          "source_heading_or_logical_block": "preview host rows",
+          "source_ref": "config/edge/dns_and_origin_matrix.json::host_origin_rows",
+          "rationale": "Preview domain patterns and fail-closed edge bindings were already frozen in pc_0056 and must not drift here."
+        }
+      ]
+    },
+    {
+      "gate_ref": "gate.preprod.verify",
+      "workflow_family_ref": "WF_PREPROD_CANDIDATE_VERIFY",
+      "lane_ref": "STAGING",
+      "environment_ref": "env_preproduction_verification",
+      "required_runner_pool_refs": [
+        "runner.release-linux.controlled"
+      ],
+      "required_identity_binding_refs": [
+        "oidc.preprod.release-broker"
+      ],
+      "required_suites": [
+        "sandbox-passed",
+        "preprod-deploy",
+        "migration-readiness-check",
+        "release-admission-preflight"
+      ],
+      "required_evidence_refs": [
+        "candidate_hash",
+        "schema_bundle_hash",
+        "release_admission_input_pack",
+        "edge_boundary_ref"
+      ],
+      "required_approvals": [
+        "release-engineering-review"
+      ],
+      "candidate_scope": "CANDIDATE_DIGEST_AND_SCHEMA_BUNDLE",
+      "concurrency_group_template": "preprod-${{ github.sha }}",
+      "cancel_in_progress": false,
+      "artifact_retention_days": 90,
+      "trace_retention_days": 14,
+      "write_target_refs": [
+        "env_preproduction_verification"
+      ],
+      "manual_path_policy": "Approvals are explicit and tied to the candidate; bypass requires a review comment and leaves an audit receipt.",
+      "notes": [
+        "Preproduction verifies release candidate readiness without sharing production secrets or mutable gate results."
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "promotion pipeline",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::promotion_pipeline",
+          "rationale": "Promotion, rollback, and staged environment progression must remain candidate-bound and environment scoped."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "blocking suites and release verification manifest",
+          "source_ref": "Algorithm/verification_and_release_gates.md::blocking_suites_and_release_verification_manifest",
+          "rationale": "Release gates define required suites, evidence bundles, and candidate-binding expectations."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "secret handling and least privilege",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::secret_handling_and_least_privilege",
+          "rationale": "CI and preview lanes must minimize secrets, prefer short-lived identity, and keep privileged paths explicit."
+        },
+        {
+          "source_file": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md",
+          "source_heading_or_logical_block": "candidate identity and admissibility",
+          "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::candidate_identity_and_admissibility",
+          "rationale": "Gate results and promotions must bind to the exact tested candidate, not mutable branch state."
+        },
+        {
+          "source_file": "data/analysis/environment_catalog.json",
+          "source_heading_or_logical_block": "environment rows",
+          "source_ref": "data/analysis/environment_catalog.json::rows",
+          "rationale": "Environment posture for CI, preview, sandbox, preproduction, and production was already frozen earlier."
+        },
+        {
+          "source_file": "data/analysis/environment_secret_namespace_plan.json",
+          "source_heading_or_logical_block": "secret namespace rows",
+          "source_ref": "data/analysis/environment_secret_namespace_plan.json::secret_namespace_rows",
+          "rationale": "Secret namespaces and mixing rules must carry through to delivery automation without widening environment trust."
+        },
+        {
+          "source_file": "data/analysis/credential_secret_inventory.json",
+          "source_heading_or_logical_block": "credential rows",
+          "source_ref": "data/analysis/credential_secret_inventory.json::rows",
+          "rationale": "Runner registration, preview deploy tokens, and Apple-signing material are already identified as separate credential boundaries."
+        },
+        {
+          "source_file": "config/supplychain/release_admission_input_pack.json",
+          "source_heading_or_logical_block": "target profiles and evidence truth statement",
+          "source_ref": "config/supplychain/release_admission_input_pack.json::target_profiles",
+          "rationale": "Production promotion gates must reuse the machine-readable release admission contract authored in pc_0055."
+        },
+        {
+          "source_file": "config/edge/dns_and_origin_matrix.json",
+          "source_heading_or_logical_block": "preview host rows",
+          "source_ref": "config/edge/dns_and_origin_matrix.json::host_origin_rows",
+          "rationale": "Preview domain patterns and fail-closed edge bindings were already frozen in pc_0056 and must not drift here."
+        }
+      ]
+    },
+    {
+      "gate_ref": "gate.native.notarize",
+      "workflow_family_ref": "WF_NATIVE_NOTARIZE",
+      "lane_ref": "NATIVE_MACOS",
+      "environment_ref": "env_preproduction_verification",
+      "required_runner_pool_refs": [
+        "runner.macos.native.larger"
+      ],
+      "required_identity_binding_refs": [
+        "oidc.preprod.release-broker",
+        "oidc.production.release-broker",
+        "exception.apple.notary.release-broker"
+      ],
+      "required_suites": [
+        "xcode-build",
+        "codesign-verify",
+        "notary-submit-and-poll",
+        "update-feed-manifest-verify"
+      ],
+      "required_evidence_refs": [
+        "candidate_hash",
+        "notarization_ref",
+        "artifact_attestation_ref",
+        "signed_update_manifest_ref"
+      ],
+      "required_approvals": [
+        "desktop-platform-review"
+      ],
+      "candidate_scope": "NATIVE_DIGEST_AND_NOTARIZATION_RECEIPT",
+      "concurrency_group_template": "native-macos-${{ github.sha }}",
+      "cancel_in_progress": false,
+      "artifact_retention_days": 30,
+      "trace_retention_days": 14,
+      "write_target_refs": [
+        "env_preproduction_verification",
+        "env_production"
+      ],
+      "manual_path_policy": "No unsigned or unnotarized native candidate can bypass this lane.",
+      "notes": [
+        "Native macOS delivery remains separately controlled and candidate-bound all the way to notarization evidence."
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "promotion pipeline",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::promotion_pipeline",
+          "rationale": "Promotion, rollback, and staged environment progression must remain candidate-bound and environment scoped."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "blocking suites and release verification manifest",
+          "source_ref": "Algorithm/verification_and_release_gates.md::blocking_suites_and_release_verification_manifest",
+          "rationale": "Release gates define required suites, evidence bundles, and candidate-binding expectations."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "secret handling and least privilege",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::secret_handling_and_least_privilege",
+          "rationale": "CI and preview lanes must minimize secrets, prefer short-lived identity, and keep privileged paths explicit."
+        },
+        {
+          "source_file": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md",
+          "source_heading_or_logical_block": "candidate identity and admissibility",
+          "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::candidate_identity_and_admissibility",
+          "rationale": "Gate results and promotions must bind to the exact tested candidate, not mutable branch state."
+        },
+        {
+          "source_file": "data/analysis/environment_catalog.json",
+          "source_heading_or_logical_block": "environment rows",
+          "source_ref": "data/analysis/environment_catalog.json::rows",
+          "rationale": "Environment posture for CI, preview, sandbox, preproduction, and production was already frozen earlier."
+        },
+        {
+          "source_file": "data/analysis/environment_secret_namespace_plan.json",
+          "source_heading_or_logical_block": "secret namespace rows",
+          "source_ref": "data/analysis/environment_secret_namespace_plan.json::secret_namespace_rows",
+          "rationale": "Secret namespaces and mixing rules must carry through to delivery automation without widening environment trust."
+        },
+        {
+          "source_file": "data/analysis/credential_secret_inventory.json",
+          "source_heading_or_logical_block": "credential rows",
+          "source_ref": "data/analysis/credential_secret_inventory.json::rows",
+          "rationale": "Runner registration, preview deploy tokens, and Apple-signing material are already identified as separate credential boundaries."
+        },
+        {
+          "source_file": "config/supplychain/release_admission_input_pack.json",
+          "source_heading_or_logical_block": "target profiles and evidence truth statement",
+          "source_ref": "config/supplychain/release_admission_input_pack.json::target_profiles",
+          "rationale": "Production promotion gates must reuse the machine-readable release admission contract authored in pc_0055."
+        },
+        {
+          "source_file": "config/edge/dns_and_origin_matrix.json",
+          "source_heading_or_logical_block": "preview host rows",
+          "source_ref": "config/edge/dns_and_origin_matrix.json::host_origin_rows",
+          "rationale": "Preview domain patterns and fail-closed edge bindings were already frozen in pc_0056 and must not drift here."
+        }
+      ]
+    },
+    {
+      "gate_ref": "gate.production.promote",
+      "workflow_family_ref": "WF_PRODUCTION_PROMOTE",
+      "lane_ref": "PRODUCTION",
+      "environment_ref": "env_production",
+      "required_runner_pool_refs": [
+        "runner.release-linux.controlled"
+      ],
+      "required_identity_binding_refs": [
+        "oidc.production.release-broker",
+        "exception.apple.notary.release-broker"
+      ],
+      "required_suites": [
+        "preprod-passed",
+        "release-admission-pack-verified",
+        "artifact-attestations-enforced",
+        "post-deploy-canary"
+      ],
+      "required_evidence_refs": [
+        "candidate_hash",
+        "schema_bundle_hash",
+        "release_admission_input_pack",
+        "promotion_receipt",
+        "artifact_attestation_ref"
+      ],
+      "required_approvals": [
+        "release-engineering-review",
+        "operations-review",
+        "approve-and-deploy"
+      ],
+      "candidate_scope": "PROMOTION_CANDIDATE_DIGEST_ONLY",
+      "concurrency_group_template": "production-release",
+      "cancel_in_progress": false,
+      "artifact_retention_days": 400,
+      "trace_retention_days": 14,
+      "write_target_refs": [
+        "env_production"
+      ],
+      "manual_path_policy": "Any manual override must use environment review plus custom protection rules and leaves an explicit operator attestation.",
+      "notes": [
+        "Production promote is candidate-bound, approval-gated, and never reuses mutable branch or tag-only truth."
+      ],
+      "source_refs": [
+        {
+          "source_file": "Algorithm/deployment_and_resilience_contract.md",
+          "source_heading_or_logical_block": "promotion pipeline",
+          "source_ref": "Algorithm/deployment_and_resilience_contract.md::promotion_pipeline",
+          "rationale": "Promotion, rollback, and staged environment progression must remain candidate-bound and environment scoped."
+        },
+        {
+          "source_file": "Algorithm/verification_and_release_gates.md",
+          "source_heading_or_logical_block": "blocking suites and release verification manifest",
+          "source_ref": "Algorithm/verification_and_release_gates.md::blocking_suites_and_release_verification_manifest",
+          "rationale": "Release gates define required suites, evidence bundles, and candidate-binding expectations."
+        },
+        {
+          "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+          "source_heading_or_logical_block": "secret handling and least privilege",
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::secret_handling_and_least_privilege",
+          "rationale": "CI and preview lanes must minimize secrets, prefer short-lived identity, and keep privileged paths explicit."
+        },
+        {
+          "source_file": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md",
+          "source_heading_or_logical_block": "candidate identity and admissibility",
+          "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::candidate_identity_and_admissibility",
+          "rationale": "Gate results and promotions must bind to the exact tested candidate, not mutable branch state."
+        },
+        {
+          "source_file": "data/analysis/environment_catalog.json",
+          "source_heading_or_logical_block": "environment rows",
+          "source_ref": "data/analysis/environment_catalog.json::rows",
+          "rationale": "Environment posture for CI, preview, sandbox, preproduction, and production was already frozen earlier."
+        },
+        {
+          "source_file": "data/analysis/environment_secret_namespace_plan.json",
+          "source_heading_or_logical_block": "secret namespace rows",
+          "source_ref": "data/analysis/environment_secret_namespace_plan.json::secret_namespace_rows",
+          "rationale": "Secret namespaces and mixing rules must carry through to delivery automation without widening environment trust."
+        },
+        {
+          "source_file": "data/analysis/credential_secret_inventory.json",
+          "source_heading_or_logical_block": "credential rows",
+          "source_ref": "data/analysis/credential_secret_inventory.json::rows",
+          "rationale": "Runner registration, preview deploy tokens, and Apple-signing material are already identified as separate credential boundaries."
+        },
+        {
+          "source_file": "config/supplychain/release_admission_input_pack.json",
+          "source_heading_or_logical_block": "target profiles and evidence truth statement",
+          "source_ref": "config/supplychain/release_admission_input_pack.json::target_profiles",
+          "rationale": "Production promotion gates must reuse the machine-readable release admission contract authored in pc_0055."
+        },
+        {
+          "source_file": "config/edge/dns_and_origin_matrix.json",
+          "source_heading_or_logical_block": "preview host rows",
+          "source_ref": "config/edge/dns_and_origin_matrix.json::host_origin_rows",
+          "rationale": "Preview domain patterns and fail-closed edge bindings were already frozen in pc_0056 and must not drift here."
+        }
+      ]
+    }
+  ],
+  "truth_statement": "Gate results are candidate-bound and cannot be reused across changed digests, schema bundles, or provider-profile sets.",
+  "notes": [
+    "Protected environments combine approvals, concurrency, and environment-scoped secret access.",
+    "Preview deploys remain non-promotable and aggressively cancellable on superseded runs."
+  ],
+  "source_refs": [
+    {
+      "source_file": "Algorithm/deployment_and_resilience_contract.md",
+      "source_heading_or_logical_block": "promotion pipeline",
+      "source_ref": "Algorithm/deployment_and_resilience_contract.md::promotion_pipeline",
+      "rationale": "Promotion, rollback, and staged environment progression must remain candidate-bound and environment scoped."
+    },
+    {
+      "source_file": "Algorithm/verification_and_release_gates.md",
+      "source_heading_or_logical_block": "blocking suites and release verification manifest",
+      "source_ref": "Algorithm/verification_and_release_gates.md::blocking_suites_and_release_verification_manifest",
+      "rationale": "Release gates define required suites, evidence bundles, and candidate-binding expectations."
+    },
+    {
+      "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+      "source_heading_or_logical_block": "secret handling and least privilege",
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::secret_handling_and_least_privilege",
+      "rationale": "CI and preview lanes must minimize secrets, prefer short-lived identity, and keep privileged paths explicit."
+    },
+    {
+      "source_file": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md",
+      "source_heading_or_logical_block": "candidate identity and admissibility",
+      "source_ref": "Algorithm/release_candidate_identity_and_promotion_evidence_contract.md::candidate_identity_and_admissibility",
+      "rationale": "Gate results and promotions must bind to the exact tested candidate, not mutable branch state."
+    },
+    {
+      "source_file": "data/analysis/environment_catalog.json",
+      "source_heading_or_logical_block": "environment rows",
+      "source_ref": "data/analysis/environment_catalog.json::rows",
+      "rationale": "Environment posture for CI, preview, sandbox, preproduction, and production was already frozen earlier."
+    },
+    {
+      "source_file": "data/analysis/environment_secret_namespace_plan.json",
+      "source_heading_or_logical_block": "secret namespace rows",
+      "source_ref": "data/analysis/environment_secret_namespace_plan.json::secret_namespace_rows",
+      "rationale": "Secret namespaces and mixing rules must carry through to delivery automation without widening environment trust."
+    },
+    {
+      "source_file": "data/analysis/credential_secret_inventory.json",
+      "source_heading_or_logical_block": "credential rows",
+      "source_ref": "data/analysis/credential_secret_inventory.json::rows",
+      "rationale": "Runner registration, preview deploy tokens, and Apple-signing material are already identified as separate credential boundaries."
+    },
+    {
+      "source_file": "config/supplychain/release_admission_input_pack.json",
+      "source_heading_or_logical_block": "target profiles and evidence truth statement",
+      "source_ref": "config/supplychain/release_admission_input_pack.json::target_profiles",
+      "rationale": "Production promotion gates must reuse the machine-readable release admission contract authored in pc_0055."
+    },
+    {
+      "source_file": "config/edge/dns_and_origin_matrix.json",
+      "source_heading_or_logical_block": "preview host rows",
+      "source_ref": "config/edge/dns_and_origin_matrix.json::host_origin_rows",
+      "rationale": "Preview domain patterns and fail-closed edge bindings were already frozen in pc_0056 and must not drift here."
+    },
+    {
+      "source_file": "https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency",
+      "source_heading_or_logical_block": "Control workflow concurrency",
+      "source_ref": "https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency",
+      "rationale": "Current GitHub docs confirm concurrency groups can cancel superseded preview work and enforce one active deployment per group."
+    },
+    {
+      "source_file": "https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/review-deployments",
+      "source_heading_or_logical_block": "Reviewing deployments",
+      "source_ref": "https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/review-deployments",
+      "rationale": "Current GitHub docs confirm environment approvals are the point where protected jobs gain access to environment secrets."
+    }
+  ]
+}

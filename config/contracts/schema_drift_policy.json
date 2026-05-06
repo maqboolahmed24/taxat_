@@ -1,0 +1,328 @@
+{
+  "contractVersion": "SCHEMA_DRIFT_POLICY_V1",
+  "policyId": "schema-drift-policy.current-repo",
+  "basisStatement": "Compare the imported contracts-core schema bundle against a candidate bundle, then join drift, migration posture, reader-window policy, and candidate identity into one deterministic release-readiness verdict.",
+  "comparisonBasis": {
+    "baselineBundleRef": "schema_bundle_catalog.current_imported_baseline",
+    "candidateBundleRef": "schema_bundle_catalog.current_candidate_workspace",
+    "historicalWindowSourceRef": "config/migrations/schema_reader_window_baseline.json"
+  },
+  "severityRows": [
+    {
+      "diffCode": "OPTIONAL_PROPERTY_ADDED",
+      "atlasGroupRef": "ADDITIVE",
+      "severityRef": "NOTICE",
+      "phaseRef": "EXPAND",
+      "migrationRequirement": "NONE",
+      "defaultReadinessImpact": "ROLLBACK_SAFE"
+    },
+    {
+      "diffCode": "REQUIRED_PROPERTY_ADDED",
+      "atlasGroupRef": "NARROWING",
+      "severityRef": "BLOCKING",
+      "phaseRef": "EXPAND",
+      "migrationRequirement": "MIGRATION_LEDGER_REQUIRED",
+      "defaultReadinessImpact": "BLOCKING"
+    },
+    {
+      "diffCode": "PROPERTY_REMOVED",
+      "atlasGroupRef": "DESTRUCTIVE",
+      "severityRef": "BLOCKING",
+      "phaseRef": "CONTRACT",
+      "migrationRequirement": "READER_WINDOW_CLOSE_REQUIRED",
+      "defaultReadinessImpact": "FAIL_FORWARD_ONLY"
+    },
+    {
+      "diffCode": "TYPE_NARROWED",
+      "atlasGroupRef": "NARROWING",
+      "severityRef": "BLOCKING",
+      "phaseRef": "VERIFY",
+      "migrationRequirement": "READER_WINDOW_CLOSE_REQUIRED",
+      "defaultReadinessImpact": "FAIL_FORWARD_ONLY"
+    },
+    {
+      "diffCode": "TYPE_WIDENED",
+      "atlasGroupRef": "ADDITIVE",
+      "severityRef": "WARNING",
+      "phaseRef": "EXPAND",
+      "migrationRequirement": "NONE",
+      "defaultReadinessImpact": "ROLLBACK_SAFE"
+    },
+    {
+      "diffCode": "TYPE_CHANGED",
+      "atlasGroupRef": "DESTRUCTIVE",
+      "severityRef": "BLOCKING",
+      "phaseRef": "BACKFILL",
+      "migrationRequirement": "BACKFILL_REQUIRED",
+      "defaultReadinessImpact": "BLOCKING"
+    },
+    {
+      "diffCode": "ENUM_NARROWED",
+      "atlasGroupRef": "NARROWING",
+      "severityRef": "BLOCKING",
+      "phaseRef": "VERIFY",
+      "migrationRequirement": "READER_WINDOW_CLOSE_REQUIRED",
+      "defaultReadinessImpact": "FAIL_FORWARD_ONLY"
+    },
+    {
+      "diffCode": "ENUM_EXPANDED",
+      "atlasGroupRef": "ADDITIVE",
+      "severityRef": "NOTICE",
+      "phaseRef": "EXPAND",
+      "migrationRequirement": "NONE",
+      "defaultReadinessImpact": "ROLLBACK_SAFE"
+    },
+    {
+      "diffCode": "ENUM_REORDERED",
+      "atlasGroupRef": "ADDITIVE",
+      "severityRef": "NOTICE",
+      "phaseRef": "VERIFY",
+      "migrationRequirement": "NONE",
+      "defaultReadinessImpact": "ROLLBACK_SAFE"
+    },
+    {
+      "diffCode": "SCHEMA_ID_CHANGED",
+      "atlasGroupRef": "DESTRUCTIVE",
+      "severityRef": "BLOCKING",
+      "phaseRef": "VERIFY",
+      "migrationRequirement": "MIGRATION_LEDGER_REQUIRED",
+      "defaultReadinessImpact": "BLOCKING"
+    },
+    {
+      "diffCode": "DOC_TOKEN_STALE",
+      "atlasGroupRef": "DOC_DRIFT",
+      "severityRef": "BLOCKING",
+      "phaseRef": "VERIFY",
+      "migrationRequirement": "NONE",
+      "defaultReadinessImpact": "BLOCKING"
+    },
+    {
+      "diffCode": "SAMPLE_BINDING_DRIFT",
+      "atlasGroupRef": "DOC_DRIFT",
+      "severityRef": "BLOCKING",
+      "phaseRef": "VERIFY",
+      "migrationRequirement": "NONE",
+      "defaultReadinessImpact": "BLOCKING"
+    },
+    {
+      "diffCode": "BINDING_SOURCE_MAP_STALE",
+      "atlasGroupRef": "BINDING_DRIFT",
+      "severityRef": "BLOCKING",
+      "phaseRef": "VERIFY",
+      "migrationRequirement": "NONE",
+      "defaultReadinessImpact": "BLOCKING"
+    },
+    {
+      "diffCode": "BINDING_LANGUAGE_MISSING",
+      "atlasGroupRef": "BINDING_DRIFT",
+      "severityRef": "BLOCKING",
+      "phaseRef": "VERIFY",
+      "migrationRequirement": "NONE",
+      "defaultReadinessImpact": "BLOCKING"
+    },
+    {
+      "diffCode": "SCHEMA_REMOVED",
+      "atlasGroupRef": "DESTRUCTIVE",
+      "severityRef": "BLOCKING",
+      "phaseRef": "CONTRACT",
+      "migrationRequirement": "READER_WINDOW_CLOSE_REQUIRED",
+      "defaultReadinessImpact": "FAIL_FORWARD_ONLY"
+    },
+    {
+      "diffCode": "SCHEMA_ADDED",
+      "atlasGroupRef": "ADDITIVE",
+      "severityRef": "WARNING",
+      "phaseRef": "EXPAND",
+      "migrationRequirement": "NONE",
+      "defaultReadinessImpact": "ROLLBACK_SAFE"
+    }
+  ],
+  "sealedManifestSchemaRefs": [
+    "release_candidate_identity_contract.schema.json",
+    "release_verification_manifest.schema.json",
+    "schema_bundle_compatibility_gate_contract.schema.json",
+    "schema_migration_ledger.schema.json"
+  ],
+  "candidateIdentityTemplate": {
+    "candidateEnvironmentRef": "candidate-env.operator.release",
+    "buildArtifactRef": "build.operator.release",
+    "artifactDigestSalt": "schema-drift-migration-readiness",
+    "providerProfileRefs": [
+      "provider.github-actions.oidc",
+      "provider.sigstore.keyless"
+    ],
+    "supportedClientWindowRefOrNull": "client-window.operator.stable"
+  },
+  "documentationRoots": [
+    "docs/contracts",
+    "docs/datastore",
+    "docs/repository"
+  ],
+  "bindingLanguagesRequired": [
+    "PYTHON",
+    "SWIFT",
+    "TYPESCRIPT"
+  ],
+  "atlasScenarioCatalog": [
+    {
+      "scenario_ref": "scenario.optional-field.additive.no-migration",
+      "atlas_group_ref": "ADDITIVE",
+      "phase_ref": "EXPAND",
+      "tone": "success",
+      "verdict_ref": "ROLLBACK_SAFE",
+      "accessible_label": "optional field addition remains rollback safe because existing readers still accept the old payload",
+      "summary": "Optional field added with no migration or reader-window action required.",
+      "schema_path": "decision_bundle.schema.json#/properties/reviewer_note_or_null",
+      "reason_codes": [
+        "OPTIONAL_PROPERTY_ADDED"
+      ],
+      "required_artifact_refs": [
+        "packages/contracts-core/schemas/decision_bundle.schema.json"
+      ],
+      "rollback_boundary": "ROLLBACK_ALLOWED",
+      "inspector_body": "An optional field widened the schema surface without invalidating historical payloads, bundled samples, or generated bindings."
+    },
+    {
+      "scenario_ref": "scenario.enum-narrowing.client-window-block",
+      "atlas_group_ref": "NARROWING",
+      "phase_ref": "VERIFY",
+      "tone": "danger",
+      "verdict_ref": "BLOCKED_PENDING_CLIENT_WINDOW",
+      "accessible_label": "enum narrowing blocks promotion because historical replay and supported clients still depend on retired values",
+      "summary": "Enum narrowing breaks replay and the current supported-client window.",
+      "schema_path": "client_compatibility_matrix.schema.json#/properties/client_family",
+      "reason_codes": [
+        "ENUM_NARROWED",
+        "SUPPORTED_CLIENT_WINDOW_REF_MISMATCH"
+      ],
+      "required_artifact_refs": [
+        "packages/contracts-core/schemas/client_compatibility_matrix.schema.json",
+        "packages/contracts-core/schemas/release_candidate_identity_contract.schema.json"
+      ],
+      "rollback_boundary": "ROLLBACK_ALLOWED",
+      "inspector_body": "The narrowing is semantically breaking, so the candidate must align to a supported-client window before release evidence can claim compatibility."
+    },
+    {
+      "scenario_ref": "scenario.field-removal.window-open",
+      "atlas_group_ref": "DESTRUCTIVE",
+      "phase_ref": "CONTRACT",
+      "tone": "danger",
+      "verdict_ref": "BLOCKED_PENDING_READER_WINDOW",
+      "accessible_label": "destructive field removal blocks promotion until compatibility window closes",
+      "summary": "Field removal has a migration ledger but the reader window is still open.",
+      "schema_path": "release_candidate_identity_contract.schema.json#/properties/build_artifact_ref",
+      "reason_codes": [
+        "PROPERTY_REMOVED",
+        "READER_WINDOW_STILL_OPEN"
+      ],
+      "required_artifact_refs": [
+        "config/migrations/schema_reader_window_baseline.json",
+        "packages/control-plane-db/src/migrations"
+      ],
+      "rollback_boundary": "ROLLBACK_ALLOWED",
+      "inspector_body": "The destructive contraction is recorded, but protected readers and replay flows still depend on the prior field surface."
+    },
+    {
+      "scenario_ref": "scenario.ledger-present.backfill-missing",
+      "atlas_group_ref": "MIGRATION_GAP",
+      "phase_ref": "BACKFILL",
+      "tone": "danger",
+      "verdict_ref": "BLOCKED_PENDING_BACKFILL",
+      "accessible_label": "migration ledger exists but missing backfill evidence blocks promotion",
+      "summary": "Migration ledger exists, but the required backfill execution contract is incomplete.",
+      "schema_path": "schema_bundle#/backfill_execution_contract",
+      "reason_codes": [
+        "BACKFILL_EXECUTION_CONTRACT_INCOMPLETE"
+      ],
+      "required_artifact_refs": [
+        "config/migrations/backfill_execution_policy.json"
+      ],
+      "rollback_boundary": "ROLLBACK_ALLOWED",
+      "inspector_body": "The structure is ready to expand, but semantic data shape is not yet proven because resumable backfill evidence is absent."
+    },
+    {
+      "scenario_ref": "scenario.docs-heading.stale-token",
+      "atlas_group_ref": "DOC_DRIFT",
+      "phase_ref": "VERIFY",
+      "tone": "warning",
+      "verdict_ref": "BLOCKED_PENDING_DOC_SYNC",
+      "accessible_label": "documentation drift blocks promotion because schema tokens still point to the prior contract file",
+      "summary": "Docs heading changed but the schema token still points at an old contract file.",
+      "schema_path": "schema_bundle#/documentationBindings",
+      "reason_codes": [
+        "DOC_TOKEN_STALE"
+      ],
+      "required_artifact_refs": [
+        "docs/contracts/schema_drift_and_migration_readiness.md",
+        "config/contracts/schema_drift_policy.json"
+      ],
+      "rollback_boundary": "ROLLBACK_ALLOWED",
+      "inspector_body": "Docs-only edits can mask true contract posture, so promotion blocks until prose, token bindings, and schema identity agree again."
+    },
+    {
+      "scenario_ref": "scenario.generated-bindings.stale",
+      "atlas_group_ref": "BINDING_DRIFT",
+      "phase_ref": "VERIFY",
+      "tone": "warning",
+      "verdict_ref": "BLOCKED_PENDING_BINDING_REGEN",
+      "accessible_label": "stale python and swift bindings block release evidence because generated surfaces no longer match the schema bundle",
+      "summary": "Generated Python and Swift bindings are stale relative to the candidate schema bundle.",
+      "schema_path": "schema_bundle#/$defs/generatedBindings",
+      "reason_codes": [
+        "BINDING_SOURCE_MAP_STALE",
+        "LANGUAGE_PYTHON_STALE",
+        "LANGUAGE_SWIFT_STALE"
+      ],
+      "required_artifact_refs": [
+        "data/contracts/binding_coverage_report.json",
+        "packages/generated-models/src/generated",
+        "python/generated_contract_models/src/taxat_generated_contract_models/generated",
+        "native/TaxatOperator/GeneratedContracts/Sources/GeneratedContracts/Generated"
+      ],
+      "rollback_boundary": "ROLLBACK_ALLOWED",
+      "inspector_body": "Generated bindings are evidence-bearing artifacts in this repo, so stale downstreams block promotion even when the source schemas look consistent."
+    },
+    {
+      "scenario_ref": "scenario.sealed-manifest.fail-forward",
+      "atlas_group_ref": "DESTRUCTIVE",
+      "phase_ref": "CONTRACT",
+      "tone": "danger",
+      "verdict_ref": "FAIL_FORWARD_ONLY",
+      "accessible_label": "sealed manifest contraction is admissible only as fail forward after the protection window closes",
+      "summary": "Destructive change on a sealed-manifest path requires explicit fail-forward posture.",
+      "schema_path": "schema_bundle_compatibility_gate_contract.schema.json#/properties/reason_codes",
+      "reason_codes": [
+        "PROPERTY_REMOVED",
+        "SEALED_MANIFEST_PATH_FAIL_FORWARD_ONLY"
+      ],
+      "required_artifact_refs": [
+        "packages/contracts-core/schemas/schema_bundle_compatibility_gate_contract.schema.json",
+        "config/migrations/schema_reader_window_baseline.json"
+      ],
+      "rollback_boundary": "FAIL_FORWARD_ONLY",
+      "inspector_body": "Protected promotion evidence already binds this path, so the contract phase is only admissible after the window closes and rollback is no longer promised."
+    },
+    {
+      "scenario_ref": "scenario.rename.sample-and-docs-drift",
+      "atlas_group_ref": "DOC_DRIFT",
+      "phase_ref": "VERIFY",
+      "tone": "warning",
+      "verdict_ref": "BLOCKED_PENDING_DOC_SYNC",
+      "accessible_label": "rename plus sample and documentation drift blocks promotion because semantic intent is no longer provable",
+      "summary": "One semantic rename appears as field removal, replacement field, sample drift, and docs drift.",
+      "schema_path": "governance_policy_snapshot.schema.json#/properties/policy_basis_ref",
+      "reason_codes": [
+        "PROPERTY_REMOVED",
+        "OPTIONAL_PROPERTY_ADDED",
+        "SAMPLE_BINDING_DRIFT",
+        "DOC_TOKEN_STALE"
+      ],
+      "required_artifact_refs": [
+        "packages/contracts-core/samples",
+        "docs/contracts/schema_drift_and_migration_readiness.md"
+      ],
+      "rollback_boundary": "ROLLBACK_ALLOWED",
+      "inspector_body": "The automation treats the rename as a bundle of structural and parity deltas so release evidence cannot hand-wave it as a benign refactor."
+    }
+  ]
+}
