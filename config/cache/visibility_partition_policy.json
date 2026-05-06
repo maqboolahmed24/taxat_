@@ -1,0 +1,112 @@
+{
+  "contract_version": "VISIBILITY_PARTITION_POLICY_V1",
+  "policy_id": "visibility_partition_policy",
+  "basis_statement": "Visibility partition keys are required only for cache scopes that can otherwise replay broader list or workspace slices across narrower customer- or role-bounded views.",
+  "scope_rows": [
+    {
+      "cache_scope_class": "LOW_NOISE_FRAME",
+      "partition_required": false,
+      "canonical_dimension_fields": [],
+      "notes": ["Low-noise frames remain route-bound and do not publish a separate visibility partition key."]
+    },
+    {
+      "cache_scope_class": "WORKSPACE_SNAPSHOT",
+      "partition_required": true,
+      "canonical_dimension_fields": [
+        "tenant_id",
+        "client_id_or_null",
+        "principal_class",
+        "access_binding_hash_or_null",
+        "masking_posture_fingerprint_or_null",
+        "customer_safe_projection",
+        "shell_family"
+      ],
+      "notes": ["Workspace visibility partitions separate staff, customer-safe, and narrower task-slice variants even when route and object stay stable."]
+    },
+    {
+      "cache_scope_class": "WORK_INBOX_SNAPSHOT",
+      "partition_required": true,
+      "canonical_dimension_fields": [
+        "tenant_id",
+        "client_id_or_null",
+        "principal_class",
+        "access_binding_hash_or_null",
+        "masking_posture_fingerprint_or_null",
+        "customer_safe_projection",
+        "shell_family"
+      ],
+      "notes": ["Inbox partitions freeze which list slice is visible, not just which route is mounted."]
+    },
+    {
+      "cache_scope_class": "CLIENT_PORTAL_WORKSPACE",
+      "partition_required": true,
+      "canonical_dimension_fields": [
+        "tenant_id",
+        "client_id_or_null",
+        "principal_class",
+        "access_binding_hash_or_null",
+        "masking_posture_fingerprint_or_null",
+        "customer_safe_projection",
+        "shell_family"
+      ],
+      "notes": ["Portal partitions stay customer-safe and must distinguish invite, history, and masking posture slices."]
+    },
+    {
+      "cache_scope_class": "CUSTOMER_REQUEST_LIST",
+      "partition_required": true,
+      "canonical_dimension_fields": [
+        "tenant_id",
+        "client_id_or_null",
+        "principal_class",
+        "access_binding_hash_or_null",
+        "masking_posture_fingerprint_or_null",
+        "customer_safe_projection",
+        "shell_family"
+      ],
+      "notes": ["Customer request-list partitions protect customer-safe list slices from broader support variants."]
+    },
+    {
+      "cache_scope_class": "TENANT_GOVERNANCE_SNAPSHOT",
+      "partition_required": false,
+      "canonical_dimension_fields": [],
+      "notes": ["Governance snapshots are tenant-governed and therefore do not use customer-visibility partitions."]
+    },
+    {
+      "cache_scope_class": "GOVERNANCE_POLICY_SNAPSHOT",
+      "partition_required": false,
+      "canonical_dimension_fields": [],
+      "notes": ["Governance policy snapshots keep artifact visibility out of the cache identity envelope."]
+    },
+    {
+      "cache_scope_class": "PRINCIPAL_ACCESS_VIEW",
+      "partition_required": false,
+      "canonical_dimension_fields": [],
+      "notes": ["Principal-access views are governance-scoped rather than customer-visibility-scoped."]
+    },
+    {
+      "cache_scope_class": "ROLE_TEMPLATE_MATRIX",
+      "partition_required": false,
+      "canonical_dimension_fields": [],
+      "notes": ["Role-template matrices do not publish per-customer visibility partitions."]
+    },
+    {
+      "cache_scope_class": "NATIVE_OPERATOR_WORKSPACE_SCENE",
+      "partition_required": false,
+      "canonical_dimension_fields": [],
+      "notes": ["Native primary scenes bind legality through route, object, access, and masking instead of a separate list-slice partition."]
+    },
+    {
+      "cache_scope_class": "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE",
+      "partition_required": false,
+      "canonical_dimension_fields": [],
+      "notes": ["Native secondary windows rely on preview subject binding rather than a visibility partition key."]
+    }
+  ],
+  "source_lineage": [
+    {
+      "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+      "source_heading_or_logical_block": "Scope Rules",
+      "rationale": "Names the scope classes that must carry a visibility cache partition key and the governance classes that must not."
+    }
+  ]
+}

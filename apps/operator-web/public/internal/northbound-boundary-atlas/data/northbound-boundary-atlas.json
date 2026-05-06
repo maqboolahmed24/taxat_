@@ -1,0 +1,1472 @@
+{
+  "routeId": "northbound-boundary-atlas",
+  "title": "Taxat Northbound Boundary Atlas",
+  "subtitle": "One shared admission scaffold turns command envelopes into typed problems or durable receipts without per-endpoint guesswork.",
+  "basisStatement": "Northbound write admission is driven by explicit command family policy so every endpoint reuses the same scope, stale-guard, truth-boundary, and duplicate-handling posture instead of hand-rolling parse logic.",
+  "routeStabilityBadge": "Route stability required",
+  "boundaryPostureChip": "Receipt / Problem only",
+  "schemaHashes": {
+    "apiCommandReceipt": "fe995f1540fa1295edffbce7fef87cc9f63da5b0d8e05b45c08c6dbb06a12ad6",
+    "commandEnvelope": "7bcc8aca262314bba58ef65c15f0c3d035ed76ea3989ec64a003f89b0835afb1",
+    "problemEnvelope": "d0ecad4da0b4ef69fbacb2a378c835ec510fd9ba0488f32267415789fce81206",
+    "routeStabilityContract": "ae13fc174b6924f8525c5b26fa8615663cb48634fdaa730a3f33f85bcbc72bfc"
+  },
+  "stages": [
+    {
+      "stage_ref": "PARSE",
+      "label": "PARSE",
+      "summary": "Read the exact northbound envelope and actor/session binding."
+    },
+    {
+      "stage_ref": "VALIDATE",
+      "label": "VALIDATE",
+      "summary": "Enforce command family, mutation profile, and truth-boundary shape."
+    },
+    {
+      "stage_ref": "STALE",
+      "label": "STALE",
+      "summary": "Compare command-side stale guards against the current route-stability contract."
+    },
+    {
+      "stage_ref": "DUPLICATE",
+      "label": "DUPLICATE",
+      "summary": "Detect safe replay versus idempotency collision."
+    },
+    {
+      "stage_ref": "RECEIPT",
+      "label": "RECEIPT",
+      "summary": "Emit durable ApiCommandReceipt before downstream side effects fan out."
+    },
+    {
+      "stage_ref": "PROBLEM",
+      "label": "PROBLEM",
+      "summary": "Emit typed ProblemEnvelope when the command cannot be accepted safely."
+    }
+  ],
+  "selectedCommandType": "AMEND_RETURN",
+  "selectedStageRef": "STALE",
+  "families": [
+    {
+      "commandType": "SUBMIT_RETURN",
+      "displayName": "Submit return",
+      "familyGroup": "MANIFEST",
+      "targetScopeClass": "MANIFEST",
+      "routeScopeClass": "MANIFEST_EXPERIENCE",
+      "projectionStreamClass": "MANIFEST_EXPERIENCE",
+      "dispatchPosture": "ASYNC_MANIFEST_PIPELINE",
+      "requiredGuardFields": [
+        "if_match_decision_bundle_hash",
+        "if_match_shell_stability_token",
+        "if_match_frame_epoch"
+      ],
+      "staleGuardFamilies": [
+        "DECISION_BUNDLE_HASH",
+        "SHELL_STABILITY_TOKEN",
+        "FRAME_EPOCH"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "REBASE_REQUIRED",
+        "VIEW_STALE"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "MANIFEST",
+        "MANIFEST_EXPERIENCE",
+        "MANIFEST_EXPERIENCE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse SUBMIT_RETURN against the imported CommandEnvelope contract and bind it to MANIFEST scope.",
+        "VALIDATE": "Validate MANIFEST_RENDER_FRAME exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare DECISION_BUNDLE_HASH, SHELL_STABILITY_TOKEN, FRAME_EPOCH against the current MANIFEST_EXPERIENCE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with MANIFEST_EXPERIENCE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for decision_bundle-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Filing-capable manifest commands stay bound to the current decision bundle, shell token, and live frame epoch.",
+        "The durable receipt is the legal retry anchor even when downstream filing execution is still pending."
+      ]
+    },
+    {
+      "commandType": "AMEND_RETURN",
+      "displayName": "Amend return",
+      "familyGroup": "MANIFEST",
+      "targetScopeClass": "MANIFEST",
+      "routeScopeClass": "MANIFEST_EXPERIENCE",
+      "projectionStreamClass": "MANIFEST_EXPERIENCE",
+      "dispatchPosture": "ASYNC_MANIFEST_PIPELINE",
+      "requiredGuardFields": [
+        "if_match_decision_bundle_hash",
+        "if_match_shell_stability_token",
+        "if_match_frame_epoch"
+      ],
+      "staleGuardFamilies": [
+        "DECISION_BUNDLE_HASH",
+        "SHELL_STABILITY_TOKEN",
+        "FRAME_EPOCH"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "REBASE_REQUIRED",
+        "VIEW_STALE"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "MANIFEST",
+        "MANIFEST_EXPERIENCE",
+        "MANIFEST_EXPERIENCE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse AMEND_RETURN against the imported CommandEnvelope contract and bind it to MANIFEST scope.",
+        "VALIDATE": "Validate MANIFEST_RENDER_FRAME exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare DECISION_BUNDLE_HASH, SHELL_STABILITY_TOKEN, FRAME_EPOCH against the current MANIFEST_EXPERIENCE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with MANIFEST_EXPERIENCE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for decision_bundle-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Amendment intent remains a manifest command and must not outlive the rendered decision bundle basis."
+      ]
+    },
+    {
+      "commandType": "CLIENT_PORTAL_COMPLETE_ONBOARDING_STEP",
+      "displayName": "Complete onboarding step",
+      "familyGroup": "CLIENT_PORTAL",
+      "targetScopeClass": "MANIFEST",
+      "routeScopeClass": "CLIENT_PORTAL_ROUTE",
+      "projectionStreamClass": "NONE",
+      "dispatchPosture": "ASYNC_PORTAL_ROUTE_MUTATION",
+      "requiredGuardFields": [
+        "if_match_client_portal_workspace_version"
+      ],
+      "staleGuardFamilies": [
+        "CLIENT_PORTAL_WORKSPACE_VERSION"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "VIEW_STALE"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "MANIFEST",
+        "CLIENT_PORTAL_ROUTE",
+        "NONE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse CLIENT_PORTAL_COMPLETE_ONBOARDING_STEP against the imported CommandEnvelope contract and bind it to MANIFEST scope.",
+        "VALIDATE": "Validate CLIENT_PORTAL_ROUTE_MUTATION exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare CLIENT_PORTAL_WORKSPACE_VERSION against the current CLIENT_PORTAL_ROUTE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with NONE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for client_portal_workspace-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Portal route mutations bind the customer-visible workspace version instead of borrowing collaboration thread guards."
+      ]
+    },
+    {
+      "commandType": "CLIENT_PORTAL_FINALIZE_UPLOAD",
+      "displayName": "Finalize upload",
+      "familyGroup": "CLIENT_PORTAL",
+      "targetScopeClass": "MANIFEST",
+      "routeScopeClass": "CLIENT_PORTAL_ROUTE",
+      "projectionStreamClass": "NONE",
+      "dispatchPosture": "ASYNC_UPLOAD_FINALIZATION",
+      "requiredGuardFields": [
+        "if_match_client_portal_workspace_version"
+      ],
+      "staleGuardFamilies": [
+        "CLIENT_PORTAL_WORKSPACE_VERSION"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "VIEW_STALE"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "MANIFEST",
+        "CLIENT_PORTAL_ROUTE",
+        "NONE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse CLIENT_PORTAL_FINALIZE_UPLOAD against the imported CommandEnvelope contract and bind it to MANIFEST scope.",
+        "VALIDATE": "Validate CLIENT_PORTAL_ROUTE_MUTATION exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare CLIENT_PORTAL_WORKSPACE_VERSION against the current CLIENT_PORTAL_ROUTE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with NONE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for upload_session-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Upload finalization shares the command scaffold but keeps recovery anchored to the governed upload session rather than raw file bytes."
+      ]
+    },
+    {
+      "commandType": "CLIENT_PORTAL_REQUEST_HELP",
+      "displayName": "Request help",
+      "familyGroup": "CLIENT_PORTAL",
+      "targetScopeClass": "WORK_ITEM",
+      "routeScopeClass": "CLIENT_PORTAL_ROUTE",
+      "projectionStreamClass": "WORKSPACE",
+      "dispatchPosture": "ASYNC_HELP_REQUEST_AND_WORKSPACE_APPEND",
+      "requiredGuardFields": [
+        "if_match_client_portal_workspace_version"
+      ],
+      "staleGuardFamilies": [
+        "CLIENT_PORTAL_WORKSPACE_VERSION"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "VIEW_STALE"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "WORK_ITEM",
+        "CLIENT_PORTAL_ROUTE",
+        "WORKSPACE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse CLIENT_PORTAL_REQUEST_HELP against the imported CommandEnvelope contract and bind it to WORK_ITEM scope.",
+        "VALIDATE": "Validate CLIENT_PORTAL_ROUTE_MUTATION exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare CLIENT_PORTAL_WORKSPACE_VERSION against the current CLIENT_PORTAL_ROUTE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with WORKSPACE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for client_portal_workspace-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Portal help requests may allocate both a portal-facing help request and the linked collaboration request-for-info record."
+      ]
+    },
+    {
+      "commandType": "CLIENT_PORTAL_ACKNOWLEDGE_APPROVAL_PACK",
+      "displayName": "Acknowledge approval pack",
+      "familyGroup": "CLIENT_PORTAL",
+      "targetScopeClass": "MANIFEST",
+      "routeScopeClass": "MANIFEST_EXPERIENCE",
+      "projectionStreamClass": "MANIFEST_EXPERIENCE",
+      "dispatchPosture": "ASYNC_APPROVAL_ACKNOWLEDGEMENT",
+      "requiredGuardFields": [
+        "if_match_decision_bundle_hash",
+        "if_match_shell_stability_token",
+        "if_match_frame_epoch",
+        "if_match_approval_pack_hash"
+      ],
+      "staleGuardFamilies": [
+        "DECISION_BUNDLE_HASH",
+        "SHELL_STABILITY_TOKEN",
+        "FRAME_EPOCH",
+        "APPROVAL_PACK_HASH"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "REBASE_REQUIRED",
+        "VIEW_STALE"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "MANIFEST",
+        "MANIFEST_EXPERIENCE",
+        "MANIFEST_EXPERIENCE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse CLIENT_PORTAL_ACKNOWLEDGE_APPROVAL_PACK against the imported CommandEnvelope contract and bind it to MANIFEST scope.",
+        "VALIDATE": "Validate MANIFEST_APPROVAL_PACK_REVIEW exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare DECISION_BUNDLE_HASH, SHELL_STABILITY_TOKEN, FRAME_EPOCH, APPROVAL_PACK_HASH against the current MANIFEST_EXPERIENCE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with MANIFEST_EXPERIENCE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for approval_pack-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Approval-pack acknowledgement must bind to the exact reviewed pack and the exact render frame the client saw."
+      ]
+    },
+    {
+      "commandType": "CLIENT_PORTAL_SIGN_APPROVAL_PACK",
+      "displayName": "Sign approval pack",
+      "familyGroup": "CLIENT_PORTAL",
+      "targetScopeClass": "MANIFEST",
+      "routeScopeClass": "MANIFEST_EXPERIENCE",
+      "projectionStreamClass": "MANIFEST_EXPERIENCE",
+      "dispatchPosture": "ASYNC_APPROVAL_SIGNATURE",
+      "requiredGuardFields": [
+        "if_match_decision_bundle_hash",
+        "if_match_shell_stability_token",
+        "if_match_frame_epoch",
+        "if_match_approval_pack_hash"
+      ],
+      "staleGuardFamilies": [
+        "DECISION_BUNDLE_HASH",
+        "SHELL_STABILITY_TOKEN",
+        "FRAME_EPOCH",
+        "APPROVAL_PACK_HASH"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "REBASE_REQUIRED",
+        "VIEW_STALE"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "MANIFEST",
+        "MANIFEST_EXPERIENCE",
+        "MANIFEST_EXPERIENCE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse CLIENT_PORTAL_SIGN_APPROVAL_PACK against the imported CommandEnvelope contract and bind it to MANIFEST scope.",
+        "VALIDATE": "Validate MANIFEST_APPROVAL_PACK_REVIEW exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare DECISION_BUNDLE_HASH, SHELL_STABILITY_TOKEN, FRAME_EPOCH, APPROVAL_PACK_HASH against the current MANIFEST_EXPERIENCE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with MANIFEST_EXPERIENCE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for approval_pack-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Signature commands reuse the approval-pack review profile and remain stale-closed when pack or shell posture drifted."
+      ]
+    },
+    {
+      "commandType": "ASSIGN_WORK_ITEM",
+      "displayName": "Assign work item",
+      "familyGroup": "COLLABORATION",
+      "targetScopeClass": "WORK_ITEM",
+      "routeScopeClass": "WORKSPACE",
+      "projectionStreamClass": "WORKSPACE",
+      "dispatchPosture": "ASYNC_WORKSPACE_STATE_MUTATION",
+      "requiredGuardFields": [
+        "if_match_work_item_version",
+        "if_match_shell_stability_token"
+      ],
+      "staleGuardFamilies": [
+        "WORK_ITEM_VERSION",
+        "SHELL_STABILITY_TOKEN"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "REBASE_REQUIRED",
+        "VIEW_STALE"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "WORK_ITEM",
+        "WORKSPACE",
+        "WORKSPACE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse ASSIGN_WORK_ITEM against the imported CommandEnvelope contract and bind it to WORK_ITEM scope.",
+        "VALIDATE": "Validate WORK_ITEM_STATE_MUTATION exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare WORK_ITEM_VERSION, SHELL_STABILITY_TOKEN against the current WORKSPACE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with WORKSPACE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for workspace_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "State-changing collaboration mutations bind the current workspace version and shell token."
+      ]
+    },
+    {
+      "commandType": "REASSIGN_WORK_ITEM",
+      "displayName": "Reassign work item",
+      "familyGroup": "COLLABORATION",
+      "targetScopeClass": "WORK_ITEM",
+      "routeScopeClass": "WORKSPACE",
+      "projectionStreamClass": "WORKSPACE",
+      "dispatchPosture": "ASYNC_WORKSPACE_STATE_MUTATION",
+      "requiredGuardFields": [
+        "if_match_work_item_version",
+        "if_match_shell_stability_token"
+      ],
+      "staleGuardFamilies": [
+        "WORK_ITEM_VERSION",
+        "SHELL_STABILITY_TOKEN"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "REBASE_REQUIRED",
+        "VIEW_STALE"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "WORK_ITEM",
+        "WORKSPACE",
+        "WORKSPACE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse REASSIGN_WORK_ITEM against the imported CommandEnvelope contract and bind it to WORK_ITEM scope.",
+        "VALIDATE": "Validate WORK_ITEM_STATE_MUTATION exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare WORK_ITEM_VERSION, SHELL_STABILITY_TOKEN against the current WORKSPACE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with WORKSPACE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for workspace_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Reassignment shares the same concurrency profile as other work-item state changes."
+      ]
+    },
+    {
+      "commandType": "ESCALATE_WORK_ITEM",
+      "displayName": "Escalate work item",
+      "familyGroup": "COLLABORATION",
+      "targetScopeClass": "WORK_ITEM",
+      "routeScopeClass": "WORKSPACE",
+      "projectionStreamClass": "WORKSPACE",
+      "dispatchPosture": "ASYNC_WORKSPACE_STATE_MUTATION",
+      "requiredGuardFields": [
+        "if_match_work_item_version",
+        "if_match_shell_stability_token"
+      ],
+      "staleGuardFamilies": [
+        "WORK_ITEM_VERSION",
+        "SHELL_STABILITY_TOKEN"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "REBASE_REQUIRED",
+        "VIEW_STALE"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "WORK_ITEM",
+        "WORKSPACE",
+        "WORKSPACE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse ESCALATE_WORK_ITEM against the imported CommandEnvelope contract and bind it to WORK_ITEM scope.",
+        "VALIDATE": "Validate WORK_ITEM_STATE_MUTATION exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare WORK_ITEM_VERSION, SHELL_STABILITY_TOKEN against the current WORKSPACE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with WORKSPACE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for workspace_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Escalations remain stale-closed and must not allocate duplicate activity on retry."
+      ]
+    },
+    {
+      "commandType": "CHANGE_WORK_ITEM_STATUS",
+      "displayName": "Change work item status",
+      "familyGroup": "COLLABORATION",
+      "targetScopeClass": "WORK_ITEM",
+      "routeScopeClass": "WORKSPACE",
+      "projectionStreamClass": "WORKSPACE",
+      "dispatchPosture": "ASYNC_WORKSPACE_STATE_MUTATION",
+      "requiredGuardFields": [
+        "if_match_work_item_version",
+        "if_match_shell_stability_token"
+      ],
+      "staleGuardFamilies": [
+        "WORK_ITEM_VERSION",
+        "SHELL_STABILITY_TOKEN"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "REBASE_REQUIRED",
+        "VIEW_STALE"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "WORK_ITEM",
+        "WORKSPACE",
+        "WORKSPACE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse CHANGE_WORK_ITEM_STATUS against the imported CommandEnvelope contract and bind it to WORK_ITEM scope.",
+        "VALIDATE": "Validate WORK_ITEM_STATE_MUTATION exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare WORK_ITEM_VERSION, SHELL_STABILITY_TOKEN against the current WORKSPACE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with WORKSPACE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for workspace_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Status changes use the common work-item mutation profile."
+      ]
+    },
+    {
+      "commandType": "SET_WORK_ITEM_DUE_DATES",
+      "displayName": "Set work item due dates",
+      "familyGroup": "COLLABORATION",
+      "targetScopeClass": "WORK_ITEM",
+      "routeScopeClass": "WORKSPACE",
+      "projectionStreamClass": "WORKSPACE",
+      "dispatchPosture": "ASYNC_WORKSPACE_STATE_MUTATION",
+      "requiredGuardFields": [
+        "if_match_work_item_version",
+        "if_match_shell_stability_token"
+      ],
+      "staleGuardFamilies": [
+        "WORK_ITEM_VERSION",
+        "SHELL_STABILITY_TOKEN"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "REBASE_REQUIRED",
+        "VIEW_STALE"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "WORK_ITEM",
+        "WORKSPACE",
+        "WORKSPACE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse SET_WORK_ITEM_DUE_DATES against the imported CommandEnvelope contract and bind it to WORK_ITEM scope.",
+        "VALIDATE": "Validate WORK_ITEM_STATE_MUTATION exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare WORK_ITEM_VERSION, SHELL_STABILITY_TOKEN against the current WORKSPACE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with WORKSPACE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for workspace_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Due-date changes remain ordinary collaboration state mutations."
+      ]
+    },
+    {
+      "commandType": "ADD_INTERNAL_NOTE",
+      "displayName": "Add internal note",
+      "familyGroup": "COLLABORATION",
+      "targetScopeClass": "WORK_ITEM",
+      "routeScopeClass": "WORKSPACE",
+      "projectionStreamClass": "WORKSPACE",
+      "dispatchPosture": "ASYNC_INTERNAL_APPEND",
+      "requiredGuardFields": [
+        "if_match_work_item_version",
+        "if_match_shell_stability_token",
+        "if_match_internal_head_sequence"
+      ],
+      "staleGuardFamilies": [
+        "WORK_ITEM_VERSION",
+        "SHELL_STABILITY_TOKEN",
+        "INTERNAL_THREAD_HEAD"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "REBASE_REQUIRED",
+        "VIEW_STALE"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "WORK_ITEM",
+        "WORKSPACE",
+        "WORKSPACE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse ADD_INTERNAL_NOTE against the imported CommandEnvelope contract and bind it to WORK_ITEM scope.",
+        "VALIDATE": "Validate WORK_ITEM_INTERNAL_APPEND exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare WORK_ITEM_VERSION, SHELL_STABILITY_TOKEN, INTERNAL_THREAD_HEAD against the current WORKSPACE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with WORKSPACE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for workspace_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Internal append commands use the internal head sequence and must never drift onto the customer lane."
+      ]
+    },
+    {
+      "commandType": "ADD_CUSTOMER_COMMENT",
+      "displayName": "Add customer comment",
+      "familyGroup": "COLLABORATION",
+      "targetScopeClass": "WORK_ITEM",
+      "routeScopeClass": "WORKSPACE",
+      "projectionStreamClass": "WORKSPACE",
+      "dispatchPosture": "ASYNC_CUSTOMER_APPEND",
+      "requiredGuardFields": [
+        "if_match_work_item_version",
+        "if_match_shell_stability_token",
+        "if_match_customer_head_sequence"
+      ],
+      "staleGuardFamilies": [
+        "WORK_ITEM_VERSION",
+        "SHELL_STABILITY_TOKEN",
+        "CUSTOMER_THREAD_HEAD"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "REBASE_REQUIRED",
+        "VIEW_STALE"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "WORK_ITEM",
+        "WORKSPACE",
+        "WORKSPACE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse ADD_CUSTOMER_COMMENT against the imported CommandEnvelope contract and bind it to WORK_ITEM scope.",
+        "VALIDATE": "Validate WORK_ITEM_CUSTOMER_APPEND exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare WORK_ITEM_VERSION, SHELL_STABILITY_TOKEN, CUSTOMER_THREAD_HEAD against the current WORKSPACE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with WORKSPACE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for workspace_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Customer-visible append commands use the customer thread head and remain stale-closed on workspace drift."
+      ]
+    },
+    {
+      "commandType": "REQUEST_CUSTOMER_INFO",
+      "displayName": "Request customer info",
+      "familyGroup": "COLLABORATION",
+      "targetScopeClass": "WORK_ITEM",
+      "routeScopeClass": "WORKSPACE",
+      "projectionStreamClass": "WORKSPACE",
+      "dispatchPosture": "ASYNC_CUSTOMER_APPEND_AND_REQUEST_STATE",
+      "requiredGuardFields": [
+        "if_match_work_item_version",
+        "if_match_shell_stability_token",
+        "if_match_customer_head_sequence"
+      ],
+      "staleGuardFamilies": [
+        "WORK_ITEM_VERSION",
+        "SHELL_STABILITY_TOKEN",
+        "CUSTOMER_THREAD_HEAD"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "REBASE_REQUIRED",
+        "VIEW_STALE"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "WORK_ITEM",
+        "WORKSPACE",
+        "WORKSPACE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse REQUEST_CUSTOMER_INFO against the imported CommandEnvelope contract and bind it to WORK_ITEM scope.",
+        "VALIDATE": "Validate WORK_ITEM_CUSTOMER_APPEND exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare WORK_ITEM_VERSION, SHELL_STABILITY_TOKEN, CUSTOMER_THREAD_HEAD against the current WORKSPACE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with WORKSPACE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for workspace_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Request-for-info commands stay on the customer-visible lane and open a governed request-state lineage."
+      ]
+    },
+    {
+      "commandType": "RESPOND_TO_REQUEST_INFO",
+      "displayName": "Respond to request info",
+      "familyGroup": "COLLABORATION",
+      "targetScopeClass": "WORK_ITEM",
+      "routeScopeClass": "WORKSPACE",
+      "projectionStreamClass": "WORKSPACE",
+      "dispatchPosture": "ASYNC_REQUEST_STATE_MUTATION",
+      "requiredGuardFields": [
+        "if_match_work_item_version",
+        "if_match_shell_stability_token",
+        "if_match_customer_head_sequence",
+        "if_match_request_state_version"
+      ],
+      "staleGuardFamilies": [
+        "WORK_ITEM_VERSION",
+        "SHELL_STABILITY_TOKEN",
+        "CUSTOMER_THREAD_HEAD",
+        "REQUEST_STATE_VERSION"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "REBASE_REQUIRED",
+        "VIEW_STALE"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "WORK_ITEM",
+        "WORKSPACE",
+        "WORKSPACE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse RESPOND_TO_REQUEST_INFO against the imported CommandEnvelope contract and bind it to WORK_ITEM scope.",
+        "VALIDATE": "Validate WORK_ITEM_REQUEST_RESPONSE exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare WORK_ITEM_VERSION, SHELL_STABILITY_TOKEN, CUSTOMER_THREAD_HEAD, REQUEST_STATE_VERSION against the current WORKSPACE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with WORKSPACE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for workspace_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Request-info responses carry both the customer head and the durable request-state version so stale replies fail closed."
+      ]
+    },
+    {
+      "commandType": "ADMIN_UPDATE_TENANT_SETTINGS",
+      "displayName": "Update tenant settings",
+      "familyGroup": "GOVERNANCE",
+      "targetScopeClass": "GOVERNANCE",
+      "routeScopeClass": "GOVERNANCE_ROUTE",
+      "projectionStreamClass": "NONE",
+      "dispatchPosture": "ASYNC_GOVERNANCE_WRITE",
+      "requiredGuardFields": [
+        "if_match_policy_snapshot_hash"
+      ],
+      "staleGuardFamilies": [
+        "POLICY_SNAPSHOT_HASH"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "VIEW_STALE",
+        "GOVERNANCE_SIMULATION_BASIS_REQUIRED",
+        "GOVERNANCE_PREVIEW_ONLY_COMMIT_BLOCKED",
+        "POLICY_REJECTED"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "GOVERNANCE",
+        "GOVERNANCE_ROUTE",
+        "NONE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse ADMIN_UPDATE_TENANT_SETTINGS against the imported CommandEnvelope contract and bind it to GOVERNANCE scope.",
+        "VALIDATE": "Validate GOVERNANCE_POLICY_MUTATION exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare POLICY_SNAPSHOT_HASH against the current GOVERNANCE_ROUTE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with NONE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for policy_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Tenant-wide settings remain stale-closed on the current policy snapshot."
+      ]
+    },
+    {
+      "commandType": "ADMIN_STAGE_POLICY_CHANGE",
+      "displayName": "Stage policy change",
+      "familyGroup": "GOVERNANCE",
+      "targetScopeClass": "GOVERNANCE",
+      "routeScopeClass": "GOVERNANCE_ROUTE",
+      "projectionStreamClass": "NONE",
+      "dispatchPosture": "ASYNC_GOVERNANCE_WRITE",
+      "requiredGuardFields": [
+        "if_match_policy_snapshot_hash",
+        "if_match_dependency_topology_hash",
+        "simulation_basis_hash"
+      ],
+      "staleGuardFamilies": [
+        "POLICY_SNAPSHOT_HASH",
+        "DEPENDENCY_TOPOLOGY_HASH",
+        "SIMULATION_BASIS_HASH",
+        "MUTATION_BASIS_CONTRACT_HASH"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "VIEW_STALE",
+        "GOVERNANCE_SIMULATION_BASIS_REQUIRED",
+        "GOVERNANCE_PREVIEW_ONLY_COMMIT_BLOCKED",
+        "POLICY_REJECTED"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "GOVERNANCE",
+        "GOVERNANCE_ROUTE",
+        "NONE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse ADMIN_STAGE_POLICY_CHANGE against the imported CommandEnvelope contract and bind it to GOVERNANCE scope.",
+        "VALIDATE": "Validate GOVERNANCE_SIMULATION_COMMIT exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare POLICY_SNAPSHOT_HASH, DEPENDENCY_TOPOLOGY_HASH, SIMULATION_BASIS_HASH, MUTATION_BASIS_CONTRACT_HASH against the current GOVERNANCE_ROUTE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with NONE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for policy_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Simulation-backed policy staging must keep topology, simulation basis, and mutation basis contract aligned."
+      ]
+    },
+    {
+      "commandType": "ADMIN_ASSIGN_PRINCIPAL_ROLE",
+      "displayName": "Assign principal role",
+      "familyGroup": "GOVERNANCE",
+      "targetScopeClass": "GOVERNANCE",
+      "routeScopeClass": "GOVERNANCE_ROUTE",
+      "projectionStreamClass": "NONE",
+      "dispatchPosture": "ASYNC_GOVERNANCE_WRITE",
+      "requiredGuardFields": [
+        "if_match_policy_snapshot_hash",
+        "if_match_dependency_topology_hash",
+        "simulation_basis_hash"
+      ],
+      "staleGuardFamilies": [
+        "POLICY_SNAPSHOT_HASH",
+        "DEPENDENCY_TOPOLOGY_HASH",
+        "SIMULATION_BASIS_HASH",
+        "MUTATION_BASIS_CONTRACT_HASH"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "VIEW_STALE",
+        "GOVERNANCE_SIMULATION_BASIS_REQUIRED",
+        "GOVERNANCE_PREVIEW_ONLY_COMMIT_BLOCKED",
+        "POLICY_REJECTED"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "GOVERNANCE",
+        "GOVERNANCE_ROUTE",
+        "NONE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse ADMIN_ASSIGN_PRINCIPAL_ROLE against the imported CommandEnvelope contract and bind it to GOVERNANCE scope.",
+        "VALIDATE": "Validate GOVERNANCE_SIMULATION_COMMIT exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare POLICY_SNAPSHOT_HASH, DEPENDENCY_TOPOLOGY_HASH, SIMULATION_BASIS_HASH, MUTATION_BASIS_CONTRACT_HASH against the current GOVERNANCE_ROUTE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with NONE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for policy_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Role assignment is governance-scope and may rely on a prior simulation cut."
+      ]
+    },
+    {
+      "commandType": "ADMIN_REMOVE_PRINCIPAL_ROLE",
+      "displayName": "Remove principal role",
+      "familyGroup": "GOVERNANCE",
+      "targetScopeClass": "GOVERNANCE",
+      "routeScopeClass": "GOVERNANCE_ROUTE",
+      "projectionStreamClass": "NONE",
+      "dispatchPosture": "ASYNC_GOVERNANCE_WRITE",
+      "requiredGuardFields": [
+        "if_match_policy_snapshot_hash",
+        "if_match_dependency_topology_hash",
+        "simulation_basis_hash"
+      ],
+      "staleGuardFamilies": [
+        "POLICY_SNAPSHOT_HASH",
+        "DEPENDENCY_TOPOLOGY_HASH",
+        "SIMULATION_BASIS_HASH",
+        "MUTATION_BASIS_CONTRACT_HASH"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "VIEW_STALE",
+        "GOVERNANCE_SIMULATION_BASIS_REQUIRED",
+        "GOVERNANCE_PREVIEW_ONLY_COMMIT_BLOCKED",
+        "POLICY_REJECTED"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "GOVERNANCE",
+        "GOVERNANCE_ROUTE",
+        "NONE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse ADMIN_REMOVE_PRINCIPAL_ROLE against the imported CommandEnvelope contract and bind it to GOVERNANCE scope.",
+        "VALIDATE": "Validate GOVERNANCE_SIMULATION_COMMIT exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare POLICY_SNAPSHOT_HASH, DEPENDENCY_TOPOLOGY_HASH, SIMULATION_BASIS_HASH, MUTATION_BASIS_CONTRACT_HASH against the current GOVERNANCE_ROUTE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with NONE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for policy_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Role removal stays on the same simulation-backed governance posture."
+      ]
+    },
+    {
+      "commandType": "ADMIN_SET_PRINCIPAL_ATTRIBUTES",
+      "displayName": "Set principal attributes",
+      "familyGroup": "GOVERNANCE",
+      "targetScopeClass": "GOVERNANCE",
+      "routeScopeClass": "GOVERNANCE_ROUTE",
+      "projectionStreamClass": "NONE",
+      "dispatchPosture": "ASYNC_GOVERNANCE_WRITE",
+      "requiredGuardFields": [
+        "if_match_policy_snapshot_hash"
+      ],
+      "staleGuardFamilies": [
+        "POLICY_SNAPSHOT_HASH"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "VIEW_STALE",
+        "GOVERNANCE_SIMULATION_BASIS_REQUIRED",
+        "GOVERNANCE_PREVIEW_ONLY_COMMIT_BLOCKED",
+        "POLICY_REJECTED"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "GOVERNANCE",
+        "GOVERNANCE_ROUTE",
+        "NONE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse ADMIN_SET_PRINCIPAL_ATTRIBUTES against the imported CommandEnvelope contract and bind it to GOVERNANCE scope.",
+        "VALIDATE": "Validate GOVERNANCE_POLICY_MUTATION exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare POLICY_SNAPSHOT_HASH against the current GOVERNANCE_ROUTE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with NONE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for policy_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Principal attribute mutation requires the current policy snapshot even when no simulation cut is reused."
+      ]
+    },
+    {
+      "commandType": "ADMIN_LINK_AUTHORITY",
+      "displayName": "Link authority",
+      "familyGroup": "GOVERNANCE",
+      "targetScopeClass": "GOVERNANCE",
+      "routeScopeClass": "GOVERNANCE_ROUTE",
+      "projectionStreamClass": "NONE",
+      "dispatchPosture": "ASYNC_GOVERNANCE_WRITE",
+      "requiredGuardFields": [
+        "if_match_policy_snapshot_hash",
+        "if_match_dependency_topology_hash",
+        "simulation_basis_hash"
+      ],
+      "staleGuardFamilies": [
+        "POLICY_SNAPSHOT_HASH",
+        "DEPENDENCY_TOPOLOGY_HASH",
+        "SIMULATION_BASIS_HASH",
+        "MUTATION_BASIS_CONTRACT_HASH"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "VIEW_STALE",
+        "GOVERNANCE_SIMULATION_BASIS_REQUIRED",
+        "GOVERNANCE_PREVIEW_ONLY_COMMIT_BLOCKED",
+        "POLICY_REJECTED"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "GOVERNANCE",
+        "GOVERNANCE_ROUTE",
+        "NONE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse ADMIN_LINK_AUTHORITY against the imported CommandEnvelope contract and bind it to GOVERNANCE scope.",
+        "VALIDATE": "Validate GOVERNANCE_SIMULATION_COMMIT exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare POLICY_SNAPSHOT_HASH, DEPENDENCY_TOPOLOGY_HASH, SIMULATION_BASIS_HASH, MUTATION_BASIS_CONTRACT_HASH against the current GOVERNANCE_ROUTE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with NONE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for policy_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Authority-link changes remain stale-closed and may require the reviewed simulation basis."
+      ]
+    },
+    {
+      "commandType": "ADMIN_RELINK_AUTHORITY",
+      "displayName": "Relink authority",
+      "familyGroup": "GOVERNANCE",
+      "targetScopeClass": "GOVERNANCE",
+      "routeScopeClass": "GOVERNANCE_ROUTE",
+      "projectionStreamClass": "NONE",
+      "dispatchPosture": "ASYNC_GOVERNANCE_WRITE",
+      "requiredGuardFields": [
+        "if_match_policy_snapshot_hash",
+        "if_match_dependency_topology_hash",
+        "simulation_basis_hash"
+      ],
+      "staleGuardFamilies": [
+        "POLICY_SNAPSHOT_HASH",
+        "DEPENDENCY_TOPOLOGY_HASH",
+        "SIMULATION_BASIS_HASH",
+        "MUTATION_BASIS_CONTRACT_HASH"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "VIEW_STALE",
+        "GOVERNANCE_SIMULATION_BASIS_REQUIRED",
+        "GOVERNANCE_PREVIEW_ONLY_COMMIT_BLOCKED",
+        "POLICY_REJECTED"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "GOVERNANCE",
+        "GOVERNANCE_ROUTE",
+        "NONE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse ADMIN_RELINK_AUTHORITY against the imported CommandEnvelope contract and bind it to GOVERNANCE scope.",
+        "VALIDATE": "Validate GOVERNANCE_SIMULATION_COMMIT exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare POLICY_SNAPSHOT_HASH, DEPENDENCY_TOPOLOGY_HASH, SIMULATION_BASIS_HASH, MUTATION_BASIS_CONTRACT_HASH against the current GOVERNANCE_ROUTE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with NONE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for policy_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Relinking authority scope is simulation-backed because blast radius and approval posture may shift."
+      ]
+    },
+    {
+      "commandType": "ADMIN_UNLINK_AUTHORITY",
+      "displayName": "Unlink authority",
+      "familyGroup": "GOVERNANCE",
+      "targetScopeClass": "GOVERNANCE",
+      "routeScopeClass": "GOVERNANCE_ROUTE",
+      "projectionStreamClass": "NONE",
+      "dispatchPosture": "ASYNC_GOVERNANCE_WRITE",
+      "requiredGuardFields": [
+        "if_match_policy_snapshot_hash"
+      ],
+      "staleGuardFamilies": [
+        "POLICY_SNAPSHOT_HASH"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "VIEW_STALE",
+        "GOVERNANCE_SIMULATION_BASIS_REQUIRED",
+        "GOVERNANCE_PREVIEW_ONLY_COMMIT_BLOCKED",
+        "POLICY_REJECTED"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "GOVERNANCE",
+        "GOVERNANCE_ROUTE",
+        "NONE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse ADMIN_UNLINK_AUTHORITY against the imported CommandEnvelope contract and bind it to GOVERNANCE scope.",
+        "VALIDATE": "Validate GOVERNANCE_POLICY_MUTATION exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare POLICY_SNAPSHOT_HASH against the current GOVERNANCE_ROUTE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with NONE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for policy_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Unlink flows still require the live policy snapshot but can skip topology/simulation reuse when staged on fresh truth."
+      ]
+    },
+    {
+      "commandType": "ADMIN_APPLY_RETENTION_POLICY",
+      "displayName": "Apply retention policy",
+      "familyGroup": "GOVERNANCE",
+      "targetScopeClass": "GOVERNANCE",
+      "routeScopeClass": "GOVERNANCE_ROUTE",
+      "projectionStreamClass": "NONE",
+      "dispatchPosture": "ASYNC_GOVERNANCE_WRITE",
+      "requiredGuardFields": [
+        "if_match_policy_snapshot_hash",
+        "if_match_dependency_topology_hash",
+        "simulation_basis_hash"
+      ],
+      "staleGuardFamilies": [
+        "POLICY_SNAPSHOT_HASH",
+        "DEPENDENCY_TOPOLOGY_HASH",
+        "SIMULATION_BASIS_HASH",
+        "MUTATION_BASIS_CONTRACT_HASH"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "VIEW_STALE",
+        "GOVERNANCE_SIMULATION_BASIS_REQUIRED",
+        "GOVERNANCE_PREVIEW_ONLY_COMMIT_BLOCKED",
+        "POLICY_REJECTED"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "GOVERNANCE",
+        "GOVERNANCE_ROUTE",
+        "NONE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse ADMIN_APPLY_RETENTION_POLICY against the imported CommandEnvelope contract and bind it to GOVERNANCE scope.",
+        "VALIDATE": "Validate GOVERNANCE_SIMULATION_COMMIT exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare POLICY_SNAPSHOT_HASH, DEPENDENCY_TOPOLOGY_HASH, SIMULATION_BASIS_HASH, MUTATION_BASIS_CONTRACT_HASH against the current GOVERNANCE_ROUTE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with NONE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for policy_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Retention mutations are simulation-backed because blast radius, approval, and downstream legal effect all depend on the reviewed basis."
+      ]
+    },
+    {
+      "commandType": "ADMIN_APPLY_LEGAL_HOLD",
+      "displayName": "Apply legal hold",
+      "familyGroup": "GOVERNANCE",
+      "targetScopeClass": "GOVERNANCE",
+      "routeScopeClass": "GOVERNANCE_ROUTE",
+      "projectionStreamClass": "NONE",
+      "dispatchPosture": "ASYNC_GOVERNANCE_WRITE",
+      "requiredGuardFields": [
+        "if_match_policy_snapshot_hash",
+        "if_match_dependency_topology_hash",
+        "simulation_basis_hash"
+      ],
+      "staleGuardFamilies": [
+        "POLICY_SNAPSHOT_HASH",
+        "DEPENDENCY_TOPOLOGY_HASH",
+        "SIMULATION_BASIS_HASH",
+        "MUTATION_BASIS_CONTRACT_HASH"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "VIEW_STALE",
+        "GOVERNANCE_SIMULATION_BASIS_REQUIRED",
+        "GOVERNANCE_PREVIEW_ONLY_COMMIT_BLOCKED",
+        "POLICY_REJECTED"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "GOVERNANCE",
+        "GOVERNANCE_ROUTE",
+        "NONE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse ADMIN_APPLY_LEGAL_HOLD against the imported CommandEnvelope contract and bind it to GOVERNANCE scope.",
+        "VALIDATE": "Validate GOVERNANCE_SIMULATION_COMMIT exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare POLICY_SNAPSHOT_HASH, DEPENDENCY_TOPOLOGY_HASH, SIMULATION_BASIS_HASH, MUTATION_BASIS_CONTRACT_HASH against the current GOVERNANCE_ROUTE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with NONE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for policy_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Legal holds are simulation-backed and stale-closed."
+      ]
+    },
+    {
+      "commandType": "ADMIN_RELEASE_LEGAL_HOLD",
+      "displayName": "Release legal hold",
+      "familyGroup": "GOVERNANCE",
+      "targetScopeClass": "GOVERNANCE",
+      "routeScopeClass": "GOVERNANCE_ROUTE",
+      "projectionStreamClass": "NONE",
+      "dispatchPosture": "ASYNC_GOVERNANCE_WRITE",
+      "requiredGuardFields": [
+        "if_match_policy_snapshot_hash",
+        "if_match_dependency_topology_hash",
+        "simulation_basis_hash"
+      ],
+      "staleGuardFamilies": [
+        "POLICY_SNAPSHOT_HASH",
+        "DEPENDENCY_TOPOLOGY_HASH",
+        "SIMULATION_BASIS_HASH",
+        "MUTATION_BASIS_CONTRACT_HASH"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "VIEW_STALE",
+        "GOVERNANCE_SIMULATION_BASIS_REQUIRED",
+        "GOVERNANCE_PREVIEW_ONLY_COMMIT_BLOCKED",
+        "POLICY_REJECTED"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "GOVERNANCE",
+        "GOVERNANCE_ROUTE",
+        "NONE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse ADMIN_RELEASE_LEGAL_HOLD against the imported CommandEnvelope contract and bind it to GOVERNANCE scope.",
+        "VALIDATE": "Validate GOVERNANCE_SIMULATION_COMMIT exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare POLICY_SNAPSHOT_HASH, DEPENDENCY_TOPOLOGY_HASH, SIMULATION_BASIS_HASH, MUTATION_BASIS_CONTRACT_HASH against the current GOVERNANCE_ROUTE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with NONE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for policy_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Legal-hold release remains a governance simulation commit because the reviewed approval posture matters."
+      ]
+    },
+    {
+      "commandType": "ADMIN_EXECUTE_ERASURE",
+      "displayName": "Execute erasure",
+      "familyGroup": "GOVERNANCE",
+      "targetScopeClass": "GOVERNANCE",
+      "routeScopeClass": "GOVERNANCE_ROUTE",
+      "projectionStreamClass": "NONE",
+      "dispatchPosture": "ASYNC_GOVERNANCE_WRITE",
+      "requiredGuardFields": [
+        "if_match_policy_snapshot_hash",
+        "if_match_dependency_topology_hash",
+        "simulation_basis_hash"
+      ],
+      "staleGuardFamilies": [
+        "POLICY_SNAPSHOT_HASH",
+        "DEPENDENCY_TOPOLOGY_HASH",
+        "SIMULATION_BASIS_HASH",
+        "MUTATION_BASIS_CONTRACT_HASH"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "VIEW_STALE",
+        "GOVERNANCE_SIMULATION_BASIS_REQUIRED",
+        "GOVERNANCE_PREVIEW_ONLY_COMMIT_BLOCKED",
+        "POLICY_REJECTED"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "GOVERNANCE",
+        "GOVERNANCE_ROUTE",
+        "NONE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse ADMIN_EXECUTE_ERASURE against the imported CommandEnvelope contract and bind it to GOVERNANCE scope.",
+        "VALIDATE": "Validate GOVERNANCE_SIMULATION_COMMIT exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare POLICY_SNAPSHOT_HASH, DEPENDENCY_TOPOLOGY_HASH, SIMULATION_BASIS_HASH, MUTATION_BASIS_CONTRACT_HASH against the current GOVERNANCE_ROUTE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with NONE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for policy_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Irreversible erasure must never outrun the reviewed governance basis."
+      ]
+    },
+    {
+      "commandType": "ADMIN_EXPORT_AUDIT_SLICE",
+      "displayName": "Export audit slice",
+      "familyGroup": "GOVERNANCE",
+      "targetScopeClass": "GOVERNANCE",
+      "routeScopeClass": "GOVERNANCE_ROUTE",
+      "projectionStreamClass": "NONE",
+      "dispatchPosture": "ASYNC_GOVERNANCE_EXPORT",
+      "requiredGuardFields": [
+        "if_match_policy_snapshot_hash"
+      ],
+      "staleGuardFamilies": [
+        "POLICY_SNAPSHOT_HASH"
+      ],
+      "problemCodes": [
+        "INVALID_COMMAND_ENVELOPE",
+        "COMMAND_SCOPE_TARGET_MISMATCH",
+        "IDEMPOTENCY_COLLISION",
+        "VIEW_STALE",
+        "GOVERNANCE_SIMULATION_BASIS_REQUIRED",
+        "GOVERNANCE_PREVIEW_ONLY_COMMIT_BLOCKED",
+        "POLICY_REJECTED"
+      ],
+      "receiptFields": [
+        "receipt_id",
+        "request_hash",
+        "acceptance_state",
+        "truth_boundary_contract",
+        "mutation_precondition_binding"
+      ],
+      "chips": [
+        "GOVERNANCE",
+        "GOVERNANCE_ROUTE",
+        "NONE"
+      ],
+      "stageNarrative": {
+        "PARSE": "Parse ADMIN_EXPORT_AUDIT_SLICE against the imported CommandEnvelope contract and bind it to GOVERNANCE scope.",
+        "VALIDATE": "Validate GOVERNANCE_POLICY_MUTATION exactly, reject extra stale guards, and preserve the command-request truth-boundary contract.",
+        "STALE": "Compare POLICY_SNAPSHOT_HASH against the current GOVERNANCE_ROUTE route-stability contract.",
+        "DUPLICATE": "Reuse the same durable receipt for exact request replays; reject idempotency collisions instead of guessing user intent.",
+        "RECEIPT": "Emit ApiCommandReceipt with NONE projection posture and append-only boundary evidence.",
+        "PROBLEM": "Emit typed ProblemEnvelope recovery for policy_snapshot-anchored rebase or hard-stop paths."
+      },
+      "notes": [
+        "Audit export is still a governance command and reuses the shared receipt/problem boundary."
+      ]
+    }
+  ]
+}

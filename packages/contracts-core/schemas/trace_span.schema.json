@@ -1,0 +1,749 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/trace_span.schema.json",
+  "title": "TraceSpan",
+  "description": "Manifest-rooted trace-span contract for compliance-capable runs. This contract freezes root-span versus child-span semantics and the minimum operation taxonomy required for filing-grade observability.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "span_scope_class",
+    "trace_id",
+    "span_id",
+    "parent_span_id",
+    "manifest_id",
+    "resource_ref",
+    "span_code",
+    "sampling_class",
+    "retention_class",
+    "started_at",
+    "ended_at",
+    "status_code",
+    "correlation_context",
+    "span_attributes"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "TraceSpan"
+    },
+    "span_scope_class": {
+      "const": "MANIFEST_RUNTIME"
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "span_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "parent_span_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resource_ref": {
+      "$ref": "./telemetry_resource.schema.json#/$defs/resourceRef"
+    },
+    "span_code": {
+      "type": "string",
+      "enum": [
+        "RUN_ROOT",
+        "PRIOR_MANIFEST_CONTEXT_LOAD",
+        "REUSE_CONTINUATION_DECISION",
+        "CONFIG_RESOLVE_OR_INHERITANCE_DECISION",
+        "EXISTING_DECISION_BUNDLE_RELOAD",
+        "MANIFEST_FREEZE",
+        "MANIFEST_START_CLAIM",
+        "SOURCE_COLLECTION",
+        "SNAPSHOT_BUILD",
+        "COMPUTE",
+        "PARITY",
+        "TRUST",
+        "GRAPH_BUILD",
+        "FILING_PACKET_BUILD",
+        "AUTHORITY_REQUEST_BUILD",
+        "AUTHORITY_TRANSMIT",
+        "AUTHORITY_RECONCILE",
+        "DRIFT_DETECT",
+        "AMENDMENT_EVALUATE",
+        "RETENTION_APPLY",
+        "ERASURE_EXECUTE",
+        "OTHER"
+      ]
+    },
+    "sampling_class": {
+      "type": "string",
+      "enum": [
+        "MANDATORY_FORENSIC",
+        "DETERMINISTIC_RETAIN",
+        "SAMPLED_OPERATIONAL"
+      ]
+    },
+    "retention_class": {
+      "type": "string",
+      "minLength": 1
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ended_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "status_code": {
+      "type": "string",
+      "enum": [
+        "UNSET",
+        "OK",
+        "ERROR"
+      ]
+    },
+    "correlation_context": {
+      "$ref": "./telemetry_resource.schema.json#/$defs/correlationContext"
+    },
+    "span_attributes": {
+      "$ref": "./telemetry_resource.schema.json#/$defs/attributeMap"
+    }
+  },
+  "allOf": [
+    {
+      "properties": {
+        "correlation_context": {
+          "type": "object",
+          "properties": {
+            "manifest_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "trace_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "span_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "service_name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "environment_ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "manifest_id",
+            "trace_id",
+            "span_id",
+            "service_name",
+            "environment_ref"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "span_code": {
+            "enum": [
+              "FILING_PACKET_BUILD",
+              "AUTHORITY_REQUEST_BUILD",
+              "AUTHORITY_TRANSMIT",
+              "AUTHORITY_RECONCILE",
+              "DRIFT_DETECT",
+              "AMENDMENT_EVALUATE",
+              "RETENTION_APPLY",
+              "ERASURE_EXECUTE"
+            ]
+          }
+        },
+        "required": [
+          "span_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "sampling_class": {
+            "enum": [
+              "MANDATORY_FORENSIC",
+              "DETERMINISTIC_RETAIN"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status_code": {
+            "const": "ERROR"
+          }
+        },
+        "required": [
+          "status_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "correlation_context": {
+            "type": "object",
+            "properties": {
+              "error_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "error_id"
+            ]
+          },
+          "span_attributes": {
+            "type": "object",
+            "properties": {
+              "failure_class": {
+                "type": "string",
+                "minLength": 1
+              },
+              "failure_phase": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "failure_class",
+              "failure_phase"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "span_code": {
+            "const": "RUN_ROOT"
+          }
+        },
+        "required": [
+          "span_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parent_span_id": {
+            "type": "null"
+          },
+          "correlation_context": {
+            "type": "object",
+            "properties": {
+              "run_kind": {
+                "type": "string",
+                "enum": [
+                  "INTERACTIVE",
+                  "NIGHTLY",
+                  "BACKFILL",
+                  "REPLAY",
+                  "REMEDIATION",
+                  "AMENDMENT",
+                  "MIGRATION"
+                ]
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "COMPLIANCE",
+                  "ANALYSIS"
+                ]
+              }
+            },
+            "required": [
+              "run_kind",
+              "mode"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "span_code": {
+            "const": "RUN_ROOT"
+          },
+          "correlation_context": {
+            "type": "object",
+            "properties": {
+              "run_kind": {
+                "const": "NIGHTLY"
+              }
+            },
+            "required": [
+              "run_kind"
+            ]
+          }
+        },
+        "required": [
+          "span_code",
+          "correlation_context"
+        ]
+      },
+      "then": {
+        "properties": {
+          "correlation_context": {
+            "type": "object",
+            "properties": {
+              "nightly_batch_run_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "nightly_window_key": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "nightly_batch_run_ref",
+              "nightly_window_key"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "span_code": {
+            "const": "RUN_ROOT"
+          },
+          "correlation_context": {
+            "type": "object",
+            "properties": {
+              "run_kind": {
+                "const": "REPLAY"
+              }
+            },
+            "required": [
+              "run_kind"
+            ]
+          }
+        },
+        "required": [
+          "span_code",
+          "correlation_context"
+        ]
+      },
+      "then": {
+        "properties": {
+          "correlation_context": {
+            "type": "object",
+            "properties": {
+              "replay_class": {
+                "type": "string",
+                "enum": [
+                  "STANDARD_REPLAY",
+                  "AUDIT_REPLAY",
+                  "COUNTERFACTUAL_ANALYSIS"
+                ]
+              }
+            },
+            "required": [
+              "replay_class"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "span_code": {
+            "enum": [
+              "PRIOR_MANIFEST_CONTEXT_LOAD",
+              "REUSE_CONTINUATION_DECISION",
+              "CONFIG_RESOLVE_OR_INHERITANCE_DECISION"
+            ]
+          }
+        },
+        "required": [
+          "span_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "correlation_context": {
+            "type": "object",
+            "anyOf": [
+              {
+                "properties": {
+                  "root_manifest_id": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "root_manifest_id"
+                ]
+              },
+              {
+                "properties": {
+                  "parent_manifest_id": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "parent_manifest_id"
+                ]
+              },
+              {
+                "properties": {
+                  "continuation_of_manifest_id": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "continuation_of_manifest_id"
+                ]
+              },
+              {
+                "properties": {
+                  "replay_of_manifest_id": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "replay_of_manifest_id"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "span_code": {
+            "const": "REUSE_CONTINUATION_DECISION"
+          }
+        },
+        "required": [
+          "span_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "correlation_context": {
+            "type": "object",
+            "properties": {
+              "idempotency_key": {
+                "type": "string",
+                "minLength": 1
+              },
+              "access_binding_hash": {
+                "type": "string",
+                "minLength": 1
+              },
+              "continuation_basis": {
+                "type": "string",
+                "minLength": 1
+              },
+              "manifest_lineage_trace_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "manifest_branch_decision": {
+                "$ref": "https://taxat.dev/schemas/manifest_branch_decision_contract.schema.json"
+              }
+            },
+            "required": [
+              "idempotency_key",
+              "access_binding_hash",
+              "continuation_basis",
+              "manifest_lineage_trace_ref",
+              "manifest_branch_decision"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "span_code": {
+            "const": "CONFIG_RESOLVE_OR_INHERITANCE_DECISION"
+          }
+        },
+        "required": [
+          "span_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "correlation_context": {
+            "type": "object",
+            "properties": {
+              "idempotency_key": {
+                "type": "string",
+                "minLength": 1
+              },
+              "access_binding_hash": {
+                "type": "string",
+                "minLength": 1
+              },
+              "config_inheritance_mode": {
+                "type": "string",
+                "enum": [
+                  "FRESH_CHILD_RESOLUTION",
+                  "REPLAY_EXACT",
+                  "RECOVERY_EXACT",
+                  "HISTORICAL_EXPLICIT"
+                ]
+              },
+              "manifest_lineage_trace_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "manifest_branch_decision": {
+                "$ref": "https://taxat.dev/schemas/manifest_branch_decision_contract.schema.json"
+              }
+            },
+            "required": [
+              "idempotency_key",
+              "access_binding_hash",
+              "config_inheritance_mode",
+              "manifest_lineage_trace_ref",
+              "manifest_branch_decision"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "span_code": {
+            "const": "MANIFEST_START_CLAIM"
+          }
+        },
+        "required": [
+          "span_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "correlation_context": {
+            "type": "object",
+            "properties": {
+              "idempotency_key": {
+                "type": "string",
+                "minLength": 1
+              },
+              "access_binding_hash": {
+                "type": "string",
+                "minLength": 1
+              },
+              "continuation_basis": {
+                "type": "string",
+                "minLength": 1
+              },
+              "manifest_lineage_trace_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "manifest_branch_decision": {
+                "$ref": "https://taxat.dev/schemas/manifest_branch_decision_contract.schema.json"
+              },
+              "manifest_start_claim": {
+                "$ref": "https://taxat.dev/schemas/manifest_start_claim_contract.schema.json"
+              }
+            },
+            "required": [
+              "idempotency_key",
+              "access_binding_hash",
+              "continuation_basis",
+              "manifest_lineage_trace_ref",
+              "manifest_branch_decision",
+              "manifest_start_claim"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "span_code": {
+            "not": {
+              "const": "RUN_ROOT"
+            }
+          }
+        },
+        "required": [
+          "span_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parent_span_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "ended_at": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "ended_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "status_code": {
+            "const": "UNSET"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "ended_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ended_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "status_code": {
+            "enum": [
+              "OK",
+              "ERROR"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "span_code": {
+            "enum": [
+              "RETENTION_APPLY",
+              "ERASURE_EXECUTE"
+            ]
+          }
+        },
+        "required": [
+          "span_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "correlation_context": {
+            "type": "object",
+            "properties": {
+              "retention_class": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "retention_class"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "span_code": {
+            "enum": [
+              "AUTHORITY_REQUEST_BUILD",
+              "AUTHORITY_TRANSMIT",
+              "AUTHORITY_RECONCILE"
+            ]
+          }
+        },
+        "required": [
+          "span_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "correlation_context": {
+            "type": "object",
+            "properties": {
+              "authority_operation_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "access_binding_hash": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "authority_operation_id",
+              "access_binding_hash"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "span_code": {
+            "enum": [
+              "AUTHORITY_TRANSMIT",
+              "AUTHORITY_RECONCILE"
+            ]
+          }
+        },
+        "required": [
+          "span_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "correlation_context": {
+            "type": "object",
+            "properties": {
+              "submission_record_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "submission_record_id"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

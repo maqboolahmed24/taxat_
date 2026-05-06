@@ -18,7 +18,9 @@ FRONTEND_LAW_PATH = ALGORITHM_DIR / "frontend_shell_and_interaction_law.md"
 PORTAL_PATH = ALGORITHM_DIR / "customer_client_portal_experience_contract.md"
 COLLABORATION_PATH = ALGORITHM_DIR / "collaboration_workspace_contract.md"
 ADMIN_GOVERNANCE_PATH = ALGORITHM_DIR / "admin_governance_console_architecture.md"
-CROSS_SHELL_PATH = ALGORITHM_DIR / "cross_shell_design_token_and_interaction_layer_foundation_contract.md"
+CROSS_SHELL_PATH = (
+    ALGORITHM_DIR / "cross_shell_design_token_and_interaction_layer_foundation_contract.md"
+)
 UIUX_SKILL_PATH = ALGORITHM_DIR / "UIUX_DESIGN_SKILL.md"
 MACOS_BLUEPRINT_PATH = ALGORITHM_DIR / "macos_native_operator_workspace_blueprint.md"
 NORTHBOUND_API_PATH = ALGORITHM_DIR / "northbound_api_and_session_contract.md"
@@ -107,10 +109,7 @@ def md_escape(value: Any) -> str:
 def markdown_table(headers: list[str], rows: list[list[Any]]) -> str:
     header_line = "| " + " | ".join(headers) + " |"
     divider_line = "| " + " | ".join("---" for _ in headers) + " |"
-    body_lines = [
-        "| " + " | ".join(md_escape(cell) for cell in row) + " |"
-        for row in rows
-    ]
+    body_lines = ["| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows]
     return "\n".join([header_line, divider_line, *body_lines])
 
 
@@ -197,10 +196,14 @@ def build_criteria() -> list[dict[str, Any]]:
             "priority": "HARD_REQUIREMENT",
             "rationale": "Browser automation is a first-class delivery and validation requirement, not a testing afterthought.",
             "source_refs": [
-                heading_ref(FRONTEND_LAW_PATH, "10. Automation anchors and UI observability fencing"),
+                heading_ref(
+                    FRONTEND_LAW_PATH, "10. Automation anchors and UI observability fencing"
+                ),
                 heading_ref(PORTAL_PATH, "Playwright validation minimum"),
                 heading_ref(COLLABORATION_PATH, "12. Playwright scenarios"),
-                heading_ref(UIUX_SKILL_PATH, "Playwright-first / XCUITest-first design expectation"),
+                heading_ref(
+                    UIUX_SKILL_PATH, "Playwright-first / XCUITest-first design expectation"
+                ),
                 text_ref(PACKAGE_JSON_PATH, "@playwright/test", "playwright_dependency"),
             ],
         },
@@ -253,7 +256,9 @@ def build_criteria() -> list[dict[str, Any]]:
                 heading_ref(MACOS_BLUEPRINT_PATH, "3. Recommended Xcode workspace topology"),
                 heading_ref(MACOS_BLUEPRINT_PATH, "7. Authentication and session strategy"),
                 heading_ref(MACOS_BLUEPRINT_PATH, "9. SwiftUI versus AppKit decision matrix"),
-                heading_ref(MACOS_BLUEPRINT_PATH, "11. Security and runtime posture for the desktop client"),
+                heading_ref(
+                    MACOS_BLUEPRINT_PATH, "11. Security and runtime posture for the desktop client"
+                ),
             ],
         },
         {
@@ -289,7 +294,7 @@ def build_criteria() -> list[dict[str, Any]]:
                     "The authoritative validator entrypoints are `python3 Algorithm/scripts/validate_contracts.py --self-test` and `python3 Algorithm/tools/forensic_contract_guard.py`",
                     "python_toolchain_evidence",
                 ),
-                text_ref(PACKAGE_JSON_PATH, "\"type\": \"module\"", "node_module_repo_evidence"),
+                text_ref(PACKAGE_JSON_PATH, '"type": "module"', "node_module_repo_evidence"),
             ],
         },
         {
@@ -539,7 +544,11 @@ def validate_inputs(criteria: list[dict[str, Any]], alternatives: list[dict[str,
     if len(criterion_ids) != len(criteria):
         raise ValueError("Duplicate criteria IDs detected")
     for criterion in criteria:
-        if criterion["priority"] not in {"HARD_REQUIREMENT", "STRONG_PREFERENCE", "DEFERRED_CONCERN"}:
+        if criterion["priority"] not in {
+            "HARD_REQUIREMENT",
+            "STRONG_PREFERENCE",
+            "DEFERRED_CONCERN",
+        }:
             raise ValueError(f"Invalid criterion priority: {criterion['priority']}")
     for alternative in alternatives:
         if set(alternative["scores"]) != criterion_ids:
@@ -582,7 +591,10 @@ def calculate_results(
                 "weighted_total": round(weighted_total, 2),
                 "criterion_breakdown": sorted(
                     criterion_breakdown,
-                    key=lambda item: (-criteria_by_id[item["criterion_id"]]["weight"], item["criterion_id"]),
+                    key=lambda item: (
+                        -criteria_by_id[item["criterion_id"]]["weight"],
+                        item["criterion_id"],
+                    ),
                 ),
                 "strengths": alternative["strengths"],
                 "risks": alternative["risks"],
@@ -597,9 +609,15 @@ def calculate_results(
 def build_constraint_matrix(criteria: list[dict[str, Any]]) -> dict[str, Any]:
     summary = {
         "constraint_count": len(criteria),
-        "hard_requirement_count": sum(1 for item in criteria if item["priority"] == "HARD_REQUIREMENT"),
-        "strong_preference_count": sum(1 for item in criteria if item["priority"] == "STRONG_PREFERENCE"),
-        "deferred_concern_count": sum(1 for item in criteria if item["priority"] == "DEFERRED_CONCERN"),
+        "hard_requirement_count": sum(
+            1 for item in criteria if item["priority"] == "HARD_REQUIREMENT"
+        ),
+        "strong_preference_count": sum(
+            1 for item in criteria if item["priority"] == "STRONG_PREFERENCE"
+        ),
+        "deferred_concern_count": sum(
+            1 for item in criteria if item["priority"] == "DEFERRED_CONCERN"
+        ),
     }
     return {
         "decision_id": "ADR-001",
@@ -636,7 +654,9 @@ def build_role_assignment() -> dict[str, Any]:
                     "browser layout and design-token iteration remain rapid",
                 ],
                 "source_refs": [
-                    heading_ref(FRONTEND_LAW_PATH, "10. Automation anchors and UI observability fencing"),
+                    heading_ref(
+                        FRONTEND_LAW_PATH, "10. Automation anchors and UI observability fencing"
+                    ),
                     heading_ref(PORTAL_PATH, "Playwright validation minimum"),
                     heading_ref(ADMIN_GOVERNANCE_PATH, "7. Frontend systems architecture"),
                 ],
@@ -662,7 +682,10 @@ def build_role_assignment() -> dict[str, Any]:
                 "role": "shared_contract_and_model_packages",
                 "primary_runtime": "JSON Schema as source, TypeScript as primary product-consumption target",
                 "host_runtime": "schema generation pipeline",
-                "secondary_runtimes": ["Python validation wrappers", "Swift Codable/Decodable models"],
+                "secondary_runtimes": [
+                    "Python validation wrappers",
+                    "Swift Codable/Decodable models",
+                ],
                 "ownership_reason": "The product core should consume generated or tightly aligned TypeScript models while Python and Swift consume the same schema source through dedicated adapters.",
                 "hard_rules": [
                     "closed schemas stay authoritative",
@@ -713,7 +736,9 @@ def build_role_assignment() -> dict[str, Any]:
                     "browser automation remains mandatory regardless of backend runtime",
                 ],
                 "source_refs": [
-                    heading_ref(UIUX_SKILL_PATH, "Playwright-first / XCUITest-first design expectation"),
+                    heading_ref(
+                        UIUX_SKILL_PATH, "Playwright-first / XCUITest-first design expectation"
+                    ),
                     text_ref(PACKAGE_JSON_PATH, "@playwright/test", "playwright_dependency"),
                 ],
             },
@@ -743,7 +768,9 @@ def build_role_assignment() -> dict[str, Any]:
                     "native semantic identifiers mirror browser semantic selectors where the contract says so",
                 ],
                 "source_refs": [
-                    heading_ref(UIUX_SKILL_PATH, "Playwright-first / XCUITest-first design expectation"),
+                    heading_ref(
+                        UIUX_SKILL_PATH, "Playwright-first / XCUITest-first design expectation"
+                    ),
                     heading_ref(UIUX_SKILL_PATH, "Selector strategy"),
                 ],
             },
@@ -763,7 +790,7 @@ def build_role_assignment() -> dict[str, Any]:
                         "The authoritative validator entrypoints are `python3 Algorithm/scripts/validate_contracts.py --self-test` and `python3 Algorithm/tools/forensic_contract_guard.py`",
                         "python_tooling_is_real",
                     ),
-                    text_ref(PACKAGE_JSON_PATH, "\"type\": \"module\"", "node_tooling_is_real"),
+                    text_ref(PACKAGE_JSON_PATH, '"type": "module"', "node_tooling_is_real"),
                 ],
             },
         ],
@@ -884,45 +911,48 @@ def build_scorecard_payload(
 
 
 def build_mermaid() -> str:
-    return "\n".join(
-        [
-            "flowchart TD",
-            '  prose["Algorithm prose contracts"]',
-            '  schemas["JSON schemas and sample payloads"]',
-            '  fixtures["Deterministic fixtures and validator self-tests"]',
-            '  canon["Canonical serialization, decimal, and hash law"]',
-            '  tscontracts["TypeScript generated and hand-authored contract package"]',
-            '  nodecore["Node.js product core"]',
-            '  browser["Browser product surfaces"]',
-            '  playwright["Playwright browser automation"]',
-            '  pytools["Python validators and analysis tooling"]',
-            '  swiftmodels["Swift generated models and adapters"]',
-            '  macos["SwiftUI/AppKit macOS client"]',
-            "  prose --> schemas",
-            "  schemas --> fixtures",
-            "  prose --> canon",
-            "  schemas --> tscontracts",
-            "  canon --> tscontracts",
-            "  fixtures --> tscontracts",
-            "  tscontracts --> nodecore",
-            "  tscontracts --> browser",
-            "  tscontracts --> playwright",
-            "  schemas --> pytools",
-            "  fixtures --> pytools",
-            "  canon --> pytools",
-            "  schemas --> swiftmodels",
-            "  canon --> swiftmodels",
-            "  swiftmodels --> macos",
-            "  nodecore --> browser",
-            "  nodecore --> macos",
-            "  classDef primary fill:#E6FFFA,stroke:#2C7A7B,color:#234E52;",
-            "  classDef support fill:#EBF8FF,stroke:#3182CE,color:#2A4365;",
-            "  classDef source fill:#F7FAFC,stroke:#4A5568,color:#2D3748;",
-            "  class nodecore,browser,playwright,tscontracts primary;",
-            "  class pytools,swiftmodels,macos support;",
-            "  class prose,schemas,fixtures,canon source;",
-        ]
-    ) + "\n"
+    return (
+        "\n".join(
+            [
+                "flowchart TD",
+                '  prose["Algorithm prose contracts"]',
+                '  schemas["JSON schemas and sample payloads"]',
+                '  fixtures["Deterministic fixtures and validator self-tests"]',
+                '  canon["Canonical serialization, decimal, and hash law"]',
+                '  tscontracts["TypeScript generated and hand-authored contract package"]',
+                '  nodecore["Node.js product core"]',
+                '  browser["Browser product surfaces"]',
+                '  playwright["Playwright browser automation"]',
+                '  pytools["Python validators and analysis tooling"]',
+                '  swiftmodels["Swift generated models and adapters"]',
+                '  macos["SwiftUI/AppKit macOS client"]',
+                "  prose --> schemas",
+                "  schemas --> fixtures",
+                "  prose --> canon",
+                "  schemas --> tscontracts",
+                "  canon --> tscontracts",
+                "  fixtures --> tscontracts",
+                "  tscontracts --> nodecore",
+                "  tscontracts --> browser",
+                "  tscontracts --> playwright",
+                "  schemas --> pytools",
+                "  fixtures --> pytools",
+                "  canon --> pytools",
+                "  schemas --> swiftmodels",
+                "  canon --> swiftmodels",
+                "  swiftmodels --> macos",
+                "  nodecore --> browser",
+                "  nodecore --> macos",
+                "  classDef primary fill:#E6FFFA,stroke:#2C7A7B,color:#234E52;",
+                "  classDef support fill:#EBF8FF,stroke:#3182CE,color:#2A4365;",
+                "  classDef source fill:#F7FAFC,stroke:#4A5568,color:#2D3748;",
+                "  class nodecore,browser,playwright,tscontracts primary;",
+                "  class pytools,swiftmodels,macos support;",
+                "  class prose,schemas,fixtures,canon source;",
+            ]
+        )
+        + "\n"
+    )
 
 
 def write_adr_markdown(
@@ -933,12 +963,10 @@ def write_adr_markdown(
 ) -> None:
     winner = results[0]
     comparison_rows = [
-        [result["label"], result["weighted_total"], result["rank"]]
-        for result in results
+        [result["label"], result["weighted_total"], result["rank"]] for result in results
     ]
     driver_rows = [
-        [item["label"], item["priority"], item["weight"], item["rationale"]]
-        for item in criteria
+        [item["label"], item["priority"], item["weight"], item["rationale"]] for item in criteria
     ]
     role_rows = [
         [item["role"], item["primary_runtime"], item["host_runtime"], item["ownership_reason"]]
@@ -1091,10 +1119,17 @@ def write_adr_markdown(
     text_write(ADR_PATH, "\n".join(sections))
 
 
-def write_comparison_markdown(criteria: list[dict[str, Any]], results: list[dict[str, Any]]) -> None:
+def write_comparison_markdown(
+    criteria: list[dict[str, Any]], results: list[dict[str, Any]]
+) -> None:
     criteria_by_id = {item["criterion_id"]: item for item in criteria}
     summary_rows = [
-        [result["rank"], result["label"], result["weighted_total"], "; ".join(result["strengths"][:2])]
+        [
+            result["rank"],
+            result["label"],
+            result["weighted_total"],
+            "; ".join(result["strengths"][:2]),
+        ]
         for result in results
     ]
     sections = [
@@ -1132,7 +1167,9 @@ def write_comparison_markdown(criteria: list[dict[str, Any]], results: list[dict
         row_values: list[list[Any]] = []
         for result in results:
             breakdown = next(
-                item for item in result["criterion_breakdown"] if item["criterion_id"] == criterion["criterion_id"]
+                item
+                for item in result["criterion_breakdown"]
+                if item["criterion_id"] == criterion["criterion_id"]
             )
             row_values.append(
                 [

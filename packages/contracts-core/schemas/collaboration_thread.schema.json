@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/collaboration_thread.schema.json",
+  "title": "CollaborationThread",
+  "description": "Append-only collaboration lane contract for a shared work item. This schema freezes lane visibility, head sequence, participant scope, and last-entry linkage for customer-visible and internal-only activity threads.",
+  "type": "object",
+  "required": [
+    "thread_id",
+    "item_id",
+    "visibility_class",
+    "head_sequence",
+    "lifecycle_state",
+    "participant_refs",
+    "last_entry_ref"
+  ],
+  "properties": {
+    "thread_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "item_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "visibility_class": {
+      "type": "string",
+      "enum": [
+        "CUSTOMER_VISIBLE",
+        "INTERNAL_ONLY"
+      ]
+    },
+    "head_sequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "CLOSED",
+        "LIMITED"
+      ]
+    },
+    "participant_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "last_entry_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "head_sequence": {
+            "const": 0
+          }
+        },
+        "required": [
+          "head_sequence"
+        ]
+      },
+      "then": {
+        "properties": {
+          "last_entry_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "head_sequence": {
+            "minimum": 1
+          }
+        },
+        "required": [
+          "head_sequence"
+        ]
+      },
+      "then": {
+        "properties": {
+          "last_entry_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "CLOSED",
+              "LIMITED"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "head_sequence": {
+            "minimum": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "head_sequence": {
+            "const": 0
+          }
+        },
+        "required": [
+          "head_sequence"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "OPEN"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

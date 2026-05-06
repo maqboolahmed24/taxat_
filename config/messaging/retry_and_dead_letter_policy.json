@@ -1,0 +1,62 @@
+{
+  "contract_version": "1.0",
+  "policy_id": "retry_and_dead_letter_policy",
+  "basis_statement": "Retries remain safe only while the same durable meaning still holds. Once safe retries are exhausted or source truth drifts, the runtime dead-letters or quarantines instead of looping blindly.",
+  "policy_rows": [
+    {
+      "family_ref": "NORTHBOUND_COMMAND",
+      "channel_refs": ["channel.api.command.accepted"],
+      "initial_backoff_seconds": 5,
+      "max_backoff_seconds": 60,
+      "max_delivery_attempts": 3,
+      "dead_letter_mode": "DEAD_LETTER_QUEUE_REQUIRED",
+      "redrive_gate": "Redrive is lawful only when the same command receipt, actor/session binding, and payload hash still match current truth.",
+      "terminal_posture": "Dead-letter the packet and return the original durable command receipt rather than accepting a second command mutation.",
+      "notes": ["Commands should fail fast into deterministic receipts rather than spin in transport."]
+    },
+    {
+      "family_ref": "STAGE_TASK",
+      "channel_refs": ["channel.manifest.stage.dispatch"],
+      "initial_backoff_seconds": 15,
+      "max_backoff_seconds": 300,
+      "max_delivery_attempts": 4,
+      "dead_letter_mode": "DEAD_LETTER_QUEUE_REQUIRED",
+      "redrive_gate": "Redrive requires the same manifest, stage code, command receipt, and precondition hash.",
+      "terminal_posture": "Dead-letter after repeated safe retries and surface operator repair on the durable stage receipt.",
+      "notes": ["Late duplicate worker completions may be ignored unless adopted by a recovery manifest."]
+    },
+    {
+      "family_ref": "ARTIFACT_EVENT",
+      "channel_refs": ["channel.upload.scan.request", "channel.preview.registration"],
+      "initial_backoff_seconds": 30,
+      "max_backoff_seconds": 900,
+      "max_delivery_attempts": 4,
+      "dead_letter_mode": "DEAD_LETTER_QUEUE_REQUIRED",
+      "redrive_gate": "Redrive requires the same immutable object version, event identity, and safety posture to remain valid.",
+      "terminal_posture": "Dead-letter the packet and keep immutable object-version processing status explicit on the durable ledger.",
+      "notes": ["At-least-once event delivery must still converge to one processing outcome."]
+    },
+    {
+      "family_ref": "AUTHORITY_REQUEST",
+      "channel_refs": ["channel.authority.transmit.dispatch", "channel.authority.reconciliation.poll"],
+      "initial_backoff_seconds": 120,
+      "max_backoff_seconds": 3600,
+      "max_delivery_attempts": 3,
+      "dead_letter_mode": "QUARANTINE_INBOX_REQUIRED",
+      "redrive_gate": "Re-drive requires binding-lineage revalidation, duplicate-truth revalidation, and the same duplicate meaning bucket to remain lawful.",
+      "terminal_posture": "Quarantine the packet after repeated safe retries so operator review can inspect request identity, token lineage, and stronger external truth.",
+      "notes": ["Authority transport failure is not permission to mint a fresh legal attempt."]
+    },
+    {
+      "family_ref": "AUTHORITY_INGRESS",
+      "channel_refs": ["channel.authority.callback.ingress"],
+      "initial_backoff_seconds": 30,
+      "max_backoff_seconds": 600,
+      "max_delivery_attempts": 2,
+      "dead_letter_mode": "QUARANTINE_INBOX_REQUIRED",
+      "redrive_gate": "Re-drive requires the same canonical ingress receipt, authenticated channel proof, and source-record continuity.",
+      "terminal_posture": "Quarantine ambiguous or drifted ingress instead of applying a speculative state transition.",
+      "notes": ["Ingress ambiguity is an investigation surface, not a silent retry loop."]
+    }
+  ]
+}

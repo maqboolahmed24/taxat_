@@ -1,0 +1,552 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/collaboration_attachment.schema.json",
+  "title": "CollaborationAttachment",
+  "description": "Published collaboration attachment contract. This schema freezes governed upload lineage, publication timing, customer-safe derivation, download-safe availability posture, and quarantine lineage for files attached to collaboration activity.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "attachment_id",
+    "item_id",
+    "published_entry_ref",
+    "current_state_entry_ref",
+    "state_audit_event_ref",
+    "visibility_class",
+    "request_info_ref",
+    "upload_session_id",
+    "publish_copy_mode",
+    "source_attachment_ref",
+    "filename",
+    "media_type",
+    "byte_size",
+    "checksum",
+    "storage_ref",
+    "download_ref",
+    "malware_scan_state",
+    "publication_state",
+    "download_state",
+    "unavailable_reason_code",
+    "uploaded_by_ref",
+    "uploaded_at",
+    "published_at",
+    "state_changed_at",
+    "scan_completed_at",
+    "semantic_action_id",
+    "retention_class"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "CollaborationAttachment"
+    },
+    "attachment_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "item_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "published_entry_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "current_state_entry_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "state_audit_event_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "visibility_class": {
+      "type": "string",
+      "enum": [
+        "CUSTOMER_VISIBLE",
+        "INTERNAL_ONLY"
+      ]
+    },
+    "request_info_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "upload_session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "publish_copy_mode": {
+      "type": "string",
+      "enum": [
+        "DIRECT_UPLOAD",
+        "CUSTOMER_SAFE_COPY",
+        "CUSTOMER_SAFE_DERIVATIVE"
+      ]
+    },
+    "source_attachment_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "filename": {
+      "type": "string",
+      "minLength": 1
+    },
+    "media_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "byte_size": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "checksum": {
+      "type": "string",
+      "minLength": 1
+    },
+    "storage_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "download_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "malware_scan_state": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "CLEAN",
+        "QUARANTINED"
+      ]
+    },
+    "publication_state": {
+      "type": "string",
+      "enum": [
+        "PENDING_SCAN",
+        "AVAILABLE",
+        "QUARANTINED"
+      ]
+    },
+    "download_state": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "DOWNLOADABLE",
+        "UNAVAILABLE"
+      ]
+    },
+    "unavailable_reason_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "SCAN_PENDING",
+        "QUARANTINED_BY_MALWARE_SCAN",
+        null
+      ]
+    },
+    "uploaded_by_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "uploaded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "state_changed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scan_completed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "semantic_action_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "retention_class": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "publish_copy_mode": {
+            "const": "DIRECT_UPLOAD"
+          }
+        },
+        "required": [
+          "publish_copy_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_attachment_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "publish_copy_mode": {
+            "enum": [
+              "CUSTOMER_SAFE_COPY",
+              "CUSTOMER_SAFE_DERIVATIVE"
+            ]
+          }
+        },
+        "required": [
+          "publish_copy_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "visibility_class": {
+            "const": "CUSTOMER_VISIBLE"
+          },
+          "source_attachment_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "source_attachment_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "source_attachment_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "visibility_class": {
+            "const": "CUSTOMER_VISIBLE"
+          },
+          "publish_copy_mode": {
+            "enum": [
+              "CUSTOMER_SAFE_COPY",
+              "CUSTOMER_SAFE_DERIVATIVE"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "publication_state": {
+            "const": "PENDING_SCAN"
+          }
+        },
+        "required": [
+          "publication_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "malware_scan_state": {
+            "const": "PENDING"
+          },
+          "download_state": {
+            "const": "PENDING"
+          },
+          "download_ref": {
+            "type": "null"
+          },
+          "unavailable_reason_code": {
+            "const": "SCAN_PENDING"
+          },
+          "scan_completed_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "publication_state": {
+            "const": "AVAILABLE"
+          }
+        },
+        "required": [
+          "publication_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "malware_scan_state": {
+            "const": "CLEAN"
+          },
+          "download_state": {
+            "const": "DOWNLOADABLE"
+          },
+          "download_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "unavailable_reason_code": {
+            "type": "null"
+          },
+          "scan_completed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "publication_state": {
+            "const": "QUARANTINED"
+          }
+        },
+        "required": [
+          "publication_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "malware_scan_state": {
+            "const": "QUARANTINED"
+          },
+          "download_state": {
+            "const": "UNAVAILABLE"
+          },
+          "download_ref": {
+            "type": "null"
+          },
+          "unavailable_reason_code": {
+            "const": "QUARANTINED_BY_MALWARE_SCAN"
+          },
+          "scan_completed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "scan_completed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "scan_completed_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "publication_state": {
+            "enum": [
+              "AVAILABLE",
+              "QUARANTINED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "malware_scan_state": {
+            "const": "PENDING"
+          }
+        },
+        "required": [
+          "malware_scan_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "publication_state": {
+            "const": "PENDING_SCAN"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "malware_scan_state": {
+            "const": "CLEAN"
+          }
+        },
+        "required": [
+          "malware_scan_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "publication_state": {
+            "const": "AVAILABLE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "malware_scan_state": {
+            "const": "QUARANTINED"
+          }
+        },
+        "required": [
+          "malware_scan_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "publication_state": {
+            "const": "QUARANTINED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "download_state": {
+            "const": "PENDING"
+          }
+        },
+        "required": [
+          "download_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "publication_state": {
+            "const": "PENDING_SCAN"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "download_state": {
+            "const": "DOWNLOADABLE"
+          }
+        },
+        "required": [
+          "download_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "publication_state": {
+            "const": "AVAILABLE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "download_state": {
+            "const": "UNAVAILABLE"
+          }
+        },
+        "required": [
+          "download_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "publication_state": {
+            "const": "QUARANTINED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "unavailable_reason_code": {
+            "const": "SCAN_PENDING"
+          }
+        },
+        "required": [
+          "unavailable_reason_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "publication_state": {
+            "const": "PENDING_SCAN"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "unavailable_reason_code": {
+            "const": "QUARANTINED_BY_MALWARE_SCAN"
+          }
+        },
+        "required": [
+          "unavailable_reason_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "publication_state": {
+            "const": "QUARANTINED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "unavailable_reason_code": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "unavailable_reason_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "publication_state": {
+            "const": "AVAILABLE"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

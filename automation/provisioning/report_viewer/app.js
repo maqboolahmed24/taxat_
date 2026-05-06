@@ -45,6 +45,19 @@ const state = {
   activeTelemetryEnvironmentRef: null,
   activeTelemetryFamilyRef: null,
   activeTelemetryFocusRef: null,
+  activeSupplyChainEnvironmentRef: null,
+  activeSupplyChainFamilyRef: null,
+  activeSupplyChainFocusKind: null,
+  activeSupplyChainFocusRef: null,
+  activeEdgeEnvironmentRef: null,
+  activeEdgeFamilyRef: null,
+  activeEdgeFocusRef: null,
+  activeSmokeEnvironmentRef: null,
+  activeSmokeFamilyRef: null,
+  activeSmokeFocusRef: null,
+  activeDeliveryEnvironmentRef: null,
+  activeDeliveryLaneRef: null,
+  activeDeliveryFocusRef: null,
   activePage: DEFAULT_PAGE,
   lastTrigger: null,
 };
@@ -77,9 +90,7 @@ const elements = {
 function setMotionPreference() {
   const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   const sync = () => {
-    document.documentElement.dataset.motion = motionQuery.matches
-      ? "reduce"
-      : "standard";
+    document.documentElement.dataset.motion = motionQuery.matches ? "reduce" : "standard";
   };
   sync();
   motionQuery.addEventListener("change", sync);
@@ -106,6 +117,12 @@ function formatTitleLabel(value) {
     .replace(/\b\w/g, (match) => match.toUpperCase());
 }
 
+function uniqueSorted(values) {
+  return [...new Set((values ?? []).filter(Boolean))].sort((left, right) =>
+    String(left).localeCompare(String(right)),
+  );
+}
+
 function statusTone(status) {
   if (
     status === "SUCCEEDED" ||
@@ -115,11 +132,7 @@ function statusTone(status) {
   ) {
     return "success";
   }
-  if (
-    status === "FAILED" ||
-    status === "BLOCKED_BY_POLICY" ||
-    status === "danger"
-  ) {
+  if (status === "FAILED" || status === "BLOCKED_BY_POLICY" || status === "danger") {
     return "danger";
   }
   if (
@@ -213,9 +226,7 @@ function buildRetryLineage(step, allSteps) {
       related.push(parent);
     }
   }
-  related.push(
-    ...allSteps.filter((candidate) => candidate.retryOfStepId === step.stepId),
-  );
+  related.push(...allSteps.filter((candidate) => candidate.retryOfStepId === step.stepId));
   return related;
 }
 
@@ -287,7 +298,10 @@ function openStepDrawer(step, evidence, trigger) {
       ["Step ID", step.stepId],
       ["Status", formatLabel(step.status)],
       ["Recorded", evidence ? formatDate(evidence.recordedAt) : formatDate(step.changedAt)],
-      ["Capture mode", evidence ? evidence.captureMode : step.manualCheckpoint?.capturePolicy ?? "n/a"],
+      [
+        "Capture mode",
+        evidence ? evidence.captureMode : (step.manualCheckpoint?.capturePolicy ?? "n/a"),
+      ],
       ["Relative path", evidence?.relativePath ?? "Suppressed or not captured"],
     ],
     blocks,
@@ -442,6 +456,7 @@ function emptyDrawerMarkup() {
 
 function closeDrawer() {
   if (
+    state.activePage === "credential-evidence-ledger" ||
     state.activePage === "idp-topology-atlas" ||
     state.activePage === "access-stepup-matrix" ||
     state.activePage === "email-domain-readiness-board" ||
@@ -457,7 +472,10 @@ function closeDrawer() {
     state.activePage === "storage-bucket-topology-board" ||
     state.activePage === "message-fabric-atlas" ||
     state.activePage === "resume-isolation-atlas" ||
-    state.activePage === "telemetry-signal-atlas"
+    state.activePage === "telemetry-signal-atlas" ||
+    state.activePage === "delivery-pipeline-atlas" ||
+    state.activePage === "release-supply-chain-atlas" ||
+    state.activePage === "edge-boundary-atlas"
   ) {
     return;
   }
@@ -488,8 +506,7 @@ function renderDefaultTopBar(payload) {
     }),
   );
   elements.environmentSelect.disabled = false;
-  elements.environmentHint.textContent =
-    "Live-provider flows remain gated outside default CI.";
+  elements.environmentHint.textContent = "Live-provider flows remain gated outside default CI.";
   document.title = `Provisioning Viewer - ${run.providerDisplayName}`;
 }
 
@@ -506,10 +523,7 @@ function renderRunRail(payload) {
       const listItem = document.createElement("li");
       const button = document.createElement("button");
       button.type = "button";
-      button.setAttribute(
-        "aria-current",
-        runEntry.runId === payload.run.runId ? "true" : "false",
-      );
+      button.setAttribute("aria-current", runEntry.runId === payload.run.runId ? "true" : "false");
       button.innerHTML = `
         <div class="run-list__title">
           <strong class="monospace">${runEntry.runId}</strong>
@@ -681,9 +695,7 @@ function createStepCard(step) {
   }
 
   if (step.policyBlockReason) {
-    article.querySelector(".step-meta").append(
-      createPolicyBlock(step.policyBlockReason),
-    );
+    article.querySelector(".step-meta").append(createPolicyBlock(step.policyBlockReason));
   }
 
   return article;
@@ -691,9 +703,7 @@ function createStepCard(step) {
 
 function renderSteps(payload) {
   elements.stepList.className = "step-list";
-  elements.stepList.replaceChildren(
-    ...payload.steps.map((step) => createStepCard(step)),
-  );
+  elements.stepList.replaceChildren(...payload.steps.map((step) => createStepCard(step)));
 }
 
 function resolveActiveApplication(ledger) {
@@ -1087,10 +1097,7 @@ function renderAttestationSection(application) {
     inspect.addEventListener("click", () =>
       openCredentialAttestationDrawer(application, attestation, inspect),
     );
-    actions.append(
-      inspect,
-      createCopyButton("Copy attestation ref", attestation.attestationRef),
-    );
+    actions.append(inspect, createCopyButton("Copy attestation ref", attestation.attestationRef));
     card.append(actions);
     attestationList.append(card);
   });
@@ -1159,10 +1166,7 @@ function resolveActiveAtlasTenant(atlas) {
       tenants.find((tenant) => tenant.provider_environment_tag === "Staging")?.tenant_ref ??
       tenants[0].tenant_ref;
   }
-  return (
-    tenants.find((tenant) => tenant.tenant_ref === state.activeAtlasTenantRef) ??
-    tenants[0]
-  );
+  return tenants.find((tenant) => tenant.tenant_ref === state.activeAtlasTenantRef) ?? tenants[0];
 }
 
 function atlasNodesForTenant(atlas, tenant) {
@@ -1183,12 +1187,12 @@ function resolveActiveAtlasNode(atlas, tenant) {
   if (!nodes.length) {
     return null;
   }
-  if (!state.activeAtlasNodeRef || !nodes.some((node) => node.client_ref === state.activeAtlasNodeRef)) {
+  if (
+    !state.activeAtlasNodeRef ||
+    !nodes.some((node) => node.client_ref === state.activeAtlasNodeRef)
+  ) {
     state.activeAtlasNodeRef =
-      atlas.selectedNodeRef ??
-      interactive[0]?.client_ref ??
-      machine[0]?.client_ref ??
-      null;
+      atlas.selectedNodeRef ?? interactive[0]?.client_ref ?? machine[0]?.client_ref ?? null;
   }
   return nodes.find((node) => node.client_ref === state.activeAtlasNodeRef) ?? nodes[0];
 }
@@ -1342,7 +1346,12 @@ function renderIdpAtlasSummary(atlas, tenant, activeNode) {
   chipRow.append(
     createChip(formatLabel(atlas.selectionPosture), "neutral"),
     createChip(`Policy ${atlas.policyVersion}`, "neutral"),
-    createChip(activeNode ? formatLabel(activeNode.surface_family ?? activeNode.machine_client_family) : "Tenant", "success"),
+    createChip(
+      activeNode
+        ? formatLabel(activeNode.surface_family ?? activeNode.machine_client_family)
+        : "Tenant",
+      "success",
+    ),
   );
   const notes = document.createElement("ul");
   notes.className = "note-list";
@@ -1520,9 +1529,7 @@ function renderIdpInspector(atlas, tenant, activeNode) {
         createFieldRow("Secret posture", formatLabel(activeNode.secret_posture.capture_posture), {
           chips: [
             createChip(
-              activeNode.secret_posture.requires_vault_secret
-                ? "Vault required"
-                : "Public client",
+              activeNode.secret_posture.requires_vault_secret ? "Vault required" : "Public client",
               activeNode.secret_posture.requires_vault_secret ? "warning" : "success",
             ),
           ],
@@ -1560,11 +1567,9 @@ function renderIdpInspector(atlas, tenant, activeNode) {
       createFieldRow("Custom domain", tenant.custom_domain ?? "n/a", {
         monospace: true,
       }),
-      createFieldRow(
-        "Secret namespaces",
-        tenant.secret_namespace_refs.join(", "),
-        { monospace: true },
-      ),
+      createFieldRow("Secret namespaces", tenant.secret_namespace_refs.join(", "), {
+        monospace: true,
+      }),
     );
   }
 
@@ -1699,12 +1704,9 @@ function resolveActivePolicyTriggerRow(matrix, railItem) {
     !state.activePolicyTriggerRef ||
     !rows.some((row) => row.trigger_id === state.activePolicyTriggerRef)
   ) {
-    state.activePolicyTriggerRef =
-      matrix.selectedTriggerRef ?? rows[0].trigger_id;
+    state.activePolicyTriggerRef = matrix.selectedTriggerRef ?? rows[0].trigger_id;
   }
-  return (
-    rows.find((row) => row.trigger_id === state.activePolicyTriggerRef) ?? rows[0]
-  );
+  return rows.find((row) => row.trigger_id === state.activePolicyTriggerRef) ?? rows[0];
 }
 
 function renderAccessTopBar(matrix) {
@@ -1855,12 +1857,10 @@ function renderAccessMatrixCanvas(matrix, activeRailItem, activeRow) {
         </div>
       </button>
     `;
-    article
-      .querySelector(".access-matrix-row__button")
-      .addEventListener("click", () => {
-        state.activePolicyTriggerRef = row.trigger_id;
-        renderAccessStepupMatrixPage(matrix);
-      });
+    article.querySelector(".access-matrix-row__button").addEventListener("click", () => {
+      state.activePolicyTriggerRef = row.trigger_id;
+      renderAccessStepupMatrixPage(matrix);
+    });
     canvas.append(article);
   });
 
@@ -1870,7 +1870,8 @@ function renderAccessMatrixCanvas(matrix, activeRailItem, activeRow) {
 function renderAccessInspector(matrix, activeRailItem, activeRow) {
   elements.drawer.dataset.state = "open";
   elements.drawerClose.hidden = true;
-  elements.drawerTitle.textContent = activeRow?.label ?? activeRailItem?.title ?? "Access inspector";
+  elements.drawerTitle.textContent =
+    activeRow?.label ?? activeRailItem?.title ?? "Access inspector";
 
   const container = document.createElement("div");
   container.className = "atlas-inspector";
@@ -1911,7 +1912,9 @@ function renderAccessInspector(matrix, activeRailItem, activeRow) {
         monospace: true,
       }),
       createFieldRow("Scope class", scope.scope_class, {
-        chips: [createChip(scope.scope_class, scope.scope_class === "ELEVATED" ? "warning" : "success")],
+        chips: [
+          createChip(scope.scope_class, scope.scope_class === "ELEVATED" ? "warning" : "success"),
+        ],
       }),
       createFieldRow("Allowed actors", scope.allowed_actor_classes.join(", "), {}),
       createFieldRow("Allowed surfaces", scope.allowed_surface_families.join(", "), {
@@ -2026,9 +2029,7 @@ function renderAccessStepupMatrixPage(matrix) {
   renderAccessRail(matrix, activeRailItem);
   renderAccessSummary(matrix, activeRailItem, activeRow);
   elements.stepList.className = "access-matrix-canvas";
-  elements.stepList.replaceChildren(
-    renderAccessMatrixCanvas(matrix, activeRailItem, activeRow),
-  );
+  elements.stepList.replaceChildren(renderAccessMatrixCanvas(matrix, activeRailItem, activeRow));
   renderAccessInspector(matrix, activeRailItem, activeRow);
 }
 
@@ -2211,9 +2212,7 @@ function renderWorkspaceBand(board, activeDomain, activeFocus) {
 }
 
 function renderDomainIdentityBand(activeDomain) {
-  const returnPathRecord = activeDomain.dns_records.find(
-    (row) => row.purpose === "RETURN_PATH",
-  );
+  const returnPathRecord = activeDomain.dns_records.find((row) => row.purpose === "RETURN_PATH");
   const section = document.createElement("section");
   section.className = "readiness-band";
   section.innerHTML = `
@@ -2375,10 +2374,7 @@ function renderEmailInspector(board, activeDomain, activeFocus) {
       createMetadataList([
         ["Label", activeFocus.item.label],
         ["Recipients", formatLabel(activeFocus.item.allowed_recipient_posture)],
-        [
-          "Live recipients",
-          activeFocus.item.allows_live_recipients ? "Allowed" : "Not allowed",
-        ],
+        ["Live recipients", activeFocus.item.allows_live_recipients ? "Allowed" : "Not allowed"],
         ["Environment", activeDomain.environment_label],
       ]),
     );
@@ -2399,10 +2395,7 @@ function renderEmailInspector(board, activeDomain, activeFocus) {
         ["Delivery type", activeFocus.item.server_delivery_type],
         ["Account token ref", activeFocus.item.account_token_metadata_ref],
         ["Server token ref", activeFocus.item.server_token_metadata_ref],
-        [
-          "Live recipients",
-          activeFocus.item.allows_live_recipients ? "Allowed" : "Not allowed",
-        ],
+        ["Live recipients", activeFocus.item.allows_live_recipients ? "Allowed" : "Not allowed"],
       ]),
     );
     const notes = document.createElement("ul");
@@ -2702,9 +2695,7 @@ function renderDeviceMessagingTopologyBoard(board) {
 
 function resolveActiveMonitoringProject(board) {
   return (
-    board.projects.find(
-      (project) => project.project_ref === state.activeMonitoringProjectRef,
-    ) ||
+    board.projects.find((project) => project.project_ref === state.activeMonitoringProjectRef) ||
     board.projects[0] ||
     null
   );
@@ -2944,8 +2935,7 @@ function renderSignalGovernanceBoard(board) {
 function resolveActiveDocumentExtractionEnvironment(board) {
   return (
     board.environment_options.find(
-      (option) =>
-        option.environment_ref === state.activeDocumentExtractionEnvironmentRef,
+      (option) => option.environment_ref === state.activeDocumentExtractionEnvironmentRef,
     ) ||
     board.environment_options.find(
       (option) => option.environment_ref === board.active_environment_ref,
@@ -2958,8 +2948,7 @@ function resolveActiveDocumentExtractionEnvironment(board) {
 function resolveActiveDocumentExtractionProfile(board) {
   return (
     board.profiles.find(
-      (profile) =>
-        profile.profile_ref === state.activeDocumentExtractionProfileRef,
+      (profile) => profile.profile_ref === state.activeDocumentExtractionProfileRef,
     ) ||
     board.profiles[0] ||
     null
@@ -3227,16 +3216,12 @@ function renderDocumentExtractionGovernanceBoard(board) {
   const environment = resolveActiveDocumentExtractionEnvironment(board);
   const profile = resolveActiveDocumentExtractionProfile(board);
   if (!environment || !profile) {
-    renderError(
-      new Error("Document extraction governance board is missing required data."),
-    );
+    renderError(new Error("Document extraction governance board is missing required data."));
     return;
   }
   renderDocumentExtractionTopBar(board, environment, profile);
   renderDocumentExtractionRail(board, profile);
-  elements.runSummary.replaceChildren(
-    renderDocumentExtractionSummary(board, environment, profile),
-  );
+  elements.runSummary.replaceChildren(renderDocumentExtractionSummary(board, environment, profile));
   elements.stepList.className = "document-extraction-canvas";
   elements.stepList.replaceChildren(renderDocumentExtractionCanvas(profile));
   renderDocumentExtractionInspector(board, environment, profile);
@@ -3355,7 +3340,10 @@ function renderUploadSafetySummary(board, environment, scenario) {
   chipRow.append(
     createChip(board.selection_posture_label, "warning"),
     createChip(environment.label, "neutral"),
-    createChip(scenario.status_label, statusTone(uploadSafetyStatusDataValue(scenario.status_label))),
+    createChip(
+      scenario.status_label,
+      statusTone(uploadSafetyStatusDataValue(scenario.status_label)),
+    ),
   );
 
   return section;
@@ -3531,9 +3519,7 @@ function renderUploadIntakeSafetyBoard(board) {
   }
   renderUploadSafetyTopBar(board, environment, scenario);
   renderUploadSafetyRail(board, scenario);
-  elements.runSummary.replaceChildren(
-    renderUploadSafetySummary(board, environment, scenario),
-  );
+  elements.runSummary.replaceChildren(renderUploadSafetySummary(board, environment, scenario));
   elements.stepList.className = "upload-intake-conveyor";
   elements.stepList.replaceChildren(renderUploadSafetyCanvas(scenario));
   renderUploadSafetyInspector(board, environment, scenario);
@@ -3542,9 +3528,10 @@ function renderUploadIntakeSafetyBoard(board) {
 function resolveActivePortalCheckpointScenario(board) {
   const activeScenario =
     board.scenarios.find(
-      (scenario) =>
-        scenario.scenario_ref === state.activePortalCheckpointScenarioRef,
-    ) || board.scenarios[0] || null;
+      (scenario) => scenario.scenario_ref === state.activePortalCheckpointScenarioRef,
+    ) ||
+    board.scenarios[0] ||
+    null;
   if (activeScenario) {
     state.activePortalCheckpointScenarioRef = activeScenario.scenario_ref;
   }
@@ -3576,10 +3563,7 @@ function renderPortalCheckpointTopBar(board, scenario) {
 }
 
 function renderPortalCheckpointRail(board, activeScenario) {
-  elements.runRail.setAttribute(
-    "aria-label",
-    "Checkpoint families and portal runs",
-  );
+  elements.runRail.setAttribute("aria-label", "Checkpoint families and portal runs");
   elements.runList.className = "portal-checkpoint-rail-list";
   elements.railEyebrow.textContent = "Scenario rail";
   elements.railTitle.textContent = "Checkpoint families";
@@ -3635,9 +3619,7 @@ function renderPortalCheckpointSummary(board, scenario) {
     createChip(scenario.checkpoint_severity_label, "warning"),
     createChip(
       scenario.resume_readiness_label,
-      scenario.resume_readiness_label === "Expired until reopened"
-        ? "danger"
-        : "warning",
+      scenario.resume_readiness_label === "Expired until reopened" ? "danger" : "warning",
     ),
   );
 
@@ -3698,11 +3680,7 @@ function renderPortalCheckpointCanvas(scenario) {
       scenario.checkpoint_rows,
     ),
     renderPortalCheckpointStage("Human Step", "Human Step", scenario.human_step_rows),
-    renderPortalCheckpointStage(
-      "Resume Verification",
-      "Resume Verification",
-      scenario.resume_rows,
-    ),
+    renderPortalCheckpointStage("Resume Verification", "Resume Verification", scenario.resume_rows),
     renderPortalCheckpointStage("Outcome", "Outcome", scenario.outcome_rows),
   );
 
@@ -3729,9 +3707,7 @@ function renderPortalCheckpointInspector(board, scenario) {
   reasonValue.className = "field-row__value";
   const reasonChip = createChip(
     scenario.checkpoint_reason_code,
-    scenario.resume_readiness_label === "Expired until reopened"
-      ? "danger"
-      : "warning",
+    scenario.resume_readiness_label === "Expired until reopened" ? "danger" : "warning",
   );
   reasonChip.dataset.testid = "checkpoint-reason-chip";
   reasonValue.append(reasonChip);
@@ -3867,9 +3843,7 @@ function renderPortalCheckpointAtlas(board) {
 
 function resolveActiveSupportScenario(board) {
   return (
-    board.scenarios.find(
-      (scenario) => scenario.scenario_ref === state.activeSupportScenarioRef,
-    ) ||
+    board.scenarios.find((scenario) => scenario.scenario_ref === state.activeSupportScenarioRef) ||
     board.scenarios[0] ||
     null
   );
@@ -3889,15 +3863,11 @@ function renderSupportTopBar(board, scenario) {
   elements.providerBadge.textContent = board.provider_monogram;
   elements.runTitle.textContent = board.provider_label;
   elements.runStatus.textContent = board.support_mode_label;
-  elements.runStatus.dataset.status = supportStatusDataValue(
-    board.support_mode_label,
-  );
+  elements.runStatus.dataset.status = supportStatusDataValue(board.support_mode_label);
   elements.environmentControl.hidden = true;
   elements.environmentChipWrap.hidden = false;
   elements.environmentChip.textContent = board.environment_label;
-  elements.environmentChip.dataset.status = supportStatusDataValue(
-    board.support_mode_label,
-  );
+  elements.environmentChip.dataset.status = supportStatusDataValue(board.support_mode_label);
   elements.environmentHint.textContent = board.truth_boundary_statement;
   document.title = `Provisioning Viewer - ${scenario.label}`;
 }
@@ -4139,9 +4109,7 @@ function resolveActiveNotificationTemplate(atlas) {
     atlas.templates.find(
       (template) => template.template_ref === state.activeNotificationTemplateRef,
     ) ||
-    atlas.templates.find(
-      (template) => template.template_ref === atlas.selectedTemplateRef,
-    ) ||
+    atlas.templates.find((template) => template.template_ref === atlas.selectedTemplateRef) ||
     atlas.templates[0] ||
     null
   );
@@ -4155,9 +4123,7 @@ function resolveActiveNotificationLifecycle(atlas, template) {
     template.lifecycle_rail.find(
       (stage) => stage.stage_ref === state.activeNotificationLifecycleRef,
     ) ||
-    template.lifecycle_rail.find(
-      (stage) => stage.stage_ref === atlas.selectedLifecycleRef,
-    ) ||
+    template.lifecycle_rail.find((stage) => stage.stage_ref === atlas.selectedLifecycleRef) ||
     template.lifecycle_rail[0] ||
     null
   );
@@ -4432,13 +4398,7 @@ function renderNotificationInspector(atlas, template) {
   });
   privacySection.append(privacyList);
 
-  container.append(
-    fields,
-    eventSection,
-    callbackSection,
-    mappingSection,
-    privacySection,
-  );
+  container.append(fields, eventSection, callbackSection, mappingSection, privacySection);
   elements.drawerBody.replaceChildren(container);
 }
 
@@ -4455,9 +4415,7 @@ function renderNotificationCopyAtlas(atlas) {
     renderNotificationSummary(atlas, activeTemplate, activeLifecycle),
   );
   elements.stepList.className = "notification-copy-canvas";
-  elements.stepList.replaceChildren(
-    renderNotificationCanvas(activeTemplate, activeLifecycle),
-  );
+  elements.stepList.replaceChildren(renderNotificationCanvas(activeTemplate, activeLifecycle));
   renderNotificationInspector(atlas, activeTemplate);
 }
 
@@ -4484,9 +4442,7 @@ function resolveActiveSecretEnvironment(board) {
 
 function secretAliasesForEnvironment(board, environment) {
   return (board.aliases ?? []).filter((alias) =>
-    alias.namespace_refs.some((namespaceRef) =>
-      environment.namespace_refs.includes(namespaceRef),
-    ),
+    alias.namespace_refs.some((namespaceRef) => environment.namespace_refs.includes(namespaceRef)),
   );
 }
 
@@ -4543,9 +4499,7 @@ function resolveActiveSecretNode(board, alias) {
 function grantTouchesAliasAndEnvironment(grant, alias, environment) {
   return (
     grant.alias_refs.includes(alias.alias_ref) &&
-    grant.namespace_refs.some((namespaceRef) =>
-      environment.namespace_refs.includes(namespaceRef),
-    )
+    grant.namespace_refs.some((namespaceRef) => environment.namespace_refs.includes(namespaceRef))
   );
 }
 
@@ -4580,15 +4534,14 @@ function aliasNamespaceForEnvironment(alias, environment) {
 function resolveActiveStorageEnvironment(board) {
   if (!state.activeStorageEnvironmentRef) {
     state.activeStorageEnvironmentRef =
-      board.selectedEnvironmentRef ??
-      board.environments?.[0]?.environment_ref ??
-      null;
+      board.selectedEnvironmentRef ?? board.environments?.[0]?.environment_ref ?? null;
   }
   return (
     board.environments?.find(
-      (environment) =>
-        environment.environment_ref === state.activeStorageEnvironmentRef,
-    ) ?? board.environments?.[0] ?? null
+      (environment) => environment.environment_ref === state.activeStorageEnvironmentRef,
+    ) ??
+    board.environments?.[0] ??
+    null
   );
 }
 
@@ -4614,28 +4567,19 @@ function resolveActiveStorageBucket(board, environment) {
         ? board.selectedBucketRef
         : buckets[0].bucket_ref;
   }
-  return (
-    buckets.find((bucket) => bucket.bucket_ref === state.activeStorageBucketRef) ??
-    buckets[0]
-  );
+  return buckets.find((bucket) => bucket.bucket_ref === state.activeStorageBucketRef) ?? buckets[0];
 }
 
 function storageKeyFamiliesForBucket(board, bucket) {
-  return (board.keyFamilies ?? []).filter(
-    (family) => family.purpose_ref === bucket.purpose_ref,
-  );
+  return (board.keyFamilies ?? []).filter((family) => family.purpose_ref === bucket.purpose_ref);
 }
 
 function storageLifecycleRulesForBucket(board, bucket) {
-  return (board.lifecycleRules ?? []).filter(
-    (rule) => rule.purpose_ref === bucket.purpose_ref,
-  );
+  return (board.lifecycleRules ?? []).filter((rule) => rule.purpose_ref === bucket.purpose_ref);
 }
 
 function storageEventRoutesForBucket(board, bucket) {
-  return (board.eventRoutes ?? []).filter(
-    (route) => route.purpose_ref === bucket.purpose_ref,
-  );
+  return (board.eventRoutes ?? []).filter((route) => route.purpose_ref === bucket.purpose_ref);
 }
 
 function setActiveStorageBucketByPurpose(board, environment, purposeRef) {
@@ -4663,10 +4607,7 @@ function resolveActiveStorageLifecycle(board, bucket) {
         ? board.selectedLifecycleRef
         : rules[0].lifecycle_ref;
   }
-  return (
-    rules.find((rule) => rule.lifecycle_ref === state.activeStorageLifecycleRef) ??
-    rules[0]
-  );
+  return rules.find((rule) => rule.lifecycle_ref === state.activeStorageLifecycleRef) ?? rules[0];
 }
 
 function resolveActiveStorageEvent(board, bucket) {
@@ -4680,15 +4621,11 @@ function resolveActiveStorageEvent(board, bucket) {
     !routes.some((route) => route.route_ref === state.activeStorageEventRef)
   ) {
     state.activeStorageEventRef =
-      board.selectedEventRef &&
-      routes.some((route) => route.route_ref === board.selectedEventRef)
+      board.selectedEventRef && routes.some((route) => route.route_ref === board.selectedEventRef)
         ? board.selectedEventRef
         : routes[0].route_ref;
   }
-  return (
-    routes.find((route) => route.route_ref === state.activeStorageEventRef) ??
-    routes[0]
-  );
+  return routes.find((route) => route.route_ref === state.activeStorageEventRef) ?? routes[0];
 }
 
 function renderStorageTopBar(board, environment) {
@@ -4696,9 +4633,7 @@ function renderStorageTopBar(board, environment) {
   elements.runTitle.textContent = `${board.providerDisplayName} atlas`;
   elements.runStatus.textContent = formatLabel(board.selectionPosture);
   elements.runStatus.dataset.status =
-    board.selectionPosture === "PROVIDER_SELECTION_REQUIRED"
-      ? "warning"
-      : "success";
+    board.selectionPosture === "PROVIDER_SELECTION_REQUIRED" ? "warning" : "success";
   elements.environmentControl.hidden = false;
   elements.environmentChipWrap.hidden = true;
   elements.environmentSelect.replaceChildren(
@@ -4844,16 +4779,12 @@ function renderStorageZone(board, environment, zoneRef, title) {
     .filter((bucket) => bucket.zone_ref === zoneRef)
     .forEach((bucket) => {
       list.append(
-        createStorageBucketCard(
-          bucket,
-          bucket.bucket_ref === state.activeStorageBucketRef,
-          () => {
-            state.activeStorageBucketRef = bucket.bucket_ref;
-            state.activeStorageLifecycleRef = null;
-            state.activeStorageEventRef = null;
-            renderStorageBucketTopologyBoard(board);
-          },
-        ),
+        createStorageBucketCard(bucket, bucket.bucket_ref === state.activeStorageBucketRef, () => {
+          state.activeStorageBucketRef = bucket.bucket_ref;
+          state.activeStorageLifecycleRef = null;
+          state.activeStorageEventRef = null;
+          renderStorageBucketTopologyBoard(board);
+        }),
       );
     });
   section.append(list);
@@ -4966,7 +4897,13 @@ function renderStorageStrip(board, environment, activeLifecycle, activeEvent) {
   return section;
 }
 
-function renderStorageInspector(environment, activeBucket, keyFamilies, activeLifecycle, activeEvent) {
+function renderStorageInspector(
+  environment,
+  activeBucket,
+  keyFamilies,
+  activeLifecycle,
+  activeEvent,
+) {
   elements.drawer.dataset.state = "open";
   elements.drawerClose.hidden = true;
   elements.drawerTitle.textContent = activeBucket.label;
@@ -5093,26 +5030,17 @@ function renderStorageBucketTopologyBoard(board) {
     renderStorageZone(board, environment, "QUARANTINE", "Quarantine"),
     renderStorageStrip(board, environment, activeLifecycle, activeEvent),
   );
-  renderStorageInspector(
-    environment,
-    activeBucket,
-    keyFamilies,
-    activeLifecycle,
-    activeEvent,
-  );
+  renderStorageInspector(environment, activeBucket, keyFamilies, activeLifecycle, activeEvent);
 }
 
 function resolveActiveMessagingEnvironment(board) {
   if (!state.activeMessagingEnvironmentRef) {
     state.activeMessagingEnvironmentRef =
-      board.selectedEnvironmentRef ??
-      board.environments?.[0]?.environment_ref ??
-      null;
+      board.selectedEnvironmentRef ?? board.environments?.[0]?.environment_ref ?? null;
   }
   return (
     board.environments?.find(
-      (environment) =>
-        environment.environment_ref === state.activeMessagingEnvironmentRef,
+      (environment) => environment.environment_ref === state.activeMessagingEnvironmentRef,
     ) ??
     board.environments?.[0] ??
     null
@@ -5125,18 +5053,14 @@ function resolveActiveMessagingFamily(board) {
       board.selectedFamilyRef ?? board.families?.[0]?.family_ref ?? null;
   }
   return (
-    board.families?.find(
-      (family) => family.family_ref === state.activeMessagingFamilyRef,
-    ) ??
+    board.families?.find((family) => family.family_ref === state.activeMessagingFamilyRef) ??
     board.families?.[0] ??
     null
   );
 }
 
 function messageChannelsForFamily(board, family) {
-  return (board.channels ?? []).filter(
-    (channel) => channel.family_ref === family.family_ref,
-  );
+  return (board.channels ?? []).filter((channel) => channel.family_ref === family.family_ref);
 }
 
 function resolveActiveMessagingChannel(board, family) {
@@ -5147,22 +5071,17 @@ function resolveActiveMessagingChannel(board, family) {
   }
   if (
     !state.activeMessagingChannelRef ||
-    !familyChannels.some(
-      (channel) => channel.channel_ref === state.activeMessagingChannelRef,
-    )
+    !familyChannels.some((channel) => channel.channel_ref === state.activeMessagingChannelRef)
   ) {
     state.activeMessagingChannelRef =
       board.selectedChannelRef &&
-      familyChannels.some(
-        (channel) => channel.channel_ref === board.selectedChannelRef,
-      )
+      familyChannels.some((channel) => channel.channel_ref === board.selectedChannelRef)
         ? board.selectedChannelRef
         : familyChannels[0].channel_ref;
   }
   return (
-    familyChannels.find(
-      (channel) => channel.channel_ref === state.activeMessagingChannelRef,
-    ) ?? familyChannels[0]
+    familyChannels.find((channel) => channel.channel_ref === state.activeMessagingChannelRef) ??
+    familyChannels[0]
   );
 }
 
@@ -5185,25 +5104,20 @@ function resolveBrokerAlias(channel, environment) {
 
 function resolveActiveOrderingPolicy(board, channel) {
   return (
-    board.orderingPolicies?.find(
-      (policy) => policy.policy_ref === channel.ordering_policy_ref,
-    ) ?? null
+    board.orderingPolicies?.find((policy) => policy.policy_ref === channel.ordering_policy_ref) ??
+    null
   );
 }
 
 function resolveActiveRetryPolicy(board, channel) {
   return (
-    board.retryPolicies?.find(
-      (policy) => policy.policy_ref === channel.retry_policy_ref,
-    ) ?? null
+    board.retryPolicies?.find((policy) => policy.policy_ref === channel.retry_policy_ref) ?? null
   );
 }
 
 function resolveActiveDedupePolicy(board, channel) {
   return (
-    board.dedupePolicies?.find(
-      (policy) => policy.policy_ref === channel.dedupe_policy_ref,
-    ) ?? null
+    board.dedupePolicies?.find((policy) => policy.policy_ref === channel.dedupe_policy_ref) ?? null
   );
 }
 
@@ -5236,10 +5150,7 @@ function renderMessageFabricTopBar(board, environment) {
 }
 
 function renderMessageFabricRail(board, activeFamily) {
-  elements.runRail.setAttribute(
-    "aria-label",
-    "Channel families and coordination flows",
-  );
+  elements.runRail.setAttribute("aria-label", "Channel families and coordination flows");
   elements.runList.className = "message-family-rail-list";
   elements.railEyebrow.textContent = "Family rail";
   elements.railTitle.textContent = "Channel families";
@@ -5422,8 +5333,7 @@ function renderMessagePolicyStrip(
     createMessagePolicyCard(
       "Ordering policy",
       activeOrderingPolicy?.label ?? "Ordering",
-      activeOrderingPolicy?.note ??
-        "No ordering policy found for the selected channel.",
+      activeOrderingPolicy?.note ?? "No ordering policy found for the selected channel.",
       [
         [`${activeOrderingPolicy?.partition_key_fields?.length ?? 0} keys`, "neutral"],
         [activeChannel.ordering_policy_ref, "warning"],
@@ -5451,8 +5361,7 @@ function renderMessagePolicyStrip(
     createMessagePolicyCard(
       "Idempotency / Dedupe",
       activeDedupePolicy?.label ?? "Dedupe",
-      activeDedupePolicy?.note ??
-        "No dedupe policy found for the selected channel.",
+      activeDedupePolicy?.note ?? "No dedupe policy found for the selected channel.",
       [
         [`${activeDedupePolicy?.dedupe_key_fields?.length ?? 0} keys`, "neutral"],
         [activeChannel.dedupe_policy_ref, "warning"],
@@ -5505,13 +5414,9 @@ function renderMessageFabricInspector(
       copyValue: brokerAlias,
       copyLabel: "Copy broker alias",
     }),
-    createFieldRow(
-      "Durable outbox",
-      activeChannel.outbox_ref_or_null ?? "External callback edge",
-      {
-        monospace: Boolean(activeChannel.outbox_ref_or_null),
-      },
-    ),
+    createFieldRow("Durable outbox", activeChannel.outbox_ref_or_null ?? "External callback edge", {
+      monospace: Boolean(activeChannel.outbox_ref_or_null),
+    }),
     createFieldRow("Inbox", activeChannel.inbox_ref, {
       monospace: true,
     }),
@@ -5581,12 +5486,7 @@ function renderMessageFabricInspector(
     ]),
   );
 
-  container.append(
-    fields,
-    boundarySection,
-    selectedPolicySection,
-    laneSection,
-  );
+  container.append(fields, boundarySection, selectedPolicySection, laneSection);
   elements.drawerBody.replaceChildren(container);
 }
 
@@ -5649,8 +5549,7 @@ function resolveActiveCacheEnvironment(board) {
 
 function resolveActiveCacheFamily(board) {
   if (!state.activeCacheFamilyRef) {
-    state.activeCacheFamilyRef =
-      board.selectedFamilyRef ?? board.families?.[0]?.family_ref ?? null;
+    state.activeCacheFamilyRef = board.selectedFamilyRef ?? board.families?.[0]?.family_ref ?? null;
   }
   return (
     board.families?.find((family) => family.family_ref === state.activeCacheFamilyRef) ??
@@ -5660,9 +5559,7 @@ function resolveActiveCacheFamily(board) {
 }
 
 function resolveCachePartitionRow(board, family) {
-  return (
-    board.partitionRows?.find((row) => row.family_ref === family.family_ref) ?? null
-  );
+  return board.partitionRows?.find((row) => row.family_ref === family.family_ref) ?? null;
 }
 
 function resolveCacheResumeRow(board, family) {
@@ -5686,9 +5583,7 @@ function cacheBoundaryRowsForFamily(board, family) {
 }
 
 function cacheContractRowsForFamily(board, family) {
-  return (board.contractRows ?? []).filter(
-    (row) => row.family_ref === family.family_ref,
-  );
+  return (board.contractRows ?? []).filter((row) => row.family_ref === family.family_ref);
 }
 
 function cacheFocusIsValid(board, family, kind, ref) {
@@ -5696,19 +5591,13 @@ function cacheFocusIsValid(board, family, kind, ref) {
     return ref === family.family_ref;
   }
   if (kind === "trigger") {
-    return cacheInvalidationRowsForFamily(board, family).some(
-      (row) => row.trigger_ref === ref,
-    );
+    return cacheInvalidationRowsForFamily(board, family).some((row) => row.trigger_ref === ref);
   }
   if (kind === "class") {
-    return cacheBoundaryRowsForFamily(board, family).some(
-      (row) => row.class_ref === ref,
-    );
+    return cacheBoundaryRowsForFamily(board, family).some((row) => row.class_ref === ref);
   }
   if (kind === "contract") {
-    return cacheContractRowsForFamily(board, family).some(
-      (row) => row.contract_row_ref === ref,
-    );
+    return cacheContractRowsForFamily(board, family).some((row) => row.contract_row_ref === ref);
   }
   return false;
 }
@@ -5720,12 +5609,7 @@ function resolveActiveCacheFocus(board, family) {
   if (
     !state.activeCacheFocusKind ||
     !state.activeCacheFocusRef ||
-    !cacheFocusIsValid(
-      board,
-      family,
-      state.activeCacheFocusKind,
-      state.activeCacheFocusRef,
-    )
+    !cacheFocusIsValid(board, family, state.activeCacheFocusKind, state.activeCacheFocusRef)
   ) {
     if (cacheFocusIsValid(board, family, selectedKind, selectedRef)) {
       state.activeCacheFocusKind = selectedKind;
@@ -6080,21 +5964,21 @@ function renderResumeIsolationInspector(board, environment, activeFamily, active
   const resumeRow = resolveCacheResumeRow(board, activeFamily);
   const focusTrigger =
     activeFocus.kind === "trigger"
-      ? cacheInvalidationRowsForFamily(board, activeFamily).find(
+      ? (cacheInvalidationRowsForFamily(board, activeFamily).find(
           (row) => row.trigger_ref === activeFocus.ref,
-        ) ?? null
+        ) ?? null)
       : null;
   const focusClass =
     activeFocus.kind === "class"
-      ? cacheBoundaryRowsForFamily(board, activeFamily).find(
+      ? (cacheBoundaryRowsForFamily(board, activeFamily).find(
           (row) => row.class_ref === activeFocus.ref,
-        ) ?? null
+        ) ?? null)
       : null;
   const focusContract =
     activeFocus.kind === "contract"
-      ? cacheContractRowsForFamily(board, activeFamily).find(
+      ? (cacheContractRowsForFamily(board, activeFamily).find(
           (row) => row.contract_row_ref === activeFocus.ref,
-        ) ?? null
+        ) ?? null)
       : null;
 
   const container = document.createElement("div");
@@ -6270,8 +6154,7 @@ function resolveActiveTelemetryEnvironment(board) {
   }
   return (
     board.environments?.find(
-      (environment) =>
-        environment.environment_ref === state.activeTelemetryEnvironmentRef,
+      (environment) => environment.environment_ref === state.activeTelemetryEnvironmentRef,
     ) ??
     board.environments?.[0] ??
     null
@@ -6284,9 +6167,7 @@ function resolveActiveTelemetryFamily(board) {
       board.selectedFamilyRef ?? board.families?.[0]?.family_ref ?? null;
   }
   return (
-    board.families?.find(
-      (family) => family.family_ref === state.activeTelemetryFamilyRef,
-    ) ??
+    board.families?.find((family) => family.family_ref === state.activeTelemetryFamilyRef) ??
     board.families?.[0] ??
     null
   );
@@ -6308,9 +6189,7 @@ function resolveActiveTelemetryFocus(board, activeFamily) {
     state.activeTelemetryFocusRef &&
     rows.some((row) => row.row_ref === state.activeTelemetryFocusRef)
   ) {
-    return (
-      rows.find((row) => row.row_ref === state.activeTelemetryFocusRef) ?? null
-    );
+    return rows.find((row) => row.row_ref === state.activeTelemetryFocusRef) ?? null;
   }
   if (selectedFocusRef && rows.some((row) => row.row_ref === selectedFocusRef)) {
     state.activeTelemetryFocusRef = selectedFocusRef;
@@ -6364,10 +6243,7 @@ function renderTelemetrySignalTopBar(board, environment) {
 }
 
 function renderTelemetrySignalRail(board, activeFamily) {
-  elements.runRail.setAttribute(
-    "aria-label",
-    "Signal families and telemetry routes",
-  );
+  elements.runRail.setAttribute("aria-label", "Signal families and telemetry routes");
   elements.runList.className = "telemetry-family-rail-list";
   elements.railEyebrow.textContent = "Signal rail";
   elements.railTitle.textContent = "Signal families";
@@ -6472,15 +6348,10 @@ function renderTelemetryPlane(planeLabel, eyebrow, rows, activeFocus) {
   list.className = "telemetry-plane__list";
   rows.forEach((row) => {
     list.append(
-      createTelemetryAtlasRow(
-        planeLabel,
-        row,
-        activeFocus?.row_ref === row.row_ref,
-        () => {
-          state.activeTelemetryFocusRef = row.row_ref;
-          renderTelemetrySignalAtlas(state.payload.telemetrySignalAtlas);
-        },
-      ),
+      createTelemetryAtlasRow(planeLabel, row, activeFocus?.row_ref === row.row_ref, () => {
+        state.activeTelemetryFocusRef = row.row_ref;
+        renderTelemetrySignalAtlas(state.payload.telemetrySignalAtlas);
+      }),
     );
   });
   section.append(list);
@@ -6574,7 +6445,12 @@ function renderTelemetrySignalInspector(environment, activeFamily, activeFocus) 
     createFieldRow("Primary backend", activeFamily.primary_backend_label),
     createFieldRow("Retention class", activeFamily.retention_class_label),
     createFieldRow("Exportability", activeFamily.exportability_label, {
-      chips: [createChip(activeFamily.exportability_label, telemetryBadgeTone(activeFamily.exportability_label))],
+      chips: [
+        createChip(
+          activeFamily.exportability_label,
+          telemetryBadgeTone(activeFamily.exportability_label),
+        ),
+      ],
     }),
   );
 
@@ -6610,10 +6486,7 @@ function renderTelemetrySignalInspector(environment, activeFamily, activeFocus) 
   `;
   correlationSection.append(
     createMetadataList(
-      (activeFamily.required_key_labels ?? []).map((key, index) => [
-        `Key ${index + 1}`,
-        key,
-      ]),
+      (activeFamily.required_key_labels ?? []).map((key, index) => [`Key ${index + 1}`, key]),
     ),
   );
 
@@ -6634,32 +6507,2016 @@ function renderTelemetrySignalAtlas(board) {
   renderTelemetrySignalRail(board, activeFamily);
   renderTelemetrySignalSummary(board, environment, activeFamily, activeFocus);
   elements.stepList.className = "telemetry-signal-page";
-  elements.stepList.replaceChildren(
-    renderTelemetrySignalCanvas(activeFamily, activeFocus),
-  );
+  elements.stepList.replaceChildren(renderTelemetrySignalCanvas(activeFamily, activeFocus));
   renderTelemetrySignalInspector(environment, activeFamily, activeFocus);
+}
+
+function resolveActiveSmokeEnvironment(board) {
+  if (!state.activeSmokeEnvironmentRef) {
+    state.activeSmokeEnvironmentRef =
+      board.selectedEnvironmentRef ?? board.environments?.[0]?.environment_ref ?? null;
+  }
+  return (
+    board.environments?.find(
+      (environment) => environment.environment_ref === state.activeSmokeEnvironmentRef,
+    ) ??
+    board.environments?.[0] ??
+    null
+  );
+}
+
+function resolveActiveSmokeEnvironmentRollup(board, environmentRef) {
+  return (
+    board.environmentRollups?.find((rollup) => rollup.environment_ref === environmentRef) ?? null
+  );
+}
+
+function resolveActiveSmokeFamily(board) {
+  if (!state.activeSmokeFamilyRef) {
+    state.activeSmokeFamilyRef = board.selectedFamilyRef ?? board.families?.[0]?.family_ref ?? null;
+  }
+  return (
+    board.families?.find((family) => family.family_ref === state.activeSmokeFamilyRef) ??
+    board.families?.[0] ??
+    null
+  );
+}
+
+function smokeSliceForEnvironment(family, environmentRef) {
+  return (
+    family?.slices?.find((slice) => slice.environment_ref === environmentRef) ??
+    family?.slices?.[0] ??
+    null
+  );
+}
+
+function smokeRowsForPlane(slice, planeKind) {
+  if (!slice) {
+    return [];
+  }
+  if (planeKind === "credential") {
+    return slice.credential_rows ?? [];
+  }
+  if (planeKind === "assertion") {
+    return slice.assertion_rows ?? [];
+  }
+  if (planeKind === "evidence") {
+    return slice.evidence_rows ?? [];
+  }
+  if (planeKind === "outcome") {
+    return slice.outcome_rows ?? [];
+  }
+  return [];
+}
+
+function findSmokeFocus(slice, focusRef) {
+  if (!slice || !focusRef) {
+    return null;
+  }
+
+  for (const plane of [
+    ["credential", "Credential Family"],
+    ["assertion", "Expected Principal / Scope"],
+    ["evidence", "Masked Evidence"],
+    ["outcome", "Outcome / Next Action"],
+  ]) {
+    const [planeKind, planeTitle] = plane;
+    const row = smokeRowsForPlane(slice, planeKind).find(
+      (candidate) => candidate.row_ref === focusRef,
+    );
+    if (row) {
+      return { kind: "row", planeKind, planeTitle, item: row };
+    }
+  }
+
+  const lineageNode = (slice.evidence_lineage ?? []).find(
+    (candidate) => candidate.node_ref === focusRef,
+  );
+  if (lineageNode) {
+    return {
+      kind: "lineage",
+      planeKind: "lineage",
+      planeTitle: "Evidence lineage",
+      item: lineageNode,
+    };
+  }
+
+  return null;
+}
+
+function resolveActiveSmokeFocus(board, family, environmentRef) {
+  const slice = smokeSliceForEnvironment(family, environmentRef);
+  const persistedFocus = findSmokeFocus(slice, state.activeSmokeFocusRef);
+  if (persistedFocus) {
+    return persistedFocus;
+  }
+
+  const selectedFocus = findSmokeFocus(slice, board.selectedFocusRef);
+  if (selectedFocus) {
+    state.activeSmokeFocusRef =
+      selectedFocus.kind === "lineage" ? selectedFocus.item.node_ref : selectedFocus.item.row_ref;
+    return selectedFocus;
+  }
+
+  state.activeSmokeFocusRef = null;
+  return null;
+}
+
+function smokeOutcomeTone(outcomeCode) {
+  if (outcomeCode === "SUCCESS") {
+    return "success";
+  }
+  if (outcomeCode === "MANUAL_CHECKPOINT_REQUIRED") {
+    return "warning";
+  }
+  if (String(outcomeCode).startsWith("SOFT_FAIL")) {
+    return "danger";
+  }
+  return "neutral";
+}
+
+function smokeOutcomeStatusAttr(outcomeCode) {
+  if (outcomeCode === "SUCCESS") {
+    return "SUCCEEDED";
+  }
+  if (outcomeCode === "MANUAL_CHECKPOINT_REQUIRED") {
+    return "MANUAL_CHECKPOINT_REQUIRED";
+  }
+  if (String(outcomeCode).startsWith("SOFT_FAIL")) {
+    return "FAILED";
+  }
+  return "BLOCKED_BY_POLICY";
+}
+
+function smokeBadgeTone(label) {
+  const normalized = String(label).toLowerCase();
+  if (
+    normalized.includes("manual") ||
+    normalized.includes("masked") ||
+    normalized.includes("hash only") ||
+    normalized.includes("checkpoint")
+  ) {
+    return "warning";
+  }
+  if (
+    normalized.includes("success") ||
+    normalized.includes("ready") ||
+    normalized.includes("verified")
+  ) {
+    return "success";
+  }
+  if (
+    normalized.includes("blocked") ||
+    normalized.includes("mismatch") ||
+    normalized.includes("soft fail")
+  ) {
+    return "danger";
+  }
+  return "neutral";
+}
+
+function smokeRollupStatusAttr(rollup) {
+  if (!rollup) {
+    return "PENDING";
+  }
+  if (rollup.outcome_counts.soft_fail > 0) {
+    return "FAILED";
+  }
+  if (rollup.outcome_counts.manual_checkpoint > 0) {
+    return "MANUAL_CHECKPOINT_REQUIRED";
+  }
+  if (rollup.outcome_counts.blocked > 0 || rollup.outcome_counts.environment_disabled > 0) {
+    return "BLOCKED_BY_POLICY";
+  }
+  return "SUCCEEDED";
+}
+
+function renderSmokeTopBar(board, environment) {
+  const rollup = resolveActiveSmokeEnvironmentRollup(board, environment.environment_ref);
+  elements.providerBadge.textContent = board.providerMonogram ?? "SMK";
+  elements.runTitle.textContent = board.providerDisplayName;
+  elements.runStatus.textContent =
+    rollup?.outcome_summary_label ?? formatLabel(board.selectionPosture);
+  elements.runStatus.dataset.status = smokeRollupStatusAttr(rollup);
+  elements.environmentControl.hidden = false;
+  elements.environmentChipWrap.hidden = false;
+  elements.environmentChip.textContent = board.smokeRunBadge;
+  elements.environmentSelect.replaceChildren(
+    ...(board.environments ?? []).map((entry) => {
+      const option = document.createElement("option");
+      option.value = entry.environment_ref;
+      option.textContent = entry.label;
+      option.selected = entry.environment_ref === environment.environment_ref;
+      return option;
+    }),
+  );
+  elements.environmentSelect.disabled = false;
+  elements.environmentSelect.onchange = () => {
+    state.activeSmokeEnvironmentRef = elements.environmentSelect.value;
+    state.activeSmokeFocusRef = null;
+    renderCredentialEvidenceLedger(board);
+  };
+  elements.environmentHint.textContent = `${board.postureChipLabel} · ${environment.smoke_posture}`;
+  document.title = `Provisioning Viewer - ${environment.label} credential evidence ledger`;
+}
+
+function renderSmokeRail(board, activeFamily, environmentRef) {
+  elements.runRail.setAttribute("aria-label", "Credential families and smoke-validation evidence");
+  elements.runList.className = "smoke-family-rail-list";
+  elements.railEyebrow.textContent = "Credential rail";
+  elements.railTitle.textContent = "Smoke families";
+  elements.mainEyebrow.textContent = "Credential evidence ledger";
+  elements.mainTitle.textContent = activeFamily.label;
+
+  elements.runList.replaceChildren(
+    ...(board.families ?? []).map((family) => {
+      const activeSlice = smokeSliceForEnvironment(family, environmentRef);
+      const listItem = document.createElement("li");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.setAttribute(
+        "aria-current",
+        family.family_ref === activeFamily.family_ref ? "true" : "false",
+      );
+      button.innerHTML = `
+        <div class="smoke-family-rail__title">
+          <strong>${family.label}</strong>
+          <span class="status-chip" data-status="${smokeOutcomeStatusAttr(activeSlice?.outcome_code)}">${activeSlice?.outcome_label ?? "Pending"}</span>
+        </div>
+        <div class="smoke-family-rail__meta">
+          <span>${formatLabel(activeSlice?.validation_mode ?? "n/a")}</span>
+          <span class="meta-note">${family.provider_label}</span>
+        </div>
+      `;
+      button.addEventListener("click", () => {
+        state.activeSmokeFamilyRef = family.family_ref;
+        state.activeSmokeFocusRef = null;
+        renderCredentialEvidenceLedger(board);
+      });
+      listItem.append(button);
+      return listItem;
+    }),
+  );
+}
+
+function renderSmokeSummary(board, environment, activeFamily, activeSlice, activeFocus) {
+  elements.runSummary.innerHTML = "";
+  const container = document.createElement("div");
+  container.className = "credential-evidence-summary-band";
+  container.innerHTML = `
+    <div class="credential-evidence-summary-band__card">
+      <p class="eyebrow">Environment</p>
+      <h2>${environment.label}</h2>
+      <p class="ledger-note">${environment.topology_summary}</p>
+    </div>
+    <div class="credential-evidence-summary-band__card">
+      <p class="eyebrow">Family posture</p>
+      <h2>${activeFamily.label}</h2>
+      <p class="ledger-note">${activeFamily.summary}</p>
+    </div>
+    <div class="credential-evidence-summary-band__card">
+      <p class="eyebrow">Focus</p>
+      <h2>${activeFocus?.item?.label ?? activeFamily.label}</h2>
+      <p class="ledger-note">${activeFocus?.item?.detail ?? activeSlice.summary}</p>
+    </div>
+  `;
+  const chipRow = document.createElement("div");
+  chipRow.className = "chip-row";
+  chipRow.append(
+    createChip(board.postureChipLabel, "neutral"),
+    createChip(environment.smoke_posture, "warning"),
+    createChip(activeSlice.outcome_label, smokeOutcomeTone(activeSlice.outcome_code)),
+  );
+  elements.runSummary.append(container, chipRow);
+}
+
+function createSmokeEvidenceStrip(activeSlice, activeFocus, board) {
+  const section = document.createElement("section");
+  section.className = "credential-evidence-strip";
+  section.innerHTML = `
+    <div class="panel-heading">
+      <p class="eyebrow">Thin evidence lineage</p>
+      <h3>Masked evidence chain</h3>
+    </div>
+  `;
+
+  const list = document.createElement("div");
+  list.className = "credential-evidence-strip__list";
+
+  (activeSlice.evidence_lineage ?? []).forEach((node) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "credential-evidence-strip__node";
+    button.dataset.active =
+      activeFocus?.kind === "lineage" && activeFocus.item?.node_ref === node.node_ref
+        ? "true"
+        : "false";
+    button.dataset.tone = node.tone;
+    button.setAttribute("aria-label", `Evidence ref ${node.label} ${node.summary}`);
+    button.innerHTML = `
+      <strong>${node.label}</strong>
+      <p>${node.summary}</p>
+    `;
+    button.addEventListener("click", () => {
+      state.activeSmokeFocusRef = node.node_ref;
+      renderCredentialEvidenceLedger(board);
+    });
+    list.append(button);
+  });
+
+  section.append(list);
+  return section;
+}
+
+function createSmokeRow(planeTitle, row, outcomeCode, active, onSelect) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "credential-evidence-row";
+  button.dataset.active = active ? "true" : "false";
+  button.setAttribute("aria-pressed", active ? "true" : "false");
+  button.setAttribute("aria-label", `${planeTitle} row ${row.label}`);
+  button.innerHTML = `
+    <div class="credential-evidence-row__head">
+      <div>
+        <p class="eyebrow">${planeTitle}</p>
+        <strong>${row.label}</strong>
+      </div>
+      <div class="chip-row"></div>
+    </div>
+    <p class="ledger-note">${row.detail}</p>
+  `;
+  const chipRow = button.querySelector(".chip-row");
+  (row.badges ?? []).forEach((badge, index) =>
+    chipRow.append(
+      createChip(
+        badge,
+        index === 0 && planeTitle === "Outcome / Next Action"
+          ? smokeOutcomeTone(outcomeCode)
+          : smokeBadgeTone(badge),
+      ),
+    ),
+  );
+  button.addEventListener("click", onSelect);
+  return button;
+}
+
+function renderSmokePlane(planeKind, planeTitle, eyebrow, rows, activeFocus, outcomeCode, board) {
+  const section = document.createElement("section");
+  section.className = "credential-evidence-plane";
+  section.innerHTML = `
+    <div class="panel-heading">
+      <p class="eyebrow">${eyebrow}</p>
+      <h3>${planeTitle}</h3>
+    </div>
+  `;
+
+  const list = document.createElement("div");
+  list.className = "credential-evidence-plane__list";
+  rows.forEach((row) => {
+    list.append(
+      createSmokeRow(
+        planeTitle,
+        row,
+        outcomeCode,
+        activeFocus?.kind === "row" && activeFocus.item?.row_ref === row.row_ref,
+        () => {
+          state.activeSmokeFocusRef = row.row_ref;
+          renderCredentialEvidenceLedger(board);
+        },
+      ),
+    );
+  });
+  section.append(list);
+  return section;
+}
+
+function renderSmokeCanvas(activeSlice, activeFocus, board) {
+  const section = document.createElement("section");
+  section.className = "credential-evidence-canvas";
+  section.setAttribute("aria-label", "credential-evidence-canvas");
+  section.append(
+    renderSmokePlane(
+      "credential",
+      "Credential Family",
+      "Family and provider boundary",
+      activeSlice.credential_rows ?? [],
+      activeFocus,
+      activeSlice.outcome_code,
+      board,
+    ),
+    renderSmokePlane(
+      "assertion",
+      "Expected Principal / Scope",
+      "Principal, scope, and endpoint",
+      activeSlice.assertion_rows ?? [],
+      activeFocus,
+      activeSlice.outcome_code,
+      board,
+    ),
+    renderSmokePlane(
+      "evidence",
+      "Masked Evidence",
+      "Copy-safe evidence only",
+      activeSlice.evidence_rows ?? [],
+      activeFocus,
+      activeSlice.outcome_code,
+      board,
+    ),
+    renderSmokePlane(
+      "outcome",
+      "Outcome / Next Action",
+      "Typed readiness posture",
+      activeSlice.outcome_rows ?? [],
+      activeFocus,
+      activeSlice.outcome_code,
+      board,
+    ),
+  );
+  return section;
+}
+
+function renderSmokeInspector(board, environment, activeFamily, activeSlice, activeFocus) {
+  elements.drawer.dataset.state = "open";
+  elements.drawerClose.hidden = true;
+  elements.drawerTitle.textContent = activeFocus?.item?.label ?? activeFamily.label;
+
+  const focusLines =
+    activeFocus?.kind === "lineage"
+      ? [
+          `Evidence ref: ${activeFocus.item.node_ref}`,
+          `Tone: ${formatTitleLabel(activeFocus.item.tone)}`,
+          `Summary: ${activeFocus.item.summary}`,
+        ]
+      : (activeFocus?.item?.inspector_lines ?? activeSlice.inspector_notes ?? []);
+  const focusEvidenceRefs =
+    activeFocus?.kind === "lineage"
+      ? [activeFocus.item.node_ref]
+      : (activeFocus?.item?.evidence_refs ??
+        activeSlice.evidence_lineage.map((node) => node.node_ref));
+  const focusPolicyRefs =
+    activeFocus?.kind === "lineage" ? [] : (activeFocus?.item?.policy_refs ?? []);
+
+  const container = document.createElement("div");
+  container.className = "atlas-inspector";
+
+  const fields = document.createElement("div");
+  fields.className = "field-list";
+  fields.append(
+    createFieldRow("Environment", environment.label, {
+      chips: [createChip(activeSlice.outcome_label, smokeOutcomeTone(activeSlice.outcome_code))],
+    }),
+    createFieldRow("Validation mode", formatLabel(activeSlice.validation_mode)),
+    createFieldRow("Source card", activeSlice.source_card_ref, {
+      monospace: true,
+      copyValue: activeSlice.source_card_ref,
+      copyLabel: "Copy source card",
+    }),
+    createFieldRow("Result ref", activeSlice.result_ref, {
+      monospace: true,
+      copyValue: activeSlice.result_ref,
+      copyLabel: "Copy result ref",
+    }),
+    createFieldRow("Provider", activeSlice.provider_label),
+    createFieldRow("Safe refs", activeSlice.safe_credential_refs.join(", ") || "n/a", {
+      monospace: true,
+    }),
+  );
+
+  const familySection = document.createElement("section");
+  familySection.className = "checkpoint-card";
+  familySection.innerHTML = `
+    <p class="eyebrow">Credential family</p>
+    <h3>${activeFamily.label}</h3>
+    <p>${activeFamily.family_note ?? activeFamily.summary}</p>
+  `;
+  familySection.append(
+    createMetadataList([
+      ["Provider", activeFamily.provider_label],
+      ["Source card", activeFamily.source_card_ref],
+      ["Outcome", activeSlice.outcome_label],
+    ]),
+  );
+
+  const focusSection = document.createElement("section");
+  focusSection.className = "checkpoint-card";
+  focusSection.innerHTML = `
+    <p class="eyebrow">${activeFocus?.planeTitle ?? "Focused surface"}</p>
+    <h3>${activeFocus?.item?.label ?? activeFamily.label}</h3>
+    <p>${activeFocus?.item?.detail ?? activeSlice.summary}</p>
+  `;
+  if (activeFocus?.kind === "row") {
+    const chipRow = document.createElement("div");
+    chipRow.className = "chip-row";
+    (activeFocus.item.badges ?? []).forEach((badge, index) =>
+      chipRow.append(
+        createChip(
+          badge,
+          index === 0 && activeFocus.planeKind === "outcome"
+            ? smokeOutcomeTone(activeSlice.outcome_code)
+            : smokeBadgeTone(badge),
+        ),
+      ),
+    );
+    focusSection.append(chipRow);
+  }
+  if (focusLines.length) {
+    const list = document.createElement("ul");
+    list.className = "note-list";
+    focusLines.forEach((line) => {
+      const item = document.createElement("li");
+      item.textContent = line;
+      list.append(item);
+    });
+    focusSection.append(list);
+  }
+
+  const evidenceSection = document.createElement("section");
+  evidenceSection.className = "checkpoint-card";
+  evidenceSection.innerHTML = `
+    <p class="eyebrow">Evidence / Next Action</p>
+    <h3>${activeSlice.outcome_label}</h3>
+    <p>${activeSlice.next_action}</p>
+  `;
+  if (focusEvidenceRefs.length) {
+    const evidenceList = document.createElement("ul");
+    evidenceList.className = "note-list";
+    focusEvidenceRefs.forEach((ref) => {
+      const item = document.createElement("li");
+      item.className = "monospace";
+      item.textContent = ref;
+      evidenceList.append(item);
+    });
+    evidenceSection.append(evidenceList);
+  }
+  if (focusPolicyRefs.length) {
+    evidenceSection.append(
+      createMetadataList(focusPolicyRefs.map((ref, index) => [`Policy ${index + 1}`, ref])),
+    );
+  }
+
+  container.append(fields, familySection, focusSection, evidenceSection);
+  elements.drawerBody.replaceChildren(container);
+}
+
+function renderCredentialEvidenceLedger(board) {
+  const environment = resolveActiveSmokeEnvironment(board);
+  const activeFamily = resolveActiveSmokeFamily(board);
+  if (!environment || !activeFamily) {
+    renderError(new Error("Credential evidence ledger is missing environment or family data."));
+    return;
+  }
+  const activeSlice = smokeSliceForEnvironment(activeFamily, environment.environment_ref);
+  if (!activeSlice) {
+    renderError(
+      new Error("Credential evidence ledger is missing a slice for the selected environment."),
+    );
+    return;
+  }
+  const activeFocus = resolveActiveSmokeFocus(board, activeFamily, environment.environment_ref);
+
+  renderSmokeTopBar(board, environment);
+  renderSmokeRail(board, activeFamily, environment.environment_ref);
+  renderSmokeSummary(board, environment, activeFamily, activeSlice, activeFocus);
+  elements.stepList.className = "credential-evidence-page";
+  elements.stepList.replaceChildren(
+    createSmokeEvidenceStrip(activeSlice, activeFocus, board),
+    renderSmokeCanvas(activeSlice, activeFocus, board),
+  );
+  renderSmokeInspector(board, environment, activeFamily, activeSlice, activeFocus);
+}
+
+function resolveActiveDeliveryEnvironment(board) {
+  if (!state.activeDeliveryEnvironmentRef) {
+    state.activeDeliveryEnvironmentRef =
+      board.selectedEnvironmentRef ?? board.environments?.[0]?.environment_ref ?? null;
+  }
+  return (
+    board.environments?.find(
+      (environment) => environment.environment_ref === state.activeDeliveryEnvironmentRef,
+    ) ??
+    board.environments?.[0] ??
+    null
+  );
+}
+
+function resolveActiveDeliveryLane(board) {
+  if (!state.activeDeliveryLaneRef) {
+    state.activeDeliveryLaneRef = board.selectedLaneRef ?? board.lanes?.[0]?.lane_ref ?? null;
+  }
+  return (
+    board.lanes?.find((lane) => lane.lane_ref === state.activeDeliveryLaneRef) ??
+    board.lanes?.[0] ??
+    null
+  );
+}
+
+function deliveryRowsForPlane(lane, planeKind, environmentRef) {
+  const rows = lane?.[planeKind] ?? [];
+  return rows.filter(
+    (row) =>
+      !environmentRef || row.environment_ref === environmentRef || row.environment_ref === "shared",
+  );
+}
+
+function resolveDeliveryFocusCandidate(lane, environmentRef, focusRef) {
+  if (!focusRef) {
+    return null;
+  }
+  for (const planeKind of ["runner_rows", "identity_rows", "gate_rows", "preview_rows"]) {
+    const row = deliveryRowsForPlane(lane, planeKind, environmentRef).find(
+      (candidate) => candidate.row_ref === focusRef,
+    );
+    if (row) {
+      return { kind: planeKind, item: row };
+    }
+  }
+  return null;
+}
+
+function resolveActiveDeliveryFocus(board, lane, environmentRef) {
+  const activeCandidate = resolveDeliveryFocusCandidate(
+    lane,
+    environmentRef,
+    state.activeDeliveryFocusRef,
+  );
+  if (activeCandidate) {
+    return activeCandidate;
+  }
+
+  const selectedCandidate = resolveDeliveryFocusCandidate(
+    lane,
+    environmentRef,
+    board.selectedFocusRef,
+  );
+  if (selectedCandidate) {
+    state.activeDeliveryFocusRef = selectedCandidate.item.row_ref;
+    return selectedCandidate;
+  }
+
+  for (const planeKind of ["runner_rows", "identity_rows", "gate_rows", "preview_rows"]) {
+    const firstRow = deliveryRowsForPlane(lane, planeKind, environmentRef)[0];
+    if (firstRow) {
+      state.activeDeliveryFocusRef = firstRow.row_ref;
+      return { kind: planeKind, item: firstRow };
+    }
+  }
+
+  state.activeDeliveryFocusRef = null;
+  return null;
+}
+
+function deliveryBadgeTone(label) {
+  const normalized = String(label).toLowerCase();
+  if (
+    normalized.includes("protected") ||
+    normalized.includes("approval") ||
+    normalized.includes("exception") ||
+    normalized.includes("untrusted")
+  ) {
+    return "warning";
+  }
+  if (
+    normalized.includes("oidc") ||
+    normalized.includes("hosted") ||
+    normalized.includes("synthetic") ||
+    normalized.includes("auto gate")
+  ) {
+    return "success";
+  }
+  if (normalized.includes("serialized") || normalized.includes("no external")) {
+    return "neutral";
+  }
+  return "neutral";
+}
+
+function deliveryInspectorLine(row, prefix) {
+  return (
+    row?.inspector_lines
+      ?.find((line) => line.startsWith(prefix))
+      ?.slice(prefix.length)
+      .trim() ?? "n/a"
+  );
+}
+
+function renderDeliveryPipelineTopBar(board, environment) {
+  elements.providerBadge.textContent = board.providerMonogram ?? "DP";
+  elements.runTitle.textContent = `${board.providerDisplayName} atlas`;
+  elements.runStatus.textContent = formatLabel(board.selectionPosture);
+  elements.runStatus.dataset.status =
+    board.selectionPosture === "PROVIDER_OVERRIDE_APPLIED" ? "SUCCEEDED" : "warning";
+  elements.environmentControl.hidden = false;
+  elements.environmentChipWrap.hidden = false;
+  elements.environmentChip.textContent = board.postureChipLabel;
+  elements.environmentSelect.replaceChildren(
+    ...(board.environments ?? []).map((entry) => {
+      const option = document.createElement("option");
+      option.value = entry.environment_ref;
+      option.textContent = entry.label;
+      option.selected = entry.environment_ref === environment.environment_ref;
+      return option;
+    }),
+  );
+  elements.environmentSelect.disabled = false;
+  elements.environmentSelect.onchange = () => {
+    state.activeDeliveryEnvironmentRef = elements.environmentSelect.value;
+    state.activeDeliveryFocusRef = null;
+    renderDeliveryPipelineAtlas(board);
+  };
+  elements.environmentHint.textContent =
+    "Runner pools, secret resolution, gates, and preview teardown stay explicit here. The atlas is read-only.";
+  document.title = `Provisioning Viewer - ${environment.label} delivery pipeline atlas`;
+}
+
+function renderDeliveryPipelineRail(board, activeLane, environment) {
+  elements.runRail.setAttribute("aria-label", "Execution lanes and delivery control topology");
+  elements.runList.className = "delivery-lane-rail-list";
+  elements.railEyebrow.textContent = "Execution rail";
+  elements.railTitle.textContent = "Delivery lanes";
+  elements.mainEyebrow.textContent = "Delivery pipeline atlas";
+  elements.mainTitle.textContent = activeLane.label;
+
+  elements.runList.replaceChildren(
+    ...(board.lanes ?? []).map((lane) => {
+      const runnerRows = deliveryRowsForPlane(lane, "runner_rows", environment.environment_ref);
+      const identityRows = deliveryRowsForPlane(lane, "identity_rows", environment.environment_ref);
+      const gateRows = deliveryRowsForPlane(lane, "gate_rows", environment.environment_ref);
+      const previewRows = deliveryRowsForPlane(lane, "preview_rows", environment.environment_ref);
+
+      const listItem = document.createElement("li");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.setAttribute("aria-current", lane.lane_ref === activeLane.lane_ref ? "true" : "false");
+      button.innerHTML = `
+        <div class="delivery-lane-rail__title">
+          <strong>${lane.label}</strong>
+          <span class="status-chip" data-status="${lane.lane_ref === "PRODUCTION" || lane.lane_ref === "NATIVE_MACOS" ? "warning" : "SUCCEEDED"}">${gateRows.length} gate${gateRows.length === 1 ? "" : "s"}</span>
+        </div>
+        <div class="delivery-lane-rail__meta">
+          <span>${runnerRows.length} runner</span>
+          <span>${identityRows.length} identity</span>
+          <span>${previewRows.length} preview</span>
+        </div>
+        <p class="ledger-note">${lane.summary}</p>
+      `;
+      button.addEventListener("click", () => {
+        state.activeDeliveryLaneRef = lane.lane_ref;
+        state.activeDeliveryFocusRef = null;
+        renderDeliveryPipelineAtlas(board);
+      });
+      listItem.append(button);
+      return listItem;
+    }),
+  );
+}
+
+function renderDeliveryPipelineSummary(board, environment, activeLane, activeFocus) {
+  elements.runSummary.innerHTML = "";
+  const container = document.createElement("div");
+  container.className = "delivery-summary-band";
+  container.innerHTML = `
+    <div class="delivery-summary-band__card">
+      <p class="eyebrow">Environment</p>
+      <h2>${environment.label}</h2>
+      <p class="ledger-note">${environment.topology_summary}</p>
+    </div>
+    <div class="delivery-summary-band__card">
+      <p class="eyebrow">Lane posture</p>
+      <h2>${activeLane.label}</h2>
+      <p class="ledger-note">${activeLane.summary}</p>
+    </div>
+    <div class="delivery-summary-band__card">
+      <p class="eyebrow">Focus</p>
+      <h2>${activeFocus?.item?.label ?? activeLane.label}</h2>
+      <p class="ledger-note">${activeFocus?.item?.detail ?? board.summary}</p>
+    </div>
+  `;
+  const chipRow = document.createElement("div");
+  chipRow.className = "chip-row";
+  chipRow.append(
+    createChip(board.postureChipLabel, "neutral"),
+    createChip(formatLabel(environment.release_posture), "neutral"),
+    createChip(
+      activeLane.label,
+      activeLane.lane_ref === "PRODUCTION" || activeLane.lane_ref === "NATIVE_MACOS"
+        ? "warning"
+        : "success",
+    ),
+  );
+  elements.runSummary.append(container, chipRow);
+}
+
+function createDeliveryPipelineRow(planeLabel, row, active, onSelect) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "delivery-pipeline-row";
+  button.dataset.active = active ? "true" : "false";
+  button.setAttribute("aria-pressed", active ? "true" : "false");
+  button.setAttribute("aria-label", `${planeLabel} row ${row.label}`);
+  button.innerHTML = `
+    <div class="delivery-pipeline-row__head">
+      <div>
+        <p class="eyebrow">${planeLabel}</p>
+        <strong>${row.label}</strong>
+      </div>
+      <div class="chip-row"></div>
+    </div>
+    <p class="ledger-note">${row.detail}</p>
+    <p class="meta-note monospace">${(row.policy_refs ?? []).join(", ")}</p>
+  `;
+  const chipRow = button.querySelector(".chip-row");
+  (row.badges ?? []).forEach((badge) =>
+    chipRow.append(createChip(badge, deliveryBadgeTone(badge))),
+  );
+  button.addEventListener("click", onSelect);
+  return button;
+}
+
+function renderDeliveryPipelinePlane(planeKind, planeTitle, eyebrow, rows, activeFocus, board) {
+  const section = document.createElement("section");
+  section.className = "delivery-pipeline-plane";
+  section.innerHTML = `
+    <div class="panel-heading">
+      <p class="eyebrow">${eyebrow}</p>
+      <h3>${planeTitle}</h3>
+    </div>
+  `;
+
+  if (!rows.length) {
+    const empty = document.createElement("p");
+    empty.className = "ledger-note";
+    empty.textContent = "No rows are declared for this environment and execution-lane combination.";
+    section.append(empty);
+    return section;
+  }
+
+  const list = document.createElement("div");
+  list.className = "delivery-pipeline-plane__list";
+  rows.forEach((row) => {
+    list.append(
+      createDeliveryPipelineRow(planeTitle, row, activeFocus?.item?.row_ref === row.row_ref, () => {
+        state.activeDeliveryFocusRef = row.row_ref;
+        renderDeliveryPipelineAtlas(state.payload.deliveryPipelineAtlas);
+      }),
+    );
+  });
+  section.append(list);
+  return section;
+}
+
+function renderDeliveryPipelineCanvas(activeLane, activeFocus, environment, board) {
+  const section = document.createElement("section");
+  section.className = "delivery-pipeline-canvas";
+  section.setAttribute("aria-label", "delivery-pipeline-canvas");
+
+  section.append(
+    renderDeliveryPipelinePlane(
+      "runner_rows",
+      "Runner Pools",
+      "Capability and trust",
+      deliveryRowsForPlane(activeLane, "runner_rows", environment.environment_ref),
+      activeFocus,
+      board,
+    ),
+    renderDeliveryPipelinePlane(
+      "identity_rows",
+      "Identity / Secret Resolution",
+      "Broker and masking posture",
+      deliveryRowsForPlane(activeLane, "identity_rows", environment.environment_ref),
+      activeFocus,
+      board,
+    ),
+    renderDeliveryPipelinePlane(
+      "gate_rows",
+      "Gates",
+      "Candidate-bound admission law",
+      deliveryRowsForPlane(activeLane, "gate_rows", environment.environment_ref),
+      activeFocus,
+      board,
+    ),
+    renderDeliveryPipelinePlane(
+      "preview_rows",
+      "Preview Lifecycle",
+      "Review-zone allocation and teardown",
+      deliveryRowsForPlane(activeLane, "preview_rows", environment.environment_ref),
+      activeFocus,
+      board,
+    ),
+  );
+  return section;
+}
+
+function renderDeliveryPipelineInspector(board, environment, activeLane, activeFocus) {
+  const focusItem = activeFocus?.item ?? null;
+  const identityRows = deliveryRowsForPlane(
+    activeLane,
+    "identity_rows",
+    environment.environment_ref,
+  );
+  const gateRows = deliveryRowsForPlane(activeLane, "gate_rows", environment.environment_ref);
+  const previewRows = deliveryRowsForPlane(activeLane, "preview_rows", environment.environment_ref);
+  const primaryIdentity =
+    activeFocus?.kind === "identity_rows" ? focusItem : (identityRows[0] ?? null);
+  const primaryGate = activeFocus?.kind === "gate_rows" ? focusItem : (gateRows[0] ?? null);
+  const primaryPreview =
+    activeFocus?.kind === "preview_rows" ? focusItem : (previewRows[0] ?? null);
+  const policyRefs = uniqueSorted([
+    ...(focusItem?.policy_refs ?? []),
+    ...(primaryIdentity?.policy_refs ?? []),
+    ...(primaryGate?.policy_refs ?? []),
+    ...(primaryPreview?.policy_refs ?? []),
+  ]);
+
+  elements.drawer.dataset.state = "open";
+  elements.drawerClose.hidden = true;
+  elements.drawerTitle.textContent = focusItem?.label ?? activeLane.label;
+
+  const container = document.createElement("div");
+  container.className = "atlas-inspector";
+  const fields = document.createElement("div");
+  fields.className = "field-list";
+  fields.append(
+    createFieldRow("Environment", environment.label, {
+      chips: [createChip(formatLabel(environment.release_posture), "neutral")],
+    }),
+    createFieldRow("Execution lane", activeLane.label, {
+      chips: [createChip(`Policy v${board.policyVersion}`, "neutral")],
+    }),
+    createFieldRow("Selected surface", focusItem?.label ?? "Lane overview"),
+    createFieldRow("Provider posture", formatLabel(board.selectionPosture)),
+  );
+
+  const laneSection = document.createElement("section");
+  laneSection.className = "checkpoint-card";
+  laneSection.innerHTML = `
+    <p class="eyebrow">Lane posture</p>
+    <h3>${activeLane.label}</h3>
+    <p>${activeLane.summary}</p>
+  `;
+  laneSection.append(
+    createMetadataList([
+      ["Runner law", activeLane.runner_summary],
+      ["Identity law", activeLane.identity_summary],
+      ["Gate law", activeLane.gate_summary],
+      ["Preview law", activeLane.preview_summary],
+    ]),
+  );
+
+  const focusSection = document.createElement("section");
+  focusSection.className = "checkpoint-card";
+  focusSection.innerHTML = `
+    <p class="eyebrow">Focused surface</p>
+    <h3>${focusItem?.label ?? activeLane.label}</h3>
+    <p>${focusItem?.detail ?? board.summary}</p>
+  `;
+  if ((focusItem?.inspector_lines ?? []).length) {
+    const list = document.createElement("ul");
+    list.className = "note-list";
+    (focusItem.inspector_lines ?? []).forEach((line) => {
+      const item = document.createElement("li");
+      item.textContent = line;
+      list.append(item);
+    });
+    focusSection.append(list);
+  } else {
+    focusSection.append(
+      createMetadataList(
+        (activeLane.inspector_notes ?? []).map((line, index) => [`Note ${index + 1}`, line]),
+      ),
+    );
+  }
+
+  const secretSection = document.createElement("section");
+  secretSection.className = "checkpoint-card";
+  secretSection.innerHTML = `
+    <p class="eyebrow">Secret posture</p>
+    <h3>Environment-scoped resolution</h3>
+    <p>Identity and secret law remain explicit so later automation cannot widen environments by convention.</p>
+  `;
+  secretSection.append(
+    createMetadataList([
+      ["Resolution", deliveryInspectorLine(primaryIdentity, "Identity mode: ")],
+      ["Allowed refs", deliveryInspectorLine(primaryIdentity, "Allowed secret refs: ")],
+      ["Denied refs", deliveryInspectorLine(primaryIdentity, "Denied secret refs: ")],
+      ["Broker role", deliveryInspectorLine(primaryIdentity, "Broker role: ")],
+    ]),
+  );
+
+  const evidenceSection = document.createElement("section");
+  evidenceSection.className = "checkpoint-card";
+  evidenceSection.innerHTML = `
+    <p class="eyebrow">Required evidence</p>
+    <h3>Gate and write law</h3>
+    <p>Promotion and preview publication remain candidate-bound, approval-aware, and auditable.</p>
+  `;
+  evidenceSection.append(
+    createMetadataList([
+      ["Gate", primaryGate?.label ?? "n/a"],
+      ["Evidence refs", deliveryInspectorLine(primaryGate, "Evidence refs: ")],
+      ["Approvals", deliveryInspectorLine(primaryGate, "Approvals: ")],
+      ["Write targets", deliveryInspectorLine(primaryGate, "Write targets: ")],
+    ]),
+  );
+
+  const policySection = document.createElement("section");
+  policySection.className = "checkpoint-card";
+  policySection.innerHTML = `
+    <p class="eyebrow">Policy refs</p>
+    <h3>Typed control pack</h3>
+    <p>The atlas projects the same refs that later automation must consume.</p>
+  `;
+  policySection.append(
+    createMetadataList(
+      policyRefs.length
+        ? policyRefs.map((ref, index) => [`Ref ${index + 1}`, ref])
+        : [["Ref 1", "n/a"]],
+    ),
+  );
+
+  container.append(
+    fields,
+    laneSection,
+    focusSection,
+    secretSection,
+    evidenceSection,
+    policySection,
+  );
+  elements.drawerBody.replaceChildren(container);
+}
+
+function renderDeliveryPipelineAtlas(board) {
+  const environment = resolveActiveDeliveryEnvironment(board);
+  const activeLane = resolveActiveDeliveryLane(board);
+  if (!environment || !activeLane) {
+    renderError(new Error("Delivery pipeline atlas is missing environment or lane data."));
+    return;
+  }
+  const activeFocus = resolveActiveDeliveryFocus(board, activeLane, environment.environment_ref);
+
+  renderDeliveryPipelineTopBar(board, environment);
+  renderDeliveryPipelineRail(board, activeLane, environment);
+  renderDeliveryPipelineSummary(board, environment, activeLane, activeFocus);
+  elements.stepList.className = "delivery-pipeline-page";
+  elements.stepList.replaceChildren(
+    renderDeliveryPipelineCanvas(activeLane, activeFocus, environment, board),
+  );
+  renderDeliveryPipelineInspector(board, environment, activeLane, activeFocus);
+}
+
+function resolveActiveSupplyChainEnvironment(board) {
+  if (!state.activeSupplyChainEnvironmentRef) {
+    state.activeSupplyChainEnvironmentRef =
+      board.selectedEnvironmentRef ?? board.environments?.[0]?.environment_ref ?? null;
+  }
+  return (
+    board.environments?.find(
+      (environment) => environment.environment_ref === state.activeSupplyChainEnvironmentRef,
+    ) ??
+    board.environments?.[0] ??
+    null
+  );
+}
+
+function resolveActiveSupplyChainFamily(board) {
+  if (!state.activeSupplyChainFamilyRef) {
+    state.activeSupplyChainFamilyRef =
+      board.selectedFamilyRef ?? board.families?.[0]?.family_ref ?? null;
+  }
+  return (
+    board.families?.find((family) => family.family_ref === state.activeSupplyChainFamilyRef) ??
+    board.families?.[0] ??
+    null
+  );
+}
+
+function supplyChainRowsForKind(family, kind) {
+  if (kind === "source_build_rows") {
+    return family.source_build_rows ?? [];
+  }
+  if (kind === "registry_rows") {
+    return family.registry_rows ?? [];
+  }
+  if (kind === "sign_notarize_rows") {
+    return family.sign_notarize_rows ?? [];
+  }
+  if (kind === "attest_sbom_rows") {
+    return family.attest_sbom_rows ?? [];
+  }
+  if (kind === "promotion_input_rows") {
+    return family.promotion_input_rows ?? [];
+  }
+  return [];
+}
+
+function supplyChainFocusIsValid(board, family, kind, ref) {
+  if (!kind || !ref) {
+    return false;
+  }
+  if (kind === "segment") {
+    return (family.chain_segments ?? []).some((segment) => segment.segment_ref === ref);
+  }
+  return [
+    "source_build_rows",
+    "registry_rows",
+    "sign_notarize_rows",
+    "attest_sbom_rows",
+    "promotion_input_rows",
+  ].some((planeKind) =>
+    supplyChainRowsForKind(family, planeKind).some((row) => row.row_ref === ref),
+  );
+}
+
+function resolveActiveSupplyChainFocus(board, family) {
+  if (
+    supplyChainFocusIsValid(
+      board,
+      family,
+      state.activeSupplyChainFocusKind,
+      state.activeSupplyChainFocusRef,
+    )
+  ) {
+    if (state.activeSupplyChainFocusKind === "segment") {
+      return {
+        kind: "segment",
+        item:
+          family.chain_segments.find(
+            (segment) => segment.segment_ref === state.activeSupplyChainFocusRef,
+          ) ?? null,
+      };
+    }
+
+    for (const planeKind of [
+      "source_build_rows",
+      "registry_rows",
+      "sign_notarize_rows",
+      "attest_sbom_rows",
+      "promotion_input_rows",
+    ]) {
+      const row = supplyChainRowsForKind(family, planeKind).find(
+        (candidate) => candidate.row_ref === state.activeSupplyChainFocusRef,
+      );
+      if (row) {
+        return { kind: "row", planeKind, item: row };
+      }
+    }
+  }
+
+  if (supplyChainFocusIsValid(board, family, board.selectedFocusKind, board.selectedFocusRef)) {
+    state.activeSupplyChainFocusKind = board.selectedFocusKind;
+    state.activeSupplyChainFocusRef = board.selectedFocusRef;
+    return resolveActiveSupplyChainFocus(board, family);
+  }
+
+  state.activeSupplyChainFocusKind = null;
+  state.activeSupplyChainFocusRef = null;
+  return null;
+}
+
+function resolveActiveSupplyChainRow(family, activeFocus) {
+  if (activeFocus?.kind !== "row") {
+    return null;
+  }
+  return activeFocus.item ?? null;
+}
+
+function resolveActiveSupplyChainRibbonSegment(board, activeFocus) {
+  if (activeFocus?.kind !== "segment") {
+    return null;
+  }
+  return activeFocus.item ?? null;
+}
+
+function supplyChainBadgeTone(label) {
+  const normalized = String(label).toLowerCase();
+  if (
+    normalized.includes("notarization") ||
+    normalized.includes("gate") ||
+    normalized.includes("warning")
+  ) {
+    return "warning";
+  }
+  if (
+    normalized.includes("digest") ||
+    normalized.includes("signature") ||
+    normalized.includes("trust root")
+  ) {
+    return "success";
+  }
+  if (normalized.includes("candidate_hash") || normalized.includes("schema_bundle_hash")) {
+    return "neutral";
+  }
+  return "neutral";
+}
+
+function renderSupplyChainTopBar(board, environment) {
+  elements.providerBadge.textContent = board.providerMonogram ?? "SC";
+  elements.runTitle.textContent = `${board.providerDisplayName} atlas`;
+  elements.runStatus.textContent = formatLabel(board.selectionPosture);
+  elements.runStatus.dataset.status =
+    board.selectionPosture === "PROVIDER_SELECTION_REQUIRED" ? "warning" : "success";
+  elements.environmentControl.hidden = false;
+  elements.environmentChipWrap.hidden = false;
+  elements.environmentChip.textContent = board.postureChipLabel;
+  elements.environmentSelect.replaceChildren(
+    ...(board.environments ?? []).map((entry) => {
+      const option = document.createElement("option");
+      option.value = entry.environment_ref;
+      option.textContent = entry.label;
+      option.selected = entry.environment_ref === environment.environment_ref;
+      return option;
+    }),
+  );
+  elements.environmentSelect.disabled = false;
+  elements.environmentSelect.onchange = () => {
+    state.activeSupplyChainEnvironmentRef = elements.environmentSelect.value;
+    renderReleaseSupplyChainAtlas(board);
+  };
+  elements.environmentHint.textContent =
+    "Release truth binds immutable digest, signature, provenance, SBOM, and candidate admission evidence. The viewer remains read-only.";
+  document.title = `Provisioning Viewer - ${environment.label} release supply chain atlas`;
+}
+
+function renderSupplyChainRail(board, activeFamily) {
+  elements.runRail.setAttribute("aria-label", "Artifact families and release chain custody");
+  elements.runList.className = "supplychain-family-rail-list";
+  elements.railEyebrow.textContent = "Artifact rail";
+  elements.railTitle.textContent = "Artifact families";
+  elements.mainEyebrow.textContent = "Release chain custody atlas";
+  elements.mainTitle.textContent = activeFamily.label;
+
+  elements.runList.replaceChildren(
+    ...(board.families ?? []).map((family) => {
+      const listItem = document.createElement("li");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.setAttribute(
+        "aria-current",
+        family.family_ref === activeFamily.family_ref ? "true" : "false",
+      );
+      button.innerHTML = `
+        <div class="supplychain-family-rail__title">
+          <strong>${family.label}</strong>
+          <span class="status-chip" data-status="${family.label === "NATIVE_DESKTOP" ? "warning" : "SUCCEEDED"}">${family.retention_class_label}</span>
+        </div>
+        <div class="supplychain-family-rail__meta">
+          <span>${family.target_count} target${family.target_count === 1 ? "" : "s"}</span>
+          <span class="meta-note">${family.signature_summary}</span>
+        </div>
+      `;
+      button.addEventListener("click", () => {
+        state.activeSupplyChainFamilyRef = family.family_ref;
+        state.activeSupplyChainFocusKind = null;
+        state.activeSupplyChainFocusRef = null;
+        renderReleaseSupplyChainAtlas(board);
+      });
+      listItem.append(button);
+      return listItem;
+    }),
+  );
+}
+
+function renderSupplyChainSummary(board, environment, activeFamily, activeFocus) {
+  elements.runSummary.innerHTML = "";
+  const container = document.createElement("div");
+  container.className = "supplychain-summary-band";
+  container.innerHTML = `
+    <div class="supplychain-summary-band__card">
+      <p class="eyebrow">Environment</p>
+      <h2>${environment.label}</h2>
+      <p class="ledger-note">${environment.topology_summary}</p>
+    </div>
+    <div class="supplychain-summary-band__card">
+      <p class="eyebrow">Family posture</p>
+      <h2>${activeFamily.label}</h2>
+      <p class="ledger-note">${activeFamily.summary}</p>
+    </div>
+    <div class="supplychain-summary-band__card">
+      <p class="eyebrow">Focus</p>
+      <h2>${activeFocus?.item?.label ?? activeFamily.label}</h2>
+      <p class="ledger-note">${board.summary}</p>
+    </div>
+  `;
+  const chipRow = document.createElement("div");
+  chipRow.className = "chip-row";
+  chipRow.append(
+    createChip(board.postureChipLabel, "neutral"),
+    createChip(environment.admission_lane_posture, "success"),
+    createChip(activeFamily.label, "warning"),
+  );
+  elements.runSummary.append(container, chipRow);
+}
+
+function createSupplyChainRow(planeLabel, row, active, onSelect) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "supplychain-row";
+  button.dataset.active = active ? "true" : "false";
+  button.setAttribute("aria-pressed", active ? "true" : "false");
+  button.setAttribute("aria-label", `${planeLabel} row ${row.label}`);
+  button.innerHTML = `
+    <div class="telemetry-atlas-row__head">
+      <div>
+        <p class="eyebrow">${planeLabel}</p>
+        <strong>${row.label}</strong>
+      </div>
+      <div class="chip-row"></div>
+    </div>
+    <p class="ledger-note">${row.detail}</p>
+  `;
+  const chipRow = button.querySelector(".chip-row");
+  (row.badges ?? []).forEach((badge) =>
+    chipRow.append(createChip(badge, supplyChainBadgeTone(badge))),
+  );
+  button.addEventListener("click", onSelect);
+  return button;
+}
+
+function renderSupplyChainPlane(planeKind, planeTitle, eyebrow, rows, activeFocus, board) {
+  const section = document.createElement("section");
+  section.className = "supplychain-plane";
+  section.innerHTML = `
+    <div class="panel-heading">
+      <p class="eyebrow">${eyebrow}</p>
+      <h3>${planeTitle}</h3>
+    </div>
+  `;
+  const list = document.createElement("div");
+  list.className = "supplychain-plane__list";
+  rows.forEach((row) => {
+    list.append(
+      createSupplyChainRow(
+        planeTitle,
+        row,
+        activeFocus?.kind === "row" && activeFocus.item?.row_ref === row.row_ref,
+        () => {
+          state.activeSupplyChainFocusKind = planeKind;
+          state.activeSupplyChainFocusRef = row.row_ref;
+          renderReleaseSupplyChainAtlas(state.payload.releaseSupplyChainAtlas);
+        },
+      ),
+    );
+  });
+  section.append(list);
+  return section;
+}
+
+function renderSupplyChainCanvas(activeFamily, activeFocus, board) {
+  const section = document.createElement("section");
+  section.className = "release-supply-chain-section";
+  section.setAttribute("aria-label", "release-supply-chain-canvas");
+
+  const grid = document.createElement("div");
+  grid.className = "release-supplychain-grid";
+  grid.append(
+    renderSupplyChainPlane(
+      "source_build_rows",
+      "Source / Build",
+      "Input and assembly",
+      activeFamily.source_build_rows ?? [],
+      activeFocus,
+      board,
+    ),
+    renderSupplyChainPlane(
+      "registry_rows",
+      "Registry",
+      "Namespace and digest custody",
+      activeFamily.registry_rows ?? [],
+      activeFocus,
+      board,
+    ),
+    renderSupplyChainPlane(
+      "sign_notarize_rows",
+      "Sign / Notarize",
+      "Trust root and native gate",
+      activeFamily.sign_notarize_rows ?? [],
+      activeFocus,
+      board,
+    ),
+    renderSupplyChainPlane(
+      "attest_sbom_rows",
+      "Attest / SBOM",
+      "Evidence publication",
+      activeFamily.attest_sbom_rows ?? [],
+      activeFocus,
+      board,
+    ),
+    renderSupplyChainPlane(
+      "promotion_input_rows",
+      "Promotion Inputs",
+      "Release candidate binding",
+      activeFamily.promotion_input_rows ?? [],
+      activeFocus,
+      board,
+    ),
+  );
+
+  section.append(grid);
+  return section;
+}
+
+function renderSupplyChainRibbon(board, activeFamily, activeFocus) {
+  const section = document.createElement("section");
+  section.className = "release-supplychain-ribbon";
+  section.innerHTML = `
+    <div class="panel-heading">
+      <p class="eyebrow">Digest / Candidate Binding</p>
+      <h3>digest -> signature -> provenance -> SBOM -> candidate admission</h3>
+    </div>
+  `;
+  const list = document.createElement("div");
+  list.className = "supplychain-ribbon-list";
+  (activeFamily.chain_segments ?? []).forEach((segment) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "supplychain-ribbon-segment";
+    button.dataset.active =
+      activeFocus?.kind === "segment" && activeFocus.item?.segment_ref === segment.segment_ref
+        ? "true"
+        : "false";
+    button.setAttribute("aria-label", `Chain segment ${segment.label}`);
+    button.innerHTML = `
+      <strong>${segment.label}</strong>
+      <p class="ledger-note">${segment.detail}</p>
+    `;
+    const chipRow = document.createElement("div");
+    chipRow.className = "chip-row";
+    (segment.badges ?? []).forEach((badge) =>
+      chipRow.append(createChip(badge, supplyChainBadgeTone(badge))),
+    );
+    button.append(chipRow);
+    button.addEventListener("click", () => {
+      state.activeSupplyChainFocusKind = "segment";
+      state.activeSupplyChainFocusRef = segment.segment_ref;
+      renderReleaseSupplyChainAtlas(state.payload.releaseSupplyChainAtlas);
+    });
+    list.append(button);
+  });
+  section.append(list);
+  return section;
+}
+
+function renderSupplyChainInspector(board, environment, activeFamily, activeFocus) {
+  const activeRow = resolveActiveSupplyChainRow(activeFamily, activeFocus);
+  const activeSegment = resolveActiveSupplyChainRibbonSegment(board, activeFocus);
+  const focusItem = activeRow ?? activeSegment ?? null;
+  const familyTrustRoots = uniqueSorted(
+    [
+      ...(activeFamily.sign_notarize_rows ?? []).flatMap((row) => row.trust_root_refs ?? []),
+      ...(activeFamily.attest_sbom_rows ?? []).flatMap((row) => row.trust_root_refs ?? []),
+    ].filter(Boolean),
+  );
+
+  elements.drawer.dataset.state = "open";
+  elements.drawerClose.hidden = true;
+  elements.drawerTitle.textContent = focusItem?.label ?? activeFamily.label;
+
+  const container = document.createElement("div");
+  container.className = "atlas-inspector";
+  const fields = document.createElement("div");
+  fields.className = "field-list";
+  fields.append(
+    createFieldRow("Environment", environment.label, {
+      chips: [createChip(environment.admission_lane_posture, "neutral")],
+    }),
+    createFieldRow("Artifact family", activeFamily.label),
+    createFieldRow("Targets", uniqueSorted(activeFamily.target_refs).join(", "), {
+      monospace: true,
+    }),
+    createFieldRow("Retention", activeFamily.retention_class_label),
+    createFieldRow("Registry", activeFamily.registry_summary),
+  );
+
+  const familySection = document.createElement("section");
+  familySection.className = "checkpoint-card";
+  familySection.innerHTML = `
+    <p class="eyebrow">Family posture</p>
+    <h3>${activeFamily.label}</h3>
+    <p>${activeFamily.summary}</p>
+  `;
+  familySection.append(
+    createMetadataList([
+      ["Signature", activeFamily.signature_summary],
+      ["Evidence", activeFamily.provenance_summary],
+      ["Targets", String(activeFamily.target_count)],
+    ]),
+  );
+
+  const focusSection = document.createElement("section");
+  focusSection.className = "checkpoint-card";
+  focusSection.innerHTML = `
+    <p class="eyebrow">Focused surface</p>
+    <h3>${focusItem?.label ?? activeFamily.label}</h3>
+    <p>${focusItem?.detail ?? activeFamily.inspector_notes?.[0] ?? activeFamily.summary}</p>
+  `;
+  if ((focusItem?.inspector_lines ?? []).length) {
+    const list = document.createElement("ul");
+    list.className = "note-list";
+    (focusItem.inspector_lines ?? []).forEach((line) => {
+      const item = document.createElement("li");
+      item.textContent = line;
+      list.append(item);
+    });
+    focusSection.append(list);
+  }
+
+  const trustRootSection = document.createElement("section");
+  trustRootSection.className = "checkpoint-card";
+  trustRootSection.innerHTML = `
+    <p class="eyebrow">Trust roots</p>
+    <h3>Verification anchors</h3>
+    <p>Trust roots and admission inputs stay explicit and independently reviewable.</p>
+  `;
+  trustRootSection.append(
+    createMetadataList(
+      uniqueSorted(focusItem?.trust_root_refs ?? familyTrustRoots).map((ref, index) => [
+        `Root ${index + 1}`,
+        ref,
+      ]),
+    ),
+  );
+
+  const gateSection = document.createElement("section");
+  gateSection.className = "checkpoint-card";
+  gateSection.innerHTML = `
+    <p class="eyebrow">Admission gates</p>
+    <h3>Required before promotion</h3>
+    <p>Release admission requires digest truth, signature verification, provenance, SBOM coverage, and target-specific mandatory evidence.</p>
+  `;
+  gateSection.append(
+    createMetadataList([
+      ["Lane posture", environment.admission_lane_posture],
+      ["Candidate binding", "candidate_hash"],
+      ["Schema bundle", "schema_bundle_hash"],
+      ["Native gate", activeFamily.label === "NATIVE_DESKTOP" ? "notarization_ref" : "n/a"],
+    ]),
+  );
+
+  container.append(fields, familySection, focusSection, trustRootSection, gateSection);
+  elements.drawerBody.replaceChildren(container);
+}
+
+function renderReleaseSupplyChainAtlas(board) {
+  const environment = resolveActiveSupplyChainEnvironment(board);
+  const activeFamily = resolveActiveSupplyChainFamily(board);
+  if (!environment || !activeFamily) {
+    renderError(new Error("Release supply chain atlas is missing environment or family data."));
+    return;
+  }
+  const activeFocus = resolveActiveSupplyChainFocus(board, activeFamily);
+
+  renderSupplyChainTopBar(board, environment);
+  renderSupplyChainRail(board, activeFamily);
+  renderSupplyChainSummary(board, environment, activeFamily, activeFocus);
+  elements.stepList.className = "release-supply-chain-page";
+  elements.stepList.replaceChildren(
+    renderSupplyChainCanvas(activeFamily, activeFocus, board),
+    renderSupplyChainRibbon(board, activeFamily, activeFocus),
+  );
+  renderSupplyChainInspector(board, environment, activeFamily, activeFocus);
+}
+
+function resolveActiveEdgeEnvironment(board) {
+  if (!state.activeEdgeEnvironmentRef) {
+    state.activeEdgeEnvironmentRef =
+      board.selectedEnvironmentRef ?? board.environments?.[0]?.environment_ref ?? null;
+  }
+  return (
+    board.environments?.find(
+      (environment) => environment.environment_ref === state.activeEdgeEnvironmentRef,
+    ) ??
+    board.environments?.[0] ??
+    null
+  );
+}
+
+function resolveActiveEdgeFamily(board) {
+  if (!state.activeEdgeFamilyRef) {
+    state.activeEdgeFamilyRef = board.selectedFamilyRef ?? board.families?.[0]?.family_ref ?? null;
+  }
+  return (
+    board.families?.find((family) => family.family_ref === state.activeEdgeFamilyRef) ??
+    board.families?.[0] ??
+    null
+  );
+}
+
+function edgeRowsForPlane(family, planeKind, environmentRef) {
+  const rows = family?.[planeKind] ?? [];
+  return rows.filter(
+    (row) =>
+      !environmentRef || row.environment_ref === environmentRef || row.environment_ref === "shared",
+  );
+}
+
+function resolveEdgeFocusCandidate(family, environmentRef, focusRef) {
+  if (!focusRef) {
+    return null;
+  }
+  for (const planeKind of ["host_origin_rows", "tls_rows", "waf_rows", "cache_rows"]) {
+    const row = edgeRowsForPlane(family, planeKind, environmentRef).find(
+      (candidate) => candidate.row_ref === focusRef,
+    );
+    if (row) {
+      return { kind: planeKind, item: row };
+    }
+  }
+  return null;
+}
+
+function resolveActiveEdgeFocus(board, family, environmentRef) {
+  const activeCandidate = resolveEdgeFocusCandidate(
+    family,
+    environmentRef,
+    state.activeEdgeFocusRef,
+  );
+  if (activeCandidate) {
+    return activeCandidate;
+  }
+
+  const selectedCandidate = resolveEdgeFocusCandidate(
+    family,
+    environmentRef,
+    board.selectedFocusRef,
+  );
+  if (selectedCandidate) {
+    state.activeEdgeFocusRef = selectedCandidate.item.row_ref;
+    return selectedCandidate;
+  }
+
+  for (const planeKind of ["host_origin_rows", "tls_rows", "waf_rows", "cache_rows"]) {
+    const firstRow = edgeRowsForPlane(family, planeKind, environmentRef)[0];
+    if (firstRow) {
+      state.activeEdgeFocusRef = firstRow.row_ref;
+      return { kind: planeKind, item: firstRow };
+    }
+  }
+
+  state.activeEdgeFocusRef = null;
+  return null;
+}
+
+function edgeBadgeTone(label) {
+  const normalized = String(label).toLowerCase();
+  if (normalized.includes("block")) {
+    return "danger";
+  }
+  if (
+    normalized.includes("managed challenge") ||
+    normalized.includes("access policy") ||
+    normalized.includes("wildcard")
+  ) {
+    return "warning";
+  }
+  if (
+    normalized.includes("signed") ||
+    normalized.includes("immutable") ||
+    normalized.includes("strict") ||
+    normalized.includes("tls")
+  ) {
+    return "success";
+  }
+  return "neutral";
+}
+
+function renderEdgeBoundaryTopBar(board, environment) {
+  elements.providerBadge.textContent = board.providerMonogram ?? "ED";
+  elements.runTitle.textContent = `${board.providerDisplayName} atlas`;
+  elements.runStatus.textContent = formatLabel(board.selectionPosture);
+  elements.runStatus.dataset.status =
+    board.selectionPosture === "PROVIDER_CONFIRMED" ? "SUCCEEDED" : "warning";
+  elements.environmentControl.hidden = false;
+  elements.environmentChipWrap.hidden = false;
+  elements.environmentChip.textContent = board.postureChipLabel;
+  elements.environmentSelect.replaceChildren(
+    ...(board.environments ?? []).map((entry) => {
+      const option = document.createElement("option");
+      option.value = entry.environment_ref;
+      option.textContent = entry.label;
+      option.selected = entry.environment_ref === environment.environment_ref;
+      return option;
+    }),
+  );
+  elements.environmentSelect.disabled = false;
+  elements.environmentSelect.onchange = () => {
+    state.activeEdgeEnvironmentRef = elements.environmentSelect.value;
+    state.activeEdgeFocusRef = null;
+    renderEdgeBoundaryAtlas(board);
+  };
+  elements.environmentHint.textContent =
+    "Hosts, certificates, WAF posture, cache law, and callback boundaries stay explicit here. The atlas is read-only.";
+  document.title = `Provisioning Viewer - ${environment.label} edge boundary atlas`;
+}
+
+function renderEdgeBoundaryRail(board, activeFamily) {
+  elements.runRail.setAttribute("aria-label", "Surface families and edge boundary planes");
+  elements.runList.className = "edge-family-rail-list";
+  elements.railEyebrow.textContent = "Surface rail";
+  elements.railTitle.textContent = "Boundary families";
+  elements.mainEyebrow.textContent = "Edge boundary atlas";
+  elements.mainTitle.textContent = activeFamily.label;
+
+  elements.runList.replaceChildren(
+    ...(board.families ?? []).map((family) => {
+      const listItem = document.createElement("li");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.setAttribute(
+        "aria-current",
+        family.family_ref === activeFamily.family_ref ? "true" : "false",
+      );
+      button.innerHTML = `
+        <div class="edge-family-rail__title">
+          <strong>${family.label}</strong>
+          <span class="status-chip" data-status="${family.family_ref === "PREVIEW" ? "warning" : "SUCCEEDED"}">${family.host_count} host${family.host_count === 1 ? "" : "s"}</span>
+        </div>
+        <div class="edge-family-rail__meta">
+          <span>${family.tls_summary}</span>
+        </div>
+      `;
+      button.addEventListener("click", () => {
+        state.activeEdgeFamilyRef = family.family_ref;
+        state.activeEdgeFocusRef = null;
+        renderEdgeBoundaryAtlas(board);
+      });
+      listItem.append(button);
+      return listItem;
+    }),
+  );
+}
+
+function renderEdgeBoundarySummary(board, environment, activeFamily, activeFocus) {
+  elements.runSummary.innerHTML = "";
+  const container = document.createElement("div");
+  container.className = "edge-summary-band";
+  container.innerHTML = `
+    <div class="edge-summary-band__card">
+      <p class="eyebrow">Environment</p>
+      <h2>${environment.label}</h2>
+      <p class="ledger-note">${environment.topology_summary}</p>
+    </div>
+    <div class="edge-summary-band__card">
+      <p class="eyebrow">Family posture</p>
+      <h2>${activeFamily.label}</h2>
+      <p class="ledger-note">${activeFamily.summary}</p>
+    </div>
+    <div class="edge-summary-band__card">
+      <p class="eyebrow">Focus</p>
+      <h2>${activeFocus?.item?.label ?? activeFamily.label}</h2>
+      <p class="ledger-note">${activeFocus?.item?.detail ?? board.summary}</p>
+    </div>
+  `;
+  const chipRow = document.createElement("div");
+  chipRow.className = "chip-row";
+  chipRow.append(
+    createChip(board.postureChipLabel, "neutral"),
+    createChip(
+      environment.edge_posture,
+      environment.label === "Production" ? "success" : "warning",
+    ),
+    createChip(activeFamily.label, "neutral"),
+  );
+  elements.runSummary.append(container, chipRow);
+}
+
+function createEdgeBoundaryRow(planeLabel, row, active, onSelect) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "edge-boundary-row";
+  button.dataset.active = active ? "true" : "false";
+  button.setAttribute("aria-pressed", active ? "true" : "false");
+  button.setAttribute("aria-label", `${planeLabel} row ${row.label}`);
+  button.innerHTML = `
+    <div class="edge-boundary-row__head">
+      <div>
+        <p class="eyebrow">${planeLabel}</p>
+        <strong>${row.label}</strong>
+      </div>
+      <div class="chip-row"></div>
+    </div>
+    <p class="ledger-note">${row.detail}</p>
+    <p class="meta-note monospace">${row.hostname_or_pattern}</p>
+  `;
+  const chipRow = button.querySelector(".chip-row");
+  (row.badges ?? []).forEach((badge) => chipRow.append(createChip(badge, edgeBadgeTone(badge))));
+  button.addEventListener("click", onSelect);
+  return button;
+}
+
+function renderEdgeBoundaryPlane(planeKind, planeTitle, eyebrow, rows, activeFocus, board) {
+  const section = document.createElement("section");
+  section.className = "edge-boundary-plane";
+  section.innerHTML = `
+    <div class="panel-heading">
+      <p class="eyebrow">${eyebrow}</p>
+      <h3>${planeTitle}</h3>
+    </div>
+  `;
+
+  if (!rows.length) {
+    const empty = document.createElement("p");
+    empty.className = "ledger-note";
+    empty.textContent = "No rows are declared for this environment and family combination.";
+    section.append(empty);
+    return section;
+  }
+
+  const list = document.createElement("div");
+  list.className = "edge-boundary-plane__list";
+  rows.forEach((row) => {
+    list.append(
+      createEdgeBoundaryRow(planeTitle, row, activeFocus?.item?.row_ref === row.row_ref, () => {
+        state.activeEdgeFocusRef = row.row_ref;
+        renderEdgeBoundaryAtlas(board);
+      }),
+    );
+  });
+  section.append(list);
+  return section;
+}
+
+function renderEdgeBoundaryCanvas(activeFamily, activeFocus, environment, board) {
+  const section = document.createElement("section");
+  section.className = "edge-boundary-canvas";
+  section.setAttribute("aria-label", "edge-boundary-canvas");
+
+  section.append(
+    renderEdgeBoundaryPlane(
+      "host_origin_rows",
+      "Hostnames / Origins",
+      "Surface routing and trust",
+      edgeRowsForPlane(activeFamily, "host_origin_rows", environment.environment_ref),
+      activeFocus,
+      board,
+    ),
+    renderEdgeBoundaryPlane(
+      "tls_rows",
+      "TLS / Certificates",
+      "Transport and cert scope",
+      edgeRowsForPlane(activeFamily, "tls_rows", environment.environment_ref),
+      activeFocus,
+      board,
+    ),
+    renderEdgeBoundaryPlane(
+      "waf_rows",
+      "WAF / Rate Limits",
+      "Challenges, allowlists, and thresholds",
+      edgeRowsForPlane(activeFamily, "waf_rows", environment.environment_ref),
+      activeFocus,
+      board,
+    ),
+    renderEdgeBoundaryPlane(
+      "cache_rows",
+      "Cache / Delivery Binding",
+      "Reuse law and cache identity",
+      edgeRowsForPlane(activeFamily, "cache_rows", environment.environment_ref),
+      activeFocus,
+      board,
+    ),
+  );
+
+  return section;
+}
+
+function renderEdgeBoundaryInspector(board, environment, activeFamily, activeFocus) {
+  const focusItem = activeFocus?.item ?? null;
+  elements.drawer.dataset.state = "open";
+  elements.drawerClose.hidden = true;
+  elements.drawerTitle.textContent = focusItem?.label ?? activeFamily.label;
+
+  const container = document.createElement("div");
+  container.className = "atlas-inspector";
+  const fields = document.createElement("div");
+  fields.className = "field-list";
+  fields.append(
+    createFieldRow("Environment", environment.label, {
+      chips: [
+        createChip(environment.edge_posture, "neutral"),
+        createChip(board.selectionPosture, "warning"),
+      ],
+    }),
+    createFieldRow("Surface family", activeFamily.label, {
+      chips: [createChip(`${activeFamily.host_count} hosts`, "neutral")],
+    }),
+    createFieldRow(
+      "Host / pattern",
+      focusItem?.hostname_or_pattern ?? "No specific host selected",
+      {
+        monospace: true,
+      },
+    ),
+    createFieldRow(
+      "Origin trust posture",
+      focusItem?.origin_target_or_null ?? "Policy-only surface",
+      {
+        monospace: Boolean(focusItem?.origin_target_or_null),
+        note: focusItem?.origin_target_or_null
+          ? "Origins remain explicit per host/path family."
+          : "This selection describes a rule family rather than a single origin target.",
+      },
+    ),
+  );
+
+  const familySection = document.createElement("section");
+  familySection.className = "checkpoint-card";
+  familySection.innerHTML = `
+    <p class="eyebrow">Boundary summary</p>
+    <h3>${activeFamily.label}</h3>
+    <p>${activeFamily.summary}</p>
+  `;
+  familySection.append(
+    createMetadataList([
+      ["TLS", activeFamily.tls_summary],
+      ["WAF", activeFamily.waf_summary],
+      ["Cache", activeFamily.cache_summary],
+    ]),
+  );
+
+  const focusSection = document.createElement("section");
+  focusSection.className = "checkpoint-card";
+  focusSection.innerHTML = `
+    <p class="eyebrow">Focused rule</p>
+    <h3>${focusItem?.label ?? activeFamily.label}</h3>
+    <p>${focusItem?.detail ?? activeFamily.inspector_notes?.[0] ?? board.summary}</p>
+  `;
+  if ((focusItem?.inspector_lines ?? []).length) {
+    const list = document.createElement("ul");
+    list.className = "note-list";
+    (focusItem.inspector_lines ?? []).forEach((line) => {
+      const item = document.createElement("li");
+      item.textContent = line;
+      list.append(item);
+    });
+    focusSection.append(list);
+  }
+
+  const policySection = document.createElement("section");
+  policySection.className = "checkpoint-card";
+  policySection.innerHTML = `
+    <p class="eyebrow">Rule references</p>
+    <h3>Typed policy anchors</h3>
+    <p>DNS, TLS, WAF, and cache policy refs remain explicit so later route work cannot improvise edge law.</p>
+  `;
+  policySection.append(
+    createMetadataList(
+      (focusItem?.policy_refs ?? []).map((ref, index) => [`Ref ${index + 1}`, ref]),
+    ),
+  );
+
+  const postureSection = document.createElement("section");
+  postureSection.className = "checkpoint-card";
+  postureSection.innerHTML = `
+    <p class="eyebrow">Operating posture</p>
+    <h3>Fail closed boundary rules</h3>
+    <p>${environment.topology_summary}</p>
+  `;
+  const noteList = document.createElement("ul");
+  noteList.className = "note-list";
+  [...(activeFamily.inspector_notes ?? []), ...(board.notes ?? [])].forEach((line) => {
+    const item = document.createElement("li");
+    item.textContent = line;
+    noteList.append(item);
+  });
+  postureSection.append(noteList);
+
+  container.append(fields, familySection, focusSection, policySection, postureSection);
+  elements.drawerBody.replaceChildren(container);
+}
+
+function renderEdgeBoundaryAtlas(board) {
+  const environment = resolveActiveEdgeEnvironment(board);
+  const activeFamily = resolveActiveEdgeFamily(board);
+  if (!environment || !activeFamily) {
+    renderError(new Error("Edge boundary atlas is missing environment or family data."));
+    return;
+  }
+  const activeFocus = resolveActiveEdgeFocus(board, activeFamily, environment.environment_ref);
+
+  renderEdgeBoundaryTopBar(board, environment);
+  renderEdgeBoundaryRail(board, activeFamily);
+  renderEdgeBoundarySummary(board, environment, activeFamily, activeFocus);
+  elements.stepList.className = "edge-boundary-page";
+  elements.stepList.replaceChildren(
+    renderEdgeBoundaryCanvas(activeFamily, activeFocus, environment, board),
+  );
+  renderEdgeBoundaryInspector(board, environment, activeFamily, activeFocus);
 }
 
 function resolveActivePostgresEnvironment(board) {
   if (!state.activePostgresEnvironmentRef) {
     state.activePostgresEnvironmentRef =
-      board.selectedEnvironmentRef ??
-      board.environments?.[0]?.environment_ref ??
-      null;
+      board.selectedEnvironmentRef ?? board.environments?.[0]?.environment_ref ?? null;
   }
   return (
     board.environments?.find(
       (environment) => environment.environment_ref === state.activePostgresEnvironmentRef,
-    ) ?? board.environments?.[0] ?? null
+    ) ??
+    board.environments?.[0] ??
+    null
   );
 }
 
 function resolveActivePostgresStore(board) {
   if (!state.activePostgresStoreRef) {
-    state.activePostgresStoreRef =
-      board.selectedStoreRef ??
-      board.stores?.[0]?.store_ref ??
-      null;
+    state.activePostgresStoreRef = board.selectedStoreRef ?? board.stores?.[0]?.store_ref ?? null;
   }
   return (
     board.stores?.find((store) => store.store_ref === state.activePostgresStoreRef) ??
@@ -6692,22 +8549,19 @@ function resolveActivePostgresRole(board, store) {
         : matchingRoles[0].role_ref;
   }
   return (
-    matchingRoles.find((role) => role.role_ref === state.activePostgresRoleRef) ??
-    matchingRoles[0]
+    matchingRoles.find((role) => role.role_ref === state.activePostgresRoleRef) ?? matchingRoles[0]
   );
 }
 
 function resolveActivePostgresPolicy(board) {
   if (!state.activePostgresPolicyRef) {
     state.activePostgresPolicyRef =
-      board.selectedRestorePolicyRef ??
-      board.restorePolicies?.[0]?.policy_ref ??
-      null;
+      board.selectedRestorePolicyRef ?? board.restorePolicies?.[0]?.policy_ref ?? null;
   }
   return (
-    board.restorePolicies?.find(
-      (policy) => policy.policy_ref === state.activePostgresPolicyRef,
-    ) ?? board.restorePolicies?.[0] ?? null
+    board.restorePolicies?.find((policy) => policy.policy_ref === state.activePostgresPolicyRef) ??
+    board.restorePolicies?.[0] ??
+    null
   );
 }
 
@@ -6865,10 +8719,7 @@ function renderPostgresTwinLedgerSection(board, activeStore) {
   const twin = document.createElement("div");
   twin.className = "postgres-ledger-twin";
   (board.stores ?? [])
-    .filter(
-      (store) =>
-        store.store_kind === "CONTROL_STORE" || store.store_kind === "AUDIT_STORE",
-    )
+    .filter((store) => store.store_kind === "CONTROL_STORE" || store.store_kind === "AUDIT_STORE")
     .forEach((store) => {
       const panel = createPostgresLedgerPanel(store, store.store_ref === activeStore.store_ref);
       panel.addEventListener("click", () => {
@@ -6898,10 +8749,7 @@ function renderPostgresRoleModelSection(board, activeStore, activeRole) {
     button.type = "button";
     button.className = "postgres-role-row";
     button.dataset.active = role.role_ref === activeRole?.role_ref ? "true" : "false";
-    button.setAttribute(
-      "aria-pressed",
-      role.role_ref === activeRole?.role_ref ? "true" : "false",
-    );
+    button.setAttribute("aria-pressed", role.role_ref === activeRole?.role_ref ? "true" : "false");
     button.innerHTML = `
       <div class="postgres-role-row__head">
         <div>
@@ -7165,7 +9013,10 @@ function renderSecretRootSummary(board, environment, activeAlias) {
   const chipRow = container.querySelector(".chip-row");
   chipRow.append(
     createChip(board.rootPostureLabel, "warning"),
-    createChip(environment.root_requirement, environment.root_requirement === "OPTIONAL_HSM_CAPABLE_ROOT" ? "warning" : "neutral"),
+    createChip(
+      environment.root_requirement,
+      environment.root_requirement === "OPTIONAL_HSM_CAPABLE_ROOT" ? "warning" : "neutral",
+    ),
     createChip(formatLabel(activeAlias.secret_class), "neutral"),
   );
   const notes = document.createElement("ul");
@@ -7354,7 +9205,12 @@ function renderSecretRootInspector(board, environment, alias, activeNode, active
       copyLabel: "Copy alias ref",
     }),
     createFieldRow("Secret class", formatLabel(alias.secret_class), {
-      chips: [createChip(formatLabel(alias.value_mode), alias.value_mode === "VALUE_BEARING" ? "success" : "warning")],
+      chips: [
+        createChip(
+          formatLabel(alias.value_mode),
+          alias.value_mode === "VALUE_BEARING" ? "success" : "warning",
+        ),
+      ],
     }),
     createFieldRow("Environment", environment.label, {
       chips: environment.namespace_refs.map((namespaceRef) => createChip(namespaceRef, "neutral")),
@@ -7433,7 +9289,9 @@ function renderSecretRootTopologyLedger(board) {
   }
   const activeAlias = resolveActiveSecretAlias(board, environment);
   if (!activeAlias) {
-    renderError(new Error("Secret root topology ledger is missing alias data for the selected environment."));
+    renderError(
+      new Error("Secret root topology ledger is missing alias data for the selected environment."),
+    );
     return;
   }
   const activeNode = resolveActiveSecretNode(board, activeAlias);
@@ -7469,6 +9327,7 @@ function bindEvents() {
     if (
       event.key === "Escape" &&
       elements.drawer.dataset.state === "open" &&
+      state.activePage !== "credential-evidence-ledger" &&
       state.activePage !== "idp-topology-atlas" &&
       state.activePage !== "access-stepup-matrix" &&
       state.activePage !== "email-domain-readiness-board" &&
@@ -7484,7 +9343,10 @@ function bindEvents() {
       state.activePage !== "storage-bucket-topology-board" &&
       state.activePage !== "message-fabric-atlas" &&
       state.activePage !== "resume-isolation-atlas" &&
-      state.activePage !== "telemetry-signal-atlas"
+      state.activePage !== "telemetry-signal-atlas" &&
+      state.activePage !== "delivery-pipeline-atlas" &&
+      state.activePage !== "release-supply-chain-atlas" &&
+      state.activePage !== "edge-boundary-atlas"
     ) {
       closeDrawer();
     }
@@ -7545,9 +9407,7 @@ async function boot() {
       state.activePage === "document-extraction-governance-board" &&
       state.payload.documentExtractionGovernanceBoard?.profiles?.length
     ) {
-      renderDocumentExtractionGovernanceBoard(
-        state.payload.documentExtractionGovernanceBoard,
-      );
+      renderDocumentExtractionGovernanceBoard(state.payload.documentExtractionGovernanceBoard);
     } else if (
       state.activePage === "upload-intake-safety-board" &&
       state.payload.uploadIntakeSafetyBoard?.scenarios?.length
@@ -7588,6 +9448,26 @@ async function boot() {
       state.payload.telemetrySignalAtlas?.families?.length
     ) {
       renderTelemetrySignalAtlas(state.payload.telemetrySignalAtlas);
+    } else if (
+      state.activePage === "credential-evidence-ledger" &&
+      state.payload.credentialEvidenceLedger?.families?.length
+    ) {
+      renderCredentialEvidenceLedger(state.payload.credentialEvidenceLedger);
+    } else if (
+      state.activePage === "delivery-pipeline-atlas" &&
+      state.payload.deliveryPipelineAtlas?.lanes?.length
+    ) {
+      renderDeliveryPipelineAtlas(state.payload.deliveryPipelineAtlas);
+    } else if (
+      state.activePage === "release-supply-chain-atlas" &&
+      state.payload.releaseSupplyChainAtlas?.families?.length
+    ) {
+      renderReleaseSupplyChainAtlas(state.payload.releaseSupplyChainAtlas);
+    } else if (
+      state.activePage === "edge-boundary-atlas" &&
+      state.payload.edgeBoundaryAtlas?.families?.length
+    ) {
+      renderEdgeBoundaryAtlas(state.payload.edgeBoundaryAtlas);
     } else {
       renderDefaultTopBar(state.payload);
       renderRunRail(state.payload);

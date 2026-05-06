@@ -165,7 +165,9 @@ export async function signInDeveloperHub(
       landingStatus: checkpointState.landingStatus,
       sourceDisposition: "ADOPTED_EXISTING",
       lastSafePageUrl: options.page.url(),
-      notes: ["Existing account sign-in requires human completion before the Applications area can be used."],
+      notes: [
+        "Existing account sign-in requires human completion before the Applications area can be used.",
+      ],
     };
   }
 
@@ -191,7 +193,9 @@ export async function signInDeveloperHub(
       landingStatus: "AUTHENTICATION_REQUIRED",
       sourceDisposition: "ADOPTED_EXISTING",
       lastSafePageUrl: options.page.url(),
-      notes: ["Sign-in path signaled that account creation is required before the workspace can be used."],
+      notes: [
+        "Sign-in path signaled that account creation is required before the workspace can be used.",
+      ],
     };
   }
 

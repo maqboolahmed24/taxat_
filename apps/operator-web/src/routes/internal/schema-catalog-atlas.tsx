@@ -1,0 +1,37 @@
+export const schemaCatalogAtlasRoute = {
+  id: "schema-catalog-atlas",
+  title: "Schema Catalog Atlas",
+  purpose:
+    "Expose the imported contracts-core bundle as a premium contract cabinet with schema identity, source-hash lineage, and sample-to-validator bindings.",
+  families: [
+    "AUTHORITY_AND_ACCESS",
+    "CLIENT_AND_COLLABORATION",
+    "GOVERNANCE_AND_POLICY",
+    "MANIFEST_AND_RELEASE",
+    "SURFACE_AND_EXPERIENCE",
+    "DECISIONING_AND_NIGHTLY",
+    "PROVENANCE_AND_EVIDENCE",
+    "RETENTION_FAILURE_AND_OBSERVABILITY",
+    "DOMAIN_WORKFLOW_AND_FILING",
+  ],
+  planes: ["Schema Identity", "Source / Hash Lineage", "Sample / Validator Binding"],
+  palette: {
+    background: "#F5F6F4",
+    surface: "#FFFFFF",
+    secondary: "#EEF1EC",
+    ink: "#111418",
+    muted: "#65707A",
+    hairline: "rgba(17,20,24,0.08)",
+    accentSlate: "#456178",
+    accentMoss: "#5C715F",
+    accentBronze: "#8A6733",
+    success: "#16624B",
+    warning: "#8A5C18",
+    danger: "#A63B32",
+  },
+  notes: [
+    "Schemas and samples are mirrored byte-for-byte from Algorithm/ while validators keep path-only adapters.",
+    "Every imported artifact carries a source hash and destination hash so upstream drift is machine-detectable.",
+    "The atlas is read-only and exists to explain lineage, bundled samples, and validator entrypoints without acting like an API playground.",
+  ],
+} as const;

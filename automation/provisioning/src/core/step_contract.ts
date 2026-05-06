@@ -70,8 +70,7 @@ export function transitionStep(
   status: StepStatus,
   reason: string,
 ): StepContract {
-  const attempts =
-    status === "RUNNING" ? step.attempts + 1 : step.attempts;
+  const attempts = status === "RUNNING" ? step.attempts + 1 : step.attempts;
   return {
     ...step,
     status,
@@ -84,8 +83,7 @@ export function transitionStep(
         reason,
       },
     ],
-    policyBlockReason:
-      status === "BLOCKED_BY_POLICY" ? reason : step.policyBlockReason,
+    policyBlockReason: status === "BLOCKED_BY_POLICY" ? reason : step.policyBlockReason,
   };
 }
 
@@ -103,10 +101,7 @@ export function attachManualCheckpoint(
   };
 }
 
-export function markSkippedAsAlreadyPresent(
-  step: StepContract,
-  reason: string,
-): StepContract {
+export function markSkippedAsAlreadyPresent(step: StepContract, reason: string): StepContract {
   return transitionStep(step, "SKIPPED_AS_ALREADY_PRESENT", reason);
 }
 

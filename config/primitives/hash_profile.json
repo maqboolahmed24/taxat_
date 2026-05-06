@@ -1,0 +1,169 @@
+{
+  "$schema": "./hash_profile.schema.json",
+  "contract_version": "1.0",
+  "profile_id": "canonical_hash_profile_v1",
+  "basis_statement": "Canonical hashes use SHA-256 over deterministic JSON with Unicode NFC normalization, lexicographically ordered object keys, preserved array order, and explicit nulls.",
+  "source_lineage": [
+    {
+      "source_file": "implementation_conventions.md",
+      "source_heading_or_logical_block": "deterministic serialization and hashing",
+      "rationale": "Canonical JSON rules for ordering, normalization, and replay-safe byte generation originate here."
+    },
+    {
+      "source_file": "replay_and_reproducibility_contract.md",
+      "source_heading_or_logical_block": "canonical deterministic outcome formulas",
+      "rationale": "Replay-safe hashing and normalized payload expectations are binding for manifest and execution truth."
+    },
+    {
+      "source_file": "authority_interaction_protocol.md",
+      "source_heading_or_logical_block": "duplicate_meaning_key, request_hash, and idempotency_key identity formulas",
+      "rationale": "Authority hashes must remain aligned with validator-enforced request identity logic."
+    },
+    {
+      "source_file": "Algorithm/scripts/validate_contracts.py",
+      "source_heading_or_logical_block": "stable_json_hash and authority request identity helpers",
+      "rationale": "Executable validator behavior is the authoritative parity oracle for request-hash derivation."
+    }
+  ],
+  "algorithm": "SHA-256",
+  "digest_encoding": "LOWERCASE_HEX",
+  "serialization": {
+    "profile_ref": "CANONICAL_JSON_V1",
+    "string_normalization": "UNICODE_NFC",
+    "object_key_order": "LEXICOGRAPHIC_ASCENDING",
+    "array_ordering": "PRESERVE_DECLARED_ORDER",
+    "set_like_array_helper": "sortSetLikeStrings",
+    "null_policy": "EXPLICIT_NULL_REQUIRED",
+    "ascii_escape_policy": "JSON_ENSURE_ASCII",
+    "time_normalization": "NORMALIZE_INSTANTS_TO_UTC_BEFORE_HASHING_WHEN_TIME_VALUES_ARE_BOUND",
+    "forbidden_inputs": [
+      "undefined",
+      "NaN",
+      "Infinity",
+      "-Infinity",
+      "-0",
+      "bigint",
+      "function",
+      "symbol",
+      "non-plain-object instances"
+    ]
+  },
+  "helper_catalog": [
+    {
+      "helper_ref": "canonicalJsonStringify",
+      "purpose": "Serialize canonical JSON bytes without whitespace drift.",
+      "notes": [
+        "Strings normalize to NFC before emission.",
+        "Objects reject duplicate normalized keys."
+      ]
+    },
+    {
+      "helper_ref": "stableJsonHash",
+      "purpose": "Generate a canonical SHA-256 digest from deterministic JSON bytes.",
+      "notes": [
+        "Digest output is lowercase hexadecimal.",
+        "Used by request, replay, and config-surface identity records."
+      ]
+    },
+    {
+      "helper_ref": "stableQueryString",
+      "purpose": "Encode query parameters deterministically without sorting set-like arrays implicitly.",
+      "notes": ["Keys are sorted lexicographically.", "Value arrays preserve declared order."]
+    },
+    {
+      "helper_ref": "stablePath",
+      "purpose": "Fill URI templates without emitting partial or malformed path tokens.",
+      "notes": [
+        "Missing or empty path parameters fail closed.",
+        "Resolved values use RFC 3986 encoding."
+      ]
+    },
+    {
+      "helper_ref": "deriveAuthorityDuplicateMeaningKey",
+      "purpose": "Derive the canonical duplicate-meaning key for authority requests.",
+      "notes": [
+        "Business partition refs remain in declared order unless a caller explicitly sorts a set-like source.",
+        "Shares the identity namespace hash seed with request_hash and idempotency_key."
+      ]
+    }
+  ],
+  "canonical_examples": [
+    {
+      "case_ref": "unicode_and_array_order",
+      "label": "Unicode normalization plus preserved array order",
+      "payload": {
+        "beta": "Café",
+        "alpha": ["late", "amendment"],
+        "explicit": null
+      },
+      "note": "The decomposed accent in Café normalizes to NFC, object keys reorder lexicographically, and the tags array preserves declared order."
+    }
+  ],
+  "query_examples": [
+    {
+      "case_ref": "authority_query_order",
+      "label": "Query values preserve declared order",
+      "query": {
+        "obligation_ref": "obl-2026-q2",
+        "tags": ["late", "amendment"],
+        "view": "summary"
+      },
+      "expected": "obligation_ref=obl-2026-q2&tags=late&tags=amendment&view=summary"
+    }
+  ],
+  "path_examples": [
+    {
+      "case_ref": "authority_path_encoding",
+      "label": "Path params encode reserved characters",
+      "template": "/organisations/{org_id}/obligations/{obligation_id}",
+      "params": {
+        "org_id": "org 42",
+        "obligation_id": "obl/2026-Q2"
+      },
+      "expected": "/organisations/org%2042/obligations/obl%2F2026-Q2"
+    }
+  ],
+  "authority_examples": [
+    {
+      "case_ref": "hmrc_duplicate_and_request_hash",
+      "label": "HMRC request identity seed",
+      "payload": {
+        "authority_name": "hmrc",
+        "authority_product_profile": "mtd-income-tax",
+        "provider_environment": "sandbox",
+        "authority_scope": "obligation.read",
+        "operation_family": "OBLIGATION_READ",
+        "operation_profile": "GET_OBLIGATION",
+        "provider_api_version": "v1",
+        "binding_lineage_ref": "binding-lineage/authority/hmrc-web",
+        "tenant_id": "tenant.shared-sandbox/2026-04",
+        "client_id": "client.hmrc/web-app",
+        "attempt_lineage_manifest_id": "attempt-manifest/2026-04-23T09:15:00Z",
+        "business_partition_refs": ["fy2026", "tenant.shared-sandbox/2026-04"],
+        "http_method": "GET",
+        "request_body_hash": "2ca273a99e1e26c257ef8fb939d4bca9339fd0d79f7dc1afc378cb1cf6df38f2",
+        "access_binding_hash": "4f258f6d57e8f64e7b4fd0ef80da6e70f519327c1114d2e2ee0e8ef8e754e665",
+        "header_profile_refs": ["fraud-header/v1", "trace-header/v1"],
+        "token_binding_ref": "token-binding/hmrc/web/2026-04-23",
+        "authority_binding_ref": "authority-binding/hmrc/web",
+        "authority_link_ref": "authority-link/hmrc/tenant.shared-sandbox",
+        "delegation_grant_ref": "",
+        "subject_ref": "taxpayer/AA000001A",
+        "acting_party_ref": "agent/agent-4901",
+        "policy_snapshot_hash": "a56a44c878f3dbe8d5f052d6e39bb927445e7d347db76f8cb59bff8c3946c45f"
+      },
+      "resource_template": "/organisations/{org_id}/obligations/{obligation_id}",
+      "path_params": {
+        "org_id": "org 42",
+        "obligation_id": "obl/2026-Q2"
+      },
+      "query_params": {
+        "obligation_ref": "obl-2026-q2",
+        "tags": ["late", "amendment"],
+        "view": "summary"
+      },
+      "normalized_obligation_ref": "obl-2026-q2",
+      "normalized_basis_type": "TAX_PERIOD"
+    }
+  ]
+}

@@ -1,0 +1,307 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/feature_flag_snapshot.schema.json",
+  "title": "FeatureFlagSnapshot",
+  "description": "Provider-neutral frozen feature-flag evaluation artifact used to derive manifest-level feature_flag_snapshot_hash without relying on live vendor SDK state after seal.",
+  "type": "object",
+  "required": [
+    "feature_flag_snapshot_id",
+    "artifact_type",
+    "surface_state",
+    "provider_adapter_ref_or_null",
+    "provider_environment_ref_or_null",
+    "provider_contract_profile_ref_or_null",
+    "evaluation_context",
+    "entries",
+    "ordered_flag_keys",
+    "feature_flag_snapshot_hash"
+  ],
+  "properties": {
+    "feature_flag_snapshot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_type": {
+      "const": "FeatureFlagSnapshot"
+    },
+    "surface_state": {
+      "type": "string",
+      "enum": [
+        "GOVERNED_FLAG_SURFACE_PRESENT",
+        "NO_GOVERNED_FLAG_SURFACE"
+      ]
+    },
+    "provider_adapter_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "provider_environment_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "provider_contract_profile_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "evaluation_context": {
+      "type": "object",
+      "required": [
+        "tenant_id",
+        "client_id_or_null",
+        "environment_ref",
+        "requested_scope",
+        "executable_scope",
+        "principal_context_ref_or_null",
+        "access_binding_hash_or_null",
+        "route_identity_ref_or_null"
+      ],
+      "properties": {
+        "tenant_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "client_id_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "environment_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requested_scope": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "executable_scope": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "principal_context_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "access_binding_hash_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "route_identity_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/entry"
+      },
+      "uniqueItems": true
+    },
+    "ordered_flag_keys": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "feature_flag_snapshot_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "required": [
+        "flag_key",
+        "enabled",
+        "variant_ref_or_null",
+        "value_json",
+        "default_value_json",
+        "rule_ref_or_null",
+        "reason_code"
+      ],
+      "properties": {
+        "flag_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "variant_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "value_json": {
+          "$ref": "#/$defs/jsonValue"
+        },
+        "default_value_json": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/jsonValue"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rule_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "reason_code": {
+          "type": "string",
+          "enum": [
+            "TARGETING_MATCH",
+            "STATIC_DEFAULT",
+            "NO_GOVERNED_FLAG_SURFACE"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "jsonValue": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "surface_state": {
+            "const": "NO_GOVERNED_FLAG_SURFACE"
+          }
+        },
+        "required": [
+          "surface_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "provider_adapter_ref_or_null": {
+            "type": "null"
+          },
+          "provider_environment_ref_or_null": {
+            "type": "null"
+          },
+          "provider_contract_profile_ref_or_null": {
+            "type": "null"
+          },
+          "entries": {
+            "maxItems": 0
+          },
+          "ordered_flag_keys": {
+            "maxItems": 0
+          },
+          "feature_flag_snapshot_hash": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "surface_state": {
+            "const": "GOVERNED_FLAG_SURFACE_PRESENT"
+          }
+        },
+        "required": [
+          "surface_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "provider_adapter_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "provider_environment_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "provider_contract_profile_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "entries": {
+            "minItems": 1
+          },
+          "feature_flag_snapshot_hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

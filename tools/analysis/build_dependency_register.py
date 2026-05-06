@@ -29,8 +29,12 @@ INVENTION_BOUNDARY_PATH = ALGORITHM_DIR / "invention_and_system_boundary.md"
 FRONTEND_LAW_PATH = ALGORITHM_DIR / "frontend_shell_and_interaction_law.md"
 CHECKLIST_PATH = PROMPT_DIR / "Checklist.md"
 
-REGISTER_DOC_PATH = DOCS_ANALYSIS_DIR / "18_external_services_apis_and_control_plane_dependencies.md"
-PROVISIONING_DOC_PATH = DOCS_ANALYSIS_DIR / "18_provisioning_feasibility_and_browser_automation_strategy.md"
+REGISTER_DOC_PATH = (
+    DOCS_ANALYSIS_DIR / "18_external_services_apis_and_control_plane_dependencies.md"
+)
+PROVISIONING_DOC_PATH = (
+    DOCS_ANALYSIS_DIR / "18_provisioning_feasibility_and_browser_automation_strategy.md"
+)
 
 REGISTER_JSON_PATH = DATA_ANALYSIS_DIR / "dependency_register.json"
 SOURCE_MATRIX_CSV_PATH = DATA_ANALYSIS_DIR / "dependency_capability_to_source_matrix.csv"
@@ -253,7 +257,9 @@ def dependency_row(
         "data_or_credential_sensitivity": data_or_credential_sensitivity,
         "human_or_machine_actor": human_or_machine_actor,
         "owning_subsystem": owning_subsystem,
-        "environment_scope": [scope for scope in ENVIRONMENT_ORDER if scope in set(environment_scope)],
+        "environment_scope": [
+            scope for scope in ENVIRONMENT_ORDER if scope in set(environment_scope)
+        ],
         "provisioning_prerequisites": ordered_unique(provisioning_prerequisites),
         "automation_feasibility": automation_feasibility,
         "candidate_service_types": ordered_unique(candidate_service_types),
@@ -289,7 +295,9 @@ def credential_record(
         "credential_kind": credential_kind,
         "owner_actor": owner_actor,
         "owning_subsystem": owning_subsystem,
-        "environment_scope": [scope for scope in ENVIRONMENT_ORDER if scope in set(environment_scope)],
+        "environment_scope": [
+            scope for scope in ENVIRONMENT_ORDER if scope in set(environment_scope)
+        ],
         "storage_boundary": storage_boundary,
         "rotation_or_renewal_rule": rotation_or_renewal_rule,
         "usage_constraints": list(usage_constraints),
@@ -307,10 +315,7 @@ def md_escape(value: Any) -> str:
 def markdown_table(headers: list[str], rows: list[list[Any]]) -> str:
     header_line = "| " + " | ".join(headers) + " |"
     divider_line = "| " + " | ".join("---" for _ in headers) + " |"
-    body_lines = [
-        "| " + " | ".join(md_escape(cell) for cell in row) + " |"
-        for row in rows
-    ]
+    body_lines = ["| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows]
     return "\n".join([header_line, divider_line, *body_lines])
 
 
@@ -353,7 +358,9 @@ def validate_rows(rows: list[dict[str, Any]]) -> None:
             if not isinstance(row[field], list):
                 raise ValueError(f"{row['dependency_key']} field `{field}` must be a list")
         if row["classification"] not in CLASSIFICATIONS:
-            raise ValueError(f"{row['dependency_key']} has invalid classification {row['classification']}")
+            raise ValueError(
+                f"{row['dependency_key']} has invalid classification {row['classification']}"
+            )
         if row["automation_feasibility"] not in AUTOMATION_FEASIBILITY_VALUES:
             raise ValueError(f"{row['dependency_key']} has invalid automation feasibility")
         if row["mvp_requirement"] not in MVP_REQUIREMENT_VALUES:
@@ -363,16 +370,31 @@ def validate_rows(rows: list[dict[str, Any]]) -> None:
         if not row["source_refs"]:
             raise ValueError(f"{row['dependency_key']} must include source refs")
         for ref in row["source_refs"]:
-            for field in ["source_file", "source_heading_or_logical_block", "source_ref", "rationale"]:
+            for field in [
+                "source_file",
+                "source_heading_or_logical_block",
+                "source_ref",
+                "rationale",
+            ]:
                 if not ref.get(field):
                     raise ValueError(f"{row['dependency_key']} has malformed source ref: {ref}")
         for prerequisite in row["provisioning_prerequisites"]:
             if prerequisite not in dependency_keys:
-                raise ValueError(f"{row['dependency_key']} references missing prerequisite {prerequisite}")
-        if row["dependency_key"].startswith("INTERNAL_") and row["classification"] != "INTERNAL_ONLY":
+                raise ValueError(
+                    f"{row['dependency_key']} references missing prerequisite {prerequisite}"
+                )
+        if (
+            row["dependency_key"].startswith("INTERNAL_")
+            and row["classification"] != "INTERNAL_ONLY"
+        ):
             raise ValueError(f"{row['dependency_key']} must be INTERNAL_ONLY")
-        if row["classification"] == "INTERNAL_ONLY" and row["decision_status"] != "INTERNAL_IMPLEMENTATION":
-            raise ValueError(f"{row['dependency_key']} must use INTERNAL_IMPLEMENTATION decision status")
+        if (
+            row["classification"] == "INTERNAL_ONLY"
+            and row["decision_status"] != "INTERNAL_IMPLEMENTATION"
+        ):
+            raise ValueError(
+                f"{row['dependency_key']} must use INTERNAL_IMPLEMENTATION decision status"
+            )
 
 
 def validate_credentials(rows: list[dict[str, Any]], credentials: list[dict[str, Any]]) -> None:
@@ -381,17 +403,26 @@ def validate_credentials(rows: list[dict[str, Any]], credentials: list[dict[str,
 
     for entry in credentials:
         if entry["dependency_key"] not in row_map:
-            raise ValueError(f"Credential record references unknown dependency {entry['dependency_key']}")
+            raise ValueError(
+                f"Credential record references unknown dependency {entry['dependency_key']}"
+            )
         if not row_map[entry["dependency_key"]]["needs_credentials_or_secrets"]:
             raise ValueError(
                 f"Credential record {entry['credential_key']} attached to dependency that does not require secrets"
             )
         if not entry["source_refs"]:
-            raise ValueError(f"Credential record {entry['credential_key']} must include source refs")
+            raise ValueError(
+                f"Credential record {entry['credential_key']} must include source refs"
+            )
 
     for row in rows:
-        if row["needs_credentials_or_secrets"] and row["dependency_key"] not in credential_dependency_keys:
-            raise ValueError(f"{row['dependency_key']} needs credentials but is absent from credential inventory")
+        if (
+            row["needs_credentials_or_secrets"]
+            and row["dependency_key"] not in credential_dependency_keys
+        ):
+            raise ValueError(
+                f"{row['dependency_key']} needs credentials but is absent from credential inventory"
+            )
 
 
 def build_rows() -> list[dict[str, Any]]:
@@ -421,7 +452,10 @@ def build_rows() -> list[dict[str, Any]]:
                 "authority profile catalog",
             ],
             source_refs=[
-                task_source("pc_0031", "The provisioning wave starts by enumerating environments, tenants, and authority profiles."),
+                task_source(
+                    "pc_0031",
+                    "The provisioning wave starts by enumerating environments, tenants, and authority profiles.",
+                ),
                 heading_source(
                     AUTHORITY_PROTOCOL_PATH,
                     "9.3 Core protocol objects",
@@ -467,8 +501,13 @@ def build_rows() -> list[dict[str, Any]]:
                 "automation artifact store",
             ],
             source_refs=[
-                task_source("pc_0032", "Provisioning work requires a reusable browser automation workspace."),
-                task_source("pc_0048", "The roadmap expects checkpoint evidence capture when portals block full automation."),
+                task_source(
+                    "pc_0032", "Provisioning work requires a reusable browser automation workspace."
+                ),
+                task_source(
+                    "pc_0048",
+                    "The roadmap expects checkpoint evidence capture when portals block full automation.",
+                ),
             ],
             notes=[
                 "This row is required even though it is not a production runtime service.",
@@ -506,7 +545,10 @@ def build_rows() -> list[dict[str, Any]]:
                 "authority app-management console",
             ],
             source_refs=[
-                task_source("pc_0034", "The roadmap requires a developer-hub workspace before sandbox app registration can begin."),
+                task_source(
+                    "pc_0034",
+                    "The roadmap requires a developer-hub workspace before sandbox app registration can begin.",
+                ),
                 heading_source(
                     AUTHORITY_PROTOCOL_PATH,
                     "9.2 Protocol scope",
@@ -549,7 +591,10 @@ def build_rows() -> list[dict[str, Any]]:
                 "provider-managed OAuth client",
             ],
             source_refs=[
-                task_source("pc_0035", "The roadmap creates a dedicated sandbox application for obligations, calculations, and submissions."),
+                task_source(
+                    "pc_0035",
+                    "The roadmap creates a dedicated sandbox application for obligations, calculations, and submissions.",
+                ),
                 heading_source(
                     AUTHORITY_PROTOCOL_PATH,
                     "9.6 Token and client binding rule",
@@ -598,8 +643,14 @@ def build_rows() -> list[dict[str, Any]]:
                 "provider go-live approval workflow",
             ],
             source_refs=[
-                task_source("pc_0031", "Environment and authority-profile planning implies a live provider environment alongside sandbox."),
-                task_source("pc_0038", "Vault export and rotation boundaries imply separate live credentials as well as sandbox credentials."),
+                task_source(
+                    "pc_0031",
+                    "Environment and authority-profile planning implies a live provider environment alongside sandbox.",
+                ),
+                task_source(
+                    "pc_0038",
+                    "Vault export and rotation boundaries imply separate live credentials as well as sandbox credentials.",
+                ),
                 heading_source(
                     AUTHORITY_PROTOCOL_PATH,
                     "9.3 Core protocol objects",
@@ -642,7 +693,10 @@ def build_rows() -> list[dict[str, Any]]:
                 "provider scope configuration",
             ],
             source_refs=[
-                task_source("pc_0036", "Redirect URIs, scopes, and callback endpoints are an explicit provisioning step."),
+                task_source(
+                    "pc_0036",
+                    "Redirect URIs, scopes, and callback endpoints are an explicit provisioning step.",
+                ),
                 heading_source(
                     AUTHORITY_PROTOCOL_PATH,
                     "9.5 Preflight sequence",
@@ -689,7 +743,10 @@ def build_rows() -> list[dict[str, Any]]:
                 "provider environment profile validation",
             ],
             source_refs=[
-                task_source("pc_0037", "The roadmap calls for explicit fraud-prevention and sandbox-profile validation."),
+                task_source(
+                    "pc_0037",
+                    "The roadmap calls for explicit fraud-prevention and sandbox-profile validation.",
+                ),
                 heading_source(
                     AUTHORITY_PROTOCOL_PATH,
                     "9.7 Fraud-prevention header rule",
@@ -836,7 +893,10 @@ def build_rows() -> list[dict[str, Any]]:
                 "service-principal registration",
             ],
             source_refs=[
-                task_source("pc_0039", "The roadmap creates IdP tenants and application clients as a first-class provisioning dependency."),
+                task_source(
+                    "pc_0039",
+                    "The roadmap creates IdP tenants and application clients as a first-class provisioning dependency.",
+                ),
                 heading_source(
                     SECURITY_PATH,
                     "2. Identity, session, and command trust",
@@ -875,7 +935,10 @@ def build_rows() -> list[dict[str, Any]]:
                 "MFA and step-up policy configuration",
             ],
             source_refs=[
-                task_source("pc_0040", "The roadmap treats MFA, step-up, session, and role-policy setup as its own dependency boundary."),
+                task_source(
+                    "pc_0040",
+                    "The roadmap treats MFA, step-up, session, and role-policy setup as its own dependency boundary.",
+                ),
                 heading_source(
                     ACTOR_MODEL_PATH,
                     "3.11 Non-delegable and step-up actions",
@@ -924,7 +987,10 @@ def build_rows() -> list[dict[str, Any]]:
                 "managed SMTP relay",
             ],
             source_refs=[
-                task_source("pc_0041", "The roadmap provisions a delivery-provider account and sender domain explicitly."),
+                task_source(
+                    "pc_0041",
+                    "The roadmap provisions a delivery-provider account and sender domain explicitly.",
+                ),
                 heading_source(
                     COLLABORATION_PATH,
                     "9.2 Notification rules",
@@ -967,7 +1033,10 @@ def build_rows() -> list[dict[str, Any]]:
                 "delivery webhook configuration",
             ],
             source_refs=[
-                task_source("pc_0042", "The roadmap isolates email templates, webhooks, and callbacks as a dedicated setup step."),
+                task_source(
+                    "pc_0042",
+                    "The roadmap isolates email templates, webhooks, and callbacks as a dedicated setup step.",
+                ),
                 heading_source(
                     COLLABORATION_PATH,
                     "9.2 Notification rules",
@@ -1010,7 +1079,9 @@ def build_rows() -> list[dict[str, Any]]:
                 "device messaging gateway",
             ],
             source_refs=[
-                task_source("pc_0043", "The roadmap includes a push or device-messaging project and keys."),
+                task_source(
+                    "pc_0043", "The roadmap includes a push or device-messaging project and keys."
+                ),
                 text_source(
                     MACOS_BLUEPRINT_PATH,
                     "system notifications for long-running review or authority callbacks",
@@ -1053,7 +1124,10 @@ def build_rows() -> list[dict[str, Any]]:
                 "self-hosted error aggregation workspace",
             ],
             source_refs=[
-                task_source("pc_0044", "The roadmap provides a dedicated error-monitoring workspace and project tokens."),
+                task_source(
+                    "pc_0044",
+                    "The roadmap provides a dedicated error-monitoring workspace and project tokens.",
+                ),
                 heading_source(
                     OBSERVABILITY_PATH,
                     "14.2 Separation of concerns",
@@ -1095,7 +1169,10 @@ def build_rows() -> list[dict[str, Any]]:
                 "CRM case-management integration",
             ],
             source_refs=[
-                task_source("pc_0045", "The roadmap treats helpdesk integration as conditional on selection."),
+                task_source(
+                    "pc_0045",
+                    "The roadmap treats helpdesk integration as conditional on selection.",
+                ),
                 heading_source(
                     PORTAL_PATH,
                     "`Help`",
@@ -1137,7 +1214,10 @@ def build_rows() -> list[dict[str, Any]]:
                 "self-hosted OCR runtime",
             ],
             source_refs=[
-                task_source("pc_0046", "The roadmap makes OCR explicitly pluggable: managed project or self-host decision."),
+                task_source(
+                    "pc_0046",
+                    "The roadmap makes OCR explicitly pluggable: managed project or self-host decision.",
+                ),
                 text_source(
                     SECURITY_PATH,
                     "connector/OCR/authority gateway components SHALL run with least-privilege network egress policies;",
@@ -1188,7 +1268,10 @@ def build_rows() -> list[dict[str, Any]]:
                 "object-event-driven scanning worker",
             ],
             source_refs=[
-                task_source("pc_0047", "The roadmap requires either a scanning/quarantine service or a recorded self-host choice."),
+                task_source(
+                    "pc_0047",
+                    "The roadmap requires either a scanning/quarantine service or a recorded self-host choice.",
+                ),
                 heading_source(
                     PORTAL_PATH,
                     "Secure document-upload flow",
@@ -1640,7 +1723,10 @@ def build_rows() -> list[dict[str, Any]]:
                 "WAF or edge gateway",
             ],
             source_refs=[
-                task_source("pc_0056", "The roadmap packages DNS, TLS, WAF, and edge delivery as a single provisioning step."),
+                task_source(
+                    "pc_0056",
+                    "The roadmap packages DNS, TLS, WAF, and edge delivery as a single provisioning step.",
+                ),
                 heading_source(
                     SECURITY_PATH,
                     "4. Browser, native-client, API, and transport hardening",
@@ -1684,7 +1770,10 @@ def build_rows() -> list[dict[str, Any]]:
                 "deployment orchestrator",
             ],
             source_refs=[
-                task_source("pc_0057", "The roadmap explicitly provisions CI/CD runners, environment secrets, and preview accounts."),
+                task_source(
+                    "pc_0057",
+                    "The roadmap explicitly provisions CI/CD runners, environment secrets, and preview accounts.",
+                ),
                 heading_source(
                     DEPLOYMENT_PATH,
                     "2. Promotion pipeline",
@@ -1954,7 +2043,10 @@ def build_credential_inventory() -> list[dict[str, Any]]:
                 "Sandbox and production client secrets must never share one record.",
             ],
             source_refs=[
-                task_source("pc_0038", "The roadmap explicitly exports HMRC client identifiers and secrets into vault records."),
+                task_source(
+                    "pc_0038",
+                    "The roadmap explicitly exports HMRC client identifiers and secrets into vault records.",
+                ),
                 heading_source(
                     AUTHORITY_PROTOCOL_PATH,
                     "9.6 Token and client binding rule",
@@ -1975,7 +2067,10 @@ def build_credential_inventory() -> list[dict[str, Any]]:
                 "Live authority credentials require stricter approval and rotation evidence than sandbox credentials.",
             ],
             source_refs=[
-                task_source("pc_0038", "Vault export and rotation evidence apply to HMRC client identifiers and secrets."),
+                task_source(
+                    "pc_0038",
+                    "Vault export and rotation evidence apply to HMRC client identifiers and secrets.",
+                ),
                 heading_source(
                     AUTHORITY_PROTOCOL_PATH,
                     "9.3 Core protocol objects",
@@ -2016,7 +2111,10 @@ def build_credential_inventory() -> list[dict[str, Any]]:
                 "Separate web, native, and service-principal client material where the IdP does so.",
             ],
             source_refs=[
-                task_source("pc_0039", "Application clients are a provisioning output and therefore create managed secrets."),
+                task_source(
+                    "pc_0039",
+                    "Application clients are a provisioning output and therefore create managed secrets.",
+                ),
             ],
         ),
         credential_record(
@@ -2032,7 +2130,10 @@ def build_credential_inventory() -> list[dict[str, Any]]:
                 "Outbound mail identities must remain environment-scoped and redaction-safe.",
             ],
             source_refs=[
-                task_source("pc_0041", "The delivery provider account and sender domain create provider credentials and domain-proof artifacts."),
+                task_source(
+                    "pc_0041",
+                    "The delivery provider account and sender domain create provider credentials and domain-proof artifacts.",
+                ),
             ],
         ),
         credential_record(
@@ -2048,7 +2149,10 @@ def build_credential_inventory() -> list[dict[str, Any]]:
                 "Webhook verification secrets must never be embedded in customer-visible templates or logs.",
             ],
             source_refs=[
-                task_source("pc_0042", "Webhook and callback configuration produces shared verification material."),
+                task_source(
+                    "pc_0042",
+                    "Webhook and callback configuration produces shared verification material.",
+                ),
             ],
         ),
         credential_record(
@@ -2064,7 +2168,9 @@ def build_credential_inventory() -> list[dict[str, Any]]:
                 "Push payloads must remain redaction-safe regardless of provider choice.",
             ],
             source_refs=[
-                task_source("pc_0043", "Device-messaging projects and keys generate platform credentials."),
+                task_source(
+                    "pc_0043", "Device-messaging projects and keys generate platform credentials."
+                ),
             ],
         ),
         credential_record(
@@ -2101,7 +2207,10 @@ def build_credential_inventory() -> list[dict[str, Any]]:
                 "External helpdesk sync must not widen visibility beyond customer-safe or operator-authorized context.",
             ],
             source_refs=[
-                task_source("pc_0045", "External helpdesk integration requires vendor API credentials when selected."),
+                task_source(
+                    "pc_0045",
+                    "External helpdesk integration requires vendor API credentials when selected.",
+                ),
             ],
         ),
         credential_record(
@@ -2117,7 +2226,10 @@ def build_credential_inventory() -> list[dict[str, Any]]:
                 "OCR workers must not bypass malware-scan or retention controls when fetching source documents.",
             ],
             source_refs=[
-                task_source("pc_0046", "Managed OCR projects create provider credentials; self-hosted runtimes require workload identity instead."),
+                task_source(
+                    "pc_0046",
+                    "Managed OCR projects create provider credentials; self-hosted runtimes require workload identity instead.",
+                ),
             ],
         ),
         credential_record(
@@ -2133,7 +2245,10 @@ def build_credential_inventory() -> list[dict[str, Any]]:
                 "Scanning credentials must stay partitioned from customer-facing download or preview credentials.",
             ],
             source_refs=[
-                task_source("pc_0047", "Managed scanning or self-hosted decision both require governed service identity."),
+                task_source(
+                    "pc_0047",
+                    "Managed scanning or self-hosted decision both require governed service identity.",
+                ),
                 heading_source(
                     COLLABORATION_PATH,
                     "8.2 Upload staging",
@@ -2194,7 +2309,10 @@ def build_credential_inventory() -> list[dict[str, Any]]:
                 "Operational readers must not share write-capable migration credentials.",
             ],
             source_refs=[
-                task_source("pc_0050", "Provisioning the primary PostgreSQL store creates runtime and migration credentials."),
+                task_source(
+                    "pc_0050",
+                    "Provisioning the primary PostgreSQL store creates runtime and migration credentials.",
+                ),
                 heading_source(
                     DEPLOYMENT_PATH,
                     "3. Schema and datastore migration rules",
@@ -2215,7 +2333,10 @@ def build_credential_inventory() -> list[dict[str, Any]]:
                 "Append-only evidence writers should not share mutable control-store credentials.",
             ],
             source_refs=[
-                task_source("pc_0050", "Provisioning the audit store creates dedicated credentials or service identities."),
+                task_source(
+                    "pc_0050",
+                    "Provisioning the audit store creates dedicated credentials or service identities.",
+                ),
             ],
         ),
         credential_record(
@@ -2231,7 +2352,9 @@ def build_credential_inventory() -> list[dict[str, Any]]:
                 "Separate quarantine writers from general artifact readers where the platform allows.",
             ],
             source_refs=[
-                task_source("pc_0051", "Object storage buckets create runtime access roles or keys."),
+                task_source(
+                    "pc_0051", "Object storage buckets create runtime access roles or keys."
+                ),
             ],
         ),
         credential_record(
@@ -2247,7 +2370,10 @@ def build_credential_inventory() -> list[dict[str, Any]]:
                 "Broker identities must never imply durable truth ownership by themselves.",
             ],
             source_refs=[
-                task_source("pc_0052", "Provisioning a queue or broker creates client-auth material for workers and inbox/outbox adapters."),
+                task_source(
+                    "pc_0052",
+                    "Provisioning a queue or broker creates client-auth material for workers and inbox/outbox adapters.",
+                ),
             ],
         ),
         credential_record(
@@ -2263,7 +2389,10 @@ def build_credential_inventory() -> list[dict[str, Any]]:
                 "Cache credentials do not grant access to raw authority tokens or immutable audit evidence.",
             ],
             source_refs=[
-                task_source("pc_0053", "Provisioning cache and stream-resume state creates service identities."),
+                task_source(
+                    "pc_0053",
+                    "Provisioning cache and stream-resume state creates service identities.",
+                ),
             ],
         ),
         credential_record(
@@ -2279,7 +2408,10 @@ def build_credential_inventory() -> list[dict[str, Any]]:
                 "Telemetry ingest identities must respect the contract's access separation between operational, security, and privacy signals.",
             ],
             source_refs=[
-                task_source("pc_0054", "Provisioning telemetry backends creates ingest credentials or collector trust identities."),
+                task_source(
+                    "pc_0054",
+                    "Provisioning telemetry backends creates ingest credentials or collector trust identities.",
+                ),
             ],
         ),
         credential_record(
@@ -2295,7 +2427,10 @@ def build_credential_inventory() -> list[dict[str, Any]]:
                 "Signing keys must remain rooted in the KMS/HSM boundary, not copied into CI runner disks.",
             ],
             source_refs=[
-                task_source("pc_0055", "Registry, build-signing, and attestation services create delivery credentials and key references."),
+                task_source(
+                    "pc_0055",
+                    "Registry, build-signing, and attestation services create delivery credentials and key references.",
+                ),
                 heading_source(
                     SECURITY_PATH,
                     "7. Supply-chain and build integrity",
@@ -2316,7 +2451,10 @@ def build_credential_inventory() -> list[dict[str, Any]]:
                 "Do not reuse DNS or certificate automation credentials as generic deployment credentials.",
             ],
             source_refs=[
-                task_source("pc_0056", "DNS, TLS, WAF, and edge delivery provisioning creates domain-control and certificate-automation identities."),
+                task_source(
+                    "pc_0056",
+                    "DNS, TLS, WAF, and edge delivery provisioning creates domain-control and certificate-automation identities.",
+                ),
             ],
         ),
         credential_record(
@@ -2332,7 +2470,10 @@ def build_credential_inventory() -> list[dict[str, Any]]:
                 "Ephemeral preview credentials must not implicitly grant access to live authority or production secret scopes.",
             ],
             source_refs=[
-                task_source("pc_0057", "Runner registration and preview-account provisioning create deployment credentials."),
+                task_source(
+                    "pc_0057",
+                    "Runner registration and preview-account provisioning create deployment credentials.",
+                ),
             ],
         ),
         credential_record(
@@ -2764,7 +2905,9 @@ def write_source_matrix(rows: list[dict[str, Any]]) -> None:
                 )
 
 
-def build_classification_summary(rows: list[dict[str, Any]], credentials: list[dict[str, Any]], dag: dict[str, Any]) -> dict[str, Any]:
+def build_classification_summary(
+    rows: list[dict[str, Any]], credentials: list[dict[str, Any]], dag: dict[str, Any]
+) -> dict[str, Any]:
     classification_counts = Counter(row["classification"] for row in rows)
     owner_counts = Counter(row["owning_subsystem"] for row in rows)
     mvp_counts = Counter(row["mvp_requirement"] for row in rows)
@@ -2775,7 +2918,9 @@ def build_classification_summary(rows: list[dict[str, Any]], credentials: list[d
             "classification_counts": dict(sorted(classification_counts.items())),
             "owning_subsystem_counts": dict(sorted(owner_counts.items())),
             "mvp_requirement_counts": dict(sorted(mvp_counts.items())),
-            "adr_or_procurement_needed_count": sum(1 for row in rows if row["adr_or_procurement_needed"]),
+            "adr_or_procurement_needed_count": sum(
+                1 for row in rows if row["adr_or_procurement_needed"]
+            ),
         },
         "dependency_rows": [
             {
@@ -2796,7 +2941,9 @@ def build_classification_summary(rows: list[dict[str, Any]], credentials: list[d
             }
             for row in rows
         ],
-        "internal_only_keys": [row["dependency_key"] for row in rows if row["classification"] == "INTERNAL_ONLY"],
+        "internal_only_keys": [
+            row["dependency_key"] for row in rows if row["classification"] == "INTERNAL_ONLY"
+        ],
         "vendor_or_platform_choice_keys": [
             row["dependency_key"] for row in rows if row["adr_or_procurement_needed"]
         ],
@@ -2867,7 +3014,14 @@ def write_register_doc(rows: list[dict[str, Any]], credentials: list[dict[str, A
                 f"## {classification_titles[classification]}",
                 "",
                 markdown_table(
-                    ["Dependency", "Category", "MVP", "Owner", "Automation", "Candidate Service Types"],
+                    [
+                        "Dependency",
+                        "Category",
+                        "MVP",
+                        "Owner",
+                        "Automation",
+                        "Candidate Service Types",
+                    ],
                     [
                         [
                             row["dependency_key"],
@@ -2920,7 +3074,9 @@ def write_register_doc(rows: list[dict[str, Any]], credentials: list[dict[str, A
     text_write(REGISTER_DOC_PATH, "\n".join(sections))
 
 
-def write_provisioning_doc(rows: list[dict[str, Any]], dag: dict[str, Any], browser_matrix: dict[str, Any]) -> None:
+def write_provisioning_doc(
+    rows: list[dict[str, Any]], dag: dict[str, Any], browser_matrix: dict[str, Any]
+) -> None:
     sections = [
         "# Provisioning Feasibility and Browser Automation Strategy",
         "",
@@ -2939,8 +3095,16 @@ def write_provisioning_doc(rows: list[dict[str, Any]], dag: dict[str, Any], brow
                     [
                         [
                             dependency_key,
-                            next(row["classification"] for row in rows if row["dependency_key"] == dependency_key),
-                            next(row["owning_subsystem"] for row in rows if row["dependency_key"] == dependency_key),
+                            next(
+                                row["classification"]
+                                for row in rows
+                                if row["dependency_key"] == dependency_key
+                            ),
+                            next(
+                                row["owning_subsystem"]
+                                for row in rows
+                                if row["dependency_key"] == dependency_key
+                            ),
                             dag["node_purposes"][dependency_key],
                         ]
                         for dependency_key in layer
@@ -2955,7 +3119,13 @@ def write_provisioning_doc(rows: list[dict[str, Any]], dag: dict[str, Any], brow
             "## Browser Automation Environment Profiles",
             "",
             markdown_table(
-                ["Environment", "Overall Feasibility", "Tooling", "Secret Source", "Recommended Use"],
+                [
+                    "Environment",
+                    "Overall Feasibility",
+                    "Tooling",
+                    "Secret Source",
+                    "Recommended Use",
+                ],
                 [
                     [
                         profile["environment"],
@@ -2971,7 +3141,14 @@ def write_provisioning_doc(rows: list[dict[str, Any]], dag: dict[str, Any], brow
             "## Dependency-Specific Browser Automation Feasibility",
             "",
             markdown_table(
-                ["Dependency", "Local Dev", "CI", "Ephemeral Review", "Staging", "Blocking Classes"],
+                [
+                    "Dependency",
+                    "Local Dev",
+                    "CI",
+                    "Ephemeral Review",
+                    "Staging",
+                    "Blocking Classes",
+                ],
                 [
                     [
                         item["dependency_key"],
@@ -3025,11 +3202,15 @@ def validate_browser_matrix(browser_matrix: dict[str, Any], rows: list[dict[str,
 
     for assessment in browser_matrix["dependency_assessments"]:
         if assessment["dependency_key"] not in dependency_keys:
-            raise ValueError(f"Unknown dependency in browser matrix: {assessment['dependency_key']}")
+            raise ValueError(
+                f"Unknown dependency in browser matrix: {assessment['dependency_key']}"
+            )
         for env in expected_envs:
             status = assessment[env]
             if status not in BROWSER_AUTOMATION_STATUS_VALUES:
-                raise ValueError(f"Invalid browser automation status `{status}` for {assessment['dependency_key']}:{env}")
+                raise ValueError(
+                    f"Invalid browser automation status `{status}` for {assessment['dependency_key']}:{env}"
+                )
 
 
 def validate_dag(dag: dict[str, Any], rows: list[dict[str, Any]]) -> None:

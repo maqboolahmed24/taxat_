@@ -26,13 +26,7 @@ import {
   type SupportWorkspaceSelectionRecord,
 } from "../../src/providers/support/flows/create_support_workspace_if_selected.js";
 
-const repoRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "..",
-  "..",
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
 
 async function readJson<T>(segments: string[]): Promise<T> {
   const filePath = path.join(repoRoot, ...segments);
@@ -81,13 +75,7 @@ test("checked-in support selection artifacts and board match the builders", asyn
   ]);
   const sampleRun = await readJson<{
     supportContextMappingBoard: SupportContextMappingBoardViewModel;
-  }>([
-    "automation",
-    "provisioning",
-    "report_viewer",
-    "data",
-    "sample_run.json",
-  ]);
+  }>(["automation", "provisioning", "report_viewer", "data", "sample_run.json"]);
 
   expect(persistedSelectionRecord).toEqual(
     createRecommendedSupportWorkspaceSelectionRecord(supportRunContext()),
@@ -96,24 +84,14 @@ test("checked-in support selection artifacts and board match the builders", asyn
     createRecommendedSupportFieldMappingTemplate(supportRunContext()),
   );
   expect(persistedChannelPolicy).toEqual(createRecommendedSupportChannelPolicy());
-  expect(persistedPortalHelpMapping).toEqual(
-    createRecommendedPortalHelpToExternalTicketMapping(),
-  );
-  expect(persistedWebhookContract).toEqual(
-    createRecommendedSupportWebhookEndpointContract(),
-  );
-  expect(sampleRun.supportContextMappingBoard).toEqual(
-    createSupportContextMappingBoardViewModel(),
-  );
+  expect(persistedPortalHelpMapping).toEqual(createRecommendedPortalHelpToExternalTicketMapping());
+  expect(persistedWebhookContract).toEqual(createRecommendedSupportWebhookEndpointContract());
+  expect(sampleRun.supportContextMappingBoard).toEqual(createSupportContextMappingBoardViewModel());
 });
 
 test("canonical support selection stays explicitly not-selected while preserving a future-safe adapter baseline", () => {
-  const selectionRecord = createRecommendedSupportWorkspaceSelectionRecord(
-    supportRunContext(),
-  );
-  const fieldMapping = createRecommendedSupportFieldMappingTemplate(
-    supportRunContext(),
-  );
+  const selectionRecord = createRecommendedSupportWorkspaceSelectionRecord(supportRunContext());
+  const fieldMapping = createRecommendedSupportFieldMappingTemplate(supportRunContext());
   const channelPolicy = createRecommendedSupportChannelPolicy();
   const webhookContract = createRecommendedSupportWebhookEndpointContract();
 
@@ -125,9 +103,7 @@ test("canonical support selection stays explicitly not-selected while preserving
   expect(selectionRecord.selection_status).toBe("NOT_SELECTED");
   expect(selectionRecord.selected_vendor_adapter_or_null).toBeNull();
   expect(selectionRecord.selected_vendor_label_or_null).toBeNull();
-  expect(selectionRecord.future_default_vendor_adapter_or_null).toBe(
-    "ZENDESK_COMPATIBLE_BASELINE",
-  );
+  expect(selectionRecord.future_default_vendor_adapter_or_null).toBe("ZENDESK_COMPATIBLE_BASELINE");
   expect(fieldMapping.selection_status).toBe("NOT_SELECTED");
   expect(channelPolicy.channel_rows.map((row) => row.restate_required)).toEqual([
     false,
@@ -136,9 +112,7 @@ test("canonical support selection stays explicitly not-selected while preserving
   ]);
   expect(
     webhookContract.webhook_rows.every(
-      (row) =>
-        row.activation_state === "NOT_SELECTED" &&
-        row.callback_url_ref_or_null === null,
+      (row) => row.activation_state === "NOT_SELECTED" && row.callback_url_ref_or_null === null,
     ),
   ).toBe(true);
 });

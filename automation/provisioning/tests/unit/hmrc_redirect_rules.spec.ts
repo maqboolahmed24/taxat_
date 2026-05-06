@@ -68,10 +68,7 @@ test("rejects fragment-bearing redirects", () => {
 
 test("rejects IP-address hosts", () => {
   expect(() =>
-    validateRegisteredRedirectUri(
-      "https://203.0.113.11/oauth/hmrc/callback",
-      "WEB_APP_VIA_SERVER",
-    ),
+    validateRegisteredRedirectUri("https://203.0.113.11/oauth/hmrc/callback", "WEB_APP_VIA_SERVER"),
   ).toThrow(/must use a DNS name/i);
 });
 
@@ -99,7 +96,9 @@ test("rejects duplicate rows and over-budget inventories", () => {
     ),
   );
 
-  expect(() => validateConfiguredRedirectRows(overBudgetRows)).toThrow(/exceeds HMRC's 5-URI limit/i);
+  expect(() => validateConfiguredRedirectRows(overBudgetRows)).toThrow(
+    /exceeds HMRC's 5-URI limit/i,
+  );
 });
 
 test("rejects localhost web callbacks and non-localhost desktop callbacks", () => {

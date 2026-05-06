@@ -1,0 +1,1383 @@
+{
+  "matrixVersion": "CODE_QUALITY_MATRIX_V1",
+  "workspaceContextChip": "pnpm workspace / python / native",
+  "statusSentence": "Biome governs repo JS and static web assets, Ruff plus Pyright govern authored Python, pre-commit keeps staged checks fast, and imported or generated artifacts are edit-guarded instead of being silently reformatted.",
+  "stageLanes": [
+    {
+      "stageRef": "SAVE",
+      "label": "SAVE",
+      "summary": "Editor-time or manual local write safety."
+    },
+    {
+      "stageRef": "STAGED",
+      "label": "STAGED",
+      "summary": "Staged-file-safe pre-commit enforcement."
+    },
+    {
+      "stageRef": "COMMIT",
+      "label": "COMMIT",
+      "summary": "Fast commit-time guards after staging."
+    },
+    {
+      "stageRef": "CI",
+      "label": "CI",
+      "summary": "Full deterministic quality and replay-safe validation."
+    }
+  ],
+  "toolFamilies": [
+    {
+      "toolFamilyRef": "FORMAT",
+      "label": "FORMAT",
+      "summary": "Single-writer formatting surfaces for governed source only."
+    },
+    {
+      "toolFamilyRef": "LINT",
+      "label": "LINT",
+      "summary": "Parser and semantic lint layers tuned for authored source."
+    },
+    {
+      "toolFamilyRef": "TYPECHECK",
+      "label": "TYPECHECK",
+      "summary": "Language-native type or compile smoke checks with explicit scope."
+    },
+    {
+      "toolFamilyRef": "HOOKS",
+      "label": "HOOKS",
+      "summary": "Fast staged-file guardrails and immutable-path protection."
+    },
+    {
+      "toolFamilyRef": "PLAYWRIGHT",
+      "label": "PLAYWRIGHT",
+      "summary": "Locator discipline and browser atlas verification for semantic automation."
+    }
+  ],
+  "toolDefinitions": [
+    {
+      "toolRef": "BIOME_FORMAT",
+      "toolFamilyRef": "FORMAT",
+      "label": "Biome Format",
+      "summary": "Formats governed JS, TS, JSON, CSS, HTML, and Markdown-adjacent repo files with one formatter.",
+      "commandRef": "pnpm exec biome format --write .",
+      "autofixPosture": "SAFE_AUTOFIX_ON_GOVERNED_SOURCE_ONLY",
+      "blockingPolicy": "FORMAT_CHECK_BLOCKS_COMMIT_AND_CI_WHEN_DIRTY",
+      "ignoredPolicyRefs": [
+        "GENERATED_CONTRACT_SCHEMA_CATALOG",
+        "GENERATED_TS_BINDINGS",
+        "GENERATED_ATLAS_DATA",
+        "GENERATED_SYNTHETIC_FIXTURE_PACK",
+        "IMPORTED_CONTRACT_SCHEMA_MIRROR",
+        "IMPORTED_CONTRACT_SAMPLE_MIRROR",
+        "GENERATED_PROVISIONING_AND_EDGE_ARTIFACTS",
+        "PLAYWRIGHT_SNAPSHOTS_AND_ARTIFACTS",
+        "LOCAL_ENV_AND_TOOL_CACHE",
+        "LOCAL_ENV_AND_SECRET_FILES"
+      ],
+      "visibility": "atlas_visible"
+    },
+    {
+      "toolRef": "RUFF_FORMAT",
+      "toolFamilyRef": "FORMAT",
+      "label": "Ruff Format",
+      "summary": "Formats authored Python only; generated Python stays generator-owned.",
+      "commandRef": "python3 -m ruff format",
+      "autofixPosture": "SAFE_AUTOFIX_ON_AUTHORED_PYTHON",
+      "blockingPolicy": "FORMAT_CHECK_BLOCKS_COMMIT_AND_CI_WHEN_DIRTY",
+      "ignoredPolicyRefs": [
+        "GENERATED_PY_BINDINGS",
+        "IMPORTED_CONTRACT_VALIDATOR_MIRROR",
+        "LOCAL_ENV_AND_TOOL_CACHE",
+        "LOCAL_ENV_AND_SECRET_FILES"
+      ],
+      "visibility": "atlas_visible"
+    },
+    {
+      "toolRef": "BIOME_LINT",
+      "toolFamilyRef": "LINT",
+      "label": "Biome Lint",
+      "summary": "Lints governed JS, TS, JSON, CSS, HTML, and Markdown-adjacent repo files without touching imported mirrors.",
+      "commandRef": "pnpm exec biome lint .",
+      "autofixPosture": "MANUAL_FIX_OR_FORMAT_PASS",
+      "blockingPolicy": "ERRORS_BLOCK_STAGED_COMMIT_AND_CI",
+      "ignoredPolicyRefs": [
+        "GENERATED_CONTRACT_SCHEMA_CATALOG",
+        "GENERATED_TS_BINDINGS",
+        "GENERATED_ATLAS_DATA",
+        "GENERATED_SYNTHETIC_FIXTURE_PACK",
+        "IMPORTED_CONTRACT_SCHEMA_MIRROR",
+        "IMPORTED_CONTRACT_SAMPLE_MIRROR",
+        "GENERATED_PROVISIONING_AND_EDGE_ARTIFACTS",
+        "PLAYWRIGHT_SNAPSHOTS_AND_ARTIFACTS",
+        "LOCAL_ENV_AND_TOOL_CACHE",
+        "LOCAL_ENV_AND_SECRET_FILES"
+      ],
+      "visibility": "atlas_visible"
+    },
+    {
+      "toolRef": "RUFF_LINT",
+      "toolFamilyRef": "LINT",
+      "label": "Ruff Check",
+      "summary": "Lints authored Python and keeps import order, syntax, and low-risk correctness checks deterministic.",
+      "commandRef": "python3 -m ruff check",
+      "autofixPosture": "SAFE_FIXES_ALLOWED_ON_STAGED_AUTHORED_PYTHON",
+      "blockingPolicy": "ERRORS_BLOCK_STAGED_COMMIT_AND_CI",
+      "ignoredPolicyRefs": [
+        "GENERATED_PY_BINDINGS",
+        "IMPORTED_CONTRACT_VALIDATOR_MIRROR",
+        "LOCAL_ENV_AND_TOOL_CACHE",
+        "LOCAL_ENV_AND_SECRET_FILES"
+      ],
+      "visibility": "atlas_visible"
+    },
+    {
+      "toolRef": "TSC_REPO",
+      "toolFamilyRef": "TYPECHECK",
+      "label": "TypeScript Compiler",
+      "summary": "Type-checks the repo TypeScript graph outside the provisioning workspace with a dedicated repo tsconfig.",
+      "commandRef": "pnpm exec tsc --noEmit -p tsconfig.quality.json",
+      "autofixPosture": "NO_AUTOFIX",
+      "blockingPolicy": "ERRORS_BLOCK_COMMIT_AND_CI",
+      "ignoredPolicyRefs": ["LOCAL_ENV_AND_TOOL_CACHE", "LOCAL_ENV_AND_SECRET_FILES"],
+      "visibility": "atlas_visible"
+    },
+    {
+      "toolRef": "TSC_AUTOMATION",
+      "toolFamilyRef": "TYPECHECK",
+      "label": "Provisioning TSC",
+      "summary": "Type-checks the browser automation workspace against its own Playwright-aware tsconfig.",
+      "commandRef": "pnpm --dir automation/provisioning exec tsc --noEmit -p tsconfig.json",
+      "autofixPosture": "NO_AUTOFIX",
+      "blockingPolicy": "ERRORS_BLOCK_COMMIT_AND_CI",
+      "ignoredPolicyRefs": [
+        "PLAYWRIGHT_SNAPSHOTS_AND_ARTIFACTS",
+        "LOCAL_ENV_AND_TOOL_CACHE",
+        "LOCAL_ENV_AND_SECRET_FILES"
+      ],
+      "visibility": "atlas_visible"
+    },
+    {
+      "toolRef": "PYRIGHT",
+      "toolFamilyRef": "TYPECHECK",
+      "label": "Pyright",
+      "summary": "Type-checks authored Python with strictness tuned by execution environment instead of applying one blanket mode.",
+      "commandRef": "pnpm exec pyright --project pyrightconfig.json",
+      "autofixPosture": "NO_AUTOFIX",
+      "blockingPolicy": "ERRORS_BLOCK_COMMIT_AND_CI",
+      "ignoredPolicyRefs": [
+        "GENERATED_PY_BINDINGS",
+        "IMPORTED_CONTRACT_VALIDATOR_MIRROR",
+        "LOCAL_ENV_AND_TOOL_CACHE",
+        "LOCAL_ENV_AND_SECRET_FILES"
+      ],
+      "visibility": "atlas_visible"
+    },
+    {
+      "toolRef": "SWIFTPM_SMOKE",
+      "toolFamilyRef": "TYPECHECK",
+      "label": "SwiftPM Smoke",
+      "summary": "Compiles and runs the generated native bindings through Swift Package Manager instead of pretending JS tools cover native code.",
+      "commandRef": "swift test --package-path native/TaxatOperator",
+      "autofixPosture": "NO_AUTOFIX",
+      "blockingPolicy": "ERRORS_BLOCK_CI_AND_RELEASE_GATES",
+      "ignoredPolicyRefs": [
+        "GENERATED_SWIFT_BINDINGS",
+        "LOCAL_ENV_AND_TOOL_CACHE",
+        "LOCAL_ENV_AND_SECRET_FILES"
+      ],
+      "visibility": "atlas_visible"
+    },
+    {
+      "toolRef": "CONTRACT_HASH_SYNC",
+      "toolFamilyRef": "TYPECHECK",
+      "label": "Contract Hash Sync",
+      "summary": "Verifies imported contract mirrors and generated catalog artifacts stay synchronized with their canonical import lineage.",
+      "commandRef": "node --experimental-strip-types ./tools/contracts/import_algorithm_contracts.ts --check && python3 ./tools/contracts/sync_contract_hashes.py --check",
+      "autofixPosture": "NO_AUTOFIX",
+      "blockingPolicy": "ERRORS_BLOCK_COMMIT_AND_CI",
+      "ignoredPolicyRefs": [],
+      "visibility": "atlas_visible"
+    },
+    {
+      "toolRef": "GENERATOR_SYNC",
+      "toolFamilyRef": "TYPECHECK",
+      "label": "Generator Sync",
+      "summary": "Checks generated bindings, the contract observatory, runtime and governed config atlases, baseline governance access data, local runtime observatory data, deterministic synthetic fixtures, messaging and queue fabric atlases, primitive contracts, reference grammar data, object lifecycle data, migration observatory data, and quality data stay synchronized with their upstream matrix and source-hash lineage.",
+      "commandRef": "node --experimental-strip-types ./tools/contracts/generate_language_bindings.ts --check && node --experimental-strip-types ./packages/contracts-docs/src/generate_contract_observatory.ts --check && node --experimental-strip-types ./packages/runtime-foundation/src/load_runtime_profile.ts --check && node --experimental-strip-types ./packages/runtime-foundation/src/build_local_runtime_observatory.ts --check && node --experimental-strip-types ./packages/domain-kernel/src/config/build_config_resolution_atlas.ts --check && node --experimental-strip-types ./packages/domain-kernel/src/messaging/build_event_envelope_atlas.ts --check && node --experimental-strip-types ./packages/domain-kernel/src/primitives/build_canonical_primitives_atlas.ts --check && node --experimental-strip-types ./packages/domain-kernel/src/references/build_reference_grammar_atlas.ts --check && node --experimental-strip-types ./packages/domain-kernel/src/cache/build_cache_isolation_atlas.ts --check && node --experimental-strip-types ./packages/domain-kernel/src/storage/build_object_lifecycle_atlas.ts --check && node --experimental-strip-types ./packages/domain-kernel/src/queue/build_queue_fabric_atlas.ts --check && node --experimental-strip-types ./packages/domain-kernel/src/streaming/build_stream_recovery_atlas.ts --check && node --experimental-strip-types ./packages/domain-kernel/src/uploads/build_upload_transfer_atlas.ts --check && node --experimental-strip-types ./packages/telemetry/src/build_telemetry_correlation_atlas.ts --check && node --experimental-strip-types ./packages/audit/src/build_audit_stream_atlas.ts --check && node --experimental-strip-types ./packages/control-plane-db/src/build_migration_window_atlas.ts --check && node --experimental-strip-types ./packages/access-control/src/emit_baseline_access_artifacts.ts --check && node --experimental-strip-types ./apps/control-plane-api/src/northbound/build_northbound_boundary_atlas.ts --check && node --experimental-strip-types ./tools/fixtures/build_deterministic_fixture_pack.ts --check && node --experimental-strip-types ./scripts/contracts/generate_migration_readiness_report.ts --check && node --experimental-strip-types ./tools/repository/verify_code_quality_coverage.ts --check",
+      "autofixPosture": "NO_AUTOFIX",
+      "blockingPolicy": "ERRORS_BLOCK_COMMIT_AND_CI",
+      "ignoredPolicyRefs": [],
+      "visibility": "atlas_visible"
+    },
+    {
+      "toolRef": "PRE_COMMIT_SCOPED",
+      "toolFamilyRef": "HOOKS",
+      "label": "Pre-commit Scoped Runner",
+      "summary": "Runs only staged-safe hooks and keeps browser suites out of the normal commit path.",
+      "commandRef": "python3 -m pre_commit run --hook-stage pre-commit --files ...",
+      "autofixPosture": "SAFE_FIXES_ONLY_ON_MATCHED_STAGED_FILES",
+      "blockingPolicy": "HOOK_FAILURE_BLOCKS_COMMIT",
+      "ignoredPolicyRefs": [
+        "PLAYWRIGHT_SNAPSHOTS_AND_ARTIFACTS",
+        "LOCAL_ENV_AND_TOOL_CACHE",
+        "LOCAL_ENV_AND_SECRET_FILES"
+      ],
+      "visibility": "atlas_visible"
+    },
+    {
+      "toolRef": "GENERATED_EDIT_GUARD",
+      "toolFamilyRef": "HOOKS",
+      "label": "Generated / Mirror Edit Guard",
+      "summary": "Rejects direct edits to generated or imported paths and forces regeneration or sync commands instead.",
+      "commandRef": "node --experimental-strip-types ./tools/repository/verify_code_quality_coverage.ts --stage-guard",
+      "autofixPosture": "NO_AUTOFIX",
+      "blockingPolicy": "STAGED_IMMUTABLE_PATHS_BLOCK_COMMIT",
+      "ignoredPolicyRefs": [],
+      "visibility": "atlas_visible"
+    },
+    {
+      "toolRef": "PLAYWRIGHT_LOCATOR_POLICY",
+      "toolFamilyRef": "PLAYWRIGHT",
+      "label": "Locator Policy",
+      "summary": "Scans Playwright suites for force-clicks, handle APIs, xpath, and fragile selector patterns that bypass semantic actionability.",
+      "commandRef": "node --experimental-strip-types ./tools/repository/lint_playwright_locator_policy.ts",
+      "autofixPosture": "NO_AUTOFIX",
+      "blockingPolicy": "ERRORS_BLOCK_COMMIT_AND_CI",
+      "ignoredPolicyRefs": [
+        "PLAYWRIGHT_SNAPSHOTS_AND_ARTIFACTS",
+        "LOCAL_ENV_AND_TOOL_CACHE",
+        "LOCAL_ENV_AND_SECRET_FILES"
+      ],
+      "visibility": "atlas_visible"
+    },
+    {
+      "toolRef": "PLAYWRIGHT_INTERNAL_ATLAS_BROWSER",
+      "toolFamilyRef": "PLAYWRIGHT",
+      "label": "Internal Atlas Browser",
+      "summary": "Runs semantic browser checks for internal atlas surfaces in CI instead of forcing full browser runs on every commit.",
+      "commandRef": "pnpm exec playwright test --config=playwright.config.ts --project=browser tests/playwright/internal/*.spec.ts",
+      "autofixPosture": "NO_AUTOFIX",
+      "blockingPolicy": "CI_FAILURE_BLOCKS_RELEASE_ADMISSION",
+      "ignoredPolicyRefs": [
+        "PLAYWRIGHT_SNAPSHOTS_AND_ARTIFACTS",
+        "LOCAL_ENV_AND_TOOL_CACHE",
+        "LOCAL_ENV_AND_SECRET_FILES"
+      ],
+      "visibility": "atlas_visible"
+    },
+    {
+      "toolRef": "FORMAT_EXEMPT_POLICY",
+      "toolFamilyRef": "FORMAT",
+      "label": "Formatter Exempt",
+      "summary": "Policy-owned path class intentionally excluded from formatter writes.",
+      "commandRef": "policy only",
+      "autofixPosture": "NOT_APPLICABLE",
+      "blockingPolicy": "EXEMPT_BY_POLICY",
+      "ignoredPolicyRefs": [],
+      "visibility": "atlas_hidden"
+    },
+    {
+      "toolRef": "LINT_EXEMPT_POLICY",
+      "toolFamilyRef": "LINT",
+      "label": "Linter Exempt",
+      "summary": "Policy-owned path class intentionally excluded from linting.",
+      "commandRef": "policy only",
+      "autofixPosture": "NOT_APPLICABLE",
+      "blockingPolicy": "EXEMPT_BY_POLICY",
+      "ignoredPolicyRefs": [],
+      "visibility": "atlas_hidden"
+    },
+    {
+      "toolRef": "TYPECHECK_EXEMPT_POLICY",
+      "toolFamilyRef": "TYPECHECK",
+      "label": "Typecheck Exempt",
+      "summary": "Policy-owned path class intentionally excluded from language-native type checking.",
+      "commandRef": "policy only",
+      "autofixPosture": "NOT_APPLICABLE",
+      "blockingPolicy": "EXEMPT_BY_POLICY",
+      "ignoredPolicyRefs": [],
+      "visibility": "atlas_hidden"
+    },
+    {
+      "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+      "toolFamilyRef": "PLAYWRIGHT",
+      "label": "Playwright Not Applicable",
+      "summary": "Path class does not participate in semantic browser automation.",
+      "commandRef": "policy only",
+      "autofixPosture": "NOT_APPLICABLE",
+      "blockingPolicy": "EXEMPT_BY_POLICY",
+      "ignoredPolicyRefs": [],
+      "visibility": "atlas_hidden"
+    }
+  ],
+  "areas": [
+    {
+      "areaRef": "ROOT_REPOSITORY_TOOLING",
+      "label": "Repository Tooling And Runbooks",
+      "qualityClass": "GOVERNED_JS_TS_SOURCE",
+      "owners": ["@taxat/foundations-contracts"],
+      "pathGlobs": [
+        "package.json",
+        "pnpm-workspace.yaml",
+        "turbo.json",
+        "tsconfig.base.json",
+        "tsconfig.quality.json",
+        ".editorconfig",
+        "biome.json",
+        "pyproject.toml",
+        "pyrightconfig.json",
+        ".pre-commit-config.yaml",
+        "config/access/**",
+        "db/migrations/**/*.sql",
+        "config/cache/**",
+        "config/configuration/**",
+        "config/docs/**",
+        "config/tooling/**",
+        "config/contracts/**",
+        "schemas/**/*.json",
+        "docs/fixtures/**",
+        "config/audit/**",
+        "config/messaging/**",
+        "config/migrations/**",
+        "config/northbound/**",
+        "config/primitives/**",
+        "config/queue/**",
+        "config/release/**",
+        "config/references/**",
+        "config/runtime/**",
+        "config/storage/**",
+        "config/streaming/**",
+        "config/telemetry/**",
+        "config/uploads/**",
+        "docs/access/**",
+        "docs/api/**",
+        "docs/audit/**",
+        "docs/cache/**",
+        "docs/configuration/**",
+        "docs/contracts/**",
+        "docs/datastore/**",
+        "docs/messaging/**",
+        "docs/primitives/**",
+        "docs/queue/**",
+        "docs/release/**",
+        "docs/references/**",
+        "docs/runtime/**",
+        "docs/storage/**",
+        "docs/streaming/**",
+        "docs/telemetry/**",
+        "docs/testing/**",
+        "docs/uploads/**",
+        "docs/repository/code_quality_runbook.md",
+        "docs/repository/task_runner_and_agent_entrypoints.md",
+        "scripts/contracts/**/*.ts",
+        "scripts/release/**/*.ts",
+        "scripts/tasks/**/*.json",
+        "tools/database/**",
+        "tools/repository/**",
+        "tools/contracts/**/*.ts",
+        "tools/fixtures/**/*.ts",
+        "tools/workspace-devx/**/*.ts",
+        "tools/workspace-devx/**/*.mjs"
+      ],
+      "coverage": {
+        "formatter": {
+          "toolRef": "BIOME_FORMAT",
+          "stages": ["SAVE", "STAGED", "COMMIT", "CI"]
+        },
+        "linter": {
+          "toolRef": "BIOME_LINT",
+          "stages": ["STAGED", "COMMIT", "CI"]
+        },
+        "typechecker": {
+          "toolRef": "TSC_REPO",
+          "stages": ["COMMIT", "CI"]
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "LOCAL_RUNTIME_INFRA_CONTRACTS",
+      "label": "Local Runtime Infra Contracts",
+      "qualityClass": "GOVERNED_STATIC_CONFIGURATION",
+      "owners": ["@taxat/foundations-contracts"],
+      "pathGlobs": ["infra/local/compose.yaml", "infra/local/**/*.json"],
+      "coverage": {
+        "formatter": {
+          "toolRef": "FORMAT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "linter": {
+          "toolRef": "LINT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "typechecker": {
+          "toolRef": "TYPECHECK_EXEMPT_POLICY",
+          "stages": []
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "EPHEMERAL_TEST_INFRA_CONTRACTS",
+      "label": "Ephemeral Test Infra Contracts",
+      "qualityClass": "GOVERNED_STATIC_CONFIGURATION",
+      "owners": ["@taxat/foundations-contracts"],
+      "pathGlobs": ["infra/test/**/*.json"],
+      "coverage": {
+        "formatter": {
+          "toolRef": "FORMAT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "linter": {
+          "toolRef": "LINT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "typechecker": {
+          "toolRef": "TYPECHECK_EXEMPT_POLICY",
+          "stages": []
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "APPS_WEB_AND_API_WORKSPACES",
+      "label": "Web And API Workspace Packages",
+      "qualityClass": "GOVERNED_JS_TS_SOURCE",
+      "owners": ["@taxat/web-experience", "@taxat/control-plane-runtime"],
+      "pathGlobs": [
+        "apps/control-plane-api/package.json",
+        "apps/control-plane-api/src/**",
+        "apps/operator-web/package.json",
+        "apps/client-portal-web/package.json",
+        "apps/client-portal-web/src/**",
+        "apps/provisioning-workbench/package.json",
+        "apps/provisioning-workbench/src/**",
+        "apps/internal-operator-macos/package.json",
+        "apps/internal-operator-macos/src/**"
+      ],
+      "coverage": {
+        "formatter": {
+          "toolRef": "BIOME_FORMAT",
+          "stages": ["SAVE", "STAGED", "COMMIT", "CI"]
+        },
+        "linter": {
+          "toolRef": "BIOME_LINT",
+          "stages": ["STAGED", "COMMIT", "CI"]
+        },
+        "typechecker": {
+          "toolRef": "TYPECHECK_EXEMPT_POLICY",
+          "stages": []
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_LOCATOR_POLICY",
+          "stages": ["COMMIT", "CI"]
+        }
+      }
+    },
+    {
+      "areaRef": "PACKAGES_TS_BOUNDARIES",
+      "label": "Shared TS Package Boundaries",
+      "qualityClass": "GOVERNED_JS_TS_SOURCE",
+      "owners": [
+        "@taxat/foundations-contracts",
+        "@taxat/engine-core",
+        "@taxat/web-experience",
+        "@taxat/native-experience",
+        "@taxat/reliability-release"
+      ],
+      "pathGlobs": [
+        "packages/contracts-core/package.json",
+        "packages/contracts-core/src/index.ts",
+        "packages/contracts-tools/package.json",
+        "packages/contracts-tools/src/**",
+        "packages/contracts-docs/package.json",
+        "packages/contracts-docs/src/**",
+        "packages/access-control/package.json",
+        "packages/access-control/src/**",
+        "packages/generated-models/package.json",
+        "packages/generated-models/src/index.ts",
+        "packages/runtime-foundation/package.json",
+        "packages/runtime-foundation/src/**",
+        "packages/domain-kernel/package.json",
+        "packages/domain-kernel/src/**",
+        "packages/telemetry/package.json",
+        "packages/telemetry/src/**",
+        "packages/audit/package.json",
+        "packages/audit/src/**",
+        "packages/web-platform/package.json",
+        "packages/web-platform/src/**",
+        "packages/native-platform/package.json",
+        "packages/native-platform/src/**",
+        "packages/testing-harnesses/package.json",
+        "packages/testing-harnesses/src/**"
+      ],
+      "coverage": {
+        "formatter": {
+          "toolRef": "BIOME_FORMAT",
+          "stages": ["SAVE", "STAGED", "COMMIT", "CI"]
+        },
+        "linter": {
+          "toolRef": "BIOME_LINT",
+          "stages": ["STAGED", "COMMIT", "CI"]
+        },
+        "typechecker": {
+          "toolRef": "TYPECHECK_EXEMPT_POLICY",
+          "stages": []
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "CONTRACTS_CORE_SCHEMA_CATALOG",
+      "label": "Contracts Core Generated Schema Catalog",
+      "qualityClass": "GENERATED_CODE",
+      "owners": ["@taxat/foundations-contracts"],
+      "pathGlobs": ["packages/contracts-core/src/schemaCatalog.ts"],
+      "coverage": {
+        "formatter": {
+          "toolRef": "FORMAT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "linter": {
+          "toolRef": "LINT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "typechecker": {
+          "toolRef": "CONTRACT_HASH_SYNC",
+          "stages": ["COMMIT", "CI"]
+        },
+        "hooks": {
+          "toolRef": "GENERATED_EDIT_GUARD",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "CONTRACTS_CORE_PY_ADAPTERS",
+      "label": "Contracts Core Python Adapters",
+      "qualityClass": "IMPORTED_CANONICAL_MIRROR",
+      "owners": ["@taxat/foundations-contracts"],
+      "pathGlobs": ["packages/contracts-core/python/*.py"],
+      "coverage": {
+        "formatter": {
+          "toolRef": "FORMAT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "linter": {
+          "toolRef": "LINT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "typechecker": {
+          "toolRef": "CONTRACT_HASH_SYNC",
+          "stages": ["COMMIT", "CI"]
+        },
+        "hooks": {
+          "toolRef": "GENERATED_EDIT_GUARD",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "CONTROL_PLANE_DB_WORKSPACE",
+      "label": "Control-Plane Database Workspace",
+      "qualityClass": "GOVERNED_JS_TS_SOURCE",
+      "owners": ["@taxat/foundations-contracts"],
+      "pathGlobs": ["packages/control-plane-db/package.json", "packages/control-plane-db/src/**"],
+      "coverage": {
+        "formatter": {
+          "toolRef": "BIOME_FORMAT",
+          "stages": ["SAVE", "STAGED", "COMMIT", "CI"]
+        },
+        "linter": {
+          "toolRef": "BIOME_LINT",
+          "stages": ["STAGED", "COMMIT", "CI"]
+        },
+        "typechecker": {
+          "toolRef": "TSC_REPO",
+          "stages": ["COMMIT", "CI"]
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "BACKEND_ACCESS_WORKSPACE",
+      "label": "Backend Access Workspace",
+      "qualityClass": "GOVERNED_JS_TS_SOURCE",
+      "owners": ["@taxat/engine-core"],
+      "pathGlobs": ["packages/backend-access/package.json", "packages/backend-access/src/**"],
+      "coverage": {
+        "formatter": {
+          "toolRef": "BIOME_FORMAT",
+          "stages": ["SAVE", "STAGED", "COMMIT", "CI"]
+        },
+        "linter": {
+          "toolRef": "BIOME_LINT",
+          "stages": ["STAGED", "COMMIT", "CI"]
+        },
+        "typechecker": {
+          "toolRef": "TSC_REPO",
+          "stages": ["COMMIT", "CI"]
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "OPERATOR_WEB_GOVERNANCE_ACCESS_ROUTE_METADATA",
+      "label": "Operator Web Governance Access Route Metadata",
+      "qualityClass": "AUTHORED_UI_METADATA",
+      "owners": ["@taxat/operator-web", "@taxat/governance-control-plane"],
+      "pathGlobs": [
+        "apps/operator-web/src/routes/governance/access/index.tsx",
+        "apps/operator-web/src/routes/governance/access/simulator.tsx"
+      ],
+      "coverage": {
+        "formatter": {
+          "toolRef": "BIOME_FORMAT",
+          "stages": ["SAVE", "STAGED", "COMMIT", "CI"]
+        },
+        "linter": {
+          "toolRef": "BIOME_LINT",
+          "stages": ["STAGED", "COMMIT", "CI"]
+        },
+        "typechecker": {
+          "toolRef": "TSC_REPO",
+          "stages": ["COMMIT", "CI"]
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_INTERNAL_ATLAS_BROWSER",
+          "stages": ["CI"]
+        }
+      }
+    },
+    {
+      "areaRef": "OPERATOR_WEB_GOVERNANCE_ACCESS_STATIC_SURFACES",
+      "label": "Operator Web Governance Access Static Surfaces",
+      "qualityClass": "STATIC_BROWSER_EXPERIENCE",
+      "owners": ["@taxat/operator-web", "@taxat/governance-control-plane"],
+      "pathGlobs": ["apps/operator-web/public/governance/access/**"],
+      "coverage": {
+        "formatter": {
+          "toolRef": "BIOME_FORMAT",
+          "stages": ["SAVE", "STAGED", "COMMIT", "CI"]
+        },
+        "linter": {
+          "toolRef": "BIOME_LINT",
+          "stages": ["STAGED", "COMMIT", "CI"]
+        },
+        "typechecker": {
+          "toolRef": "TYPECHECK_EXEMPT_POLICY",
+          "stages": []
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_INTERNAL_ATLAS_BROWSER",
+          "stages": ["CI"]
+        }
+      }
+    },
+    {
+      "areaRef": "OPERATOR_WEB_INTERNAL_ROUTE_METADATA",
+      "label": "Operator Web Internal Route Metadata",
+      "qualityClass": "GOVERNED_JS_TS_SOURCE",
+      "owners": ["@taxat/web-experience"],
+      "pathGlobs": [
+        "apps/operator-web/src/index.ts",
+        "apps/operator-web/src/components/contracts-observatory/**",
+        "apps/operator-web/src/routes/internal/audit-stream-atlas.tsx",
+        "apps/operator-web/src/routes/internal/binding-coverage-atlas.tsx",
+        "apps/operator-web/src/routes/internal/cache-isolation-atlas.tsx",
+        "apps/operator-web/src/routes/internal/canonical-domain-example-atlas.tsx",
+        "apps/operator-web/src/routes/internal/canonical-primitives-atlas.tsx",
+        "apps/operator-web/src/routes/internal/code-quality-atlas.tsx",
+        "apps/operator-web/src/routes/internal/contracts-observatory/index.tsx",
+        "apps/operator-web/src/routes/internal/contracts-observatory/[artifact].tsx",
+        "apps/operator-web/src/routes/internal/config-resolution-atlas.tsx",
+        "apps/operator-web/src/routes/internal/environment-basis-atlas.tsx",
+        "apps/operator-web/src/routes/internal/event-envelope-atlas.tsx",
+        "apps/operator-web/src/routes/internal/local-runtime-observatory.tsx",
+        "apps/operator-web/src/routes/internal/migration-window-atlas.tsx",
+        "apps/operator-web/src/routes/internal/northbound-boundary-atlas.tsx",
+        "apps/operator-web/src/routes/internal/object-lifecycle-atlas.tsx",
+        "apps/operator-web/src/routes/internal/queue-fabric-atlas.tsx",
+        "apps/operator-web/src/routes/internal/reference-grammar-atlas.tsx",
+        "apps/operator-web/src/routes/internal/schema-catalog-atlas.tsx",
+        "apps/operator-web/src/routes/internal/schema-compatibility-atlas.tsx",
+        "apps/operator-web/src/routes/internal/stream-recovery-atlas.tsx",
+        "apps/operator-web/src/routes/internal/telemetry-correlation-atlas.tsx",
+        "apps/operator-web/src/routes/internal/upload-transfer-atlas.tsx",
+        "apps/operator-web/src/routes/internal/workspace-topology-atlas.tsx"
+      ],
+      "coverage": {
+        "formatter": {
+          "toolRef": "BIOME_FORMAT",
+          "stages": ["SAVE", "STAGED", "COMMIT", "CI"]
+        },
+        "linter": {
+          "toolRef": "BIOME_LINT",
+          "stages": ["STAGED", "COMMIT", "CI"]
+        },
+        "typechecker": {
+          "toolRef": "TSC_REPO",
+          "stages": ["COMMIT", "CI"]
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_INTERNAL_ATLAS_BROWSER",
+          "stages": ["CI"]
+        }
+      }
+    },
+    {
+      "areaRef": "OPERATOR_WEB_INTERNAL_STATIC_ATLASES",
+      "label": "Operator Web Internal Static Atlases",
+      "qualityClass": "GOVERNED_STATIC_WEB_SOURCE",
+      "owners": ["@taxat/web-experience"],
+      "pathGlobs": [
+        "apps/operator-web/public/internal/audit-stream-atlas/**",
+        "apps/operator-web/public/internal/binding-coverage-atlas/**",
+        "apps/operator-web/public/internal/cache-isolation-atlas/**",
+        "apps/operator-web/public/internal/canonical-domain-example-atlas/**",
+        "apps/operator-web/public/internal/canonical-primitives-atlas/**",
+        "apps/operator-web/public/internal/code-quality-atlas/**",
+        "apps/operator-web/public/internal/config-resolution-atlas/**",
+        "apps/operator-web/public/internal/contracts-observatory/**",
+        "apps/operator-web/public/internal/environment-basis-atlas/**",
+        "apps/operator-web/public/internal/event-envelope-atlas/**",
+        "apps/operator-web/public/internal/local-runtime-observatory/**",
+        "apps/operator-web/public/internal/migration-window-atlas/**",
+        "apps/operator-web/public/internal/northbound-boundary-atlas/**",
+        "apps/operator-web/public/internal/object-lifecycle-atlas/**",
+        "apps/operator-web/public/internal/queue-fabric-atlas/**",
+        "apps/operator-web/public/internal/reference-grammar-atlas/**",
+        "apps/operator-web/public/internal/schema-catalog-atlas/**",
+        "apps/operator-web/public/internal/schema-compatibility-atlas/**",
+        "apps/operator-web/public/internal/stream-recovery-atlas/**",
+        "apps/operator-web/public/internal/telemetry-correlation-atlas/**",
+        "apps/operator-web/public/internal/upload-transfer-atlas/**",
+        "apps/operator-web/public/internal/workspace-topology-atlas/**"
+      ],
+      "coverage": {
+        "formatter": {
+          "toolRef": "BIOME_FORMAT",
+          "stages": ["SAVE", "STAGED", "COMMIT", "CI"]
+        },
+        "linter": {
+          "toolRef": "BIOME_LINT",
+          "stages": ["STAGED", "COMMIT", "CI"]
+        },
+        "typechecker": {
+          "toolRef": "TYPECHECK_EXEMPT_POLICY",
+          "stages": []
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_INTERNAL_ATLAS_BROWSER",
+          "stages": ["CI"]
+        }
+      }
+    },
+    {
+      "areaRef": "AUTOMATION_PROVISIONING_WORKSPACE",
+      "label": "Provisioning Automation Workspace",
+      "qualityClass": "GOVERNED_JS_TS_SOURCE",
+      "owners": ["@taxat/foundations-contracts"],
+      "pathGlobs": [
+        "automation/provisioning/package.json",
+        "automation/provisioning/playwright.config.ts",
+        "automation/provisioning/src/**",
+        "automation/provisioning/scripts/**",
+        "automation/provisioning/tests/**/*.ts",
+        "automation/provisioning/report_viewer/src/**",
+        "automation/provisioning/report_viewer/app.js",
+        "automation/provisioning/report_viewer/styles.css"
+      ],
+      "coverage": {
+        "formatter": {
+          "toolRef": "BIOME_FORMAT",
+          "stages": ["SAVE", "STAGED", "COMMIT", "CI"]
+        },
+        "linter": {
+          "toolRef": "BIOME_LINT",
+          "stages": ["STAGED", "COMMIT", "CI"]
+        },
+        "typechecker": {
+          "toolRef": "TSC_AUTOMATION",
+          "stages": ["COMMIT", "CI"]
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_LOCATOR_POLICY",
+          "stages": ["COMMIT", "CI"]
+        }
+      }
+    },
+    {
+      "areaRef": "REPOSITORY_TEST_SUITES",
+      "label": "Repository Unit, Integration, And Browser Suites",
+      "qualityClass": "GOVERNED_JS_TS_SOURCE",
+      "owners": ["@taxat/reliability-release"],
+      "pathGlobs": [
+        "playwright.config.ts",
+        "tests/unit/**/*.ts",
+        "tests/integration/**/*.ts",
+        "tests/playwright/**/*.ts"
+      ],
+      "coverage": {
+        "formatter": {
+          "toolRef": "BIOME_FORMAT",
+          "stages": ["SAVE", "STAGED", "COMMIT", "CI"]
+        },
+        "linter": {
+          "toolRef": "BIOME_LINT",
+          "stages": ["STAGED", "COMMIT", "CI"]
+        },
+        "typechecker": {
+          "toolRef": "TYPECHECK_EXEMPT_POLICY",
+          "stages": []
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_LOCATOR_POLICY",
+          "stages": ["COMMIT", "CI"]
+        }
+      }
+    },
+    {
+      "areaRef": "REPOSITORY_ATLAS_AND_QUALITY_TESTS",
+      "label": "Repository Atlas And Quality Tests",
+      "qualityClass": "GOVERNED_JS_TS_SOURCE",
+      "owners": ["@taxat/reliability-release", "@taxat/web-experience"],
+      "pathGlobs": [
+        "playwright.config.ts",
+        "tests/unit/repository/**/*.ts",
+        "tests/playwright/internal/**/*.ts"
+      ],
+      "coverage": {
+        "formatter": {
+          "toolRef": "BIOME_FORMAT",
+          "stages": ["SAVE", "STAGED", "COMMIT", "CI"]
+        },
+        "linter": {
+          "toolRef": "BIOME_LINT",
+          "stages": ["STAGED", "COMMIT", "CI"]
+        },
+        "typechecker": {
+          "toolRef": "TSC_REPO",
+          "stages": ["COMMIT", "CI"]
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_INTERNAL_ATLAS_BROWSER",
+          "stages": ["CI"]
+        }
+      }
+    },
+    {
+      "areaRef": "PYTHON_VALIDATORS",
+      "label": "Python Validators",
+      "qualityClass": "GOVERNED_PYTHON_SOURCE",
+      "owners": ["@taxat/foundations-contracts"],
+      "pathGlobs": ["python/validators/pyproject.toml", "python/validators/src/**"],
+      "coverage": {
+        "formatter": {
+          "toolRef": "RUFF_FORMAT",
+          "stages": ["SAVE", "STAGED", "COMMIT", "CI"]
+        },
+        "linter": {
+          "toolRef": "RUFF_LINT",
+          "stages": ["STAGED", "COMMIT", "CI"]
+        },
+        "typechecker": {
+          "toolRef": "PYRIGHT",
+          "stages": ["COMMIT", "CI"]
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "PYTHON_ANALYSIS_AND_CORPUS_TOOLS",
+      "label": "Python Analysis And Contract Tooling",
+      "qualityClass": "GOVERNED_PYTHON_SOURCE",
+      "owners": ["@taxat/foundations-contracts"],
+      "pathGlobs": ["tools/analysis/**/*.py", "tools/security/**/*.py", "tools/contracts/**/*.py"],
+      "coverage": {
+        "formatter": {
+          "toolRef": "RUFF_FORMAT",
+          "stages": ["SAVE", "STAGED", "COMMIT", "CI"]
+        },
+        "linter": {
+          "toolRef": "RUFF_LINT",
+          "stages": ["STAGED", "COMMIT", "CI"]
+        },
+        "typechecker": {
+          "toolRef": "TYPECHECK_EXEMPT_POLICY",
+          "stages": []
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "LOCAL_RUNTIME_BOOTSTRAP_SCRIPTS",
+      "label": "Local Runtime Bootstrap Scripts",
+      "qualityClass": "GOVERNED_PYTHON_SOURCE",
+      "owners": ["@taxat/foundations-contracts"],
+      "pathGlobs": ["scripts/local/**/*.py"],
+      "coverage": {
+        "formatter": {
+          "toolRef": "RUFF_FORMAT",
+          "stages": ["SAVE", "STAGED", "COMMIT", "CI"]
+        },
+        "linter": {
+          "toolRef": "RUFF_LINT",
+          "stages": ["STAGED", "COMMIT", "CI"]
+        },
+        "typechecker": {
+          "toolRef": "PYRIGHT",
+          "stages": ["COMMIT", "CI"]
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "EPHEMERAL_TEST_LIFECYCLE_SCRIPTS",
+      "label": "Ephemeral Test Lifecycle Scripts",
+      "qualityClass": "GOVERNED_PYTHON_SOURCE",
+      "owners": ["@taxat/foundations-contracts"],
+      "pathGlobs": ["scripts/test/**/*.py"],
+      "coverage": {
+        "formatter": {
+          "toolRef": "RUFF_FORMAT",
+          "stages": ["SAVE", "STAGED", "COMMIT", "CI"]
+        },
+        "linter": {
+          "toolRef": "RUFF_LINT",
+          "stages": ["STAGED", "COMMIT", "CI"]
+        },
+        "typechecker": {
+          "toolRef": "PYRIGHT",
+          "stages": ["COMMIT", "CI"]
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "REPOSITORY_TASK_RUNNER_PYTHON",
+      "label": "Repository Task Runner Python",
+      "qualityClass": "GOVERNED_PYTHON_SOURCE",
+      "owners": ["@taxat/foundations-contracts"],
+      "pathGlobs": ["scripts/tasks/**/*.py", "scripts/agent/**/*.py"],
+      "coverage": {
+        "formatter": {
+          "toolRef": "RUFF_FORMAT",
+          "stages": ["SAVE", "STAGED", "COMMIT", "CI"]
+        },
+        "linter": {
+          "toolRef": "RUFF_LINT",
+          "stages": ["STAGED", "COMMIT", "CI"]
+        },
+        "typechecker": {
+          "toolRef": "PYRIGHT",
+          "stages": ["COMMIT", "CI"]
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "REPOSITORY_TASK_RUNNER_SHELL_SURFACES",
+      "label": "Repository Task Runner Shell Surfaces",
+      "qualityClass": "GOVERNED_SHELL_AND_MAKE_SURFACE",
+      "owners": ["@taxat/foundations-contracts"],
+      "pathGlobs": ["Makefile", "scripts/agent/**/*.sh", "tests/integration/repository/**/*.sh"],
+      "coverage": {
+        "formatter": {
+          "toolRef": "FORMAT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "linter": {
+          "toolRef": "LINT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "typechecker": {
+          "toolRef": "TYPECHECK_EXEMPT_POLICY",
+          "stages": []
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "ALGORITHM_CANONICAL_VALIDATORS",
+      "label": "Algorithm Canonical Validator Bundle",
+      "qualityClass": "AUTHORITATIVE_CANONICAL_PYTHON_SOURCE",
+      "owners": ["@taxat/foundations-contracts"],
+      "pathGlobs": ["Algorithm/scripts/**/*.py", "Algorithm/tools/**/*.py"],
+      "coverage": {
+        "formatter": {
+          "toolRef": "FORMAT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "linter": {
+          "toolRef": "LINT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "typechecker": {
+          "toolRef": "CONTRACT_HASH_SYNC",
+          "stages": ["COMMIT", "CI"]
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": []
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "NATIVE_TAXAT_OPERATOR_WORKSPACE",
+      "label": "Native TaxatOperator Workspace",
+      "qualityClass": "DECLARED_NATIVE_BOUNDARY",
+      "owners": ["@taxat/native-experience"],
+      "pathGlobs": [
+        "native/TaxatOperator/Package.swift",
+        "native/TaxatOperator/README.md",
+        "native/TaxatOperator/Sources/**",
+        "native/TaxatOperator/Tests/**",
+        "native/TaxatOperator/GeneratedContracts/Tests/**"
+      ],
+      "coverage": {
+        "formatter": {
+          "toolRef": "FORMAT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "linter": {
+          "toolRef": "LINT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "typechecker": {
+          "toolRef": "SWIFTPM_SMOKE",
+          "stages": ["CI"]
+        },
+        "hooks": {
+          "toolRef": "GENERATED_EDIT_GUARD",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "PROTOTYPE_ANALYSIS_STATIC_APPS",
+      "label": "Prototype Analysis Atlases",
+      "qualityClass": "GOVERNED_STATIC_WEB_SOURCE",
+      "owners": ["@taxat/web-experience"],
+      "pathGlobs": ["prototypes/analysis/**/*.js", "tests/playwright/analysis/**/*.ts"],
+      "coverage": {
+        "formatter": {
+          "toolRef": "BIOME_FORMAT",
+          "stages": ["SAVE", "STAGED", "COMMIT", "CI"]
+        },
+        "linter": {
+          "toolRef": "BIOME_LINT",
+          "stages": ["STAGED", "COMMIT", "CI"]
+        },
+        "typechecker": {
+          "toolRef": "TYPECHECK_EXEMPT_POLICY",
+          "stages": []
+        },
+        "hooks": {
+          "toolRef": "PRE_COMMIT_SCOPED",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_LOCATOR_POLICY",
+          "stages": ["COMMIT", "CI"]
+        }
+      }
+    },
+    {
+      "areaRef": "IMPORTED_CONTRACT_MIRRORS",
+      "label": "Imported Contract Mirrors",
+      "qualityClass": "IMPORTED_CANONICAL_MIRROR",
+      "owners": ["@taxat/foundations-contracts"],
+      "pathGlobs": [
+        "packages/contracts-core/schemas/**",
+        "packages/contracts-core/samples/**",
+        "packages/contracts-core/data/schema_source_map.json",
+        "packages/contracts-core/data/sample_binding_map.json"
+      ],
+      "coverage": {
+        "formatter": {
+          "toolRef": "FORMAT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "linter": {
+          "toolRef": "LINT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "typechecker": {
+          "toolRef": "CONTRACT_HASH_SYNC",
+          "stages": ["COMMIT", "CI"]
+        },
+        "hooks": {
+          "toolRef": "GENERATED_EDIT_GUARD",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "GENERATED_TS_BINDINGS",
+      "label": "Generated TypeScript Bindings",
+      "qualityClass": "GENERATED_CODE",
+      "owners": ["@taxat/foundations-contracts"],
+      "pathGlobs": ["packages/generated-models/src/generated/typescript/**"],
+      "coverage": {
+        "formatter": {
+          "toolRef": "FORMAT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "linter": {
+          "toolRef": "LINT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "typechecker": {
+          "toolRef": "GENERATOR_SYNC",
+          "stages": ["COMMIT", "CI"]
+        },
+        "hooks": {
+          "toolRef": "GENERATED_EDIT_GUARD",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "GENERATED_PYTHON_BINDINGS",
+      "label": "Generated Python Bindings",
+      "qualityClass": "GENERATED_CODE",
+      "owners": ["@taxat/foundations-contracts"],
+      "pathGlobs": [
+        "python/generated_contract_models/src/taxat_generated_contract_models/generated/**"
+      ],
+      "coverage": {
+        "formatter": {
+          "toolRef": "FORMAT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "linter": {
+          "toolRef": "LINT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "typechecker": {
+          "toolRef": "GENERATOR_SYNC",
+          "stages": ["COMMIT", "CI"]
+        },
+        "hooks": {
+          "toolRef": "GENERATED_EDIT_GUARD",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "GENERATED_SWIFT_BINDINGS",
+      "label": "Generated Swift Bindings",
+      "qualityClass": "GENERATED_CODE",
+      "owners": ["@taxat/foundations-contracts", "@taxat/native-experience"],
+      "pathGlobs": [
+        "native/TaxatOperator/GeneratedContracts/Sources/GeneratedContracts/Generated/**"
+      ],
+      "coverage": {
+        "formatter": {
+          "toolRef": "FORMAT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "linter": {
+          "toolRef": "LINT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "typechecker": {
+          "toolRef": "SWIFTPM_SMOKE",
+          "stages": ["CI"]
+        },
+        "hooks": {
+          "toolRef": "GENERATED_EDIT_GUARD",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    },
+    {
+      "areaRef": "GENERATED_DATA_AND_RUNBOOK_ARTIFACTS",
+      "label": "Generated Atlas, Data, And Provisioning Artifacts",
+      "qualityClass": "GENERATED_DATA",
+      "owners": ["@taxat/foundations-contracts", "@taxat/reliability-release"],
+      "pathGlobs": [
+        "apps/operator-web/public/internal/*/data/**",
+        "data/contracts/**",
+        "config/ci/**",
+        "config/edge/**",
+        "config/smoke/**",
+        "config/supplychain/**",
+        "data/provisioning/**",
+        "data/smoke/**",
+        "docs/provisioning/**",
+        "docs/verification/**",
+        "automation/provisioning/report_viewer/data/sample_run.json"
+      ],
+      "coverage": {
+        "formatter": {
+          "toolRef": "FORMAT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "linter": {
+          "toolRef": "LINT_EXEMPT_POLICY",
+          "stages": []
+        },
+        "typechecker": {
+          "toolRef": "GENERATOR_SYNC",
+          "stages": ["CI"]
+        },
+        "hooks": {
+          "toolRef": "GENERATED_EDIT_GUARD",
+          "stages": ["STAGED", "COMMIT"]
+        },
+        "playwright": {
+          "toolRef": "PLAYWRIGHT_NOT_APPLICABLE",
+          "stages": []
+        }
+      }
+    }
+  ]
+}

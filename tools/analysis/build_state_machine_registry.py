@@ -16,7 +16,9 @@ DATA_ANALYSIS_DIR = ROOT / "data" / "analysis"
 DOCS_ANALYSIS_DIR = ROOT / "docs" / "analysis"
 DIAGRAMS_ANALYSIS_DIR = ROOT / "diagrams" / "analysis"
 
-STATE_MACHINE_DOC_PATH = DOCS_ANALYSIS_DIR / "09_state_machine_definitions_and_transition_invariants.md"
+STATE_MACHINE_DOC_PATH = (
+    DOCS_ANALYSIS_DIR / "09_state_machine_definitions_and_transition_invariants.md"
+)
 TERMINAL_DOC_PATH = DOCS_ANALYSIS_DIR / "09_terminal_recovery_and_supersession_matrix.md"
 INVARIANT_DOC_PATH = DOCS_ANALYSIS_DIR / "09_cross_state_invariant_index.md"
 MERMAID_PATH = DIAGRAMS_ANALYSIS_DIR / "09_state_machine_overview.mmd"
@@ -680,7 +682,9 @@ MANUAL_TERMINAL_STATES = {
 }
 
 
-def parse_children(lines: list[str], start_index: int, end_index: int, level: int, key_prefix: str) -> list[Block]:
+def parse_children(
+    lines: list[str], start_index: int, end_index: int, level: int, key_prefix: str
+) -> list[Block]:
     marker = "#" * level + " "
     positions: list[tuple[int, str]] = []
     for index in range(start_index, end_index):
@@ -701,7 +705,9 @@ def parse_children(lines: list[str], start_index: int, end_index: int, level: in
             end_line=next_index,
             lines=lines[index:next_index],
         )
-        block.children = parse_children(lines, index + 1, next_index, level + 1, child_key) if level < 4 else []
+        block.children = (
+            parse_children(lines, index + 1, next_index, level + 1, child_key) if level < 4 else []
+        )
         blocks.append(block)
     return blocks
 
@@ -789,7 +795,9 @@ def code_bullets(block: Block) -> list[dict[str, Any]]:
 def parse_coverage_map(section_6_1: Block) -> dict[tuple[str, str], dict[str, str]]:
     coverage_block = get_child_block(section_6_1, "Persisted coverage map")
     rows: dict[tuple[str, str], dict[str, str]] = {}
-    for line_number, line in enumerate(coverage_block.lines[1:], start=coverage_block.start_line + 1):
+    for line_number, line in enumerate(
+        coverage_block.lines[1:], start=coverage_block.start_line + 1
+    ):
         if not line.startswith("|") or line.startswith("| ---"):
             continue
         parts = [part.strip() for part in line.strip().strip("|").split("|")]
@@ -804,7 +812,9 @@ def parse_coverage_map(section_6_1: Block) -> dict[tuple[str, str], dict[str, st
         rows[(object_family, state_field)] = {
             "schema_path": schema_path,
             "shared_transition_contract": contract_name,
-            "source_ref": line_ref(repo_rel(STATE_MACHINES_PATH), line_number, f"{object_family}.{state_field}"),
+            "source_ref": line_ref(
+                repo_rel(STATE_MACHINES_PATH), line_number, f"{object_family}.{state_field}"
+            ),
         }
     return rows
 
@@ -827,7 +837,11 @@ def parse_explicit_transitions(
         source = match.group("source").strip()
         event = match.group("event").strip()
         target = match.group("target").strip()
-        if source not in states and target not in states and not any(f"`{state}`" in raw for state in states):
+        if (
+            source not in states
+            and target not in states
+            and not any(f"`{state}`" in raw for state in states)
+        ):
             continue
         rows.append(
             {
@@ -845,7 +859,9 @@ def parse_explicit_transitions(
                 "target_ref_kind": "state" if target in states else "selector_alias",
                 "source_file": repo_rel(STATE_MACHINES_PATH),
                 "source_heading_or_logical_block": line_ref(
-                    repo_rel(STATE_MACHINES_PATH), item["line_number"], f"{object_family}.{state_field}"
+                    repo_rel(STATE_MACHINES_PATH),
+                    item["line_number"],
+                    f"{object_family}.{state_field}",
                 ),
                 "rationale": "Explicit event-driven transition extracted from the canonical state-machine source.",
             }
@@ -881,7 +897,9 @@ def parse_prose_transitions(
                 "target_ref_kind": "state" if target_hits else "implicit_rule_context",
                 "source_file": repo_rel(STATE_MACHINES_PATH),
                 "source_heading_or_logical_block": line_ref(
-                    repo_rel(STATE_MACHINES_PATH), item["line_number"], f"{object_family}.{state_field}"
+                    repo_rel(STATE_MACHINES_PATH),
+                    item["line_number"],
+                    f"{object_family}.{state_field}",
                 ),
                 "rationale": "Prose transition rule retained verbatim because the source section did not use explicit event-edge syntax.",
             }
@@ -898,7 +916,9 @@ def parse_schema_index() -> dict[str, Path]:
     return rows
 
 
-def recursive_find_property_paths(payload: Any, field_name: str, path_parts: list[str] | None = None) -> list[list[str]]:
+def recursive_find_property_paths(
+    payload: Any, field_name: str, path_parts: list[str] | None = None
+) -> list[list[str]]:
     path_parts = path_parts or []
     rows: list[list[str]] = []
     if isinstance(payload, dict):
@@ -935,7 +955,9 @@ def load_json_if_exists(path: Path) -> Any:
     return json.loads(path.read_text())
 
 
-def parse_text_machine_refs(text: str, direct_map: dict[tuple[str, str], str], primary_map: dict[str, str]) -> list[str]:
+def parse_text_machine_refs(
+    text: str, direct_map: dict[tuple[str, str], str], primary_map: dict[str, str]
+) -> list[str]:
     refs: list[str] = []
     for object_name, field_name in FIELD_REF_RE.findall(text):
         machine_id = direct_map.get((object_name, field_name))
@@ -954,7 +976,9 @@ def parse_text_machine_refs(text: str, direct_map: dict[tuple[str, str], str], p
     return ordered_unique(refs)
 
 
-def extract_policy_line(rule_items: list[dict[str, Any]], keywords: tuple[str, ...], fallback: str) -> str:
+def extract_policy_line(
+    rule_items: list[dict[str, Any]], keywords: tuple[str, ...], fallback: str
+) -> str:
     for item in rule_items:
         lowered = item["text"].lower()
         if all(keyword in lowered for keyword in keywords):
@@ -995,11 +1019,17 @@ def build_outputs() -> dict[str, Any]:
     primary_machine_by_object: dict[str, str] = {}
     for entry in MACHINE_SPECS:
         machine_ids_by_field[(entry.object_family, entry.state_field)] = entry.machine_id
-        if entry.object_family not in primary_machine_by_object or entry.machine_class in {"lifecycle", "cursor", "release_control"}:
+        if entry.object_family not in primary_machine_by_object or entry.machine_class in {
+            "lifecycle",
+            "cursor",
+            "release_control",
+        }:
             primary_machine_by_object[entry.object_family] = entry.machine_id
 
     invariants_rows: list[dict[str, Any]] = []
-    for index, item in enumerate(collect_list_items(section_blocks["6.1"], stop_before_children=True), start=1):
+    for index, item in enumerate(
+        collect_list_items(section_blocks["6.1"], stop_before_children=True), start=1
+    ):
         invariants_rows.append(
             {
                 "invariant_id": f"inv_global_{index:03d}",
@@ -1008,9 +1038,15 @@ def build_outputs() -> dict[str, Any]:
                 "scope": "global",
                 "raw_invariant": item["text"],
                 "authoritative_source_refs": [
-                    line_ref(repo_rel(STATE_MACHINES_PATH), item["line_number"], f"global_rule_{index:03d}")
+                    line_ref(
+                        repo_rel(STATE_MACHINES_PATH),
+                        item["line_number"],
+                        f"global_rule_{index:03d}",
+                    )
                 ],
-                "related_machine_ids": parse_text_machine_refs(item["text"], machine_ids_by_field, primary_machine_by_object),
+                "related_machine_ids": parse_text_machine_refs(
+                    item["text"], machine_ids_by_field, primary_machine_by_object
+                ),
                 "source_file": repo_rel(STATE_MACHINES_PATH),
                 "source_heading_or_logical_block": line_ref(
                     repo_rel(STATE_MACHINES_PATH), item["line_number"], f"global_rule_{index:03d}"
@@ -1027,9 +1063,15 @@ def build_outputs() -> dict[str, Any]:
                 "scope": "cross_state",
                 "raw_invariant": item["text"],
                 "authoritative_source_refs": [
-                    line_ref(repo_rel(STATE_MACHINES_PATH), item["line_number"], f"cross_state_{index:03d}")
+                    line_ref(
+                        repo_rel(STATE_MACHINES_PATH),
+                        item["line_number"],
+                        f"cross_state_{index:03d}",
+                    )
                 ],
-                "related_machine_ids": parse_text_machine_refs(item["text"], machine_ids_by_field, primary_machine_by_object),
+                "related_machine_ids": parse_text_machine_refs(
+                    item["text"], machine_ids_by_field, primary_machine_by_object
+                ),
                 "source_file": repo_rel(STATE_MACHINES_PATH),
                 "source_heading_or_logical_block": line_ref(
                     repo_rel(STATE_MACHINES_PATH), item["line_number"], f"cross_state_{index:03d}"
@@ -1075,7 +1117,11 @@ def build_outputs() -> dict[str, Any]:
             section_ids.append(section_id)
             source_block = get_child_block(section_blocks[section_id], block_title)
             source_refs.append(
-                line_ref(repo_rel(STATE_MACHINES_PATH), source_block.start_line, f"{spec_entry.object_family}.{spec_entry.state_field}")
+                line_ref(
+                    repo_rel(STATE_MACHINES_PATH),
+                    source_block.start_line,
+                    f"{spec_entry.object_family}.{spec_entry.state_field}",
+                )
             )
             all_state_rows.extend(code_bullets(source_block))
 
@@ -1117,11 +1163,15 @@ def build_outputs() -> dict[str, Any]:
         for row in explicit_edges + prose_edges:
             edge_key = (row["transition_kind"], row["raw_transition"])
             if edge_key in seen_edge_keys:
-                note_set.add("ASSUMPTION_DUPLICATE_TRANSITION_STRING_COLLAPSED_ACROSS_SECTION_OVERLAY")
+                note_set.add(
+                    "ASSUMPTION_DUPLICATE_TRANSITION_STRING_COLLAPSED_ACROSS_SECTION_OVERLAY"
+                )
                 continue
             seen_edge_keys.add(edge_key)
             deduped_edges.append(row)
-        explicit_edges = [row for row in deduped_edges if row["transition_kind"] == "explicit_event_edge"]
+        explicit_edges = [
+            row for row in deduped_edges if row["transition_kind"] == "explicit_event_edge"
+        ]
         prose_edges = [row for row in deduped_edges if row["transition_kind"] == "prose_rule"]
         for index, row in enumerate(explicit_edges, start=1):
             row["transition_id"] = f"{spec_entry.machine_id}_edge_{index:03d}"
@@ -1133,14 +1183,22 @@ def build_outputs() -> dict[str, Any]:
             section_ids.append(section_id)
             source_block = get_child_block(section_blocks[section_id], block_title)
             source_refs.append(
-                line_ref(repo_rel(STATE_MACHINES_PATH), source_block.start_line, f"{spec_entry.object_family}.{spec_entry.state_field}")
+                line_ref(
+                    repo_rel(STATE_MACHINES_PATH),
+                    source_block.start_line,
+                    f"{spec_entry.object_family}.{spec_entry.state_field}",
+                )
             )
             rule_items.extend(collect_list_items(source_block))
 
         source_refs = ordered_unique(source_refs)
         note_set = set(spec_entry.notes)
 
-        if spec_entry.machine_class in {"lifecycle", "cursor", "release_control"} and not explicit_edges and not prose_edges:
+        if (
+            spec_entry.machine_class in {"lifecycle", "cursor", "release_control"}
+            and not explicit_edges
+            and not prose_edges
+        ):
             note_set.add("GAP_NO_TRANSITION_RULES_CAPTURED")
 
         for row in explicit_edges:
@@ -1171,11 +1229,19 @@ def build_outputs() -> dict[str, Any]:
             schema_path = repo_rel(schema_index[spec_entry.schema_title])
         elif spec_entry.object_family in schema_index:
             schema_path = repo_rel(schema_index[spec_entry.object_family])
-        elif spec_entry.object_family in {row["object_name"] for row in entity_catalog.get("objects", [])}:
+        elif spec_entry.object_family in {
+            row["object_name"] for row in entity_catalog.get("objects", [])
+        }:
             entity_row = next(
-                row for row in entity_catalog["objects"] if row["object_name"] == spec_entry.object_family
+                row
+                for row in entity_catalog["objects"]
+                if row["object_name"] == spec_entry.object_family
             )
-            schema_path = entity_row["schema_path_or_paths"][0] if entity_row["schema_path_or_paths"] else None
+            schema_path = (
+                entity_row["schema_path_or_paths"][0]
+                if entity_row["schema_path_or_paths"]
+                else None
+            )
 
         schema_field_paths: list[str] = []
         schema_enum: list[str] = []
@@ -1190,7 +1256,11 @@ def build_outputs() -> dict[str, Any]:
                 field_payload = follow_path(schema_payload, sorted(raw_paths, key=len)[0])
                 raw_enum = field_payload.get("enum")
                 if raw_enum is None:
-                    coverage_status = "no_enum" if spec_entry.machine_class != "compound_axis" else "non_enumerated_counter_field"
+                    coverage_status = (
+                        "no_enum"
+                        if spec_entry.machine_class != "compound_axis"
+                        else "non_enumerated_counter_field"
+                    )
                 else:
                     schema_enum = [value for value in raw_enum if isinstance(value, str)]
                     source_state_set = set(states)
@@ -1216,7 +1286,9 @@ def build_outputs() -> dict[str, Any]:
         related_machine_ids = ordered_unique(
             ref
             for item in rule_items
-            for ref in parse_text_machine_refs(item["text"], machine_ids_by_field, primary_machine_by_object)
+            for ref in parse_text_machine_refs(
+                item["text"], machine_ids_by_field, primary_machine_by_object
+            )
             if ref != spec_entry.machine_id
         )
 
@@ -1240,14 +1312,28 @@ def build_outputs() -> dict[str, Any]:
             [item["text"] for item in rule_items if "authority" in item["text"].lower()]
         )
         mode_rules = ordered_unique(
-            [item["text"] for item in rule_items if "analysis" in item["text"].lower() or "compliance" in item["text"].lower()]
+            [
+                item["text"]
+                for item in rule_items
+                if "analysis" in item["text"].lower() or "compliance" in item["text"].lower()
+            ]
         )
 
         if spec_entry.machine_class in {"lifecycle", "release_control"} and (
-            authority_rules or spec_entry.object_family in {"SubmissionRecord", "FilingCase", "ObligationMirror", "AuthorityInteractionRecord", "AuthorityLink"}
+            authority_rules
+            or spec_entry.object_family
+            in {
+                "SubmissionRecord",
+                "FilingCase",
+                "ObligationMirror",
+                "AuthorityInteractionRecord",
+                "AuthorityLink",
+            }
         ):
             authority_rules = ordered_unique(
-                ["authority-originated transitions outrank tenant-originated assumptions where legal state is involved;"]
+                [
+                    "authority-originated transitions outrank tenant-originated assumptions where legal state is involved;"
+                ]
                 + authority_rules
             )
         if mode_rules:
@@ -1326,7 +1412,9 @@ def build_outputs() -> dict[str, Any]:
                 "schema_path": schema_path,
                 "schema_field_present": bool(schema_field_paths),
                 "schema_field_paths": schema_field_paths,
-                "shared_transition_contract_or_null": coverage_row["shared_transition_contract"] if coverage_row else None,
+                "shared_transition_contract_or_null": coverage_row["shared_transition_contract"]
+                if coverage_row
+                else None,
                 "source_state_count": len(states),
                 "schema_enum_state_count": len(schema_enum),
                 "schema_enum_states": schema_enum,
@@ -1404,7 +1492,9 @@ def build_outputs() -> dict[str, Any]:
                 "record_type": "entity_catalog_primary_state_without_formal_machine",
                 "object_family": object_name,
                 "state_field": primary_state_field,
-                "schema_path": row["schema_path_or_paths"][0] if row["schema_path_or_paths"] else "",
+                "schema_path": row["schema_path_or_paths"][0]
+                if row["schema_path_or_paths"]
+                else "",
                 "rationale": "The entity catalog exposes a primary persisted state field, but no formal state-machine section was registered for it.",
                 "source_refs": row["authoritative_source_refs"],
             }
@@ -1426,7 +1516,11 @@ def build_outputs() -> dict[str, Any]:
     compound_rows = []
     for group in COMPOUND_GROUPS:
         source_refs = [
-            line_ref(repo_rel(STATE_MACHINES_PATH), section_blocks[section_id].start_line, group["compound_axis_id"])
+            line_ref(
+                repo_rel(STATE_MACHINES_PATH),
+                section_blocks[section_id].start_line,
+                group["compound_axis_id"],
+            )
             for section_id in group["source_sections"]
         ]
         compound_rows.append(
@@ -1440,9 +1534,15 @@ def build_outputs() -> dict[str, Any]:
         )
     compound_rows.sort(key=lambda row: row["compound_axis_id"])
 
-    machine_class_counts = dict(sorted(Counter(row["machine_class"] for row in registry_rows).items()))
-    transition_kind_counts = dict(sorted(Counter(row["transition_kind"] for row in edge_rows).items()))
-    coverage_status_counts = dict(sorted(Counter(row["coverage_status"] for row in coverage_rows).items()))
+    machine_class_counts = dict(
+        sorted(Counter(row["machine_class"] for row in registry_rows).items())
+    )
+    transition_kind_counts = dict(
+        sorted(Counter(row["transition_kind"] for row in edge_rows).items())
+    )
+    coverage_status_counts = dict(
+        sorted(Counter(row["coverage_status"] for row in coverage_rows).items())
+    )
 
     registry_payload = {
         "summary": {
@@ -1470,7 +1570,9 @@ def build_outputs() -> dict[str, Any]:
     ambiguity_payload = {
         "summary": {
             "row_count": len(ambiguity_rows),
-            "record_type_counts": dict(sorted(Counter(row["record_type"] for row in ambiguity_rows).items())),
+            "record_type_counts": dict(
+                sorted(Counter(row["record_type"] for row in ambiguity_rows).items())
+            ),
         },
         "rows": ambiguity_rows,
     }
@@ -1499,7 +1601,9 @@ def edge_csv_rows(rows: list[dict[str, Any]]) -> list[dict[str, str]]:
                 "raw_transition": row["raw_transition"],
                 "source_state_or_selector": row["source_state_or_selector"],
                 "source_ref_kind": row["source_ref_kind"],
-                "event_code_or_null": "" if row["event_code_or_null"] is None else row["event_code_or_null"],
+                "event_code_or_null": ""
+                if row["event_code_or_null"] is None
+                else row["event_code_or_null"],
                 "target_state_or_selector": row["target_state_or_selector"],
                 "target_ref_kind": row["target_ref_kind"],
                 "source_file": row["source_file"],
@@ -1604,7 +1708,9 @@ def render_docs(outputs: dict[str, Any]) -> tuple[str, str, str]:
         "| Invariant Class | Count |",
         "| --- | ---: |",
     ]
-    for invariant_class, count in sorted(Counter(row["invariant_class"] for row in invariant_rows).items()):
+    for invariant_class, count in sorted(
+        Counter(row["invariant_class"] for row in invariant_rows).items()
+    ):
         invariant_lines.append(f"| `{invariant_class}` | {count} |")
 
     return (

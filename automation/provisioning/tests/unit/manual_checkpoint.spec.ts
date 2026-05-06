@@ -4,14 +4,9 @@ import path from "node:path";
 
 import { test, expect } from "@playwright/test";
 
-import {
-  createManualCheckpoint,
-} from "../../src/core/manual_checkpoint.js";
+import { createManualCheckpoint } from "../../src/core/manual_checkpoint.js";
 import { FileResumeStore } from "../../src/core/resume_store.js";
-import {
-  createRunContext,
-  summarizeRunContext,
-} from "../../src/core/run_context.js";
+import { createRunContext, summarizeRunContext } from "../../src/core/run_context.js";
 import {
   attachManualCheckpoint,
   createPendingStep,
@@ -79,10 +74,7 @@ test("persists and resumes a manual checkpoint without replaying unsafe state", 
     reason: "Resumed after manual checkpoint checkpoint-001",
   });
 
-  const latestRaw = await readFile(
-    path.join(rootDir, runContext.runId, "latest.json"),
-    "utf8",
-  );
+  const latestRaw = await readFile(path.join(rootDir, runContext.runId, "latest.json"), "utf8");
   expect(JSON.parse(latestRaw)).toMatchObject({
     revision: 2,
     checkpoint: { status: "RESUMED" },

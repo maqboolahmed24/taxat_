@@ -81,7 +81,9 @@ def main() -> int:
     expected_schema_coverage = outputs["schema_coverage"]
     expected_compound_axes = outputs["compound_axes"]
     expected_ambiguities = outputs["ambiguities"]
-    expected_machine_doc, expected_terminal_doc, expected_invariant_doc = builder.render_docs(outputs)
+    expected_machine_doc, expected_terminal_doc, expected_invariant_doc = builder.render_docs(
+        outputs
+    )
     expected_mermaid = builder.render_mermaid(outputs["registry"]["machines"])
 
     actual_registry = load_json(builder.REGISTRY_PATH)
@@ -94,7 +96,9 @@ def main() -> int:
         transition_id for transition_id, count in Counter(actual_edge_ids).items() if count > 1
     )
     if duplicate_edge_ids:
-        fail(f"Duplicate transition_id values detected in state_transition_edges.csv: {duplicate_edge_ids[:10]}")
+        fail(
+            f"Duplicate transition_id values detected in state_transition_edges.csv: {duplicate_edge_ids[:10]}"
+        )
     actual_edges = {row["transition_id"]: row for row in actual_edge_rows}
     expected_edges_by_id = {row["transition_id"]: row for row in expected_edges}
     if actual_edges != expected_edges_by_id:
@@ -104,7 +108,9 @@ def main() -> int:
     diff = first_diff(expected_invariants, actual_invariants)
     if diff is not None:
         index, expected, actual = diff
-        fail(f"state_machine_invariants.jsonl drifted at row {index}. Expected {expected}, got {actual}")
+        fail(
+            f"state_machine_invariants.jsonl drifted at row {index}. Expected {expected}, got {actual}"
+        )
 
     actual_schema_coverage = load_json(builder.SCHEMA_COVERAGE_PATH)
     if actual_schema_coverage != expected_schema_coverage:
@@ -116,12 +122,18 @@ def main() -> int:
 
     actual_ambiguities = load_json(builder.AMBIGUITY_PATH)
     if actual_ambiguities != expected_ambiguities:
-        fail("unmodeled_or_ambiguous_state_postures.json drifted from the canonical builder output.")
+        fail(
+            "unmodeled_or_ambiguous_state_postures.json drifted from the canonical builder output."
+        )
 
     if builder.STATE_MACHINE_DOC_PATH.read_text() != expected_machine_doc:
-        fail("09_state_machine_definitions_and_transition_invariants.md drifted from the canonical builder render.")
+        fail(
+            "09_state_machine_definitions_and_transition_invariants.md drifted from the canonical builder render."
+        )
     if builder.TERMINAL_DOC_PATH.read_text() != expected_terminal_doc:
-        fail("09_terminal_recovery_and_supersession_matrix.md drifted from the canonical builder render.")
+        fail(
+            "09_terminal_recovery_and_supersession_matrix.md drifted from the canonical builder render."
+        )
     if builder.INVARIANT_DOC_PATH.read_text() != expected_invariant_doc:
         fail("09_cross_state_invariant_index.md drifted from the canonical builder render.")
     if builder.MERMAID_PATH.read_text() != expected_mermaid:
@@ -136,14 +148,24 @@ def main() -> int:
 
     for row in registry_rows:
         if row["machine_class"] not in builder.STATE_MACHINE_CLASSES:
-            fail(f"Machine `{row['machine_id']}` has invalid machine_class `{row['machine_class']}`.")
+            fail(
+                f"Machine `{row['machine_id']}` has invalid machine_class `{row['machine_class']}`."
+            )
         if not row["authoritative_source_refs"]:
             fail(f"Machine `{row['machine_id']}` has no authoritative_source_refs.")
 
     expected_sections = sorted(
-        {"6.1", "6.29"} | {section_id for spec in builder.MACHINE_SPECS for section_id, _ in (
-            spec.state_sources + spec.explicit_transition_sources + spec.prose_transition_sources + spec.rule_sources
-        )}
+        {"6.1", "6.29"}
+        | {
+            section_id
+            for spec in builder.MACHINE_SPECS
+            for section_id, _ in (
+                spec.state_sources
+                + spec.explicit_transition_sources
+                + spec.prose_transition_sources
+                + spec.rule_sources
+            )
+        }
     )
     actual_sections = actual_registry["summary"]["represented_section_ids"]
     if actual_sections != expected_sections:
@@ -155,9 +177,13 @@ def main() -> int:
     explicit_edges_by_machine: dict[str, list[dict[str, str]]] = {}
     for row in actual_edges.values():
         if row["machine_class"] not in builder.STATE_MACHINE_CLASSES:
-            fail(f"Edge `{row['transition_id']}` has invalid machine_class `{row['machine_class']}`.")
+            fail(
+                f"Edge `{row['transition_id']}` has invalid machine_class `{row['machine_class']}`."
+            )
         if row["transition_kind"] not in builder.TRANSITION_KINDS:
-            fail(f"Edge `{row['transition_id']}` has invalid transition_kind `{row['transition_kind']}`.")
+            fail(
+                f"Edge `{row['transition_id']}` has invalid transition_kind `{row['transition_kind']}`."
+            )
         explicit_edges_by_machine.setdefault(row["machine_id"], []).append(row)
 
     for machine_id, rows in explicit_edges_by_machine.items():
@@ -166,9 +192,13 @@ def main() -> int:
             if row["transition_kind"] != "explicit_event_edge":
                 continue
             if not row["event_code_or_null"].strip():
-                fail(f"Explicit transition `{row['transition_id']}` is missing an event_code_or_null.")
+                fail(
+                    f"Explicit transition `{row['transition_id']}` is missing an event_code_or_null."
+                )
             if row["raw_transition"] in seen_explicit:
-                fail(f"Duplicate explicit raw transition detected for `{machine_id}`: {row['raw_transition']}")
+                fail(
+                    f"Duplicate explicit raw transition detected for `{machine_id}`: {row['raw_transition']}"
+                )
             seen_explicit.add(row["raw_transition"])
 
     expected_explicit_transition_count = len(
@@ -193,8 +223,12 @@ def main() -> int:
     if invariant_classes != {"global_state_machine_rule", "cross_state_invariant"}:
         fail(f"Unexpected invariant classes detected: {sorted(invariant_classes)}")
 
-    cross_state_rows = [row for row in invariants if row["invariant_class"] == "cross_state_invariant"]
-    global_rows = [row for row in invariants if row["invariant_class"] == "global_state_machine_rule"]
+    cross_state_rows = [
+        row for row in invariants if row["invariant_class"] == "cross_state_invariant"
+    ]
+    global_rows = [
+        row for row in invariants if row["invariant_class"] == "global_state_machine_rule"
+    ]
     if len(global_rows) != 9:
         fail(f"Expected 9 global state-machine rules, found {len(global_rows)}.")
     if len(cross_state_rows) != 20:
@@ -209,8 +243,13 @@ def main() -> int:
             fail(f"Machine `{row['machine_id']}` is missing schema coverage.")
     for row in coverage_rows:
         if row["coverage_status"] not in builder.SCHEMA_COVERAGE_STATUSES:
-            fail(f"Coverage row `{row['machine_id']}` has invalid coverage_status `{row['coverage_status']}`.")
-        if row["schema_path"] and row["schema_path"] != coverage_by_machine[row["machine_id"]]["schema_path"]:
+            fail(
+                f"Coverage row `{row['machine_id']}` has invalid coverage_status `{row['coverage_status']}`."
+            )
+        if (
+            row["schema_path"]
+            and row["schema_path"] != coverage_by_machine[row["machine_id"]]["schema_path"]
+        ):
             fail(f"Coverage row `{row['machine_id']}` has inconsistent schema_path.")
 
     compound_group_ids = [row["compound_axis_id"] for row in actual_compound_axes["groups"]]
@@ -221,17 +260,25 @@ def main() -> int:
     for row in actual_compound_axes["groups"]:
         for machine_id in row["machine_ids"]:
             if machine_id not in set(machine_ids):
-                fail(f"Compound group `{row['compound_axis_id']}` references unknown machine `{machine_id}`.")
+                fail(
+                    f"Compound group `{row['compound_axis_id']}` references unknown machine `{machine_id}`."
+                )
 
     ambiguity_rows = actual_ambiguities["rows"]
     ambiguity_ids = {
-        (row["record_type"], row.get("object_family") or row.get("machine_id"), row.get("state_field") or "")
+        (
+            row["record_type"],
+            row.get("object_family") or row.get("machine_id"),
+            row.get("state_field") or "",
+        )
         for row in ambiguity_rows
     }
     if len(ambiguity_ids) != len(ambiguity_rows):
         fail("Duplicate ambiguity rows detected.")
     if not any(row["record_type"] == "conflicting_terminality_overlay" for row in ambiguity_rows):
-        fail("The ambiguity register is missing the expected ExperienceCursor terminality conflict.")
+        fail(
+            "The ambiguity register is missing the expected ExperienceCursor terminality conflict."
+        )
 
     if "# State Machine Definitions and Transition Invariants" not in expected_machine_doc:
         fail("State machine doc title is missing.")

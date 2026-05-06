@@ -39,10 +39,7 @@ export const HMRC_SANDBOX_SUBSCRIPTION_STEP_IDS = {
   persistSubscriptionMatrix: "hmrc.devhub.sandbox-app.persist-subscription-matrix",
 } as const;
 
-export type ApiLabelResolution =
-  | "CANONICAL_MATCH"
-  | "ALIAS_MATCH"
-  | "PORTAL_NOT_PRESENT";
+export type ApiLabelResolution = "CANONICAL_MATCH" | "ALIAS_MATCH" | "PORTAL_NOT_PRESENT";
 
 export type ApiSubscriptionAction =
   | "ALREADY_SUBSCRIBED"
@@ -159,8 +156,7 @@ async function resolveApiCheckbox(
       return {
         locator: exactRole.first(),
         portalLabel: candidate,
-        labelResolution:
-          candidate === api.display_name ? "CANONICAL_MATCH" : "ALIAS_MATCH",
+        labelResolution: candidate === api.display_name ? "CANONICAL_MATCH" : "ALIAS_MATCH",
       };
     }
 
@@ -169,8 +165,7 @@ async function resolveApiCheckbox(
       return {
         locator: label.first(),
         portalLabel: candidate,
-        labelResolution:
-          candidate === api.display_name ? "CANONICAL_MATCH" : "ALIAS_MATCH",
+        labelResolution: candidate === api.display_name ? "CANONICAL_MATCH" : "ALIAS_MATCH",
       };
     }
   }
@@ -191,8 +186,7 @@ async function resolveApiCheckbox(
       return {
         locator: rowCheckbox.first(),
         portalLabel: (await row.innerText()).replace(/\s+/g, " ").trim(),
-        labelResolution:
-          candidate === api.display_name ? "CANONICAL_MATCH" : "ALIAS_MATCH",
+        labelResolution: candidate === api.display_name ? "CANONICAL_MATCH" : "ALIAS_MATCH",
       };
     }
   }
@@ -383,11 +377,12 @@ export async function subscribeRequiredMtdApis(
       scope_bucket: "LIKELY_REQUIRED_LATER",
       portal_label: resolved?.portalLabel ?? null,
       label_resolution: resolved?.labelResolution ?? "PORTAL_NOT_PRESENT",
-      subscription_state: resolved && (await resolved.locator.isChecked())
-        ? "SUBSCRIBED"
-        : resolved
-          ? "DEFERRED_SCOPE"
-          : "NOT_VISIBLE",
+      subscription_state:
+        resolved && (await resolved.locator.isChecked())
+          ? "SUBSCRIBED"
+          : resolved
+            ? "DEFERRED_SCOPE"
+            : "NOT_VISIBLE",
       action_taken: "DEFERRED_SCOPE",
       relevant_operation_families: api.relevant_operation_families,
       documentation_url: api.documentation_url,
@@ -461,8 +456,7 @@ export async function subscribeRequiredMtdApis(
     application_record_ref: options.applicationRecordPath,
     required_api_baseline_ref: applicationRecord.required_api_baseline_ref,
     application_alias: applicationRecord.sandbox_application.application_alias,
-    application_display_name:
-      applicationRecord.sandbox_application.application_display_name,
+    application_display_name: applicationRecord.sandbox_application.application_display_name,
     applications_console_url: applicationRecord.portal_state.applications_console_url,
     api_subscriptions_page_url: options.page.url(),
     required_now_complete: true,
@@ -483,7 +477,8 @@ export async function subscribeRequiredMtdApis(
   applicationRecord.sandbox_application.subscription_state = "REQUIRED_NOW_SUBSCRIBED";
   applicationRecord.sandbox_application.api_subscriptions_page_url = options.page.url();
   applicationRecord.portal_state.last_safe_page_url = options.page.url();
-  applicationRecord.portal_state.last_completed_step_id = HMRC_SANDBOX_SUBSCRIPTION_STEP_IDS.persistSubscriptionMatrix;
+  applicationRecord.portal_state.last_completed_step_id =
+    HMRC_SANDBOX_SUBSCRIPTION_STEP_IDS.persistSubscriptionMatrix;
   applicationRecord.portal_state.evidence_manifest_ref = evidenceManifestPath;
   applicationRecord.evidence_refs = [
     ...new Set([...applicationRecord.evidence_refs, ...subscriptionMatrix.evidence_refs]),

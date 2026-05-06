@@ -27,13 +27,7 @@ import {
   type SignalGovernanceBoardViewModel,
 } from "../../src/providers/monitoring/flows/create_error_monitoring_workspace.js";
 
-const repoRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "..",
-  "..",
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
 
 async function readJson<T>(segments: string[]): Promise<T> {
   const filePath = path.join(repoRoot, ...segments);
@@ -82,13 +76,7 @@ test("checked-in monitoring artifacts and signal board match the builders", asyn
   ]);
   const sampleRun = await readJson<{
     signalGovernanceBoard: SignalGovernanceBoardViewModel;
-  }>([
-    "automation",
-    "provisioning",
-    "report_viewer",
-    "data",
-    "sample_run.json",
-  ]);
+  }>(["automation", "provisioning", "report_viewer", "data", "sample_run.json"]);
 
   expect(persistedCatalog).toEqual(createRecommendedErrorMonitoringProjectCatalog());
   expect(persistedScrubRules).toEqual(createRecommendedErrorMonitoringScrubRules());
@@ -97,9 +85,7 @@ test("checked-in monitoring artifacts and signal board match the builders", asyn
   expect(persistedTemplate).toEqual(
     createRecommendedMonitoringWorkspaceTemplate(monitoringRunContext()),
   );
-  expect(sampleRun.signalGovernanceBoard).toEqual(
-    createSignalGovernanceBoardViewModel(),
-  );
+  expect(sampleRun.signalGovernanceBoard).toEqual(createSignalGovernanceBoardViewModel());
 });
 
 test("monitoring scrub posture keeps high-risk payload classes excluded and capture modes disabled", () => {

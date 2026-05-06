@@ -1,0 +1,394 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "correlation_key_matrix",
+  "resource_attribute_contract": {
+    "required_attributes": [
+      "service.name",
+      "service.namespace",
+      "deployment.environment.name",
+      "service.instance.id",
+      "taxat.release.candidate_hash",
+      "taxat.build.artifact_digest",
+      "taxat.schema.bundle_hash",
+      "taxat.workspace.id"
+    ],
+    "optional_attributes": [
+      "taxat.manifest.lineage_trace_ref",
+      "taxat.authority.binding_ref",
+      "taxat.manual.checkpoint_ref"
+    ]
+  },
+  "context_contract": {
+    "mandatory_keys": [
+      "tenant_id",
+      "trace_id",
+      "service_name",
+      "environment_ref",
+      "code_build_id"
+    ],
+    "optional_keys": [
+      "client_id",
+      "manifest_id",
+      "root_manifest_id",
+      "parent_manifest_id",
+      "continuation_of_manifest_id",
+      "replay_of_manifest_id",
+      "run_kind",
+      "mode",
+      "workflow_item_id",
+      "submission_record_id",
+      "authority_operation_id",
+      "error_id",
+      "access_binding_hash",
+      "idempotency_key",
+      "manifest_lineage_trace_ref",
+      "comparison_mode",
+      "basis_validation_state"
+    ],
+    "audit_join_keys": [
+      "manifest_id",
+      "submission_record_id",
+      "authority_operation_id",
+      "workflow_item_id",
+      "nightly_batch_run_ref",
+      "nightly_window_key"
+    ],
+    "authoritative_only_keys": [
+      "manifest_id",
+      "root_manifest_id",
+      "parent_manifest_id",
+      "continuation_of_manifest_id",
+      "replay_of_manifest_id",
+      "submission_record_id",
+      "authority_operation_id",
+      "workflow_item_id",
+      "gate_code",
+      "access_binding_hash",
+      "idempotency_key"
+    ]
+  },
+  "channel_rows": [
+    {
+      "channel_ref": "TRACE_SIGNAL",
+      "label": "Trace signal",
+      "retained_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "root_manifest_id",
+        "trace_id",
+        "span_id",
+        "run_kind",
+        "mode",
+        "workflow_item_id",
+        "submission_record_id",
+        "authority_operation_id",
+        "error_id",
+        "service_name",
+        "environment_ref",
+        "code_build_id",
+        "access_binding_hash"
+      ],
+      "optional_keys": [
+        "parent_manifest_id",
+        "continuation_of_manifest_id",
+        "replay_of_manifest_id",
+        "comparison_mode",
+        "basis_validation_state",
+        "manifest_lineage_trace_ref"
+      ],
+      "redacted_keys": [
+        "raw_headers",
+        "masked_field_payload",
+        "declaration_text",
+        "evidence_text",
+        "resume_token"
+      ],
+      "surface_limited_keys": [
+        "access_binding_hash"
+      ],
+      "propagation_mode": "CHILD_SPAN_CONTEXT_WITH_SERVER_AUTHORED_BUSINESS_KEYS",
+      "trust_boundary": "SERVER_AUTHORED_CONTEXT_PLUS_TRANSPORT_TRACE",
+      "notes": [
+        "Trace continuity may reuse valid transport trace ids.",
+        "Business lineage remains server-authored even when transport continuity is present."
+      ]
+    },
+    {
+      "channel_ref": "METRIC_SIGNAL",
+      "label": "Metric signal",
+      "retained_keys": [
+        "tenant_id",
+        "manifest_id",
+        "workflow_item_id",
+        "authority_operation_id",
+        "service_name",
+        "environment_ref",
+        "code_build_id"
+      ],
+      "optional_keys": [
+        "client_id",
+        "submission_record_id",
+        "run_kind",
+        "mode"
+      ],
+      "redacted_keys": [
+        "payload_fragment",
+        "user_text",
+        "raw_header_values"
+      ],
+      "surface_limited_keys": [
+        "client_id"
+      ],
+      "propagation_mode": "LOW_CARDINALITY_DIMENSIONS_ONLY",
+      "trust_boundary": "SERVER_AUTHORED_ONLY",
+      "notes": [
+        "Metric dimensions stay low-cardinality and query-safe.",
+        "No free-form payload or copied UI text is allowed."
+      ]
+    },
+    {
+      "channel_ref": "LOG_SIGNAL",
+      "label": "Structured log signal",
+      "retained_keys": [
+        "tenant_id",
+        "manifest_id",
+        "trace_id",
+        "span_id",
+        "workflow_item_id",
+        "submission_record_id",
+        "authority_operation_id",
+        "error_id",
+        "service_name",
+        "environment_ref",
+        "code_build_id"
+      ],
+      "optional_keys": [
+        "client_id",
+        "run_kind",
+        "mode",
+        "access_binding_hash"
+      ],
+      "redacted_keys": [
+        "secret_values",
+        "token_values",
+        "masked_field_payload",
+        "document_text"
+      ],
+      "surface_limited_keys": [
+        "access_binding_hash"
+      ],
+      "propagation_mode": "SCHEMA_ALIGNED_STRUCTURED_LOG_ONLY",
+      "trust_boundary": "SERVER_AUTHORED_CONTEXT_ONLY",
+      "notes": [
+        "Logs retain enough context to join back to audit and trace.",
+        "Logs remain operational explanation only and never become the proof of record."
+      ]
+    },
+    {
+      "channel_ref": "HTTP_PUBLIC_INGRESS",
+      "label": "Public HTTP ingress",
+      "retained_keys": [
+        "trace_id",
+        "span_id",
+        "tenant_id",
+        "service_name",
+        "environment_ref"
+      ],
+      "optional_keys": [
+        "client_id",
+        "manifest_id",
+        "workflow_item_id"
+      ],
+      "redacted_keys": [
+        "public_business_baggage",
+        "cookies",
+        "authorization_headers",
+        "csrf_tokens"
+      ],
+      "surface_limited_keys": [
+        "client_id"
+      ],
+      "propagation_mode": "TRACEPARENT_ONLY_AT_PUBLIC_INGRESS",
+      "trust_boundary": "PUBLIC_TRANSPORT_ONLY",
+      "notes": [
+        "Public ingress may contribute transport trace continuity only.",
+        "Server-authored context overrides any inbound business baggage."
+      ]
+    },
+    {
+      "channel_ref": "HTTP_INTERNAL_PROPAGATION",
+      "label": "Internal HTTP propagation",
+      "retained_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "root_manifest_id",
+        "trace_id",
+        "span_id",
+        "workflow_item_id",
+        "submission_record_id",
+        "authority_operation_id",
+        "service_name",
+        "environment_ref",
+        "code_build_id"
+      ],
+      "optional_keys": [
+        "error_id",
+        "run_kind",
+        "mode",
+        "access_binding_hash"
+      ],
+      "redacted_keys": [
+        "authorization_headers",
+        "raw_body",
+        "masked_field_payload"
+      ],
+      "surface_limited_keys": [
+        "access_binding_hash"
+      ],
+      "propagation_mode": "TRACEPARENT_PLUS_SAFE_INTERNAL_CORRELATION_CARRIER",
+      "trust_boundary": "INTERNAL_SERVICE_BOUNDARY",
+      "notes": [
+        "Internal services may carry safe business context in a bounded correlation carrier.",
+        "Transport continuity and business truth remain distinct."
+      ]
+    },
+    {
+      "channel_ref": "QUEUE_MESSAGE",
+      "label": "Queue message propagation",
+      "retained_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "root_manifest_id",
+        "trace_id",
+        "span_id",
+        "workflow_item_id",
+        "submission_record_id",
+        "authority_operation_id",
+        "service_name",
+        "environment_ref",
+        "code_build_id"
+      ],
+      "optional_keys": [
+        "error_id",
+        "run_kind",
+        "mode",
+        "access_binding_hash"
+      ],
+      "redacted_keys": [
+        "queue_payload_body",
+        "transport_retry_metadata",
+        "masked_field_payload"
+      ],
+      "surface_limited_keys": [
+        "access_binding_hash"
+      ],
+      "propagation_mode": "SAFE_MESSAGE_BAGGAGE_PLUS_TRACEPARENT",
+      "trust_boundary": "INTERNAL_WORKER_BOUNDARY",
+      "notes": [
+        "Malformed queue carriers are dropped without losing safe trace continuity.",
+        "Workers preserve authoritative manifest and workflow anchors."
+      ]
+    },
+    {
+      "channel_ref": "STREAM_PUBLICATION",
+      "label": "Stream publication propagation",
+      "retained_keys": [
+        "tenant_id",
+        "client_id",
+        "manifest_id",
+        "trace_id",
+        "span_id",
+        "workflow_item_id",
+        "service_name",
+        "environment_ref",
+        "code_build_id"
+      ],
+      "optional_keys": [
+        "submission_record_id",
+        "authority_operation_id"
+      ],
+      "redacted_keys": [
+        "resume_token",
+        "session_cookie",
+        "masked_field_payload"
+      ],
+      "surface_limited_keys": [
+        "client_id"
+      ],
+      "propagation_mode": "HASHED_TRANSPORT_REF_ONLY",
+      "trust_boundary": "SERVER_AUTHORED_STREAM_BOUNDARY",
+      "notes": [
+        "Resume tokens remain transport-only material and never enter telemetry as raw values.",
+        "Manifest and trace lineage remain sufficient for joinability."
+      ]
+    },
+    {
+      "channel_ref": "UPLOAD_CONTINUATION",
+      "label": "Upload continuation propagation",
+      "retained_keys": [
+        "tenant_id",
+        "manifest_id",
+        "trace_id",
+        "span_id",
+        "workflow_item_id",
+        "service_name",
+        "environment_ref",
+        "code_build_id"
+      ],
+      "optional_keys": [
+        "client_id",
+        "submission_record_id"
+      ],
+      "redacted_keys": [
+        "upload_bytes",
+        "retry_token",
+        "document_text"
+      ],
+      "surface_limited_keys": [
+        "client_id"
+      ],
+      "propagation_mode": "HASHED_RETRY_REF_PLUS_SAFE_SESSION_STORAGE_REFS",
+      "trust_boundary": "SERVER_AUTHORED_UPLOAD_BOUNDARY",
+      "notes": [
+        "Upload retries preserve correlation context across attempts.",
+        "Raw retry tokens and uploaded bytes never enter telemetry."
+      ]
+    },
+    {
+      "channel_ref": "CLIENT_SURFACE",
+      "label": "Client surface telemetry",
+      "retained_keys": [
+        "tenant_id",
+        "manifest_id",
+        "trace_id",
+        "span_id",
+        "workflow_item_id",
+        "service_name",
+        "environment_ref"
+      ],
+      "optional_keys": [
+        "client_id"
+      ],
+      "redacted_keys": [
+        "ui_text",
+        "document_filename",
+        "clipboard_contents",
+        "dom_snapshot",
+        "screenshot_payload",
+        "masked_field_payload"
+      ],
+      "surface_limited_keys": [
+        "client_id"
+      ],
+      "propagation_mode": "LOW_NOISE_ROUTE_MODULE_POSTURE_CODES_ONLY",
+      "trust_boundary": "CLIENT_TO_SERVER_OPAQUE_ONLY",
+      "notes": [
+        "Client telemetry keeps shell, route, module, posture, action, timing, accessibility, and opaque refs only.",
+        "Any unprovable redaction mode must be disabled on regulated surfaces."
+      ]
+    }
+  ]
+}

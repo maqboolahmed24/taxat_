@@ -13,12 +13,9 @@ import {
   type EmailProviderEntryUrls,
 } from "../../../../automation/provisioning/src/providers/email/flows/create_email_account_and_sender_domain.js";
 
-function fixtureEntryUrls(
-  scenario: "fresh" | "existing" | "dns-pending",
-): EmailProviderEntryUrls {
+function fixtureEntryUrls(scenario: "fresh" | "existing" | "dns-pending"): EmailProviderEntryUrls {
   return {
-    controlPlane:
-      `/automation/provisioning/tests/fixtures/postmark_email_console.html?scenario=${scenario}`,
+    controlPlane: `/automation/provisioning/tests/fixtures/postmark_email_console.html?scenario=${scenario}`,
   };
 }
 
@@ -101,9 +98,7 @@ test("fresh bootstrap persists sanitized workspace, sender-domain, DNS, and stre
   expect(flow.evidenceRaw).toContain("Persisted sanitized workspace");
 });
 
-test("existing workspace and domains are adopted instead of duplicated", async ({
-  page,
-}) => {
+test("existing workspace and domains are adopted instead of duplicated", async ({ page }) => {
   const flow = await runFixtureFlow(page, "existing");
 
   expect(flow.result.outcome).toBe("EMAIL_DOMAIN_READY");
@@ -142,9 +137,7 @@ test("email readiness board renders semantic regions, persistent inspector detai
   );
 
   await expect(page.locator("html")).toHaveAttribute("data-motion", "reduce");
-  await expect(
-    page.getByRole("navigation", { name: "Sender domains and streams" }),
-  ).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Sender domains and streams" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Workspace" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Domain Identity" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "DNS Records" })).toBeVisible();
@@ -166,8 +159,6 @@ test("email readiness board renders semantic regions, persistent inspector detai
     .filter({ hasText: "Return-Path CNAME" })
     .first()
     .click();
-  await expect(page.locator("#drawer-title")).toHaveText(
-    "pm-bounces.notify.preprod.taxat.example",
-  );
+  await expect(page.locator("#drawer-title")).toHaveText("pm-bounces.notify.preprod.taxat.example");
   await expect(page.locator("#drawer-body")).toContainText("pm.mtasv.net");
 });

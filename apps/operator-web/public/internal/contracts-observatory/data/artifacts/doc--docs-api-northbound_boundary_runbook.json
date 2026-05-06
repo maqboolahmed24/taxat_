@@ -1,0 +1,310 @@
+{
+  "artifactVersion": "CONTRACT_OBSERVATORY_ARTIFACT_V1",
+  "artifactSlug": "doc--docs-api-northbound_boundary_runbook",
+  "artifactKind": "MARKDOWN",
+  "sectionRef": "SUPPORT_DOCS",
+  "authorityLevel": "SUPPORTING_REFERENCE",
+  "sourceTruthBadge": "Support Documentation",
+  "tone": "slate",
+  "title": "Northbound Boundary Runbook",
+  "subtitle": "docs/api/northbound_boundary_runbook.md",
+  "summary": "pc 0068 establishes one reusable northbound admission scaffold for apps/control plane api. Handlers should compose the shared parser, stale precondition guard, duplicate/idempoten…",
+  "canonicalPath": "docs/api/northbound_boundary_runbook.md",
+  "sourceLineage": [
+    "docs/api/northbound_boundary_runbook.md"
+  ],
+  "headingCount": 7,
+  "headings": [
+    {
+      "level": 1,
+      "text": "Northbound Boundary Runbook",
+      "slug": "northbound-boundary-runbook"
+    },
+    {
+      "level": 2,
+      "text": "Composition Order",
+      "slug": "composition-order"
+    },
+    {
+      "level": 2,
+      "text": "Handler Shape",
+      "slug": "handler-shape"
+    },
+    {
+      "level": 2,
+      "text": "Policy Files",
+      "slug": "policy-files"
+    },
+    {
+      "level": 2,
+      "text": "Important Decisions",
+      "slug": "important-decisions"
+    },
+    {
+      "level": 2,
+      "text": "Recovery Rules",
+      "slug": "recovery-rules"
+    },
+    {
+      "level": 2,
+      "text": "Do Not Reintroduce",
+      "slug": "do-not-reintroduce"
+    }
+  ],
+  "proseSections": [
+    {
+      "headingSlug": "northbound-boundary-runbook",
+      "headingText": "Northbound Boundary Runbook",
+      "level": 1,
+      "lines": [
+        "",
+        "`pc_0068` establishes one reusable northbound admission scaffold for `apps/control-plane-api`.",
+        "Handlers should compose the shared parser, stale-precondition guard, duplicate/idempotency guard,",
+        "and deterministic receipt/problem builders instead of rebuilding those rules locally.",
+        ""
+      ],
+      "plainText": "pc 0068 establishes one reusable northbound admission scaffold for apps/control plane api. Handlers should compose the shared parser, stale precondition guard, duplicate/idempotency guard, and deterministic receipt/problem builders instead of rebuilding those rules locally.",
+      "excerpt": "pc 0068 establishes one reusable northbound admission scaffold for apps/control plane api. Handlers should compose the shared parser, stale precondition guard, duplicate/idempoten…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": [
+        "pc_0068"
+      ]
+    },
+    {
+      "headingSlug": "composition-order",
+      "headingText": "Composition Order",
+      "level": 2,
+      "lines": [
+        "",
+        "1. Load the shared policy bundle with `loadNorthboundPolicyBundle()`.",
+        "2. Parse and validate the incoming payload with `parseCommandEnvelope(...)`.",
+        "3. Evaluate route and stale-view guards with `evaluateStalePreconditions(...)`.",
+        "4. Evaluate duplicate posture with `evaluateCommandIdempotency(...)`.",
+        "5. If the command is accepted, persist a durable `ApiCommandReceipt` before downstream side effects.",
+        "6. If the command is stale, invalid, or policy-rejected, emit one typed `ProblemEnvelope`.",
+        ""
+      ],
+      "plainText": "1. Load the shared policy bundle with loadNorthboundPolicyBundle(). 2. Parse and validate the incoming payload with parseCommandEnvelope(...). 3. Evaluate route and stale view guards with evaluateStalePreconditions(...). 4. Evaluate duplicate posture with evaluateCommandIdempotency(...). 5. If the command is accepted, persist a durable ApiCommandReceipt before downstream side effects. 6. If the command is stale, invalid, or policy rejected, emit one typed ProblemEnvelope.",
+      "excerpt": "1. Load the shared policy bundle with loadNorthboundPolicyBundle(). 2. Parse and validate the incoming payload with parseCommandEnvelope(...). 3. Evaluate route and stale view gua…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "handler-shape",
+      "headingText": "Handler Shape",
+      "level": 2,
+      "lines": [
+        "",
+        "```ts",
+        "const bundle = await loadNorthboundPolicyBundle();",
+        "const parsed = await parseCommandEnvelope(request.body, actorContext, { policyBundle: bundle });",
+        "const stale = evaluateStalePreconditions(parsed, currentRouteState);",
+        "if (stale.outcome === \"STALE\") {",
+        "  return buildProblemEnvelope({",
+        "    problemCode: stale.problemCode,",
+        "    policyBundle: bundle,",
+        "    correlationId,",
+        "    parsed,",
+        "    latestCommandReceiptRefOrNull: stale.latestCommandReceiptRefOrNull,",
+        "    latestStaleGuardValue: stale.latestStaleGuardValue,",
+        "    latestStabilityContractOrNull: stale.routeStabilityContract,",
+        "    reasonCodes: stale.reasonCodes,",
+        "    routeState: currentRouteState,",
+        "    staleGuardFamily: stale.staleGuardFamily,",
+        "  });",
+        "}",
+        "",
+        "const duplicate = evaluateCommandIdempotency(parsed, existingIdempotencyRecordOrNull);",
+        "if (duplicate.outcome === \"RETURN_EXISTING_RECEIPT\") {",
+        "  return duplicate.existingReceipt;",
+        "}",
+        "if (duplicate.outcome === \"IDEMPOTENCY_COLLISION\") {",
+        "  return buildProblemEnvelope({",
+        "    problemCode: \"IDEMPOTENCY_COLLISION\",",
+        "    policyBundle: bundle,",
+        "    correlationId,",
+        "    parsed,",
+        "    latestCommandReceiptRefOrNull: duplicate.existingReceiptRefOrNull,",
+        "    reasonCodes: duplicate.reasonCodes,",
+        "  });",
+        "}",
+        "",
+        "return buildApiCommandReceipt({",
+        "  parsed,",
+        "  acceptedAt,",
+        "  acceptanceState: \"ACCEPTED\",",
+        "  expiresAt,",
+        "  projectionRefOrNull,",
+        "  projectionSequenceOrNull,",
+        "  requestHash: duplicate.requestHash,",
+        "  resultRefOrNull: null,",
+        "});",
+        "```",
+        ""
+      ],
+      "plainText": "",
+      "excerpt": "",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "policy-files",
+      "headingText": "Policy Files",
+      "level": 2,
+      "lines": [
+        "",
+        "- `config/northbound/command_family_matrix.json`",
+        "  Records target scope, mutation precondition profile, projection posture, and recovery defaults per",
+        "  command family.",
+        "- `config/northbound/stale_guard_profile_matrix.json`",
+        "  Records how each profile maps command guard fields onto route-stability components and which typed",
+        "  problem code to use on mismatch.",
+        "- `config/northbound/problem_code_catalog.json`",
+        "  Records the typed problem vocabulary instead of scattering handler-local HTTP error strings.",
+        ""
+      ],
+      "plainText": "config/northbound/command family matrix.json Records target scope, mutation precondition profile, projection posture, and recovery defaults per command family. config/northbound/stale guard profile matrix.json Records how each profile maps command guard fields onto route stability components and which typed problem code to use on mismatch. config/northbound/problem code catalog.json Records the typed problem vocabulary instead of scattering handler local HTTP error strings.",
+      "excerpt": "config/northbound/command family matrix.json Records target scope, mutation precondition profile, projection posture, and recovery defaults per command family. config/northbound/s…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "important-decisions",
+      "headingText": "Important Decisions",
+      "level": 2,
+      "lines": [
+        "",
+        "- Exact safe retries return the original durable receipt. The boundary does not mint a new duplicate",
+        "  receipt by default.",
+        "- Idempotency-key reuse with a different payload or namespace tuple emits",
+        "  `IDEMPOTENCY_COLLISION`.",
+        "- Governance simulation-commit families require `policy_snapshot_hash`,",
+        "  `dependency_topology_hash`, `simulation_basis_hash`, and `mutation_basis_contract`.",
+        "- If a governance mutation basis still carries `PREVIEW_ONLY`, the boundary fails closed with",
+        "  `GOVERNANCE_PREVIEW_ONLY_COMMIT_BLOCKED`.",
+        "- Families with `projection_stream_class = NONE` should surface stale outcomes as",
+        "  `ProblemEnvelope` paths rather than forced `REJECTED_STALE_VIEW` receipts, because stale receipts",
+        "  require a live projection anchor.",
+        ""
+      ],
+      "plainText": "Exact safe retries return the original durable receipt. The boundary does not mint a new duplicate receipt by default. Idempotency key reuse with a different payload or namespace tuple emits IDEMPOTENCY COLLISION. Governance simulation commit families require policy snapshot hash, dependency topology hash, simulation basis hash, and mutation basis contract. If a governance mutation basis still carries PREVIEW ONLY, the boundary fails closed with GOVERNANCE PREVIEW ONLY COMMIT BLOCKED. Families with projection stream class = NONE should surface stale outcomes as ProblemEnvelope paths rather than forced REJECTED STALE VIEW receipts, because stale receipts require a live projection anchor.",
+      "excerpt": "Exact safe retries return the original durable receipt. The boundary does not mint a new duplicate receipt by default. Idempotency key reuse with a different payload or namespace…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "recovery-rules",
+      "headingText": "Recovery Rules",
+      "level": 2,
+      "lines": [
+        "",
+        "- Manifest render and approval-pack families recover through `latest_decision_bundle_ref`,",
+        "  `latest_approval_pack_ref`, and manifest resume tokens where needed.",
+        "- Collaboration families recover through `latest_workspace_snapshot_ref`.",
+        "- Portal route mutations recover through `latest_client_portal_workspace_ref` or",
+        "  `latest_upload_session_ref`.",
+        "- Governance mutations recover through `latest_policy_snapshot_ref`.",
+        "- Every stale or rebase-required problem also carries the grouped `latest_stability_contract_or_null`",
+        "  plus the authoritative stale guard value.",
+        ""
+      ],
+      "plainText": "Manifest render and approval pack families recover through latest decision bundle ref, latest approval pack ref, and manifest resume tokens where needed. Collaboration families recover through latest workspace snapshot ref. Portal route mutations recover through latest client portal workspace ref or latest upload session ref. Governance mutations recover through latest policy snapshot ref. Every stale or rebase required problem also carries the grouped latest stability contract or null plus the authoritative stale guard value.",
+      "excerpt": "Manifest render and approval pack families recover through latest decision bundle ref, latest approval pack ref, and manifest resume tokens where needed. Collaboration families re…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "do-not-reintroduce",
+      "headingText": "Do Not Reintroduce",
+      "level": 2,
+      "lines": [
+        "",
+        "- Handler-local parsing rules that drift from `CommandEnvelope`.",
+        "- Ad hoc stale checks that compare some but not all required guard fields.",
+        "- Local duplicate handling that ignores the stored request hash.",
+        "- UI explanations inferred from optimistic local state instead of durable receipt/problem truth.",
+        ""
+      ],
+      "plainText": "Handler local parsing rules that drift from CommandEnvelope. Ad hoc stale checks that compare some but not all required guard fields. Local duplicate handling that ignores the stored request hash. UI explanations inferred from optimistic local state instead of durable receipt/problem truth.",
+      "excerpt": "Handler local parsing rules that drift from CommandEnvelope. Ad hoc stale checks that compare some but not all required guard fields. Local duplicate handling that ignores the sto…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    }
+  ],
+  "schemaIdentityOrNull": null,
+  "schemaFields": [],
+  "samplePointers": [],
+  "sampleIdentityOrNull": null,
+  "bindingIdentityOrNull": null,
+  "validatorIdentityOrNull": null,
+  "driftIdentityOrNull": null,
+  "headerStrip": {
+    "kind": "PROSE",
+    "badgeLabel": "Support Documentation",
+    "metricPairs": [
+      {
+        "label": "Headings",
+        "value": "7"
+      },
+      {
+        "label": "Schemas",
+        "value": "0"
+      },
+      {
+        "label": "Tasks",
+        "value": "1"
+      }
+    ]
+  },
+  "relationships": {
+    "schemas": [],
+    "samples": [],
+    "bindings": [],
+    "validators": [],
+    "docs": [],
+    "tasks": [
+      {
+        "artifactSlug": "task--PROMPT-CARDS-pc_0079",
+        "title": "pc_0079 · pc_0079",
+        "kind": "TASK_CARD",
+        "authorityLevel": "TRACEABILITY_REFERENCE",
+        "sectionRef": "SUPPORT_DOCS",
+        "headingSlugOrNull": null,
+        "reason": "roadmap card references this artifact"
+      }
+    ]
+  },
+  "sourceTruthStack": {
+    "file": [
+      "docs/api/northbound_boundary_runbook.md"
+    ],
+    "headings": [
+      "Northbound Boundary Runbook",
+      "Composition Order",
+      "Handler Shape",
+      "Policy Files",
+      "Important Decisions",
+      "Recovery Rules",
+      "Do Not Reintroduce"
+    ],
+    "schemaRefs": [],
+    "sampleRefs": [],
+    "bindingRefs": [],
+    "validatorRefs": [],
+    "driftRefs": [],
+    "taskRefs": [
+      "pc_0068"
+    ]
+  },
+  "fieldCrosslinks": [],
+  "taskRefs": [
+    "pc_0068"
+  ]
+}

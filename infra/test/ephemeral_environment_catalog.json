@@ -1,0 +1,155 @@
+{
+  "contract_version": "EPHEMERAL_ENVIRONMENT_CATALOG_V1",
+  "catalog_id": "ephemeral_environment_catalog",
+  "basis_statement": "Ephemeral environments are isolated test-shard instances that reuse the governed local runtime substrate while deriving explicit namespace, seed, and evidence identity for CI, preview-review, and local high-fidelity suites.",
+  "unit_of_ephemerality": "TEST_SHARD_INSTANCE",
+  "naming_contract": {
+    "environment_id_pattern": "^env-ephemeral-[a-z0-9]+(?:-[a-z0-9]+)*$",
+    "namespace_hash_length": 12,
+    "approved_namespace_prefixes": [
+      "schema.control.",
+      "schema.audit.",
+      "queue.ephemeral.",
+      "dlq.ephemeral.",
+      "cache.ephemeral.",
+      "projection.ephemeral.",
+      "cursor.ephemeral.",
+      "upload.ephemeral.",
+      "worker-lease.ephemeral.",
+      "audit.ephemeral.",
+      "object.ephemeral/"
+    ]
+  },
+  "scope_rows": [
+    {
+      "scope_class_ref": "CI_RUN_SHARD",
+      "environment_ref": "env_ci_ephemeral_validation",
+      "default_seed_profile_ref": "PROFILE_GOLDEN_PACK_ONLY",
+      "owner_ref_pattern": "^ci\\.[a-z0-9._-]+$",
+      "notes": [
+        "Each CI shard gets its own environment identity so queue, cache, upload, and replay state cannot collide across concurrent runs.",
+        "This scope favors golden-pack determinism over the larger local example cabinet."
+      ]
+    },
+    {
+      "scope_class_ref": "PREVIEW_REVIEW_SHARD",
+      "environment_ref": "env_ephemeral_review_preview",
+      "default_seed_profile_ref": "PROFILE_GOLDEN_PACK_ONLY",
+      "owner_ref_pattern": "^preview\\.[a-z0-9._-]+$",
+      "notes": [
+        "Review-preview environments remain synthetic-data-safe and explicitly disallow long-lived authority callbacks or production secret posture.",
+        "One preview shard may exist per pull-request review path without reusing queue or cache namespaces."
+      ]
+    },
+    {
+      "scope_class_ref": "LOCAL_HIGH_FIDELITY_SHARD",
+      "environment_ref": "env_local_authoring",
+      "default_seed_profile_ref": "PROFILE_DETERMINISTIC_BASELINE",
+      "owner_ref_pattern": "^local\\.[a-z0-9._-]+$",
+      "notes": [
+        "Local high-fidelity suites still require explicit environment identity rather than inferring shared state from a workstation default.",
+        "This scope uses the fuller deterministic baseline profile so browser-visible and replay-oriented checks can share one governed seed basis."
+      ]
+    }
+  ],
+  "resource_class_rows": [
+    {
+      "resource_class_ref": "CONTROL_SCHEMA",
+      "service_ref": "CONTROL_STORE",
+      "namespace_template": "schema.control.${namespace_hash}",
+      "persistence_class": "RESETTABLE_EPHEMERAL_TRUTH",
+      "reset_behavior": "RECREATE_AND_RESEED"
+    },
+    {
+      "resource_class_ref": "AUDIT_SCHEMA",
+      "service_ref": "AUDIT_STORE",
+      "namespace_template": "schema.audit.${namespace_hash}",
+      "persistence_class": "RESETTABLE_EPHEMERAL_TRUTH",
+      "reset_behavior": "RECREATE_AND_RESEED"
+    },
+    {
+      "resource_class_ref": "OBJECT_PREFIX_STAGING",
+      "service_ref": "OBJECT_STORAGE",
+      "namespace_template": "object.ephemeral/${environment_id}/staging",
+      "persistence_class": "RESETTABLE_EPHEMERAL_TRUTH",
+      "reset_behavior": "RECREATE_AND_RESEED"
+    },
+    {
+      "resource_class_ref": "OBJECT_PREFIX_QUARANTINE",
+      "service_ref": "OBJECT_STORAGE",
+      "namespace_template": "object.ephemeral/${environment_id}/quarantine",
+      "persistence_class": "RESETTABLE_EPHEMERAL_TRUTH",
+      "reset_behavior": "RECREATE_AND_RESEED"
+    },
+    {
+      "resource_class_ref": "OBJECT_PREFIX_DERIVED",
+      "service_ref": "OBJECT_STORAGE",
+      "namespace_template": "object.ephemeral/${environment_id}/derived",
+      "persistence_class": "RESETTABLE_EPHEMERAL_TRUTH",
+      "reset_behavior": "RECREATE_AND_RESEED"
+    },
+    {
+      "resource_class_ref": "QUEUE_NAMESPACE_SET",
+      "service_ref": "QUEUE",
+      "namespace_template": "queue.ephemeral.${namespace_hash}.stage-work",
+      "persistence_class": "DISPOSABLE_ACCELERATION",
+      "reset_behavior": "PURGE_AND_REBUILD"
+    },
+    {
+      "resource_class_ref": "DLQ_NAMESPACE_SET",
+      "service_ref": "QUEUE",
+      "namespace_template": "dlq.ephemeral.${namespace_hash}.stage-work",
+      "persistence_class": "DISPOSABLE_ACCELERATION",
+      "reset_behavior": "PURGE_AND_REBUILD"
+    },
+    {
+      "resource_class_ref": "CACHE_NAMESPACE_SET",
+      "service_ref": "CACHE",
+      "namespace_template": "cache.ephemeral.${namespace_hash}.workspace",
+      "persistence_class": "DISPOSABLE_ACCELERATION",
+      "reset_behavior": "PURGE_AND_REBUILD"
+    },
+    {
+      "resource_class_ref": "PROJECTION_NAMESPACE_SET",
+      "service_ref": "CACHE",
+      "namespace_template": "projection.ephemeral.${namespace_hash}",
+      "persistence_class": "DISPOSABLE_ACCELERATION",
+      "reset_behavior": "PURGE_AND_REBUILD"
+    },
+    {
+      "resource_class_ref": "STREAM_CURSOR_SET",
+      "service_ref": "CACHE",
+      "namespace_template": "cursor.ephemeral.${namespace_hash}",
+      "persistence_class": "DISPOSABLE_ACCELERATION",
+      "reset_behavior": "PURGE_AND_REBUILD"
+    },
+    {
+      "resource_class_ref": "UPLOAD_SESSION_SET",
+      "service_ref": "OBJECT_STORAGE",
+      "namespace_template": "upload.ephemeral.${namespace_hash}",
+      "persistence_class": "RESETTABLE_EPHEMERAL_TRUTH",
+      "reset_behavior": "RECREATE_AND_RESEED"
+    },
+    {
+      "resource_class_ref": "WORKER_LEASE_SET",
+      "service_ref": "WORKERS",
+      "namespace_template": "worker-lease.ephemeral.${namespace_hash}",
+      "persistence_class": "DISPOSABLE_ACCELERATION",
+      "reset_behavior": "PURGE_AND_REBUILD"
+    },
+    {
+      "resource_class_ref": "AUDIT_STREAM_SET",
+      "service_ref": "AUDIT_STORE",
+      "namespace_template": "audit.ephemeral.${namespace_hash}",
+      "persistence_class": "RESETTABLE_EPHEMERAL_TRUTH",
+      "reset_behavior": "RECREATE_AND_RESEED"
+    },
+    {
+      "resource_class_ref": "RESET_EVIDENCE_ARTIFACT",
+      "service_ref": "APP",
+      "namespace_template": "evidence/${environment_id}",
+      "persistence_class": "EVIDENCE_RETAINED",
+      "reset_behavior": "PRESERVE_EVIDENCE_ONLY"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+// DO NOT EDIT: generated downstream from packages/contracts-core.
+import Foundation
+
+public enum BindingCoverageManifest {
+  public static let authorityAndAccess = "AUTHORITY_AND_ACCESS:SELECTED_NATIVE_SUBSET_GAP_BEARING_BINDING:ab446f65801d7423851ab63d446a85dd1cc5d151f6f07a471ebce936824eb06e"
+  public static let clientAndCollaboration = "CLIENT_AND_COLLABORATION:SELECTED_NATIVE_SUBSET_GAP_BEARING_BINDING:35ff2225b0f3bc9bfdd54a203dd26e1fb1de0b478c01a3482e4e1b5b3d3a4348"
+  public static let manifestAndRelease = "MANIFEST_AND_RELEASE:SELECTED_NATIVE_SUBSET_GAP_BEARING_BINDING:ce7fe771af563f01092a86870d086cced6a45b22bee212ff513c385ab39ca390"
+  public static let surfaceAndExperience = "SURFACE_AND_EXPERIENCE:SELECTED_NATIVE_SUBSET_GAP_BEARING_BINDING:ed389b21adb15cc24d1ec4088047fdead1278c09fae76381d56efc6bce300119"
+  public static let decisioningAndNightly = "DECISIONING_AND_NIGHTLY:SELECTED_NATIVE_SUBSET_GAP_BEARING_BINDING:4b8a92eaf51ef71796e2b6ab8ab00ff9fe33044b73004ab835268cedee1b0026"
+}

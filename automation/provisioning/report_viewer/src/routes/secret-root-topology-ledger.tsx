@@ -3,17 +3,8 @@ export const secretRootTopologyLedgerRoute = {
   title: "Secret Root Topology Ledger",
   purpose:
     "Render a premium cryptographic ledger for alias families, key hierarchy, and least-privilege access grants without exposing secret values or imitating a cloud console.",
-  focusOrder: [
-    "secret-root-alias-rail",
-    "secret-root-ledger-canvas",
-    "secret-root-inspector",
-  ],
-  sections: [
-    "Alias Catalog",
-    "Key Hierarchy",
-    "Access Matrix",
-    "Lineage and grant inspector",
-  ],
+  focusOrder: ["secret-root-alias-rail", "secret-root-ledger-canvas", "secret-root-inspector"],
+  sections: ["Alias Catalog", "Key Hierarchy", "Access Matrix", "Lineage and grant inspector"],
   palette: {
     background: "#F5F6F4",
     surface: "#FFFFFF",

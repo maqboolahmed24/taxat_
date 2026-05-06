@@ -13,15 +13,9 @@ test("renders the message fabric atlas with semantic lanes and reduced-motion pa
   await expect(
     page.getByRole("navigation", { name: "Channel families and coordination flows" }),
   ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Durable Outboxes", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Broker Channels", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Inbox / Consumers", exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Durable Outboxes", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Broker Channels", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Inbox / Consumers", exact: true })).toBeVisible();
   await expect(
     page.getByRole("heading", {
       name: "Ordering / Partition / Retry",
@@ -45,9 +39,7 @@ test("supports keyboard selection across families, channels, and policy strips",
   await governanceFamily.focus();
   await page.keyboard.press("Enter");
 
-  await expect(page.locator("#main-title")).toHaveText(
-    "External Delivery / Governance",
-  );
+  await expect(page.locator("#main-title")).toHaveText("External Delivery / Governance");
 
   const restrictedAttestation = page.getByRole("button", {
     name: /Restricted export delivery attestation/i,
@@ -55,15 +47,9 @@ test("supports keyboard selection across families, channels, and policy strips",
   await restrictedAttestation.focus();
   await page.keyboard.press("Enter");
 
-  await expect(page.locator("#drawer-title")).toHaveText(
-    "Restricted export delivery attestation",
-  );
-  await expect(page.locator("#drawer-body")).toContainText(
-    "control_async.delivery_evidence_inbox",
-  );
-  await expect(page.locator("#drawer-body")).toContainText(
-    "worker.export-attestation-restricted",
-  );
+  await expect(page.locator("#drawer-title")).toHaveText("Restricted export delivery attestation");
+  await expect(page.locator("#drawer-body")).toContainText("control_async.delivery_evidence_inbox");
+  await expect(page.locator("#drawer-body")).toContainText("worker.export-attestation-restricted");
 
   const retryPolicy = page.getByRole("button", {
     name: /Retry policy Delivery evidence backoff/i,
@@ -71,10 +57,6 @@ test("supports keyboard selection across families, channels, and policy strips",
   await retryPolicy.focus();
   await page.keyboard.press("Enter");
 
-  await expect(page.locator("#drawer-body")).toContainText(
-    "DEAD_LETTER_QUEUE_REQUIRED",
-  );
-  await expect(page.locator("#drawer-body")).toContainText(
-    "dedupe.delivery_binding",
-  );
+  await expect(page.locator("#drawer-body")).toContainText("DEAD_LETTER_QUEUE_REQUIRED");
+  await expect(page.locator("#drawer-body")).toContainText("dedupe.delivery_binding");
 });

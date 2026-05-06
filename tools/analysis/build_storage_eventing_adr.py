@@ -19,26 +19,19 @@ OBSERVABILITY_PATH = ALGORITHM_DIR / "observability_and_audit_contract.md"
 PROVENANCE_PATH = ALGORITHM_DIR / "provenance_graph_semantics.md"
 RETENTION_PATH = ALGORITHM_DIR / "retention_and_privacy.md"
 RETENTION_LIMIT_PATH = (
-    ALGORITHM_DIR
-    / "retention_limited_explainability_and_audit_sufficiency_contract.md"
+    ALGORITHM_DIR / "retention_limited_explainability_and_audit_sufficiency_contract.md"
 )
 RETENTION_ERROR_PATH = ALGORITHM_DIR / "retention_error_and_observability_contract.md"
 DEPLOYMENT_PATH = ALGORITHM_DIR / "deployment_and_resilience_contract.md"
-RECOVERY_PATH = (
-    ALGORITHM_DIR / "recovery_tier_checkpoint_and_fail_forward_governance_contract.md"
-)
+RECOVERY_PATH = ALGORITHM_DIR / "recovery_tier_checkpoint_and_fail_forward_governance_contract.md"
 AUTHORITY_PATH = ALGORITHM_DIR / "authority_interaction_protocol.md"
 NORTHBOUND_PATH = ALGORITHM_DIR / "northbound_api_and_session_contract.md"
 COLLAB_PATH = ALGORITHM_DIR / "collaboration_workspace_contract.md"
 PORTAL_PATH = ALGORITHM_DIR / "customer_client_portal_experience_contract.md"
 
 ADR_PATH = DOCS_ARCH_ADR_DIR / "ADR-002-storage-and-eventing-topology.md"
-COMPARISON_PATH = (
-    DOCS_ARCH_ADR_DIR / "ADR-002-storage-and-eventing-topology-comparison.md"
-)
-SCORECARD_PATH = (
-    DOCS_ARCH_ADR_DIR / "ADR-002-storage-and-eventing-topology-scorecard.json"
-)
+COMPARISON_PATH = DOCS_ARCH_ADR_DIR / "ADR-002-storage-and-eventing-topology-comparison.md"
+SCORECARD_PATH = DOCS_ARCH_ADR_DIR / "ADR-002-storage-and-eventing-topology-scorecard.json"
 STORE_MATRIX_PATH = DATA_ANALYSIS_DIR / "storage_artifact_to_store_matrix.json"
 EVENT_FLOW_PATH = DATA_ANALYSIS_DIR / "event_flow_and_delivery_contracts.json"
 REBUILD_PATH = DATA_ANALYSIS_DIR / "rebuild_restore_and_replay_topology.json"
@@ -125,10 +118,7 @@ def md_escape(value: Any) -> str:
 def markdown_table(headers: list[str], rows: list[list[Any]]) -> str:
     header_line = "| " + " | ".join(headers) + " |"
     divider_line = "| " + " | ".join("---" for _ in headers) + " |"
-    body_lines = [
-        "| " + " | ".join(md_escape(cell) for cell in row) + " |"
-        for row in rows
-    ]
+    body_lines = ["| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows]
     return "\n".join([header_line, divider_line, *body_lines])
 
 
@@ -1249,11 +1239,11 @@ def build_event_flows() -> dict[str, Any]:
                 "user_visible_surface_impact": "Enquiry, audit, and replay views can explain legal decisions from one traversable evidence graph.",
                 "source_refs": [
                     heading_ref(OBSERVABILITY_PATH, "14.5 Audit event contract"),
-                text_ref(
-                    PROVENANCE_PATH,
-                    "and legal-state transition SHALL have at least one `ED_AUDITED_BY` edge to an `EN_AUDIT_EVENT` node",
-                    "gate_and_audit_anchoring_rule",
-                ),
+                    text_ref(
+                        PROVENANCE_PATH,
+                        "and legal-state transition SHALL have at least one `ED_AUDITED_BY` edge to an `EN_AUDIT_EVENT` node",
+                        "gate_and_audit_anchoring_rule",
+                    ),
                     heading_ref(PROVENANCE_PATH, "11.14D Replay-safe proof reconstruction"),
                 ],
             },
@@ -1278,7 +1268,10 @@ def build_event_flows() -> dict[str, Any]:
                     heading_ref(RETENTION_PATH, "Artifact retention contract"),
                     heading_ref(RETENTION_PATH, "Erasure and legal-hold workflow"),
                     heading_ref(RETENTION_LIMIT_PATH, "Required Outcomes"),
-                    heading_ref(RETENTION_ERROR_PATH, "15.5 Erasure, legal-hold, and proof-preservation invariants"),
+                    heading_ref(
+                        RETENTION_ERROR_PATH,
+                        "15.5 Erasure, legal-hold, and proof-preservation invariants",
+                    ),
                 ],
             },
             {
@@ -1498,7 +1491,9 @@ def build_rebuild_topology() -> dict[str, Any]:
             {
                 "rule_id": "ingress_checkpoint_before_mutation",
                 "rule": "No async provider payload may mutate legal state before a canonical AuthorityIngressReceipt is durable.",
-                "source_ref": heading_ref(AUTHORITY_PATH, "9.9A Inbound authority ingress protocol"),
+                "source_ref": heading_ref(
+                    AUTHORITY_PATH, "9.9A Inbound authority ingress protocol"
+                ),
             },
             {
                 "rule_id": "projections_and_caches_never_reopen_as_truth",
@@ -1651,10 +1646,7 @@ def write_adr(criteria: list[dict[str, Any]], results: list[dict[str, Any]]) -> 
         [criterion["label"], criterion["priority"], criterion["weight"], criterion["rationale"]]
         for criterion in criteria
     ]
-    alt_rows = [
-        [item["label"], item["weighted_total"], item["rank"]]
-        for item in results
-    ]
+    alt_rows = [[item["label"], item["weighted_total"], item["rank"]] for item in results]
     sections = [
         "# ADR-002: Storage and Eventing Topology",
         "",

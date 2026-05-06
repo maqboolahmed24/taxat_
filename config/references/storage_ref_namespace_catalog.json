@@ -1,0 +1,133 @@
+{
+  "$schema": "./storage_ref_namespace_catalog.schema.json",
+  "contract_version": "1.0",
+  "catalog_id": "storage_ref_namespace_catalog",
+  "basis_statement": "Storage refs align to the existing object-store purpose matrix. They expose only stable internal namespace prefixes and lifecycle posture, never provider paths or customer-visible delivery handles.",
+  "source_lineage": [
+    {
+      "source_file": "config/object_storage/bucket_purpose_matrix.json",
+      "source_heading_or_logical_block": "purpose rows",
+      "rationale": "Bucket purpose taxonomy already defines the durable storage zones that storage refs must align to."
+    },
+    {
+      "source_file": "config/object_storage/object_key_naming_contract.json",
+      "source_heading_or_logical_block": "key family rows",
+      "rationale": "Object key naming already separates upload staging, evidence retention, quarantine, previews, and exports."
+    },
+    {
+      "source_file": "Algorithm/upload_session_recovery_harness_contract.md",
+      "source_heading_or_logical_block": "Resume continuity",
+      "rationale": "Upload-session recovery requires the same `storage_ref` across resume and reconnect scenarios."
+    },
+    {
+      "source_file": "Algorithm/retention_and_privacy.md",
+      "source_heading_or_logical_block": "Artifact retention contract",
+      "rationale": "Storage namespaces are lifecycle- and privacy-bound rather than generic blob locations."
+    }
+  ],
+  "namespace_rows": [
+    {
+      "namespace_ref": "UPLOAD_STAGING",
+      "purpose_ref": "purpose.upload_staging",
+      "storage_ref_prefix": "storage.upload-staging",
+      "object_key_family_refs": [
+        "key_family.upload_staging_body",
+        "key_family.upload_part_manifest"
+      ],
+      "exposure_posture": "INTERNAL_ONLY",
+      "continuity_posture": "SAME_STORAGE_REF_REUSED_ACROSS_RESUME_AND_REQUEST_REBASE",
+      "delivery_posture": "NO_DIRECT_CUSTOMER_DELIVERY",
+      "notes": [
+        "Upload staging survives reconnect and request rebase with the same storage ref.",
+        "No preview or download target may be inferred from staging storage."
+      ]
+    },
+    {
+      "namespace_ref": "RETAINED_EVIDENCE",
+      "purpose_ref": "purpose.retained_evidence",
+      "storage_ref_prefix": "storage.retained-evidence",
+      "object_key_family_refs": ["key_family.retained_evidence_body"],
+      "exposure_posture": "INTERNAL_ONLY",
+      "continuity_posture": "IMMUTABLE_VERSIONED_BODY",
+      "delivery_posture": "CUSTOMER_DELIVERY_ONLY_VIA_TARGET_AND_BINDING",
+      "notes": [
+        "Retained evidence stores immutable bodies for durable refs and provenance.",
+        "Customer-safe preview or download requires separate target and delivery families."
+      ]
+    },
+    {
+      "namespace_ref": "AUTHORITY_PAYLOAD_BODIES",
+      "purpose_ref": "purpose.authority_payload_bodies",
+      "storage_ref_prefix": "storage.authority-payloads",
+      "object_key_family_refs": ["key_family.authority_payload_body"],
+      "exposure_posture": "INTERNAL_ONLY",
+      "continuity_posture": "IMMUTABLE_VERSIONED_BODY",
+      "delivery_posture": "NO_DIRECT_CUSTOMER_DELIVERY",
+      "notes": [
+        "Authority payload bodies remain durable internal evidence and never become customer download handles."
+      ]
+    },
+    {
+      "namespace_ref": "QUARANTINE",
+      "purpose_ref": "purpose.quarantine",
+      "storage_ref_prefix": "storage.quarantine",
+      "object_key_family_refs": ["key_family.quarantine_body"],
+      "exposure_posture": "INTERNAL_ONLY",
+      "continuity_posture": "IMMUTABLE_UNTIL_RELEASE_OR_SUPERSESSION",
+      "delivery_posture": "NO_DIRECT_DELIVERY",
+      "notes": [
+        "Quarantine bodies remain isolated until explicit release or supersession.",
+        "Quarantine storage refs may never leak into target or delivery families."
+      ]
+    },
+    {
+      "namespace_ref": "DERIVED_PREVIEWS",
+      "purpose_ref": "purpose.derived_previews",
+      "storage_ref_prefix": "storage.derived-preview",
+      "object_key_family_refs": ["key_family.derived_preview"],
+      "exposure_posture": "INTERNAL_ONLY",
+      "continuity_posture": "REGENERABLE_FROM_SOURCE_AND_TARGET_SELECTION",
+      "delivery_posture": "PREVIEW_ONLY_VIA_TARGET_AND_BINDING",
+      "notes": [
+        "Derived previews are disposable storage artifacts behind stable target refs.",
+        "Regeneration or cache invalidation may change storage without changing the target ref."
+      ]
+    },
+    {
+      "namespace_ref": "MASKED_EXPORTS",
+      "purpose_ref": "purpose.export_masked",
+      "storage_ref_prefix": "storage.export-masked",
+      "object_key_family_refs": ["key_family.export_masked_bundle"],
+      "exposure_posture": "INTERNAL_ONLY",
+      "continuity_posture": "NEW_STORAGE_REF_PER_EXPORT_GENERATION",
+      "delivery_posture": "CUSTOMER_SAFE_EXPORT_VIA_DOWNLOAD_REF_AND_BINDING",
+      "notes": [
+        "Masked exports are customer-safe derivatives and therefore mint new target and delivery families."
+      ]
+    },
+    {
+      "namespace_ref": "RESTRICTED_EXPORTS",
+      "purpose_ref": "purpose.export_restricted",
+      "storage_ref_prefix": "storage.export-restricted",
+      "object_key_family_refs": ["key_family.export_restricted_bundle"],
+      "exposure_posture": "INTERNAL_ONLY",
+      "continuity_posture": "NEW_STORAGE_REF_PER_EXPORT_GENERATION",
+      "delivery_posture": "RESTRICTED_DELIVERY_ONLY_VIA_GOVERNED_BINDING",
+      "notes": [
+        "Restricted exports remain governed and visibility-partitioned even when delivery is allowed."
+      ]
+    },
+    {
+      "namespace_ref": "RESTORE_ARCHIVE",
+      "purpose_ref": "purpose.restore_archive",
+      "storage_ref_prefix": "storage.restore-archive",
+      "object_key_family_refs": ["key_family.restore_archive_bundle"],
+      "exposure_posture": "INTERNAL_ONLY",
+      "continuity_posture": "REPLAY_AND_DRILL_ONLY",
+      "delivery_posture": "NO_DIRECT_CUSTOMER_DELIVERY",
+      "notes": [
+        "Restore archives exist for replay and drill workflows and remain outside customer-facing delivery families."
+      ]
+    }
+  ]
+}

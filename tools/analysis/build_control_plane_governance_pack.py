@@ -18,7 +18,9 @@ MANIFEST_FREEZE_PATH = ALGORITHM_DIR / "manifest_and_config_freeze_contract.md"
 MANIFEST_START_CLAIM_PATH = ALGORITHM_DIR / "manifest_start_claim_protocol.md"
 MANIFEST_BRANCH_PATH = ALGORITHM_DIR / "manifest_branch_selection_contract.md"
 NIGHTLY_AUTOPILOT_PATH = ALGORITHM_DIR / "nightly_autopilot_contract.md"
-NIGHTLY_SELECTION_PATH = ALGORITHM_DIR / "nightly_selection_disposition_and_batch_isolation_contract.md"
+NIGHTLY_SELECTION_PATH = (
+    ALGORITHM_DIR / "nightly_selection_disposition_and_batch_isolation_contract.md"
+)
 RECOVERY_PATH = ALGORITHM_DIR / "recovery_tier_checkpoint_and_fail_forward_governance_contract.md"
 RELEASE_PATH = ALGORITHM_DIR / "release_candidate_identity_and_promotion_evidence_contract.md"
 DEPLOYMENT_PATH = ALGORITHM_DIR / "deployment_and_resilience_contract.md"
@@ -36,9 +38,13 @@ RECOVERY_GOVERNANCE_SCHEMA_PATH = SCHEMAS_DIR / "recovery_governance_contract.sc
 RECOVERY_CHECKPOINT_SCHEMA_PATH = SCHEMAS_DIR / "recovery_checkpoint.schema.json"
 RESTORE_PRIVACY_SCHEMA_PATH = SCHEMAS_DIR / "restore_privacy_reconciliation_contract.schema.json"
 RELEASE_CANDIDATE_SCHEMA_PATH = SCHEMAS_DIR / "release_candidate_identity_contract.schema.json"
-COMPATIBILITY_GATE_SCHEMA_PATH = SCHEMAS_DIR / "schema_bundle_compatibility_gate_contract.schema.json"
+COMPATIBILITY_GATE_SCHEMA_PATH = (
+    SCHEMAS_DIR / "schema_bundle_compatibility_gate_contract.schema.json"
+)
 DEPLOYMENT_RELEASE_SCHEMA_PATH = SCHEMAS_DIR / "deployment_release.schema.json"
-RELEASE_VERIFICATION_MANIFEST_SCHEMA_PATH = SCHEMAS_DIR / "release_verification_manifest.schema.json"
+RELEASE_VERIFICATION_MANIFEST_SCHEMA_PATH = (
+    SCHEMAS_DIR / "release_verification_manifest.schema.json"
+)
 
 REQUIREMENTS_DOC_PATH = DOCS_ANALYSIS_DIR / "15_replay_recovery_nightly_release_governance.md"
 FAILURE_DOC_PATH = DOCS_ANALYSIS_DIR / "15_control_plane_failure_and_promotion_rules.md"
@@ -46,12 +52,18 @@ FAILURE_DOC_PATH = DOCS_ANALYSIS_DIR / "15_control_plane_failure_and_promotion_r
 ARTIFACT_INVENTORY_PATH = DATA_ANALYSIS_DIR / "control_plane_artifact_inventory.json"
 REPLAY_CLASS_MATRIX_PATH = DATA_ANALYSIS_DIR / "replay_class_and_precondition_matrix.json"
 REPLAY_COMPARISON_MATRIX_PATH = DATA_ANALYSIS_DIR / "replay_comparison_and_attestation_matrix.json"
-CLAIM_BRANCH_MATRIX_PATH = DATA_ANALYSIS_DIR / "manifest_start_claim_and_branch_selection_matrix.json"
+CLAIM_BRANCH_MATRIX_PATH = (
+    DATA_ANALYSIS_DIR / "manifest_start_claim_and_branch_selection_matrix.json"
+)
 NIGHTLY_SELECTION_MATRIX_PATH = DATA_ANALYSIS_DIR / "nightly_selection_disposition_matrix.json"
 NIGHTLY_POLICY_MATRIX_PATH = DATA_ANALYSIS_DIR / "nightly_unattended_policy_matrix.json"
 RECOVERY_REOPEN_MATRIX_PATH = DATA_ANALYSIS_DIR / "recovery_checkpoint_reopen_matrix.json"
-RESEND_RECOVERY_MATRIX_PATH = DATA_ANALYSIS_DIR / "no_blind_resend_and_authority_recovery_rules.json"
-RELEASE_GATE_MATRIX_PATH = DATA_ANALYSIS_DIR / "release_candidate_and_compatibility_gate_matrix.json"
+RESEND_RECOVERY_MATRIX_PATH = (
+    DATA_ANALYSIS_DIR / "no_blind_resend_and_authority_recovery_rules.json"
+)
+RELEASE_GATE_MATRIX_PATH = (
+    DATA_ANALYSIS_DIR / "release_candidate_and_compatibility_gate_matrix.json"
+)
 ROLLBACK_MATRIX_PATH = DATA_ANALYSIS_DIR / "rollback_fail_forward_boundary_matrix.json"
 
 LIFECYCLE_MERMAID_PATH = DIAGRAMS_ANALYSIS_DIR / "15_control_plane_lifecycle.mmd"
@@ -77,7 +89,14 @@ REQUIRED_RECORD_FIELDS = [
     "source_heading_or_logical_block",
     "notes",
 ]
-LIST_FIELDS = ["identity_tuple", "frozen_inputs", "allowed_next_actions", "idempotency_or_hash_fields", "audit_events", "notes"]
+LIST_FIELDS = [
+    "identity_tuple",
+    "frozen_inputs",
+    "allowed_next_actions",
+    "idempotency_or_hash_fields",
+    "audit_events",
+    "notes",
+]
 
 CLAIM_OUTCOMES = [
     "CLAIM_GRANTED",
@@ -108,16 +127,46 @@ BRANCH_REASON_CODES = [
     "NIGHTLY_WINDOW_ADVANCED",
 ]
 REPLAY_PRECONDITION_SPECS = [
-    ("CONTINUATION_BASIS_MATCH", "The requested `continuation_basis` names the exact lineage edge being replayed or recovered."),
-    ("CONFIG_INHERITANCE_EXACT", "`continuation_set.config_inheritance_mode` stays exact rather than historically explicit or fresh."),
-    ("INPUT_INHERITANCE_EXACT", "`continuation_set.input_inheritance_mode` stays exact rather than historically explicit or fresh."),
-    ("SOURCE_MANIFEST_READABLE", "The source manifest remains sealed, historically readable, and not reconstructed from projections."),
-    ("CONFIG_FREEZE_AVAILABLE", "The frozen `ConfigFreeze` is available, valid, and readable under the recorded schema bundle."),
-    ("INPUT_FREEZE_AND_INTAKE_AVAILABLE", "The frozen `InputFreeze` and authoritative intake artifacts remain available, valid, and schema-readable."),
-    ("READER_WINDOW_OR_HISTORICAL_BUNDLE_AVAILABLE", "The persisted reader-window still admits the replay reader or the runtime can load the exact historical bundle directly."),
-    ("PRESEAL_TAPE_AVAILABLE", "Historical `preseal_gate_evaluation{...}` and the ordered pre-seal prefix are present and internally consistent."),
-    ("AUTHORITY_AND_LATE_DATA_BASIS_AVAILABLE", "Authority and late-data basis artifacts remain available when they materially influenced the original run."),
-    ("RUNTIME_CAN_DESERIALIZE_AND_DECRYPT", "The replay runtime can deserialize the historical schema bundle and decrypt retained artifacts where required."),
+    (
+        "CONTINUATION_BASIS_MATCH",
+        "The requested `continuation_basis` names the exact lineage edge being replayed or recovered.",
+    ),
+    (
+        "CONFIG_INHERITANCE_EXACT",
+        "`continuation_set.config_inheritance_mode` stays exact rather than historically explicit or fresh.",
+    ),
+    (
+        "INPUT_INHERITANCE_EXACT",
+        "`continuation_set.input_inheritance_mode` stays exact rather than historically explicit or fresh.",
+    ),
+    (
+        "SOURCE_MANIFEST_READABLE",
+        "The source manifest remains sealed, historically readable, and not reconstructed from projections.",
+    ),
+    (
+        "CONFIG_FREEZE_AVAILABLE",
+        "The frozen `ConfigFreeze` is available, valid, and readable under the recorded schema bundle.",
+    ),
+    (
+        "INPUT_FREEZE_AND_INTAKE_AVAILABLE",
+        "The frozen `InputFreeze` and authoritative intake artifacts remain available, valid, and schema-readable.",
+    ),
+    (
+        "READER_WINDOW_OR_HISTORICAL_BUNDLE_AVAILABLE",
+        "The persisted reader-window still admits the replay reader or the runtime can load the exact historical bundle directly.",
+    ),
+    (
+        "PRESEAL_TAPE_AVAILABLE",
+        "Historical `preseal_gate_evaluation{...}` and the ordered pre-seal prefix are present and internally consistent.",
+    ),
+    (
+        "AUTHORITY_AND_LATE_DATA_BASIS_AVAILABLE",
+        "Authority and late-data basis artifacts remain available when they materially influenced the original run.",
+    ),
+    (
+        "RUNTIME_CAN_DESERIALIZE_AND_DECRYPT",
+        "The replay runtime can deserialize the historical schema bundle and decrypt retained artifacts where required.",
+    ),
     ("NO_LIVE_MUTATION_SCOPE_TOKEN", "The requested replay scope contains no live mutation token."),
 ]
 REPLAY_VARIANCE_TAXONOMY = [
@@ -357,7 +406,9 @@ def assert_required_record_fields(rows: Iterable[dict[str, Any]]) -> None:
     for row in rows:
         missing = [field for field in REQUIRED_RECORD_FIELDS if field not in row]
         if missing:
-            raise ValueError(f"Record {row.get('canonical_id')} is missing required fields: {missing}")
+            raise ValueError(
+                f"Record {row.get('canonical_id')} is missing required fields: {missing}"
+            )
         for field in LIST_FIELDS:
             if not isinstance(row[field], list):
                 raise ValueError(f"Record {row['canonical_id']} field `{field}` must be a list.")
@@ -391,29 +442,59 @@ def render_table(headers: list[str], rows: list[dict[str, Any]]) -> list[str]:
     return lines
 
 
-def make_summary(rows: list[dict[str, Any]], *, extra: dict[str, Any] | None = None) -> dict[str, Any]:
+def make_summary(
+    rows: list[dict[str, Any]], *, extra: dict[str, Any] | None = None
+) -> dict[str, Any]:
     summary = {"row_count": len(rows)}
     if extra:
         summary.update(extra)
     return summary
 
 
-REPLAY_CLASS_ENUM = schema_enum(REPLAY_ATTESTATION_SCHEMA_PATH, "properties", "replay_class", "enum")
-COMPARISON_MODE_ENUM = schema_enum(REPLAY_ATTESTATION_SCHEMA_PATH, "properties", "comparison_mode", "enum")
-BASIS_VALIDATION_ENUM = schema_enum(REPLAY_ATTESTATION_SCHEMA_PATH, "properties", "basis_validation_state", "enum")
-OUTCOME_CLASS_ENUM = schema_enum(REPLAY_ATTESTATION_SCHEMA_PATH, "properties", "outcome_class", "enum")
-BASIS_IDENTITY_ENUM = schema_enum(REPLAY_ATTESTATION_SCHEMA_PATH, "properties", "basis_identity_verdict", "enum")
-EQUIVALENCE_ENUM = schema_enum(REPLAY_ATTESTATION_SCHEMA_PATH, "properties", "deterministic_equivalence_verdict", "enum")
-ATTESTATION_CONFIDENCE_BANDS = schema_enum(REPLAY_ATTESTATION_SCHEMA_PATH, "properties", "attestation_confidence_band", "enum")
+REPLAY_CLASS_ENUM = schema_enum(
+    REPLAY_ATTESTATION_SCHEMA_PATH, "properties", "replay_class", "enum"
+)
+COMPARISON_MODE_ENUM = schema_enum(
+    REPLAY_ATTESTATION_SCHEMA_PATH, "properties", "comparison_mode", "enum"
+)
+BASIS_VALIDATION_ENUM = schema_enum(
+    REPLAY_ATTESTATION_SCHEMA_PATH, "properties", "basis_validation_state", "enum"
+)
+OUTCOME_CLASS_ENUM = schema_enum(
+    REPLAY_ATTESTATION_SCHEMA_PATH, "properties", "outcome_class", "enum"
+)
+BASIS_IDENTITY_ENUM = schema_enum(
+    REPLAY_ATTESTATION_SCHEMA_PATH, "properties", "basis_identity_verdict", "enum"
+)
+EQUIVALENCE_ENUM = schema_enum(
+    REPLAY_ATTESTATION_SCHEMA_PATH, "properties", "deterministic_equivalence_verdict", "enum"
+)
+ATTESTATION_CONFIDENCE_BANDS = schema_enum(
+    REPLAY_ATTESTATION_SCHEMA_PATH, "properties", "attestation_confidence_band", "enum"
+)
 
-CLAIM_STATE_ENUM = schema_enum(MANIFEST_START_CLAIM_SCHEMA_PATH, "properties", "claim_state", "enum")
-CLAIM_STATUS_ENUM = schema_enum(MANIFEST_START_CLAIM_SCHEMA_PATH, "properties", "claim_status_code", "enum")
-STALE_RECLAIM_REASON_ENUM = schema_enum(MANIFEST_START_CLAIM_SCHEMA_PATH, "properties", "stale_reclaim_reason_code_or_null", "enum")
-CLAIM_RELEASE_REASON_ENUM = schema_enum(MANIFEST_START_CLAIM_SCHEMA_PATH, "properties", "claim_release_reason_code_or_null", "enum")
+CLAIM_STATE_ENUM = schema_enum(
+    MANIFEST_START_CLAIM_SCHEMA_PATH, "properties", "claim_state", "enum"
+)
+CLAIM_STATUS_ENUM = schema_enum(
+    MANIFEST_START_CLAIM_SCHEMA_PATH, "properties", "claim_status_code", "enum"
+)
+STALE_RECLAIM_REASON_ENUM = schema_enum(
+    MANIFEST_START_CLAIM_SCHEMA_PATH, "properties", "stale_reclaim_reason_code_or_null", "enum"
+)
+CLAIM_RELEASE_REASON_ENUM = schema_enum(
+    MANIFEST_START_CLAIM_SCHEMA_PATH, "properties", "claim_release_reason_code_or_null", "enum"
+)
 
-NIGHTLY_TRIGGER_ENUM = schema_enum(NIGHTLY_BATCH_IDENTITY_SCHEMA_PATH, "properties", "trigger_class", "enum")
-NIGHTLY_RESUME_ENUM = schema_enum(NIGHTLY_BATCH_IDENTITY_SCHEMA_PATH, "properties", "recovery_resume_state", "enum")
-NIGHTLY_ENVIRONMENT_ENUM = schema_enum(NIGHTLY_BATCH_IDENTITY_SCHEMA_PATH, "properties", "environment_ref", "enum")
+NIGHTLY_TRIGGER_ENUM = schema_enum(
+    NIGHTLY_BATCH_IDENTITY_SCHEMA_PATH, "properties", "trigger_class", "enum"
+)
+NIGHTLY_RESUME_ENUM = schema_enum(
+    NIGHTLY_BATCH_IDENTITY_SCHEMA_PATH, "properties", "recovery_resume_state", "enum"
+)
+NIGHTLY_ENVIRONMENT_ENUM = schema_enum(
+    NIGHTLY_BATCH_IDENTITY_SCHEMA_PATH, "properties", "environment_ref", "enum"
+)
 SELECTION_DISPOSITION_ENUM = schema_enum(
     NIGHTLY_BATCH_RUN_SCHEMA_PATH,
     "$defs",
@@ -461,23 +542,35 @@ NIGHTLY_SHARD_FAILURE_ENUM = schema_enum(
     "enum",
 )
 
-RECOVERY_BOUNDARY_SCOPE_ENUM = schema_enum(RECOVERY_GOVERNANCE_SCHEMA_PATH, "properties", "boundary_scope", "enum")
+RECOVERY_BOUNDARY_SCOPE_ENUM = schema_enum(
+    RECOVERY_GOVERNANCE_SCHEMA_PATH, "properties", "boundary_scope", "enum"
+)
 RECOVERY_WORKLOAD_CLASS_ENUM = schema_enum(
     RECOVERY_GOVERNANCE_SCHEMA_PATH, "properties", "protected_workload_class", "enum"
 )
-RECOVERY_TIER_ENUM = schema_enum(RECOVERY_GOVERNANCE_SCHEMA_PATH, "properties", "recovery_tier_class", "enum")
+RECOVERY_TIER_ENUM = schema_enum(
+    RECOVERY_GOVERNANCE_SCHEMA_PATH, "properties", "recovery_tier_class", "enum"
+)
 RPO_ENUM = schema_enum(RECOVERY_GOVERNANCE_SCHEMA_PATH, "properties", "rpo_class", "enum")
 RTO_ENUM = schema_enum(RECOVERY_GOVERNANCE_SCHEMA_PATH, "properties", "rto_class", "enum")
-RECOVERY_CHECKPOINT_STATE_ENUM = schema_enum(RECOVERY_CHECKPOINT_SCHEMA_PATH, "properties", "checkpoint_state", "enum")
-REOPEN_READINESS_ENUM = schema_enum(RECOVERY_CHECKPOINT_SCHEMA_PATH, "properties", "reopen_readiness_state", "enum")
+RECOVERY_CHECKPOINT_STATE_ENUM = schema_enum(
+    RECOVERY_CHECKPOINT_SCHEMA_PATH, "properties", "checkpoint_state", "enum"
+)
+REOPEN_READINESS_ENUM = schema_enum(
+    RECOVERY_CHECKPOINT_SCHEMA_PATH, "properties", "reopen_readiness_state", "enum"
+)
 PRIVACY_RECONCILIATION_ENUM = schema_enum(
     RESTORE_PRIVACY_SCHEMA_PATH, "properties", "privacy_reconciliation_state", "enum"
 )
-REOPEN_ACCESS_ENUM = schema_enum(RESTORE_PRIVACY_SCHEMA_PATH, "properties", "reopen_access_state", "enum")
+REOPEN_ACCESS_ENUM = schema_enum(
+    RESTORE_PRIVACY_SCHEMA_PATH, "properties", "reopen_access_state", "enum"
+)
 
 RELEASE_CANDIDATE_REQUIRED = schema_required(RELEASE_CANDIDATE_SCHEMA_PATH)
 COMPATIBILITY_GATE_REQUIRED = schema_required(COMPATIBILITY_GATE_SCHEMA_PATH)
-COMPATIBILITY_READER_WINDOW_ENUM = schema_enum(COMPATIBILITY_GATE_SCHEMA_PATH, "properties", "reader_window_state", "enum")
+COMPATIBILITY_READER_WINDOW_ENUM = schema_enum(
+    COMPATIBILITY_GATE_SCHEMA_PATH, "properties", "reader_window_state", "enum"
+)
 COMPATIBILITY_HISTORICAL_GUARD_ENUM = schema_enum(
     COMPATIBILITY_GATE_SCHEMA_PATH, "properties", "historical_manifest_guard_state", "enum"
 )
@@ -493,9 +586,15 @@ COMPATIBILITY_MIGRATION_ENUM = schema_enum(
 COMPATIBILITY_DESTRUCTIVE_ENUM = schema_enum(
     COMPATIBILITY_GATE_SCHEMA_PATH, "properties", "destructive_contract_state", "enum"
 )
-ROLLBACK_BOUNDARY_ENUM = schema_enum(DEPLOYMENT_RELEASE_SCHEMA_PATH, "properties", "rollback_boundary_state", "enum")
-ROLLOUT_STRATEGY_ENUM = schema_enum(DEPLOYMENT_RELEASE_SCHEMA_PATH, "properties", "rollout_strategy", "enum")
-ROLLOUT_STATE_ENUM = schema_enum(DEPLOYMENT_RELEASE_SCHEMA_PATH, "properties", "rollout_state", "enum")
+ROLLBACK_BOUNDARY_ENUM = schema_enum(
+    DEPLOYMENT_RELEASE_SCHEMA_PATH, "properties", "rollback_boundary_state", "enum"
+)
+ROLLOUT_STRATEGY_ENUM = schema_enum(
+    DEPLOYMENT_RELEASE_SCHEMA_PATH, "properties", "rollout_strategy", "enum"
+)
+ROLLOUT_STATE_ENUM = schema_enum(
+    DEPLOYMENT_RELEASE_SCHEMA_PATH, "properties", "rollout_state", "enum"
+)
 
 
 def source_assertions() -> None:
@@ -543,7 +642,9 @@ def source_assertions() -> None:
     heading_ref(AUTHORITY_PROTOCOL_PATH, "9.8 Request hashing and idempotency")
     heading_ref(AUTHORITY_PROTOCOL_PATH, "9.13A Reconciliation budget and escalation rule")
     heading_ref(RETENTION_PRIVACY_PATH, "Basis-preserving retention for replay")
-    heading_ref(RETENTION_OBSERVABILITY_PATH, "15.5 Erasure, legal-hold, and proof-preservation invariants")
+    heading_ref(
+        RETENTION_OBSERVABILITY_PATH, "15.5 Erasure, legal-hold, and proof-preservation invariants"
+    )
 
 
 def artifact_inventory_rows() -> list[dict[str, Any]]:
@@ -552,16 +653,45 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             record_type="control_plane_artifact",
             canonical_id="artifact_run_manifest",
             trigger_or_entry_condition="A materially significant run allocates or reuses a manifest envelope.",
-            identity_tuple=["manifest_id", "root_manifest_id", "parent_manifest_id_or_null", "run_kind", "mode"],
-            frozen_inputs=["requested_scope[]", "effective_scope[]", "config_freeze_ref", "input_freeze_ref", "hash_set.execution_basis_hash"],
+            identity_tuple=[
+                "manifest_id",
+                "root_manifest_id",
+                "parent_manifest_id_or_null",
+                "run_kind",
+                "mode",
+            ],
+            frozen_inputs=[
+                "requested_scope[]",
+                "effective_scope[]",
+                "config_freeze_ref",
+                "input_freeze_ref",
+                "hash_set.execution_basis_hash",
+            ],
             state_or_outcome="RunManifest is the canonical execution, lineage, and sealing truth for request-time control.",
-            allowed_next_actions=["freeze_manifest", "seal_manifest", "start_claim_or_reuse", "append_post_seal_outcomes"],
-            idempotency_or_hash_fields=["idempotency_key", "manifest_hash", "execution_basis_hash", "decision_bundle_hash", "deterministic_outcome_hash"],
+            allowed_next_actions=[
+                "freeze_manifest",
+                "seal_manifest",
+                "start_claim_or_reuse",
+                "append_post_seal_outcomes",
+            ],
+            idempotency_or_hash_fields=[
+                "idempotency_key",
+                "manifest_hash",
+                "execution_basis_hash",
+                "decision_bundle_hash",
+                "deterministic_outcome_hash",
+            ],
             recovery_posture="Root artifact for same-manifest reuse, replay child allocation, and recovery child lineage.",
             privacy_reconciliation_required=False,
             authority_safety_posture="No authority mutation, replay, or continuation may bypass manifest lineage truth.",
             operator_visible_effect="Operators can reconstruct why a run was new, reused, replayed, or continued from one manifest spine.",
-            audit_events=["ManifestAllocated", "ManifestFrozen", "ManifestSealed", "ManifestCompleted", "ManifestSuperseded"],
+            audit_events=[
+                "ManifestAllocated",
+                "ManifestFrozen",
+                "ManifestSealed",
+                "ManifestCompleted",
+                "ManifestSuperseded",
+            ],
             source_path=MANIFEST_FREEZE_PATH,
             source_heading_or_logical_block="5.3 RunManifest required field groups",
             source_ref=heading_ref(MANIFEST_FREEZE_PATH, "5.3 `RunManifest` required field groups"),
@@ -574,10 +704,23 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             canonical_id="artifact_config_freeze",
             trigger_or_entry_condition="Freeze-before-decision and freeze-before-replay rules resolve stable config.",
             identity_tuple=["config_freeze_id", "config_surface_hash", "schema_bundle_hash"],
-            frozen_inputs=["resolved_policy_snapshot", "formula_bundle", "provider_profile_set", "mode_specific_controls"],
+            frozen_inputs=[
+                "resolved_policy_snapshot",
+                "formula_bundle",
+                "provider_profile_set",
+                "mode_specific_controls",
+            ],
             state_or_outcome="ConfigFreeze captures the lawful config basis for live, replay, nightly, and release flows.",
-            allowed_next_actions=["hash_config_surface", "seal_manifest", "inherit_exact_or_historical_explicit"],
-            idempotency_or_hash_fields=["config_freeze_hash", "config_surface_hash", "execution_basis_hash"],
+            allowed_next_actions=[
+                "hash_config_surface",
+                "seal_manifest",
+                "inherit_exact_or_historical_explicit",
+            ],
+            idempotency_or_hash_fields=[
+                "config_freeze_hash",
+                "config_surface_hash",
+                "execution_basis_hash",
+            ],
             recovery_posture="Exact same-attempt recovery and exact replay require identical config freeze semantics.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Counterfactual analysis may vary config only under analysis posture and explicit declaration.",
@@ -595,9 +738,17 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             canonical_id="artifact_input_freeze",
             trigger_or_entry_condition="Intake and source collection complete before compute, submission, or replay.",
             identity_tuple=["input_freeze_id", "input_set_hash", "authoritative_intake_set_hash"],
-            frozen_inputs=["ordered_input_artifacts", "authoritative_intake_artifacts", "retention_placeholders"],
+            frozen_inputs=[
+                "ordered_input_artifacts",
+                "authoritative_intake_artifacts",
+                "retention_placeholders",
+            ],
             state_or_outcome="InputFreeze captures the exact input basis later used by replay, recovery, and audits.",
-            allowed_next_actions=["seal_manifest", "derive_execution_basis_hash", "validate_basis_readability"],
+            allowed_next_actions=[
+                "seal_manifest",
+                "derive_execution_basis_hash",
+                "validate_basis_readability",
+            ],
             idempotency_or_hash_fields=["input_set_hash", "execution_basis_hash"],
             recovery_posture="Exact replay and same-attempt recovery require readable input freeze plus authoritative intake basis.",
             privacy_reconciliation_required=False,
@@ -607,7 +758,9 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             source_path=MANIFEST_FREEZE_PATH,
             source_heading_or_logical_block="5.8 Input freeze contract",
             source_ref=heading_ref(MANIFEST_FREEZE_PATH, "5.8 Input freeze contract"),
-            notes=["Retention-limited placeholders must surface explicitly instead of collapsing to not applicable."],
+            notes=[
+                "Retention-limited placeholders must surface explicitly instead of collapsing to not applicable."
+            ],
             artifact_name="InputFreeze",
             schema_path="Algorithm/schemas/input_freeze.schema.json",
         ),
@@ -615,11 +768,33 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             record_type="control_plane_artifact",
             canonical_id="artifact_hash_set",
             trigger_or_entry_condition="Manifest sealing derives the execution, manifest, decision, and outcome hashes.",
-            identity_tuple=["manifest_id", "config_freeze_hash", "input_set_hash", "execution_basis_hash"],
-            frozen_inputs=["config_freeze", "input_freeze", "scope_execution_binding", "deterministic_seed"],
+            identity_tuple=[
+                "manifest_id",
+                "config_freeze_hash",
+                "input_set_hash",
+                "execution_basis_hash",
+            ],
+            frozen_inputs=[
+                "config_freeze",
+                "input_freeze",
+                "scope_execution_binding",
+                "deterministic_seed",
+            ],
             state_or_outcome="HashSet is the canonical replay, idempotency, and audit integrity spine.",
-            allowed_next_actions=["reuse_preseal_tape", "compare_replay_basis", "prove_idempotent_retry"],
-            idempotency_or_hash_fields=["config_freeze_hash", "config_surface_hash", "input_set_hash", "execution_basis_hash", "manifest_hash", "decision_bundle_hash", "deterministic_outcome_hash"],
+            allowed_next_actions=[
+                "reuse_preseal_tape",
+                "compare_replay_basis",
+                "prove_idempotent_retry",
+            ],
+            idempotency_or_hash_fields=[
+                "config_freeze_hash",
+                "config_surface_hash",
+                "input_set_hash",
+                "execution_basis_hash",
+                "manifest_hash",
+                "decision_bundle_hash",
+                "deterministic_outcome_hash",
+            ],
             recovery_posture="Recovery children preserve `execution_basis_hash`; later lineage nodes must not rewrite it in place.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Authority recovery and replay attestations read persisted hashes instead of inferring basis from side effects.",
@@ -628,7 +803,9 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             source_path=MANIFEST_FREEZE_PATH,
             source_heading_or_logical_block="5.9 Hash contract",
             source_ref=heading_ref(MANIFEST_FREEZE_PATH, "5.9 Hash contract"),
-            notes=["Decision and outcome hashes are append-only once published for a manifest version."],
+            notes=[
+                "Decision and outcome hashes are append-only once published for a manifest version."
+            ],
             artifact_name="HashSet",
             schema_path="Algorithm/schemas/hash_set.schema.json",
         ),
@@ -636,11 +813,27 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             record_type="control_plane_artifact",
             canonical_id="artifact_continuation_set",
             trigger_or_entry_condition="A child manifest or replay chooses inherited versus freshly resolved basis.",
-            identity_tuple=["manifest_id", "continuation_basis", "selected_manifest_continuation_basis"],
-            frozen_inputs=["config_inheritance_mode_or_null", "input_inheritance_mode_or_null", "lineage_refs"],
+            identity_tuple=[
+                "manifest_id",
+                "continuation_basis",
+                "selected_manifest_continuation_basis",
+            ],
+            frozen_inputs=[
+                "config_inheritance_mode_or_null",
+                "input_inheritance_mode_or_null",
+                "lineage_refs",
+            ],
             state_or_outcome="ContinuationSet distinguishes exact recovery, replay, historically explicit continuation, and new-request children.",
-            allowed_next_actions=["allocate_recovery_child", "allocate_replay_child", "allocate_continuation_child"],
-            idempotency_or_hash_fields=["continuation_basis", "idempotency_key", "request_identity_hash"],
+            allowed_next_actions=[
+                "allocate_recovery_child",
+                "allocate_replay_child",
+                "allocate_continuation_child",
+            ],
+            idempotency_or_hash_fields=[
+                "continuation_basis",
+                "idempotency_key",
+                "request_identity_hash",
+            ],
             recovery_posture="Same-attempt recovery is exact; historically explicit continuation is limited and must stay explicitly marked.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Continuation metadata cannot impersonate transport resume tokens or read-side stability tokens.",
@@ -649,7 +842,9 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             source_path=MANIFEST_FREEZE_PATH,
             source_heading_or_logical_block="5.7 Parent/child manifest semantics",
             source_ref=heading_ref(MANIFEST_FREEZE_PATH, "5.7 Parent/child manifest semantics"),
-            notes=["Continuation legality is part of branch proof, not a late-stage convenience flag."],
+            notes=[
+                "Continuation legality is part of branch proof, not a late-stage convenience flag."
+            ],
             artifact_name="ContinuationSet",
             schema_path="Algorithm/schemas/continuation_set.schema.json",
         ),
@@ -657,11 +852,30 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             record_type="control_plane_artifact",
             canonical_id="artifact_frozen_execution_binding",
             trigger_or_entry_condition="Access evaluation resolves the executable request boundary before sealing or authority mutation.",
-            identity_tuple=["manifest_id", "access_binding_hash", "access_decision", "required_authn_level"],
-            frozen_inputs=["effective_scope[]", "masking_rules[]", "required_approvals[]", "delegation_and_authority_lineage"],
+            identity_tuple=[
+                "manifest_id",
+                "access_binding_hash",
+                "access_decision",
+                "required_authn_level",
+            ],
+            frozen_inputs=[
+                "effective_scope[]",
+                "masking_rules[]",
+                "required_approvals[]",
+                "delegation_and_authority_lineage",
+            ],
             state_or_outcome="FrozenExecutionBinding extends request identity with executable scope and approval context.",
-            allowed_next_actions=["derive_manifest_idempotency_key", "derive_authority_request_hashes", "enforce_scope_and_masking"],
-            idempotency_or_hash_fields=["access_binding_hash", "idempotency_key", "duplicate_meaning_key", "request_hash"],
+            allowed_next_actions=[
+                "derive_manifest_idempotency_key",
+                "derive_authority_request_hashes",
+                "enforce_scope_and_masking",
+            ],
+            idempotency_or_hash_fields=[
+                "access_binding_hash",
+                "idempotency_key",
+                "duplicate_meaning_key",
+                "request_hash",
+            ],
             recovery_posture="Authority recovery may reuse request lineage only when binding lineage remains unchanged.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Access binding drift blocks silent replay or resend reuse.",
@@ -670,7 +884,9 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             source_path=MANIFEST_FREEZE_PATH,
             source_heading_or_logical_block="5.3 H. Frozen execution binding",
             source_ref=heading_ref(MANIFEST_FREEZE_PATH, "H. Frozen execution binding"),
-            notes=["Executable identity includes access decision class, executable scope, masking, approvals, and authentication level."],
+            notes=[
+                "Executable identity includes access decision class, executable scope, masking, approvals, and authentication level."
+            ],
             artifact_name="FrozenExecutionBinding",
             schema_path="Algorithm/schemas/frozen_execution_binding.schema.json",
         ),
@@ -679,9 +895,18 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             canonical_id="artifact_preseal_gate_evaluation",
             trigger_or_entry_condition="A manifest approaches seal and must freeze the canonical pre-seal gate prefix.",
             identity_tuple=["manifest_id", "execution_basis_hash", "ordered_gate_decision_ids[]"],
-            frozen_inputs=["MANIFEST_GATE", "ARTIFACT_CONTRACT_GATE", "INPUT_BOUNDARY_GATE", "DATA_QUALITY_GATE"],
+            frozen_inputs=[
+                "MANIFEST_GATE",
+                "ARTIFACT_CONTRACT_GATE",
+                "INPUT_BOUNDARY_GATE",
+                "DATA_QUALITY_GATE",
+            ],
             state_or_outcome="preseal_gate_evaluation captures the authoritative pre-start tape and durability boundary.",
-            allowed_next_actions=["seal_manifest", "reuse_same_manifest_preseal_tape", "block_prestart_execution"],
+            allowed_next_actions=[
+                "seal_manifest",
+                "reuse_same_manifest_preseal_tape",
+                "block_prestart_execution",
+            ],
             idempotency_or_hash_fields=["execution_basis_hash", "ordered_gate_decision_ids[]"],
             recovery_posture="Exact replay and same-manifest reuse consume the persisted tape instead of recomputing on ambient state.",
             privacy_reconciliation_required=False,
@@ -691,7 +916,9 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             source_path=MANIFEST_FREEZE_PATH,
             source_heading_or_logical_block="5.11 Pre-seal gate evaluation contract",
             source_ref=heading_ref(MANIFEST_FREEZE_PATH, "Pre-seal gate evaluation contract"),
-            notes=["The first four gate records remain an immutable prefix even when later gates append after seal."],
+            notes=[
+                "The first four gate records remain an immutable prefix even when later gates append after seal."
+            ],
             artifact_name="preseal_gate_evaluation",
             schema_path="Algorithm/schemas/preseal_gate_evaluation_contract.schema.json",
         ),
@@ -699,11 +926,32 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             record_type="control_plane_artifact",
             canonical_id="artifact_manifest_start_claim",
             trigger_or_entry_condition="A sealed manifest is claimed for the first live post-seal execution or stale recovery successor flow.",
-            identity_tuple=["manifest_id", "execution_basis_hash", "attempt_lineage_ref", "claim_epoch"],
-            frozen_inputs=["claim_state", "claim_status_code", "claim_holder_ref_or_null", "claim_token_or_null", "publication_state"],
+            identity_tuple=[
+                "manifest_id",
+                "execution_basis_hash",
+                "attempt_lineage_ref",
+                "claim_epoch",
+            ],
+            frozen_inputs=[
+                "claim_state",
+                "claim_status_code",
+                "claim_holder_ref_or_null",
+                "claim_token_or_null",
+                "publication_state",
+            ],
             state_or_outcome="manifest_start_claim is the single-writer start lease and first-publication truth for live execution.",
-            allowed_next_actions=["grant_claim", "reject_duplicate_start", "mark_stale_reclaim_required", "publish_first_stage_or_outbox"],
-            idempotency_or_hash_fields=["manifest_hash", "execution_basis_hash", "access_binding_hash", "attempt_lineage_ref"],
+            allowed_next_actions=[
+                "grant_claim",
+                "reject_duplicate_start",
+                "mark_stale_reclaim_required",
+                "publish_first_stage_or_outbox",
+            ],
+            idempotency_or_hash_fields=[
+                "manifest_hash",
+                "execution_basis_hash",
+                "access_binding_hash",
+                "attempt_lineage_ref",
+            ],
             recovery_posture="Nightly reclaim and recovery child allocation must read this control object instead of inferring from missing heartbeats.",
             privacy_reconciliation_required=False,
             authority_safety_posture="No second live start is legal while an active lease still exists.",
@@ -720,20 +968,43 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             record_type="control_plane_artifact",
             canonical_id="artifact_manifest_lineage_trace",
             trigger_or_entry_condition="Branch selection chooses reuse, replay, recovery, continuation, or fresh-child allocation.",
-            identity_tuple=["manifest_lineage_trace_ref", "selected_branch_action", "selected_branch_reason_code"],
-            frozen_inputs=["candidate_evaluations[]", "mirror_consistency_state", "prior_manifest_hash_at_decision_or_null", "nightly_predecessor_context"],
+            identity_tuple=[
+                "manifest_lineage_trace_ref",
+                "selected_branch_action",
+                "selected_branch_reason_code",
+            ],
+            frozen_inputs=[
+                "candidate_evaluations[]",
+                "mirror_consistency_state",
+                "prior_manifest_hash_at_decision_or_null",
+                "nightly_predecessor_context",
+            ],
             state_or_outcome="ManifestLineageTrace is the request-time branch explainer and candidate rejection ledger.",
-            allowed_next_actions=["render_branch_narrative", "bind_audit_and_trace_refs", "explain_nightly_window_continuity"],
-            idempotency_or_hash_fields=["request_identity_hash", "idempotency_key", "prior_manifest_hash_at_decision_or_null"],
+            allowed_next_actions=[
+                "render_branch_narrative",
+                "bind_audit_and_trace_refs",
+                "explain_nightly_window_continuity",
+            ],
+            idempotency_or_hash_fields=[
+                "request_identity_hash",
+                "idempotency_key",
+                "prior_manifest_hash_at_decision_or_null",
+            ],
             recovery_posture="Recovery, replay, continuation, and same-manifest reuse remain explainable from one branch artifact.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Lineage truth is explicit; nearby timestamps or read mirrors cannot substitute for branch proof.",
             operator_visible_effect="Explorers and audit tooling can show why one candidate won and others were rejected.",
-            audit_events=["ExistingDecisionBundleReturned", "ManifestContextReused", "ContinuationChildAllocated"],
+            audit_events=[
+                "ExistingDecisionBundleReturned",
+                "ManifestContextReused",
+                "ContinuationChildAllocated",
+            ],
             source_path=MANIFEST_BRANCH_PATH,
             source_heading_or_logical_block="Explorer Truth",
             source_ref=heading_ref(MANIFEST_BRANCH_PATH, "Explorer Truth"),
-            notes=["The current corpus names ManifestLineageTrace in prose but does not provide a dedicated schema."],
+            notes=[
+                "The current corpus names ManifestLineageTrace in prose but does not provide a dedicated schema."
+            ],
             artifact_name="ManifestLineageTrace",
             schema_path=None,
         ),
@@ -741,11 +1012,32 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             record_type="control_plane_artifact",
             canonical_id="artifact_replay_attestation",
             trigger_or_entry_condition="A replay child reaches a persisted decision outcome and must publish durable comparison truth.",
-            identity_tuple=["replay_attestation_id", "manifest_id", "replay_of_manifest_id", "replay_class"],
-            frozen_inputs=["comparison_mode", "basis_validation_state", "basis_identity_verdict", "deterministic_equivalence_verdict", "basis_dimension_results[]", "outcome_component_results[]"],
+            identity_tuple=[
+                "replay_attestation_id",
+                "manifest_id",
+                "replay_of_manifest_id",
+                "replay_class",
+            ],
+            frozen_inputs=[
+                "comparison_mode",
+                "basis_validation_state",
+                "basis_identity_verdict",
+                "deterministic_equivalence_verdict",
+                "basis_dimension_results[]",
+                "outcome_component_results[]",
+            ],
             state_or_outcome="ReplayAttestation is the durable replay-comparison and operator/auditor explanation artifact.",
-            allowed_next_actions=["publish_replay_visible_outcome", "answer_audit_queries", "return_existing_replay_child_on_duplicate_request"],
-            idempotency_or_hash_fields=["expected_execution_basis_hash", "actual_execution_basis_hash", "expected_deterministic_outcome_hash", "actual_deterministic_outcome_hash"],
+            allowed_next_actions=[
+                "publish_replay_visible_outcome",
+                "answer_audit_queries",
+                "return_existing_replay_child_on_duplicate_request",
+            ],
+            idempotency_or_hash_fields=[
+                "expected_execution_basis_hash",
+                "actual_execution_basis_hash",
+                "expected_deterministic_outcome_hash",
+                "actual_deterministic_outcome_hash",
+            ],
             recovery_posture="Corrupt, incomplete, or retention-limited basis becomes explicit posture instead of silent substitution.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Counterfactual analysis remains analysis-only and may not mutate authority-facing state.",
@@ -754,7 +1046,9 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             source_path=REPLAY_PATH,
             source_heading_or_logical_block="Replay attestation artifact",
             source_ref=heading_ref(REPLAY_PATH, "Replay attestation artifact"),
-            notes=["No replay child may publish replay-visible truth without a linked durable attestation."],
+            notes=[
+                "No replay child may publish replay-visible truth without a linked durable attestation."
+            ],
             artifact_name="ReplayAttestation",
             schema_path=repo_rel(REPLAY_ATTESTATION_SCHEMA_PATH),
         ),
@@ -762,10 +1056,29 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             record_type="control_plane_artifact",
             canonical_id="artifact_nightly_batch_identity_contract",
             trigger_or_entry_condition="Nightly trigger allocation freezes same-window dedupe, cross-window continuity, and recovery lineage.",
-            identity_tuple=["tenant_id", "nightly_window_key", "trigger_class", "release_verification_manifest_ref", "policy_snapshot_hash", "autopilot_policy_hash"],
-            frozen_inputs=["schema_bundle_hash", "code_build_id", "environment_ref", "selection_universe_hash", "selection_universe_count", "reclaimed_predecessor_batch_run_ref_or_null", "recovery_resume_state"],
+            identity_tuple=[
+                "tenant_id",
+                "nightly_window_key",
+                "trigger_class",
+                "release_verification_manifest_ref",
+                "policy_snapshot_hash",
+                "autopilot_policy_hash",
+            ],
+            frozen_inputs=[
+                "schema_bundle_hash",
+                "code_build_id",
+                "environment_ref",
+                "selection_universe_hash",
+                "selection_universe_count",
+                "reclaimed_predecessor_batch_run_ref_or_null",
+                "recovery_resume_state",
+            ],
             state_or_outcome="NightlyBatchIdentityContract is the scheduler dedupe and batch identity tuple.",
-            allowed_next_actions=["allocate_or_reuse_batch", "freeze_selection_universe", "prove_same_window_duplicate_suppression"],
+            allowed_next_actions=[
+                "allocate_or_reuse_batch",
+                "freeze_selection_universe",
+                "prove_same_window_duplicate_suppression",
+            ],
             idempotency_or_hash_fields=["identity_contract_hash", "scheduler_dedupe_key"],
             recovery_posture="Recovery reclaim windows link the predecessor explicitly and forbid silent second-batch allocation.",
             privacy_reconciliation_required=False,
@@ -775,7 +1088,9 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             source_path=NIGHTLY_SELECTION_PATH,
             source_heading_or_logical_block="Identity law",
             source_ref=heading_ref(NIGHTLY_SELECTION_PATH, "Identity law"),
-            notes=["Same-window duplicates reuse batch identity; later windows remain separate control objects."],
+            notes=[
+                "Same-window duplicates reuse batch identity; later windows remain separate control objects."
+            ],
             artifact_name="NightlyBatchIdentityContract",
             schema_path=repo_rel(NIGHTLY_BATCH_IDENTITY_SCHEMA_PATH),
         ),
@@ -783,20 +1098,48 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             record_type="control_plane_artifact",
             canonical_id="artifact_nightly_batch_run",
             trigger_or_entry_condition="A nightly control-plane window has been allocated and frozen for one tenant.",
-            identity_tuple=["batch_run_id", "tenant_id", "nightly_window_key", "trigger_class", "release_verification_manifest_ref"],
-            frozen_inputs=["identity_contract", "global_concurrency_profile", "selection_entries[]", "shard_plan[]", "operator_digest_publication_state"],
+            identity_tuple=[
+                "batch_run_id",
+                "tenant_id",
+                "nightly_window_key",
+                "trigger_class",
+                "release_verification_manifest_ref",
+            ],
+            frozen_inputs=[
+                "identity_contract",
+                "global_concurrency_profile",
+                "selection_entries[]",
+                "shard_plan[]",
+                "operator_digest_publication_state",
+            ],
             state_or_outcome="NightlyBatchRun is the authoritative overnight selection, shard, and quiescence control object.",
-            allowed_next_actions=["select_portfolio", "dispatch_client_execution", "reclaim_stale_batch", "publish_operator_digest"],
-            idempotency_or_hash_fields=["scheduler_dedupe_key", "identity_contract_hash", "selection_universe_hash"],
+            allowed_next_actions=[
+                "select_portfolio",
+                "dispatch_client_execution",
+                "reclaim_stale_batch",
+                "publish_operator_digest",
+            ],
+            idempotency_or_hash_fields=[
+                "scheduler_dedupe_key",
+                "identity_contract_hash",
+                "selection_universe_hash",
+            ],
             recovery_posture="Crash recovery reuses predecessor selection and shard truth or escalates if proof is incomplete.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Nightly automation may not bypass manifest leases, authority ambiguity rules, or resend boundaries.",
             operator_visible_effect="Morning operations can read one batch artifact instead of reconstructing overnight behavior from queues.",
-            audit_events=["NightlyBatchAllocated", "NightlyPortfolioSelected", "NightlyBatchCompleted", "OperatorMorningDigestPublished"],
+            audit_events=[
+                "NightlyBatchAllocated",
+                "NightlyPortfolioSelected",
+                "NightlyBatchCompleted",
+                "OperatorMorningDigestPublished",
+            ],
             source_path=NIGHTLY_AUTOPILOT_PATH,
             source_heading_or_logical_block="2.3 Frozen batch envelope",
             source_ref=heading_ref(NIGHTLY_AUTOPILOT_PATH, "2.3 Frozen batch envelope"),
-            notes=["Per-client entries remain explicit even for reuse, defer, escalation, and skip outcomes."],
+            notes=[
+                "Per-client entries remain explicit even for reuse, defer, escalation, and skip outcomes."
+            ],
             artifact_name="NightlyBatchRun",
             schema_path=repo_rel(NIGHTLY_BATCH_RUN_SCHEMA_PATH),
         ),
@@ -804,20 +1147,47 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             record_type="control_plane_artifact",
             canonical_id="artifact_nightly_selection_entry",
             trigger_or_entry_condition="Nightly portfolio selection evaluates one candidate client-period tuple exactly once.",
-            identity_tuple=["entry_id", "candidate_identity_hash", "client_id", "period", "selection_disposition"],
-            frozen_inputs=["terminal_result_reuse_state", "active_attempt_resolution_state", "priority_tuple", "reason_codes[]", "workflow_item_refs[]", "next_checkpoint_at"],
+            identity_tuple=[
+                "entry_id",
+                "candidate_identity_hash",
+                "client_id",
+                "period",
+                "selection_disposition",
+            ],
+            frozen_inputs=[
+                "terminal_result_reuse_state",
+                "active_attempt_resolution_state",
+                "priority_tuple",
+                "reason_codes[]",
+                "workflow_item_refs[]",
+                "next_checkpoint_at",
+            ],
             state_or_outcome="Nightly selection entry is the per-candidate operating decision row for overnight execution.",
-            allowed_next_actions=["execute_new_manifest", "execute_continuation_child", "reuse_result", "defer", "escalate", "skip"],
+            allowed_next_actions=[
+                "execute_new_manifest",
+                "execute_continuation_child",
+                "reuse_result",
+                "defer",
+                "escalate",
+                "skip",
+            ],
             idempotency_or_hash_fields=["candidate_identity_hash", "selection_basis_hash"],
             recovery_posture="Selection rows survive reclaim and batch restarts; unrelated clients retain explicit outcomes despite shard failure.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Same-window active attempts may defer or reclaim; they may not silently duplicate live execution.",
             operator_visible_effect="Client-level overnight outcomes are visible even when no manifest is executed.",
-            audit_events=["NightlyClientExecutionDispatched", "NightlyClientExecutionDeferred", "NightlyClientExecutionSkipped", "NightlyClientExecutionEscalated"],
+            audit_events=[
+                "NightlyClientExecutionDispatched",
+                "NightlyClientExecutionDeferred",
+                "NightlyClientExecutionSkipped",
+                "NightlyClientExecutionEscalated",
+            ],
             source_path=NIGHTLY_SELECTION_PATH,
             source_heading_or_logical_block="Selection law",
             source_ref=heading_ref(NIGHTLY_SELECTION_PATH, "Selection law"),
-            notes=["Only execution-capable rows enter shard plans; reuse, defer, escalation, and skip remain off-shard."],
+            notes=[
+                "Only execution-capable rows enter shard plans; reuse, defer, escalation, and skip remain off-shard."
+            ],
             artifact_name="NightlySelectionEntry",
             schema_path=repo_rel(NIGHTLY_BATCH_RUN_SCHEMA_PATH),
         ),
@@ -826,10 +1196,25 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             canonical_id="artifact_operator_morning_digest",
             trigger_or_entry_condition="Nightly quiescence succeeds far enough to publish one tenant coverage-date handoff summary.",
             identity_tuple=["coverage_date", "source_batch_run_refs[]", "supersedes_digest_id"],
-            frozen_inputs=["covered_selection_entry_refs[]", "summary_counts{...}", "queue_summaries[]", "highlighted_client_outcomes[]", "published_workflow_item_refs[]", "published_notification_refs[]"],
+            frozen_inputs=[
+                "covered_selection_entry_refs[]",
+                "summary_counts{...}",
+                "queue_summaries[]",
+                "highlighted_client_outcomes[]",
+                "published_workflow_item_refs[]",
+                "published_notification_refs[]",
+            ],
             state_or_outcome="OperatorMorningDigest is the deterministic next-morning handoff artifact for overnight control-plane behavior.",
-            allowed_next_actions=["publish_workflow_updates", "publish_notifications", "supersede_prior_digest"],
-            idempotency_or_hash_fields=["derivation_contract_hash", "coverage_date", "source_batch_run_refs[]"],
+            allowed_next_actions=[
+                "publish_workflow_updates",
+                "publish_notifications",
+                "supersede_prior_digest",
+            ],
+            idempotency_or_hash_fields=[
+                "derivation_contract_hash",
+                "coverage_date",
+                "source_batch_run_refs[]",
+            ],
             recovery_posture="Digest derivation remains pinned to live nightly compliance posture, not replay or analysis.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Customer-visible consequences remain bound to persisted workflow and audit evidence, not free-text summaries.",
@@ -846,20 +1231,48 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             record_type="control_plane_artifact",
             canonical_id="artifact_recovery_governance_contract",
             trigger_or_entry_condition="Checkpoint and release artifacts bind one shared recovery governance boundary.",
-            identity_tuple=["boundary_scope", "protected_workload_class", "recovery_tier_class", "rpo_class", "rto_class"],
-            frozen_inputs=["checkpoint_inventory_policy", "privacy_reconciliation_policy", "queue_recovery_policy", "authority_recovery_policy", "rollback_boundary_policy", "fail_forward_policy"],
+            identity_tuple=[
+                "boundary_scope",
+                "protected_workload_class",
+                "recovery_tier_class",
+                "rpo_class",
+                "rto_class",
+            ],
+            frozen_inputs=[
+                "checkpoint_inventory_policy",
+                "privacy_reconciliation_policy",
+                "queue_recovery_policy",
+                "authority_recovery_policy",
+                "rollback_boundary_policy",
+                "fail_forward_policy",
+            ],
             state_or_outcome="RecoveryGovernanceContract is the shared checkpoint and release resilience policy object.",
-            allowed_next_actions=["bind_checkpoint", "bind_deployment_release", "validate_reopen_and_fail_forward_boundaries"],
-            idempotency_or_hash_fields=["contract_version", "protected_workload_class", "boundary_scope"],
+            allowed_next_actions=[
+                "bind_checkpoint",
+                "bind_deployment_release",
+                "validate_reopen_and_fail_forward_boundaries",
+            ],
+            idempotency_or_hash_fields=[
+                "contract_version",
+                "protected_workload_class",
+                "boundary_scope",
+            ],
             recovery_posture="Tier mappings and reopen policy remain explicit and fail closed when weaker classes appear.",
             privacy_reconciliation_required=True,
             authority_safety_posture="Authority mutations require lineage and binding revalidation after restore or failover.",
             operator_visible_effect="SRE and release tooling can prove the tier, RPO/RTO, and reopen policy used by a checkpoint or release.",
-            audit_events=["BackupCreated", "RestoreDrillExecuted", "ReleasePromoted", "ReleaseRolledBack"],
+            audit_events=[
+                "BackupCreated",
+                "RestoreDrillExecuted",
+                "ReleasePromoted",
+                "ReleaseRolledBack",
+            ],
             source_path=RECOVERY_PATH,
             source_heading_or_logical_block="Shared recovery-governance boundary",
             source_ref=heading_ref(RECOVERY_PATH, "Shared recovery-governance boundary"),
-            notes=["Control-plane legal truth may not serialize a weaker tier than TIER_0_CONTROL_PLANE."],
+            notes=[
+                "Control-plane legal truth may not serialize a weaker tier than TIER_0_CONTROL_PLANE."
+            ],
             artifact_name="RecoveryGovernanceContract",
             schema_path=repo_rel(RECOVERY_GOVERNANCE_SCHEMA_PATH),
         ),
@@ -867,20 +1280,45 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             record_type="control_plane_artifact",
             canonical_id="artifact_recovery_checkpoint",
             trigger_or_entry_condition="Scheduled backup cadence or promotion/DR evidence binds a restore-capable checkpoint.",
-            identity_tuple=["checkpoint_id", "datastore_ref", "checkpoint_state", "restore_drill_ref"],
-            frozen_inputs=["checkpoint_inventory_ref", "restore_verification_hash", "privacy_reconciliation_contract", "audit_continuity_verified", "queue_rebuild_verified", "authority_binding_revalidation_verified", "reopen_readiness_state"],
+            identity_tuple=[
+                "checkpoint_id",
+                "datastore_ref",
+                "checkpoint_state",
+                "restore_drill_ref",
+            ],
+            frozen_inputs=[
+                "checkpoint_inventory_ref",
+                "restore_verification_hash",
+                "privacy_reconciliation_contract",
+                "audit_continuity_verified",
+                "queue_rebuild_verified",
+                "authority_binding_revalidation_verified",
+                "reopen_readiness_state",
+            ],
             state_or_outcome="RecoveryCheckpoint is the authoritative restore evidence and reopen-gating artifact for a protected workload.",
-            allowed_next_actions=["verify_checkpoint", "reopen_if_ready", "quarantine_or_expire", "bind_restore_drill_to_release"],
+            allowed_next_actions=[
+                "verify_checkpoint",
+                "reopen_if_ready",
+                "quarantine_or_expire",
+                "bind_restore_drill_to_release",
+            ],
             idempotency_or_hash_fields=["restore_verification_hash", "checkpoint_id"],
             recovery_posture="Verified posture requires restore evidence, privacy reconciliation, queue rebuild, and authority revalidation.",
             privacy_reconciliation_required=True,
             authority_safety_posture="Restore of authority-integrated work must rebuild outstanding reconciliation from durable truth.",
             operator_visible_effect="Restore readiness remains blocked by typed missing gates instead of silent reopen optimism.",
-            audit_events=["BackupCreated", "RestoreDrillExecuted", "DisasterRecoveryFailedOver", "DisasterRecoveryFailedBack"],
+            audit_events=[
+                "BackupCreated",
+                "RestoreDrillExecuted",
+                "DisasterRecoveryFailedOver",
+                "DisasterRecoveryFailedBack",
+            ],
             source_path=RECOVERY_PATH,
             source_heading_or_logical_block="Recovery checkpoint law",
             source_ref=heading_ref(RECOVERY_PATH, "Recovery checkpoint law"),
-            notes=["`READY_FOR_REOPEN` is lawful only after privacy, audit, queue, and authority checks all pass."],
+            notes=[
+                "`READY_FOR_REOPEN` is lawful only after privacy, audit, queue, and authority checks all pass."
+            ],
             artifact_name="RecoveryCheckpoint",
             schema_path=repo_rel(RECOVERY_CHECKPOINT_SCHEMA_PATH),
         ),
@@ -888,16 +1326,40 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             record_type="control_plane_artifact",
             canonical_id="artifact_restore_privacy_reconciliation_contract",
             trigger_or_entry_condition="A restore or drill may resurrect restricted data and must reconcile privacy before reopen.",
-            identity_tuple=["checkpoint_ref", "restore_drill_ref", "privacy_reconciliation_state", "reopen_access_state"],
-            frozen_inputs=["resurrected_data_posture", "compensating_re_erasure_state", "legal_hold_ref_or_null", "proof_preservation_basis_ref_or_null", "authority_ambiguity_ref_or_null", "audit_chain_continuity_state"],
+            identity_tuple=[
+                "checkpoint_ref",
+                "restore_drill_ref",
+                "privacy_reconciliation_state",
+                "reopen_access_state",
+            ],
+            frozen_inputs=[
+                "resurrected_data_posture",
+                "compensating_re_erasure_state",
+                "legal_hold_ref_or_null",
+                "proof_preservation_basis_ref_or_null",
+                "authority_ambiguity_ref_or_null",
+                "audit_chain_continuity_state",
+            ],
             state_or_outcome="RestorePrivacyReconciliationContract is the authoritative restore privacy blocker and compensating re-erasure record.",
-            allowed_next_actions=["reconcile_privacy", "complete_compensating_re_erasure", "block_reopen_pending_review"],
-            idempotency_or_hash_fields=["reconciliation_contract_hash", "privacy_reconciliation_outcome_ref"],
+            allowed_next_actions=[
+                "reconcile_privacy",
+                "complete_compensating_re_erasure",
+                "block_reopen_pending_review",
+            ],
+            idempotency_or_hash_fields=[
+                "reconciliation_contract_hash",
+                "privacy_reconciliation_outcome_ref",
+            ],
             recovery_posture="Restore remains blocked until privacy, limitation, and audit continuity become reopen-safe.",
             privacy_reconciliation_required=True,
             authority_safety_posture="Authority ambiguity blocks reopen rather than being erased or hand-waved away.",
             operator_visible_effect="Operators can distinguish ready-for-reopen, limited, legal-hold-blocked, and proof-preservation-blocked restore posture.",
-            audit_events=["ErasureRequested", "ErasureCompleted", "LegalHoldApplied", "LegalHoldReleased"],
+            audit_events=[
+                "ErasureRequested",
+                "ErasureCompleted",
+                "LegalHoldApplied",
+                "LegalHoldReleased",
+            ],
             source_path=RECOVERY_PATH,
             source_heading_or_logical_block="Restore privacy reconciliation law",
             source_ref=heading_ref(RECOVERY_PATH, "Restore privacy reconciliation law"),
@@ -909,20 +1371,50 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             record_type="control_plane_artifact",
             canonical_id="artifact_authority_interaction_record",
             trigger_or_entry_condition="An authority-bound submission or reconciliation exchange exists or is awaiting clarification.",
-            identity_tuple=["interaction_id", "request_hash", "idempotency_key", "authority_operation_profile_ref"],
-            frozen_inputs=["response_history_ids[]", "reconciliation_budget_state", "next_reconciliation_at", "resend_legality_state", "reconciliation_control_contract"],
+            identity_tuple=[
+                "interaction_id",
+                "request_hash",
+                "idempotency_key",
+                "authority_operation_profile_ref",
+            ],
+            frozen_inputs=[
+                "response_history_ids[]",
+                "reconciliation_budget_state",
+                "next_reconciliation_at",
+                "resend_legality_state",
+                "reconciliation_control_contract",
+            ],
             state_or_outcome="AuthorityInteractionRecord is the durable exchange and reconciliation truth for no-blind-resend safety.",
-            allowed_next_actions=["follow_up_read_only", "exact_idempotent_recovery", "escalate_reconciliation", "bind_submission_projection"],
-            idempotency_or_hash_fields=["request_hash", "duplicate_meaning_key", "idempotency_key", "binding_lineage_ref"],
+            allowed_next_actions=[
+                "follow_up_read_only",
+                "exact_idempotent_recovery",
+                "escalate_reconciliation",
+                "bind_submission_projection",
+            ],
+            idempotency_or_hash_fields=[
+                "request_hash",
+                "duplicate_meaning_key",
+                "idempotency_key",
+                "binding_lineage_ref",
+            ],
             recovery_posture="Restore, replay, or reclaim reuses the persisted reconciliation control packet rather than recomputing from retries.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Fresh mutation resend is blocked after budget exhaustion or unresolved ambiguity.",
             operator_visible_effect="Operations can see whether recovery is read-only, idempotent-only, or blocked pending escalation.",
-            audit_events=["AuthorityRequestSent", "AuthorityResponseReceived", "AuthorityReconciliationAttempted", "AuthorityReconciliationResolved"],
+            audit_events=[
+                "AuthorityRequestSent",
+                "AuthorityResponseReceived",
+                "AuthorityReconciliationAttempted",
+                "AuthorityReconciliationResolved",
+            ],
             source_path=AUTHORITY_PROTOCOL_PATH,
             source_heading_or_logical_block="9.13A Reconciliation budget and escalation rule",
-            source_ref=heading_ref(AUTHORITY_PROTOCOL_PATH, "9.13A Reconciliation budget and escalation rule"),
-            notes=["The reconciliation control packet is copied onto unresolved SubmissionRecord and ObligationMirror surfaces."],
+            source_ref=heading_ref(
+                AUTHORITY_PROTOCOL_PATH, "9.13A Reconciliation budget and escalation rule"
+            ),
+            notes=[
+                "The reconciliation control packet is copied onto unresolved SubmissionRecord and ObligationMirror surfaces."
+            ],
             artifact_name="AuthorityInteractionRecord",
             schema_path="Algorithm/schemas/authority_interaction_record.schema.json",
         ),
@@ -930,11 +1422,33 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             record_type="control_plane_artifact",
             canonical_id="artifact_release_candidate_identity_contract",
             trigger_or_entry_condition="A promotion candidate or restore drill binds one exact build, schema, config, provider-profile, and client-window tuple.",
-            identity_tuple=["candidate_environment_ref", "build_artifact_ref", "artifact_digest", "schema_bundle_hash", "config_bundle_hash", "migration_plan_ref_or_null", "enabled_provider_profile_refs[]", "supported_client_window_ref_or_null"],
-            frozen_inputs=["array_canonicalization_policy", "suite_context_policy", "admissibility_binding_policy"],
+            identity_tuple=[
+                "candidate_environment_ref",
+                "build_artifact_ref",
+                "artifact_digest",
+                "schema_bundle_hash",
+                "config_bundle_hash",
+                "migration_plan_ref_or_null",
+                "enabled_provider_profile_refs[]",
+                "supported_client_window_ref_or_null",
+            ],
+            frozen_inputs=[
+                "array_canonicalization_policy",
+                "suite_context_policy",
+                "admissibility_binding_policy",
+            ],
             state_or_outcome="ReleaseCandidateIdentityContract is the shared candidate tuple for release evidence and deployment records.",
-            allowed_next_actions=["bind_verification_suite_results", "bind_release_verification_manifest", "bind_deployment_release"],
-            idempotency_or_hash_fields=["candidate_identity_hash", "artifact_digest", "schema_bundle_hash", "config_bundle_hash"],
+            allowed_next_actions=[
+                "bind_verification_suite_results",
+                "bind_release_verification_manifest",
+                "bind_deployment_release",
+            ],
+            idempotency_or_hash_fields=[
+                "candidate_identity_hash",
+                "artifact_digest",
+                "schema_bundle_hash",
+                "config_bundle_hash",
+            ],
             recovery_posture="Restore drills and client compatibility evidence must remain bound to the exact candidate tuple they verified.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Authority sandbox evidence may not drift across enabled provider-profile sets.",
@@ -943,7 +1457,9 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             source_path=RELEASE_PATH,
             source_heading_or_logical_block="1. Governing candidate identity model",
             source_ref=heading_ref(RELEASE_PATH, "1. Governing candidate identity model"),
-            notes=["Ordered arrays are canonicalized before hashing so the same candidate cannot drift across workers."],
+            notes=[
+                "Ordered arrays are canonicalized before hashing so the same candidate cannot drift across workers."
+            ],
             artifact_name="ReleaseCandidateIdentityContract",
             schema_path=repo_rel(RELEASE_CANDIDATE_SCHEMA_PATH),
         ),
@@ -951,20 +1467,49 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             record_type="control_plane_artifact",
             canonical_id="artifact_schema_bundle_compatibility_gate_contract",
             trigger_or_entry_condition="Promotion or restore evidence claims schema safety for historical manifests, replay, restore, and native-client compatibility.",
-            identity_tuple=["candidate_identity_hash", "compatibility_window_ref", "reader_window_state", "rollback_boundary_state"],
-            frozen_inputs=["schema_reader_window_contract", "migration_plan_ref_or_null", "migration_ledger_refs[]", "historical_manifest_guard_state", "replay_restore_guard_state", "native_client_window_state", "destructive_contract_state", "reason_codes[]"],
+            identity_tuple=[
+                "candidate_identity_hash",
+                "compatibility_window_ref",
+                "reader_window_state",
+                "rollback_boundary_state",
+            ],
+            frozen_inputs=[
+                "schema_reader_window_contract",
+                "migration_plan_ref_or_null",
+                "migration_ledger_refs[]",
+                "historical_manifest_guard_state",
+                "replay_restore_guard_state",
+                "native_client_window_state",
+                "destructive_contract_state",
+                "reason_codes[]",
+            ],
             state_or_outcome="SchemaBundleCompatibilityGateContract is the mutable schema safety boundary around a fixed release candidate.",
-            allowed_next_actions=["admit_release_gate", "block_destructive_contract", "force_fail_forward_after_window_close"],
-            idempotency_or_hash_fields=["compatibility_gate_hash", "candidate_identity_hash", "schema_bundle_hash"],
+            allowed_next_actions=[
+                "admit_release_gate",
+                "block_destructive_contract",
+                "force_fail_forward_after_window_close",
+            ],
+            idempotency_or_hash_fields=[
+                "compatibility_gate_hash",
+                "candidate_identity_hash",
+                "schema_bundle_hash",
+            ],
             recovery_posture="Replay and restore require a compatible reader window or an explicitly blocked posture.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Closed reader windows and blocked native windows become explicit fail-forward boundaries.",
             operator_visible_effect="Release tooling can show why rollback remained legal or became fail-forward-only.",
-            audit_events=["SchemaMigrationPlanned", "SchemaMigrationApplied", "SchemaMigrationVerified", "ReleaseRolledBack"],
+            audit_events=[
+                "SchemaMigrationPlanned",
+                "SchemaMigrationApplied",
+                "SchemaMigrationVerified",
+                "ReleaseRolledBack",
+            ],
             source_path=RELEASE_PATH,
             source_heading_or_logical_block="2. Contract boundary",
             source_ref=heading_ref(RELEASE_PATH, "2. Contract boundary"),
-            notes=["Compatibility gate rows must bind the same candidate hash and compatibility hash across evidence artifacts."],
+            notes=[
+                "Compatibility gate rows must bind the same candidate hash and compatibility hash across evidence artifacts."
+            ],
             artifact_name="SchemaBundleCompatibilityGateContract",
             schema_path=repo_rel(COMPATIBILITY_GATE_SCHEMA_PATH),
         ),
@@ -972,11 +1517,31 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             record_type="control_plane_artifact",
             canonical_id="artifact_release_verification_manifest",
             trigger_or_entry_condition="Promotion assembles blocking evidence, admissibility posture, and companion artifacts into one durable release root.",
-            identity_tuple=["release_verification_manifest_id", "candidate_identity_hash", "compatibility_gate_hash", "decision_posture"],
-            frozen_inputs=["blocking_gates.*", "manifest_assembly_contract", "restore_drill_ref", "client_compatibility_matrix_ref", "canary_health_summary_ref"],
+            identity_tuple=[
+                "release_verification_manifest_id",
+                "candidate_identity_hash",
+                "compatibility_gate_hash",
+                "decision_posture",
+            ],
+            frozen_inputs=[
+                "blocking_gates.*",
+                "manifest_assembly_contract",
+                "restore_drill_ref",
+                "client_compatibility_matrix_ref",
+                "canary_health_summary_ref",
+            ],
             state_or_outcome="ReleaseVerificationManifest is the machine-assembled promotion-evidence root for one candidate.",
-            allowed_next_actions=["approve_release", "block_release", "supersede_manifest", "bind_deployment_release"],
-            idempotency_or_hash_fields=["candidate_identity_hash", "compatibility_gate_hash", "manifest_assembly_contract_hash"],
+            allowed_next_actions=[
+                "approve_release",
+                "block_release",
+                "supersede_manifest",
+                "bind_deployment_release",
+            ],
+            idempotency_or_hash_fields=[
+                "candidate_identity_hash",
+                "compatibility_gate_hash",
+                "manifest_assembly_contract_hash",
+            ],
             recovery_posture="Restore drills used for promotion bind the exact checkpoint and candidate tuple into the promotion record.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Authority sandbox coverage remains part of promotion admissibility when suite_family = AUTHORITY_SANDBOX.",
@@ -985,7 +1550,9 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             source_path=RELEASE_PATH,
             source_heading_or_logical_block="2. Contract boundary",
             source_ref=heading_ref(RELEASE_PATH, "2. Contract boundary"),
-            notes=["Promotion evidence is machine-assembled from first-class artifacts instead of reconstructed dashboards."],
+            notes=[
+                "Promotion evidence is machine-assembled from first-class artifacts instead of reconstructed dashboards."
+            ],
             artifact_name="ReleaseVerificationManifest",
             schema_path=repo_rel(RELEASE_VERIFICATION_MANIFEST_SCHEMA_PATH),
         ),
@@ -993,20 +1560,55 @@ def artifact_inventory_rows() -> list[dict[str, Any]]:
             record_type="control_plane_artifact",
             canonical_id="artifact_deployment_release",
             trigger_or_entry_condition="A candidate is deployed, rolled back, pinned, failed forward, or superseded in one environment.",
-            identity_tuple=["release_id", "environment_ref", "candidate_identity_hash", "rollout_strategy", "rollout_state"],
-            frozen_inputs=["schema_bundle_compatibility_gate_contract", "recovery_governance_contract", "rollback_boundary_state", "release_verification_manifest_ref", "supported_client_window_ref", "compensating_release_id_or_null", "fail_forward_owner_ref_or_null"],
+            identity_tuple=[
+                "release_id",
+                "environment_ref",
+                "candidate_identity_hash",
+                "rollout_strategy",
+                "rollout_state",
+            ],
+            frozen_inputs=[
+                "schema_bundle_compatibility_gate_contract",
+                "recovery_governance_contract",
+                "rollback_boundary_state",
+                "release_verification_manifest_ref",
+                "supported_client_window_ref",
+                "compensating_release_id_or_null",
+                "fail_forward_owner_ref_or_null",
+            ],
             state_or_outcome="DeploymentRelease is the authoritative rollout, rollback, and fail-forward governance object.",
-            allowed_next_actions=["promote", "abort_canary", "roll_back_if_allowed", "fail_forward_with_compensating_release", "supersede"],
-            idempotency_or_hash_fields=["candidate_identity_hash", "schema_bundle_hash", "config_bundle_hash", "rollback_boundary_state"],
+            allowed_next_actions=[
+                "promote",
+                "abort_canary",
+                "roll_back_if_allowed",
+                "fail_forward_with_compensating_release",
+                "supersede",
+            ],
+            idempotency_or_hash_fields=[
+                "candidate_identity_hash",
+                "schema_bundle_hash",
+                "config_bundle_hash",
+                "rollback_boundary_state",
+            ],
             recovery_posture="Closed schema windows force FAIL_FORWARD_ONLY; rollback cannot obscure already-persisted legal evidence.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Release rollback is distinct from legal authority truth; evidence is never deleted to simulate rollback.",
             operator_visible_effect="Release operators can see whether a rollout remained rollback-safe or crossed into fail-forward-only posture.",
-            audit_events=["ReleaseCanaryStarted", "ReleasePromoted", "ReleaseRolledBack", "DisasterRecoveryFailedOver", "DisasterRecoveryFailedBack"],
+            audit_events=[
+                "ReleaseCanaryStarted",
+                "ReleasePromoted",
+                "ReleaseRolledBack",
+                "DisasterRecoveryFailedOver",
+                "DisasterRecoveryFailedBack",
+            ],
             source_path=DEPLOYMENT_PATH,
             source_heading_or_logical_block="6. Rollout, rollback, and fail-forward posture",
-            source_ref=heading_ref(DEPLOYMENT_PATH, "6. Rollout, rollback, and fail-forward posture"),
-            notes=["FAILED_FORWARD posture is unlawful without a compensating release and named owner."],
+            source_ref=heading_ref(
+                DEPLOYMENT_PATH, "6. Rollout, rollback, and fail-forward posture"
+            ),
+            notes=[
+                "FAILED_FORWARD posture is unlawful without a compensating release and named owner."
+            ],
             artifact_name="DeploymentRelease",
             schema_path=repo_rel(DEPLOYMENT_RELEASE_SCHEMA_PATH),
         ),
@@ -1019,28 +1621,65 @@ def replay_class_and_precondition_payload() -> dict[str, Any]:
     replay_class_details = {
         "STANDARD_REPLAY": {
             "trigger": "Caller requests an exact historical rerun against a sealed historical manifest.",
-            "frozen_inputs": ["replay_of_manifest_id", "continuation_basis", "ConfigFreeze", "InputFreeze", "preseal_gate_evaluation"],
+            "frozen_inputs": [
+                "replay_of_manifest_id",
+                "continuation_basis",
+                "ConfigFreeze",
+                "InputFreeze",
+                "preseal_gate_evaluation",
+            ],
             "state": "Exact compliance-grade replay under historical-read-only posture.",
-            "next": ["validate_exact_preconditions", "reuse_existing_replay_child_if_duplicate", "persist_replay_attestation"],
-            "notes": ["Must retain compliance posture and may not carry `counterfactual_basis`.", "Non-deterministic allowlist must remain empty."],
+            "next": [
+                "validate_exact_preconditions",
+                "reuse_existing_replay_child_if_duplicate",
+                "persist_replay_attestation",
+            ],
+            "notes": [
+                "Must retain compliance posture and may not carry `counterfactual_basis`.",
+                "Non-deterministic allowlist must remain empty.",
+            ],
             "analysis_only": False,
             "mutation_posture": "HISTORICAL_REPLAY_READ_ONLY",
         },
         "AUDIT_REPLAY": {
             "trigger": "Auditor, regulator, or dispute-resolution flow requests historical replay with evidentiary intent.",
-            "frozen_inputs": ["replay_of_manifest_id", "continuation_basis", "ConfigFreeze", "InputFreeze", "preseal_gate_evaluation"],
+            "frozen_inputs": [
+                "replay_of_manifest_id",
+                "continuation_basis",
+                "ConfigFreeze",
+                "InputFreeze",
+                "preseal_gate_evaluation",
+            ],
             "state": "Exact replay semantics identical to STANDARD_REPLAY with audit-facing explanation posture.",
-            "next": ["validate_exact_preconditions", "persist_replay_attestation", "serve_auditor_summary"],
-            "notes": ["Equivalent to STANDARD_REPLAY in basis law; audit intent may not be smuggled into analysis-only replay."],
+            "next": [
+                "validate_exact_preconditions",
+                "persist_replay_attestation",
+                "serve_auditor_summary",
+            ],
+            "notes": [
+                "Equivalent to STANDARD_REPLAY in basis law; audit intent may not be smuggled into analysis-only replay."
+            ],
             "analysis_only": False,
             "mutation_posture": "REPLAY_COMPLIANCE_AND_EVIDENTIARY_READ_ONLY",
         },
         "COUNTERFACTUAL_ANALYSIS": {
             "trigger": "Analysis-mode replay intentionally changes one or more declared basis dimensions.",
-            "frozen_inputs": ["replay_of_manifest_id", "counterfactual_basis", "declared_counterfactual_dimensions[]", "analysis_only=true"],
+            "frozen_inputs": [
+                "replay_of_manifest_id",
+                "counterfactual_basis",
+                "declared_counterfactual_dimensions[]",
+                "analysis_only=true",
+            ],
             "state": "Analysis-only replay that must classify expected equivalence, expected difference, or unexpected mismatch.",
-            "next": ["declare_counterfactual_dimensions", "persist_replay_attestation", "prevent_authority_facing_mutation"],
-            "notes": ["Counterfactual analysis must never mutate authoritative run history or authority-facing state.", "Declared dimensions are limited to config, input, policy/formula, authority interpretation, or mixed basis."],
+            "next": [
+                "declare_counterfactual_dimensions",
+                "persist_replay_attestation",
+                "prevent_authority_facing_mutation",
+            ],
+            "notes": [
+                "Counterfactual analysis must never mutate authoritative run history or authority-facing state.",
+                "Declared dimensions are limited to config, input, policy/formula, authority interpretation, or mixed basis.",
+            ],
             "analysis_only": True,
             "mutation_posture": "ANALYSIS_ONLY_NO_AUTHORITY_MUTATION",
         },
@@ -1056,7 +1695,12 @@ def replay_class_and_precondition_payload() -> dict[str, Any]:
                 frozen_inputs=detail["frozen_inputs"],
                 state_or_outcome=detail["state"],
                 allowed_next_actions=detail["next"],
-                idempotency_or_hash_fields=["replay_of_manifest_id", "execution_basis_hash", "request_identity_hash", "replay_attestation_id"],
+                idempotency_or_hash_fields=[
+                    "replay_of_manifest_id",
+                    "execution_basis_hash",
+                    "request_identity_hash",
+                    "replay_attestation_id",
+                ],
                 recovery_posture="Replay child reuse is idempotent for identical replay intent.",
                 privacy_reconciliation_required=False,
                 authority_safety_posture="Replay classes may not silently widen into live mutation semantics.",
@@ -1078,10 +1722,26 @@ def replay_class_and_precondition_payload() -> dict[str, Any]:
             canonical_id=f"replay_precondition_{code.lower()}",
             trigger_or_entry_condition="An exact replay or exact recovery is about to begin execution.",
             identity_tuple=["replay_of_manifest_id", "continuation_basis", "replay_class"],
-            frozen_inputs=["ConfigFreeze", "InputFreeze", "schema_reader_window_contract", "preseal_gate_evaluation", "authority_basis_refs", "late_data_basis_refs"],
+            frozen_inputs=[
+                "ConfigFreeze",
+                "InputFreeze",
+                "schema_reader_window_contract",
+                "preseal_gate_evaluation",
+                "authority_basis_refs",
+                "late_data_basis_refs",
+            ],
             state_or_outcome=description,
-            allowed_next_actions=["proceed_exact_replay", "fail_closed_with_typed_basis_error", "downgrade_to_limited_historical_comparison_if_policy_allows"],
-            idempotency_or_hash_fields=["execution_basis_hash", "manifest_hash", "config_freeze_hash", "input_set_hash"],
+            allowed_next_actions=[
+                "proceed_exact_replay",
+                "fail_closed_with_typed_basis_error",
+                "downgrade_to_limited_historical_comparison_if_policy_allows",
+            ],
+            idempotency_or_hash_fields=[
+                "execution_basis_hash",
+                "manifest_hash",
+                "config_freeze_hash",
+                "input_set_hash",
+            ],
             recovery_posture="Exact recovery and exact replay share the same fail-closed pre-start basis check.",
             privacy_reconciliation_required=False,
             authority_safety_posture="No live recollection or live mutation token may be smuggled into exact replay.",
@@ -1090,7 +1750,10 @@ def replay_class_and_precondition_payload() -> dict[str, Any]:
             source_path=REPLAY_PATH,
             source_heading_or_logical_block="Exact replay preconditions",
             source_ref=heading_ref(REPLAY_PATH, "Exact replay preconditions"),
-            notes=["If a precondition fails, the system fails closed or emits a limited comparison posture.", "The engine must not silently recollect inputs or substitute live state."],
+            notes=[
+                "If a precondition fails, the system fails closed or emits a limited comparison posture.",
+                "The engine must not silently recollect inputs or substitute live state.",
+            ],
             precondition_code=code,
         )
         for code, description in REPLAY_PRECONDITION_SPECS
@@ -1102,9 +1765,19 @@ def replay_class_and_precondition_payload() -> dict[str, Any]:
             canonical_id="recovery_rule_transport_reconnect_is_read_side_only",
             trigger_or_entry_condition="Transport, shell, or stream resume metadata is available during replay or recovery.",
             identity_tuple=["manifest_id", "resume_token_or_null", "frame_epoch_or_null"],
-            frozen_inputs=["resume_token", "frame_epoch", "shell_stability_token", "workspace_version", "view_guard_ref"],
+            frozen_inputs=[
+                "resume_token",
+                "frame_epoch",
+                "shell_stability_token",
+                "workspace_version",
+                "view_guard_ref",
+            ],
             state_or_outcome="Transport and UX resume metadata remains read-side recovery context, never replay lineage truth.",
-            allowed_next_actions=["resume_view_state", "reload_projection", "ignore_as_branch_proof"],
+            allowed_next_actions=[
+                "resume_view_state",
+                "reload_projection",
+                "ignore_as_branch_proof",
+            ],
             idempotency_or_hash_fields=["trace_id", "manifest_id"],
             recovery_posture="Read-side continuity can resume while control-plane lineage remains anchored in manifest artifacts.",
             privacy_reconciliation_required=False,
@@ -1114,7 +1787,9 @@ def replay_class_and_precondition_payload() -> dict[str, Any]:
             source_path=REPLAY_PATH,
             source_heading_or_logical_block="Recovery and continuation semantics",
             source_ref=heading_ref(REPLAY_PATH, "Recovery and continuation semantics"),
-            notes=["The same rule applies to calm-shell, portal, workspace, and projection artifacts."],
+            notes=[
+                "The same rule applies to calm-shell, portal, workspace, and projection artifacts."
+            ],
             rule_code="TRANSPORT_METADATA_READ_SIDE_ONLY",
         ),
         control_record(
@@ -1122,9 +1797,18 @@ def replay_class_and_precondition_payload() -> dict[str, Any]:
             canonical_id="recovery_rule_same_attempt_recovery_child",
             trigger_or_entry_condition="A started attempt is being recovered under the same attempt lineage.",
             identity_tuple=["manifest_id", "attempt_lineage_ref", "branch_action=RECOVERY_CHILD"],
-            frozen_inputs=["ConfigFreeze", "InputFreeze", "execution_basis_hash", "attempt_lineage_ref"],
+            frozen_inputs=[
+                "ConfigFreeze",
+                "InputFreeze",
+                "execution_basis_hash",
+                "attempt_lineage_ref",
+            ],
             state_or_outcome="RECOVERY_CHILD reuses the exact frozen config and input basis and preserves `execution_basis_hash`.",
-            allowed_next_actions=["resume_durable_stage", "preserve_same_attempt_lineage", "reject_fresh_child_recast"],
+            allowed_next_actions=[
+                "resume_durable_stage",
+                "preserve_same_attempt_lineage",
+                "reject_fresh_child_recast",
+            ],
             idempotency_or_hash_fields=["execution_basis_hash", "attempt_lineage_ref"],
             recovery_posture="Same-attempt recovery is exact and not a fresh-child continuation.",
             privacy_reconciliation_required=False,
@@ -1141,11 +1825,23 @@ def replay_class_and_precondition_payload() -> dict[str, Any]:
             record_type="replay_recovery_rule",
             canonical_id="recovery_rule_historical_explicit_continuation",
             trigger_or_entry_condition="A non-replay child reuses historical config or input outside same-attempt recovery.",
-            identity_tuple=["manifest_id", "selected_manifest_continuation_basis", "config_inheritance_mode_or_null", "input_inheritance_mode_or_null"],
+            identity_tuple=[
+                "manifest_id",
+                "selected_manifest_continuation_basis",
+                "config_inheritance_mode_or_null",
+                "input_inheritance_mode_or_null",
+            ],
             frozen_inputs=["HISTORICAL_EXPLICIT", "limitation_metadata", "parent_manifest_hash"],
             state_or_outcome="Historically explicit continuation is legal only when the child declares `HISTORICAL_EXPLICIT` and carries limitation metadata.",
-            allowed_next_actions=["allocate_continuation_child", "emit_limitation_metadata", "block_present_tense_freshness_claims"],
-            idempotency_or_hash_fields=["request_identity_hash", "prior_manifest_hash_at_decision_or_null"],
+            allowed_next_actions=[
+                "allocate_continuation_child",
+                "emit_limitation_metadata",
+                "block_present_tense_freshness_claims",
+            ],
+            idempotency_or_hash_fields=[
+                "request_identity_hash",
+                "prior_manifest_hash_at_decision_or_null",
+            ],
             recovery_posture="Historically explicit continuation is distinct from recovery and from exact replay.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Historical explicit reuse may not pretend to be current freshness or same-attempt recovery.",
@@ -1154,18 +1850,32 @@ def replay_class_and_precondition_payload() -> dict[str, Any]:
             source_path=REPLAY_PATH,
             source_heading_or_logical_block="Historically explicit continuation",
             source_ref=heading_ref(REPLAY_PATH, "Historically explicit continuation"),
-            notes=["Non-replay children may reuse config or input only when they declare historical explicit inheritance."],
+            notes=[
+                "Non-replay children may reuse config or input only when they declare historical explicit inheritance."
+            ],
             rule_code="HISTORICAL_EXPLICIT_CONTINUATION",
         ),
         control_record(
             record_type="replay_recovery_rule",
             canonical_id="recovery_rule_counterfactual_dimension_declaration",
             trigger_or_entry_condition="Counterfactual analysis changes one or more basis dimensions.",
-            identity_tuple=["replay_of_manifest_id", "replay_class=COUNTERFACTUAL_ANALYSIS", "declared_counterfactual_dimensions[]"],
+            identity_tuple=[
+                "replay_of_manifest_id",
+                "replay_class=COUNTERFACTUAL_ANALYSIS",
+                "declared_counterfactual_dimensions[]",
+            ],
             frozen_inputs=["counterfactual_basis", "declared_counterfactual_dimensions[]"],
             state_or_outcome="Counterfactual replay must declare which basis dimensions changed and classify difference as expected or limited.",
-            allowed_next_actions=["persist_replay_attestation", "classify_expected_difference_or_equivalence", "flag_unexpected_mismatch_if_undeclared_variance_exists"],
-            idempotency_or_hash_fields=["replay_attestation_id", "expected_execution_basis_hash", "actual_execution_basis_hash"],
+            allowed_next_actions=[
+                "persist_replay_attestation",
+                "classify_expected_difference_or_equivalence",
+                "flag_unexpected_mismatch_if_undeclared_variance_exists",
+            ],
+            idempotency_or_hash_fields=[
+                "replay_attestation_id",
+                "expected_execution_basis_hash",
+                "actual_execution_basis_hash",
+            ],
             recovery_posture="Analysis-only counterfactual replay never publishes exact-match semantics when basis changed.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Counterfactual replay remains non-mutating even when it models authority interpretation changes.",
@@ -1189,7 +1899,11 @@ def replay_class_and_precondition_payload() -> dict[str, Any]:
             frozen_inputs=["persisted DecisionBundle", "idempotency_key", "request_identity_hash"],
             state_or_outcome="The existing persisted DecisionBundle is returned; no continuation child is allocated.",
             allowed_next_actions=["return_existing_decision_bundle"],
-            idempotency_or_hash_fields=["idempotency_key", "decision_bundle_hash", "request_identity_hash"],
+            idempotency_or_hash_fields=[
+                "idempotency_key",
+                "decision_bundle_hash",
+                "request_identity_hash",
+            ],
             recovery_posture="Terminal same-manifest retry reuses the prior terminal result instead of creating new lineage.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Terminal idempotent retry must not create a continuation child merely because continuation could be legal.",
@@ -1226,7 +1940,11 @@ def replay_class_and_precondition_payload() -> dict[str, Any]:
             canonical_id="rerun_guarantee_reuse_same_sealed_context",
             trigger_or_entry_condition="An exact same-request retry arrives against a still-pre-start sealed manifest.",
             identity_tuple=["manifest_id", "request_identity_hash", "sealed_prestart_manifest"],
-            frozen_inputs=["preseal_gate_evaluation", "sealed manifest context", "manifest_start_claim.claim_state=UNCLAIMED_SEALED"],
+            frozen_inputs=[
+                "preseal_gate_evaluation",
+                "sealed manifest context",
+                "manifest_start_claim.claim_state=UNCLAIMED_SEALED",
+            ],
             state_or_outcome="The already sealed context is reused instead of recollecting inputs or re-evaluating the pre-seal chain.",
             allowed_next_actions=["reuse_sealed_manifest", "claim_or_return_prestart_context"],
             idempotency_or_hash_fields=["idempotency_key", "manifest_hash", "execution_basis_hash"],
@@ -1245,11 +1963,19 @@ def replay_class_and_precondition_payload() -> dict[str, Any]:
             record_type="idempotent_rerun_guarantee",
             canonical_id="rerun_guarantee_preserve_same_attempt_recovery_identity",
             trigger_or_entry_condition="A same-attempt recovery resumes an interrupted execution.",
-            identity_tuple=["attempt_lineage_ref", "execution_basis_hash", "branch_action=RECOVERY_CHILD"],
+            identity_tuple=[
+                "attempt_lineage_ref",
+                "execution_basis_hash",
+                "branch_action=RECOVERY_CHILD",
+            ],
             frozen_inputs=["attempt_lineage_ref", "execution_basis_hash", "manifest_start_claim"],
             state_or_outcome="Same-attempt recovery preserves lineage and basis identity across retries and reclaims.",
             allowed_next_actions=["reclaim_or_resume", "continue_from_durable_stage"],
-            idempotency_or_hash_fields=["attempt_lineage_ref", "execution_basis_hash", "claim_epoch"],
+            idempotency_or_hash_fields=[
+                "attempt_lineage_ref",
+                "execution_basis_hash",
+                "claim_epoch",
+            ],
             recovery_posture="Recovery preserves lineage-safe identity instead of starting a fresh child.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Authority or workflow side effects resume from durable lineage rather than duplicate sends.",
@@ -1269,10 +1995,29 @@ def replay_class_and_precondition_payload() -> dict[str, Any]:
             canonical_id="replay_retention_posture_basis_preserving_retention",
             trigger_or_entry_condition="A material run enters the lawful review window for replay and audit.",
             identity_tuple=["manifest_id", "retention_class", "lawful_review_window"],
-            frozen_inputs=["RunManifest", "ConfigFreeze", "InputFreeze", "authoritative intake set hashes", "execution_basis_hash", "decision_bundle_hash", "deterministic_outcome_hash", "GateDecisionRecord lineage", "historical authority basis refs", "ReplayAttestation"],
+            frozen_inputs=[
+                "RunManifest",
+                "ConfigFreeze",
+                "InputFreeze",
+                "authoritative intake set hashes",
+                "execution_basis_hash",
+                "decision_bundle_hash",
+                "deterministic_outcome_hash",
+                "GateDecisionRecord lineage",
+                "historical authority basis refs",
+                "ReplayAttestation",
+            ],
             state_or_outcome="Retention must preserve or explicitly placeholder the minimum replay basis for the full lawful review window.",
-            allowed_next_actions=["retain_basis", "emit_limitation_placeholders", "answer_audit_queries"],
-            idempotency_or_hash_fields=["execution_basis_hash", "decision_bundle_hash", "deterministic_outcome_hash"],
+            allowed_next_actions=[
+                "retain_basis",
+                "emit_limitation_placeholders",
+                "answer_audit_queries",
+            ],
+            idempotency_or_hash_fields=[
+                "execution_basis_hash",
+                "decision_bundle_hash",
+                "deterministic_outcome_hash",
+            ],
             recovery_posture="Replay and audit remain possible even when payloads were minimized, provided limitation posture is explicit.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Retention must not rewrite basis hashes or swap in newer content.",
@@ -1289,9 +2034,17 @@ def replay_class_and_precondition_payload() -> dict[str, Any]:
             canonical_id="replay_retention_posture_limitation_must_be_explicit",
             trigger_or_entry_condition="Payload minimization or erasure removed underlying content while preserving replay placeholders or hashes.",
             identity_tuple=["manifest_id", "retention_class", "limitation_code"],
-            frozen_inputs=["retained_hashes", "placeholder_refs", "ReplayAttestation limitation codes"],
+            frozen_inputs=[
+                "retained_hashes",
+                "placeholder_refs",
+                "ReplayAttestation limitation codes",
+            ],
             state_or_outcome="Replay must surface RETENTION_LIMITED or equivalent instead of silently treating minimized basis as unavailable or not applicable.",
-            allowed_next_actions=["emit_limited_historical_comparison", "block_exact_replay_claim", "preserve_audit_proof_of_absence"],
+            allowed_next_actions=[
+                "emit_limited_historical_comparison",
+                "block_exact_replay_claim",
+                "preserve_audit_proof_of_absence",
+            ],
             idempotency_or_hash_fields=["execution_basis_hash", "deterministic_outcome_hash"],
             recovery_posture="Limited historical comparison remains explicit rather than mutating exact replay semantics.",
             privacy_reconciliation_required=False,
@@ -1301,12 +2054,16 @@ def replay_class_and_precondition_payload() -> dict[str, Any]:
             source_path=RETENTION_PRIVACY_PATH,
             source_heading_or_logical_block="Basis-preserving retention for replay",
             source_ref=heading_ref(RETENTION_PRIVACY_PATH, "Basis-preserving retention for replay"),
-            notes=["Surviving derived artifacts must point to explicit expired/erased placeholders or limitation notes."],
+            notes=[
+                "Surviving derived artifacts must point to explicit expired/erased placeholders or limitation notes."
+            ],
             retention_posture="LIMITATION_EXPLICIT_NOT_SILENT",
         ),
     ]
 
-    rows = flatten(replay_class_rows, precondition_rows, recovery_rows, guarantee_rows, retention_rows)
+    rows = flatten(
+        replay_class_rows, precondition_rows, recovery_rows, guarantee_rows, retention_rows
+    )
     assert_required_record_fields(rows)
     return {
         "summary": make_summary(
@@ -1373,10 +2130,25 @@ def replay_comparison_and_attestation_payload() -> dict[str, Any]:
             canonical_id=f"replay_comparison_mode_{mode.lower()}",
             trigger_or_entry_condition="Replay comparison classifies one persisted replay child.",
             identity_tuple=["replay_attestation_id", "replay_class", "comparison_mode"],
-            frozen_inputs=["basis_dimension_results[]", "outcome_component_results[]", "expected_execution_basis_hash", "actual_execution_basis_hash"],
+            frozen_inputs=[
+                "basis_dimension_results[]",
+                "outcome_component_results[]",
+                "expected_execution_basis_hash",
+                "actual_execution_basis_hash",
+            ],
             state_or_outcome=comparison_mode_details[mode],
-            allowed_next_actions=["render_operator_summary", "render_auditor_summary", "answer_get_replay_attestation"],
-            idempotency_or_hash_fields=["replay_attestation_id", "expected_execution_basis_hash", "actual_execution_basis_hash", "expected_deterministic_outcome_hash", "actual_deterministic_outcome_hash"],
+            allowed_next_actions=[
+                "render_operator_summary",
+                "render_auditor_summary",
+                "answer_get_replay_attestation",
+            ],
+            idempotency_or_hash_fields=[
+                "replay_attestation_id",
+                "expected_execution_basis_hash",
+                "actual_execution_basis_hash",
+                "expected_deterministic_outcome_hash",
+                "actual_deterministic_outcome_hash",
+            ],
             recovery_posture="Comparison mode remains immutable once the attestation is persisted.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Comparison mode cannot be upgraded later by re-reading live state.",
@@ -1396,9 +2168,19 @@ def replay_comparison_and_attestation_payload() -> dict[str, Any]:
             canonical_id=f"replay_basis_validation_state_{state.lower()}",
             trigger_or_entry_condition="Replay comparison checks whether retained basis is usable and defensible.",
             identity_tuple=["replay_attestation_id", "basis_validation_state"],
-            frozen_inputs=["ConfigFreeze", "InputFreeze", "preseal_gate_evaluation", "schema_reader_window_contract", "historical authority basis refs"],
+            frozen_inputs=[
+                "ConfigFreeze",
+                "InputFreeze",
+                "preseal_gate_evaluation",
+                "schema_reader_window_contract",
+                "historical authority basis refs",
+            ],
             state_or_outcome=basis_validation_details[state],
-            allowed_next_actions=["classify_comparison_mode", "persist_limitation_codes", "fail_closed_if_required"],
+            allowed_next_actions=[
+                "classify_comparison_mode",
+                "persist_limitation_codes",
+                "fail_closed_if_required",
+            ],
             idempotency_or_hash_fields=["execution_basis_hash", "schema_bundle_hash"],
             recovery_posture="Basis validation state defines whether replay may proceed, downgrade, or fail closed.",
             privacy_reconciliation_required=False,
@@ -1422,7 +2204,10 @@ def replay_comparison_and_attestation_payload() -> dict[str, Any]:
             frozen_inputs=["basis_dimension_results[]", "basis_coverage", "basis_match_ratio"],
             state_or_outcome=verdict_details[verdict],
             allowed_next_actions=["classify_outcome", "compute_attestation_confidence"],
-            idempotency_or_hash_fields=["expected_execution_basis_hash", "actual_execution_basis_hash"],
+            idempotency_or_hash_fields=[
+                "expected_execution_basis_hash",
+                "actual_execution_basis_hash",
+            ],
             recovery_posture="Basis verdict remains linked to persisted dimension results and cannot be recomputed from dashboards.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Undeclared basis variance remains explicit even when outcome differences are non-material.",
@@ -1442,10 +2227,17 @@ def replay_comparison_and_attestation_payload() -> dict[str, Any]:
             canonical_id=f"replay_deterministic_equivalence_verdict_{verdict.lower()}",
             trigger_or_entry_condition="Observed outcome-component results are classified after material coverage and match calculations.",
             identity_tuple=["replay_attestation_id", "deterministic_equivalence_verdict"],
-            frozen_inputs=["outcome_component_results[]", "material_outcome_coverage", "material_outcome_match_ratio"],
+            frozen_inputs=[
+                "outcome_component_results[]",
+                "material_outcome_coverage",
+                "material_outcome_match_ratio",
+            ],
             state_or_outcome=verdict_details[verdict],
             allowed_next_actions=["classify_outcome", "compute_attestation_confidence"],
-            idempotency_or_hash_fields=["expected_deterministic_outcome_hash", "actual_deterministic_outcome_hash"],
+            idempotency_or_hash_fields=[
+                "expected_deterministic_outcome_hash",
+                "actual_deterministic_outcome_hash",
+            ],
             recovery_posture="Outcome verdict remains durable and replayable from persisted component results.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Material outcome equivalence cannot be inferred from a root hash alone without component evidence.",
@@ -1465,10 +2257,24 @@ def replay_comparison_and_attestation_payload() -> dict[str, Any]:
             canonical_id=f"replay_outcome_class_{outcome.lower()}",
             trigger_or_entry_condition="Classification rules finish evaluating basis state, verdicts, coverage, and declared variance.",
             identity_tuple=["replay_attestation_id", "comparison_mode", "outcome_class"],
-            frozen_inputs=["basis_validation_state", "basis_identity_verdict", "deterministic_equivalence_verdict", "basis_coverage", "material_outcome_coverage"],
+            frozen_inputs=[
+                "basis_validation_state",
+                "basis_identity_verdict",
+                "deterministic_equivalence_verdict",
+                "basis_coverage",
+                "material_outcome_coverage",
+            ],
             state_or_outcome=outcome_details[outcome],
-            allowed_next_actions=["publish_operator_summary", "publish_auditor_summary", "bind_manifest_replay_attestation_ref"],
-            idempotency_or_hash_fields=["replay_attestation_id", "expected_execution_basis_hash", "expected_deterministic_outcome_hash"],
+            allowed_next_actions=[
+                "publish_operator_summary",
+                "publish_auditor_summary",
+                "bind_manifest_replay_attestation_ref",
+            ],
+            idempotency_or_hash_fields=[
+                "replay_attestation_id",
+                "expected_execution_basis_hash",
+                "expected_deterministic_outcome_hash",
+            ],
             recovery_posture="Outcome class remains coupled to the immutable attestation artifact.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Expected outcomes require declared basis variance; undeclared variance becomes UNEXPECTED_MISMATCH.",
@@ -1490,7 +2296,10 @@ def replay_comparison_and_attestation_payload() -> dict[str, Any]:
             identity_tuple=["replay_attestation_id", "variance_class"],
             frozen_inputs=["basis_dimension_results[]", "outcome_component_results[]"],
             state_or_outcome=f"Variance classified as `{variance}`.",
-            allowed_next_actions=["aggregate_declared_or_undeclared_variance", "drive_outcome_classification"],
+            allowed_next_actions=[
+                "aggregate_declared_or_undeclared_variance",
+                "drive_outcome_classification",
+            ],
             idempotency_or_hash_fields=["replay_attestation_id"],
             recovery_posture="Variance remains explicit at the per-dimension and per-component level.",
             privacy_reconciliation_required=False,
@@ -1510,8 +2319,18 @@ def replay_comparison_and_attestation_payload() -> dict[str, Any]:
             record_type="replay_attestation_confidence_band",
             canonical_id=f"replay_attestation_confidence_band_{band.lower()}",
             trigger_or_entry_condition="Attestation confidence score is computed from signature status, coverage, and undeclared variance mass.",
-            identity_tuple=["replay_attestation_id", "attestation_confidence_score", "attestation_confidence_band"],
-            frozen_inputs=["signature_verification_state", "basis_coverage", "material_outcome_coverage", "basis_undeclared_variance_mass", "undeclared_material_variance_mass"],
+            identity_tuple=[
+                "replay_attestation_id",
+                "attestation_confidence_score",
+                "attestation_confidence_band",
+            ],
+            frozen_inputs=[
+                "signature_verification_state",
+                "basis_coverage",
+                "material_outcome_coverage",
+                "basis_undeclared_variance_mass",
+                "undeclared_material_variance_mass",
+            ],
             state_or_outcome=confidence_band_details[band],
             allowed_next_actions=["publish_defensibility_band", "gate_auditor_grade_evidence_use"],
             idempotency_or_hash_fields=["replay_attestation_id", "control_contract_hash"],
@@ -1556,8 +2375,14 @@ def replay_comparison_and_attestation_payload() -> dict[str, Any]:
             identity_tuple=["replay_of_manifest_id", "basis_validation_state=CORRUPT"],
             frozen_inputs=["retained_artifact", "content_hash", "frozen_manifest_reference"],
             state_or_outcome="Replay enters BASIS_CORRUPT posture.",
-            allowed_next_actions=["persist_corrupt_attestation", "block_exact_or_limited_match_claims"],
-            idempotency_or_hash_fields=["expected_execution_basis_hash", "actual_execution_basis_hash"],
+            allowed_next_actions=[
+                "persist_corrupt_attestation",
+                "block_exact_or_limited_match_claims",
+            ],
+            idempotency_or_hash_fields=[
+                "expected_execution_basis_hash",
+                "actual_execution_basis_hash",
+            ],
             recovery_posture="Corrupt basis remains explicit rather than silently repaired.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Integrity failure blocks reuse or resend decisions that depend on historical truth.",
@@ -1573,8 +2398,16 @@ def replay_comparison_and_attestation_payload() -> dict[str, Any]:
             record_type="replay_corruption_or_limitation_rule",
             canonical_id="replay_corruption_rule_schema_reader_incompatibility",
             trigger_or_entry_condition="The runtime cannot deserialize a historical artifact under the recorded schema bundle.",
-            identity_tuple=["replay_of_manifest_id", "schema_bundle_hash", "basis_validation_state=SCHEMA_INCOMPATIBLE"],
-            frozen_inputs=["schema_reader_window_contract", "schema_bundle_hash", "historical_artifact_refs[]"],
+            identity_tuple=[
+                "replay_of_manifest_id",
+                "schema_bundle_hash",
+                "basis_validation_state=SCHEMA_INCOMPATIBLE",
+            ],
+            frozen_inputs=[
+                "schema_reader_window_contract",
+                "schema_bundle_hash",
+                "historical_artifact_refs[]",
+            ],
             state_or_outcome="Replay remains in SCHEMA_INCOMPATIBLE posture until a compatible reader is supplied.",
             allowed_next_actions=["fail_closed", "supply_compatible_reader"],
             idempotency_or_hash_fields=["schema_bundle_hash"],
@@ -1615,11 +2448,33 @@ def replay_comparison_and_attestation_payload() -> dict[str, Any]:
             record_type="replay_attestation_requirement",
             canonical_id="replay_attestation_requirement_core_fields",
             trigger_or_entry_condition="A replay child reaches a persisted decision outcome.",
-            identity_tuple=["replay_attestation_id", "manifest_id", "replay_of_manifest_id", "replay_class"],
-            frozen_inputs=["comparison_mode", "basis_validation_state", "basis_identity_verdict", "deterministic_equivalence_verdict", "outcome_class", "basis_integrity_contract", "difference_reason_codes[]", "limitation_codes[]"],
+            identity_tuple=[
+                "replay_attestation_id",
+                "manifest_id",
+                "replay_of_manifest_id",
+                "replay_class",
+            ],
+            frozen_inputs=[
+                "comparison_mode",
+                "basis_validation_state",
+                "basis_identity_verdict",
+                "deterministic_equivalence_verdict",
+                "outcome_class",
+                "basis_integrity_contract",
+                "difference_reason_codes[]",
+                "limitation_codes[]",
+            ],
             state_or_outcome="ReplayAttestation must capture the full comparison envelope and explanation basis.",
-            allowed_next_actions=["bind_manifest_replay_attestation_ref", "serve_operator_and_auditor_summaries"],
-            idempotency_or_hash_fields=["expected_execution_basis_hash", "actual_execution_basis_hash", "expected_deterministic_outcome_hash", "actual_deterministic_outcome_hash"],
+            allowed_next_actions=[
+                "bind_manifest_replay_attestation_ref",
+                "serve_operator_and_auditor_summaries",
+            ],
+            idempotency_or_hash_fields=[
+                "expected_execution_basis_hash",
+                "actual_execution_basis_hash",
+                "expected_deterministic_outcome_hash",
+                "actual_deterministic_outcome_hash",
+            ],
             recovery_posture="Attestation is immutable after persistence; corrections require new lineage or superseding artifacts.",
             privacy_reconciliation_required=False,
             authority_safety_posture="No replay-visible truth may publish before the attestation is durable and linked.",
@@ -1636,9 +2491,17 @@ def replay_comparison_and_attestation_payload() -> dict[str, Any]:
             canonical_id="replay_attestation_requirement_common_execution_context",
             trigger_or_entry_condition="ReplayAttestation is serialized for STANDARD_REPLAY, AUDIT_REPLAY, or COUNTERFACTUAL_ANALYSIS.",
             identity_tuple=["replay_attestation_id", "replay_class", "execution_mode"],
-            frozen_inputs=["analysis_only", "counterfactual_basis", "difference_reason_codes[]", "limitation_codes[]"],
+            frozen_inputs=[
+                "analysis_only",
+                "counterfactual_basis",
+                "difference_reason_codes[]",
+                "limitation_codes[]",
+            ],
             state_or_outcome="Execution context fields must align coherently with the replay class and outcome class.",
-            allowed_next_actions=["reject_incoherent_attestation", "publish_coherent_operator_summary"],
+            allowed_next_actions=[
+                "reject_incoherent_attestation",
+                "publish_coherent_operator_summary",
+            ],
             idempotency_or_hash_fields=["replay_attestation_id"],
             recovery_posture="Replay class coherence remains part of the durable artifact contract, not just runtime validation.",
             privacy_reconciliation_required=False,
@@ -1648,7 +2511,10 @@ def replay_comparison_and_attestation_payload() -> dict[str, Any]:
             source_path=REPLAY_PATH,
             source_heading_or_logical_block="Replay attestation artifact",
             source_ref=heading_ref(REPLAY_PATH, "Replay attestation artifact"),
-            notes=["EXPECTED_EQUIVALENCE and EXPECTED_DIFFERENCE require non-empty difference reason codes.", "LIMITED_COMPARABLE and BASIS_INCOMPLETE require non-empty limitation codes."],
+            notes=[
+                "EXPECTED_EQUIVALENCE and EXPECTED_DIFFERENCE require non-empty difference reason codes.",
+                "LIMITED_COMPARABLE and BASIS_INCOMPLETE require non-empty limitation codes.",
+            ],
             requirement_code="ATTESTATION_COMMON_EXECUTION_CONTEXT",
         ),
     ]
@@ -1693,13 +2559,41 @@ def replay_comparison_and_attestation_payload() -> dict[str, Any]:
 
 def claim_branch_payload() -> dict[str, Any]:
     claim_outcome_details = {
-        "CLAIM_GRANTED": ("Start lease granted and run_started committed atomically.", ["publish_first_stage", "execute_manifest"], "ACTIVE_LEASED"),
-        "ALREADY_ACTIVE": ("Another live lease still owns the same sealed manifest and attempt lineage.", ["defer_duplicate_start", "surface_active_lease_conflict"], "ACTIVE_LEASED"),
-        "ALREADY_TERMINAL": ("Manifest already has a terminal post-start result.", ["return_existing_terminal_result"], "TERMINAL_RESULT_RECORDED"),
-        "INVALID_PRESTART_STATE": ("Manifest is not in a legal pre-start state for new post-seal execution.", ["fail_closed"], "INVALID_PRESTART_STATE"),
-        "RECOVERY_REQUIRED": ("The persisted attempt cannot restart fresh and must transition through recovery lineage.", ["allocate_recovery_child", "mark_reclaim_required"], "STALE_RECLAIM_REQUIRED"),
-        "RECLAIM_GRANTED": ("Stale reclaim proof succeeded and a verified successor resumed the same attempt lineage.", ["resume_from_durable_stage", "publish_successor_linkage"], "STALE_RECLAIM_REQUIRED"),
-        "RECLAIM_REJECTED_ACTIVE_LEASE": ("A reclaim attempt was rejected because the active lease still exists.", ["defer_duplicate_start", "surface_reclaim_conflict"], "ACTIVE_LEASED"),
+        "CLAIM_GRANTED": (
+            "Start lease granted and run_started committed atomically.",
+            ["publish_first_stage", "execute_manifest"],
+            "ACTIVE_LEASED",
+        ),
+        "ALREADY_ACTIVE": (
+            "Another live lease still owns the same sealed manifest and attempt lineage.",
+            ["defer_duplicate_start", "surface_active_lease_conflict"],
+            "ACTIVE_LEASED",
+        ),
+        "ALREADY_TERMINAL": (
+            "Manifest already has a terminal post-start result.",
+            ["return_existing_terminal_result"],
+            "TERMINAL_RESULT_RECORDED",
+        ),
+        "INVALID_PRESTART_STATE": (
+            "Manifest is not in a legal pre-start state for new post-seal execution.",
+            ["fail_closed"],
+            "INVALID_PRESTART_STATE",
+        ),
+        "RECOVERY_REQUIRED": (
+            "The persisted attempt cannot restart fresh and must transition through recovery lineage.",
+            ["allocate_recovery_child", "mark_reclaim_required"],
+            "STALE_RECLAIM_REQUIRED",
+        ),
+        "RECLAIM_GRANTED": (
+            "Stale reclaim proof succeeded and a verified successor resumed the same attempt lineage.",
+            ["resume_from_durable_stage", "publish_successor_linkage"],
+            "STALE_RECLAIM_REQUIRED",
+        ),
+        "RECLAIM_REJECTED_ACTIVE_LEASE": (
+            "A reclaim attempt was rejected because the active lease still exists.",
+            ["defer_duplicate_start", "surface_reclaim_conflict"],
+            "ACTIVE_LEASED",
+        ),
     }
     claim_rows = [
         control_record(
@@ -1707,10 +2601,22 @@ def claim_branch_payload() -> dict[str, Any]:
             canonical_id=f"manifest_start_claim_outcome_{outcome.lower()}",
             trigger_or_entry_condition="A caller attempts to start or reclaim one sealed manifest.",
             identity_tuple=["manifest_id", "attempt_lineage_ref", "claim_epoch", "claim_outcome"],
-            frozen_inputs=["claim_state", "claim_status_code", "claim_holder_ref_or_null", "claim_token_or_null", "stage_dag_ref_or_null", "outbox_batch_ref_or_null"],
+            frozen_inputs=[
+                "claim_state",
+                "claim_status_code",
+                "claim_holder_ref_or_null",
+                "claim_token_or_null",
+                "stage_dag_ref_or_null",
+                "outbox_batch_ref_or_null",
+            ],
             state_or_outcome=claim_outcome_details[outcome][0],
             allowed_next_actions=claim_outcome_details[outcome][1],
-            idempotency_or_hash_fields=["manifest_hash", "execution_basis_hash", "access_binding_hash", "attempt_lineage_ref"],
+            idempotency_or_hash_fields=[
+                "manifest_hash",
+                "execution_basis_hash",
+                "access_binding_hash",
+                "attempt_lineage_ref",
+            ],
             recovery_posture="All non-granted outcomes are fail-closed for new post-seal execution.",
             privacy_reconciliation_required=False,
             authority_safety_posture="No second live start is authorized by broker silence or missing heartbeat alone.",
@@ -1731,7 +2637,14 @@ def claim_branch_payload() -> dict[str, Any]:
             canonical_id=f"manifest_start_claim_atomicity_{idx}",
             trigger_or_entry_condition="CLAIM_GRANTED commits under one durable write boundary.",
             identity_tuple=["manifest_id", "attempt_lineage_ref", "claim_epoch"],
-            frozen_inputs=["RunManifest.lifecycle_state", "RunManifest.opened_at", "manifest_start_claim.claim_state", "active_claim_token", "stage_dag_ref_or_null", "outbox_batch_ref_or_null"],
+            frozen_inputs=[
+                "RunManifest.lifecycle_state",
+                "RunManifest.opened_at",
+                "manifest_start_claim.claim_state",
+                "active_claim_token",
+                "stage_dag_ref_or_null",
+                "outbox_batch_ref_or_null",
+            ],
             state_or_outcome=statement,
             allowed_next_actions=["commit_claim_and_first_publication_together"],
             idempotency_or_hash_fields=["manifest_hash", "execution_basis_hash"],
@@ -1762,7 +2675,11 @@ def claim_branch_payload() -> dict[str, Any]:
             canonical_id="manifest_start_claim_recovery_rule_durable_expiry_proof_required",
             trigger_or_entry_condition="A stale-lease recovery or reclaim is attempted.",
             identity_tuple=["manifest_id", "attempt_lineage_ref", "claim_state"],
-            frozen_inputs=["durable_expiry_proof", "claim_expires_at_or_null", "stale_reclaim_reason_code_or_null"],
+            frozen_inputs=[
+                "durable_expiry_proof",
+                "claim_expires_at_or_null",
+                "stale_reclaim_reason_code_or_null",
+            ],
             state_or_outcome="A claim becomes reclaimable only when durable expiry proof exists under frozen policy.",
             allowed_next_actions=["grant_reclaim", "reject_reclaim_active_lease"],
             idempotency_or_hash_fields=["claim_epoch", "attempt_lineage_ref"],
@@ -1802,10 +2719,18 @@ def claim_branch_payload() -> dict[str, Any]:
             canonical_id="manifest_start_claim_recovery_rule_resume_from_durable_publication",
             trigger_or_entry_condition="A recovery successor resumes an interrupted started manifest.",
             identity_tuple=["manifest_id", "stage_dag_ref_or_null", "outbox_batch_ref_or_null"],
-            frozen_inputs=["stage_dag_ref_or_null", "outbox_batch_ref_or_null", "first_publication_committed_at_or_null"],
+            frozen_inputs=[
+                "stage_dag_ref_or_null",
+                "outbox_batch_ref_or_null",
+                "first_publication_committed_at_or_null",
+            ],
             state_or_outcome="Recovery continues from durable stage/outbox publication proof instead of inferring safety from broker silence.",
             allowed_next_actions=["resume_durable_stage", "resume_outbox_replay"],
-            idempotency_or_hash_fields=["claim_epoch", "stage_dag_ref_or_null", "outbox_batch_ref_or_null"],
+            idempotency_or_hash_fields=[
+                "claim_epoch",
+                "stage_dag_ref_or_null",
+                "outbox_batch_ref_or_null",
+            ],
             recovery_posture="Resume point is durable publication proof, not queue absence.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Recovery does not authorize fresh authority mutation if request lineage already left the process.",
@@ -1859,7 +2784,11 @@ def claim_branch_payload() -> dict[str, Any]:
             frozen_inputs=["claim_status_code", "claim_epoch", "publication_state"],
             state_or_outcome=f"manifest_start_claim.claim_state = {state}",
             allowed_next_actions=["validate_start_or_reclaim_rule"],
-            idempotency_or_hash_fields=["manifest_hash", "execution_basis_hash", "attempt_lineage_ref"],
+            idempotency_or_hash_fields=[
+                "manifest_hash",
+                "execution_basis_hash",
+                "attempt_lineage_ref",
+            ],
             recovery_posture="Claim state is durable truth for duplicate-start suppression and reclaim semantics.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Claim state prevents ambiguous live restarts.",
@@ -1910,16 +2839,31 @@ def claim_branch_payload() -> dict[str, Any]:
             record_type="manifest_branch_action",
             canonical_id=f"manifest_branch_action_{action.lower()}",
             trigger_or_entry_condition="Branch selection resolves one request-time manifest choice.",
-            identity_tuple=["request_identity_hash", "selected_branch_action", "selected_branch_reason_code"],
+            identity_tuple=[
+                "request_identity_hash",
+                "selected_branch_action",
+                "selected_branch_reason_code",
+            ],
             frozen_inputs=FROZEN_IDENTITY_INPUTS,
             state_or_outcome=branch_action_details[action],
-            allowed_next_actions=["persist_manifest_branch_decision", "persist_manifest_lineage_trace"],
-            idempotency_or_hash_fields=["request_identity_hash", "idempotency_key", "prior_manifest_hash_at_decision_or_null"],
+            allowed_next_actions=[
+                "persist_manifest_branch_decision",
+                "persist_manifest_lineage_trace",
+            ],
+            idempotency_or_hash_fields=[
+                "request_identity_hash",
+                "idempotency_key",
+                "prior_manifest_hash_at_decision_or_null",
+            ],
             recovery_posture="Branch action keeps terminal retry, pre-start reuse, replay, recovery, continuation, and new request distinct.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Branch decisions may not widen effective scope beyond requested scope or collapse recovery into ordinary continuation.",
             operator_visible_effect="Schedulers and APIs can execute one explicit branch action instead of heuristically diffing nearby manifests.",
-            audit_events=["ExistingDecisionBundleReturned", "ManifestContextReused", "ContinuationChildAllocated"],
+            audit_events=[
+                "ExistingDecisionBundleReturned",
+                "ManifestContextReused",
+                "ContinuationChildAllocated",
+            ],
             source_path=MANIFEST_BRANCH_PATH,
             source_heading_or_logical_block="Branch Actions",
             source_ref=heading_ref(MANIFEST_BRANCH_PATH, "Branch Actions"),
@@ -1933,16 +2877,31 @@ def claim_branch_payload() -> dict[str, Any]:
             record_type="manifest_branch_reason",
             canonical_id=f"manifest_branch_reason_{reason.lower()}",
             trigger_or_entry_condition="One manifest branch action is chosen and needs a machine-checked legal basis.",
-            identity_tuple=["request_identity_hash", "selected_branch_action", "branch_reason_code"],
+            identity_tuple=[
+                "request_identity_hash",
+                "selected_branch_action",
+                "branch_reason_code",
+            ],
             frozen_inputs=FROZEN_IDENTITY_INPUTS,
             state_or_outcome=f"branch_reason_code = {reason}",
-            allowed_next_actions=["validate_branch_action_reason_alignment", "explain_candidate_rejection"],
-            idempotency_or_hash_fields=["request_identity_hash", "idempotency_key", "prior_manifest_hash_at_decision_or_null"],
+            allowed_next_actions=[
+                "validate_branch_action_reason_alignment",
+                "explain_candidate_rejection",
+            ],
+            idempotency_or_hash_fields=[
+                "request_identity_hash",
+                "idempotency_key",
+                "prior_manifest_hash_at_decision_or_null",
+            ],
             recovery_posture="Typed reasons preserve replay, recovery, terminal retry, and nightly continuity distinctions.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Nightly continuation branches must explicitly carry NIGHTLY_WINDOW_ADVANCED.",
             operator_visible_effect="Manifest explorers can explain the legal branch basis with typed reasons instead of free-form copy.",
-            audit_events=["ExistingDecisionBundleReturned", "ManifestContextReused", "ContinuationChildAllocated"],
+            audit_events=[
+                "ExistingDecisionBundleReturned",
+                "ManifestContextReused",
+                "ContinuationChildAllocated",
+            ],
             source_path=MANIFEST_BRANCH_PATH,
             source_heading_or_logical_block="Typed Branch Reasons",
             source_ref=heading_ref(MANIFEST_BRANCH_PATH, "Typed Branch Reasons"),
@@ -1954,18 +2913,25 @@ def claim_branch_payload() -> dict[str, Any]:
     frozen_identity_rows = [
         control_record(
             record_type="manifest_branch_frozen_identity_input",
-            canonical_id=f"manifest_branch_identity_input_{field.lower().replace('[','').replace(']','').replace('.','_')}",
+            canonical_id=f"manifest_branch_identity_input_{field.lower().replace('[', '').replace(']', '').replace('.', '_')}",
             trigger_or_entry_condition="Branch selection freezes the comparison vector for reuse, replay, recovery, and continuation decisions.",
             identity_tuple=["request_identity_hash", "selected_branch_action"],
             frozen_inputs=FROZEN_IDENTITY_INPUTS,
             state_or_outcome=f"Frozen identity input includes `{field}`.",
-            allowed_next_actions=["compute_request_identity_hash", "persist_manifest_branch_decision"],
+            allowed_next_actions=[
+                "compute_request_identity_hash",
+                "persist_manifest_branch_decision",
+            ],
             idempotency_or_hash_fields=["request_identity_hash", "idempotency_key"],
             recovery_posture="All branch choices remain reproducible from the same frozen identity spine.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Requested and effective scope distinctions remain explicit inside branch proof.",
             operator_visible_effect="Operators can audit why one request was the same request, a replay, a recovery, or a materially new request.",
-            audit_events=["AccessScopeBound", "ManifestContextReused", "ContinuationChildAllocated"],
+            audit_events=[
+                "AccessScopeBound",
+                "ManifestContextReused",
+                "ContinuationChildAllocated",
+            ],
             source_path=MANIFEST_BRANCH_PATH,
             source_heading_or_logical_block="Frozen Identity Inputs",
             source_ref=heading_ref(MANIFEST_BRANCH_PATH, "Frozen Identity Inputs"),
@@ -2017,8 +2983,20 @@ def nightly_selection_payload() -> dict[str, Any]:
             record_type="nightly_trigger_class",
             canonical_id=f"nightly_trigger_class_{trigger.lower()}",
             trigger_or_entry_condition="Nightly control-plane allocation observes a new trigger window.",
-            identity_tuple=["tenant_id", "nightly_window_key", "trigger_class", "release_verification_manifest_ref", "policy_snapshot_hash", "autopilot_policy_hash"],
-            frozen_inputs=["scheduler_dedupe_key", "schema_bundle_hash", "code_build_id", "environment_ref"],
+            identity_tuple=[
+                "tenant_id",
+                "nightly_window_key",
+                "trigger_class",
+                "release_verification_manifest_ref",
+                "policy_snapshot_hash",
+                "autopilot_policy_hash",
+            ],
+            frozen_inputs=[
+                "scheduler_dedupe_key",
+                "schema_bundle_hash",
+                "code_build_id",
+                "environment_ref",
+            ],
             state_or_outcome=f"Nightly trigger class = {trigger}",
             allowed_next_actions=["allocate_or_reuse_nightly_batch", "freeze_identity_contract"],
             idempotency_or_hash_fields=["scheduler_dedupe_key", "identity_contract_hash"],
@@ -2043,7 +3021,10 @@ def nightly_selection_payload() -> dict[str, Any]:
             identity_tuple=["tenant_id", "nightly_window_key", "selection_universe_hash"],
             frozen_inputs=[source],
             state_or_outcome=f"Candidate universe source includes `{source}`.",
-            allowed_next_actions=["freeze_selection_universe", "persist_selection_entry_per_candidate"],
+            allowed_next_actions=[
+                "freeze_selection_universe",
+                "persist_selection_entry_per_candidate",
+            ],
             idempotency_or_hash_fields=["selection_universe_hash", "selection_universe_count"],
             recovery_posture="Selection sources are frozen into the batch envelope before per-client execution begins.",
             privacy_reconciliation_required=False,
@@ -2072,16 +3053,38 @@ def nightly_selection_payload() -> dict[str, Any]:
             record_type="nightly_selection_disposition",
             canonical_id=f"nightly_selection_disposition_{disposition.lower()}",
             trigger_or_entry_condition="One frozen selection entry is classified during nightly portfolio selection.",
-            identity_tuple=["batch_run_id", "entry_id", "candidate_identity_hash", "selection_disposition"],
-            frozen_inputs=["terminal_result_reuse_state", "active_attempt_resolution_state", "reason_codes[]", "workflow_item_refs[]", "next_checkpoint_at", "priority_tuple"],
+            identity_tuple=[
+                "batch_run_id",
+                "entry_id",
+                "candidate_identity_hash",
+                "selection_disposition",
+            ],
+            frozen_inputs=[
+                "terminal_result_reuse_state",
+                "active_attempt_resolution_state",
+                "reason_codes[]",
+                "workflow_item_refs[]",
+                "next_checkpoint_at",
+                "priority_tuple",
+            ],
             state_or_outcome=disposition_details[disposition],
             allowed_next_actions=["persist_selection_entry", "dispatch_or_handoff_entry"],
-            idempotency_or_hash_fields=["candidate_identity_hash", "selection_basis_hash", "scheduler_dedupe_key"],
+            idempotency_or_hash_fields=[
+                "candidate_identity_hash",
+                "selection_basis_hash",
+                "scheduler_dedupe_key",
+            ],
             recovery_posture="Every candidate gets one persisted selection row and preserves its disposition across reclaim and restart.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Reuse is evaluated before new execution and live active attempts may not silently duplicate manifests.",
             operator_visible_effect="Nightly operations can see whether a client executed, reused, deferred, escalated, or skipped.",
-            audit_events=["NightlyPortfolioSelected", "NightlyClientExecutionDispatched", "NightlyClientExecutionDeferred", "NightlyClientExecutionSkipped", "NightlyClientExecutionEscalated"],
+            audit_events=[
+                "NightlyPortfolioSelected",
+                "NightlyClientExecutionDispatched",
+                "NightlyClientExecutionDeferred",
+                "NightlyClientExecutionSkipped",
+                "NightlyClientExecutionEscalated",
+            ],
             source_path=NIGHTLY_AUTOPILOT_PATH,
             source_heading_or_logical_block="4.2 Selection dispositions",
             source_ref=heading_ref(NIGHTLY_AUTOPILOT_PATH, "4.2 Selection dispositions"),
@@ -2096,7 +3099,12 @@ def nightly_selection_payload() -> dict[str, Any]:
             canonical_id=f"nightly_ineligible_condition_{condition}",
             trigger_or_entry_condition="Nightly selector evaluates whether a candidate can execute this window.",
             identity_tuple=["batch_run_id", "entry_id", "candidate_identity_hash"],
-            frozen_inputs=["selection_disposition", "reason_codes[]", "workflow_item_refs[]", "next_checkpoint_at"],
+            frozen_inputs=[
+                "selection_disposition",
+                "reason_codes[]",
+                "workflow_item_refs[]",
+                "next_checkpoint_at",
+            ],
             state_or_outcome=f"Ineligible or deferred condition: `{condition}`.",
             allowed_next_actions=["persist_skip_or_defer_posture", "escalate_if_required"],
             idempotency_or_hash_fields=["candidate_identity_hash", "selection_basis_hash"],
@@ -2104,7 +3112,11 @@ def nightly_selection_payload() -> dict[str, Any]:
             privacy_reconciliation_required=False,
             authority_safety_posture="Authority ambiguity, step-up, approval, override, or active lease blocks unattended execution.",
             operator_visible_effect="Morning handoff can explain why a client did not execute overnight.",
-            audit_events=["NightlyClientExecutionDeferred", "NightlyClientExecutionSkipped", "NightlyClientExecutionEscalated"],
+            audit_events=[
+                "NightlyClientExecutionDeferred",
+                "NightlyClientExecutionSkipped",
+                "NightlyClientExecutionEscalated",
+            ],
             source_path=NIGHTLY_AUTOPILOT_PATH,
             source_heading_or_logical_block="4.3 Ineligible or deferred cases",
             source_ref=heading_ref(NIGHTLY_AUTOPILOT_PATH, "4.3 Ineligible or deferred cases"),
@@ -2142,9 +3154,17 @@ def nightly_selection_payload() -> dict[str, Any]:
             canonical_id=f"nightly_active_attempt_resolution_state_{state.lower()}",
             trigger_or_entry_condition="Nightly selection encounters active or stale manifest work for the same client-period tuple.",
             identity_tuple=["entry_id", "active_attempt_resolution_state"],
-            frozen_inputs=["manifest_start_claim", "prior_manifest_ref", "predecessor_selection_entry_ref_or_null"],
+            frozen_inputs=[
+                "manifest_start_claim",
+                "prior_manifest_ref",
+                "predecessor_selection_entry_ref_or_null",
+            ],
             state_or_outcome=f"active_attempt_resolution_state = {state}",
-            allowed_next_actions=["defer_active_attempt", "require_stale_reclaim", "allow_new_execution_if_no_active_attempt"],
+            allowed_next_actions=[
+                "defer_active_attempt",
+                "require_stale_reclaim",
+                "allow_new_execution_if_no_active_attempt",
+            ],
             idempotency_or_hash_fields=["candidate_identity_hash", "attempt_lineage_ref_or_null"],
             recovery_posture="Same-window active attempts resolve to defer or stale-reclaim-required posture rather than duplicate execution.",
             privacy_reconciliation_required=False,
@@ -2165,9 +3185,17 @@ def nightly_selection_payload() -> dict[str, Any]:
             canonical_id=f"nightly_recovery_resume_state_{state.lower()}",
             trigger_or_entry_condition="A batch is either a fresh window or a stale-batch recovery successor.",
             identity_tuple=["batch_run_id", "trigger_class", "recovery_resume_state"],
-            frozen_inputs=["reclaimed_predecessor_batch_run_ref_or_null", "selection_entries[]", "shard_plan[]"],
+            frozen_inputs=[
+                "reclaimed_predecessor_batch_run_ref_or_null",
+                "selection_entries[]",
+                "shard_plan[]",
+            ],
             state_or_outcome=f"recovery_resume_state = {state}",
-            allowed_next_actions=["reuse_predecessor_selection", "reshard_if_required", "mark_not_applicable_for_non_recovery_windows"],
+            allowed_next_actions=[
+                "reuse_predecessor_selection",
+                "reshard_if_required",
+                "mark_not_applicable_for_non_recovery_windows",
+            ],
             idempotency_or_hash_fields=["identity_contract_hash", "scheduler_dedupe_key"],
             recovery_posture="Successor batches must link the predecessor and either resume its selection/shards or explicitly reshards them.",
             privacy_reconciliation_required=False,
@@ -2188,9 +3216,17 @@ def nightly_selection_payload() -> dict[str, Any]:
             canonical_id=f"nightly_shard_failure_state_{state.lower()}",
             trigger_or_entry_condition="Shard-level execution or recovery isolates one subset of selected entries.",
             identity_tuple=["batch_run_id", "shard_id", "shard_state"],
-            frozen_inputs=["entry_refs[]", "global_concurrency_profile", "stale_heartbeat_after_seconds"],
+            frozen_inputs=[
+                "entry_refs[]",
+                "global_concurrency_profile",
+                "stale_heartbeat_after_seconds",
+            ],
             state_or_outcome=f"shard_state = {state}",
-            allowed_next_actions=["continue_other_shards", "block_tenant_wide_if_required", "request_reclaim_if_required"],
+            allowed_next_actions=[
+                "continue_other_shards",
+                "block_tenant_wide_if_required",
+                "request_reclaim_if_required",
+            ],
             idempotency_or_hash_fields=["batch_run_id", "shard_id"],
             recovery_posture="Shard-local failure isolation keeps unrelated clients explicit even when one shard fails.",
             privacy_reconciliation_required=False,
@@ -2208,7 +3244,9 @@ def nightly_selection_payload() -> dict[str, Any]:
     outcome_rows = [
         control_record(
             record_type="nightly_outcome_bucket",
-            canonical_id=f"nightly_outcome_bucket_{state.lower()}" if state is not None else "nightly_outcome_bucket_null",
+            canonical_id=f"nightly_outcome_bucket_{state.lower()}"
+            if state is not None
+            else "nightly_outcome_bucket_null",
             trigger_or_entry_condition="A selected entry, client execution, or batch convergence settles into one explicit bucket.",
             identity_tuple=["entry_id", "outcome_bucket"],
             frozen_inputs=["selection_disposition", "workflow_item_refs[]", "next_checkpoint_at"],
@@ -2222,7 +3260,9 @@ def nightly_selection_payload() -> dict[str, Any]:
             audit_events=["NightlyBatchQuiesced", "NightlyBatchCompleted"],
             source_path=NIGHTLY_AUTOPILOT_PATH,
             source_heading_or_logical_block="10.5 Finite-progress convergence guarantee",
-            source_ref=heading_ref(NIGHTLY_AUTOPILOT_PATH, "10.5 Finite-progress convergence guarantee"),
+            source_ref=heading_ref(
+                NIGHTLY_AUTOPILOT_PATH, "10.5 Finite-progress convergence guarantee"
+            ),
             notes=[],
             outcome_bucket=state,
         )
@@ -2234,9 +3274,17 @@ def nightly_selection_payload() -> dict[str, Any]:
             canonical_id=f"nightly_operator_digest_publication_state_{state.lower()}",
             trigger_or_entry_condition="Nightly batch reaches a digest-publication boundary after selection or quiescence.",
             identity_tuple=["batch_run_id", "operator_digest_publication_state"],
-            frozen_inputs=["operator_digest_derivation_contract_or_null", "operator_digest_ref", "published_workflow_item_refs[]", "published_notification_refs[]"],
+            frozen_inputs=[
+                "operator_digest_derivation_contract_or_null",
+                "operator_digest_ref",
+                "published_workflow_item_refs[]",
+                "published_notification_refs[]",
+            ],
             state_or_outcome=f"operator_digest_publication_state = {state}",
-            allowed_next_actions=["advance_digest_publication", "block_on_missing_publication_step"],
+            allowed_next_actions=[
+                "advance_digest_publication",
+                "block_on_missing_publication_step",
+            ],
             idempotency_or_hash_fields=["batch_run_id", "coverage_date_or_null"],
             recovery_posture="Digest publication remains explicit across retries and quiescence rather than being implied by missing inbox work.",
             privacy_reconciliation_required=False,
@@ -2306,7 +3354,11 @@ def unattended_policy_effect(policy_value: str) -> str:
 
 
 def authority_posture_for_stage(stage_family: str) -> str:
-    if stage_family in {"SUBMIT_TO_AUTHORITY", "AUTHORITY_RECONCILIATION", "OUT_OF_BAND_STATE_MARKING"}:
+    if stage_family in {
+        "SUBMIT_TO_AUTHORITY",
+        "AUTHORITY_RECONCILIATION",
+        "OUT_OF_BAND_STATE_MARKING",
+    }:
         return "Controlled-edge authority stage; blind resend, ambiguous truth, and self-approved exception posture are forbidden."
     if stage_family == "OPEN_CUSTOMER_REQUEST":
         return "Customer-visible stage; frozen templates and durable evidence are required."
@@ -2314,7 +3366,9 @@ def authority_posture_for_stage(stage_family: str) -> str:
         return "Override stage; filing-critical overrides and exceptional authority may not be self-approved overnight."
     if stage_family == "REPLAY_OR_RECOVERY":
         return "Replay and recovery stage; exact-vs-counterfactual posture must remain explicit and non-mutating when analysis-only."
-    return "Internal control-plane stage subject to trust, approval, override, and lease boundaries."
+    return (
+        "Internal control-plane stage subject to trust, approval, override, and lease boundaries."
+    )
 
 
 def nightly_policy_payload() -> dict[str, Any]:
@@ -2327,15 +3381,28 @@ def nightly_policy_payload() -> dict[str, Any]:
                     canonical_id=f"nightly_unattended_policy_cell_{stage_family.lower()}_{policy_value.lower()}",
                     trigger_or_entry_condition="A nightly batch freezes one tenant/client unattended policy matrix row for a stage family.",
                     identity_tuple=["tenant_id", "client_id", "stage_family", "policy_value"],
-                    frozen_inputs=["trust_input_basis_contract", "decision_constraint_codes[]", "required_human_steps[]", "authority_truth_clear_i", "manifest_lease_clear_i"],
+                    frozen_inputs=[
+                        "trust_input_basis_contract",
+                        "decision_constraint_codes[]",
+                        "required_human_steps[]",
+                        "authority_truth_clear_i",
+                        "manifest_lease_clear_i",
+                    ],
                     state_or_outcome=unattended_policy_effect(policy_value),
-                    allowed_next_actions=["progress_stage_if_all_preconditions_hold", "open_internal_workflow_if_not_admissible"],
+                    allowed_next_actions=[
+                        "progress_stage_if_all_preconditions_hold",
+                        "open_internal_workflow_if_not_admissible",
+                    ],
                     idempotency_or_hash_fields=["policy_snapshot_hash", "autopilot_policy_hash"],
                     recovery_posture="Policy matrix remains frozen for the window and is replayable from persisted policy hashes.",
                     privacy_reconciliation_required=False,
                     authority_safety_posture=authority_posture_for_stage(stage_family),
                     operator_visible_effect="Operators can inspect unattended legality per stage family instead of inferring it from overnight behavior.",
-                    audit_events=["NightlyPortfolioSelected", "NightlyClientExecutionDeferred", "NightlyClientExecutionEscalated"],
+                    audit_events=[
+                        "NightlyPortfolioSelected",
+                        "NightlyClientExecutionDeferred",
+                        "NightlyClientExecutionEscalated",
+                    ],
                     source_path=NIGHTLY_AUTOPILOT_PATH,
                     source_heading_or_logical_block="6.1 Matrix requirement",
                     source_ref=heading_ref(NIGHTLY_AUTOPILOT_PATH, "6.1 Matrix requirement"),
@@ -2350,7 +3417,12 @@ def nightly_policy_payload() -> dict[str, Any]:
             canonical_id=f"nightly_hard_unattended_boundary_{boundary}",
             trigger_or_entry_condition="Nightly automation considers progressing a stage or publishing customer-visible work unattended.",
             identity_tuple=["tenant_id", "nightly_window_key", "hard_boundary"],
-            frozen_inputs=["selection_disposition", "trust_input_basis_contract", "required_human_steps[]", "reconciliation_budget_state"],
+            frozen_inputs=[
+                "selection_disposition",
+                "trust_input_basis_contract",
+                "required_human_steps[]",
+                "reconciliation_budget_state",
+            ],
             state_or_outcome=f"Hard unattended boundary: `{boundary}`.",
             allowed_next_actions=["block_unattended_progression", "open_internal_workflow"],
             idempotency_or_hash_fields=["policy_snapshot_hash", "autopilot_policy_hash"],
@@ -2373,9 +3445,17 @@ def nightly_policy_payload() -> dict[str, Any]:
             canonical_id=f"nightly_safe_customer_visible_requirement_{requirement}",
             trigger_or_entry_condition="Nightly automation wants to publish customer-visible follow-up automatically.",
             identity_tuple=["tenant_id", "client_id", "stage_family=OPEN_CUSTOMER_REQUEST"],
-            frozen_inputs=["unattended_policy_matrix", "frozen_template_family", "persisted_workflow_or_gate_posture", "audit_evidence_refs[]"],
+            frozen_inputs=[
+                "unattended_policy_matrix",
+                "frozen_template_family",
+                "persisted_workflow_or_gate_posture",
+                "audit_evidence_refs[]",
+            ],
             state_or_outcome=f"Safe customer-visible automation requires `{requirement}`.",
-            allowed_next_actions=["publish_customer_request_if_all_requirements_hold", "open_internal_workflow_only"],
+            allowed_next_actions=[
+                "publish_customer_request_if_all_requirements_hold",
+                "open_internal_workflow_only",
+            ],
             idempotency_or_hash_fields=["policy_snapshot_hash", "template_family_hash_or_ref"],
             recovery_posture="Safe customer-visible automation remains reconstructible from persisted artifacts after restore or replay.",
             privacy_reconciliation_required=False,
@@ -2396,10 +3476,24 @@ def nightly_policy_payload() -> dict[str, Any]:
             canonical_id=f"nightly_retry_class_{retry_class.lower()}",
             trigger_or_entry_condition="A batch decides whether a failed or deferred client attempt may retry inside the same window.",
             identity_tuple=["batch_run_id", "entry_id", "retry_class"],
-            frozen_inputs=["ErrorRecord posture", "next_retry_at", "retry_expected_gain_i", "retry_capacity_fraction", "reconciliation_control_contract"],
+            frozen_inputs=[
+                "ErrorRecord posture",
+                "next_retry_at",
+                "retry_expected_gain_i",
+                "retry_capacity_fraction",
+                "reconciliation_control_contract",
+            ],
             state_or_outcome=f"Retry class = {retry_class}.",
-            allowed_next_actions=["retry_inside_batch_if_lawful", "defer_to_successor_batch", "open_queue_visible_handoff"],
-            idempotency_or_hash_fields=["retry_idempotency_scope", "manifest_idempotency_key", "authority_idempotency_key_or_null"],
+            allowed_next_actions=[
+                "retry_inside_batch_if_lawful",
+                "defer_to_successor_batch",
+                "open_queue_visible_handoff",
+            ],
+            idempotency_or_hash_fields=[
+                "retry_idempotency_scope",
+                "manifest_idempotency_key",
+                "authority_idempotency_key_or_null",
+            ],
             recovery_posture="Retries preserve manifest or authority idempotency scope and use deterministic phase offsets.",
             privacy_reconciliation_required=False,
             authority_safety_posture="RECONCILE_THEN_RETRY may not blind-resend a mutation and human-review classes become queue-visible handoff.",
@@ -2419,9 +3513,18 @@ def nightly_policy_payload() -> dict[str, Any]:
             canonical_id=f"nightly_global_stop_condition_{condition}",
             trigger_or_entry_condition="Batch-level governance evaluates whether overnight execution should stop, throttle, or publish partial-failure posture.",
             identity_tuple=["batch_run_id", "nightly_window_key", "stability_state"],
-            frozen_inputs=["release_verification_manifest_ref", "policy_snapshot_hash", "audit_refs[]", "provenance_refs[]"],
+            frozen_inputs=[
+                "release_verification_manifest_ref",
+                "policy_snapshot_hash",
+                "audit_refs[]",
+                "provenance_refs[]",
+            ],
             state_or_outcome=f"Global stop or batch-level condition: `{condition}`.",
-            allowed_next_actions=["block_new_dispatch", "quiesce_batch", "publish_completed_with_failures_if_quiescent"],
+            allowed_next_actions=[
+                "block_new_dispatch",
+                "quiesce_batch",
+                "publish_completed_with_failures_if_quiescent",
+            ],
             idempotency_or_hash_fields=["batch_run_id", "scheduler_dedupe_key"],
             recovery_posture="Per-client failures alone do not force batch FAILED when the batch can quiesce explicitly with failures.",
             privacy_reconciliation_required=False,
@@ -2430,7 +3533,9 @@ def nightly_policy_payload() -> dict[str, Any]:
             audit_events=["NightlyBatchAbandoned", "NightlyBatchCompleted"],
             source_path=NIGHTLY_AUTOPILOT_PATH,
             source_heading_or_logical_block="11. Global stop conditions and partial-failure handling",
-            source_ref=heading_ref(NIGHTLY_AUTOPILOT_PATH, "11. Global stop conditions and partial-failure handling"),
+            source_ref=heading_ref(
+                NIGHTLY_AUTOPILOT_PATH, "11. Global stop conditions and partial-failure handling"
+            ),
             notes=[],
             global_stop_condition=condition,
         )
@@ -2441,8 +3546,19 @@ def nightly_policy_payload() -> dict[str, Any]:
             record_type="nightly_digest_requirement",
             canonical_id="nightly_digest_requirement_derivation_contract",
             trigger_or_entry_condition="The batch is ready to publish its next-morning digest.",
-            identity_tuple=["coverage_date", "source_batch_run_refs[]", "operator_digest_ref_or_null"],
-            frozen_inputs=["covered_selection_entry_refs[]", "summary_counts{...}", "queue_summaries[]", "highlighted_client_outcomes[]", "waiting_on_authority_refs[]", "late_data_hold_refs[]"],
+            identity_tuple=[
+                "coverage_date",
+                "source_batch_run_refs[]",
+                "operator_digest_ref_or_null",
+            ],
+            frozen_inputs=[
+                "covered_selection_entry_refs[]",
+                "summary_counts{...}",
+                "queue_summaries[]",
+                "highlighted_client_outcomes[]",
+                "waiting_on_authority_refs[]",
+                "late_data_hold_refs[]",
+            ],
             state_or_outcome="OperatorMorningDigest must carry an explicit derivation contract tied to the same source batch set.",
             allowed_next_actions=["publish_digest", "supersede_prior_digest"],
             idempotency_or_hash_fields=["derivation_contract_hash", "coverage_date"],
@@ -2461,7 +3577,11 @@ def nightly_policy_payload() -> dict[str, Any]:
             canonical_id="nightly_digest_requirement_publication_state_is_explicit",
             trigger_or_entry_condition="Digest publication may require workflow publication and notification publication before completion.",
             identity_tuple=["batch_run_id", "operator_digest_publication_state"],
-            frozen_inputs=["published_workflow_item_refs[]", "published_notification_refs[]", "published_at_or_null"],
+            frozen_inputs=[
+                "published_workflow_item_refs[]",
+                "published_notification_refs[]",
+                "published_at_or_null",
+            ],
             state_or_outcome="Digest publication state and QA remain explicit rather than implied.",
             allowed_next_actions=["advance_publication_state", "block_on_missing_publication_step"],
             idempotency_or_hash_fields=["batch_run_id", "operator_digest_ref"],
@@ -2476,7 +3596,9 @@ def nightly_policy_payload() -> dict[str, Any]:
             notes=[],
         ),
     ]
-    rows = flatten(policy_rows, boundary_rows, safe_customer_rows, retry_rows, stop_rows, digest_rows)
+    rows = flatten(
+        policy_rows, boundary_rows, safe_customer_rows, retry_rows, stop_rows, digest_rows
+    )
     assert_required_record_fields(rows)
     return {
         "summary": make_summary(
@@ -2510,10 +3632,26 @@ def recovery_checkpoint_payload() -> dict[str, Any]:
             record_type="recovery_tier_mapping",
             canonical_id=f"recovery_tier_mapping_{workload.lower()}",
             trigger_or_entry_condition="A checkpoint or deployment release binds recovery governance.",
-            identity_tuple=["boundary_scope", "protected_workload_class", "recovery_tier_class", "rpo_class", "rto_class"],
-            frozen_inputs=["checkpoint_inventory_policy", "privacy_reconciliation_policy", "queue_recovery_policy", "authority_recovery_policy", "rollback_boundary_policy", "fail_forward_policy"],
+            identity_tuple=[
+                "boundary_scope",
+                "protected_workload_class",
+                "recovery_tier_class",
+                "rpo_class",
+                "rto_class",
+            ],
+            frozen_inputs=[
+                "checkpoint_inventory_policy",
+                "privacy_reconciliation_policy",
+                "queue_recovery_policy",
+                "authority_recovery_policy",
+                "rollback_boundary_policy",
+                "fail_forward_policy",
+            ],
             state_or_outcome=f"{workload} maps to {mapping[0]} / {mapping[1]} / {mapping[2]}.",
-            allowed_next_actions=["validate_checkpoint_or_release_tier", "reject_weaker_serialization"],
+            allowed_next_actions=[
+                "validate_checkpoint_or_release_tier",
+                "reject_weaker_serialization",
+            ],
             idempotency_or_hash_fields=["contract_version", "protected_workload_class"],
             recovery_posture="Tier mapping is shared across RecoveryCheckpoint and DeploymentRelease artifacts.",
             privacy_reconciliation_required=True,
@@ -2537,9 +3675,19 @@ def recovery_checkpoint_payload() -> dict[str, Any]:
             canonical_id=f"recovery_checkpoint_gate_{code.lower()}",
             trigger_or_entry_condition="A checkpoint claims VERIFIED posture or an environment claims READY_FOR_REOPEN.",
             identity_tuple=["checkpoint_id", "checkpoint_state", "reopen_readiness_state"],
-            frozen_inputs=["restore_drill_ref", "privacy_reconciliation_contract", "audit_continuity_verified", "queue_rebuild_verified", "authority_rebuild_verified", "authority_binding_revalidation_verified"],
+            frozen_inputs=[
+                "restore_drill_ref",
+                "privacy_reconciliation_contract",
+                "audit_continuity_verified",
+                "queue_rebuild_verified",
+                "authority_rebuild_verified",
+                "authority_binding_revalidation_verified",
+            ],
             state_or_outcome=description,
-            allowed_next_actions=["advance_to_verified_or_ready_for_reopen", "remain_blocked_by_missing_gate"],
+            allowed_next_actions=[
+                "advance_to_verified_or_ready_for_reopen",
+                "remain_blocked_by_missing_gate",
+            ],
             idempotency_or_hash_fields=["restore_verification_hash", "checkpoint_id"],
             recovery_posture="Verified checkpoint and reopen claims fail closed until every required gate is bound explicitly.",
             privacy_reconciliation_required=True,
@@ -2553,13 +3701,28 @@ def recovery_checkpoint_payload() -> dict[str, Any]:
             checkpoint_gate=code,
         )
         for code, description in [
-            ("RESTORE_EVIDENCE_BOUND", "Checkpoint cannot claim VERIFIED without bound restore drill evidence and verification basis."),
-            ("PRIVACY_RECONCILIATION_BOUND", "Checkpoint cannot reopen until privacy reconciliation evidence is bound and reopen-safe."),
+            (
+                "RESTORE_EVIDENCE_BOUND",
+                "Checkpoint cannot claim VERIFIED without bound restore drill evidence and verification basis.",
+            ),
+            (
+                "PRIVACY_RECONCILIATION_BOUND",
+                "Checkpoint cannot reopen until privacy reconciliation evidence is bound and reopen-safe.",
+            ),
             ("AUDIT_CONTINUITY_VERIFIED", "Audit continuity must be verified before reopen."),
             ("QUEUE_REBUILD_VERIFIED", "Queues must be rebuilt from durable truth before reopen."),
-            ("AUTHORITY_REBUILD_VERIFIED", "Outstanding authority work must be rebuilt from durable receipts and records."),
-            ("AUTHORITY_BINDING_REVALIDATED", "Authority binding lineage must be revalidated before authority-facing work resumes."),
-            ("READY_FOR_REOPEN", "Typed reopen readiness must remain READY_FOR_REOPEN before normal access resumes."),
+            (
+                "AUTHORITY_REBUILD_VERIFIED",
+                "Outstanding authority work must be rebuilt from durable receipts and records.",
+            ),
+            (
+                "AUTHORITY_BINDING_REVALIDATED",
+                "Authority binding lineage must be revalidated before authority-facing work resumes.",
+            ),
+            (
+                "READY_FOR_REOPEN",
+                "Typed reopen readiness must remain READY_FOR_REOPEN before normal access resumes.",
+            ),
         ]
     ]
     reopen_rows = [
@@ -2568,7 +3731,12 @@ def recovery_checkpoint_payload() -> dict[str, Any]:
             canonical_id=f"recovery_reopen_readiness_state_{state.lower()}",
             trigger_or_entry_condition="RecoveryCheckpoint serializes its reopen readiness state after restore evaluation.",
             identity_tuple=["checkpoint_id", "reopen_readiness_state"],
-            frozen_inputs=["privacy_reconciliation_contract", "audit_continuity_verified", "queue_rebuild_verified", "authority_binding_revalidation_verified"],
+            frozen_inputs=[
+                "privacy_reconciliation_contract",
+                "audit_continuity_verified",
+                "queue_rebuild_verified",
+                "authority_binding_revalidation_verified",
+            ],
             state_or_outcome=f"reopen_readiness_state = {state}",
             allowed_next_actions=["stay_blocked", "quarantine", "expire", "reopen_if_ready"],
             idempotency_or_hash_fields=["checkpoint_id", "restore_verification_hash"],
@@ -2590,16 +3758,40 @@ def recovery_checkpoint_payload() -> dict[str, Any]:
             record_type="restore_privacy_reconciliation_state",
             canonical_id=f"restore_privacy_reconciliation_state_{state.lower()}",
             trigger_or_entry_condition="A restore privacy reconciliation contract evaluates resurrected data, limitations, and hold blockers.",
-            identity_tuple=["checkpoint_ref", "restore_drill_ref", "privacy_reconciliation_state", "reopen_access_state"],
-            frozen_inputs=["resurrected_data_posture", "compensating_re_erasure_state", "legal_hold_ref_or_null", "proof_preservation_basis_ref_or_null", "authority_ambiguity_ref_or_null", "audit_chain_continuity_state"],
+            identity_tuple=[
+                "checkpoint_ref",
+                "restore_drill_ref",
+                "privacy_reconciliation_state",
+                "reopen_access_state",
+            ],
+            frozen_inputs=[
+                "resurrected_data_posture",
+                "compensating_re_erasure_state",
+                "legal_hold_ref_or_null",
+                "proof_preservation_basis_ref_or_null",
+                "authority_ambiguity_ref_or_null",
+                "audit_chain_continuity_state",
+            ],
             state_or_outcome=f"privacy_reconciliation_state = {state}",
-            allowed_next_actions=["complete_reconciliation", "complete_compensating_re_erasure", "remain_blocked_for_legal_review"],
-            idempotency_or_hash_fields=["reconciliation_contract_hash", "privacy_reconciliation_outcome_ref"],
+            allowed_next_actions=[
+                "complete_reconciliation",
+                "complete_compensating_re_erasure",
+                "remain_blocked_for_legal_review",
+            ],
+            idempotency_or_hash_fields=[
+                "reconciliation_contract_hash",
+                "privacy_reconciliation_outcome_ref",
+            ],
             recovery_posture="Restore privacy posture remains durable and grouped with limitation and audit continuity evidence.",
             privacy_reconciliation_required=True,
             authority_safety_posture="Authority ambiguity blocks reopen instead of being resolved by deletion or omission.",
             operator_visible_effect="Operators can see whether restore is reconciled, compensating re-erasure is in progress, or review is blocked by holds or proof preservation.",
-            audit_events=["ErasureRequested", "ErasureCompleted", "LegalHoldApplied", "LegalHoldReleased"],
+            audit_events=[
+                "ErasureRequested",
+                "ErasureCompleted",
+                "LegalHoldApplied",
+                "LegalHoldReleased",
+            ],
             source_path=RECOVERY_PATH,
             source_heading_or_logical_block="Restore privacy reconciliation law",
             source_ref=heading_ref(RECOVERY_PATH, "Restore privacy reconciliation law"),
@@ -2614,15 +3806,28 @@ def recovery_checkpoint_payload() -> dict[str, Any]:
             canonical_id="recovery_policy_queues_rebuilt_from_durable_truth_only",
             trigger_or_entry_condition="Queues or projections must be reconstructed after restore, failover, or broker loss.",
             identity_tuple=["boundary_scope", "queue_recovery_policy"],
-            frozen_inputs=["outbox_truth", "inbox_truth", "manifests", "workflow_items", "audit_evidence"],
+            frozen_inputs=[
+                "outbox_truth",
+                "inbox_truth",
+                "manifests",
+                "workflow_items",
+                "audit_evidence",
+            ],
             state_or_outcome="queue_recovery_policy = QUEUES_REBUILT_FROM_DURABLE_TRUTH_ONLY",
-            allowed_next_actions=["rebuild_queues_from_durable_truth", "reject_projection_as_legal_source"],
+            allowed_next_actions=[
+                "rebuild_queues_from_durable_truth",
+                "reject_projection_as_legal_source",
+            ],
             idempotency_or_hash_fields=["checkpoint_id", "restore_verification_hash"],
             recovery_posture="Queue state is rebuildable projection, not legal source of record.",
             privacy_reconciliation_required=True,
             authority_safety_posture="Queue rebuild cannot authorize duplicate authority mutation or replay without lineage proof.",
             operator_visible_effect="Recovery runbooks can rebuild work queues deterministically from durable artifacts.",
-            audit_events=["RestoreDrillExecuted", "DisasterRecoveryFailedOver", "DisasterRecoveryFailedBack"],
+            audit_events=[
+                "RestoreDrillExecuted",
+                "DisasterRecoveryFailedOver",
+                "DisasterRecoveryFailedBack",
+            ],
             source_path=RECOVERY_PATH,
             source_heading_or_logical_block="Queue and authority recovery law",
             source_ref=heading_ref(RECOVERY_PATH, "Queue and authority recovery law"),
@@ -2634,15 +3839,29 @@ def recovery_checkpoint_payload() -> dict[str, Any]:
             canonical_id="recovery_policy_authority_mutations_require_lineage_and_binding_revalidation",
             trigger_or_entry_condition="Outstanding authority-integrated work is resumed after restore or failover.",
             identity_tuple=["boundary_scope", "authority_recovery_policy"],
-            frozen_inputs=["AuthorityIngressReceipt", "AuthorityInteractionRecord", "SubmissionRecord", "canonical_ingress_receipt_ref", "reconciliation_control_contract"],
+            frozen_inputs=[
+                "AuthorityIngressReceipt",
+                "AuthorityInteractionRecord",
+                "SubmissionRecord",
+                "canonical_ingress_receipt_ref",
+                "reconciliation_control_contract",
+            ],
             state_or_outcome="authority_recovery_policy = AUTHORITY_MUTATIONS_REQUIRE_LINEAGE_AND_BINDING_REVALIDATION",
-            allowed_next_actions=["rebuild_outstanding_authority_work", "resume_reconciliation_from_control_contract", "block_fresh_resend_without_exact_recovery"],
+            allowed_next_actions=[
+                "rebuild_outstanding_authority_work",
+                "resume_reconciliation_from_control_contract",
+                "block_fresh_resend_without_exact_recovery",
+            ],
             idempotency_or_hash_fields=["request_hash", "idempotency_key", "binding_lineage_ref"],
             recovery_posture="Authority recovery rebuilds outstanding transmit and reconciliation work from durable truth instead of broker replay.",
             privacy_reconciliation_required=True,
             authority_safety_posture="No-blind-resend and binding-lineage validation survive restore, reclaim, and fail-forward pressure.",
             operator_visible_effect="Authority recovery tools can point to exact persisted receipts and reconciliation packets.",
-            audit_events=["AuthorityReconciliationAttempted", "AuthorityReconciliationResolved", "RestoreDrillExecuted"],
+            audit_events=[
+                "AuthorityReconciliationAttempted",
+                "AuthorityReconciliationResolved",
+                "RestoreDrillExecuted",
+            ],
             source_path=RECOVERY_PATH,
             source_heading_or_logical_block="Queue and authority recovery law",
             source_ref=heading_ref(RECOVERY_PATH, "Queue and authority recovery law"),
@@ -2654,15 +3873,31 @@ def recovery_checkpoint_payload() -> dict[str, Any]:
             canonical_id="recovery_policy_post_restore_privacy_reconciliation_required_before_reopen",
             trigger_or_entry_condition="Restore completed for an environment containing retained or previously erased restricted data.",
             identity_tuple=["checkpoint_id", "privacy_reconciliation_state", "reopen_access_state"],
-            frozen_inputs=["resurrected_data_posture", "compensating_re_erasure_state", "audit_chain_continuity_state"],
+            frozen_inputs=[
+                "resurrected_data_posture",
+                "compensating_re_erasure_state",
+                "audit_chain_continuity_state",
+            ],
             state_or_outcome="privacy_reconciliation_policy = POST_RESTORE_PRIVACY_RECONCILIATION_REQUIRED_BEFORE_REOPEN",
-            allowed_next_actions=["complete_privacy_reconciliation", "remain_blocked", "complete_compensating_re_erasure_if_required"],
-            idempotency_or_hash_fields=["reconciliation_contract_hash", "privacy_reconciliation_outcome_ref"],
+            allowed_next_actions=[
+                "complete_privacy_reconciliation",
+                "remain_blocked",
+                "complete_compensating_re_erasure_if_required",
+            ],
+            idempotency_or_hash_fields=[
+                "reconciliation_contract_hash",
+                "privacy_reconciliation_outcome_ref",
+            ],
             recovery_posture="Privacy reconciliation is part of reopen law, not a later cleanup queue.",
             privacy_reconciliation_required=True,
             authority_safety_posture="Authority ambiguity or proof-preservation conflicts block reopen instead of being hidden.",
             operator_visible_effect="Restore dashboards surface blocked legal-hold, proof-preservation, and authority-ambiguity review states.",
-            audit_events=["ErasureRequested", "ErasureCompleted", "LegalHoldApplied", "LegalHoldReleased"],
+            audit_events=[
+                "ErasureRequested",
+                "ErasureCompleted",
+                "LegalHoldApplied",
+                "LegalHoldReleased",
+            ],
             source_path=RECOVERY_PATH,
             source_heading_or_logical_block="Restore privacy reconciliation law",
             source_ref=heading_ref(RECOVERY_PATH, "Restore privacy reconciliation law"),
@@ -2699,10 +3934,23 @@ def resend_recovery_payload() -> dict[str, Any]:
             canonical_id="authority_recovery_resend_rule_auto_resend_preconditions",
             trigger_or_entry_condition="The engine considers automatic resend of a mutation-capable authority packet.",
             identity_tuple=["request_hash", "idempotency_key", "binding_lineage_ref"],
-            frozen_inputs=["binding_lineage_ref", "idempotency_scope", "collision_flags", "unresolved_external_ambiguity"],
+            frozen_inputs=[
+                "binding_lineage_ref",
+                "idempotency_scope",
+                "collision_flags",
+                "unresolved_external_ambiguity",
+            ],
             state_or_outcome="Automatic resend of mutation-capable packets requires unchanged binding lineage, unchanged idempotency scope, zero collision flags, and low unresolved external ambiguity.",
-            allowed_next_actions=["continue_if_preconditions_hold", "downgrade_to_follow_up_or_blocked_resend_posture"],
-            idempotency_or_hash_fields=["request_hash", "duplicate_meaning_key", "idempotency_key", "binding_lineage_ref"],
+            allowed_next_actions=[
+                "continue_if_preconditions_hold",
+                "downgrade_to_follow_up_or_blocked_resend_posture",
+            ],
+            idempotency_or_hash_fields=[
+                "request_hash",
+                "duplicate_meaning_key",
+                "idempotency_key",
+                "binding_lineage_ref",
+            ],
             recovery_posture="Mutation resend is not the default recovery posture; it must still satisfy exact recovery prerequisites.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Changed binding lineage or ambiguous evidence blocks automatic resend.",
@@ -2710,7 +3958,9 @@ def resend_recovery_payload() -> dict[str, Any]:
             audit_events=["AuthorityRequestSent", "AuthorityReconciliationAttempted"],
             source_path=AUTHORITY_PROTOCOL_PATH,
             source_heading_or_logical_block="9.13A Reconciliation budget and escalation rule",
-            source_ref=heading_ref(AUTHORITY_PROTOCOL_PATH, "9.13A Reconciliation budget and escalation rule"),
+            source_ref=heading_ref(
+                AUTHORITY_PROTOCOL_PATH, "9.13A Reconciliation budget and escalation rule"
+            ),
             notes=[],
             resend_legality_state="PRECONDITIONED_MUTATION_RESEND",
         ),
@@ -2727,18 +3977,40 @@ def resend_recovery_payload() -> dict[str, Any]:
             canonical_id=f"authority_recovery_resend_rule_{state.lower()}",
             trigger_or_entry_condition="The reconciliation control contract evaluates resend legality after a response, timeout, restore, or reclaim boundary.",
             identity_tuple=["request_hash", "idempotency_key", "resend_legality_state"],
-            frozen_inputs=["reconciliation_budget_state", "next_reconciliation_at", "reconciliation_deadline_at", "resend_control_reason_codes[]", "reconciliation_control_contract"],
+            frozen_inputs=[
+                "reconciliation_budget_state",
+                "next_reconciliation_at",
+                "reconciliation_deadline_at",
+                "resend_control_reason_codes[]",
+                "reconciliation_control_contract",
+            ],
             state_or_outcome=resend_state_details[state],
-            allowed_next_actions=["follow_up_read", "exact_idempotent_recovery", "open_or_update_workflow", "preserve_last_defensible_legal_state"],
-            idempotency_or_hash_fields=["request_hash", "duplicate_meaning_key", "idempotency_key", "binding_lineage_ref"],
+            allowed_next_actions=[
+                "follow_up_read",
+                "exact_idempotent_recovery",
+                "open_or_update_workflow",
+                "preserve_last_defensible_legal_state",
+            ],
+            idempotency_or_hash_fields=[
+                "request_hash",
+                "duplicate_meaning_key",
+                "idempotency_key",
+                "binding_lineage_ref",
+            ],
             recovery_posture="Restore, replay, or continuation resumes from the persisted reconciliation budget and deadline rather than resetting the clock.",
             privacy_reconciliation_required=False,
             authority_safety_posture="No blind resend is lawful after budget exhaustion, contradictory evidence, or escalation posture.",
             operator_visible_effect="Authority recovery views can show whether follow-up remained read-only, idempotent-only, or blocked pending escalation.",
-            audit_events=["AuthorityReconciliationAttempted", "AuthorityReconciliationResolved", "AuthorityReconciliationEscalated"],
+            audit_events=[
+                "AuthorityReconciliationAttempted",
+                "AuthorityReconciliationResolved",
+                "AuthorityReconciliationEscalated",
+            ],
             source_path=AUTHORITY_PROTOCOL_PATH,
             source_heading_or_logical_block="9.13A Reconciliation budget and escalation rule",
-            source_ref=heading_ref(AUTHORITY_PROTOCOL_PATH, "9.13A Reconciliation budget and escalation rule"),
+            source_ref=heading_ref(
+                AUTHORITY_PROTOCOL_PATH, "9.13A Reconciliation budget and escalation rule"
+            ),
             notes=[],
             resend_legality_state=state,
         )
@@ -2749,10 +4021,22 @@ def resend_recovery_payload() -> dict[str, Any]:
             record_type="authority_recovery_grouped_control_rule",
             canonical_id="authority_recovery_grouped_control_rule_copy_control_packet_to_submission_and_obligation",
             trigger_or_entry_condition="An unresolved authority interaction remains pending across restore, replay, or continuation boundaries.",
-            identity_tuple=["request_hash", "submission_record_id_or_null", "obligation_mirror_id_or_null"],
-            frozen_inputs=["reconciliation_control_contract", "AuthorityInteractionRecord", "SubmissionRecord", "ObligationMirror"],
+            identity_tuple=[
+                "request_hash",
+                "submission_record_id_or_null",
+                "obligation_mirror_id_or_null",
+            ],
+            frozen_inputs=[
+                "reconciliation_control_contract",
+                "AuthorityInteractionRecord",
+                "SubmissionRecord",
+                "ObligationMirror",
+            ],
             state_or_outcome="The persisted reconciliation control contract must be copied onto AuthorityInteractionRecord, unresolved SubmissionRecord, and unresolved ObligationMirror.",
-            allowed_next_actions=["resume_follow_up_from_persisted_budget", "reject_recomputation_from_retry_logs"],
+            allowed_next_actions=[
+                "resume_follow_up_from_persisted_budget",
+                "reject_recomputation_from_retry_logs",
+            ],
             idempotency_or_hash_fields=["request_hash", "idempotency_key", "control_contract_hash"],
             recovery_posture="Replay, restore, and continuation reuse the grouped control packet instead of recomputing attempt budget and resend legality.",
             privacy_reconciliation_required=False,
@@ -2761,7 +4045,9 @@ def resend_recovery_payload() -> dict[str, Any]:
             audit_events=["AuthorityReconciliationEscalated", "SubmissionUnknown"],
             source_path=AUTHORITY_PROTOCOL_PATH,
             source_heading_or_logical_block="9.13A Reconciliation budget and escalation rule",
-            source_ref=heading_ref(AUTHORITY_PROTOCOL_PATH, "9.13A Reconciliation budget and escalation rule"),
+            source_ref=heading_ref(
+                AUTHORITY_PROTOCOL_PATH, "9.13A Reconciliation budget and escalation rule"
+            ),
             notes=[],
         ),
         control_record(
@@ -2769,15 +4055,34 @@ def resend_recovery_payload() -> dict[str, Any]:
             canonical_id="authority_recovery_grouped_control_rule_restore_rebuilds_from_durable_truth",
             trigger_or_entry_condition="Restore or failover reconstructs outstanding authority-integrated workloads.",
             identity_tuple=["checkpoint_id", "environment_ref", "authority_recovery_policy"],
-            frozen_inputs=["AuthorityIngressReceipt", "AuthorityInteractionRecord", "SubmissionRecord", "canonical_ingress_receipt_ref", "response_history_ids[]", "meaning_resolution_state"],
+            frozen_inputs=[
+                "AuthorityIngressReceipt",
+                "AuthorityInteractionRecord",
+                "SubmissionRecord",
+                "canonical_ingress_receipt_ref",
+                "response_history_ids[]",
+                "meaning_resolution_state",
+            ],
             state_or_outcome="Authority recovery rebuilds outstanding transmit and reconciliation work from persisted receipts, interaction records, submissions, and inbox truth instead of broker replay.",
-            allowed_next_actions=["rebuild_outstanding_authority_work", "reuse_persisted_ingress_proof", "resume_reconciliation_from_control_contract"],
-            idempotency_or_hash_fields=["request_hash", "idempotency_key", "canonical_ingress_receipt_ref"],
+            allowed_next_actions=[
+                "rebuild_outstanding_authority_work",
+                "reuse_persisted_ingress_proof",
+                "resume_reconciliation_from_control_contract",
+            ],
+            idempotency_or_hash_fields=[
+                "request_hash",
+                "idempotency_key",
+                "canonical_ingress_receipt_ref",
+            ],
             recovery_posture="Outstanding unresolved authority work resumes from persisted control packets and ingress proofs.",
             privacy_reconciliation_required=True,
             authority_safety_posture="Canonical ingress receipt lineage prevents duplicate callback or poll deliveries from mutating legal state twice.",
             operator_visible_effect="Recovery tooling can show exactly which persisted authority artifacts justified resumed work.",
-            audit_events=["RestoreDrillExecuted", "AuthorityReconciliationAttempted", "AuthorityReconciliationResolved"],
+            audit_events=[
+                "RestoreDrillExecuted",
+                "AuthorityReconciliationAttempted",
+                "AuthorityReconciliationResolved",
+            ],
             source_path=DEPLOYMENT_PATH,
             source_heading_or_logical_block="5. Backup, restore, and DR rules",
             source_ref=heading_ref(DEPLOYMENT_PATH, "5. Backup, restore, and DR rules"),
@@ -2807,11 +4112,23 @@ def release_gate_payload() -> dict[str, Any]:
             record_type="release_candidate_identity_field",
             canonical_id=f"release_candidate_identity_field_{field.lower()}",
             trigger_or_entry_condition="A promotion candidate freezes one release candidate identity contract.",
-            identity_tuple=["candidate_identity_hash", "candidate_environment_ref", "build_artifact_ref"],
+            identity_tuple=[
+                "candidate_identity_hash",
+                "candidate_environment_ref",
+                "build_artifact_ref",
+            ],
             frozen_inputs=RELEASE_CANDIDATE_REQUIRED,
             state_or_outcome=f"ReleaseCandidateIdentityContract requires `{field}`.",
-            allowed_next_actions=["compute_candidate_identity_hash", "bind_release_evidence_to_candidate"],
-            idempotency_or_hash_fields=["candidate_identity_hash", "artifact_digest", "schema_bundle_hash", "config_bundle_hash"],
+            allowed_next_actions=[
+                "compute_candidate_identity_hash",
+                "bind_release_evidence_to_candidate",
+            ],
+            idempotency_or_hash_fields=[
+                "candidate_identity_hash",
+                "artifact_digest",
+                "schema_bundle_hash",
+                "config_bundle_hash",
+            ],
             recovery_posture="Restore drills and release evidence remain bound to the exact candidate tuple they verified.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Provider-profile and client-window drift cannot silently reuse green evidence from a different candidate.",
@@ -2830,16 +4147,33 @@ def release_gate_payload() -> dict[str, Any]:
             record_type="release_compatibility_gate_field",
             canonical_id=f"release_compatibility_gate_field_{field.lower()}",
             trigger_or_entry_condition="A blocking release gate claims schema, replay, restore, and client compatibility safety.",
-            identity_tuple=["candidate_identity_hash", "compatibility_gate_hash", "compatibility_window_ref"],
+            identity_tuple=[
+                "candidate_identity_hash",
+                "compatibility_gate_hash",
+                "compatibility_window_ref",
+            ],
             frozen_inputs=COMPATIBILITY_GATE_REQUIRED,
             state_or_outcome=f"SchemaBundleCompatibilityGateContract requires `{field}`.",
-            allowed_next_actions=["compute_compatibility_gate_hash", "bind_release_verification_manifest_rows", "block_release_if_reason_codes_present"],
-            idempotency_or_hash_fields=["compatibility_gate_hash", "candidate_identity_hash", "schema_bundle_hash"],
+            allowed_next_actions=[
+                "compute_compatibility_gate_hash",
+                "bind_release_verification_manifest_rows",
+                "block_release_if_reason_codes_present",
+            ],
+            idempotency_or_hash_fields=[
+                "compatibility_gate_hash",
+                "candidate_identity_hash",
+                "schema_bundle_hash",
+            ],
             recovery_posture="Rollback and fail-forward posture remains reader-window-bound as part of the same compatibility tuple.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Reader-window, restore, replay, and native-client compatibility remain one blocking boundary.",
             operator_visible_effect="Release reviewers can point to the exact compatibility field that blocked promotion or rollback.",
-            audit_events=["SchemaMigrationPlanned", "SchemaMigrationApplied", "SchemaMigrationVerified", "ReleaseRolledBack"],
+            audit_events=[
+                "SchemaMigrationPlanned",
+                "SchemaMigrationApplied",
+                "SchemaMigrationVerified",
+                "ReleaseRolledBack",
+            ],
             source_path=RELEASE_PATH,
             source_heading_or_logical_block="2. Contract boundary",
             source_ref=heading_ref(RELEASE_PATH, "2. Contract boundary"),
@@ -2853,11 +4187,25 @@ def release_gate_payload() -> dict[str, Any]:
             record_type="release_evidence_binding",
             canonical_id=f"release_evidence_binding_{artifact.lower()}",
             trigger_or_entry_condition="Release evidence claims to describe one promotion candidate or blocking gate.",
-            identity_tuple=["candidate_identity_hash", "compatibility_gate_hash_or_null", "artifact_kind"],
-            frozen_inputs=["candidate_identity_contract", "candidate_identity_hash", "compatibility_gate_hash_or_null"],
+            identity_tuple=[
+                "candidate_identity_hash",
+                "compatibility_gate_hash_or_null",
+                "artifact_kind",
+            ],
+            frozen_inputs=[
+                "candidate_identity_contract",
+                "candidate_identity_hash",
+                "compatibility_gate_hash_or_null",
+            ],
             state_or_outcome=f"{artifact} must bind the exact candidate identity and, where applicable, the shared compatibility gate hash.",
-            allowed_next_actions=["reject_mixed_candidate_evidence", "assemble_release_verification_manifest"],
-            idempotency_or_hash_fields=["candidate_identity_hash", "compatibility_gate_hash_or_null"],
+            allowed_next_actions=[
+                "reject_mixed_candidate_evidence",
+                "assemble_release_verification_manifest",
+            ],
+            idempotency_or_hash_fields=[
+                "candidate_identity_hash",
+                "compatibility_gate_hash_or_null",
+            ],
             recovery_posture="Restore drill, canary, and client compatibility evidence stay attached to the candidate they actually verified.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Authority sandbox coverage remains exact to provider-profile and operation-family scope.",
@@ -2884,8 +4232,18 @@ def release_gate_payload() -> dict[str, Any]:
             record_type="release_admissibility_requirement",
             canonical_id=f"release_admissibility_requirement_{idx}",
             trigger_or_entry_condition="A blocking release gate reports GREEN or APPROVED posture.",
-            identity_tuple=["candidate_identity_hash", "compatibility_gate_hash", "gate_result_ref"],
-            frozen_inputs=["candidate_identity_contract", "freshness_window", "rerun_scope", "quarantine_posture", "manual_waiver_posture"],
+            identity_tuple=[
+                "candidate_identity_hash",
+                "compatibility_gate_hash",
+                "gate_result_ref",
+            ],
+            frozen_inputs=[
+                "candidate_identity_contract",
+                "freshness_window",
+                "rerun_scope",
+                "quarantine_posture",
+                "manual_waiver_posture",
+            ],
             state_or_outcome=statement,
             allowed_next_actions=["admit_green_gate", "block_release_if_requirement_fails"],
             idempotency_or_hash_fields=["candidate_identity_hash", "compatibility_gate_hash"],
@@ -2916,10 +4274,17 @@ def release_gate_payload() -> dict[str, Any]:
             canonical_id=f"release_eliminated_failure_mode_{idx}",
             trigger_or_entry_condition="Promotion evidence claims that candidate binding and compatibility gates eliminate a known failure mode.",
             identity_tuple=["candidate_identity_hash", "compatibility_gate_hash_or_null"],
-            frozen_inputs=["release_candidate_identity_contract", "schema_bundle_compatibility_gate_contract", "manifest_assembly_contract"],
+            frozen_inputs=[
+                "release_candidate_identity_contract",
+                "schema_bundle_compatibility_gate_contract",
+                "manifest_assembly_contract",
+            ],
             state_or_outcome=statement,
             allowed_next_actions=["reject_drifted_evidence", "preserve_exact_gate_binding"],
-            idempotency_or_hash_fields=["candidate_identity_hash", "compatibility_gate_hash_or_null"],
+            idempotency_or_hash_fields=[
+                "candidate_identity_hash",
+                "compatibility_gate_hash_or_null",
+            ],
             recovery_posture="Eliminated failure modes stay covered by durable hashes and first-class evidence refs.",
             privacy_reconciliation_required=False,
             authority_safety_posture="Sandbox, migration, reader-window, and native-client compatibility drift cannot silently remain green.",
@@ -2984,7 +4349,14 @@ def release_gate_payload() -> dict[str, Any]:
             start=1,
         )
     ]
-    rows = flatten(candidate_rows, compatibility_rows, artifact_binding_rows, admissibility_rows, eliminated_rows, enforcement_rows)
+    rows = flatten(
+        candidate_rows,
+        compatibility_rows,
+        artifact_binding_rows,
+        admissibility_rows,
+        eliminated_rows,
+        enforcement_rows,
+    )
     assert_required_record_fields(rows)
     return {
         "summary": make_summary(
@@ -3014,7 +4386,11 @@ def rollback_payload() -> dict[str, Any]:
             canonical_id=f"rollback_boundary_state_{state.lower()}",
             trigger_or_entry_condition="A DeploymentRelease or compatibility gate evaluates rollback safety.",
             identity_tuple=["release_id", "rollback_boundary_state", "reader_window_state"],
-            frozen_inputs=["schema_bundle_compatibility_gate_contract", "schema_reader_window_contract", "supported_client_window_ref"],
+            frozen_inputs=[
+                "schema_bundle_compatibility_gate_contract",
+                "schema_reader_window_contract",
+                "supported_client_window_ref",
+            ],
             state_or_outcome=f"rollback_boundary_state = {state}",
             allowed_next_actions=["allow_rollback_if_safe", "force_fail_forward_if_not_safe"],
             idempotency_or_hash_fields=["compatibility_gate_hash", "candidate_identity_hash"],
@@ -3037,7 +4413,13 @@ def rollback_payload() -> dict[str, Any]:
             canonical_id=f"rollout_strategy_state_alignment_{strategy.lower()}_{state.lower()}",
             trigger_or_entry_condition="DeploymentRelease serializes a rollout strategy and rollout state combination.",
             identity_tuple=["release_id", "rollout_strategy", "rollout_state"],
-            frozen_inputs=["rollback_boundary_state", "compensating_release_id_or_null", "fail_forward_owner_ref_or_null", "rollback_runbook_ref", "fail_forward_runbook_ref"],
+            frozen_inputs=[
+                "rollback_boundary_state",
+                "compensating_release_id_or_null",
+                "fail_forward_owner_ref_or_null",
+                "rollback_runbook_ref",
+                "fail_forward_runbook_ref",
+            ],
             state_or_outcome=f"{strategy} / {state}",
             allowed_next_actions=["validate_alignment", "reject_illegal_state_transition"],
             idempotency_or_hash_fields=["candidate_identity_hash", "release_id"],
@@ -3048,7 +4430,9 @@ def rollback_payload() -> dict[str, Any]:
             audit_events=["ReleaseCanaryStarted", "ReleasePromoted", "ReleaseRolledBack"],
             source_path=DEPLOYMENT_PATH,
             source_heading_or_logical_block="6. Rollout, rollback, and fail-forward posture",
-            source_ref=heading_ref(DEPLOYMENT_PATH, "6. Rollout, rollback, and fail-forward posture"),
+            source_ref=heading_ref(
+                DEPLOYMENT_PATH, "6. Rollout, rollback, and fail-forward posture"
+            ),
             notes=[],
             rollout_strategy=strategy,
             rollout_state=state,
@@ -3067,16 +4451,36 @@ def rollback_payload() -> dict[str, Any]:
             record_type="restore_drill_requirement",
             canonical_id=f"restore_drill_requirement_{idx}",
             trigger_or_entry_condition="Promotion, DR, or reopen logic claims restore capability or successful checkpoint verification.",
-            identity_tuple=["checkpoint_id", "restore_drill_ref", "release_verification_manifest_ref_or_null"],
-            frozen_inputs=["restore_checkpoint_ref", "release_candidate_identity_contract", "schema_reader_window_contract", "checkpoint_inventory_ref", "audit_continuity_verified", "queue_rebuild_verified", "authority_binding_revalidation_verified"],
+            identity_tuple=[
+                "checkpoint_id",
+                "restore_drill_ref",
+                "release_verification_manifest_ref_or_null",
+            ],
+            frozen_inputs=[
+                "restore_checkpoint_ref",
+                "release_candidate_identity_contract",
+                "schema_reader_window_contract",
+                "checkpoint_inventory_ref",
+                "audit_continuity_verified",
+                "queue_rebuild_verified",
+                "authority_binding_revalidation_verified",
+            ],
             state_or_outcome=statement,
-            allowed_next_actions=["prove_restore_capability", "bind_restore_evidence_to_release_or_checkpoint"],
+            allowed_next_actions=[
+                "prove_restore_capability",
+                "bind_restore_evidence_to_release_or_checkpoint",
+            ],
             idempotency_or_hash_fields=["restore_verification_hash", "candidate_identity_hash"],
             recovery_posture="Restore claims remain tied to exact checkpoints, candidate tuples, and reopen gates.",
             privacy_reconciliation_required=True,
             authority_safety_posture="Restore of authority-integrated workloads must rebuild outstanding work from durable receipts and control packets.",
             operator_visible_effect="Release and DR reviewers can inspect the exact restore proof used for promotion or reopen.",
-            audit_events=["RestoreDrillExecuted", "BackupCreated", "DisasterRecoveryFailedOver", "DisasterRecoveryFailedBack"],
+            audit_events=[
+                "RestoreDrillExecuted",
+                "BackupCreated",
+                "DisasterRecoveryFailedOver",
+                "DisasterRecoveryFailedBack",
+            ],
             source_path=DEPLOYMENT_PATH,
             source_heading_or_logical_block="5. Backup, restore, and DR rules",
             source_ref=heading_ref(DEPLOYMENT_PATH, "5. Backup, restore, and DR rules"),
@@ -3101,15 +4505,30 @@ def rollback_payload() -> dict[str, Any]:
             canonical_id=f"release_resilience_invariant_{idx}",
             trigger_or_entry_condition="The release and resilience control plane validates its non-negotiable invariants.",
             identity_tuple=["environment_ref", "release_or_checkpoint_scope"],
-            frozen_inputs=["DeploymentRelease", "ReleaseVerificationManifest", "RecoveryCheckpoint", "RestorePrivacyReconciliationContract"],
+            frozen_inputs=[
+                "DeploymentRelease",
+                "ReleaseVerificationManifest",
+                "RecoveryCheckpoint",
+                "RestorePrivacyReconciliationContract",
+            ],
             state_or_outcome=statement,
             allowed_next_actions=["reject_invalid_promotion_or_restore_claim"],
-            idempotency_or_hash_fields=["candidate_identity_hash", "compatibility_gate_hash", "checkpoint_id_or_null"],
+            idempotency_or_hash_fields=[
+                "candidate_identity_hash",
+                "compatibility_gate_hash",
+                "checkpoint_id_or_null",
+            ],
             recovery_posture="Invariants remain fail-closed guards for promotion, rollback, restore, and fail-forward.",
             privacy_reconciliation_required=True,
             authority_safety_posture="Invariants prevent rollback or restore from obscuring already-persisted legal evidence.",
             operator_visible_effect="SRE and release teams can audit whether one invariant blocked a rollout, reopen, or restore claim.",
-            audit_events=["ReleasePromoted", "ReleaseRolledBack", "RestoreDrillExecuted", "DisasterRecoveryFailedOver", "DisasterRecoveryFailedBack"],
+            audit_events=[
+                "ReleasePromoted",
+                "ReleaseRolledBack",
+                "RestoreDrillExecuted",
+                "DisasterRecoveryFailedOver",
+                "DisasterRecoveryFailedBack",
+            ],
             source_path=DEPLOYMENT_PATH,
             source_heading_or_logical_block="8. Release and resilience invariants",
             source_ref=heading_ref(DEPLOYMENT_PATH, "8. Release and resilience invariants"),
@@ -3181,11 +4600,21 @@ def build_outputs() -> dict[str, Any]:
             "gap_id": "shared_operating_contract_reference_missing_for_pc_0015",
             "severity": "low",
             "description": "pc_0015 references ../shared_operating_contract_0014_to_0021.md, but no such file exists under PROMPT/ at generation time.",
-            "source_ref": line_ref(Path("/Users/test/Code/taxat_/PROMPT/CARDS/pc_0015.md"), find_line_containing(Path("/Users/test/Code/taxat_/PROMPT/CARDS/pc_0015.md"), "shared_operating_contract_0014_to_0021.md"), "missing_shared_contract_reference"),
+            "source_ref": line_ref(
+                Path("/Users/test/Code/taxat_/PROMPT/CARDS/pc_0015.md"),
+                find_line_containing(
+                    Path("/Users/test/Code/taxat_/PROMPT/CARDS/pc_0015.md"),
+                    "shared_operating_contract_0014_to_0021.md",
+                ),
+                "missing_shared_contract_reference",
+            ),
         },
     ]
     artifact_inventory = {
-        "summary": make_summary(artifact_rows, extra={"artifact_count": len(artifact_rows), "explicit_gap_count": len(explicit_gaps)}),
+        "summary": make_summary(
+            artifact_rows,
+            extra={"artifact_count": len(artifact_rows), "explicit_gap_count": len(explicit_gaps)},
+        ),
         "artifacts": artifact_rows,
         "explicit_gaps": explicit_gaps,
         "rows": artifact_rows,
@@ -3262,7 +4691,13 @@ def render_docs(
     ]
     lifecycle_lines.extend(
         render_table(
-            ["artifact_name", "state_or_outcome", "recovery_posture", "authority_safety_posture", "source_ref"],
+            [
+                "artifact_name",
+                "state_or_outcome",
+                "recovery_posture",
+                "authority_safety_posture",
+                "source_ref",
+            ],
             artifact_inventory["artifacts"],
         )
     )
@@ -3366,7 +4801,13 @@ def render_docs(
     )
     lifecycle_lines.extend(
         render_table(
-            ["protected_workload_class", "recovery_tier_class", "rpo_class", "rto_class", "source_ref"],
+            [
+                "protected_workload_class",
+                "recovery_tier_class",
+                "rpo_class",
+                "rto_class",
+                "source_ref",
+            ],
             recovery_matrix["recovery_tier_mappings"],
         )
     )
@@ -3391,7 +4832,9 @@ def render_docs(
         ]
     )
     for gap in artifact_inventory["explicit_gaps"]:
-        lifecycle_lines.append(f"- `{gap['gap_id']}` ({gap['severity']}): {gap['description']} [{gap['source_ref']}]")
+        lifecycle_lines.append(
+            f"- `{gap['gap_id']}` ({gap['severity']}): {gap['description']} [{gap['source_ref']}]"
+        )
 
     failure_lines = [
         "# Control-Plane Failure and Promotion Rules",
@@ -3546,10 +4989,10 @@ def render_mermaids() -> tuple[str, str]:
             '    O --> P["Rollback Allowed"]',
             '    O --> Q["Fail Forward Only"]',
             "  end",
-            '  B --> F',
-            '  E --> N',
-            '  H --> N',
-            '  K --> N',
+            "  B --> F",
+            "  E --> N",
+            "  H --> N",
+            "  K --> N",
             "",
         ]
     )
@@ -3583,11 +5026,15 @@ def main() -> int:
     summary = {
         "status": "PASS",
         "artifact_count": outputs["artifact_inventory"]["summary"]["artifact_count"],
-        "replay_row_count": outputs["replay_class_matrix"]["summary"]["row_count"] + outputs["replay_comparison_matrix"]["summary"]["row_count"],
+        "replay_row_count": outputs["replay_class_matrix"]["summary"]["row_count"]
+        + outputs["replay_comparison_matrix"]["summary"]["row_count"],
         "claim_branch_row_count": outputs["claim_branch_matrix"]["summary"]["row_count"],
-        "nightly_row_count": outputs["nightly_selection_matrix"]["summary"]["row_count"] + outputs["nightly_policy_matrix"]["summary"]["row_count"],
-        "recovery_row_count": outputs["recovery_matrix"]["summary"]["row_count"] + outputs["resend_matrix"]["summary"]["row_count"],
-        "release_row_count": outputs["release_gate_matrix"]["summary"]["row_count"] + outputs["rollback_matrix"]["summary"]["row_count"],
+        "nightly_row_count": outputs["nightly_selection_matrix"]["summary"]["row_count"]
+        + outputs["nightly_policy_matrix"]["summary"]["row_count"],
+        "recovery_row_count": outputs["recovery_matrix"]["summary"]["row_count"]
+        + outputs["resend_matrix"]["summary"]["row_count"],
+        "release_row_count": outputs["release_gate_matrix"]["summary"]["row_count"]
+        + outputs["rollback_matrix"]["summary"]["row_count"],
         "explicit_gap_count": outputs["artifact_inventory"]["summary"]["explicit_gap_count"],
     }
     print(json.dumps(summary, indent=2, sort_keys=True))

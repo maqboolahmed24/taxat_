@@ -1,0 +1,278 @@
+{
+  "contract_version": "LOCAL_RUNTIME_TOPOLOGY_V1",
+  "topology_id": "taxat_local_runtime_topology",
+  "basis_statement": "One local command starts the durable control and audit databases, durable S3-compatible object storage, disposable queue and cache services, then gates host processes on deterministic seeding and semantic smoke instead of on open ports alone.",
+  "project_name": "taxat-local-runtime",
+  "allowed_bootstrap_profile_refs": ["local", "devcontainer", "local-provisioning"],
+  "default_bootstrap_profile_ref": "local",
+  "environment_ref_map": {
+    "local": "env_local_authoring",
+    "devcontainer": "env_local_authoring",
+    "local-provisioning": "env_local_provisioning_workstation"
+  },
+  "durable_volume_refs": ["postgres-data", "minio-data"],
+  "disposable_volume_refs": ["rabbitmq-data", "redis-data"],
+  "services": [
+    {
+      "service_ref": "CONTROL_STORE",
+      "label": "Control store",
+      "family": "DATABASE",
+      "provider_family": "POSTGRESQL",
+      "provider_status": "PROVIDER_OVERRIDE_APPLIED",
+      "compose_service_refs": ["postgres", "postgres-bootstrap"],
+      "persistence_class": "DURABLE_TRUTH",
+      "reset_class": "DURABLE_PROTECTED",
+      "runtime_scope": "taxat_control",
+      "port_bindings": ["127.0.0.1:5432->5432/tcp"],
+      "namespace_refs": ["db.taxat_control"],
+      "dependency_service_refs": [],
+      "readiness_marker_refs": ["control_store_database_ready", "control_store_schema_bundle_hash"],
+      "safe_rebuild_instructions": [
+        "Re-run the idempotent postgres-bootstrap phase before host processes start.",
+        "Never remove postgres-data unless a full reset was explicitly requested and confirmed."
+      ],
+      "notes": [
+        "Local development keeps control and audit semantics separate while using one PostgreSQL cluster for portability.",
+        "The control store remains the durable mutation basis for receipts, manifests, outbox, inbox, access, and workflow facts."
+      ]
+    },
+    {
+      "service_ref": "AUDIT_STORE",
+      "label": "Audit store",
+      "family": "DATABASE",
+      "provider_family": "POSTGRESQL",
+      "provider_status": "PROVIDER_OVERRIDE_APPLIED",
+      "compose_service_refs": ["postgres", "postgres-bootstrap"],
+      "persistence_class": "DURABLE_TRUTH",
+      "reset_class": "DURABLE_PROTECTED",
+      "runtime_scope": "taxat_audit",
+      "port_bindings": ["127.0.0.1:5432->5432/tcp"],
+      "namespace_refs": ["db.taxat_audit"],
+      "dependency_service_refs": ["CONTROL_STORE"],
+      "readiness_marker_refs": ["audit_append_probe_ready"],
+      "safe_rebuild_instructions": [
+        "Append-only probe rows may be added during bootstrap, but historical rows are never mutated in place.",
+        "Durable reset requires the same explicit confirmation as the control store."
+      ],
+      "notes": [
+        "Append-only audit truth stays operationally separate from mutable control truth even in local development.",
+        "Host processes treat audit continuity as an explicit precondition, not an observability side effect."
+      ]
+    },
+    {
+      "service_ref": "OBJECT_STORAGE",
+      "label": "Object storage",
+      "family": "OBJECT_STORAGE",
+      "provider_family": "SELF_HOSTED_S3_COMPATIBLE",
+      "provider_status": "PROVIDER_LOCAL_EMULATION_ADOPTED",
+      "compose_service_refs": ["minio", "minio-bootstrap"],
+      "persistence_class": "DURABLE_TRUTH",
+      "reset_class": "DURABLE_PROTECTED",
+      "runtime_scope": "s3-compatible-buckets",
+      "port_bindings": [
+        "127.0.0.1:9000->9000/tcp",
+        "127.0.0.1:9001->9001/tcp"
+      ],
+      "namespace_refs": [
+        "taxat-local-upload-staging",
+        "taxat-local-retained-evidence",
+        "taxat-local-authority-payloads",
+        "taxat-local-quarantine",
+        "taxat-local-derived-previews",
+        "taxat-local-masked-exports",
+        "taxat-local-restricted-exports",
+        "taxat-local-restore-archive"
+      ],
+      "dependency_service_refs": ["CONTROL_STORE"],
+      "readiness_marker_refs": ["object_storage_bucket_refs"],
+      "safe_rebuild_instructions": [
+        "Bootstrap recreates buckets idempotently and re-enables versioning on every run.",
+        "Do not delete minio-data during a disposable reset because retained evidence and restore archives are durable."
+      ],
+      "notes": [
+        "Local object storage mirrors the same bucket taxonomy used by the governed storage contracts.",
+        "Provider-local emulation is explicit here: MinIO preserves S3-compatible versioning semantics without inventing cloud vendor state."
+      ]
+    },
+    {
+      "service_ref": "QUEUE",
+      "label": "Queue",
+      "family": "BROKER",
+      "provider_family": "SELF_HOSTED_RABBITMQ_QUORUM",
+      "provider_status": "PROVIDER_LOCAL_EMULATION_ADOPTED",
+      "compose_service_refs": ["rabbitmq", "rabbitmq-bootstrap"],
+      "persistence_class": "DISPOSABLE_ACCELERATION",
+      "reset_class": "DISPOSABLE_PURGEABLE",
+      "runtime_scope": "taxat-local",
+      "port_bindings": [
+        "127.0.0.1:5672->5672/tcp",
+        "127.0.0.1:15672->15672/tcp"
+      ],
+      "namespace_refs": [
+        "queue.stage-work",
+        "queue.authority-transmit",
+        "queue.reconciliation-follow-up",
+        "queue.projection-refresh",
+        "queue.recovery-job",
+        "dlq.stage-work",
+        "dlq.authority-transmit",
+        "dlq.reconciliation-follow-up",
+        "dlq.projection-refresh",
+        "dlq.recovery-job"
+      ],
+      "dependency_service_refs": ["CONTROL_STORE", "AUDIT_STORE"],
+      "readiness_marker_refs": ["queue_namespace_refs"],
+      "safe_rebuild_instructions": [
+        "Disposable reset may delete rabbitmq-data because queues rebuild from outbox, inbox, interaction, and audit truth.",
+        "Never promote broker backlog into legal truth during recovery."
+      ],
+      "notes": [
+        "Local RabbitMQ quorum queues preserve the broker-only transport posture from ADR-002 and the messaging inventory.",
+        "Queue namespaces stay subordinate to durable outbox and inbox truth."
+      ]
+    },
+    {
+      "service_ref": "CACHE",
+      "label": "Cache",
+      "family": "CACHE_RESUME_STORE",
+      "provider_family": "SELF_HOSTED_REDIS_CLUSTER",
+      "provider_status": "PROVIDER_LOCAL_EMULATION_ADOPTED",
+      "compose_service_refs": ["redis", "redis-bootstrap"],
+      "persistence_class": "DISPOSABLE_ACCELERATION",
+      "reset_class": "DISPOSABLE_PURGEABLE",
+      "runtime_scope": "taxat-local-cache",
+      "port_bindings": ["127.0.0.1:6379->6379/tcp"],
+      "namespace_refs": [
+        "taxat:local:shared-cache",
+        "taxat:local:resume-envelope",
+        "taxat:local:native-hydration"
+      ],
+      "dependency_service_refs": ["CONTROL_STORE"],
+      "readiness_marker_refs": ["cache_namespace_refs"],
+      "safe_rebuild_instructions": [
+        "Disposable reset may delete redis-data because cache and resume state must be derivable from durable truth.",
+        "Use purge and rehydrate instead of hand-editing cached rows when partition identity drifts."
+      ],
+      "notes": [
+        "Local Redis mirrors the shared-cache and resume-store posture without elevating cached data into durable meaning.",
+        "Namespace sentinels are bootstrap evidence only; they never authorize live mutation by themselves."
+      ]
+    },
+    {
+      "service_ref": "APP",
+      "label": "App",
+      "family": "HOST_PROCESS",
+      "provider_family": "NODE_HOST_PROCESS",
+      "provider_status": "NOT_SELECTED",
+      "compose_service_refs": [],
+      "persistence_class": "HOST_PROCESS_GATE",
+      "reset_class": "HOST_PROCESS_ONLY",
+      "runtime_scope": "operator-web-and-api-host-processes",
+      "port_bindings": [],
+      "namespace_refs": ["pnpm dev --filter @taxat/operator-web", "pnpm dev --filter @taxat/control-plane-api"],
+      "dependency_service_refs": ["CONTROL_STORE", "AUDIT_STORE", "OBJECT_STORAGE", "QUEUE", "CACHE"],
+      "readiness_marker_refs": ["seed_profile_ref", "validator_status", "smoke_command_path"],
+      "safe_rebuild_instructions": [
+        "Host processes start only after semantic readiness passes.",
+        "Restarting host processes does not reset durable or disposable substrate data."
+      ],
+      "notes": [
+        "Operator web and API remain host-run so local editing stays fast.",
+        "Bootstrap blocks them on schema, bucket, queue, cache, fixture, and smoke gates."
+      ]
+    },
+    {
+      "service_ref": "WORKERS",
+      "label": "Workers",
+      "family": "HOST_PROCESS",
+      "provider_family": "NODE_HOST_PROCESS",
+      "provider_status": "NOT_SELECTED",
+      "compose_service_refs": [],
+      "persistence_class": "HOST_PROCESS_GATE",
+      "reset_class": "HOST_PROCESS_ONLY",
+      "runtime_scope": "worker-host-processes",
+      "port_bindings": [],
+      "namespace_refs": ["pnpm dev --filter @taxat/control-plane-api -- --workers"],
+      "dependency_service_refs": ["CONTROL_STORE", "AUDIT_STORE", "OBJECT_STORAGE", "QUEUE", "CACHE"],
+      "readiness_marker_refs": [
+        "seed_profile_ref",
+        "validator_status",
+        "smoke_queue_path",
+        "smoke_audit_path"
+      ],
+      "safe_rebuild_instructions": [
+        "Workers stay stopped until semantic readiness and smoke checks pass.",
+        "A disposable reset requires queue and cache rebuild before workers resume claim loops."
+      ],
+      "notes": [
+        "Worker processes remain subordinate to durable truth and the deterministic local seed basis.",
+        "Queue or cache loss is recoverable only because worker legality is anchored outside those services."
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "edge_ref": "EDGE_CONTROL_TO_AUDIT",
+      "label": "Receipt and audit continuity",
+      "edge_class": "DURABLE_TRUTH",
+      "from_service_ref": "CONTROL_STORE",
+      "to_service_ref": "AUDIT_STORE",
+      "summary": "Control mutations and append-only audit evidence remain separate durable stores so replay and investigation never depend on mutable queue or cache memory.",
+      "notes": ["Audit continuity must remain queryable after restore and queue rebuild."]
+    },
+    {
+      "edge_ref": "EDGE_CONTROL_TO_QUEUE",
+      "label": "Outbox to queue delivery",
+      "edge_class": "DERIVED_TRANSPORT",
+      "from_service_ref": "CONTROL_STORE",
+      "to_service_ref": "QUEUE",
+      "summary": "Queue packets deliver work from persisted outbox or recovery truth and remain disposable transport only.",
+      "notes": ["Queue rebuild derives from durable truth instead of replaying broker backlog."]
+    },
+    {
+      "edge_ref": "EDGE_CONTROL_TO_OBJECT",
+      "label": "Control-to-object binding",
+      "edge_class": "DURABLE_TRUTH",
+      "from_service_ref": "CONTROL_STORE",
+      "to_service_ref": "OBJECT_STORAGE",
+      "summary": "Control records bind immutable refs to storage namespaces without promoting bucket paths into the system of record.",
+      "notes": ["Upload, evidence, quarantine, preview, export, and restore namespaces stay explicit."]
+    },
+    {
+      "edge_ref": "EDGE_CONTROL_TO_CACHE",
+      "label": "Projection and resume derivation",
+      "edge_class": "DISPOSABLE_ACCELERATION",
+      "from_service_ref": "CONTROL_STORE",
+      "to_service_ref": "CACHE",
+      "summary": "Shared cache and resume envelopes accelerate reads and reconnection while staying purgeable and subordinate to durable truth.",
+      "notes": ["Cache drift purges exact namespaces instead of mutating durable records."]
+    },
+    {
+      "edge_ref": "EDGE_QUEUE_TO_WORKERS",
+      "label": "Worker claim fabric",
+      "edge_class": "DERIVED_TRANSPORT",
+      "from_service_ref": "QUEUE",
+      "to_service_ref": "WORKERS",
+      "summary": "Workers consume disposable broker transport only after deterministic seeding and smoke gates pass.",
+      "notes": ["Queue packets never authorize legal mutation on their own."]
+    },
+    {
+      "edge_ref": "EDGE_OBJECT_TO_APP",
+      "label": "Gateway-bound object delivery",
+      "edge_class": "DURABLE_TRUTH",
+      "from_service_ref": "OBJECT_STORAGE",
+      "to_service_ref": "APP",
+      "summary": "Apps bind current-safe targets and delivery handles to immutable object namespaces without exposing raw storage paths.",
+      "notes": ["Preview and export remain governed derivatives, not direct bucket links."]
+    },
+    {
+      "edge_ref": "EDGE_CACHE_TO_APP",
+      "label": "Read-only cache hydration",
+      "edge_class": "DISPOSABLE_ACCELERATION",
+      "from_service_ref": "CACHE",
+      "to_service_ref": "APP",
+      "summary": "Apps may hydrate from cache only under exact partition identity and must block mutation until live legality returns.",
+      "notes": ["Local cache restoration remains read-only until revalidated."]
+    }
+  ]
+}

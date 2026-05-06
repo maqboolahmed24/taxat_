@@ -1,0 +1,85 @@
+{
+  "contract_version": "ORDER_DOMAIN_SCOPE_MATRIX_V1",
+  "matrix_id": "order_domain_scope_matrix",
+  "basis_statement": "Ordering is lawful only within one declared order domain key. No queue family may invent tenant-wide or broker-wide FIFO semantics for unrelated work.",
+  "ordering_scope_rows": [
+    {
+      "ordering_scope_ref": "MANIFEST_STAGE_DOMAIN",
+      "display_name": "Manifest stage domain",
+      "scope_chip": "manifest stage",
+      "lawful_component_fields": ["manifest_ref", "stage_code"],
+      "formula_statement": "HASH(manifest_ref, 'POST_SEAL_STAGE', stage_code)",
+      "concurrency_posture": "COMPETING_CONSUMERS_ALLOWED_ACROSS_DISTINCT_MANIFEST_STAGE_DOMAINS",
+      "notes": [
+        "Later stage packets may not overtake an earlier packet with the same manifest and stage order domain.",
+        "Distinct manifests and stage codes may execute concurrently."
+      ]
+    },
+    {
+      "ordering_scope_ref": "AUTHORITY_TRANSMIT_DOMAIN",
+      "display_name": "Authority transmit domain",
+      "scope_chip": "authority transmit",
+      "lawful_component_fields": [
+        "tenant_id",
+        "client_id",
+        "period_ref",
+        "operation_family",
+        "runtime_scope[]"
+      ],
+      "formula_statement": "HASH(tenant_id, client_id, period_ref, operation_family, ordered(runtime_scope))",
+      "concurrency_posture": "COMPETING_CONSUMERS_ALLOWED_ACROSS_DISTINCT_AUTHORITY_TRANSMIT_DOMAINS",
+      "notes": [
+        "Authority transport ordering stays narrow enough to preserve duplicate and collision law without serializing unrelated clients.",
+        "Runtime scope ordering must remain frozen and deterministic."
+      ]
+    },
+    {
+      "ordering_scope_ref": "AUTHORITY_RECONCILIATION_DOMAIN",
+      "display_name": "Authority reconciliation domain",
+      "scope_chip": "authority recon",
+      "lawful_component_fields": ["authority_interaction_ref", "duplicate_meaning_key"],
+      "formula_statement": "HASH(authority_interaction_ref, duplicate_meaning_key)",
+      "concurrency_posture": "COMPETING_CONSUMERS_ALLOWED_ACROSS_DISTINCT_INTERACTION_DOMAINS",
+      "notes": [
+        "Follow-up reads and ambiguity handling remain serialized only per exact authority interaction lineage.",
+        "Reconciliation packets must not collapse separate duplicate buckets into one domain."
+      ]
+    },
+    {
+      "ordering_scope_ref": "PROJECTION_MANIFEST_DOMAIN",
+      "display_name": "Projection manifest domain",
+      "scope_chip": "projection",
+      "lawful_component_fields": ["manifest_ref", "projection_family_ref"],
+      "formula_statement": "HASH(manifest_ref, projection_family_ref)",
+      "concurrency_posture": "COMPETING_CONSUMERS_ALLOWED_ACROSS_DISTINCT_PROJECTION_DOMAINS",
+      "notes": [
+        "Projection refresh remains ordered only inside one manifest and projection family.",
+        "Queue loss remains recoverable from persisted manifests, receipts, and audit evidence."
+      ]
+    },
+    {
+      "ordering_scope_ref": "ATTEMPT_RECOVERY_DOMAIN",
+      "display_name": "Attempt recovery domain",
+      "scope_chip": "recovery",
+      "lawful_component_fields": ["attempt_lineage_ref", "job_class_ref"],
+      "formula_statement": "HASH(attempt_lineage_ref, job_class_ref)",
+      "concurrency_posture": "COMPETING_CONSUMERS_ALLOWED_ACROSS_DISTINCT_RECOVERY_DOMAINS",
+      "notes": [
+        "Recovery coordination remains serialized only within one attempt lineage and recovery job class.",
+        "Stale reclaim and restore verification reuse durable checkpoint truth rather than broker silence."
+      ]
+    }
+  ],
+  "source_lineage": [
+    {
+      "rationale": "Ordering may be enforced only within order_domain_key and recommended domain formulas.",
+      "source_file": "Algorithm/core_engine.md",
+      "source_heading_or_logical_block": "Concurrency and modernization rules for all remaining phases"
+    },
+    {
+      "rationale": "Start-claim and recovery cannot infer safety from queue absence alone.",
+      "source_file": "Algorithm/manifest_start_claim_protocol.md",
+      "source_heading_or_logical_block": "## 4. Recovery and reclaim"
+    }
+  ]
+}

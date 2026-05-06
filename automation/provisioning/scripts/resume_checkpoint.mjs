@@ -55,9 +55,7 @@ async function main() {
   const { snapshot } = await loadSnapshot(args.root, args.run);
 
   if (!snapshot.checkpoint || snapshot.checkpoint.checkpointId !== args.checkpoint) {
-    throw new Error(
-      `Run ${args.run} does not have open checkpoint ${args.checkpoint}.`,
-    );
+    throw new Error(`Run ${args.run} does not have open checkpoint ${args.checkpoint}.`);
   }
   if (snapshot.checkpoint.status !== "OPEN") {
     throw new Error(
@@ -105,10 +103,7 @@ async function main() {
     updatedAt: resumedAt,
     checkpoint: resumedCheckpoint,
     steps: updatedSteps,
-    notes: [
-      ...(snapshot.notes ?? []),
-      `Resumed by ${args.by}: ${args.note}`,
-    ],
+    notes: [...(snapshot.notes ?? []), `Resumed by ${args.by}: ${args.note}`],
   };
 
   await saveSnapshot(args.root, args.run, updatedSnapshot);

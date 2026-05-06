@@ -1,0 +1,246 @@
+{
+  "routeId": "schema-compatibility-atlas",
+  "title": "Taxat Schema Compatibility Atlas",
+  "subtitle": "Inspect deterministic schema drift, migration chronology posture, compatibility windows, and release admissibility without re-deriving source analysis in the browser.",
+  "basisStatement": "Compare the imported contracts-core schema bundle against a candidate bundle, then join drift, migration posture, reader-window policy, and candidate identity into one deterministic release-readiness verdict.",
+  "currentVerdictChip": "ROLLBACK SAFE",
+  "candidateHashBadge": "95b977085cc4",
+  "baselineHashBadge": "95b977085cc4",
+  "readerWindowChip": "compatibility-window.control-plane.000001",
+  "dataMode": "CANONICAL_SCENARIOS",
+  "severityGroups": [
+    {
+      "groupRef": "ADDITIVE",
+      "label": "ADDITIVE",
+      "count": 1,
+      "tone": "success",
+      "summary": "Optional widening or new surfaces that preserve current readers by default."
+    },
+    {
+      "groupRef": "NARROWING",
+      "label": "NARROWING",
+      "count": 1,
+      "tone": "danger",
+      "summary": "Changes that reject formerly valid values or readers without an explicit safety window."
+    },
+    {
+      "groupRef": "DESTRUCTIVE",
+      "label": "DESTRUCTIVE",
+      "count": 2,
+      "tone": "danger",
+      "summary": "Removal, re-typing, or sealed-path changes that cannot be assumed rollback-safe."
+    },
+    {
+      "groupRef": "DOC_DRIFT",
+      "label": "DOC DRIFT",
+      "count": 2,
+      "tone": "warning",
+      "summary": "Schema, sample, or documentation parity drift that blocks trustworthy contract evidence."
+    },
+    {
+      "groupRef": "BINDING_DRIFT",
+      "label": "BINDING DRIFT",
+      "count": 1,
+      "tone": "warning",
+      "summary": "Generated binding artifacts are stale relative to the current schema bundle."
+    },
+    {
+      "groupRef": "MIGRATION_GAP",
+      "label": "MIGRATION GAP",
+      "count": 1,
+      "tone": "danger",
+      "summary": "Migration ledgers, backfill posture, or compatibility windows are missing or incomplete."
+    }
+  ],
+  "chronologyPhases": [
+    {
+      "phaseRef": "EXPAND",
+      "label": "Expand",
+      "summary": "Pre-destructive widening and reader-safe shape additions.",
+      "accessibleLabel": "Chronology phase expand"
+    },
+    {
+      "phaseRef": "BACKFILL",
+      "label": "Backfill",
+      "summary": "Data rewrites and idempotent derivations needed before verification.",
+      "accessibleLabel": "Chronology phase backfill"
+    },
+    {
+      "phaseRef": "VERIFY",
+      "label": "Verify",
+      "summary": "Reader-window and candidate-admissibility checks before contract.",
+      "accessibleLabel": "Chronology phase verify"
+    },
+    {
+      "phaseRef": "CONTRACT",
+      "label": "Contract",
+      "summary": "Post-window cleanup where rollback may already be fail-forward only.",
+      "accessibleLabel": "Chronology phase contract"
+    }
+  ],
+  "diffCards": [
+    {
+      "deltaRef": "scenario.optional-field.additive.no-migration",
+      "groupRef": "ADDITIVE",
+      "phaseRef": "EXPAND",
+      "tone": "success",
+      "accessibleLabel": "optional field addition remains rollback safe because existing readers still accept the old payload",
+      "summary": "Optional field added with no migration or reader-window action required.",
+      "schemaPath": "decision_bundle.schema.json#/properties/reviewer_note_or_null",
+      "readinessImpact": "ROLLBACK_SAFE",
+      "rollbackBoundary": "ROLLBACK_ALLOWED",
+      "reasonCodes": [
+        "OPTIONAL_PROPERTY_ADDED"
+      ],
+      "requiredArtifactRefs": [
+        "packages/contracts-core/schemas/decision_bundle.schema.json"
+      ],
+      "inspectorBody": "An optional field widened the schema surface without invalidating historical payloads, bundled samples, or generated bindings."
+    },
+    {
+      "deltaRef": "scenario.enum-narrowing.client-window-block",
+      "groupRef": "NARROWING",
+      "phaseRef": "VERIFY",
+      "tone": "danger",
+      "accessibleLabel": "enum narrowing blocks promotion because historical replay and supported clients still depend on retired values",
+      "summary": "Enum narrowing breaks replay and the current supported-client window.",
+      "schemaPath": "client_compatibility_matrix.schema.json#/properties/client_family",
+      "readinessImpact": "BLOCKED_PENDING_CLIENT_WINDOW",
+      "rollbackBoundary": "ROLLBACK_ALLOWED",
+      "reasonCodes": [
+        "ENUM_NARROWED",
+        "SUPPORTED_CLIENT_WINDOW_REF_MISMATCH"
+      ],
+      "requiredArtifactRefs": [
+        "packages/contracts-core/schemas/client_compatibility_matrix.schema.json",
+        "packages/contracts-core/schemas/release_candidate_identity_contract.schema.json"
+      ],
+      "inspectorBody": "The narrowing is semantically breaking, so the candidate must align to a supported-client window before release evidence can claim compatibility."
+    },
+    {
+      "deltaRef": "scenario.field-removal.window-open",
+      "groupRef": "DESTRUCTIVE",
+      "phaseRef": "CONTRACT",
+      "tone": "danger",
+      "accessibleLabel": "destructive field removal blocks promotion until compatibility window closes",
+      "summary": "Field removal has a migration ledger but the reader window is still open.",
+      "schemaPath": "release_candidate_identity_contract.schema.json#/properties/build_artifact_ref",
+      "readinessImpact": "BLOCKED_PENDING_READER_WINDOW",
+      "rollbackBoundary": "ROLLBACK_ALLOWED",
+      "reasonCodes": [
+        "PROPERTY_REMOVED",
+        "READER_WINDOW_STILL_OPEN"
+      ],
+      "requiredArtifactRefs": [
+        "config/migrations/schema_reader_window_baseline.json",
+        "packages/control-plane-db/src/migrations"
+      ],
+      "inspectorBody": "The destructive contraction is recorded, but protected readers and replay flows still depend on the prior field surface."
+    },
+    {
+      "deltaRef": "scenario.ledger-present.backfill-missing",
+      "groupRef": "MIGRATION_GAP",
+      "phaseRef": "BACKFILL",
+      "tone": "danger",
+      "accessibleLabel": "migration ledger exists but missing backfill evidence blocks promotion",
+      "summary": "Migration ledger exists, but the required backfill execution contract is incomplete.",
+      "schemaPath": "schema_bundle#/backfill_execution_contract",
+      "readinessImpact": "BLOCKED_PENDING_BACKFILL",
+      "rollbackBoundary": "ROLLBACK_ALLOWED",
+      "reasonCodes": [
+        "BACKFILL_EXECUTION_CONTRACT_INCOMPLETE"
+      ],
+      "requiredArtifactRefs": [
+        "config/migrations/backfill_execution_policy.json"
+      ],
+      "inspectorBody": "The structure is ready to expand, but semantic data shape is not yet proven because resumable backfill evidence is absent."
+    },
+    {
+      "deltaRef": "scenario.docs-heading.stale-token",
+      "groupRef": "DOC_DRIFT",
+      "phaseRef": "VERIFY",
+      "tone": "warning",
+      "accessibleLabel": "documentation drift blocks promotion because schema tokens still point to the prior contract file",
+      "summary": "Docs heading changed but the schema token still points at an old contract file.",
+      "schemaPath": "schema_bundle#/documentationBindings",
+      "readinessImpact": "BLOCKED_PENDING_DOC_SYNC",
+      "rollbackBoundary": "ROLLBACK_ALLOWED",
+      "reasonCodes": [
+        "DOC_TOKEN_STALE"
+      ],
+      "requiredArtifactRefs": [
+        "docs/contracts/schema_drift_and_migration_readiness.md",
+        "config/contracts/schema_drift_policy.json"
+      ],
+      "inspectorBody": "Docs-only edits can mask true contract posture, so promotion blocks until prose, token bindings, and schema identity agree again."
+    },
+    {
+      "deltaRef": "scenario.generated-bindings.stale",
+      "groupRef": "BINDING_DRIFT",
+      "phaseRef": "VERIFY",
+      "tone": "warning",
+      "accessibleLabel": "stale python and swift bindings block release evidence because generated surfaces no longer match the schema bundle",
+      "summary": "Generated Python and Swift bindings are stale relative to the candidate schema bundle.",
+      "schemaPath": "schema_bundle#/$defs/generatedBindings",
+      "readinessImpact": "BLOCKED_PENDING_BINDING_REGEN",
+      "rollbackBoundary": "ROLLBACK_ALLOWED",
+      "reasonCodes": [
+        "BINDING_SOURCE_MAP_STALE",
+        "LANGUAGE_PYTHON_STALE",
+        "LANGUAGE_SWIFT_STALE"
+      ],
+      "requiredArtifactRefs": [
+        "data/contracts/binding_coverage_report.json",
+        "packages/generated-models/src/generated",
+        "python/generated_contract_models/src/taxat_generated_contract_models/generated",
+        "native/TaxatOperator/GeneratedContracts/Sources/GeneratedContracts/Generated"
+      ],
+      "inspectorBody": "Generated bindings are evidence-bearing artifacts in this repo, so stale downstreams block promotion even when the source schemas look consistent."
+    },
+    {
+      "deltaRef": "scenario.sealed-manifest.fail-forward",
+      "groupRef": "DESTRUCTIVE",
+      "phaseRef": "CONTRACT",
+      "tone": "danger",
+      "accessibleLabel": "sealed manifest contraction is admissible only as fail forward after the protection window closes",
+      "summary": "Destructive change on a sealed-manifest path requires explicit fail-forward posture.",
+      "schemaPath": "schema_bundle_compatibility_gate_contract.schema.json#/properties/reason_codes",
+      "readinessImpact": "FAIL_FORWARD_ONLY",
+      "rollbackBoundary": "FAIL_FORWARD_ONLY",
+      "reasonCodes": [
+        "PROPERTY_REMOVED",
+        "SEALED_MANIFEST_PATH_FAIL_FORWARD_ONLY"
+      ],
+      "requiredArtifactRefs": [
+        "packages/contracts-core/schemas/schema_bundle_compatibility_gate_contract.schema.json",
+        "config/migrations/schema_reader_window_baseline.json"
+      ],
+      "inspectorBody": "Protected promotion evidence already binds this path, so the contract phase is only admissible after the window closes and rollback is no longer promised."
+    },
+    {
+      "deltaRef": "scenario.rename.sample-and-docs-drift",
+      "groupRef": "DOC_DRIFT",
+      "phaseRef": "VERIFY",
+      "tone": "warning",
+      "accessibleLabel": "rename plus sample and documentation drift blocks promotion because semantic intent is no longer provable",
+      "summary": "One semantic rename appears as field removal, replacement field, sample drift, and docs drift.",
+      "schemaPath": "governance_policy_snapshot.schema.json#/properties/policy_basis_ref",
+      "readinessImpact": "BLOCKED_PENDING_DOC_SYNC",
+      "rollbackBoundary": "ROLLBACK_ALLOWED",
+      "reasonCodes": [
+        "PROPERTY_REMOVED",
+        "OPTIONAL_PROPERTY_ADDED",
+        "SAMPLE_BINDING_DRIFT",
+        "DOC_TOKEN_STALE"
+      ],
+      "requiredArtifactRefs": [
+        "packages/contracts-core/samples",
+        "docs/contracts/schema_drift_and_migration_readiness.md"
+      ],
+      "inspectorBody": "The automation treats the rename as a bundle of structural and parity deltas so release evidence cannot hand-wave it as a benign refactor."
+    }
+  ],
+  "selectedGroupRef": "ADDITIVE",
+  "selectedPhaseRef": "EXPAND",
+  "selectedDeltaRef": "scenario.optional-field.additive.no-migration"
+}

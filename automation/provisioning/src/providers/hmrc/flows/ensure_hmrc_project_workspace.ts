@@ -73,10 +73,7 @@ export interface DeveloperHubWorkspaceRecord {
       | "EMAIL_VERIFICATION_PENDING"
       | "VERIFIED"
       | "SECURITY_INTERSTITIAL_PENDING";
-    source_disposition:
-      | "ADOPTED_EXISTING"
-      | "CREATED_DURING_RUN"
-      | "RESUMED_AFTER_PARTIAL_FAILURE";
+    source_disposition: "ADOPTED_EXISTING" | "CREATED_DURING_RUN" | "RESUMED_AFTER_PARTIAL_FAILURE";
   };
   workspace_state: {
     landing_status:
@@ -202,10 +199,7 @@ function buildWorkspaceRecord(
 
   return {
     schema_version: "1.0",
-    workspace_record_id: buildWorkspaceRecordId(
-      options.runContext,
-      options.accountAlias,
-    ),
+    workspace_record_id: buildWorkspaceRecordId(options.runContext, options.accountAlias),
     provider_id: "hmrc-developer-hub",
     provider_display_name: "HMRC Developer Hub",
     workspace_id: options.runContext.workspaceId,
@@ -328,17 +322,11 @@ async function persistCheckpointSnapshot(
     steps: result.steps,
     checkpoint: result.checkpoint,
     browserStorageStateRef: options.secretRefs.browserStorageStateRef ?? null,
-    notes: [
-      `HMRC Developer Hub checkpoint opened: ${result.checkpoint.reason}`,
-    ],
+    notes: [`HMRC Developer Hub checkpoint opened: ${result.checkpoint.reason}`],
   });
 
   return {
-    resumeSnapshotPath: path.join(
-      options.resumeRoot,
-      options.runContext.runId,
-      "latest.json",
-    ),
+    resumeSnapshotPath: path.join(options.resumeRoot, options.runContext.runId, "latest.json"),
     resumeSnapshotRef: `resume://${options.runContext.runId}/latest`,
   };
 }
@@ -474,10 +462,7 @@ export async function ensureHmrcProjectWorkspace(
     finalResult = {
       ...signInResult,
       steps: [...steps, ...signInResult.steps],
-      evidenceManifest: mergeEvidenceManifests(
-        evidenceManifest,
-        signInResult.evidenceManifest,
-      ),
+      evidenceManifest: mergeEvidenceManifests(evidenceManifest, signInResult.evidenceManifest),
       notes: [
         "Existing workspace record found; sign-in path was attempted first.",
         ...signInResult.notes,
@@ -488,10 +473,7 @@ export async function ensureHmrcProjectWorkspace(
     let mergedCreateResult: DeveloperHubFlowResult = {
       ...createResult,
       steps: [...steps, ...createResult.steps],
-      evidenceManifest: mergeEvidenceManifests(
-        evidenceManifest,
-        createResult.evidenceManifest,
-      ),
+      evidenceManifest: mergeEvidenceManifests(evidenceManifest, createResult.evidenceManifest),
       notes: [
         "No prior workspace record found; registration path was attempted first.",
         ...createResult.notes,

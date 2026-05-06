@@ -3,17 +3,8 @@ export const credentialLineageLedgerRoute = {
   title: "Credential Lineage Ledger",
   purpose:
     "Render a calm, security-oriented view of HMRC client identifiers, bound callback and fraud-profile refs, secret-version succession, and sanitized attestation evidence.",
-  focusOrder: [
-    "application-rail",
-    "credential-ledger",
-    "evidence-drawer",
-  ],
-  sections: [
-    "Identifiers",
-    "Bindings",
-    "Secret Lineage",
-    "Attestation",
-  ],
+  focusOrder: ["application-rail", "credential-ledger", "evidence-drawer"],
+  sections: ["Identifiers", "Bindings", "Secret Lineage", "Attestation"],
   palette: {
     background: "#F5F6F4",
     surface: "#FFFFFF",

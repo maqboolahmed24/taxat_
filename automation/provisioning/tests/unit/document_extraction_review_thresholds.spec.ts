@@ -24,13 +24,7 @@ import {
   type DocumentExtractionSelectionRecord,
 } from "../../src/providers/ocr/flows/create_managed_document_extraction_project_or_record_self_host_decision.js";
 
-const repoRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "..",
-  "..",
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
 
 async function readJson<T>(segments: string[]): Promise<T> {
   const filePath = path.join(repoRoot, ...segments);
@@ -52,55 +46,38 @@ function documentExtractionRunContext() {
 }
 
 test("checked-in OCR selection artifacts and governance board match the builders", async () => {
-  const persistedSelectionRecord =
-    await readJson<DocumentExtractionSelectionRecord>([
-      "data",
-      "provisioning",
-      "document_extraction_selection_record.template.json",
-    ]);
-  const persistedProviderInventory =
-    await readJson<DocumentExtractionProviderInventory>([
-      "data",
-      "provisioning",
-      "document_extraction_provider_inventory.template.json",
-    ]);
+  const persistedSelectionRecord = await readJson<DocumentExtractionSelectionRecord>([
+    "data",
+    "provisioning",
+    "document_extraction_selection_record.template.json",
+  ]);
+  const persistedProviderInventory = await readJson<DocumentExtractionProviderInventory>([
+    "data",
+    "provisioning",
+    "document_extraction_provider_inventory.template.json",
+  ]);
   const persistedProfileCatalog = await readJson<DocumentExtractionProfileCatalog>([
     "config",
     "evidence",
     "document_extraction_profile_catalog.json",
   ]);
-  const persistedReviewThresholds =
-    await readJson<DocumentExtractionReviewThresholds>([
-      "config",
-      "evidence",
-      "document_extraction_review_thresholds.json",
-    ]);
+  const persistedReviewThresholds = await readJson<DocumentExtractionReviewThresholds>([
+    "config",
+    "evidence",
+    "document_extraction_review_thresholds.json",
+  ]);
   const sampleRun = await readJson<{
     documentExtractionGovernanceBoard: DocumentExtractionGovernanceBoardViewModel;
-  }>([
-    "automation",
-    "provisioning",
-    "report_viewer",
-    "data",
-    "sample_run.json",
-  ]);
+  }>(["automation", "provisioning", "report_viewer", "data", "sample_run.json"]);
 
   expect(persistedSelectionRecord).toEqual(
-    createRecommendedDocumentExtractionSelectionRecord(
-      documentExtractionRunContext(),
-    ),
+    createRecommendedDocumentExtractionSelectionRecord(documentExtractionRunContext()),
   );
   expect(persistedProviderInventory).toEqual(
-    createRecommendedDocumentExtractionProviderInventory(
-      documentExtractionRunContext(),
-    ),
+    createRecommendedDocumentExtractionProviderInventory(documentExtractionRunContext()),
   );
-  expect(persistedProfileCatalog).toEqual(
-    createRecommendedDocumentExtractionProfileCatalog(),
-  );
-  expect(persistedReviewThresholds).toEqual(
-    createRecommendedDocumentExtractionReviewThresholds(),
-  );
+  expect(persistedProfileCatalog).toEqual(createRecommendedDocumentExtractionProfileCatalog());
+  expect(persistedReviewThresholds).toEqual(createRecommendedDocumentExtractionReviewThresholds());
   expect(sampleRun.documentExtractionGovernanceBoard).toEqual(
     createDocumentExtractionGovernanceBoardViewModel(),
   );
@@ -122,13 +99,9 @@ test("canonical OCR selection stays blocked on platform choice while profile and
   validateDocumentExtractionReviewThresholds(reviewThresholds);
 
   expect(selectionRecord.selection_status).toBe("SELF_HOST_DECISION_REQUIRED");
-  expect(selectionRecord.managed_default_status).toBe(
-    "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION",
-  );
+  expect(selectionRecord.managed_default_status).toBe("BLOCKED_BY_PLATFORM_PROVIDER_SELECTION");
   expect(providerInventory.option_rows).toHaveLength(4);
-  expect(
-    profileCatalog.profiles.map((profile) => profile.document_class),
-  ).toEqual(
+  expect(profileCatalog.profiles.map((profile) => profile.document_class)).toEqual(
     expect.arrayContaining([
       "EXPENSE_RECEIPT",
       "SUPPLIER_INVOICE",
@@ -139,11 +112,7 @@ test("canonical OCR selection stays blocked on platform choice while profile and
     ]),
   );
   expect(reviewThresholds.blocked_upload_gate_states).toEqual(
-    expect.arrayContaining([
-      "SCAN_PENDING",
-      "QUARANTINED",
-      "ATTACHMENT_UNCONFIRMED",
-    ]),
+    expect.arrayContaining(["SCAN_PENDING", "QUARANTINED", "ATTACHMENT_UNCONFIRMED"]),
   );
   expect(reviewThresholds.typed_actions).toEqual(
     expect.arrayContaining([

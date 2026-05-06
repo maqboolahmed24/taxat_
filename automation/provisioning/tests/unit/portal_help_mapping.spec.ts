@@ -52,9 +52,7 @@ test("contextual help mapping preserves route, focus, request-info lineage, and 
 test("portal help mapping keeps distinct help scenarios and blocks internal-only leakage", () => {
   const mapping = createRecommendedPortalHelpToExternalTicketMapping();
 
-  const generalHelp = mapping.mapping_rows.find(
-    (row) => row.scenario_ref === "general_help_route",
-  );
+  const generalHelp = mapping.mapping_rows.find((row) => row.scenario_ref === "general_help_route");
   const acknowledgement = mapping.mapping_rows.find(
     (row) => row.scenario_ref === "support_acknowledgement",
   );

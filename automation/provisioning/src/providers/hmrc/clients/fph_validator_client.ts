@@ -1,7 +1,5 @@
-export const HMRC_FPH_VALIDATOR_BASE_URL =
-  "https://test-api.service.hmrc.gov.uk";
-export const HMRC_FPH_VALIDATOR_ACCEPT_HEADER =
-  "application/vnd.hmrc.1.0+json";
+export const HMRC_FPH_VALIDATOR_BASE_URL = "https://test-api.service.hmrc.gov.uk";
+export const HMRC_FPH_VALIDATOR_ACCEPT_HEADER = "application/vnd.hmrc.1.0+json";
 export const HMRC_FPH_VALIDATE_PATH = "/test/fraud-prevention-headers/validate";
 export const HMRC_FPH_VALIDATION_FEEDBACK_PATH =
   "/test/fraud-prevention-headers/{api}/validation-feedback";
@@ -17,8 +15,7 @@ export const HMRC_FPH_CONNECTION_METHODS = [
   "WEB_APP_VIA_SERVER",
 ] as const;
 
-export type HmrcFphConnectionMethod =
-  (typeof HMRC_FPH_CONNECTION_METHODS)[number];
+export type HmrcFphConnectionMethod = (typeof HMRC_FPH_CONNECTION_METHODS)[number];
 
 export const HMRC_FPH_RESULT_CODES = [
   "VALID_HEADERS",
@@ -70,9 +67,7 @@ export interface HmrcFphValidationFeedbackResponse {
 }
 
 export interface HmrcFphValidatorClient {
-  validateHeaders(
-    headers: Record<string, string>,
-  ): Promise<HmrcFphValidateResponse>;
+  validateHeaders(headers: Record<string, string>): Promise<HmrcFphValidateResponse>;
   getValidationFeedback(
     apiIdentifier: string,
     options?: {
@@ -99,16 +94,11 @@ export interface CreateFixtureFphValidatorClientOptions {
     options?: {
       connectionMethod?: HmrcFphConnectionMethod;
     },
-  ) =>
-    | Promise<HmrcFphValidationFeedbackResponse>
-    | HmrcFphValidationFeedbackResponse;
+  ) => Promise<HmrcFphValidationFeedbackResponse> | HmrcFphValidationFeedbackResponse;
 }
 
 function isResultCode(value: unknown): value is HmrcFphResultCode {
-  return (
-    typeof value === "string" &&
-    HMRC_FPH_RESULT_CODES.includes(value as HmrcFphResultCode)
-  );
+  return typeof value === "string" && HMRC_FPH_RESULT_CODES.includes(value as HmrcFphResultCode);
 }
 
 function normalizeFindingArray(value: unknown): HmrcFphFinding[] {
@@ -132,8 +122,7 @@ function normalizeFindingArray(value: unknown): HmrcFphFinding[] {
 function normalizeValidateResponse(value: unknown): HmrcFphValidateResponse {
   const record = value as Record<string, unknown>;
   return {
-    specVersion:
-      typeof record.specVersion === "string" ? record.specVersion : "unknown",
+    specVersion: typeof record.specVersion === "string" ? record.specVersion : "unknown",
     code: isResultCode(record.code) ? record.code : "INVALID_HEADERS",
     message: typeof record.message === "string" ? record.message : "",
     errors: normalizeFindingArray(record.errors),
@@ -161,9 +150,7 @@ function normalizeHeaderFeedbackArray(value: unknown): HmrcFphHeaderFeedback[] {
   });
 }
 
-function normalizeCrossValidationArray(
-  value: unknown,
-): HmrcFphCrossValidationFeedback[] {
+function normalizeCrossValidationArray(value: unknown): HmrcFphCrossValidationFeedback[] {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -181,9 +168,7 @@ function normalizeCrossValidationArray(
   });
 }
 
-function normalizeFeedbackResponse(
-  value: unknown,
-): HmrcFphValidationFeedbackResponse {
+function normalizeFeedbackResponse(value: unknown): HmrcFphValidationFeedbackResponse {
   const record = value as Record<string, unknown>;
   const requests = Array.isArray(record.requests) ? record.requests : [];
   return {
@@ -193,9 +178,7 @@ function normalizeFeedbackResponse(
         path: typeof request.path === "string" ? request.path : "",
         method: typeof request.method === "string" ? request.method : "GET",
         requestTimestamp:
-          typeof request.requestTimestamp === "string"
-            ? request.requestTimestamp
-            : "",
+          typeof request.requestTimestamp === "string" ? request.requestTimestamp : "",
         code: isResultCode(request.code) ? request.code : "INVALID_HEADERS",
         headers: normalizeHeaderFeedbackArray(request.headers),
         crossValidation: normalizeCrossValidationArray(request.crossValidation),
@@ -225,9 +208,7 @@ async function parseJsonResponse<T>(
   if (!response.ok) {
     const record = parsed as Record<string, unknown>;
     const code = typeof record.code === "string" ? record.code : "UNKNOWN";
-    throw new Error(
-      `HMRC FPH validator request failed with HTTP ${response.status} (${code}).`,
-    );
+    throw new Error(`HMRC FPH validator request failed with HTTP ${response.status} (${code}).`);
   }
 
   return normalizer(parsed);
@@ -274,22 +255,18 @@ export function createHmrcFphValidatorClient(
 ): HmrcFphValidatorClient {
   const fetchImpl = options.fetchImpl ?? fetch;
   const baseUrl = options.baseUrl ?? HMRC_FPH_VALIDATOR_BASE_URL;
-  const acceptHeader =
-    options.acceptHeader ?? HMRC_FPH_VALIDATOR_ACCEPT_HEADER;
+  const acceptHeader = options.acceptHeader ?? HMRC_FPH_VALIDATOR_ACCEPT_HEADER;
 
   return {
     async validateHeaders(headers) {
-      const response = await fetchImpl(
-        `${baseUrl}${HMRC_FPH_VALIDATE_PATH}`,
-        {
-          method: "GET",
-          headers: {
-            Accept: acceptHeader,
-            Authorization: `Bearer ${options.authorizationToken}`,
-            ...headers,
-          },
+      const response = await fetchImpl(`${baseUrl}${HMRC_FPH_VALIDATE_PATH}`, {
+        method: "GET",
+        headers: {
+          Accept: acceptHeader,
+          Authorization: `Bearer ${options.authorizationToken}`,
+          ...headers,
         },
-      );
+      });
 
       return parseJsonResponse(response, normalizeValidateResponse);
     },
@@ -302,10 +279,7 @@ export function createHmrcFphValidatorClient(
         )}`,
       );
       if (feedbackOptions?.connectionMethod) {
-        url.searchParams.set(
-          "connectionMethod",
-          feedbackOptions.connectionMethod,
-        );
+        url.searchParams.set("connectionMethod", feedbackOptions.connectionMethod);
       }
 
       const response = await fetchImpl(url, {

@@ -3,11 +3,7 @@ export const messageFabricAtlasRoute = {
   title: "Message Fabric Atlas",
   purpose:
     "Render a premium coordination atlas for durable outboxes, broker lanes, authenticated inboxes, and retry or dedupe law without collapsing into a cloud-operations console.",
-  focusOrder: [
-    "message-family-rail",
-    "message-fabric-canvas",
-    "message-fabric-inspector",
-  ],
+  focusOrder: ["message-family-rail", "message-fabric-canvas", "message-fabric-inspector"],
   sections: [
     "Durable Outboxes",
     "Broker Channels",

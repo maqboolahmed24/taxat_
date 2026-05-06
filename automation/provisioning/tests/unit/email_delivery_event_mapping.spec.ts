@@ -13,13 +13,7 @@ import {
   type EmailWebhookEndpointContract,
 } from "../../src/providers/email/flows/configure_templates_and_webhooks.js";
 
-const repoRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "..",
-  "..",
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
 
 async function readJson<T>(segments: string[]): Promise<T> {
   const filePath = path.join(repoRoot, ...segments);
@@ -39,9 +33,7 @@ test("checked-in delivery-event mapping and webhook contract match the builders"
   ]);
 
   expect(persistedMapping).toEqual(createRecommendedEmailDeliveryEventMapping());
-  expect(persistedWebhookContract).toEqual(
-    createRecommendedEmailWebhookEndpointContract(),
-  );
+  expect(persistedWebhookContract).toEqual(createRecommendedEmailWebhookEndpointContract());
 });
 
 test("delivery-event mapping distinguishes allowed evidence updates from prohibited workflow mutations", () => {
@@ -51,9 +43,7 @@ test("delivery-event mapping distinguishes allowed evidence updates from prohibi
   validateEmailDeliveryEventMapping(mapping);
   validateEmailWebhookEndpointContract(webhookContract, mapping);
 
-  expect(mapping.idempotency_policy.duplicate_effect).toBe(
-    "RETURN_200_NO_DUPLICATE_EVIDENCE",
-  );
+  expect(mapping.idempotency_policy.duplicate_effect).toBe("RETURN_200_NO_DUPLICATE_EVIDENCE");
   expect(mapping.telemetry_defaults.track_opens).toBe(false);
   expect(mapping.telemetry_defaults.track_links).toBe("None");
 
@@ -81,9 +71,7 @@ test("delivery-event mapping distinguishes allowed evidence updates from prohibi
   ).toBe(true);
 
   const brokenMapping = structuredClone(mapping);
-  brokenMapping.event_mappings[0]!.allowed_internal_updates.push(
-    "WorkflowItem.lifecycle_state",
-  );
+  brokenMapping.event_mappings[0]!.allowed_internal_updates.push("WorkflowItem.lifecycle_state");
   expect(() => validateEmailDeliveryEventMapping(brokenMapping)).toThrow(
     /must not mutate workflow or authority truth/i,
   );

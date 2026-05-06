@@ -86,7 +86,11 @@ def classify_path(path: Path) -> tuple[str, str]:
     if top == "Algorithm":
         if path.name.endswith(".schema.json"):
             return "canonical_algorithm_source", "schema_contract"
-        if path.parent.name == "schemas" and path.name.startswith("sample_") and path.suffix == ".json":
+        if (
+            path.parent.name == "schemas"
+            and path.name.startswith("sample_")
+            and path.suffix == ".json"
+        ):
             return "canonical_algorithm_source", "schema_sample_payload"
         if path.suffix == ".md":
             return "canonical_algorithm_source", "markdown_corpus_document"
@@ -133,13 +137,17 @@ def discover_top_level_entries() -> list[dict[str, Any]]:
     return entries
 
 
-def collect_source_files() -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, dict[str, int]]]:
+def collect_source_files() -> tuple[
+    list[dict[str, Any]], list[dict[str, Any]], dict[str, dict[str, int]]
+]:
     file_records: list[dict[str, Any]] = []
     residue_records: list[dict[str, Any]] = []
     counts: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
 
     scan_roots: list[Path] = [ALGORITHM_DIR, PROMPT_DIR]
-    root_level_files: list[Path] = [path for path in sorted(ROOT.iterdir(), key=lambda item: item.name) if path.is_file()]
+    root_level_files: list[Path] = [
+        path for path in sorted(ROOT.iterdir(), key=lambda item: item.name) if path.is_file()
+    ]
 
     for path in scan_roots:
         for file_path in sorted(candidate for candidate in path.rglob("*") if candidate.is_file()):
@@ -154,7 +162,9 @@ def collect_source_files() -> tuple[list[dict[str, Any]], list[dict[str, Any]], 
                 "subtype": subtype,
                 "file_type": file_type_key(file_path, classification),
                 "size_bytes": file_path.stat().st_size,
-                "sha256": sha256_file(file_path) if classification in {"canonical_algorithm_source", "prompt_scaffold"} else None,
+                "sha256": sha256_file(file_path)
+                if classification in {"canonical_algorithm_source", "prompt_scaffold"}
+                else None,
             }
             file_records.append(record)
             counts[classification][record["file_type"]] += 1
@@ -180,7 +190,10 @@ def collect_source_files() -> tuple[list[dict[str, Any]], list[dict[str, Any]], 
             "subtype": subtype,
             "file_type": file_type_key(file_path, classification),
             "size_bytes": file_path.stat().st_size,
-            "sha256": sha256_file(file_path) if classification in {"canonical_algorithm_source", "prompt_scaffold", "archive_payload"} else None,
+            "sha256": sha256_file(file_path)
+            if classification
+            in {"canonical_algorithm_source", "prompt_scaffold", "archive_payload"}
+            else None,
         }
         file_records.append(record)
         counts[classification][record["file_type"]] += 1
@@ -198,7 +211,11 @@ def collect_source_files() -> tuple[list[dict[str, Any]], list[dict[str, Any]], 
         classification: dict(sorted(type_counts.items()))
         for classification, type_counts in sorted(counts.items())
     }
-    return sorted(file_records, key=lambda item: item["path"]), sorted(residue_records, key=lambda item: item["path"]), normalized_counts
+    return (
+        sorted(file_records, key=lambda item: item["path"]),
+        sorted(residue_records, key=lambda item: item["path"]),
+        normalized_counts,
+    )
 
 
 def discover_archive_payloads() -> list[dict[str, Any]]:
@@ -216,7 +233,11 @@ def discover_archive_payloads() -> list[dict[str, Any]]:
         )
 
     tracked_archive = run_git_command(["git", "ls-files", "--stage", "--", "Algorithm.zip"])
-    if tracked_archive["returncode"] == 0 and tracked_archive["stdout"].strip() and not (ROOT / "Algorithm.zip").exists():
+    if (
+        tracked_archive["returncode"] == 0
+        and tracked_archive["stdout"].strip()
+        and not (ROOT / "Algorithm.zip").exists()
+    ):
         payloads.append(
             {
                 "path": "Algorithm.zip",
@@ -274,10 +295,14 @@ def build_readme_inventory_result() -> dict[str, Any]:
                 }
             )
 
-    live_markdown_docs = sorted(path.name for path in ALGORITHM_DIR.glob("*.md") if path.name != "README.md")
+    live_markdown_docs = sorted(
+        path.name for path in ALGORITHM_DIR.glob("*.md") if path.name != "README.md"
+    )
     missing = [name for name in live_markdown_docs if name not in token_to_bullets]
     duplicates = {
-        name: refs for name, refs in sorted(token_to_bullets.items()) if len(refs) > 1 and name in live_markdown_docs
+        name: refs
+        for name, refs in sorted(token_to_bullets.items())
+        if len(refs) > 1 and name in live_markdown_docs
     }
     extras = [name for name in sorted(token_to_bullets) if name not in live_markdown_docs]
     obvious_role_mismatches = []
@@ -295,14 +320,20 @@ def build_readme_inventory_result() -> dict[str, Any]:
                 )
 
     return {
-        "status": "PASS" if not missing and not duplicates and not extras and not obvious_role_mismatches else "FAIL",
+        "status": "PASS"
+        if not missing and not duplicates and not extras and not obvious_role_mismatches
+        else "FAIL",
         "live_top_level_markdown_count": len(live_markdown_docs),
         "inventory_markdown_entry_count": sum(len(refs) for refs in token_to_bullets.values()),
         "missing": missing,
         "duplicates": duplicates,
         "extras": extras,
         "obvious_role_mismatches": obvious_role_mismatches,
-        "inventory_map": {name: refs for name, refs in sorted(token_to_bullets.items()) if name in live_markdown_docs},
+        "inventory_map": {
+            name: refs
+            for name, refs in sorted(token_to_bullets.items())
+            if name in live_markdown_docs
+        },
         "review_mode": (
             "Exact live-tree coverage and uniqueness check plus an obvious-title-mismatch heuristic. "
             "Semantic role intent remains a corpus-maintained prose responsibility."
@@ -348,7 +379,9 @@ def verify_first_five_cards(checklist_entries: list[dict[str, str]]) -> dict[str
     results = []
     missing_cards = []
     for expected_card_id in FIRST_FIVE_CARD_IDS:
-        checklist_entry = next((entry for entry in first_five if entry["card_id"] == expected_card_id), None)
+        checklist_entry = next(
+            (entry for entry in first_five if entry["card_id"] == expected_card_id), None
+        )
         if checklist_entry is None:
             missing_cards.append(expected_card_id)
             continue
@@ -421,7 +454,11 @@ def build_prompt_path_normalization() -> dict[str, Any]:
                 normalized = absolute_path.removeprefix(f"{ROOT.as_posix()}/")
                 is_placeholder = "..." in normalized or "#" in normalized
                 exists = False if is_placeholder else (ROOT / normalized).exists()
-                resolution_status = "placeholder_pattern" if is_placeholder else ("resolved" if exists else "missing_target")
+                resolution_status = (
+                    "placeholder_pattern"
+                    if is_placeholder
+                    else ("resolved" if exists else "missing_target")
+                )
                 records.append(
                     {
                         "file": repo_rel(path),
@@ -434,7 +471,9 @@ def build_prompt_path_normalization() -> dict[str, Any]:
                 )
                 files_with_matches.add(repo_rel(path))
     unresolved = [
-        record for record in records if record["resolution_status"] not in {"resolved", "placeholder_pattern"}
+        record
+        for record in records
+        if record["resolution_status"] not in {"resolved", "placeholder_pattern"}
     ]
     return {
         "repo_root": ".",
@@ -489,7 +528,8 @@ def run_validator_commands() -> list[dict[str, Any]]:
         {
             "name": "validate_contracts_self_test",
             "documented_command": "python3 Algorithm/scripts/validate_contracts.py --self-test",
-            "actual_command": python_prefix + ["Algorithm/scripts/validate_contracts.py", "--self-test"],
+            "actual_command": python_prefix
+            + ["Algorithm/scripts/validate_contracts.py", "--self-test"],
         },
         {
             "name": "forensic_contract_guard",
@@ -636,7 +676,9 @@ def build_validation_results(
     prompt_path_normalization: dict[str, Any],
     findings: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    validator_failures = [result["name"] for result in validator_results if result["status"] != "PASS"]
+    validator_failures = [
+        result["name"] for result in validator_results if result["status"] != "PASS"
+    ]
     readme_failure = readme_inventory_result["status"] != "PASS"
     card_failure = first_five_cards_result["status"] != "PASS"
     normalization_failure = prompt_path_normalization["summary"]["unresolved_occurrences"] > 0
@@ -718,15 +760,21 @@ def build_intake_manifest(
         "prompt_scaffold_cards": prompt_cards,
         "readme_inventory_compliance": {
             "status": readme_inventory_result["status"],
-            "live_top_level_markdown_count": readme_inventory_result["live_top_level_markdown_count"],
-            "inventory_markdown_entry_count": readme_inventory_result["inventory_markdown_entry_count"],
+            "live_top_level_markdown_count": readme_inventory_result[
+                "live_top_level_markdown_count"
+            ],
+            "inventory_markdown_entry_count": readme_inventory_result[
+                "inventory_markdown_entry_count"
+            ],
         },
         "git_state": git_state,
         "findings": findings,
     }
 
 
-def render_checksum_file(file_records: list[dict[str, Any]], archive_payloads: list[dict[str, Any]]) -> str:
+def render_checksum_file(
+    file_records: list[dict[str, Any]], archive_payloads: list[dict[str, Any]]
+) -> str:
     lines = []
     for record in sorted(file_records, key=lambda item: item["path"]):
         if record["classification"] not in {"canonical_algorithm_source", "prompt_scaffold"}:
@@ -914,17 +962,23 @@ def build_outputs() -> dict[str, Any]:
         "entries": residue_records,
         "summary": {
             "count": len(residue_records),
-            "kinds": dict(sorted(Counter(record["residue_kind"] for record in residue_records).items())),
+            "kinds": dict(
+                sorted(Counter(record["residue_kind"] for record in residue_records).items())
+            ),
         },
     }
-    checksum_text = render_checksum_file(file_records=file_records, archive_payloads=archive_payloads)
+    checksum_text = render_checksum_file(
+        file_records=file_records, archive_payloads=archive_payloads
+    )
     intake_doc = render_repository_intake_doc(
         manifest=manifest,
         validation_results=validation_results,
         residue_records=residue_records,
         prompt_path_normalization=prompt_path_normalization,
     )
-    precedence_doc = render_source_precedence_doc(prompt_path_normalization=prompt_path_normalization)
+    precedence_doc = render_source_precedence_doc(
+        prompt_path_normalization=prompt_path_normalization
+    )
 
     DOCS_ANALYSIS_DIR.mkdir(parents=True, exist_ok=True)
     DATA_ANALYSIS_DIR.mkdir(parents=True, exist_ok=True)
@@ -933,9 +987,13 @@ def build_outputs() -> dict[str, Any]:
     (DATA_ANALYSIS_DIR / "archive_checksums.sha256").write_text(checksum_text)
     write_json(DATA_ANALYSIS_DIR / "repository_validation_results.json", validation_results)
     write_json(DATA_ANALYSIS_DIR / "noncanonical_archive_residue.json", residue_payload)
-    write_json(DATA_ANALYSIS_DIR / "prompt_scaffold_path_normalization.json", prompt_path_normalization)
+    write_json(
+        DATA_ANALYSIS_DIR / "prompt_scaffold_path_normalization.json", prompt_path_normalization
+    )
     (DOCS_ANALYSIS_DIR / "01_repository_intake_and_archive_verification.md").write_text(intake_doc)
-    (DOCS_ANALYSIS_DIR / "01_source_precedence_and_repo_normalization.md").write_text(precedence_doc)
+    (DOCS_ANALYSIS_DIR / "01_source_precedence_and_repo_normalization.md").write_text(
+        precedence_doc
+    )
 
     return {
         "manifest": manifest,
@@ -946,21 +1004,29 @@ def build_outputs() -> dict[str, Any]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Generate deterministic repository intake artifacts.")
+    parser = argparse.ArgumentParser(
+        description="Generate deterministic repository intake artifacts."
+    )
     parser.parse_args()
 
     outputs = build_outputs()
     summary = {
         "overall_status": outputs["validation_results"]["overall_status"],
         "canonical_file_count": outputs["manifest"]["canonical_file_count"],
-        "readme_inventory_status": outputs["validation_results"]["checks"]["readme_inventory"]["status"],
-        "first_five_cards_status": outputs["validation_results"]["checks"]["first_five_prompt_cards"]["status"],
+        "readme_inventory_status": outputs["validation_results"]["checks"]["readme_inventory"][
+            "status"
+        ],
+        "first_five_cards_status": outputs["validation_results"]["checks"][
+            "first_five_prompt_cards"
+        ]["status"],
         "validator_statuses": {
             result["name"]: result["status"]
             for result in outputs["validation_results"]["checks"]["validator_entrypoints"]
         },
         "residue_count": outputs["residue_payload"]["summary"]["count"],
-        "prompt_absolute_path_occurrences": outputs["prompt_path_normalization"]["summary"]["occurrences"],
+        "prompt_absolute_path_occurrences": outputs["prompt_path_normalization"]["summary"][
+            "occurrences"
+        ],
     }
     json.dump(summary, sys.stdout, indent=2, sort_keys=True)
     sys.stdout.write("\n")

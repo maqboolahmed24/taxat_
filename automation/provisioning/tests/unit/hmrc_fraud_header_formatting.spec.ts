@@ -2,9 +2,7 @@ import { readFile } from "node:fs/promises";
 
 import { expect, test } from "@playwright/test";
 
-import {
-  HMRC_FPH_CONNECTION_METHODS,
-} from "../../src/providers/hmrc/clients/fph_validator_client.js";
+import { HMRC_FPH_CONNECTION_METHODS } from "../../src/providers/hmrc/clients/fph_validator_client.js";
 import {
   serializeFraudHeaderValue,
   serializeMissingFraudHeader,
@@ -109,9 +107,7 @@ test("serializes percent-encoded HMRC fraud-header payloads deterministically", 
         },
       ],
     ),
-  ).toBe(
-    "timestamp=2026-04-18T11%3A58Z&type=TOTP&unique-reference=abc%20123",
-  );
+  ).toBe("timestamp=2026-04-18T11%3A58Z&type=TOTP&unique-reference=abc%20123");
 });
 
 test("serializes missing-data posture as omission or empty string instead of placeholders", () => {

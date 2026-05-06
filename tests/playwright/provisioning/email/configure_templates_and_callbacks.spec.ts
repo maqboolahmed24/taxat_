@@ -86,9 +86,7 @@ test("fresh fixture configuration persists sanitized template inventory, webhook
   expect(flow.templateInventoryRaw).toContain("customer-request-info-created-v1");
   expect(flow.templateInventoryRaw).not.toContain("X-Taxat-Webhook-Secret:");
   expect(flow.templateInventoryRaw).not.toContain("postmark_api_test");
-  expect(flow.evidenceManifestRaw).toContain(
-    "Persisted sanitized template inventory",
-  );
+  expect(flow.evidenceManifestRaw).toContain("Persisted sanitized template inventory");
 });
 
 test("telemetry drift blocks policy acceptance instead of silently adopting open or click tracking", async ({
@@ -100,13 +98,9 @@ test("telemetry drift blocks policy acceptance instead of silently adopting open
   expect(flow.result.steps[3]?.status).toBe("BLOCKED_BY_POLICY");
   expect(flow.result.steps[4]?.status).toBe("SUCCEEDED");
   expect(flow.result.notes).toEqual(
-    expect.arrayContaining([
-      expect.stringContaining("Open and click tracking remain disabled"),
-    ]),
+    expect.arrayContaining([expect.stringContaining("Open and click tracking remain disabled")]),
   );
-  expect(flow.evidenceManifestRaw).toContain(
-    "Telemetry drift was surfaced explicitly and blocked",
-  );
+  expect(flow.evidenceManifestRaw).toContain("Telemetry drift was surfaced explicitly and blocked");
 });
 
 test("notification copy atlas renders semantic regions, lifecycle focus, inspector behavior, and reduced-motion parity", async ({
@@ -144,5 +138,7 @@ test("notification copy atlas renders semantic regions, lifecycle focus, inspect
     .filter({ hasText: "Delivery Event" })
     .click();
   await expect(page.getByRole("heading", { name: "Delivery Event" })).toBeVisible();
-  await expect(page.locator("#drawer-body")).toContainText("Open and click tracking remain disabled");
+  await expect(page.locator("#drawer-body")).toContainText(
+    "Open and click tracking remain disabled",
+  );
 });

@@ -59,7 +59,9 @@ def main() -> int:
     outputs = builder.build_outputs()
 
     compare_json(builder.SIGNAL_CATALOG_PATH, outputs["signal_catalog"], "signal_catalog.json")
-    compare_json(builder.AUDIT_REGISTRY_PATH, outputs["audit_registry"], "audit_event_family_registry.json")
+    compare_json(
+        builder.AUDIT_REGISTRY_PATH, outputs["audit_registry"], "audit_event_family_registry.json"
+    )
     compare_json(
         builder.CORRELATION_TOPOLOGY_PATH,
         outputs["correlation_pack"],
@@ -102,9 +104,15 @@ def main() -> int:
         outputs["docs"][2] + "\n",
         "17_failure_lifecycle_dashboard_spec.md",
     )
-    compare_text(builder.MERMAID_PATH, outputs["mermaid"] + "\n", "17_signal_and_failure_lineage.mmd")
-    compare_text(builder.ATLAS_INDEX_PATH, outputs["prototype_files"]["index.html"] + "\n", "index.html")
-    compare_text(builder.ATLAS_STYLES_PATH, outputs["prototype_files"]["styles.css"] + "\n", "styles.css")
+    compare_text(
+        builder.MERMAID_PATH, outputs["mermaid"] + "\n", "17_signal_and_failure_lineage.mmd"
+    )
+    compare_text(
+        builder.ATLAS_INDEX_PATH, outputs["prototype_files"]["index.html"] + "\n", "index.html"
+    )
+    compare_text(
+        builder.ATLAS_STYLES_PATH, outputs["prototype_files"]["styles.css"] + "\n", "styles.css"
+    )
     compare_text(builder.ATLAS_APP_PATH, outputs["prototype_files"]["app.js"] + "\n", "app.js")
 
     signal_rows = outputs["signal_catalog"]["rows"]
@@ -113,21 +121,27 @@ def main() -> int:
         if not row["correlation_keys"]:
             fail(f"Signal row {row['canonical_name']} must declare correlation keys.")
         if not row["visibility_boundary"] or not row["retention_boundary"]:
-            fail(f"Signal row {row['canonical_name']} must declare visibility and retention boundaries.")
+            fail(
+                f"Signal row {row['canonical_name']} must declare visibility and retention boundaries."
+            )
 
     audit_rows = outputs["audit_registry"]["rows"]
     builder.assert_required_record_fields(audit_rows)
     audit_names = {row["canonical_name"] for row in audit_rows}
     expected_audit = set(builder.AUDIT_EVENT_ENUM)
     if audit_names != expected_audit:
-        fail(f"Audit registry coverage drifted. Expected {sorted(expected_audit)}, got {sorted(audit_names)}")
+        fail(
+            f"Audit registry coverage drifted. Expected {sorted(expected_audit)}, got {sorted(audit_names)}"
+        )
 
     error_rows = outputs["error_matrix"]["rows"]
     builder.assert_required_record_fields(error_rows)
     error_names = {row["canonical_name"] for row in error_rows}
     expected_errors = set(builder.ERROR_FAMILY_ENUM)
     if error_names != expected_errors:
-        fail(f"Error family coverage drifted. Expected {sorted(expected_errors)}, got {sorted(error_names)}")
+        fail(
+            f"Error family coverage drifted. Expected {sorted(expected_errors)}, got {sorted(error_names)}"
+        )
     for row in error_rows:
         if row["retry_class"] not in builder.RETRY_CLASS_ENUM:
             fail(f"Unknown retry class on {row['canonical_name']}.")
@@ -156,7 +170,9 @@ def main() -> int:
     retention_domains = {row["domain"] for row in retention_rows}
     expected_domains = {"AUDIT", "OPS", "SECURITY", "PRIVACY", "FAILURE", "RISK"}
     if retention_domains != expected_domains:
-        fail(f"Retention/visibility domains drifted. Expected {sorted(expected_domains)}, got {sorted(retention_domains)}")
+        fail(
+            f"Retention/visibility domains drifted. Expected {sorted(expected_domains)}, got {sorted(retention_domains)}"
+        )
 
     query_rows = outputs["correlation_pack"]["query_contracts"]
     query_names = {row["query_code"] for row in query_rows}
@@ -175,11 +191,19 @@ def main() -> int:
         "RETENTION_LIMITATION_PATH",
     }
     if query_names != required_queries:
-        fail(f"Query-contract coverage drifted. Expected {sorted(required_queries)}, got {sorted(query_names)}")
+        fail(
+            f"Query-contract coverage drifted. Expected {sorted(required_queries)}, got {sorted(query_names)}"
+        )
 
     atlas_data = outputs["atlas_data"]
     page_ids = [page["page_id"] for page in atlas_data["pages"]]
-    if page_ids != ["signal-model", "audit-families", "failure-lifecycle", "query-contracts", "retention-visibility"]:
+    if page_ids != [
+        "signal-model",
+        "audit-families",
+        "failure-lifecycle",
+        "query-contracts",
+        "retention-visibility",
+    ]:
         fail(f"Atlas page order drifted: {page_ids}")
     if len(atlas_data["failure_lifecycle"]["states"]) < 4:
         fail("Atlas must expose at least one open, active, risk, and resolved lineage state.")
@@ -189,12 +213,12 @@ def main() -> int:
     required_anchor_markers = [
         'data-testid="signal-domain-rail"',
         'data-testid="failure-evidence-inspector"',
-        'signal-separation-diagram',
-        'audit-family-ledger',
-        'failure-lineage-ribbon',
-        'failure-dashboard-projection',
-        'query-contract-catalog',
-        'retention-visibility-matrix',
+        "signal-separation-diagram",
+        "audit-family-ledger",
+        "failure-lineage-ribbon",
+        "failure-dashboard-projection",
+        "query-contract-catalog",
+        "retention-visibility-matrix",
     ]
     index_html = builder.ATLAS_INDEX_PATH.read_text(encoding="utf-8")
     app_js = builder.ATLAS_APP_PATH.read_text(encoding="utf-8")

@@ -29,8 +29,7 @@ import {
 export const MONITORING_PROVIDER_ID = "runtime-error-monitoring-control-plane";
 export const MONITORING_FLOW_ID = "error-monitoring-workspace-bootstrap";
 export const MONITORING_PROVIDER_DISPLAY_NAME = "Error Monitoring Control Plane";
-export const MONITORING_PROVIDER_VENDOR_ADAPTER =
-  "SENTRY_COMPATIBLE_MONITORING_CONTROL_PLANE";
+export const MONITORING_PROVIDER_VENDOR_ADAPTER = "SENTRY_COMPATIBLE_MONITORING_CONTROL_PLANE";
 export const MONITORING_PROVIDER_VENDOR_SELECTION = "PROVIDER_DEFAULT_APPLIED";
 export const MONITORING_POLICY_VERSION = "1.0";
 export const MONITORING_POLICY_GENERATED_ON = "2026-04-18";
@@ -50,9 +49,7 @@ export type MonitoringProductEnvironmentId =
   | "env_preproduction_verification"
   | "env_production";
 
-export type MonitoringSourceDisposition =
-  | "CREATED_DURING_RUN"
-  | "ADOPTED_EXISTING";
+export type MonitoringSourceDisposition = "CREATED_DURING_RUN" | "ADOPTED_EXISTING";
 
 export type MonitoringProjectKind =
   | "LOCAL_FIXTURE"
@@ -62,11 +59,7 @@ export type MonitoringProjectKind =
   | "CLIENT_PORTAL_WEB"
   | "NATIVE_MACOS_OPERATOR";
 
-export type MonitoringSignalDomain =
-  | "OPS"
-  | "SECURITY"
-  | "FAILURE"
-  | "RELEASE";
+export type MonitoringSignalDomain = "OPS" | "SECURITY" | "FAILURE" | "RELEASE";
 
 export type MonitoringFlowOutcome =
   | "MONITORING_GOVERNANCE_READY"
@@ -96,9 +89,7 @@ export interface MonitoringWorkspaceRow {
   automation_token_metadata_ref: string;
   automation_token_fingerprint: string;
   automation_token_scopes: string[];
-  relay_mode:
-    | "DIRECT_VENDOR_INGEST_SERVER_SIDE_SCRUBBING"
-    | "LOCAL_FIXTURE_ONLY";
+  relay_mode: "DIRECT_VENDOR_INGEST_SERVER_SIDE_SCRUBBING" | "LOCAL_FIXTURE_ONLY";
   project_refs: string[];
   source_refs: SourceRef[];
   notes: string[];
@@ -195,9 +186,7 @@ export interface ErrorMonitoringScrubRules {
   generated_on: typeof MONITORING_POLICY_GENERATED_ON;
   truth_boundary_statement: string;
   relay_decision: {
-    mode:
-      | "DIRECT_VENDOR_INGEST_WITH_SERVER_SIDE_SCRUBBING"
-      | "LOCAL_FIXTURE_ONLY";
+    mode: "DIRECT_VENDOR_INGEST_WITH_SERVER_SIDE_SCRUBBING" | "LOCAL_FIXTURE_ONLY";
     rationale: string;
     typed_gap_or_null: string | null;
   };
@@ -461,11 +450,7 @@ const MONITORING_SELECTORS: SelectorManifest = {
 
 const REAL_ENVIRONMENTS: Array<
   Exclude<MonitoringProductEnvironmentId, "env_local_provisioning_workstation">
-> = [
-  "env_shared_sandbox_integration",
-  "env_preproduction_verification",
-  "env_production",
-];
+> = ["env_shared_sandbox_integration", "env_preproduction_verification", "env_production"];
 
 const PROJECT_BLUEPRINTS: Array<{
   kind: Exclude<MonitoringProjectKind, "LOCAL_FIXTURE">;
@@ -532,9 +517,7 @@ function hashToken(value: string): string {
   return `sha256:${createHash("sha256").update(value).digest("hex")}`;
 }
 
-function productEnvironmentLabel(
-  productEnvironmentId: MonitoringProductEnvironmentId,
-): string {
+function productEnvironmentLabel(productEnvironmentId: MonitoringProductEnvironmentId): string {
   switch (productEnvironmentId) {
     case "env_local_provisioning_workstation":
       return "Local fixture";
@@ -547,9 +530,7 @@ function productEnvironmentLabel(
   }
 }
 
-function providerEnvironmentName(
-  productEnvironmentId: MonitoringProductEnvironmentId,
-): string {
+function providerEnvironmentName(productEnvironmentId: MonitoringProductEnvironmentId): string {
   switch (productEnvironmentId) {
     case "env_local_provisioning_workstation":
       return "local-fixture";
@@ -565,8 +546,7 @@ function providerEnvironmentName(
 function monitoringSourceRefs(): SourceRef[] {
   return [
     {
-      source_ref:
-        "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
+      source_ref: "Algorithm/observability_and_audit_contract.md::L24[14.2_Separation_of_concerns]",
       rationale:
         "The vendor overlay must remain secondary to first-party audit evidence and operational telemetry.",
     },
@@ -577,20 +557,17 @@ function monitoringSourceRefs(): SourceRef[] {
         "All vendor-visible monitoring still depends on the corpus correlation keys that bind events back to manifest and authority lineage.",
     },
     {
-      source_ref:
-        "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
+      source_ref: "Algorithm/observability_and_audit_contract.md::L386[14.7_Trace_contract]",
       rationale:
         "Trace and error overlays need release and manifest-rooted runtime lineage rather than free-floating exception feeds.",
     },
     {
-      source_ref:
-        "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
+      source_ref: "Algorithm/observability_and_audit_contract.md::L420[14.8_Metric_contract]",
       rationale:
         "Alert posture must focus on actionable reliability, security, and release regressions instead of vanity noise.",
     },
     {
-      source_ref:
-        "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
+      source_ref: "Algorithm/observability_and_audit_contract.md::L494[14.9_Logging_contract]",
       rationale:
         "Monitoring capture must redact secrets, tokens, and high-risk payloads before they ever become vendor-visible.",
     },
@@ -644,9 +621,7 @@ function providerSelection(): ProviderSelectionRecord {
   };
 }
 
-function workspaceRefFor(
-  productEnvironmentId: MonitoringProductEnvironmentId,
-): string {
+function workspaceRefFor(productEnvironmentId: MonitoringProductEnvironmentId): string {
   switch (productEnvironmentId) {
     case "env_local_provisioning_workstation":
       return "monitoring_workspace_local_fixture";
@@ -659,21 +634,15 @@ function workspaceRefFor(
   }
 }
 
-function environmentTokenRef(
-  productEnvironmentId: MonitoringProductEnvironmentId,
-): string {
+function environmentTokenRef(productEnvironmentId: MonitoringProductEnvironmentId): string {
   return `vault://monitoring/sentry/${providerEnvironmentName(productEnvironmentId)}/org-automation-token`;
 }
 
-function environmentProjectRefs(
-  productEnvironmentId: MonitoringProductEnvironmentId,
-): string[] {
+function environmentProjectRefs(productEnvironmentId: MonitoringProductEnvironmentId): string[] {
   if (productEnvironmentId === "env_local_provisioning_workstation") {
     return ["monitoring_project_local_fixture"];
   }
-  return PROJECT_BLUEPRINTS.map((blueprint) =>
-    projectRefFor(productEnvironmentId, blueprint.slug),
-  );
+  return PROJECT_BLUEPRINTS.map((blueprint) => projectRefFor(productEnvironmentId, blueprint.slug));
 }
 
 function createWorkspaceRows(): MonitoringWorkspaceRow[] {
@@ -686,9 +655,7 @@ function createWorkspaceRows(): MonitoringWorkspaceRow[] {
       organization_slug_alias: "taxat-observability-fixture",
       team_slug_alias: "reliability-release",
       source_disposition: "ADOPTED_EXISTING",
-      automation_token_metadata_ref: environmentTokenRef(
-        "env_local_provisioning_workstation",
-      ),
+      automation_token_metadata_ref: environmentTokenRef("env_local_provisioning_workstation"),
       automation_token_fingerprint: hashToken("monitoring-local-fixture-org-token"),
       automation_token_scopes: ["project:admin", "project:write", "alerts:write"],
       relay_mode: "LOCAL_FIXTURE_ONLY",
@@ -740,15 +707,9 @@ function alertRefsFor(kind: MonitoringProjectKind): string[] {
     case "LOCAL_FIXTURE":
       return [];
     case "BACKEND_RUNTIME":
-      return [
-        "alert.backend_exception_regression",
-        "alert.worker_failure_cluster",
-      ];
+      return ["alert.backend_exception_regression", "alert.worker_failure_cluster"];
     case "AUTHORITY_GATEWAY":
-      return [
-        "alert.authority_gateway_auth_failure",
-        "alert.authority_gateway_error_spike",
-      ];
+      return ["alert.authority_gateway_auth_failure", "alert.authority_gateway_error_spike"];
     case "OPERATOR_WEB":
       return ["alert.operator_web_release_regression"];
     case "CLIENT_PORTAL_WEB":
@@ -834,10 +795,7 @@ function createProjectRows(): ErrorMonitoringProjectRow[] {
     dsn_fingerprint: hashToken("monitoring-local-fixture-dsn"),
     signal_domains: ["OPS", "FAILURE"],
     release_track_ref: "release_track_fixture",
-    scrub_rule_refs: [
-      "scrub.secret_and_token_material",
-      "scrub.masked_or_minimized_fields",
-    ],
+    scrub_rule_refs: ["scrub.secret_and_token_material", "scrub.masked_or_minimized_fields"],
     inbound_filter_refs: ["filter.fixture_local_only"],
     alert_rule_refs: [],
     release_health_enabled: false,
@@ -905,8 +863,7 @@ export function createRecommendedMonitoringWorkspaceTemplate(
     scrub_rules_ref: "config/observability/error_monitoring_scrub_rules.json",
     alert_policy_ref: "config/observability/error_monitoring_alert_policy.json",
     release_mapping_ref: "config/observability/error_monitoring_release_mapping.json",
-    telemetry_audit_boundary_ref:
-      "config/observability/telemetry_vs_audit_boundary.json",
+    telemetry_audit_boundary_ref: "config/observability/telemetry_vs_audit_boundary.json",
     typed_gaps: [
       "Pre-ingest Relay remains a typed future tightening option; current posture relies on server-side scrubbing plus capture disablement.",
     ],
@@ -958,12 +915,7 @@ export function createRecommendedErrorMonitoringScrubRules(): ErrorMonitoringScr
       {
         rule_ref: "scrub.secret_and_token_material",
         label: "Secret and token material",
-        protected_classes: [
-          "RAW_SECRETS",
-          "FULL_TOKENS",
-          "SESSION_BINDINGS",
-          "DSN_VALUES",
-        ],
+        protected_classes: ["RAW_SECRETS", "FULL_TOKENS", "SESSION_BINDINGS", "DSN_VALUES"],
         enforcement_mode: "SERVER_SIDE_DATA_SCRUBBING",
         action: "MASK",
         source_refs: refs,
@@ -972,11 +924,7 @@ export function createRecommendedErrorMonitoringScrubRules(): ErrorMonitoringScr
       {
         rule_ref: "scrub.authority_credentials",
         label: "Authority credentials and callback auth",
-        protected_classes: [
-          "AUTHORITY_CREDENTIALS",
-          "AUTHORITY_HEADERS",
-          "CALLBACK_SECRETS",
-        ],
+        protected_classes: ["AUTHORITY_CREDENTIALS", "AUTHORITY_HEADERS", "CALLBACK_SECRETS"],
         enforcement_mode: "SERVER_SIDE_DATA_SCRUBBING",
         action: "REMOVE",
         source_refs: refs,
@@ -1001,10 +949,7 @@ export function createRecommendedErrorMonitoringScrubRules(): ErrorMonitoringScr
       {
         rule_ref: "scrub.tax_identifiers",
         label: "Government and tax identifiers",
-        protected_classes: [
-          "GOVERNMENT_TAX_IDENTIFIERS",
-          "UTR_NINO_VRN",
-        ],
+        protected_classes: ["GOVERNMENT_TAX_IDENTIFIERS", "UTR_NINO_VRN"],
         enforcement_mode: "SERVER_SIDE_DATA_SCRUBBING",
         action: "REMOVE",
         source_refs: refs,
@@ -1024,23 +969,18 @@ export function createRecommendedErrorMonitoringScrubRules(): ErrorMonitoringScr
       {
         rule_ref: "scrub.declaration_and_evidence_text",
         label: "Declaration and evidence text",
-        protected_classes: [
-          "DECLARATION_TEXT",
-          "EVIDENCE_TEXT",
-          "APPROVAL_RATIONALE",
-        ],
+        protected_classes: ["DECLARATION_TEXT", "EVIDENCE_TEXT", "APPROVAL_RATIONALE"],
         enforcement_mode: "CAPTURE_DISABLED",
         action: "DISABLE_CAPTURE",
         source_refs: refs,
-        notes: ["Free-form declaration and evidence text remain outside vendor monitoring entirely."],
+        notes: [
+          "Free-form declaration and evidence text remain outside vendor monitoring entirely.",
+        ],
       },
       {
         rule_ref: "scrub.authority_headers_and_callback_payloads",
         label: "Authority headers and callback payloads",
-        protected_classes: [
-          "AUTHORITY_CALLBACK_PAYLOADS",
-          "AUTHORITY_RESPONSE_BODIES",
-        ],
+        protected_classes: ["AUTHORITY_CALLBACK_PAYLOADS", "AUTHORITY_RESPONSE_BODIES"],
         enforcement_mode: "CAPTURE_DISABLED",
         action: "DISABLE_CAPTURE",
         source_refs: refs,
@@ -1049,11 +989,7 @@ export function createRecommendedErrorMonitoringScrubRules(): ErrorMonitoringScr
       {
         rule_ref: "scrub.portal_route_and_dom_capture_disablement",
         label: "Portal DOM and replay disablement",
-        protected_classes: [
-          "DOM_SNAPSHOTS",
-          "SESSION_REPLAY_FRAMES",
-          "REGULATED_UI_TEXT",
-        ],
+        protected_classes: ["DOM_SNAPSHOTS", "SESSION_REPLAY_FRAMES", "REGULATED_UI_TEXT"],
         enforcement_mode: "CAPTURE_DISABLED",
         action: "DISABLE_CAPTURE",
         source_refs: refs,
@@ -1159,10 +1095,8 @@ export function createRecommendedErrorMonitoringScrubRules(): ErrorMonitoringScr
 
 export function createRecommendedErrorMonitoringAlertPolicy(): ErrorMonitoringAlertPolicy {
   const refs = monitoringSourceRefs();
-  const productionProjectRef = (slug: string) =>
-    projectRefFor("env_production", slug);
-  const preprodProjectRef = (slug: string) =>
-    projectRefFor("env_preproduction_verification", slug);
+  const productionProjectRef = (slug: string) => projectRefFor("env_production", slug);
+  const preprodProjectRef = (slug: string) => projectRefFor("env_preproduction_verification", slug);
 
   return {
     schema_version: "1.0",
@@ -1180,10 +1114,7 @@ export function createRecommendedErrorMonitoringAlertPolicy(): ErrorMonitoringAl
           productionProjectRef("backend_runtime"),
           preprodProjectRef("backend_runtime"),
         ],
-        target_environment_ids: [
-          "env_preproduction_verification",
-          "env_production",
-        ],
+        target_environment_ids: ["env_preproduction_verification", "env_production"],
         trigger_summary:
           "Trigger on new or regressed backend issues affecting release candidates or live production traffic.",
         noise_controls: [
@@ -1203,10 +1134,7 @@ export function createRecommendedErrorMonitoringAlertPolicy(): ErrorMonitoringAl
           productionProjectRef("backend_runtime"),
           preprodProjectRef("backend_runtime"),
         ],
-        target_environment_ids: [
-          "env_preproduction_verification",
-          "env_production",
-        ],
+        target_environment_ids: ["env_preproduction_verification", "env_production"],
         trigger_summary:
           "Trigger on clustered worker exceptions or queue-consumer failures across the same release window.",
         noise_controls: [
@@ -1225,10 +1153,7 @@ export function createRecommendedErrorMonitoringAlertPolicy(): ErrorMonitoringAl
           productionProjectRef("authority_gateway"),
           preprodProjectRef("authority_gateway"),
         ],
-        target_environment_ids: [
-          "env_preproduction_verification",
-          "env_production",
-        ],
+        target_environment_ids: ["env_preproduction_verification", "env_production"],
         trigger_summary:
           "Trigger on callback-auth failures, token-binding mismatches, or gateway exception spikes at the authority edge.",
         noise_controls: [
@@ -1260,10 +1185,7 @@ export function createRecommendedErrorMonitoringAlertPolicy(): ErrorMonitoringAl
           productionProjectRef("operator_web"),
           preprodProjectRef("operator_web"),
         ],
-        target_environment_ids: [
-          "env_preproduction_verification",
-          "env_production",
-        ],
+        target_environment_ids: ["env_preproduction_verification", "env_production"],
         trigger_summary:
           "Trigger on operator-web release regressions or crash-free-session drops for new deploys.",
         noise_controls: [
@@ -1282,10 +1204,7 @@ export function createRecommendedErrorMonitoringAlertPolicy(): ErrorMonitoringAl
           productionProjectRef("client_portal_web"),
           preprodProjectRef("client_portal_web"),
         ],
-        target_environment_ids: [
-          "env_preproduction_verification",
-          "env_production",
-        ],
+        target_environment_ids: ["env_preproduction_verification", "env_production"],
         trigger_summary:
           "Trigger on customer-portal release regressions with customer-safe route and module codes only.",
         noise_controls: [
@@ -1304,10 +1223,7 @@ export function createRecommendedErrorMonitoringAlertPolicy(): ErrorMonitoringAl
           productionProjectRef("native_macos_operator"),
           preprodProjectRef("native_macos_operator"),
         ],
-        target_environment_ids: [
-          "env_preproduction_verification",
-          "env_production",
-        ],
+        target_environment_ids: ["env_preproduction_verification", "env_production"],
         trigger_summary:
           "Trigger on crash spikes or release regressions in the native macOS operator workspace.",
         noise_controls: [
@@ -1338,9 +1254,7 @@ export function createRecommendedErrorMonitoringReleaseMapping(): ErrorMonitorin
   ): MonitoringReleaseTrackRow => ({
     track_ref: `release_track_${slug.replaceAll("-", "_")}`,
     deployable_id: deployableId,
-    project_refs: REAL_ENVIRONMENTS.map((environmentId) =>
-      projectRefFor(environmentId, slug),
-    ),
+    project_refs: REAL_ENVIRONMENTS.map((environmentId) => projectRefFor(environmentId, slug)),
     release_name_template: `${slug}@{code_build_id}`,
     environment_aliases: [
       {
@@ -1426,13 +1340,11 @@ export function createRecommendedTelemetryVsAuditBoundary(): TelemetryVsAuditBou
           "MODULE_CODE",
           "MANDATORY_CORRELATION_KEYS",
         ],
-        prohibited_payload_classes: [
-          "AUDIT_EVENT_PAYLOADS",
-          "DECLARATION_TEXT",
-          "EVIDENCE_TEXT",
-        ],
+        prohibited_payload_classes: ["AUDIT_EVENT_PAYLOADS", "DECLARATION_TEXT", "EVIDENCE_TEXT"],
         source_refs: refs,
-        notes: ["Vendor-visible exception payloads must remain redaction-safe and correlation-rich."],
+        notes: [
+          "Vendor-visible exception payloads must remain redaction-safe and correlation-rich.",
+        ],
       },
       {
         family_ref: "SAMPLED_TRACE_ENVELOPES",
@@ -1486,11 +1398,7 @@ export function createRecommendedTelemetryVsAuditBoundary(): TelemetryVsAuditBou
           "POSTURE_CODE",
           "MANDATORY_CORRELATION_KEYS",
         ],
-        prohibited_payload_classes: [
-          "DOM_SNAPSHOTS",
-          "SESSION_REPLAY_FRAMES",
-          "FREE_FORM_UI_TEXT",
-        ],
+        prohibited_payload_classes: ["DOM_SNAPSHOTS", "SESSION_REPLAY_FRAMES", "FREE_FORM_UI_TEXT"],
         source_refs: refs,
         notes: ["Client-surface overlays remain route-code first and replay-free."],
       },
@@ -1500,11 +1408,7 @@ export function createRecommendedTelemetryVsAuditBoundary(): TelemetryVsAuditBou
         family_ref: "AUDIT_EVENTS",
         rationale:
           "Append-only audit evidence remains the proof-of-record and cannot be delegated to the monitoring vendor.",
-        required_query_contracts: [
-          "AUDIT_TRAIL",
-          "FILING_EVIDENCE_LEDGER",
-          "REPLAY_ATTESTATION",
-        ],
+        required_query_contracts: ["AUDIT_TRAIL", "FILING_EVIDENCE_LEDGER", "REPLAY_ATTESTATION"],
         source_refs: refs,
       },
       {
@@ -1601,8 +1505,7 @@ export function createSignalGovernanceBoardViewModel(): SignalGovernanceBoardVie
         status_label: "Governed",
         summary:
           PROJECT_BLUEPRINTS.find((blueprint) => blueprint.kind === project.project_kind)
-            ?.summary ??
-          "Monitoring overlay remains governed and environment-scoped.",
+            ?.summary ?? "Monitoring overlay remains governed and environment-scoped.",
         project_rows: [
           {
             label: "Project slug",
@@ -1645,10 +1548,7 @@ export function createSignalGovernanceBoardViewModel(): SignalGovernanceBoardVie
             safe_ref: environmentTokenRef(project.product_environment_id),
           },
         ],
-        inspector_notes: [
-          ...project.notes,
-          boundary.notes[0] ?? "",
-        ].filter(Boolean),
+        inspector_notes: [...project.notes, boundary.notes[0] ?? ""].filter(Boolean),
         source_refs: project.source_refs,
       };
     });
@@ -1667,9 +1567,7 @@ export function createSignalGovernanceBoardViewModel(): SignalGovernanceBoardVie
   };
 }
 
-export function validateMonitoringWorkspaceTemplate(
-  template: MonitoringWorkspaceTemplate,
-): void {
+export function validateMonitoringWorkspaceTemplate(template: MonitoringWorkspaceTemplate): void {
   if (template.workspace_rows.length !== 4) {
     throw new Error("Monitoring workspace template must publish four workspace rows.");
   }
@@ -1691,8 +1589,7 @@ export function validateErrorMonitoringProjectCatalog(
 ): void {
   const productionPortal = catalog.project_rows.find(
     (row) =>
-      row.project_kind === "CLIENT_PORTAL_WEB" &&
-      row.product_environment_id === "env_production",
+      row.project_kind === "CLIENT_PORTAL_WEB" && row.product_environment_id === "env_production",
   );
   if (!productionPortal) {
     throw new Error("Project catalog must retain the production customer-portal project.");
@@ -1708,9 +1605,7 @@ export function validateErrorMonitoringProjectCatalog(
   }
 }
 
-export function validateErrorMonitoringScrubRules(
-  scrubRules: ErrorMonitoringScrubRules,
-): void {
+export function validateErrorMonitoringScrubRules(scrubRules: ErrorMonitoringScrubRules): void {
   const protectedClasses = new Set(
     scrubRules.scrub_rule_rows.flatMap((row) => row.protected_classes),
   );
@@ -1730,9 +1625,7 @@ export function validateErrorMonitoringScrubRules(
   });
 }
 
-export function validateErrorMonitoringAlertPolicy(
-  alertPolicy: ErrorMonitoringAlertPolicy,
-): void {
+export function validateErrorMonitoringAlertPolicy(alertPolicy: ErrorMonitoringAlertPolicy): void {
   if (alertPolicy.alert_rules.length < 6) {
     throw new Error("Alert policy must keep the operational ruleset explicitly bounded.");
   }
@@ -1753,15 +1646,9 @@ export function validateErrorMonitoringReleaseMapping(
   }
 }
 
-export function validateTelemetryVsAuditBoundary(
-  boundary: TelemetryVsAuditBoundary,
-): void {
-  const vendorVisible = new Set(
-    boundary.vendor_visible_families.map((row) => row.family_ref),
-  );
-  const firstParty = new Set(
-    boundary.first_party_only_families.map((row) => row.family_ref),
-  );
+export function validateTelemetryVsAuditBoundary(boundary: TelemetryVsAuditBoundary): void {
+  const vendorVisible = new Set(boundary.vendor_visible_families.map((row) => row.family_ref));
+  const firstParty = new Set(boundary.first_party_only_families.map((row) => row.family_ref));
   if (vendorVisible.has("AUDIT_EVENTS") || vendorVisible.has("PRIVACY_ACTION_LEDGER")) {
     throw new Error("Audit and privacy ledgers must remain first-party only.");
   }
@@ -1779,13 +1666,13 @@ export function validateTelemetryVsAuditBoundary(
   );
 }
 
-export function assertMonitoringArtifactsSanitized(
-  template: MonitoringWorkspaceTemplate,
-): void {
+export function assertMonitoringArtifactsSanitized(template: MonitoringWorkspaceTemplate): void {
   const serialized = JSON.stringify(template);
   ["sntrys_", "sntryu_", "-----BEGIN", "sentry_key="].forEach((marker) => {
     if (serialized.includes(marker)) {
-      throw new Error(`Monitoring artifacts must not persist raw vendor secret material (${marker}).`);
+      throw new Error(
+        `Monitoring artifacts must not persist raw vendor secret material (${marker}).`,
+      );
     }
   });
 }
@@ -1798,10 +1685,7 @@ export function createDefaultMonitoringProviderEntryUrls(): MonitoringWorkspaceE
 }
 
 function evidenceManifestPathFor(workspaceTemplatePath: string): string {
-  return path.join(
-    path.dirname(workspaceTemplatePath),
-    "monitoring_evidence_manifest.json",
-  );
+  return path.join(path.dirname(workspaceTemplatePath), "monitoring_evidence_manifest.json");
 }
 
 async function persistJsonArtifact(filePath: string, payload: unknown): Promise<void> {
@@ -1814,9 +1698,7 @@ function locateSelector(page: Page, descriptor: SelectorDescriptor): Locator {
     case "ROLE":
       return page.getByRole(
         descriptor.value as Parameters<Page["getByRole"]>[0],
-        descriptor.accessibleName
-          ? { name: descriptor.accessibleName, exact: true }
-          : undefined,
+        descriptor.accessibleName ? { name: descriptor.accessibleName, exact: true } : undefined,
       );
     case "LABEL":
       return page.getByLabel(descriptor.value, { exact: true });
@@ -1860,9 +1742,7 @@ async function captureNoteEvidence(
   });
 }
 
-function fixtureStateFromScenario(
-  scenario: string | null,
-): MonitoringFixtureState {
+function fixtureStateFromScenario(scenario: string | null): MonitoringFixtureState {
   switch (scenario) {
     case "fresh":
       return {
@@ -1936,11 +1816,7 @@ export async function createErrorMonitoringWorkspace(
 
   let evidenceManifest = createEvidenceManifest(options.runContext);
 
-  steps[0] = transitionStep(
-    steps[0]!,
-    "RUNNING",
-    "Opening the error monitoring control plane.",
-  );
+  steps[0] = transitionStep(steps[0]!, "RUNNING", "Opening the error monitoring control plane.");
   await options.page.goto(entryUrls.controlPlane);
   await requireVisible(options.page, manifest, "workspace-heading");
   await requireVisible(options.page, manifest, "workspace-action");
@@ -1962,9 +1838,7 @@ export async function createErrorMonitoringWorkspace(
   );
 
   const fixtureState = await detectFixtureState(options.page);
-  const workspaceTemplate = createRecommendedMonitoringWorkspaceTemplate(
-    options.runContext,
-  );
+  const workspaceTemplate = createRecommendedMonitoringWorkspaceTemplate(options.runContext);
   const projectCatalog = createRecommendedErrorMonitoringProjectCatalog();
   const scrubRules = createRecommendedErrorMonitoringScrubRules();
   const alertPolicy = createRecommendedErrorMonitoringAlertPolicy();
@@ -1990,11 +1864,7 @@ export async function createErrorMonitoringWorkspace(
           steps[1]!,
           "Existing monitoring workspace was adopted and verified against the governed topology.",
         )
-      : transitionStep(
-          steps[1]!,
-          "SUCCEEDED",
-          "Monitoring workspace was created during the run.",
-        );
+      : transitionStep(steps[1]!, "SUCCEEDED", "Monitoring workspace was created during the run.");
   evidenceManifest = await captureNoteEvidence(
     evidenceManifest,
     steps[1].stepId,
@@ -2059,11 +1929,7 @@ export async function createErrorMonitoringWorkspace(
     );
   }
 
-  steps[4] = transitionStep(
-    steps[4]!,
-    "RUNNING",
-    "Validating alert posture and release mapping.",
-  );
+  steps[4] = transitionStep(steps[4]!, "RUNNING", "Validating alert posture and release mapping.");
   steps[4] = transitionStep(
     steps[4]!,
     "SUCCEEDED",
@@ -2075,11 +1941,7 @@ export async function createErrorMonitoringWorkspace(
     "Alerting and release mapping now stay explicit, bounded, and aligned with release-health and authority-edge regressions.",
   );
 
-  steps[5] = transitionStep(
-    steps[5]!,
-    "RUNNING",
-    "Persisting monitoring governance artifacts.",
-  );
+  steps[5] = transitionStep(steps[5]!, "RUNNING", "Persisting monitoring governance artifacts.");
   await persistJsonArtifact(options.workspaceTemplatePath, workspaceTemplate);
   const manifestPath = evidenceManifestPathFor(options.workspaceTemplatePath);
   await persistJsonArtifact(manifestPath, evidenceManifest);

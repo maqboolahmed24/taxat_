@@ -15,7 +15,9 @@ DOCS_ANALYSIS_DIR = ROOT / "docs" / "analysis"
 DIAGRAMS_ANALYSIS_DIR = ROOT / "diagrams" / "analysis"
 
 RETENTION_PRIVACY_PATH = ALGORITHM_DIR / "retention_and_privacy.md"
-RETENTION_LIMITED_PATH = ALGORITHM_DIR / "retention_limited_explainability_and_audit_sufficiency_contract.md"
+RETENTION_LIMITED_PATH = (
+    ALGORITHM_DIR / "retention_limited_explainability_and_audit_sufficiency_contract.md"
+)
 RETENTION_OBSERVABILITY_PATH = ALGORITHM_DIR / "retention_error_and_observability_contract.md"
 SECURITY_HARDENING_PATH = ALGORITHM_DIR / "security_and_runtime_hardening_contract.md"
 CACHE_ISOLATION_PATH = ALGORITHM_DIR / "cache_isolation_and_secure_reuse_contract.md"
@@ -25,12 +27,18 @@ MACOS_BLUEPRINT_PATH = ALGORITHM_DIR / "macos_native_operator_workspace_blueprin
 PORTAL_EXPERIENCE_PATH = ALGORITHM_DIR / "customer_client_portal_experience_contract.md"
 COLLABORATION_PATH = ALGORITHM_DIR / "collaboration_workspace_contract.md"
 DEPLOYMENT_PATH = ALGORITHM_DIR / "deployment_and_resilience_contract.md"
-RECOVERY_GOVERNANCE_PATH = ALGORITHM_DIR / "recovery_tier_checkpoint_and_fail_forward_governance_contract.md"
-RELEASE_IDENTITY_PATH = ALGORITHM_DIR / "release_candidate_identity_and_promotion_evidence_contract.md"
+RECOVERY_GOVERNANCE_PATH = (
+    ALGORITHM_DIR / "recovery_tier_checkpoint_and_fail_forward_governance_contract.md"
+)
+RELEASE_IDENTITY_PATH = (
+    ALGORITHM_DIR / "release_candidate_identity_and_promotion_evidence_contract.md"
+)
 
 RETENTION_TAG_SCHEMA_PATH = SCHEMAS_DIR / "retention_tag.schema.json"
 ARTIFACT_RETENTION_SCHEMA_PATH = SCHEMAS_DIR / "artifact_retention.schema.json"
-RETENTION_EXPLAINABILITY_SCHEMA_PATH = SCHEMAS_DIR / "retention_limited_explainability_contract.schema.json"
+RETENTION_EXPLAINABILITY_SCHEMA_PATH = (
+    SCHEMAS_DIR / "retention_limited_explainability_contract.schema.json"
+)
 CACHE_ISOLATION_SCHEMA_PATH = SCHEMAS_DIR / "cache_isolation_contract.schema.json"
 NATIVE_CACHE_SCHEMA_PATH = SCHEMAS_DIR / "native_cache_hydration_contract.schema.json"
 ACTOR_SESSION_SCHEMA_PATH = SCHEMAS_DIR / "actor_session.schema.json"
@@ -213,10 +221,14 @@ def assert_required_row_fields(rows: Iterable[dict[str, Any]]) -> None:
     for row_data in rows:
         missing = [field for field in REQUIRED_ROW_FIELDS if field not in row_data]
         if missing:
-            raise ValueError(f"Row {row_data.get('artifact_or_control_id')} missing required fields: {missing}")
+            raise ValueError(
+                f"Row {row_data.get('artifact_or_control_id')} missing required fields: {missing}"
+            )
         for field in LIST_FIELDS:
             if not isinstance(row_data[field], list):
-                raise ValueError(f"Row {row_data['artifact_or_control_id']} field `{field}` must be a list.")
+                raise ValueError(
+                    f"Row {row_data['artifact_or_control_id']} field `{field}` must be a list."
+                )
 
 
 def format_value(value: Any) -> str:
@@ -246,19 +258,33 @@ def make_summary(rows: list[dict[str, Any]], **extra: Any) -> dict[str, Any]:
     return summary
 
 
-RETENTION_CLASS_ENUM = schema_enum(RETENTION_TAG_SCHEMA_PATH, "properties", "retention_class", "enum")
-LEGAL_HOLD_STATE_ENUM = schema_enum(RETENTION_TAG_SCHEMA_PATH, "properties", "legal_hold_state", "enum")
-ERASURE_ELIGIBILITY_ENUM = schema_enum(RETENTION_TAG_SCHEMA_PATH, "properties", "erasure_eligibility", "enum")
-LIMITATION_BEHAVIOR_ENUM = schema_enum(RETENTION_TAG_SCHEMA_PATH, "properties", "limitation_behavior", "enum")
-ARTIFACT_LIFECYCLE_ENUM = schema_enum(ARTIFACT_RETENTION_SCHEMA_PATH, "properties", "lifecycle_state", "enum")
+RETENTION_CLASS_ENUM = schema_enum(
+    RETENTION_TAG_SCHEMA_PATH, "properties", "retention_class", "enum"
+)
+LEGAL_HOLD_STATE_ENUM = schema_enum(
+    RETENTION_TAG_SCHEMA_PATH, "properties", "legal_hold_state", "enum"
+)
+ERASURE_ELIGIBILITY_ENUM = schema_enum(
+    RETENTION_TAG_SCHEMA_PATH, "properties", "erasure_eligibility", "enum"
+)
+LIMITATION_BEHAVIOR_ENUM = schema_enum(
+    RETENTION_TAG_SCHEMA_PATH, "properties", "limitation_behavior", "enum"
+)
+ARTIFACT_LIFECYCLE_ENUM = schema_enum(
+    ARTIFACT_RETENTION_SCHEMA_PATH, "properties", "lifecycle_state", "enum"
+)
 EXPLAINABILITY_BOUNDARY_SCOPE_ENUM = schema_enum(
     RETENTION_EXPLAINABILITY_SCHEMA_PATH, "properties", "boundary_scope", "enum"
 )
 EXPLAINABILITY_SURFACE_ROLE_ENUM = schema_enum(
     RETENTION_EXPLAINABILITY_SCHEMA_PATH, "properties", "surface_role", "enum"
 )
-CACHE_SCOPE_ENUM = schema_enum(CACHE_ISOLATION_SCHEMA_PATH, "properties", "cache_scope_class", "enum")
-HYDRATION_SCOPE_ENUM = schema_enum(NATIVE_CACHE_SCHEMA_PATH, "properties", "hydration_scope_class", "enum")
+CACHE_SCOPE_ENUM = schema_enum(
+    CACHE_ISOLATION_SCHEMA_PATH, "properties", "cache_scope_class", "enum"
+)
+HYDRATION_SCOPE_ENUM = schema_enum(
+    NATIVE_CACHE_SCHEMA_PATH, "properties", "hydration_scope_class", "enum"
+)
 HYDRATION_COMPATIBILITY_ENUM = schema_prefix_consts(
     NATIVE_CACHE_SCHEMA_PATH, "properties", "compatibility_dimensions", "prefixItems"
 )
@@ -268,16 +294,26 @@ HYDRATION_PURGE_TRIGGER_ENUM = schema_prefix_consts(
 LOCAL_ARTIFACT_CLASS_ENUM = schema_prefix_consts(
     NATIVE_CACHE_SCHEMA_PATH, "properties", "regulated_local_artifact_classes", "prefixItems"
 )
-SESSION_CLIENT_CLASS_ENUM = schema_enum(ACTOR_SESSION_SCHEMA_PATH, "properties", "session_client_class", "enum")
+SESSION_CLIENT_CLASS_ENUM = schema_enum(
+    ACTOR_SESSION_SCHEMA_PATH, "properties", "session_client_class", "enum"
+)
 AUTHN_LEVEL_ENUM = schema_enum(ACTOR_SESSION_SCHEMA_PATH, "properties", "authn_level", "enum")
 STEP_UP_STATE_ENUM = schema_enum(ACTOR_SESSION_SCHEMA_PATH, "properties", "step_up_state", "enum")
-DEVICE_BINDING_STATE_ENUM = schema_enum(ACTOR_SESSION_SCHEMA_PATH, "properties", "device_binding_state", "enum")
-SECRET_ROTATION_STATE_ENUM = schema_enum(SECRET_VERSION_SCHEMA_PATH, "properties", "rotation_state", "enum")
-UPLOAD_BINDING_STATE_ENUM = schema_enum(UPLOAD_BINDING_SCHEMA_PATH, "properties", "request_binding_state", "enum")
+DEVICE_BINDING_STATE_ENUM = schema_enum(
+    ACTOR_SESSION_SCHEMA_PATH, "properties", "device_binding_state", "enum"
+)
+SECRET_ROTATION_STATE_ENUM = schema_enum(
+    SECRET_VERSION_SCHEMA_PATH, "properties", "rotation_state", "enum"
+)
+UPLOAD_BINDING_STATE_ENUM = schema_enum(
+    UPLOAD_BINDING_SCHEMA_PATH, "properties", "request_binding_state", "enum"
+)
 RESTORE_PRIVACY_STATE_ENUM = schema_enum(
     RESTORE_PRIVACY_SCHEMA_PATH, "properties", "privacy_reconciliation_state", "enum"
 )
-RESTORE_REOPEN_ACCESS_ENUM = schema_enum(RESTORE_PRIVACY_SCHEMA_PATH, "properties", "reopen_access_state", "enum")
+RESTORE_REOPEN_ACCESS_ENUM = schema_enum(
+    RESTORE_PRIVACY_SCHEMA_PATH, "properties", "reopen_access_state", "enum"
+)
 RESTORE_REPLAY_LIMITATION_ENUM = schema_enum(
     RESTORE_PRIVACY_SCHEMA_PATH, "properties", "replay_limitation_state", "enum"
 )
@@ -333,7 +369,9 @@ def source_assertions() -> None:
     required_refs = [
         heading_ref(RETENTION_PRIVACY_PATH, "Retention tag contract"),
         heading_ref(RETENTION_PRIVACY_PATH, "Artifact retention contract"),
-        heading_ref(RETENTION_PRIVACY_PATH, "Quantitative survivability and privacy-preserving projection"),
+        heading_ref(
+            RETENTION_PRIVACY_PATH, "Quantitative survivability and privacy-preserving projection"
+        ),
         heading_ref(RETENTION_PRIVACY_PATH, "Erasure and legal-hold workflow"),
         heading_ref(RETENTION_LIMITED_PATH, "Governing Model"),
         heading_ref(RETENTION_OBSERVABILITY_PATH, "15.3 Gate and progression coupling"),
@@ -420,7 +458,9 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             source_path=RETENTION_PRIVACY_PATH,
             source_heading_or_logical_block=retention_basis_heading,
             source_ref=heading_ref(RETENTION_PRIVACY_PATH, retention_basis_heading, "InputFreeze"),
-            notes=["Authoritative intake basis hashes must remain queryable even when payload content is minimized."],
+            notes=[
+                "Authoritative intake basis hashes must remain queryable even when payload content is minimized."
+            ],
         ),
         row(
             artifact_or_control_id="HashSetExecutionBasis",
@@ -441,8 +481,12 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
             source_path=RETENTION_PRIVACY_PATH,
             source_heading_or_logical_block=retention_basis_heading,
-            source_ref=text_ref(RETENTION_PRIVACY_PATH, "hash_set.execution_basis_hash", "execution_basis_hash"),
-            notes=["Hash lineage is preserved even when human-readable payload detail is no longer retained."],
+            source_ref=text_ref(
+                RETENTION_PRIVACY_PATH, "hash_set.execution_basis_hash", "execution_basis_hash"
+            ),
+            notes=[
+                "Hash lineage is preserved even when human-readable payload detail is no longer retained."
+            ],
         ),
         row(
             artifact_or_control_id="GateDecisionRecordLineage",
@@ -463,8 +507,12 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
             source_path=RETENTION_PRIVACY_PATH,
             source_heading_or_logical_block=retention_basis_heading,
-            source_ref=text_ref(RETENTION_PRIVACY_PATH, "ordered `GateDecisionRecord` lineage", "gate_lineage"),
-            notes=["Retention-driven gate changes must also emit correlated error and audit objects."],
+            source_ref=text_ref(
+                RETENTION_PRIVACY_PATH, "ordered `GateDecisionRecord` lineage", "gate_lineage"
+            ),
+            notes=[
+                "Retention-driven gate changes must also emit correlated error and audit objects."
+            ],
         ),
         row(
             artifact_or_control_id="DecisionBundle",
@@ -482,11 +530,20 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             purge_trigger=["ACCESS_BINDING_CHANGE", "MASKING_CHANGE", "SCHEMA_INCOMPATIBLE"],
             replay_preservation_required=False,
             restore_reconciliation_required=True,
-            release_gate_dependency=["CROSS_TENANT_CACHE_ISOLATION_GATE", "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
+            release_gate_dependency=[
+                "CROSS_TENANT_CACHE_ISOLATION_GATE",
+                "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE",
+            ],
             source_path=RETENTION_PRIVACY_PATH,
             source_heading_or_logical_block=quant_heading,
-            source_ref=text_ref(RETENTION_PRIVACY_PATH, "Any user-visible confidence or explanation-strength cue", "DecisionBundle"),
-            notes=["DecisionBundle is a disposable read model and cannot replace authoritative truth after restore or replay."],
+            source_ref=text_ref(
+                RETENTION_PRIVACY_PATH,
+                "Any user-visible confidence or explanation-strength cue",
+                "DecisionBundle",
+            ),
+            notes=[
+                "DecisionBundle is a disposable read model and cannot replace authoritative truth after restore or replay."
+            ],
         ),
         row(
             artifact_or_control_id="ProofBundle",
@@ -507,7 +564,9 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
             source_path=RETENTION_PRIVACY_PATH,
             source_heading_or_logical_block="Proof-bundle retention semantics",
-            source_ref=heading_ref(RETENTION_PRIVACY_PATH, "Proof-bundle retention semantics", "ProofBundle"),
+            source_ref=heading_ref(
+                RETENTION_PRIVACY_PATH, "Proof-bundle retention semantics", "ProofBundle"
+            ),
             notes=[
                 "ProofBundle is retained explainability, not a viewer cache.",
                 "Silent proof degradation is forbidden.",
@@ -532,7 +591,11 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
             source_path=RETENTION_LIMITED_PATH,
             source_heading_or_logical_block=explain_heading,
-            source_ref=text_ref(RETENTION_LIMITED_PATH, "`EvidenceGraph` SHALL treat retention limitation", "EvidenceGraph"),
+            source_ref=text_ref(
+                RETENTION_LIMITED_PATH,
+                "`EvidenceGraph` SHALL treat retention limitation",
+                "EvidenceGraph",
+            ),
             notes=["EvidenceGraph cannot render retention limitation as a missing edge."],
         ),
         row(
@@ -554,7 +617,11 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
             source_path=RETENTION_LIMITED_PATH,
             source_heading_or_logical_block=explain_heading,
-            source_ref=text_ref(RETENTION_LIMITED_PATH, "`EnquiryPack` SHALL retain `retention_binding", "EnquiryPack"),
+            source_ref=text_ref(
+                RETENTION_LIMITED_PATH,
+                "`EnquiryPack` SHALL retain `retention_binding",
+                "EnquiryPack",
+            ),
             notes=["An enquiry export must remain honest about lawful omissions."],
         ),
         row(
@@ -576,7 +643,9 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
             source_path=RETENTION_LIMITED_PATH,
             source_heading_or_logical_block="Required Outcomes",
-            source_ref=text_ref(RETENTION_LIMITED_PATH, "audit events whose payload bodies expire", "AuditEvent"),
+            source_ref=text_ref(
+                RETENTION_LIMITED_PATH, "audit events whose payload bodies expire", "AuditEvent"
+            ),
             notes=["Audit events survive payload expiry as the proof-of-record boundary."],
         ),
         row(
@@ -598,8 +667,12 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
             source_path=RETENTION_PRIVACY_PATH,
             source_heading_or_logical_block="Retention tag contract",
-            source_ref=heading_ref(RETENTION_PRIVACY_PATH, "Retention tag contract", "RetentionTag"),
-            notes=["The tag carries effective expiry and blocker refs rather than delegating recomputation downstream."],
+            source_ref=heading_ref(
+                RETENTION_PRIVACY_PATH, "Retention tag contract", "RetentionTag"
+            ),
+            notes=[
+                "The tag carries effective expiry and blocker refs rather than delegating recomputation downstream."
+            ],
             schema_required_fields=schema_value(RETENTION_TAG_SCHEMA_PATH, "required"),
         ),
         row(
@@ -621,7 +694,9 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
             source_path=RETENTION_PRIVACY_PATH,
             source_heading_or_logical_block="Artifact retention contract",
-            source_ref=heading_ref(RETENTION_PRIVACY_PATH, "Artifact retention contract", "ArtifactRetention"),
+            source_ref=heading_ref(
+                RETENTION_PRIVACY_PATH, "Artifact retention contract", "ArtifactRetention"
+            ),
             notes=["Lifecycle-owned follow-up refs must not leak into terminal-only states."],
             schema_required_fields=schema_value(ARTIFACT_RETENTION_SCHEMA_PATH, "required"),
         ),
@@ -644,7 +719,9 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
             source_path=RETENTION_PRIVACY_PATH,
             source_heading_or_logical_block=hold_heading,
-            source_ref=text_ref(RETENTION_PRIVACY_PATH, "preserve an erasure-proof trail", "ErasureProof"),
+            source_ref=text_ref(
+                RETENTION_PRIVACY_PATH, "preserve an erasure-proof trail", "ErasureProof"
+            ),
             notes=["Erasure proof is durable even when the erased content is not."],
         ),
         row(
@@ -685,11 +762,18 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             purge_trigger=["AUTHORITY_REBINDING", "SESSION_REVOKED"],
             replay_preservation_required=True,
             restore_reconciliation_required=True,
-            release_gate_dependency=["AUTHORITY_SANDBOX_BINDING_GATE", "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
+            release_gate_dependency=[
+                "AUTHORITY_SANDBOX_BINDING_GATE",
+                "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE",
+            ],
             source_path=SECURITY_HARDENING_PATH,
             source_heading_or_logical_block="5. Service-to-service and network hardening",
-            source_ref=text_ref(SECURITY_HARDENING_PATH, "AuthorityIngressReceipt", "AuthorityIngressReceipt"),
-            notes=["Legal-state mutation is blocked until authenticated ingress, dedupe, and request-lineage correlation complete."],
+            source_ref=text_ref(
+                SECURITY_HARDENING_PATH, "AuthorityIngressReceipt", "AuthorityIngressReceipt"
+            ),
+            notes=[
+                "Legal-state mutation is blocked until authenticated ingress, dedupe, and request-lineage correlation complete."
+            ],
         ),
         row(
             artifact_or_control_id="AuthorityInteractionRecord",
@@ -707,10 +791,17 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             purge_trigger=NOT_APPLICABLE,
             replay_preservation_required=True,
             restore_reconciliation_required=True,
-            release_gate_dependency=["AUTHORITY_SANDBOX_BINDING_GATE", "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
+            release_gate_dependency=[
+                "AUTHORITY_SANDBOX_BINDING_GATE",
+                "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE",
+            ],
             source_path=RETENTION_OBSERVABILITY_PATH,
             source_heading_or_logical_block="15.1 Contract composition and precedence",
-            source_ref=text_ref(RETENTION_OBSERVABILITY_PATH, "authority-state reconciliation outranks", "AuthorityInteractionRecord"),
+            source_ref=text_ref(
+                RETENTION_OBSERVABILITY_PATH,
+                "authority-state reconciliation outranks",
+                "AuthorityInteractionRecord",
+            ),
             notes=["Authority history ambiguity is reconciled, never erased."],
         ),
         row(
@@ -729,10 +820,15 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             purge_trigger=NOT_APPLICABLE,
             replay_preservation_required=True,
             restore_reconciliation_required=True,
-            release_gate_dependency=["AUTHORITY_SANDBOX_BINDING_GATE", "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
+            release_gate_dependency=[
+                "AUTHORITY_SANDBOX_BINDING_GATE",
+                "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE",
+            ],
             source_path=RECOVERY_GOVERNANCE_PATH,
             source_heading_or_logical_block="Queue and authority recovery law",
-            source_ref=heading_ref(RECOVERY_GOVERNANCE_PATH, "Queue and authority recovery law", "SubmissionRecord"),
+            source_ref=heading_ref(
+                RECOVERY_GOVERNANCE_PATH, "Queue and authority recovery law", "SubmissionRecord"
+            ),
             notes=["Queue recovery is transport rebuild, not truth replay."],
         ),
         row(
@@ -751,10 +847,15 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             purge_trigger=["ACCESS_BINDING_CHANGE", "TENANT_SWITCH", "SESSION_REVOKED"],
             replay_preservation_required=False,
             restore_reconciliation_required=True,
-            release_gate_dependency=["SESSION_AND_ANTI_CSRF_GATE", "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
+            release_gate_dependency=[
+                "SESSION_AND_ANTI_CSRF_GATE",
+                "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE",
+            ],
             source_path=NORTHBOUND_API_PATH,
             source_heading_or_logical_block="2.2 Customer/Client portal and upload-session surfaces",
-            source_ref=text_ref(NORTHBOUND_API_PATH, "`POST /v1/uploads/sessions`", "ClientUploadSession"),
+            source_ref=text_ref(
+                NORTHBOUND_API_PATH, "`POST /v1/uploads/sessions`", "ClientUploadSession"
+            ),
             notes=["Binary transfer is the governed exception to the general command surface."],
         ),
         row(
@@ -773,10 +874,17 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             purge_trigger=["TENANT_SWITCH", "ACCESS_BINDING_CHANGE", "SESSION_REVOKED"],
             replay_preservation_required=False,
             restore_reconciliation_required=True,
-            release_gate_dependency=["SESSION_AND_ANTI_CSRF_GATE", "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
+            release_gate_dependency=[
+                "SESSION_AND_ANTI_CSRF_GATE",
+                "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE",
+            ],
             source_path=NORTHBOUND_API_PATH,
             source_heading_or_logical_block="2.2 Customer/Client portal and upload-session surfaces",
-            source_ref=text_ref(NORTHBOUND_API_PATH, "upload_request_binding_contract", "UploadRequestBindingContract"),
+            source_ref=text_ref(
+                NORTHBOUND_API_PATH,
+                "upload_request_binding_contract",
+                "UploadRequestBindingContract",
+            ),
             notes=["Upload rebinding is explicit and machine-readable."],
         ),
         row(
@@ -795,11 +903,18 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             purge_trigger=["MASKING_CHANGE", "ACCESS_BINDING_CHANGE", "TENANT_SWITCH"],
             replay_preservation_required=False,
             restore_reconciliation_required=True,
-            release_gate_dependency=["CROSS_TENANT_CACHE_ISOLATION_GATE", "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
+            release_gate_dependency=[
+                "CROSS_TENANT_CACHE_ISOLATION_GATE",
+                "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE",
+            ],
             source_path=COLLABORATION_PATH,
             source_heading_or_logical_block="7.2 New append-only collaboration artifacts",
-            source_ref=text_ref(COLLABORATION_PATH, "#### `CollaborationAttachment`", "CollaborationAttachment"),
-            notes=["A customer-visible attachment may appear as pending placeholder but not as downloadable content before scan clearance."],
+            source_ref=text_ref(
+                COLLABORATION_PATH, "#### `CollaborationAttachment`", "CollaborationAttachment"
+            ),
+            notes=[
+                "A customer-visible attachment may appear as pending placeholder but not as downloadable content before scan clearance."
+            ],
         ),
         row(
             artifact_or_control_id="MaskedExportArtifact",
@@ -820,8 +935,12 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["CROSS_TENANT_CACHE_ISOLATION_GATE"],
             source_path=RETENTION_PRIVACY_PATH,
             source_heading_or_logical_block=privacy_heading,
-            source_ref=text_ref(RETENTION_PRIVACY_PATH, "`MaskedExportProduced`", "MaskedExportArtifact"),
-            notes=["Masked exports prefer summaries, masked fields, and lawful omission rather than raw payload copies."],
+            source_ref=text_ref(
+                RETENTION_PRIVACY_PATH, "`MaskedExportProduced`", "MaskedExportArtifact"
+            ),
+            notes=[
+                "Masked exports prefer summaries, masked fields, and lawful omission rather than raw payload copies."
+            ],
         ),
         row(
             artifact_or_control_id="TelemetryLogTrace",
@@ -839,11 +958,20 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             purge_trigger=NOT_APPLICABLE,
             replay_preservation_required=False,
             restore_reconciliation_required=True,
-            release_gate_dependency=["SESSION_AND_ANTI_CSRF_GATE", "SECRET_ROTATION_ATTESTATION_GATE"],
+            release_gate_dependency=[
+                "SESSION_AND_ANTI_CSRF_GATE",
+                "SECRET_ROTATION_ATTESTATION_GATE",
+            ],
             source_path=RETENTION_OBSERVABILITY_PATH,
             source_heading_or_logical_block="15.4 Correlation, visibility, and signal separation",
-            source_ref=heading_ref(RETENTION_OBSERVABILITY_PATH, "15.4 Correlation, visibility, and signal separation", "TelemetryLogTrace"),
-            notes=["Telemetry omits high-volume detail when needed, but cannot remove mandatory audit history."],
+            source_ref=heading_ref(
+                RETENTION_OBSERVABILITY_PATH,
+                "15.4 Correlation, visibility, and signal separation",
+                "TelemetryLogTrace",
+            ),
+            notes=[
+                "Telemetry omits high-volume detail when needed, but cannot remove mandatory audit history."
+            ],
         ),
         row(
             artifact_or_control_id="WorkInboxSnapshot",
@@ -858,14 +986,23 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             canonical_store_or_boundary="read model store plus cache partition",
             encryption_or_protection_control="cache_isolation_contract and visibility cache partition key",
             cache_scope=["WORK_INBOX_SNAPSHOT"],
-            purge_trigger=["TENANT_SWITCH", "ACCESS_BINDING_CHANGE", "MASKING_CHANGE", "ROUTE_OR_OBJECT_DRIFT"],
+            purge_trigger=[
+                "TENANT_SWITCH",
+                "ACCESS_BINDING_CHANGE",
+                "MASKING_CHANGE",
+                "ROUTE_OR_OBJECT_DRIFT",
+            ],
             replay_preservation_required=False,
             restore_reconciliation_required=False,
             release_gate_dependency=["CROSS_TENANT_CACHE_ISOLATION_GATE"],
             source_path=COLLABORATION_PATH,
             source_heading_or_logical_block="FE-25 Cache Isolation",
-            source_ref=heading_ref(COLLABORATION_PATH, "FE-25 Cache Isolation", "WorkInboxSnapshot"),
-            notes=["Inbox caches must remain visibility-scoped and never widen across staff/customer boundaries."],
+            source_ref=heading_ref(
+                COLLABORATION_PATH, "FE-25 Cache Isolation", "WorkInboxSnapshot"
+            ),
+            notes=[
+                "Inbox caches must remain visibility-scoped and never widen across staff/customer boundaries."
+            ],
         ),
         row(
             artifact_or_control_id="WorkspaceSnapshot",
@@ -880,14 +1017,29 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             canonical_store_or_boundary="workspace snapshot store and route-stable stream spine",
             encryption_or_protection_control="shell stability token, access binding, masking fingerprint, cache partition key",
             cache_scope=["WORKSPACE_SNAPSHOT", "LOW_NOISE_FRAME"],
-            purge_trigger=["TENANT_SWITCH", "ACCESS_BINDING_CHANGE", "MASKING_CHANGE", "SESSION_REVOKED", "SCHEMA_INCOMPATIBLE"],
+            purge_trigger=[
+                "TENANT_SWITCH",
+                "ACCESS_BINDING_CHANGE",
+                "MASKING_CHANGE",
+                "SESSION_REVOKED",
+                "SCHEMA_INCOMPATIBLE",
+            ],
             replay_preservation_required=False,
             restore_reconciliation_required=False,
-            release_gate_dependency=["CROSS_TENANT_CACHE_ISOLATION_GATE", "STALE_VIEW_AND_IDEMPOTENCY_GATE"],
+            release_gate_dependency=[
+                "CROSS_TENANT_CACHE_ISOLATION_GATE",
+                "STALE_VIEW_AND_IDEMPOTENCY_GATE",
+            ],
             source_path=NORTHBOUND_API_PATH,
             source_heading_or_logical_block="2. Required northbound surfaces",
-            source_ref=text_ref(NORTHBOUND_API_PATH, "`GET /v1/manifests/{manifest_id}/experience/snapshot`", "WorkspaceSnapshot"),
-            notes=["Clients recover through resume or rebase, never by recreating hidden transitions locally."],
+            source_ref=text_ref(
+                NORTHBOUND_API_PATH,
+                "`GET /v1/manifests/{manifest_id}/experience/snapshot`",
+                "WorkspaceSnapshot",
+            ),
+            notes=[
+                "Clients recover through resume or rebase, never by recreating hidden transitions locally."
+            ],
         ),
         row(
             artifact_or_control_id="ClientPortalWorkspace",
@@ -902,14 +1054,26 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             canonical_store_or_boundary="client portal read model and visibility cache boundary",
             encryption_or_protection_control="cache_isolation_contract plus externalization_governance_contract.delivery_binding_hash",
             cache_scope=["CLIENT_PORTAL_WORKSPACE", "CUSTOMER_REQUEST_LIST"],
-            purge_trigger=["TENANT_SWITCH", "ACCESS_BINDING_CHANGE", "MASKING_CHANGE", "ROUTE_OR_OBJECT_DRIFT"],
+            purge_trigger=[
+                "TENANT_SWITCH",
+                "ACCESS_BINDING_CHANGE",
+                "MASKING_CHANGE",
+                "ROUTE_OR_OBJECT_DRIFT",
+            ],
             replay_preservation_required=False,
             restore_reconciliation_required=False,
-            release_gate_dependency=["CROSS_TENANT_CACHE_ISOLATION_GATE", "SESSION_AND_ANTI_CSRF_GATE"],
+            release_gate_dependency=[
+                "CROSS_TENANT_CACHE_ISOLATION_GATE",
+                "SESSION_AND_ANTI_CSRF_GATE",
+            ],
             source_path=PORTAL_EXPERIENCE_PATH,
             source_heading_or_logical_block="FE-25 Cache Isolation",
-            source_ref=heading_ref(PORTAL_EXPERIENCE_PATH, "FE-25 Cache Isolation", "ClientPortalWorkspace"),
-            notes=["Portal caches are always customer-safe and must stay exact to client, route, and visibility partition."],
+            source_ref=heading_ref(
+                PORTAL_EXPERIENCE_PATH, "FE-25 Cache Isolation", "ClientPortalWorkspace"
+            ),
+            notes=[
+                "Portal caches are always customer-safe and must stay exact to client, route, and visibility partition."
+            ],
         ),
         row(
             artifact_or_control_id="CacheIsolationContract",
@@ -924,13 +1088,22 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             canonical_store_or_boundary="shared cache identity contract serialized on read models and native scenes",
             encryption_or_protection_control="exact security-context match, delivery revalidation, and temporary artifact purge policy",
             cache_scope=CACHE_SCOPE_ENUM,
-            purge_trigger=["TENANT_SWITCH", "PRINCIPAL_CLASS_CHANGE", "SESSION_BINDING_CHANGE", "ACCESS_BINDING_CHANGE", "MASKING_CHANGE", "ROUTE_OR_OBJECT_DRIFT"],
+            purge_trigger=[
+                "TENANT_SWITCH",
+                "PRINCIPAL_CLASS_CHANGE",
+                "SESSION_BINDING_CHANGE",
+                "ACCESS_BINDING_CHANGE",
+                "MASKING_CHANGE",
+                "ROUTE_OR_OBJECT_DRIFT",
+            ],
             replay_preservation_required=False,
             restore_reconciliation_required=False,
             release_gate_dependency=["CROSS_TENANT_CACHE_ISOLATION_GATE"],
             source_path=CACHE_ISOLATION_PATH,
             source_heading_or_logical_block="Contract Fields",
-            source_ref=heading_ref(CACHE_ISOLATION_PATH, "Contract Fields", "CacheIsolationContract"),
+            source_ref=heading_ref(
+                CACHE_ISOLATION_PATH, "Contract Fields", "CacheIsolationContract"
+            ),
             notes=["Cache identity is a security boundary rather than a performance-only concern."],
             schema_required_fields=schema_value(CACHE_ISOLATION_SCHEMA_PATH, "required"),
         ),
@@ -950,10 +1123,15 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             purge_trigger=HYDRATION_PURGE_TRIGGER_ENUM,
             replay_preservation_required=False,
             restore_reconciliation_required=False,
-            release_gate_dependency=["CROSS_TENANT_CACHE_ISOLATION_GATE", "NATIVE_DESKTOP_HARDENING_GATE"],
+            release_gate_dependency=[
+                "CROSS_TENANT_CACHE_ISOLATION_GATE",
+                "NATIVE_DESKTOP_HARDENING_GATE",
+            ],
             source_path=NATIVE_CACHE_PATH,
             source_heading_or_logical_block="Authoritative artifacts",
-            source_ref=heading_ref(NATIVE_CACHE_PATH, "Authoritative artifacts", "NativeCacheHydrationContract"),
+            source_ref=heading_ref(
+                NATIVE_CACHE_PATH, "Authoritative artifacts", "NativeCacheHydrationContract"
+            ),
             notes=["Native speed may reuse compatible state but may not outrun legality."],
             schema_required_fields=schema_value(NATIVE_CACHE_SCHEMA_PATH, "required"),
         ),
@@ -976,7 +1154,9 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SESSION_AND_ANTI_CSRF_GATE"],
             source_path=SECURITY_HARDENING_PATH,
             source_heading_or_logical_block="2. Identity, session, and command trust",
-            source_ref=text_ref(SECURITY_HARDENING_PATH, "short-lived `ActorSession` records", "ActorSession"),
+            source_ref=text_ref(
+                SECURITY_HARDENING_PATH, "short-lived `ActorSession` records", "ActorSession"
+            ),
             notes=["Browser, native, and automation sessions share one machine-readable contract."],
             schema_required_fields=schema_value(ACTOR_SESSION_SCHEMA_PATH, "required"),
         ),
@@ -999,7 +1179,9 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SECRET_ROTATION_ATTESTATION_GATE"],
             source_path=SECURITY_HARDENING_PATH,
             source_heading_or_logical_block="3. Secret, key, and token handling",
-            source_ref=text_ref(SECURITY_HARDENING_PATH, "`SecretVersion` SHALL be versioned", "SecretVersion"),
+            source_ref=text_ref(
+                SECURITY_HARDENING_PATH, "`SecretVersion` SHALL be versioned", "SecretVersion"
+            ),
             notes=["No secret lineage may self-supersede or invert attestation chronology."],
             schema_required_fields=schema_value(SECRET_VERSION_SCHEMA_PATH, "required"),
         ),
@@ -1015,15 +1197,33 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             survivability_or_fidelity_formula="local_artifact_purge_policy requires purge with cache state on revocation, masking change, or schema incompatibility.",
             canonical_store_or_boundary="device-local structured cache, resume metadata, preview cache, temp export, local search index",
             encryption_or_protection_control="OS-protected storage plus shared purge policy and route/object binding",
-            cache_scope=["NATIVE_OPERATOR_WORKSPACE_SCENE", "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE"],
-            purge_trigger=["TENANT_SWITCH", "PRIVILEGE_DOWNGRADE", "SESSION_REVOKED", "MASKING_CHANGE", "SCHEMA_INCOMPATIBLE"],
+            cache_scope=[
+                "NATIVE_OPERATOR_WORKSPACE_SCENE",
+                "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE",
+            ],
+            purge_trigger=[
+                "TENANT_SWITCH",
+                "PRIVILEGE_DOWNGRADE",
+                "SESSION_REVOKED",
+                "MASKING_CHANGE",
+                "SCHEMA_INCOMPATIBLE",
+            ],
             replay_preservation_required=False,
             restore_reconciliation_required=False,
-            release_gate_dependency=["NATIVE_DESKTOP_HARDENING_GATE", "CROSS_TENANT_CACHE_ISOLATION_GATE"],
+            release_gate_dependency=[
+                "NATIVE_DESKTOP_HARDENING_GATE",
+                "CROSS_TENANT_CACHE_ISOLATION_GATE",
+            ],
             source_path=MACOS_BLUEPRINT_PATH,
             source_heading_or_logical_block="11. Security and runtime posture for the desktop client",
-            source_ref=text_ref(MACOS_BLUEPRINT_PATH, "scene-restoration payloads, `NSUserActivity`, preview caches, and temporary export files", "NativeLocalArtifactSet"),
-            notes=["Desktop-local derivatives inherit the same masking/export posture as the underlying server object."],
+            source_ref=text_ref(
+                MACOS_BLUEPRINT_PATH,
+                "scene-restoration payloads, `NSUserActivity`, preview caches, and temporary export files",
+                "NativeLocalArtifactSet",
+            ),
+            notes=[
+                "Desktop-local derivatives inherit the same masking/export posture as the underlying server object."
+            ],
         ),
         row(
             artifact_or_control_id="RestorePrivacyReconciliationContract",
@@ -1044,8 +1244,14 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
             source_path=RECOVERY_GOVERNANCE_PATH,
             source_heading_or_logical_block="Restore privacy reconciliation law",
-            source_ref=heading_ref(RECOVERY_GOVERNANCE_PATH, "Restore privacy reconciliation law", "RestorePrivacyReconciliationContract"),
-            notes=["Restore evidence is not lawful production evidence until privacy reconciliation reaches a reconciled state."],
+            source_ref=heading_ref(
+                RECOVERY_GOVERNANCE_PATH,
+                "Restore privacy reconciliation law",
+                "RestorePrivacyReconciliationContract",
+            ),
+            notes=[
+                "Restore evidence is not lawful production evidence until privacy reconciliation reaches a reconciled state."
+            ],
             schema_required_fields=schema_value(RESTORE_PRIVACY_SCHEMA_PATH, "required"),
         ),
         row(
@@ -1067,8 +1273,12 @@ def artifact_retention_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["STALE_VIEW_AND_IDEMPOTENCY_GATE"],
             source_path=NORTHBOUND_API_PATH,
             source_heading_or_logical_block="2. Required northbound surfaces",
-            source_ref=text_ref(NORTHBOUND_API_PATH, "`GET /v1/commands/{command_id}`", "ApiCommandReceipt"),
-            notes=["Durable receipts are the northbound recovery anchor after lost POST responses or app relaunch."],
+            source_ref=text_ref(
+                NORTHBOUND_API_PATH, "`GET /v1/commands/{command_id}`", "ApiCommandReceipt"
+            ),
+            notes=[
+                "Durable receipts are the northbound recovery anchor after lost POST responses or app relaunch."
+            ],
         ),
     ]
     assert_required_row_fields(source_rows)
@@ -1098,7 +1308,11 @@ def privacy_threshold_rows() -> list[dict[str, Any]]:
             release_gate_dependency=NOT_APPLICABLE,
             source_path=RETENTION_PRIVACY_PATH,
             source_heading_or_logical_block=quant_heading,
-            source_ref=text_ref(RETENTION_PRIVACY_PATH, "`decision_information_ratio(o) in [0,1]`", "decision_information_ratio"),
+            source_ref=text_ref(
+                RETENTION_PRIVACY_PATH,
+                "`decision_information_ratio(o) in [0,1]`",
+                "decision_information_ratio",
+            ),
             notes=["This is the retained fraction of original decision-relevant information."],
             symbol="decision_information_ratio(o)",
             ascii_symbol="decision_information_ratio(o)",
@@ -1123,8 +1337,14 @@ def privacy_threshold_rows() -> list[dict[str, Any]]:
             release_gate_dependency=NOT_APPLICABLE,
             source_path=RETENTION_PRIVACY_PATH,
             source_heading_or_logical_block=quant_heading,
-            source_ref=text_ref(RETENTION_PRIVACY_PATH, "`projection_information_ratio(o) in [0,1]`", "projection_information_ratio"),
-            notes=["Emit PRIVACY_PROJECTION_RATIO_INVALID when the projection ratio exceeds retained decision-side information."],
+            source_ref=text_ref(
+                RETENTION_PRIVACY_PATH,
+                "`projection_information_ratio(o) in [0,1]`",
+                "projection_information_ratio",
+            ),
+            notes=[
+                "Emit PRIVACY_PROJECTION_RATIO_INVALID when the projection ratio exceeds retained decision-side information."
+            ],
             symbol="projection_information_ratio(o)",
             ascii_symbol="projection_information_ratio(o)",
             formula_class="RATIO",
@@ -1148,7 +1368,11 @@ def privacy_threshold_rows() -> list[dict[str, Any]]:
             release_gate_dependency=NOT_APPLICABLE,
             source_path=RETENTION_PRIVACY_PATH,
             source_heading_or_logical_block=quant_heading,
-            source_ref=text_ref(RETENTION_PRIVACY_PATH, "`limitation_explicitness(o) in [0,1]`", "limitation_explicitness"),
+            source_ref=text_ref(
+                RETENTION_PRIVACY_PATH,
+                "`limitation_explicitness(o) in [0,1]`",
+                "limitation_explicitness",
+            ),
             notes=["Silent ambiguity is measured as the inverse of limitation explicitness."],
             symbol="limitation_explicitness(o)",
             ascii_symbol="limitation_explicitness(o)",
@@ -1173,7 +1397,11 @@ def privacy_threshold_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["STALE_VIEW_AND_IDEMPOTENCY_GATE"],
             source_path=RETENTION_PRIVACY_PATH,
             source_heading_or_logical_block=quant_heading,
-            source_ref=text_ref(RETENTION_PRIVACY_PATH, "`silent_ambiguity(o) = 1 - limitation_explicitness(o)`", "silent_ambiguity"),
+            source_ref=text_ref(
+                RETENTION_PRIVACY_PATH,
+                "`silent_ambiguity(o) = 1 - limitation_explicitness(o)`",
+                "silent_ambiguity",
+            ),
             notes=["Silent ambiguity is a structural defect, not a soft warning."],
             symbol="silent_ambiguity(o)",
             ascii_symbol="silent_ambiguity(o)",
@@ -1198,7 +1426,11 @@ def privacy_threshold_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
             source_path=RETENTION_PRIVACY_PATH,
             source_heading_or_logical_block=quant_heading,
-            source_ref=text_ref(RETENTION_PRIVACY_PATH, "`survivability(o) = clamp01(decision_information_ratio(o) * limitation_explicitness(o))`", "survivability"),
+            source_ref=text_ref(
+                RETENTION_PRIVACY_PATH,
+                "`survivability(o) = clamp01(decision_information_ratio(o) * limitation_explicitness(o))`",
+                "survivability",
+            ),
             notes=["Survivability governs controlling proof, review-only, and audit-only posture."],
             symbol="survivability(o)",
             ascii_symbol="survivability(o)",
@@ -1223,7 +1455,11 @@ def privacy_threshold_rows() -> list[dict[str, Any]]:
             release_gate_dependency=NOT_APPLICABLE,
             source_path=RETENTION_PRIVACY_PATH,
             source_heading_or_logical_block=quant_heading,
-            source_ref=text_ref(RETENTION_PRIVACY_PATH, "`projection_fidelity(o) = 0 if decision_information_ratio(o) = 0 else clamp01(projection_information_ratio(o) / decision_information_ratio(o))`", "projection_fidelity"),
+            source_ref=text_ref(
+                RETENTION_PRIVACY_PATH,
+                "`projection_fidelity(o) = 0 if decision_information_ratio(o) = 0 else clamp01(projection_information_ratio(o) / decision_information_ratio(o))`",
+                "projection_fidelity",
+            ),
             notes=["User-visible confidence cues degrade by projection_fidelity(o)."],
             symbol="projection_fidelity(o)",
             ascii_symbol="projection_fidelity(o)",
@@ -1429,7 +1665,11 @@ def security_control_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
             source_path=RETENTION_PRIVACY_PATH,
             source_heading_or_logical_block="Retention tag contract",
-            source_ref=heading_ref(RETENTION_PRIVACY_PATH, "Retention tag contract", "RETENTION_TAG_AND_ARTIFACT_RETENTION"),
+            source_ref=heading_ref(
+                RETENTION_PRIVACY_PATH,
+                "Retention tag contract",
+                "RETENTION_TAG_AND_ARTIFACT_RETENTION",
+            ),
             notes=["Retention state changes remain typed state, not passive prose."],
             control_layer="retention_control_plane",
         ),
@@ -1452,7 +1692,9 @@ def security_control_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
             source_path=RETENTION_LIMITED_PATH,
             source_heading_or_logical_block="Required Outcomes",
-            source_ref=heading_ref(RETENTION_LIMITED_PATH, "Required Outcomes", "RETENTION_LIMITED_EXPLAINABILITY"),
+            source_ref=heading_ref(
+                RETENTION_LIMITED_PATH, "Required Outcomes", "RETENTION_LIMITED_EXPLAINABILITY"
+            ),
             notes=["Lawful minimization is not permission for silent ambiguity."],
             control_layer="explainability_boundary",
         ),
@@ -1475,7 +1717,11 @@ def security_control_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
             source_path=RETENTION_OBSERVABILITY_PATH,
             source_heading_or_logical_block="15.3 Gate and progression coupling",
-            source_ref=heading_ref(RETENTION_OBSERVABILITY_PATH, "15.3 Gate and progression coupling", "RETENTION_ERROR_AND_GATE_COUPLING"),
+            source_ref=heading_ref(
+                RETENTION_OBSERVABILITY_PATH,
+                "15.3 Gate and progression coupling",
+                "RETENTION_ERROR_AND_GATE_COUPLING",
+            ),
             notes=["Retention posture is a gate input, not a UI warning."],
             control_layer="gate_and_failure_control_plane",
         ),
@@ -1495,10 +1741,17 @@ def security_control_rows() -> list[dict[str, Any]]:
             purge_trigger=["SESSION_REVOKED", "STEP_UP_COMPLETED", "PRIVILEGE_DOWNGRADE"],
             replay_preservation_required=False,
             restore_reconciliation_required=False,
-            release_gate_dependency=["SESSION_AND_ANTI_CSRF_GATE", "STALE_VIEW_AND_IDEMPOTENCY_GATE"],
+            release_gate_dependency=[
+                "SESSION_AND_ANTI_CSRF_GATE",
+                "STALE_VIEW_AND_IDEMPOTENCY_GATE",
+            ],
             source_path=SECURITY_HARDENING_PATH,
             source_heading_or_logical_block="2. Identity, session, and command trust",
-            source_ref=heading_ref(SECURITY_HARDENING_PATH, "2. Identity, session, and command trust", "SESSION_BOUND_COMMAND_VALIDATION"),
+            source_ref=heading_ref(
+                SECURITY_HARDENING_PATH,
+                "2. Identity, session, and command trust",
+                "SESSION_BOUND_COMMAND_VALIDATION",
+            ),
             notes=["No write action relies only on a client-held token."],
             control_layer="identity_and_command_trust",
         ),
@@ -1521,8 +1774,14 @@ def security_control_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SESSION_AND_ANTI_CSRF_GATE"],
             source_path=SECURITY_HARDENING_PATH,
             source_heading_or_logical_block="4. Browser, native-client, API, and transport hardening",
-            source_ref=text_ref(SECURITY_HARDENING_PATH, "anti-CSRF protection for cookie-based browser sessions", "ANTI_CSRF_AND_SECURE_COOKIE_POSTURE"),
-            notes=["Browser-origin write actions require authenticated session plus anti-CSRF posture."],
+            source_ref=text_ref(
+                SECURITY_HARDENING_PATH,
+                "anti-CSRF protection for cookie-based browser sessions",
+                "ANTI_CSRF_AND_SECURE_COOKIE_POSTURE",
+            ),
+            notes=[
+                "Browser-origin write actions require authenticated session plus anti-CSRF posture."
+            ],
             control_layer="browser_security_boundary",
         ),
         row(
@@ -1537,14 +1796,26 @@ def security_control_rows() -> list[dict[str, Any]]:
             survivability_or_fidelity_formula="session rotation after privilege elevation or step-up completion",
             canonical_store_or_boundary="session challenge state and approval boundary",
             encryption_or_protection_control="MFA/step-up, session rotation, revocation audit, and bound cursor invalidation",
-            cache_scope=["LOW_NOISE_FRAME", "NATIVE_OPERATOR_WORKSPACE_SCENE", "EXPERIENCE_CURSOR", "WORKSPACE_CURSOR"],
+            cache_scope=[
+                "LOW_NOISE_FRAME",
+                "NATIVE_OPERATOR_WORKSPACE_SCENE",
+                "EXPERIENCE_CURSOR",
+                "WORKSPACE_CURSOR",
+            ],
             purge_trigger=["STEP_UP_COMPLETED", "SESSION_REVOKED", "PRIVILEGE_DOWNGRADE"],
             replay_preservation_required=False,
             restore_reconciliation_required=False,
-            release_gate_dependency=["SESSION_AND_ANTI_CSRF_GATE", "STALE_VIEW_AND_IDEMPOTENCY_GATE"],
+            release_gate_dependency=[
+                "SESSION_AND_ANTI_CSRF_GATE",
+                "STALE_VIEW_AND_IDEMPOTENCY_GATE",
+            ],
             source_path=MACOS_BLUEPRINT_PATH,
             source_heading_or_logical_block="7. Authentication and session strategy",
-            source_ref=text_ref(MACOS_BLUEPRINT_PATH, "step-up completion SHALL rotate the effective session challenge state", "STEP_UP_AND_SESSION_ROTATION"),
+            source_ref=text_ref(
+                MACOS_BLUEPRINT_PATH,
+                "step-up completion SHALL rotate the effective session challenge state",
+                "STEP_UP_AND_SESSION_ROTATION",
+            ),
             notes=["Applies to browser, native, and authority-sensitive flows."],
             control_layer="authn_escalation_boundary",
         ),
@@ -1564,10 +1835,17 @@ def security_control_rows() -> list[dict[str, Any]]:
             purge_trigger=["AUTHORITY_REBINDING", "TOKEN_ROTATION", "SESSION_REVOKED"],
             replay_preservation_required=False,
             restore_reconciliation_required=True,
-            release_gate_dependency=["SECRET_ROTATION_ATTESTATION_GATE", "AUTHORITY_SANDBOX_BINDING_GATE"],
+            release_gate_dependency=[
+                "SECRET_ROTATION_ATTESTATION_GATE",
+                "AUTHORITY_SANDBOX_BINDING_GATE",
+            ],
             source_path=SECURITY_HARDENING_PATH,
             source_heading_or_logical_block="3. Secret, key, and token handling",
-            source_ref=heading_ref(SECURITY_HARDENING_PATH, "3. Secret, key, and token handling", "TOKEN_VAULT_AND_BINDING_LINEAGE_REVALIDATION"),
+            source_ref=heading_ref(
+                SECURITY_HARDENING_PATH,
+                "3. Secret, key, and token handling",
+                "TOKEN_VAULT_AND_BINDING_LINEAGE_REVALIDATION",
+            ),
             notes=["No raw authority token exists outside the vault boundary."],
             control_layer="secret_and_token_boundary",
         ),
@@ -1583,14 +1861,22 @@ def security_control_rows() -> list[dict[str, Any]]:
             survivability_or_fidelity_formula="object payload encryption uses per-tenant or per-sensitivity envelope keys rooted in KMS/HSM master keys.",
             canonical_store_or_boundary="object store and regulated payload boundary",
             encryption_or_protection_control="envelope encryption rooted in KMS/HSM",
-            cache_scope=["CLIENT_PORTAL_WORKSPACE", "WORKSPACE_SNAPSHOT", "NATIVE_OPERATOR_WORKSPACE_SCENE"],
+            cache_scope=[
+                "CLIENT_PORTAL_WORKSPACE",
+                "WORKSPACE_SNAPSHOT",
+                "NATIVE_OPERATOR_WORKSPACE_SCENE",
+            ],
             purge_trigger=["TENANT_SWITCH", "MASKING_CHANGE", "SCHEMA_INCOMPATIBLE"],
             replay_preservation_required=True,
             restore_reconciliation_required=True,
             release_gate_dependency=["SECRET_ROTATION_ATTESTATION_GATE"],
             source_path=SECURITY_HARDENING_PATH,
             source_heading_or_logical_block="3. Secret, key, and token handling",
-            source_ref=text_ref(SECURITY_HARDENING_PATH, "object payload encryption SHALL use per-tenant", "PER_TENANT_ENVELOPE_ENCRYPTION"),
+            source_ref=text_ref(
+                SECURITY_HARDENING_PATH,
+                "object payload encryption SHALL use per-tenant",
+                "PER_TENANT_ENVELOPE_ENCRYPTION",
+            ),
             notes=["Applies to sensitive client and authority data."],
             control_layer="data_protection_boundary",
         ),
@@ -1613,8 +1899,14 @@ def security_control_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["AUTHORITY_SANDBOX_BINDING_GATE"],
             source_path=SECURITY_HARDENING_PATH,
             source_heading_or_logical_block="5. Service-to-service and network hardening",
-            source_ref=heading_ref(SECURITY_HARDENING_PATH, "5. Service-to-service and network hardening", "AUTHORITY_INGRESS_QUARANTINE_AND_DEDUPE"),
-            notes=["A lone authority_reference match remains quarantined, not trusted as legal correlation."],
+            source_ref=heading_ref(
+                SECURITY_HARDENING_PATH,
+                "5. Service-to-service and network hardening",
+                "AUTHORITY_INGRESS_QUARANTINE_AND_DEDUPE",
+            ),
+            notes=[
+                "A lone authority_reference match remains quarantined, not trusted as legal correlation."
+            ],
             control_layer="authority_edge_boundary",
         ),
         row(
@@ -1630,14 +1922,28 @@ def security_control_rows() -> list[dict[str, Any]]:
             canonical_store_or_boundary="shared cache identity contract",
             encryption_or_protection_control="cache_isolation_contract, delivery binding hash, temp artifact purge policy",
             cache_scope=CACHE_SCOPE_ENUM,
-            purge_trigger=["TENANT_SWITCH", "PRINCIPAL_CLASS_CHANGE", "SESSION_BINDING_CHANGE", "ACCESS_BINDING_CHANGE", "MASKING_CHANGE", "ROUTE_OR_OBJECT_DRIFT", "SCHEMA_INCOMPATIBLE"],
+            purge_trigger=[
+                "TENANT_SWITCH",
+                "PRINCIPAL_CLASS_CHANGE",
+                "SESSION_BINDING_CHANGE",
+                "ACCESS_BINDING_CHANGE",
+                "MASKING_CHANGE",
+                "ROUTE_OR_OBJECT_DRIFT",
+                "SCHEMA_INCOMPATIBLE",
+            ],
             replay_preservation_required=False,
             restore_reconciliation_required=False,
             release_gate_dependency=["CROSS_TENANT_CACHE_ISOLATION_GATE"],
             source_path=SECURITY_HARDENING_PATH,
             source_heading_or_logical_block="FE-25 Cache Isolation",
-            source_ref=heading_ref(SECURITY_HARDENING_PATH, "FE-25 Cache Isolation", "CACHE_ISOLATION_CONTRACT_ENFORCEMENT"),
-            notes=["Cache identity is a security boundary across browser, portal, governance, and native surfaces."],
+            source_ref=heading_ref(
+                SECURITY_HARDENING_PATH,
+                "FE-25 Cache Isolation",
+                "CACHE_ISOLATION_CONTRACT_ENFORCEMENT",
+            ),
+            notes=[
+                "Cache identity is a security boundary across browser, portal, governance, and native surfaces."
+            ],
             control_layer="cache_reuse_boundary",
         ),
         row(
@@ -1656,10 +1962,15 @@ def security_control_rows() -> list[dict[str, Any]]:
             purge_trigger=HYDRATION_PURGE_TRIGGER_ENUM,
             replay_preservation_required=False,
             restore_reconciliation_required=False,
-            release_gate_dependency=["NATIVE_DESKTOP_HARDENING_GATE", "CROSS_TENANT_CACHE_ISOLATION_GATE"],
+            release_gate_dependency=[
+                "NATIVE_DESKTOP_HARDENING_GATE",
+                "CROSS_TENANT_CACHE_ISOLATION_GATE",
+            ],
             source_path=NATIVE_CACHE_PATH,
             source_heading_or_logical_block="Required rules",
-            source_ref=heading_ref(NATIVE_CACHE_PATH, "Required rules", "NATIVE_CACHE_HYDRATION_PURGE_AND_REBASE"),
+            source_ref=heading_ref(
+                NATIVE_CACHE_PATH, "Required rules", "NATIVE_CACHE_HYDRATION_PURGE_AND_REBASE"
+            ),
             notes=["Native speed may reuse compatible state, but may not outrun legality."],
             control_layer="native_restore_boundary",
         ),
@@ -1682,8 +1993,14 @@ def security_control_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
             source_path=RECOVERY_GOVERNANCE_PATH,
             source_heading_or_logical_block="Restore privacy reconciliation law",
-            source_ref=heading_ref(RECOVERY_GOVERNANCE_PATH, "Restore privacy reconciliation law", "RESTORE_PRIVACY_RECONCILIATION"),
-            notes=["Restore reopening is blocked until privacy reconciliation proves lawful access posture."],
+            source_ref=heading_ref(
+                RECOVERY_GOVERNANCE_PATH,
+                "Restore privacy reconciliation law",
+                "RESTORE_PRIVACY_RECONCILIATION",
+            ),
+            notes=[
+                "Restore reopening is blocked until privacy reconciliation proves lawful access posture."
+            ],
             control_layer="restore_boundary",
         ),
         row(
@@ -1702,11 +2019,20 @@ def security_control_rows() -> list[dict[str, Any]]:
             purge_trigger=["MASKING_CHANGE", "ROUTE_OR_OBJECT_DRIFT"],
             replay_preservation_required=False,
             restore_reconciliation_required=True,
-            release_gate_dependency=["SESSION_AND_ANTI_CSRF_GATE", "SECRET_ROTATION_ATTESTATION_GATE"],
+            release_gate_dependency=[
+                "SESSION_AND_ANTI_CSRF_GATE",
+                "SECRET_ROTATION_ATTESTATION_GATE",
+            ],
             source_path=SECURITY_HARDENING_PATH,
             source_heading_or_logical_block="6. Data protection, privacy, and cache safety",
-            source_ref=heading_ref(SECURITY_HARDENING_PATH, "6. Data protection, privacy, and cache safety", "LOG_REDACTION_AND_MASKED_EXPORT_POLICY"),
-            notes=["Exports inherit masking/export policy and cannot bypass it through direct object-store URLs."],
+            source_ref=heading_ref(
+                SECURITY_HARDENING_PATH,
+                "6. Data protection, privacy, and cache safety",
+                "LOG_REDACTION_AND_MASKED_EXPORT_POLICY",
+            ),
+            notes=[
+                "Exports inherit masking/export policy and cannot bypass it through direct object-store URLs."
+            ],
             control_layer="privacy_and_observability_boundary",
         ),
         row(
@@ -1728,8 +2054,14 @@ def security_control_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["AUTHORITY_SANDBOX_BINDING_GATE"],
             source_path=SECURITY_HARDENING_PATH,
             source_heading_or_logical_block="5. Service-to-service and network hardening",
-            source_ref=text_ref(SECURITY_HARDENING_PATH, "explicit allowlists and SSRF-resistant URL validation", "SSRF_ALLOWLIST_AND_LEAST_PRIVILEGE_EGRESS"),
-            notes=["Zero trust applies between service boundaries as well as to external connectors."],
+            source_ref=text_ref(
+                SECURITY_HARDENING_PATH,
+                "explicit allowlists and SSRF-resistant URL validation",
+                "SSRF_ALLOWLIST_AND_LEAST_PRIVILEGE_EGRESS",
+            ),
+            notes=[
+                "Zero trust applies between service boundaries as well as to external connectors."
+            ],
             control_layer="network_egress_boundary",
         ),
         row(
@@ -1748,11 +2080,19 @@ def security_control_rows() -> list[dict[str, Any]]:
             purge_trigger=NOT_APPLICABLE,
             replay_preservation_required=True,
             restore_reconciliation_required=True,
-            release_gate_dependency=["BUILD_SIGNATURE_AND_PROVENANCE_GATE", "CRITICAL_VULNERABILITY_CLEARANCE_GATE", "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
+            release_gate_dependency=[
+                "BUILD_SIGNATURE_AND_PROVENANCE_GATE",
+                "CRITICAL_VULNERABILITY_CLEARANCE_GATE",
+                "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE",
+            ],
             source_path=RELEASE_IDENTITY_PATH,
             source_heading_or_logical_block="2. Contract boundary",
-            source_ref=heading_ref(RELEASE_IDENTITY_PATH, "2. Contract boundary", "SIGNED_BUILD_SBOM_AND_PROVENANCE"),
-            notes=["Promotion evidence cannot be assembled from stale green runs or mixed candidate tuples."],
+            source_ref=heading_ref(
+                RELEASE_IDENTITY_PATH, "2. Contract boundary", "SIGNED_BUILD_SBOM_AND_PROVENANCE"
+            ),
+            notes=[
+                "Promotion evidence cannot be assembled from stale green runs or mixed candidate tuples."
+            ],
             control_layer="release_provenance_boundary",
         ),
         row(
@@ -1774,7 +2114,11 @@ def security_control_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SECRET_ROTATION_ATTESTATION_GATE"],
             source_path=SECURITY_HARDENING_PATH,
             source_heading_or_logical_block="3. Secret, key, and token handling",
-            source_ref=text_ref(SECURITY_HARDENING_PATH, "key and secret rotation SHALL be auditable", "SECRET_VERSION_ROTATION_AND_ATTESTATION"),
+            source_ref=text_ref(
+                SECURITY_HARDENING_PATH,
+                "key and secret rotation SHALL be auditable",
+                "SECRET_VERSION_ROTATION_AND_ATTESTATION",
+            ),
             notes=["Newly promoted environments require secret-rotation attestation."],
             control_layer="secret_rotation_boundary",
         ),
@@ -1790,14 +2134,24 @@ def security_control_rows() -> list[dict[str, Any]]:
             survivability_or_fidelity_formula="no production desktop client without signature, notarization, and hardened-runtime policy compliance",
             canonical_store_or_boundary="native release and build boundary",
             encryption_or_protection_control="signed and notarized macOS build with hardened runtime and least-privilege entitlements",
-            cache_scope=["NATIVE_OPERATOR_WORKSPACE_SCENE", "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE"],
+            cache_scope=[
+                "NATIVE_OPERATOR_WORKSPACE_SCENE",
+                "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE",
+            ],
             purge_trigger=["NATIVE_BUILD_SUPERSEDED"],
             replay_preservation_required=True,
             restore_reconciliation_required=False,
-            release_gate_dependency=["NATIVE_DESKTOP_HARDENING_GATE", "BUILD_SIGNATURE_AND_PROVENANCE_GATE"],
+            release_gate_dependency=[
+                "NATIVE_DESKTOP_HARDENING_GATE",
+                "BUILD_SIGNATURE_AND_PROVENANCE_GATE",
+            ],
             source_path=SECURITY_HARDENING_PATH,
             source_heading_or_logical_block="4. Browser, native-client, API, and transport hardening",
-            source_ref=text_ref(SECURITY_HARDENING_PATH, "signed and notarized macOS desktop builds with hardened runtime", "NATIVE_SIGNATURE_NOTARIZATION_AND_HARDENED_RUNTIME"),
+            source_ref=text_ref(
+                SECURITY_HARDENING_PATH,
+                "signed and notarized macOS desktop builds with hardened runtime",
+                "NATIVE_SIGNATURE_NOTARIZATION_AND_HARDENED_RUNTIME",
+            ),
             notes=["The desktop client is blocked from production without hardening evidence."],
             control_layer="native_release_boundary",
         ),
@@ -1810,21 +2164,32 @@ def threat_control_rows() -> list[dict[str, Any]]:
     mappings = [
         (
             "CROSS_TENANT_OR_CROSS_CLIENT_DATA_EXPOSURE",
-            ["CACHE_ISOLATION_CONTRACT_ENFORCEMENT", "PER_TENANT_ENVELOPE_ENCRYPTION", "SESSION_BOUND_COMMAND_VALIDATION"],
+            [
+                "CACHE_ISOLATION_CONTRACT_ENFORCEMENT",
+                "PER_TENANT_ENVELOPE_ENCRYPTION",
+                "SESSION_BOUND_COMMAND_VALIDATION",
+            ],
             ["CROSS_TENANT_CACHE_ISOLATION_GATE"],
             CACHE_ISOLATION_PATH,
             "Eliminated Leakage Classes",
         ),
         (
             "STALE_OR_REPLAYED_USER_COMMANDS",
-            ["SESSION_BOUND_COMMAND_VALIDATION", "STEP_UP_AND_SESSION_ROTATION", "RETENTION_ERROR_AND_GATE_COUPLING"],
+            [
+                "SESSION_BOUND_COMMAND_VALIDATION",
+                "STEP_UP_AND_SESSION_ROTATION",
+                "RETENTION_ERROR_AND_GATE_COUPLING",
+            ],
             ["STALE_VIEW_AND_IDEMPOTENCY_GATE", "SESSION_AND_ANTI_CSRF_GATE"],
             NORTHBOUND_API_PATH,
             "1. Core principles",
         ),
         (
             "AUTHORITY_TOKEN_MISUSE_OR_WRONG_CLIENT_TOKEN_BINDING",
-            ["TOKEN_VAULT_AND_BINDING_LINEAGE_REVALIDATION", "AUTHORITY_INGRESS_QUARANTINE_AND_DEDUPE"],
+            [
+                "TOKEN_VAULT_AND_BINDING_LINEAGE_REVALIDATION",
+                "AUTHORITY_INGRESS_QUARANTINE_AND_DEDUPE",
+            ],
             ["AUTHORITY_SANDBOX_BINDING_GATE", "SECRET_ROTATION_ATTESTATION_GATE"],
             SECURITY_HARDENING_PATH,
             "3. Secret, key, and token handling",
@@ -1852,15 +2217,25 @@ def threat_control_rows() -> list[dict[str, Any]]:
         ),
         (
             "SSRF_OR_UNCONTROLLED_CONNECTOR_EGRESS",
-            ["SSRF_ALLOWLIST_AND_LEAST_PRIVILEGE_EGRESS", "AUTHORITY_INGRESS_QUARANTINE_AND_DEDUPE"],
+            [
+                "SSRF_ALLOWLIST_AND_LEAST_PRIVILEGE_EGRESS",
+                "AUTHORITY_INGRESS_QUARANTINE_AND_DEDUPE",
+            ],
             ["AUTHORITY_SANDBOX_BINDING_GATE"],
             SECURITY_HARDENING_PATH,
             "5. Service-to-service and network hardening",
         ),
         (
             "COMPROMISED_BUILD_DEPENDENCY_OR_RELEASE_ARTIFACT",
-            ["SIGNED_BUILD_SBOM_AND_PROVENANCE", "NATIVE_SIGNATURE_NOTARIZATION_AND_HARDENED_RUNTIME"],
-            ["BUILD_SIGNATURE_AND_PROVENANCE_GATE", "CRITICAL_VULNERABILITY_CLEARANCE_GATE", "NATIVE_DESKTOP_HARDENING_GATE"],
+            [
+                "SIGNED_BUILD_SBOM_AND_PROVENANCE",
+                "NATIVE_SIGNATURE_NOTARIZATION_AND_HARDENED_RUNTIME",
+            ],
+            [
+                "BUILD_SIGNATURE_AND_PROVENANCE_GATE",
+                "CRITICAL_VULNERABILITY_CLEARANCE_GATE",
+                "NATIVE_DESKTOP_HARDENING_GATE",
+            ],
             SECURITY_HARDENING_PATH,
             "7. Supply-chain and build integrity",
         ),
@@ -1873,14 +2248,22 @@ def threat_control_rows() -> list[dict[str, Any]]:
         ),
         (
             "PRIVILEGED_OPERATOR_OVERREACH_WITHOUT_STEP_UP_APPROVAL_OR_AUDIT",
-            ["STEP_UP_AND_SESSION_ROTATION", "SESSION_BOUND_COMMAND_VALIDATION", "RETENTION_ERROR_AND_GATE_COUPLING"],
+            [
+                "STEP_UP_AND_SESSION_ROTATION",
+                "SESSION_BOUND_COMMAND_VALIDATION",
+                "RETENTION_ERROR_AND_GATE_COUPLING",
+            ],
             ["SESSION_AND_ANTI_CSRF_GATE", "STALE_VIEW_AND_IDEMPOTENCY_GATE"],
             SECURITY_HARDENING_PATH,
             "2. Identity, session, and command trust",
         ),
         (
             "DESKTOP_CLIENT_COMPROMISE_OR_UNSAFE_LOCAL_CACHE_EXPOSURE",
-            ["NATIVE_SIGNATURE_NOTARIZATION_AND_HARDENED_RUNTIME", "NATIVE_CACHE_HYDRATION_PURGE_AND_REBASE", "CACHE_ISOLATION_CONTRACT_ENFORCEMENT"],
+            [
+                "NATIVE_SIGNATURE_NOTARIZATION_AND_HARDENED_RUNTIME",
+                "NATIVE_CACHE_HYDRATION_PURGE_AND_REBASE",
+                "CACHE_ISOLATION_CONTRACT_ENFORCEMENT",
+            ],
             ["NATIVE_DESKTOP_HARDENING_GATE", "CROSS_TENANT_CACHE_ISOLATION_GATE"],
             SECURITY_HARDENING_PATH,
             "4. Browser, native-client, API, and transport hardening",
@@ -1904,7 +2287,8 @@ def threat_control_rows() -> list[dict[str, Any]]:
                 cache_scope=NOT_APPLICABLE,
                 purge_trigger=NOT_APPLICABLE,
                 replay_preservation_required=False,
-                restore_reconciliation_required=threat_id == "RESTORE_TIME_RESURRECTION_OF_ERASED_OR_MASKED_DATA",
+                restore_reconciliation_required=threat_id
+                == "RESTORE_TIME_RESURRECTION_OF_ERASED_OR_MASKED_DATA",
                 release_gate_dependency=gate_ids,
                 source_path=source_path,
                 source_heading_or_logical_block=heading_text,
@@ -1925,14 +2309,32 @@ def cache_rows() -> list[dict[str, Any]]:
         "WORK_INBOX_SNAPSHOT": (COLLABORATION_PATH, "FE-25 Cache Isolation"),
         "CLIENT_PORTAL_WORKSPACE": (PORTAL_EXPERIENCE_PATH, "FE-25 Cache Isolation"),
         "CUSTOMER_REQUEST_LIST": (PORTAL_EXPERIENCE_PATH, "FE-25 Cache Isolation"),
-        "TENANT_GOVERNANCE_SNAPSHOT": (NORTHBOUND_API_PATH, "2.1 Admin/Governance Console read and simulation surfaces"),
-        "GOVERNANCE_POLICY_SNAPSHOT": (NORTHBOUND_API_PATH, "2.1 Admin/Governance Console read and simulation surfaces"),
-        "PRINCIPAL_ACCESS_VIEW": (NORTHBOUND_API_PATH, "2.1 Admin/Governance Console read and simulation surfaces"),
-        "ROLE_TEMPLATE_MATRIX": (NORTHBOUND_API_PATH, "2.1 Admin/Governance Console read and simulation surfaces"),
+        "TENANT_GOVERNANCE_SNAPSHOT": (
+            NORTHBOUND_API_PATH,
+            "2.1 Admin/Governance Console read and simulation surfaces",
+        ),
+        "GOVERNANCE_POLICY_SNAPSHOT": (
+            NORTHBOUND_API_PATH,
+            "2.1 Admin/Governance Console read and simulation surfaces",
+        ),
+        "PRINCIPAL_ACCESS_VIEW": (
+            NORTHBOUND_API_PATH,
+            "2.1 Admin/Governance Console read and simulation surfaces",
+        ),
+        "ROLE_TEMPLATE_MATRIX": (
+            NORTHBOUND_API_PATH,
+            "2.1 Admin/Governance Console read and simulation surfaces",
+        ),
         "NATIVE_OPERATOR_WORKSPACE_SCENE": (MACOS_BLUEPRINT_PATH, "FE-25 Cache Isolation"),
         "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE": (MACOS_BLUEPRINT_PATH, "FE-25 Cache Isolation"),
-        "EXPERIENCE_CURSOR": (MACOS_BLUEPRINT_PATH, "FE-75 Native Cache Hydration, Purge, and Rebase"),
-        "WORKSPACE_CURSOR": (MACOS_BLUEPRINT_PATH, "FE-75 Native Cache Hydration, Purge, and Rebase"),
+        "EXPERIENCE_CURSOR": (
+            MACOS_BLUEPRINT_PATH,
+            "FE-75 Native Cache Hydration, Purge, and Rebase",
+        ),
+        "WORKSPACE_CURSOR": (
+            MACOS_BLUEPRINT_PATH,
+            "FE-75 Native Cache Hydration, Purge, and Rebase",
+        ),
         "NATIVE_PRIMARY_SCENE": (NATIVE_CACHE_PATH, "Coverage requirements"),
         "NATIVE_SECONDARY_WINDOW": (NATIVE_CACHE_PATH, "Coverage requirements"),
     }
@@ -1953,7 +2355,15 @@ def cache_rows() -> list[dict[str, Any]]:
                 canonical_store_or_boundary=f"cache_isolation_contract::{scope}",
                 encryption_or_protection_control="cache_isolation_contract, delivery_binding_hash, route/object binding",
                 cache_scope=[scope],
-                purge_trigger=["TENANT_SWITCH", "PRINCIPAL_CLASS_CHANGE", "SESSION_BINDING_CHANGE", "ACCESS_BINDING_CHANGE", "MASKING_CHANGE", "ROUTE_OR_OBJECT_DRIFT", "SCHEMA_INCOMPATIBLE"],
+                purge_trigger=[
+                    "TENANT_SWITCH",
+                    "PRINCIPAL_CLASS_CHANGE",
+                    "SESSION_BINDING_CHANGE",
+                    "ACCESS_BINDING_CHANGE",
+                    "MASKING_CHANGE",
+                    "ROUTE_OR_OBJECT_DRIFT",
+                    "SCHEMA_INCOMPATIBLE",
+                ],
                 replay_preservation_required=False,
                 restore_reconciliation_required=False,
                 release_gate_dependency=["CROSS_TENANT_CACHE_ISOLATION_GATE"],
@@ -1986,7 +2396,10 @@ def cache_rows() -> list[dict[str, Any]]:
                 purge_trigger=HYDRATION_PURGE_TRIGGER_ENUM,
                 replay_preservation_required=False,
                 restore_reconciliation_required=False,
-                release_gate_dependency=["CROSS_TENANT_CACHE_ISOLATION_GATE", "NATIVE_DESKTOP_HARDENING_GATE"],
+                release_gate_dependency=[
+                    "CROSS_TENANT_CACHE_ISOLATION_GATE",
+                    "NATIVE_DESKTOP_HARDENING_GATE",
+                ],
                 source_path=source_path,
                 source_heading_or_logical_block=heading_text,
                 source_ref=heading_ref(source_path, heading_text, scope),
@@ -2022,11 +2435,24 @@ def session_storage_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SESSION_AND_ANTI_CSRF_GATE"],
             source_path=SECURITY_HARDENING_PATH,
             source_heading_or_logical_block="2. Identity, session, and command trust",
-            source_ref=text_ref(SECURITY_HARDENING_PATH, "anti-CSRF protection for cookie-based browser sessions", "BROWSER_SESSION_COOKIE"),
-            notes=["Forbidden boundaries: localStorage, queue payloads, caches, logs, native local cache."],
+            source_ref=text_ref(
+                SECURITY_HARDENING_PATH,
+                "anti-CSRF protection for cookie-based browser sessions",
+                "BROWSER_SESSION_COOKIE",
+            ),
+            notes=[
+                "Forbidden boundaries: localStorage, queue payloads, caches, logs, native local cache."
+            ],
             credential_type="BROWSER_SESSION_COOKIE",
             allowed_storage_boundary="http_only_secure_cookie__browser_session_boundary",
-            forbidden_boundaries=["localStorage", "sessionStorage", "queue_payload", "cache_artifact", "general_log", "native_local_cache"],
+            forbidden_boundaries=[
+                "localStorage",
+                "sessionStorage",
+                "queue_payload",
+                "cache_artifact",
+                "general_log",
+                "native_local_cache",
+            ],
         ),
         row(
             artifact_or_control_id="SESSION_STORAGE::BROWSER_CSRF_REF",
@@ -2047,11 +2473,19 @@ def session_storage_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SESSION_AND_ANTI_CSRF_GATE"],
             source_path=ACTOR_SESSION_SCHEMA_PATH,
             source_heading_or_logical_block="properties.csrf_ref",
-            source_ref=text_ref(ACTOR_SESSION_SCHEMA_PATH, "\"csrf_ref\"", "BROWSER_CSRF_REF"),
-            notes=["Forbidden boundaries: localStorage, general logs, queue payloads, export artifacts."],
+            source_ref=text_ref(ACTOR_SESSION_SCHEMA_PATH, '"csrf_ref"', "BROWSER_CSRF_REF"),
+            notes=[
+                "Forbidden boundaries: localStorage, general logs, queue payloads, export artifacts."
+            ],
             credential_type="BROWSER_CSRF_REF",
             allowed_storage_boundary="server_session_plus_csrf_binding_boundary",
-            forbidden_boundaries=["localStorage", "sessionStorage", "queue_payload", "general_log", "export_artifact"],
+            forbidden_boundaries=[
+                "localStorage",
+                "sessionStorage",
+                "queue_payload",
+                "general_log",
+                "export_artifact",
+            ],
         ),
         row(
             artifact_or_control_id="SESSION_STORAGE::NATIVE_PRODUCT_SESSION_MATERIAL",
@@ -2065,18 +2499,39 @@ def session_storage_rows() -> list[dict[str, Any]]:
             survivability_or_fidelity_formula="Keychain-backed storage for native product-session material plus revocation-aware local cache purge.",
             canonical_store_or_boundary="os_keychain__native_session_boundary",
             encryption_or_protection_control="Keychain-backed storage and ASWebAuthenticationSession/system-browser sign-in",
-            cache_scope=["NATIVE_OPERATOR_WORKSPACE_SCENE", "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE"],
-            purge_trigger=["TENANT_SWITCH", "SESSION_REVOKED", "STEP_UP_COMPLETED", "PRIVILEGE_DOWNGRADE", "SCHEMA_INCOMPATIBLE"],
+            cache_scope=[
+                "NATIVE_OPERATOR_WORKSPACE_SCENE",
+                "NATIVE_OPERATOR_SECONDARY_WINDOW_SCENE",
+            ],
+            purge_trigger=[
+                "TENANT_SWITCH",
+                "SESSION_REVOKED",
+                "STEP_UP_COMPLETED",
+                "PRIVILEGE_DOWNGRADE",
+                "SCHEMA_INCOMPATIBLE",
+            ],
             replay_preservation_required=False,
             restore_reconciliation_required=False,
             release_gate_dependency=["NATIVE_DESKTOP_HARDENING_GATE", "SESSION_AND_ANTI_CSRF_GATE"],
             source_path=MACOS_BLUEPRINT_PATH,
             source_heading_or_logical_block="7. Authentication and session strategy",
-            source_ref=text_ref(MACOS_BLUEPRINT_PATH, "Keychain-backed storage for product session material", "NATIVE_PRODUCT_SESSION_MATERIAL"),
-            notes=["Forbidden boundaries: browser localStorage, structured cache rows, temp exports, preview caches, logs."],
+            source_ref=text_ref(
+                MACOS_BLUEPRINT_PATH,
+                "Keychain-backed storage for product session material",
+                "NATIVE_PRODUCT_SESSION_MATERIAL",
+            ),
+            notes=[
+                "Forbidden boundaries: browser localStorage, structured cache rows, temp exports, preview caches, logs."
+            ],
             credential_type="NATIVE_PRODUCT_SESSION_MATERIAL",
             allowed_storage_boundary="os_keychain__native_session_boundary",
-            forbidden_boundaries=["structured_cache", "preview_cache", "temp_export_file", "general_log", "browser_localStorage"],
+            forbidden_boundaries=[
+                "structured_cache",
+                "preview_cache",
+                "temp_export_file",
+                "general_log",
+                "browser_localStorage",
+            ],
         ),
         row(
             artifact_or_control_id="SESSION_STORAGE::AUTHORITY_ACCESS_REFRESH_TOKEN",
@@ -2094,14 +2549,30 @@ def session_storage_rows() -> list[dict[str, Any]]:
             purge_trigger=["AUTHORITY_REBINDING", "TOKEN_ROTATION", "SESSION_REVOKED"],
             replay_preservation_required=False,
             restore_reconciliation_required=True,
-            release_gate_dependency=["AUTHORITY_SANDBOX_BINDING_GATE", "SECRET_ROTATION_ATTESTATION_GATE"],
+            release_gate_dependency=[
+                "AUTHORITY_SANDBOX_BINDING_GATE",
+                "SECRET_ROTATION_ATTESTATION_GATE",
+            ],
             source_path=SECURITY_HARDENING_PATH,
             source_heading_or_logical_block="3. Secret, key, and token handling",
-            source_ref=text_ref(SECURITY_HARDENING_PATH, "raw authority access/refresh tokens SHALL live only", "AUTHORITY_ACCESS_REFRESH_TOKEN"),
-            notes=["Forbidden boundaries: browser state, native cache, queue payloads, read models, logs, analysis outputs."],
+            source_ref=text_ref(
+                SECURITY_HARDENING_PATH,
+                "raw authority access/refresh tokens SHALL live only",
+                "AUTHORITY_ACCESS_REFRESH_TOKEN",
+            ),
+            notes=[
+                "Forbidden boundaries: browser state, native cache, queue payloads, read models, logs, analysis outputs."
+            ],
             credential_type="AUTHORITY_ACCESS_REFRESH_TOKEN",
             allowed_storage_boundary="token_vault_or_secret_store_only",
-            forbidden_boundaries=["browser_state", "native_cache", "queue_payload", "read_model", "general_log", "analysis_artifact"],
+            forbidden_boundaries=[
+                "browser_state",
+                "native_cache",
+                "queue_payload",
+                "read_model",
+                "general_log",
+                "analysis_artifact",
+            ],
         ),
         row(
             artifact_or_control_id="SESSION_STORAGE::SERVICE_IDENTITY_MACHINE_CREDENTIAL",
@@ -2119,14 +2590,26 @@ def session_storage_rows() -> list[dict[str, Any]]:
             purge_trigger=["SECRET_ROTATION", "REVOCATION_REASON_CHANGED"],
             replay_preservation_required=False,
             restore_reconciliation_required=True,
-            release_gate_dependency=["SECRET_ROTATION_ATTESTATION_GATE", "BUILD_SIGNATURE_AND_PROVENANCE_GATE"],
+            release_gate_dependency=[
+                "SECRET_ROTATION_ATTESTATION_GATE",
+                "BUILD_SIGNATURE_AND_PROVENANCE_GATE",
+            ],
             source_path=SECURITY_HARDENING_PATH,
             source_heading_or_logical_block="5. Service-to-service and network hardening",
-            source_ref=text_ref(SECURITY_HARDENING_PATH, "east-west traffic SHALL use authenticated service identity", "SERVICE_IDENTITY_MACHINE_CREDENTIAL"),
+            source_ref=text_ref(
+                SECURITY_HARDENING_PATH,
+                "east-west traffic SHALL use authenticated service identity",
+                "SERVICE_IDENTITY_MACHINE_CREDENTIAL",
+            ),
             notes=["Forbidden boundaries: general app storage, caches, queue payloads, logs."],
             credential_type="SERVICE_IDENTITY_MACHINE_CREDENTIAL",
             allowed_storage_boundary="service_identity_secret_store",
-            forbidden_boundaries=["general_app_storage", "cache_artifact", "queue_payload", "general_log"],
+            forbidden_boundaries=[
+                "general_app_storage",
+                "cache_artifact",
+                "queue_payload",
+                "general_log",
+            ],
         ),
         row(
             artifact_or_control_id="SESSION_STORAGE::SECRET_VERSION_KEY_MATERIAL",
@@ -2147,11 +2630,22 @@ def session_storage_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["SECRET_ROTATION_ATTESTATION_GATE"],
             source_path=SECRET_VERSION_SCHEMA_PATH,
             source_heading_or_logical_block="title=SecretVersion",
-            source_ref=text_ref(SECRET_VERSION_SCHEMA_PATH, "\"title\": \"SecretVersion\"", "SECRET_VERSION_KEY_MATERIAL"),
-            notes=["Forbidden boundaries: browser state, native local cache, queue payloads, general logs."],
+            source_ref=text_ref(
+                SECRET_VERSION_SCHEMA_PATH,
+                '"title": "SecretVersion"',
+                "SECRET_VERSION_KEY_MATERIAL",
+            ),
+            notes=[
+                "Forbidden boundaries: browser state, native local cache, queue payloads, general logs."
+            ],
             credential_type="SECRET_VERSION_KEY_MATERIAL",
             allowed_storage_boundary="kms_hsm_rooted_secret_store",
-            forbidden_boundaries=["browser_state", "native_local_cache", "queue_payload", "general_log"],
+            forbidden_boundaries=[
+                "browser_state",
+                "native_local_cache",
+                "queue_payload",
+                "general_log",
+            ],
         ),
         row(
             artifact_or_control_id="SESSION_STORAGE::RESUME_TOKEN",
@@ -2165,18 +2659,44 @@ def session_storage_rows() -> list[dict[str, Any]]:
             survivability_or_fidelity_formula="resume_token is transport material only; stream_recovery_contract is authoritative for route, subject, session, access, masking, epoch, and frontier.",
             canonical_store_or_boundary="governed_snapshot_or_cursor_metadata_boundary",
             encryption_or_protection_control="stream_recovery_contract and native_cache_hydration_contract binding",
-            cache_scope=["LOW_NOISE_FRAME", "WORKSPACE_SNAPSHOT", "EXPERIENCE_CURSOR", "WORKSPACE_CURSOR"],
-            purge_trigger=["SESSION_REVOKED", "ACCESS_BINDING_CHANGE", "MASKING_CHANGE", "SCHEMA_INCOMPATIBLE", "TENANT_SWITCH", "STEP_UP_COMPLETED"],
+            cache_scope=[
+                "LOW_NOISE_FRAME",
+                "WORKSPACE_SNAPSHOT",
+                "EXPERIENCE_CURSOR",
+                "WORKSPACE_CURSOR",
+            ],
+            purge_trigger=[
+                "SESSION_REVOKED",
+                "ACCESS_BINDING_CHANGE",
+                "MASKING_CHANGE",
+                "SCHEMA_INCOMPATIBLE",
+                "TENANT_SWITCH",
+                "STEP_UP_COMPLETED",
+            ],
             replay_preservation_required=False,
             restore_reconciliation_required=False,
-            release_gate_dependency=["STALE_VIEW_AND_IDEMPOTENCY_GATE", "CROSS_TENANT_CACHE_ISOLATION_GATE"],
+            release_gate_dependency=[
+                "STALE_VIEW_AND_IDEMPOTENCY_GATE",
+                "CROSS_TENANT_CACHE_ISOLATION_GATE",
+            ],
             source_path=MACOS_BLUEPRINT_PATH,
             source_heading_or_logical_block="6. Data flow and synchronization model",
-            source_ref=text_ref(MACOS_BLUEPRINT_PATH, "Resume tokens SHALL be treated as governed cursor material", "RESUME_TOKEN"),
-            notes=["Forbidden boundaries: general logs, download URLs, detached preview links, unbound local notes."],
+            source_ref=text_ref(
+                MACOS_BLUEPRINT_PATH,
+                "Resume tokens SHALL be treated as governed cursor material",
+                "RESUME_TOKEN",
+            ),
+            notes=[
+                "Forbidden boundaries: general logs, download URLs, detached preview links, unbound local notes."
+            ],
             credential_type="RESUME_TOKEN",
             allowed_storage_boundary="governed_snapshot_or_cursor_metadata_boundary",
-            forbidden_boundaries=["general_log", "download_url", "detached_preview_link", "unbound_local_note"],
+            forbidden_boundaries=[
+                "general_log",
+                "download_url",
+                "detached_preview_link",
+                "unbound_local_note",
+            ],
         ),
         row(
             artifact_or_control_id="SESSION_STORAGE::AUTHORITY_LOGIN_CREDENTIALS",
@@ -2197,11 +2717,24 @@ def session_storage_rows() -> list[dict[str, Any]]:
             release_gate_dependency=["AUTHORITY_SANDBOX_BINDING_GATE"],
             source_path=RETENTION_PRIVACY_PATH,
             source_heading_or_logical_block="Privacy and minimization defaults",
-            source_ref=text_ref(RETENTION_PRIVACY_PATH, "authority login credentials SHALL NOT be stored", "AUTHORITY_LOGIN_CREDENTIALS"),
-            notes=["Forbidden boundaries: browser storage, native storage, vault, queue payloads, logs, analysis outputs."],
+            source_ref=text_ref(
+                RETENTION_PRIVACY_PATH,
+                "authority login credentials SHALL NOT be stored",
+                "AUTHORITY_LOGIN_CREDENTIALS",
+            ),
+            notes=[
+                "Forbidden boundaries: browser storage, native storage, vault, queue payloads, logs, analysis outputs."
+            ],
             credential_type="AUTHORITY_LOGIN_CREDENTIALS",
             allowed_storage_boundary="not_persisted__system_browser_or_provider_surface_only",
-            forbidden_boundaries=["browser_storage", "native_storage", "vault", "queue_payload", "general_log", "analysis_artifact"],
+            forbidden_boundaries=[
+                "browser_storage",
+                "native_storage",
+                "vault",
+                "queue_payload",
+                "general_log",
+                "analysis_artifact",
+            ],
         ),
     ]
     assert_required_row_fields(rows)
@@ -2211,13 +2744,37 @@ def session_storage_rows() -> list[dict[str, Any]]:
 def restore_rows() -> list[dict[str, Any]]:
     state_data = {
         "PENDING_RECONCILIATION": ("UNKNOWN_UNTIL_RECONCILED", "NOT_REQUIRED", "BLOCKED"),
-        "RECONCILED_NO_COMPENSATION_REQUIRED": ("NONE_DETECTED", "NOT_REQUIRED", "READY_FOR_REOPEN"),
-        "COMPENSATING_RE_ERASURE_REQUIRED": ("ERASURE_OR_PSEUDONYMISATION_RESURRECTED", "REQUIRED_PENDING", "BLOCKED"),
-        "COMPENSATING_RE_ERASURE_IN_PROGRESS": ("ERASURE_OR_PSEUDONYMISATION_RESURRECTED", "IN_PROGRESS", "LIMITED"),
-        "RECONCILED_WITH_COMPENSATING_RE_ERASURE": ("ERASURE_OR_PSEUDONYMISATION_RESURRECTED", "COMPLETED", "READY_FOR_REOPEN"),
+        "RECONCILED_NO_COMPENSATION_REQUIRED": (
+            "NONE_DETECTED",
+            "NOT_REQUIRED",
+            "READY_FOR_REOPEN",
+        ),
+        "COMPENSATING_RE_ERASURE_REQUIRED": (
+            "ERASURE_OR_PSEUDONYMISATION_RESURRECTED",
+            "REQUIRED_PENDING",
+            "BLOCKED",
+        ),
+        "COMPENSATING_RE_ERASURE_IN_PROGRESS": (
+            "ERASURE_OR_PSEUDONYMISATION_RESURRECTED",
+            "IN_PROGRESS",
+            "LIMITED",
+        ),
+        "RECONCILED_WITH_COMPENSATING_RE_ERASURE": (
+            "ERASURE_OR_PSEUDONYMISATION_RESURRECTED",
+            "COMPLETED",
+            "READY_FOR_REOPEN",
+        ),
         "BLOCKED_LEGAL_HOLD": ("ERASURE_OR_PSEUDONYMISATION_RESURRECTED", "BLOCKED", "LIMITED"),
-        "BLOCKED_PROOF_PRESERVATION": ("ERASURE_OR_PSEUDONYMISATION_RESURRECTED", "BLOCKED", "LIMITED"),
-        "BLOCKED_AUTHORITY_AMBIGUITY": ("ERASURE_OR_PSEUDONYMISATION_RESURRECTED", "BLOCKED", "LIMITED"),
+        "BLOCKED_PROOF_PRESERVATION": (
+            "ERASURE_OR_PSEUDONYMISATION_RESURRECTED",
+            "BLOCKED",
+            "LIMITED",
+        ),
+        "BLOCKED_AUTHORITY_AMBIGUITY": (
+            "ERASURE_OR_PSEUDONYMISATION_RESURRECTED",
+            "BLOCKED",
+            "LIMITED",
+        ),
     }
     rows: list[dict[str, Any]] = []
     for state in RESTORE_PRIVACY_STATE_ENUM:
@@ -2242,8 +2799,12 @@ def restore_rows() -> list[dict[str, Any]]:
                 release_gate_dependency=["SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"],
                 source_path=RECOVERY_GOVERNANCE_PATH,
                 source_heading_or_logical_block="Restore privacy reconciliation law",
-                source_ref=heading_ref(RECOVERY_GOVERNANCE_PATH, "Restore privacy reconciliation law", state),
-                notes=["Restore evidence is not lawful production evidence until the contract reaches a reconciled state."],
+                source_ref=heading_ref(
+                    RECOVERY_GOVERNANCE_PATH, "Restore privacy reconciliation law", state
+                ),
+                notes=[
+                    "Restore evidence is not lawful production evidence until the contract reaches a reconciled state."
+                ],
                 privacy_reconciliation_state=state,
                 resurrected_data_posture=resurrected_posture,
                 compensating_re_erasure_state=re_erasure_state,
@@ -2338,7 +2899,9 @@ def release_gate_rows() -> list[dict[str, Any]]:
                 cache_scope=NOT_APPLICABLE,
                 purge_trigger=NOT_APPLICABLE,
                 replay_preservation_required=True,
-                restore_reconciliation_required=(gate_id == "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"),
+                restore_reconciliation_required=(
+                    gate_id == "SCHEMA_COMPATIBILITY_AND_RESTORE_GATE"
+                ),
                 release_gate_dependency=[gate_id],
                 source_path=source_path,
                 source_heading_or_logical_block=heading_text,
@@ -2371,13 +2934,19 @@ def explicit_gaps() -> list[dict[str, Any]]:
             "gap_id": "authority_login_credentials_have_no_schema_because_persistence_is_forbidden",
             "severity": "low",
             "description": "The corpus forbids stored authority login credentials by design, so there is no dedicated persisted schema artifact for that credential class.",
-            "source_ref": text_ref(RETENTION_PRIVACY_PATH, "authority login credentials SHALL NOT be stored", "authority_login_credentials_forbidden"),
+            "source_ref": text_ref(
+                RETENTION_PRIVACY_PATH,
+                "authority login credentials SHALL NOT be stored",
+                "authority_login_credentials_forbidden",
+            ),
         },
         {
             "gap_id": "restore_reopen_surface_specific_matrix_not_expanded_in_source",
             "severity": "medium",
             "description": "Restore privacy reconciliation states are defined, but the corpus does not separately publish a per-surface reopen matrix for each operator and customer route family.",
-            "source_ref": heading_ref(RECOVERY_GOVERNANCE_PATH, "Restore privacy reconciliation law"),
+            "source_ref": heading_ref(
+                RECOVERY_GOVERNANCE_PATH, "Restore privacy reconciliation law"
+            ),
         },
     ]
 
@@ -2385,7 +2954,9 @@ def explicit_gaps() -> list[dict[str, Any]]:
 def artifact_retention_payload() -> dict[str, Any]:
     rows = artifact_retention_rows()
     return {
-        "summary": make_summary(rows, artifact_count=len(rows), explicit_gap_count=len(explicit_gaps())),
+        "summary": make_summary(
+            rows, artifact_count=len(rows), explicit_gap_count=len(explicit_gaps())
+        ),
         "retention_class_enum": RETENTION_CLASS_ENUM,
         "legal_hold_state_enum": LEGAL_HOLD_STATE_ENUM,
         "erasure_eligibility_enum": ERASURE_ELIGIBILITY_ENUM,
@@ -2401,9 +2972,15 @@ def privacy_threshold_payload() -> dict[str, Any]:
     return {
         "summary": make_summary(
             rows,
-            formula_count=len([row for row in rows if row["category"] == "QUANTITATIVE_PRIVACY_FORMULA"]),
-            threshold_count=len([row for row in rows if row["category"] == "QUANTITATIVE_PRIVACY_THRESHOLD"]),
-            explainability_scope_count=len([row for row in rows if row["category"] == "RETENTION_LIMITED_EXPLAINABILITY"]),
+            formula_count=len(
+                [row for row in rows if row["category"] == "QUANTITATIVE_PRIVACY_FORMULA"]
+            ),
+            threshold_count=len(
+                [row for row in rows if row["category"] == "QUANTITATIVE_PRIVACY_THRESHOLD"]
+            ),
+            explainability_scope_count=len(
+                [row for row in rows if row["category"] == "RETENTION_LIMITED_EXPLAINABILITY"]
+            ),
         ),
         "explainability_boundary_scope_enum": EXPLAINABILITY_BOUNDARY_SCOPE_ENUM,
         "explainability_surface_role_enum": EXPLAINABILITY_SURFACE_ROLE_ENUM,
@@ -2434,7 +3011,11 @@ def control_register_payload() -> dict[str, Any]:
 def cache_payload() -> dict[str, Any]:
     rows = cache_rows()
     return {
-        "summary": make_summary(rows, cache_scope_count=len(CACHE_SCOPE_ENUM), hydration_scope_count=len(HYDRATION_SCOPE_ENUM)),
+        "summary": make_summary(
+            rows,
+            cache_scope_count=len(CACHE_SCOPE_ENUM),
+            hydration_scope_count=len(HYDRATION_SCOPE_ENUM),
+        ),
         "cache_scope_enum": CACHE_SCOPE_ENUM,
         "hydration_scope_enum": HYDRATION_SCOPE_ENUM,
         "compatibility_dimension_enum": HYDRATION_COMPATIBILITY_ENUM,
@@ -2511,7 +3092,8 @@ def render_docs(outputs: dict[str, Any]) -> tuple[str, str, str]:
             [
                 row_data
                 for row_data in formula_rows
-                if row_data["category"] in {"QUANTITATIVE_PRIVACY_FORMULA", "QUANTITATIVE_PRIVACY_THRESHOLD"}
+                if row_data["category"]
+                in {"QUANTITATIVE_PRIVACY_FORMULA", "QUANTITATIVE_PRIVACY_THRESHOLD"}
             ],
         )
     )
@@ -2537,7 +3119,12 @@ def render_docs(outputs: dict[str, Any]) -> tuple[str, str, str]:
     )
     overview_lines.extend(
         render_table(
-            ["artifact_or_control_id", "canonical_store_or_boundary", "release_gate_dependency", "source_ref"],
+            [
+                "artifact_or_control_id",
+                "canonical_store_or_boundary",
+                "release_gate_dependency",
+                "source_ref",
+            ],
             control_rows,
         )
     )
@@ -2549,7 +3136,9 @@ def render_docs(outputs: dict[str, Any]) -> tuple[str, str, str]:
         ]
     )
     for gap in outputs["artifact_matrix"]["explicit_gaps"]:
-        overview_lines.append(f"- `{gap['gap_id']}` ({gap['severity']}): {gap['description']} [{gap['source_ref']}]")
+        overview_lines.append(
+            f"- `{gap['gap_id']}` ({gap['severity']}): {gap['description']} [{gap['source_ref']}]"
+        )
 
     artifact_doc_lines = [
         "# Artifact Retention, Erasure, and Limitations Matrix",
@@ -2582,8 +3171,18 @@ def render_docs(outputs: dict[str, Any]) -> tuple[str, str, str]:
     )
     artifact_doc_lines.extend(
         render_table(
-            ["artifact_or_control_id", "boundary_scope", "surface_role", "survivability_or_fidelity_formula", "source_ref"],
-            [row_data for row_data in formula_rows if row_data["category"] == "RETENTION_LIMITED_EXPLAINABILITY"],
+            [
+                "artifact_or_control_id",
+                "boundary_scope",
+                "surface_role",
+                "survivability_or_fidelity_formula",
+                "source_ref",
+            ],
+            [
+                row_data
+                for row_data in formula_rows
+                if row_data["category"] == "RETENTION_LIMITED_EXPLAINABILITY"
+            ],
         )
     )
     artifact_doc_lines.extend(
@@ -2595,7 +3194,12 @@ def render_docs(outputs: dict[str, Any]) -> tuple[str, str, str]:
     )
     artifact_doc_lines.extend(
         render_table(
-            ["privacy_reconciliation_state", "reopen_access_state", "compensating_re_erasure_state", "source_ref"],
+            [
+                "privacy_reconciliation_state",
+                "reopen_access_state",
+                "compensating_re_erasure_state",
+                "source_ref",
+            ],
             restore_rows_payload,
         )
     )
@@ -2608,7 +3212,13 @@ def render_docs(outputs: dict[str, Any]) -> tuple[str, str, str]:
     ]
     cache_doc_lines.extend(
         render_table(
-            ["artifact_or_control_id", "cache_scope", "purge_trigger", "canonical_store_or_boundary", "source_ref"],
+            [
+                "artifact_or_control_id",
+                "cache_scope",
+                "purge_trigger",
+                "canonical_store_or_boundary",
+                "source_ref",
+            ],
             cache_rows_payload,
         )
     )
@@ -2621,7 +3231,13 @@ def render_docs(outputs: dict[str, Any]) -> tuple[str, str, str]:
     )
     cache_doc_lines.extend(
         render_table(
-            ["credential_type", "allowed_storage_boundary", "forbidden_boundaries", "release_gate_dependency", "source_ref"],
+            [
+                "credential_type",
+                "allowed_storage_boundary",
+                "forbidden_boundaries",
+                "release_gate_dependency",
+                "source_ref",
+            ],
             session_rows_payload,
         )
     )
@@ -2655,12 +3271,12 @@ def render_mermaid() -> str:
             '  J["NativeCacheHydrationContract"] --> K["Native Scene / Cursor / Local Artifact Purge"]',
             '  L["RestorePrivacyReconciliationContract"] --> M["Reopen Access State"]',
             '  N["Build Signature / SBOM / Provenance"] --> O["Security Release Gates"]',
-            '  F --> O',
-            '  H --> O',
-            '  J --> O',
-            '  L --> O',
-            '  D --> M',
-            '  C --> O',
+            "  F --> O",
+            "  H --> O",
+            "  J --> O",
+            "  L --> O",
+            "  D --> M",
+            "  C --> O",
             "",
         ]
     )
@@ -2741,7 +3357,9 @@ def main() -> int:
         "artifact_row_count": outputs["artifact_matrix"]["summary"]["artifact_count"],
         "formula_row_count": outputs["privacy_thresholds"]["summary"]["formula_count"],
         "threshold_row_count": outputs["privacy_thresholds"]["summary"]["threshold_count"],
-        "explainability_scope_count": outputs["privacy_thresholds"]["summary"]["explainability_scope_count"],
+        "explainability_scope_count": outputs["privacy_thresholds"]["summary"][
+            "explainability_scope_count"
+        ],
         "threat_row_count": outputs["threat_control_map"]["summary"]["row_count"],
         "control_row_count": outputs["control_register"]["summary"]["row_count"],
         "cache_row_count": outputs["cache_matrix"]["summary"]["row_count"],

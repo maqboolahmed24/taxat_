@@ -21,13 +21,7 @@ import {
   type PushProjectInventory,
 } from "../../src/providers/push/flows/create_device_messaging_project_and_keys.js";
 
-const repoRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "..",
-  "..",
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
 
 async function readJson<T>(segments: string[]): Promise<T> {
   const filePath = path.join(repoRoot, ...segments);
@@ -66,21 +60,11 @@ test("checked-in push channel artifacts and topology board match the builders", 
   ]);
   const sampleRun = await readJson<{
     deviceMessagingTopologyBoard: DeviceMessagingTopologyBoardViewModel;
-  }>([
-    "automation",
-    "provisioning",
-    "report_viewer",
-    "data",
-    "sample_run.json",
-  ]);
+  }>(["automation", "provisioning", "report_viewer", "data", "sample_run.json"]);
 
   expect(persistedCatalog).toEqual(createRecommendedPushChannelCatalog());
-  expect(persistedInventory).toEqual(
-    createRecommendedPushProjectInventory(pushRunContext()),
-  );
-  expect(persistedLineage).toEqual(
-    createRecommendedPushKeyLineage(pushRunContext()),
-  );
+  expect(persistedInventory).toEqual(createRecommendedPushProjectInventory(pushRunContext()));
+  expect(persistedLineage).toEqual(createRecommendedPushKeyLineage(pushRunContext()));
   expect(sampleRun.deviceMessagingTopologyBoard).toEqual(
     createDeviceMessagingTopologyBoardViewModel(),
   );
@@ -95,9 +79,7 @@ test("active push channels stay native-only while browser push remains explicitl
   validatePushProjectInventory(inventory, lineage);
   validatePushKeyLineage(lineage);
 
-  expect(
-    catalog.channel_records.filter((row) => row.delivery_state === "ACTIVE"),
-  ).toHaveLength(3);
+  expect(catalog.channel_records.filter((row) => row.delivery_state === "ACTIVE")).toHaveLength(3);
   expect(
     catalog.channel_records.every((row) =>
       row.client_surface === "NATIVE_MACOS_OPERATOR"
@@ -105,9 +87,7 @@ test("active push channels stay native-only while browser push remains explicitl
         : row.delivery_state !== "ACTIVE",
     ),
   ).toBe(true);
-  expect(
-    catalog.surface_decisions,
-  ).toEqual({
+  expect(catalog.surface_decisions).toEqual({
     customer_portal_web_push: "DISABLED",
     operator_web_push: "DISABLED",
     macos_native_system_notifications: "ENABLED",

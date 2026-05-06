@@ -1,0 +1,394 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/late_data_monitor_result.schema.json",
+  "title": "LateDataMonitorResult",
+  "description": "Post-seal late-data monitoring result consumed by filing-capable gates. This contract freezes the aggregate late-data status, counts by policy effect, and the exact findings and downstream work or child-manifest artifacts created from those findings.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "late_data_monitor_id",
+    "manifest_id",
+    "manifest_hash",
+    "execution_basis_hash",
+    "collection_boundary_ref",
+    "source_window_ref",
+    "input_freeze_ref",
+    "runtime_scope_refs",
+    "latest_indicator_set_ref",
+    "finding_refs",
+    "late_data_status",
+    "total_finding_count",
+    "excluded_count",
+    "review_required_count",
+    "child_manifest_required_count",
+    "temporal_consequence_summary",
+    "child_manifest_refs",
+    "workflow_item_refs",
+    "temporal_propagation_event_refs",
+    "classified_at",
+    "reason_codes"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "LateDataMonitorResult"
+    },
+    "late_data_monitor_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_basis_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "collection_boundary_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_window_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "input_freeze_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtime_scope_refs": {
+      "$ref": "./late_data_policy_binding.schema.json#/$defs/runtimeScopeRefs"
+    },
+    "latest_indicator_set_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "finding_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "late_data_status": {
+      "type": "string",
+      "enum": [
+        "NO_LATE_DATA",
+        "EXCLUDED_LATE_ONLY",
+        "REVIEW_REQUIRED",
+        "SPAWN_CHILD_MANIFEST_REQUIRED"
+      ]
+    },
+    "total_finding_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "excluded_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "review_required_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "child_manifest_required_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "temporal_consequence_summary": {
+      "$ref": "./late_data_consequence_summary.schema.json"
+    },
+    "child_manifest_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "workflow_item_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "temporal_propagation_event_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "classified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "late_data_status": {
+            "const": "NO_LATE_DATA"
+          }
+        },
+        "required": [
+          "late_data_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "latest_indicator_set_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "finding_refs": {
+            "maxItems": 0
+          },
+          "total_finding_count": {
+            "const": 0
+          },
+          "excluded_count": {
+            "const": 0
+          },
+          "review_required_count": {
+            "const": 0
+          },
+          "child_manifest_required_count": {
+            "const": 0
+          },
+          "child_manifest_refs": {
+            "maxItems": 0
+          },
+          "workflow_item_refs": {
+            "maxItems": 0
+          },
+          "temporal_propagation_event_refs": {
+            "maxItems": 0
+          },
+          "reason_codes": {
+            "maxItems": 0
+          },
+          "temporal_consequence_summary": {
+            "properties": {
+              "true_post_baseline_event_count": {
+                "const": 0
+              },
+              "pre_cutoff_preexisting_late_arrival_count": {
+                "const": 0
+              },
+              "post_cutoff_discovery_pre_baseline_fact_count": {
+                "const": 0
+              },
+              "authority_posting_lag_count": {
+                "const": 0
+              },
+              "temporally_unproved_count": {
+                "const": 0
+              },
+              "highest_legal_consequence": {
+                "const": "NONE"
+              },
+              "retroactive_impact_required": {
+                "const": false
+              },
+              "trust_invalidation_required": {
+                "const": false
+              },
+              "proof_staleness_required": {
+                "const": false
+              },
+              "amendment_reuse_invalidated": {
+                "const": false
+              },
+              "blocking_temporal_uncertainty_present": {
+                "const": false
+              },
+              "reason_codes": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "child_manifest_required_count": {
+            "const": 0
+          }
+        },
+        "required": [
+          "child_manifest_required_count"
+        ]
+      },
+      "then": {
+        "properties": {
+          "child_manifest_refs": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "late_data_status": {
+            "const": "EXCLUDED_LATE_ONLY"
+          }
+        },
+        "required": [
+          "late_data_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "latest_indicator_set_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "finding_refs": {
+            "minItems": 1
+          },
+          "total_finding_count": {
+            "minimum": 1
+          },
+          "excluded_count": {
+            "minimum": 1
+          },
+          "review_required_count": {
+            "const": 0
+          },
+          "child_manifest_required_count": {
+            "const": 0
+          },
+          "child_manifest_refs": {
+            "maxItems": 0
+          },
+          "workflow_item_refs": {
+            "maxItems": 0
+          },
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "late_data_status": {
+            "const": "REVIEW_REQUIRED"
+          }
+        },
+        "required": [
+          "late_data_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "latest_indicator_set_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "finding_refs": {
+            "minItems": 1
+          },
+          "total_finding_count": {
+            "minimum": 1
+          },
+          "review_required_count": {
+            "minimum": 1
+          },
+          "child_manifest_required_count": {
+            "const": 0
+          },
+          "workflow_item_refs": {
+            "minItems": 1
+          },
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "late_data_status": {
+            "const": "SPAWN_CHILD_MANIFEST_REQUIRED"
+          }
+        },
+        "required": [
+          "late_data_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "latest_indicator_set_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "finding_refs": {
+            "minItems": 1
+          },
+          "total_finding_count": {
+            "minimum": 1
+          },
+          "child_manifest_required_count": {
+            "minimum": 1
+          },
+          "child_manifest_refs": {
+            "minItems": 1
+          },
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "late_data_status": {
+            "enum": [
+              "REVIEW_REQUIRED",
+              "SPAWN_CHILD_MANIFEST_REQUIRED"
+            ]
+          }
+        },
+        "required": [
+          "late_data_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "temporal_propagation_event_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

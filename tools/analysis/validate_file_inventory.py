@@ -75,16 +75,21 @@ def main() -> int:
     if len(csv_rows) != len(rows):
         fail("CSV row count does not match JSON manifest row count.")
 
-    heading_rows = [json.loads(line) for line in HEADING_INVENTORY_PATH.read_text().splitlines() if line.strip()]
+    heading_rows = [
+        json.loads(line) for line in HEADING_INVENTORY_PATH.read_text().splitlines() if line.strip()
+    ]
     heading_paths = {row["path"] for row in heading_rows}
     markdown_paths = {
         row["path"]
         for row in rows
-        if row["path"].endswith(".md") and row["path_kind"] in {"canonical_source", "prompt_scaffold"}
+        if row["path"].endswith(".md")
+        and row["path_kind"] in {"canonical_source", "prompt_scaffold"}
     }
     missing_heading_paths = sorted(markdown_paths - heading_paths)
     if missing_heading_paths:
-        fail(f"Canonical markdown files missing heading inventory rows: {missing_heading_paths[:10]}")
+        fail(
+            f"Canonical markdown files missing heading inventory rows: {missing_heading_paths[:10]}"
+        )
 
     for row in rows:
         if row["path_kind"] not in ALLOWED_PATH_KINDS:
@@ -93,10 +98,15 @@ def main() -> int:
             fail(f"Unexpected authority_level for {row['path']}: {row['authority_level']}")
         if not row["sha256"]:
             fail(f"Missing checksum for {row['path']}")
-        if row["path_kind"] in {"canonical_source", "prompt_scaffold"} and not row["authority_level"]:
+        if (
+            row["path_kind"] in {"canonical_source", "prompt_scaffold"}
+            and not row["authority_level"]
+        ):
             fail(f"Canonical row missing authority level: {row['path']}")
 
-    canonical_rows = [row for row in rows if row["path_kind"] in {"canonical_source", "prompt_scaffold"}]
+    canonical_rows = [
+        row for row in rows if row["path_kind"] in {"canonical_source", "prompt_scaffold"}
+    ]
     unclassified_canonical_rows = [
         row["path"]
         for row in canonical_rows
@@ -113,7 +123,10 @@ def main() -> int:
         schema_inventory = schema_inventory_by_path.get(row["path"])
         if schema_inventory is None:
             fail(f"Schema missing from schema/sample inventory: {row['path']}")
-        if not schema_inventory["related_sample_files"] and schema_inventory["sample_status"] != "no_sample_discovered":
+        if (
+            not schema_inventory["related_sample_files"]
+            and schema_inventory["sample_status"] != "no_sample_discovered"
+        ):
             fail(f"Schema sample status mismatch for {row['path']}")
 
     live_inventory_paths = sorted(

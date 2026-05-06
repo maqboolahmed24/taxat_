@@ -1,0 +1,1217 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/error_record.schema.json",
+  "title": "ErrorRecord",
+  "description": "Typed failure contract. This schema freezes failure family, retry and blocking posture, remediation ownership, forensic anchors, and resolution semantics for one manifest-scoped operational error.",
+  "type": "object",
+  "required": [
+    "error_id",
+    "manifest_id",
+    "root_manifest_id",
+    "error_family",
+    "error_code",
+    "error_title",
+    "error_description_template",
+    "severity",
+    "blocking_class",
+    "blocking_effects",
+    "retry_class",
+    "retry_attempt_count",
+    "retry_budget_class",
+    "next_retry_at",
+    "retry_precondition_refs",
+    "retry_idempotency_scope_ref",
+    "remediation_class",
+    "remediation_owner_type",
+    "failure_resolution_contract",
+    "invariant_enforcement_contract",
+    "remediation_owner_ref",
+    "reason_codes",
+    "affected_object_refs",
+    "source_object_refs",
+    "caused_by_error_id",
+    "originating_activity_ref",
+    "actor_ref",
+    "service_ref",
+    "authority_operation_ref",
+    "retention_class",
+    "artifact_retention_ref",
+    "workflow_item_id",
+    "remediation_task_ref",
+    "failure_investigation_ref",
+    "compensation_record_ref",
+    "next_action_ref",
+    "customer_visibility_class",
+    "operator_visibility_class",
+    "opened_at",
+    "resolved_at",
+    "resolution_state",
+    "resolution_basis_ref",
+    "closure_evidence_refs",
+    "resolved_by_task_id",
+    "accepted_risk_approval_ref",
+    "accepted_risk_expires_at",
+    "reopened_by_error_id",
+    "dedupe_key",
+    "dedupe_scope",
+    "first_seen_at",
+    "last_seen_at",
+    "occurrence_count",
+    "escalation_state",
+    "escalated_at",
+    "resolution_notes_ref",
+    "audit_refs",
+    "provenance_refs"
+  ],
+  "properties": {
+    "error_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "root_manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "error_family": {
+      "type": "string",
+      "enum": [
+        "AUTHN_ERROR",
+        "AUTHZ_ERROR",
+        "MANIFEST_ERROR",
+        "CONFIG_ERROR",
+        "INPUT_BOUNDARY_ERROR",
+        "SOURCE_COLLECTION_ERROR",
+        "CANONICALIZATION_ERROR",
+        "DATA_QUALITY_ERROR",
+        "PARITY_ERROR",
+        "TRUST_ERROR",
+        "WORKFLOW_ERROR",
+        "AUTHORITY_PROTOCOL_ERROR",
+        "AUTHORITY_RECONCILIATION_ERROR",
+        "AMENDMENT_ERROR",
+        "RETENTION_ERROR",
+        "PRIVACY_ERROR",
+        "PROVENANCE_ERROR",
+        "IDEMPOTENCY_ERROR",
+        "SYSTEM_FAULT"
+      ]
+    },
+    "error_code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "error_title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "error_description_template": {
+      "type": "string",
+      "minLength": 1
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "INFO",
+        "NOTICE",
+        "WARNING",
+        "ERROR",
+        "CRITICAL"
+      ]
+    },
+    "blocking_class": {
+      "type": "string",
+      "enum": [
+        "NON_BLOCKING",
+        "BLOCKS_AUTOMATION",
+        "BLOCKS_REVIEW_PROGRESS",
+        "BLOCKS_FILING",
+        "BLOCKS_AMENDMENT",
+        "BLOCKS_ERASURE",
+        "BLOCKS_RUN",
+        "BLOCKS_AUTHORITY_CALL"
+      ]
+    },
+    "blocking_effects": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/blockingEffect"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "retry_class": {
+      "type": "string",
+      "enum": [
+        "NO_RETRY",
+        "SAFE_RETRY",
+        "RECONCILE_THEN_RETRY",
+        "HUMAN_REVIEW_THEN_RETRY",
+        "REBUILD_THEN_RETRY",
+        "MANUAL_INTERVENTION_REQUIRED"
+      ]
+    },
+    "retry_attempt_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "retry_budget_class": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "SINGLE_ATTEMPT",
+        "BOUNDED_EXPONENTIAL",
+        "RECONCILIATION_GATED",
+        "HUMAN_GATED"
+      ]
+    },
+    "next_retry_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "retry_precondition_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "retry_idempotency_scope_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "remediation_class": {
+      "type": "string",
+      "enum": [
+        "AUTO_RETRY",
+        "AUTO_RECONCILE",
+        "SPAWN_WORKFLOW",
+        "REQUEST_CLIENT_INPUT",
+        "REQUEST_OPERATOR_REVIEW",
+        "REQUEST_APPROVAL",
+        "REBUILD_ARTIFACT",
+        "OPEN_INVESTIGATION",
+        "SUPERSEDE_AND_REPLAN",
+        "ABORT_TERMINALLY"
+      ]
+    },
+    "remediation_owner_type": {
+      "type": "string",
+      "enum": [
+        "SYSTEM",
+        "SERVICE_OPERATOR",
+        "REVIEWER",
+        "APPROVER",
+        "CLIENT",
+        "TENANT_ADMIN",
+        "SECURITY_OPERATOR"
+      ]
+    },
+    "failure_resolution_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/failure_resolution_contract.schema.json"
+        },
+        {
+          "properties": {
+            "lifecycle_role": {
+              "const": "ERROR_RECORD"
+            },
+            "role_specific_binding_policy": {
+              "const": "ERROR_RETAINS_OWNER_NEXT_ACTION_AND_CHILD_LINKS"
+            }
+          }
+        }
+      ]
+    },
+    "invariant_enforcement_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/invariant_enforcement_contract.schema.json"
+        },
+        {
+          "properties": {
+            "boundary_scope": {
+              "const": "ERROR_RECORD"
+            },
+            "boundary_specific_binding_policy": {
+              "const": "ERROR_RETAINS_INVARIANT_CLASS_FAULT_CODE_AND_TERMINAL_BINDING"
+            }
+          }
+        }
+      ]
+    },
+    "remediation_owner_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "affected_object_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "source_object_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "caused_by_error_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "originating_activity_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "actor_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "service_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "authority_operation_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "retention_class": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "regulated_record",
+        "derived_artifact",
+        "operational_log",
+        "analytics_projection",
+        "policy_governed_other",
+        null
+      ]
+    },
+    "artifact_retention_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "workflow_item_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "remediation_task_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "failure_investigation_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "compensation_record_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "next_action_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "customer_visibility_class": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "operator_visibility_class": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "opened_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resolved_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "resolution_state": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "IN_PROGRESS",
+        "MONITORING",
+        "RESOLVED",
+        "ACCEPTED_RISK",
+        "SUPERSEDED",
+        "CANCELLED"
+      ]
+    },
+    "resolution_basis_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "closure_evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "resolved_by_task_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "accepted_risk_approval_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "accepted_risk_expires_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "reopened_by_error_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "dedupe_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dedupe_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "first_seen_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_seen_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "occurrence_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "escalation_state": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "OPERATOR_ESCALATED",
+        "RECONCILIATION_ESCALATED",
+        "TENANT_ADMIN_ESCALATED",
+        "SECURITY_ESCALATED",
+        "INCIDENT_ESCALATED"
+      ]
+    },
+    "escalated_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "resolution_notes_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "audit_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "provenance_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "blockingEffect": {
+      "type": "object",
+      "required": [
+        "capability_code",
+        "impact_level",
+        "reason_codes",
+        "affected_object_refs"
+      ],
+      "properties": {
+        "capability_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "impact_level": {
+          "type": "string",
+          "enum": [
+            "BLOCKED",
+            "DEGRADED",
+            "REVIEW_REQUIRED"
+          ]
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "affected_object_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "remediation_owner_type": {
+            "const": "SYSTEM"
+          }
+        },
+        "required": [
+          "remediation_owner_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "remediation_owner_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "remediation_owner_type": {
+            "enum": [
+              "SERVICE_OPERATOR",
+              "REVIEWER",
+              "APPROVER",
+              "CLIENT",
+              "TENANT_ADMIN",
+              "SECURITY_OPERATOR"
+            ]
+          }
+        },
+        "required": [
+          "remediation_owner_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "remediation_owner_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "artifact_retention_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "artifact_retention_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retention_class": {
+            "type": "string",
+            "enum": [
+              "regulated_record",
+              "derived_artifact",
+              "operational_log",
+              "analytics_projection",
+              "policy_governed_other"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "error_family": {
+            "enum": [
+              "RETENTION_ERROR",
+              "PRIVACY_ERROR"
+            ]
+          }
+        },
+        "required": [
+          "error_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retention_class": {
+            "type": "string",
+            "enum": [
+              "regulated_record",
+              "derived_artifact",
+              "operational_log",
+              "analytics_projection",
+              "policy_governed_other"
+            ]
+          },
+          "artifact_retention_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "affected_object_refs": {
+            "minItems": 1
+          }
+        },
+        "anyOf": [
+          {
+            "properties": {
+              "workflow_item_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "workflow_item_id"
+            ]
+          },
+          {
+            "properties": {
+              "remediation_task_ref": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "remediation_task_ref"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "blocking_class": {
+            "const": "NON_BLOCKING"
+          }
+        },
+        "required": [
+          "blocking_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "blocking_effects": {
+            "not": {
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "impact_level": {
+                    "const": "BLOCKED"
+                  }
+                },
+                "required": [
+                  "impact_level"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "blocking_class": {
+            "not": {
+              "const": "NON_BLOCKING"
+            }
+          }
+        },
+        "required": [
+          "blocking_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "blocking_effects": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "retry_class": {
+            "const": "NO_RETRY"
+          }
+        },
+        "required": [
+          "retry_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retry_budget_class": {
+            "const": "NONE"
+          },
+          "next_retry_at": {
+            "type": "null"
+          },
+          "retry_precondition_refs": {
+            "maxItems": 0
+          },
+          "retry_idempotency_scope_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "retry_class": {
+            "enum": [
+              "SAFE_RETRY",
+              "RECONCILE_THEN_RETRY",
+              "HUMAN_REVIEW_THEN_RETRY",
+              "REBUILD_THEN_RETRY",
+              "MANUAL_INTERVENTION_REQUIRED"
+            ]
+          }
+        },
+        "required": [
+          "retry_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retry_budget_class": {
+            "not": {
+              "const": "NONE"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "retry_class": {
+            "enum": [
+              "SAFE_RETRY",
+              "RECONCILE_THEN_RETRY",
+              "REBUILD_THEN_RETRY"
+            ]
+          }
+        },
+        "required": [
+          "retry_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retry_idempotency_scope_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "retry_class": {
+            "enum": [
+              "SAFE_RETRY",
+              "RECONCILE_THEN_RETRY",
+              "REBUILD_THEN_RETRY"
+            ]
+          }
+        },
+        "required": [
+          "retry_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "next_retry_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "retry_class": {
+            "enum": [
+              "RECONCILE_THEN_RETRY",
+              "REBUILD_THEN_RETRY"
+            ]
+          }
+        },
+        "required": [
+          "retry_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retry_precondition_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "remediation_class": {
+            "enum": [
+              "SPAWN_WORKFLOW",
+              "REQUEST_CLIENT_INPUT",
+              "REQUEST_OPERATOR_REVIEW",
+              "REQUEST_APPROVAL",
+              "REBUILD_ARTIFACT",
+              "OPEN_INVESTIGATION",
+              "SUPERSEDE_AND_REPLAN"
+            ]
+          },
+          "resolution_state": {
+            "enum": [
+              "OPEN",
+              "IN_PROGRESS"
+            ]
+          }
+        },
+        "required": [
+          "remediation_class",
+          "resolution_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "next_action_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "remediation_class": {
+            "const": "OPEN_INVESTIGATION"
+          }
+        },
+        "required": [
+          "remediation_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "failure_investigation_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resolution_state": {
+            "enum": [
+              "OPEN",
+              "IN_PROGRESS"
+            ]
+          }
+        },
+        "required": [
+          "resolution_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resolved_at": {
+            "type": "null"
+          },
+          "resolution_basis_ref": {
+            "type": "null"
+          },
+          "closure_evidence_refs": {
+            "maxItems": 0
+          },
+          "resolved_by_task_id": {
+            "type": "null"
+          },
+          "accepted_risk_approval_ref": {
+            "type": "null"
+          },
+          "accepted_risk_expires_at": {
+            "type": "null"
+          },
+          "next_action_ref": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string",
+                "minLength": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resolution_state": {
+            "enum": [
+              "MONITORING",
+              "RESOLVED",
+              "SUPERSEDED",
+              "CANCELLED"
+            ]
+          }
+        },
+        "required": [
+          "resolution_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resolved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolution_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "closure_evidence_refs": {
+            "minItems": 1
+          },
+          "accepted_risk_approval_ref": {
+            "type": "null"
+          },
+          "accepted_risk_expires_at": {
+            "type": "null"
+          },
+          "next_action_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resolution_state": {
+            "const": "ACCEPTED_RISK"
+          }
+        },
+        "required": [
+          "resolution_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resolved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolution_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "closure_evidence_refs": {
+            "minItems": 1
+          },
+          "accepted_risk_approval_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "accepted_risk_expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "next_action_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "accepted_risk_approval_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "accepted_risk_approval_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resolution_state": {
+            "const": "ACCEPTED_RISK"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "accepted_risk_expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "accepted_risk_expires_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resolution_state": {
+            "const": "ACCEPTED_RISK"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resolved_by_task_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "resolved_by_task_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resolution_state": {
+            "enum": [
+              "MONITORING",
+              "RESOLVED",
+              "ACCEPTED_RISK",
+              "SUPERSEDED",
+              "CANCELLED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reopened_by_error_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "reopened_by_error_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resolution_state": {
+            "enum": [
+              "MONITORING",
+              "RESOLVED",
+              "ACCEPTED_RISK",
+              "SUPERSEDED",
+              "CANCELLED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "escalation_state": {
+            "const": "NONE"
+          }
+        },
+        "required": [
+          "escalation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "escalated_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "escalated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "escalated_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "escalation_state": {
+            "enum": [
+              "OPERATOR_ESCALATED",
+              "RECONCILIATION_ESCALATED",
+              "TENANT_ADMIN_ESCALATED",
+              "SECURITY_ESCALATED",
+              "INCIDENT_ESCALATED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "escalation_state": {
+            "not": {
+              "const": "NONE"
+            }
+          }
+        },
+        "required": [
+          "escalation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "escalated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

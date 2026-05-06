@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reconciliation Insights</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell" aria-labelledby="page-title">
+      <header class="profile-header" data-testid="reconciliation-profile-header">
+        <div>
+          <p class="eyebrow">Operations</p>
+          <h1 id="page-title">Reconciliation insights</h1>
+          <p id="profile-summary" class="summary"></p>
+        </div>
+        <dl class="profile-facts" aria-label="Selected snapshot context">
+          <div>
+            <dt>Environment</dt>
+            <dd id="header-environment"></dd>
+          </div>
+          <div>
+            <dt>Operation</dt>
+            <dd id="header-operation"></dd>
+          </div>
+          <div>
+            <dt>Window</dt>
+            <dd id="header-window"></dd>
+          </div>
+        </dl>
+      </header>
+
+      <div class="layout">
+        <section class="insight-stack" aria-label="Reconciliation snapshot analysis">
+          <section
+            class="panel dominant"
+            aria-labelledby="dominant-title"
+            data-testid="reconciliation-dominant-insight"
+          >
+            <p class="eyebrow">Dominant insight</p>
+            <h2 id="dominant-title"></h2>
+            <p id="dominant-copy"></p>
+            <div class="recommendations" id="recommendation-list" aria-label="Tuning recommendations"></div>
+          </section>
+
+          <section
+            class="panel"
+            aria-labelledby="budget-title"
+            data-testid="reconciliation-budget-band"
+          >
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Budget state</p>
+                <h2 id="budget-title">Lineage-deduplicated budget band</h2>
+              </div>
+              <span id="budget-total" class="soft-chip"></span>
+            </div>
+            <div class="budget-band" id="budget-band" role="img" aria-label="Budget state distribution"></div>
+            <ul class="budget-legend" id="budget-legend"></ul>
+          </section>
+
+          <section
+            class="panel"
+            aria-labelledby="reason-title"
+            data-testid="reconciliation-reason-matrix"
+          >
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Reason matrix</p>
+                <h2 id="reason-title">Resend refusal and escalation reasons</h2>
+              </div>
+            </div>
+            <table>
+              <caption>
+                Durable resend-refusal and escalation reason counts for the active snapshot.
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Reason</th>
+                  <th scope="col">Family</th>
+                  <th scope="col">Count</th>
+                  <th scope="col">Window share</th>
+                </tr>
+              </thead>
+              <tbody id="reason-body"></tbody>
+            </table>
+          </section>
+
+          <section
+            class="panel"
+            aria-labelledby="resume-title"
+            data-testid="reconciliation-resume-escalation-strip"
+          >
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Resume and escalation</p>
+                <h2 id="resume-title">Restore posture and escalation latency</h2>
+              </div>
+              <span class="soft-chip" id="latency-chip"></span>
+            </div>
+            <div class="strip" id="resume-strip" aria-label="Replay resume and escalation strip"></div>
+          </section>
+
+          <section
+            class="panel"
+            aria-labelledby="drill-title"
+            data-testid="reconciliation-drill-table"
+          >
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Drill table</p>
+                <h2 id="drill-title">Snapshot fields</h2>
+              </div>
+            </div>
+            <table>
+              <caption>
+                Read-only fields projected from the persisted reconciliation analytics snapshot.
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Field</th>
+                  <th scope="col">Value</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody id="drill-body"></tbody>
+            </table>
+          </section>
+        </section>
+
+        <aside
+          class="query-panel"
+          aria-labelledby="query-title"
+          data-testid="reconciliation-query-panel"
+        >
+          <form id="query-form" data-testid="reconciliation-window-filter">
+            <p class="eyebrow">Query</p>
+            <h2 id="query-title">Snapshot filter</h2>
+            <label>
+              Provider environment
+              <select name="environment" aria-label="Provider environment">
+                <option value="HMRC_SANDBOX">HMRC sandbox</option>
+                <option value="HMRC_PRODUCTION">HMRC production</option>
+              </select>
+            </label>
+            <label>
+              Operation family
+              <select name="operation" aria-label="Operation family">
+                <option value="AUTH_SUBMIT_PERIODIC_UPDATE">Periodic update</option>
+                <option value="AUTH_SUBMIT_FINAL_DECLARATION">Final declaration</option>
+              </select>
+            </label>
+            <label>
+              Profile
+              <select name="profile" aria-label="Authority operation profile">
+                <option value="authority-operation-profile://hmrc-periodic-fast">
+                  HMRC periodic fast
+                </option>
+                <option value="authority-operation-profile://hmrc-replay-stable">
+                  HMRC replay stable
+                </option>
+                <option value="authority-operation-profile://hmrc-empty-window">
+                  HMRC empty window
+                </option>
+              </select>
+            </label>
+            <fieldset>
+              <legend>Slice</legend>
+              <label class="check-row">
+                <input type="checkbox" name="unresolvedOnly" />
+                Unresolved only
+              </label>
+              <label class="check-row">
+                <input type="checkbox" name="escalationOnly" />
+                Escalation only
+              </label>
+              <label class="check-row">
+                <input type="checkbox" name="resumeHeavy" />
+                Resume heavy
+              </label>
+              <label class="check-row">
+                <input type="checkbox" name="ambiguityHeavy" />
+                Ambiguity heavy
+              </label>
+            </fieldset>
+            <button type="submit">Apply filters</button>
+          </form>
+          <div
+            class="empty-state"
+            id="empty-state"
+            data-testid="reconciliation-empty-state"
+            hidden
+            tabindex="-1"
+          >
+            <h2>No matching durable snapshot</h2>
+            <p id="empty-copy"></p>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

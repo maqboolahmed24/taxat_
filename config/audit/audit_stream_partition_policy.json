@@ -1,0 +1,61 @@
+{
+  "contract_version": "AUDIT_STREAM_PARTITION_POLICY_V1",
+  "policy_id": "audit_stream_partition_policy",
+  "basis_statement": "Audit events partition by the most specific continuity anchor first so nightly, authority, manifest, and workflow chains remain strict before falling back to family rails.",
+  "partition_resolution_order": ["NIGHTLY", "AUTHORITY", "MANIFEST", "WORKFLOW", "FAMILY"],
+  "stream_partition_rows": [
+    {
+      "partition_ref": "NIGHTLY",
+      "resolution_priority": 1,
+      "required_context_keys": ["tenant_id", "nightly_batch_run_ref", "nightly_window_key"],
+      "stream_ref_template": "audit.tenant.{tenant_id}.nightly.{nightly_batch_run_ref}.{nightly_window_key}",
+      "notes": [
+        "Nightly chains remain distinct per batch and window.",
+        "This partition wins before manifest or workflow fallback."
+      ]
+    },
+    {
+      "partition_ref": "AUTHORITY",
+      "resolution_priority": 2,
+      "required_context_keys": ["tenant_id", "authority_operation_id"],
+      "stream_ref_template": "audit.tenant.{tenant_id}.authority.{authority_operation_id}",
+      "notes": [
+        "Authority operations keep their own append-only continuity boundary."
+      ]
+    },
+    {
+      "partition_ref": "MANIFEST",
+      "resolution_priority": 3,
+      "required_context_keys": ["tenant_id", "manifest_id"],
+      "stream_ref_template": "audit.tenant.{tenant_id}.manifest.{manifest_id}",
+      "notes": [
+        "Manifest-scoped execution stays in one strict stream even when merged review spans other families."
+      ]
+    },
+    {
+      "partition_ref": "WORKFLOW",
+      "resolution_priority": 4,
+      "required_context_keys": ["tenant_id", "workflow_item_id"],
+      "stream_ref_template": "audit.tenant.{tenant_id}.workflow.{workflow_item_id}",
+      "notes": [
+        "Workflow fallback applies when manifest identity is absent but workflow continuity still matters."
+      ]
+    },
+    {
+      "partition_ref": "FAMILY",
+      "resolution_priority": 5,
+      "required_context_keys": ["tenant_id", "family_ref"],
+      "stream_ref_template": "audit.tenant.{tenant_id}.family.{family_ref}",
+      "notes": [
+        "Family fallback keeps append-only law explicit for events without a more specific continuity anchor."
+      ]
+    }
+  ],
+  "source_lineage": [
+    {
+      "source_file": "Algorithm/audit_and_provenance.md",
+      "source_heading_or_logical_block": "append-only event continuity",
+      "rationale": "Defines the stream partition precedence for scrutiny-safe continuity."
+    }
+  ]
+}

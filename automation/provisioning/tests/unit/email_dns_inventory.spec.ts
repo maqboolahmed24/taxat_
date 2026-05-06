@@ -37,24 +37,17 @@ test("template builder emits environment-bound DNS inventory and stream partitio
   validateEmailDnsInventory(artifacts.dnsInventory, artifacts.senderDomainRecord);
   validateMessageStreamCatalog(artifacts.messageStreamCatalog);
 
-  const requiredPurposes = new Set(
-    artifacts.dnsInventory.rows.map((row) => row.purpose),
-  );
+  const requiredPurposes = new Set(artifacts.dnsInventory.rows.map((row) => row.purpose));
   expect(requiredPurposes).toEqual(
-    new Set([
-      "DOMAIN_VERIFICATION",
-      "DKIM_SIGNING",
-      "RETURN_PATH",
-      "DMARC_POLICY",
-    ]),
+    new Set(["DOMAIN_VERIFICATION", "DKIM_SIGNING", "RETURN_PATH", "DMARC_POLICY"]),
   );
 
   const productionStreams = artifacts.messageStreamCatalog.streams.filter(
     (stream) => stream.product_environment_id === "env_production",
   );
-  expect(
-    productionStreams.some((stream) => stream.stream_kind === "SANDBOX_TEST_SINK"),
-  ).toBe(false);
+  expect(productionStreams.some((stream) => stream.stream_kind === "SANDBOX_TEST_SINK")).toBe(
+    false,
+  );
 });
 
 test("dns inventory validator rejects rows without explicit owner or environment parity", () => {
@@ -66,7 +59,7 @@ test("dns inventory validator rejects rows without explicit owner or environment
 
   brokenInventory.rows[0]!.owner_role = "" as any;
 
-  expect(() =>
-    validateEmailDnsInventory(brokenInventory, artifacts.senderDomainRecord),
-  ).toThrow(/owner role/i);
+  expect(() => validateEmailDnsInventory(brokenInventory, artifacts.senderDomainRecord)).toThrow(
+    /owner role/i,
+  );
 });

@@ -142,6 +142,8 @@ This section is the authoritative top-level inventory for every markdown corpus 
   validate the live traceability spine directly: `constraint_traceability_register.json`, the
   active named constraint register in `constraint_coverage_index.md`, and the concrete file-plus-term
   anchors listed for each live named constraint must stay synchronized.
+- `pnpm run contract-integrity` is the local and CI merge-blocking wrapper for the same two
+  Algorithm entrypoints; it does not replace the direct authoritative commands above.
 
 ## Blueprint Coverage And Acceptance Map
 - System-pass coverage: `SYS-00 -> SYS-01 -> SYS-02 -> SYS-03 -> SYS-04` is the authoritative closure chain for shared spine normalization, cross-stack reconciliation, forensic closure, corpus coherence, and final blueprint coverage/acceptance reconciliation.
@@ -154,6 +156,8 @@ This section is the authoritative top-level inventory for every markdown corpus 
 
 ## Validation
 - Install validator dependencies with `python3 -m venv .venv && . .venv/bin/activate && pip install -r Algorithm/requirements-dev.txt`
+- Run `pnpm run contract-integrity` before opening a pull request; CI runs the same wrapper on pull
+  requests, `main`, and `release/**` branches.
 - The authoritative validator entrypoints are `python3 Algorithm/scripts/validate_contracts.py --self-test` and `python3 Algorithm/tools/forensic_contract_guard.py`; the reference-doc roles and validation sections SHALL keep those exact command forms synchronized.
 - Run `python3 Algorithm/scripts/validate_contracts.py --self-test` to validate every schema, bundled samples, custom cross-field regressions, repo-level shell/document coherence checks, and the forensic guardrail suite, including runtime/release hardening objects such as `build_artifact`, `authority_ingress_receipt`, `schema_bundle_compatibility_gate_contract`, `deployment_release`, and `release_verification_manifest` plus frontend continuity evidence such as `cross_device_continuity_contract`, `native_cache_hydration_contract`, `native_cache_hydration_automation_pack`, `semantic_accessibility_contract`, `semantic_accessibility_regression_pack`, `shell_continuity_fuzz_harness`, and `focus_restore_return_target_harness`
 - Run `python3 Algorithm/tools/forensic_contract_guard.py` to execute the standalone forensic guardrail pass directly when you need the schema/doc guard suite without the full self-test.

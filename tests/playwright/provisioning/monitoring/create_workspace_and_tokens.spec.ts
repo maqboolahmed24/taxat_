@@ -18,8 +18,7 @@ function fixtureEntryUrls(
   scenario: "fresh" | "existing" | "scrub-drift",
 ): MonitoringWorkspaceEntryUrls {
   return {
-    controlPlane:
-      `/automation/provisioning/tests/fixtures/sentry_monitoring_console.html?scenario=${scenario}`,
+    controlPlane: `/automation/provisioning/tests/fixtures/sentry_monitoring_console.html?scenario=${scenario}`,
   };
 }
 
@@ -41,9 +40,7 @@ async function runFixtureFlow(
   page: Parameters<typeof createErrorMonitoringWorkspace>[0]["page"],
   scenario: "fresh" | "existing" | "scrub-drift",
 ) {
-  const rootDir = await mkdtemp(
-    path.join(os.tmpdir(), `taxat-monitoring-${scenario}-`),
-  );
+  const rootDir = await mkdtemp(path.join(os.tmpdir(), `taxat-monitoring-${scenario}-`));
   const workspaceTemplatePath = path.join(rootDir, "monitoring_workspace.template.json");
 
   const result = await createErrorMonitoringWorkspace({
@@ -124,9 +121,7 @@ test("scrub posture drift blocks policy acceptance instead of being silently acc
   expect(flow.result.steps[3]?.status).toBe("BLOCKED_BY_POLICY");
   expect(flow.result.steps[5]?.status).toBe("SUCCEEDED");
   expect(flow.result.notes).toEqual(
-    expect.arrayContaining([
-      expect.stringContaining("Scrub and capture posture drift"),
-    ]),
+    expect.arrayContaining([expect.stringContaining("Scrub and capture posture drift")]),
   );
   expect(flow.evidenceManifestRaw).toContain(
     "Scrub-policy drift was surfaced explicitly and blocked instead of being silently accepted.",
@@ -156,31 +151,23 @@ test("live-provider execution remains blocked unless the run context explicitly 
   ).rejects.toThrow(/live provider execution is not enabled/i);
 });
 
-test("signal governance board renders governed lanes and safe refs only", async ({
-  page,
-}) => {
+test("signal governance board renders governed lanes and safe refs only", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(
     "/automation/provisioning/report_viewer/index.html?fixture=./data/sample_run.json&page=signal-governance-board",
   );
 
   await expect(page.locator("html")).toHaveAttribute("data-motion", "reduce");
-  await expect(
-    page.getByRole("navigation", { name: "Monitoring projects" }),
-  ).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Monitoring projects" })).toBeVisible();
   await expect(page.locator("#main-title")).toHaveText("Sandbox Backend runtime");
   await expect(page.getByRole("heading", { name: "Projects", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Scrubbing", exact: true })).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Inbound Filters", exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Inbound Filters", exact: true })).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Alerts & Release Mapping", exact: true }),
   ).toBeVisible();
 
-  await page
-    .getByRole("button", { name: /^Production Client portal web\b/i })
-    .click();
+  await page.getByRole("button", { name: /^Production Client portal web\b/i }).click();
   await expect(page.locator("#drawer-title")).toHaveText("Production Client portal web");
   await expect(
     page.getByText("vault://monitoring/sentry/production/client-portal-web/dsn"),

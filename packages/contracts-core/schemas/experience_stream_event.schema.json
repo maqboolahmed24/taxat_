@@ -1,0 +1,311 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/experience_stream_event.schema.json",
+  "title": "ExperienceStreamEvent",
+  "description": "Typed manifest-experience stream event contract. This schema freezes event kind, ordering, frame lineage, one authoritative route-stability contract, and the one authoritative payload ref carried on each northbound experience-stream delivery.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "stream_scope_class",
+    "manifest_id",
+    "shell_route_key",
+    "experience_sequence",
+    "frame_epoch",
+    "shell_stability_token",
+    "resume_token",
+    "stream_recovery_contract",
+    "stability_contract",
+    "event_type",
+    "snapshot_ref",
+    "delta_ref",
+    "terminal_bundle_ref",
+    "occurred_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "ExperienceStreamEvent"
+    },
+    "stream_scope_class": {
+      "const": "MANIFEST_EXPERIENCE"
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "shell_route_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "experience_sequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "frame_epoch": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "shell_stability_token": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resume_token": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stream_recovery_contract": {
+      "$ref": "https://taxat.dev/schemas/stream_recovery_contract.schema.json"
+    },
+    "stability_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/route_stability_contract.schema.json"
+        },
+        {
+          "properties": {
+            "route_scope_class": {
+              "const": "MANIFEST_EXPERIENCE"
+            },
+            "guard_vector_components": {
+              "properties": {
+                "decision_bundle_hash_or_null": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "shell_stability_token_or_null": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "frame_epoch_or_null": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "work_item_version_or_null": {
+                  "type": "null"
+                },
+                "customer_thread_head_or_null": {
+                  "type": "null"
+                },
+                "internal_thread_head_or_null": {
+                  "type": "null"
+                },
+                "request_state_version_or_null": {
+                  "type": "null"
+                },
+                "client_portal_workspace_version_or_null": {
+                  "type": "null"
+                },
+                "view_guard_ref_or_null": {
+                  "type": "null"
+                }
+              }
+            },
+            "last_published_sequence_or_null": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "resume_capability": {
+              "const": "STREAM_RESUMABLE"
+            }
+          }
+        }
+      ]
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "experience.delta",
+        "experience.snapshot",
+        "terminal.bundle",
+        "heartbeat"
+      ]
+    },
+    "snapshot_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "delta_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "terminal_bundle_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "experience.delta"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "snapshot_ref": {
+            "type": "null"
+          },
+          "delta_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "terminal_bundle_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "experience.snapshot"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "snapshot_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "delta_ref": {
+            "type": "null"
+          },
+          "terminal_bundle_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "terminal.bundle"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "snapshot_ref": {
+            "type": "null"
+          },
+          "delta_ref": {
+            "type": "null"
+          },
+          "terminal_bundle_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "heartbeat"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "snapshot_ref": {
+            "type": "null"
+          },
+          "delta_ref": {
+            "type": "null"
+          },
+          "terminal_bundle_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "snapshot_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "snapshot_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "event_type": {
+            "const": "experience.snapshot"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "delta_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "delta_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "event_type": {
+            "const": "experience.delta"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "terminal_bundle_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "terminal_bundle_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "event_type": {
+            "const": "terminal.bundle"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

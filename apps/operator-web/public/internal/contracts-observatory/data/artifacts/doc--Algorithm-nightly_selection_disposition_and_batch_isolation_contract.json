@@ -1,0 +1,358 @@
+{
+  "artifactVersion": "CONTRACT_OBSERVATORY_ARTIFACT_V1",
+  "artifactSlug": "doc--Algorithm-nightly_selection_disposition_and_batch_isolation_contract",
+  "artifactKind": "MARKDOWN",
+  "sectionRef": "RUNTIME_CONTRACTS",
+  "authorityLevel": "AUTHORITATIVE",
+  "sourceTruthBadge": "Authoritative Algorithm Corpus",
+  "tone": "navy",
+  "title": "Nightly Selection Disposition and Batch Isolation Contract",
+  "subtitle": "Algorithm/nightly_selection_disposition_and_batch_isolation_contract.md",
+  "summary": "This contract closes FE 55 for nightly autopilot selection completeness, same window duplicate suppression, shard isolation, and recovery reclaim lineage.",
+  "canonicalPath": "Algorithm/nightly_selection_disposition_and_batch_isolation_contract.md",
+  "sourceLineage": [
+    "Algorithm/nightly_selection_disposition_and_batch_isolation_contract.md"
+  ],
+  "headingCount": 6,
+  "headings": [
+    {
+      "level": 1,
+      "text": "Nightly Selection Disposition and Batch Isolation Contract",
+      "slug": "nightly-selection-disposition-and-batch-isolation-contract"
+    },
+    {
+      "level": 2,
+      "text": "Authoritative surfaces",
+      "slug": "authoritative-surfaces"
+    },
+    {
+      "level": 2,
+      "text": "Identity law",
+      "slug": "identity-law"
+    },
+    {
+      "level": 2,
+      "text": "Selection law",
+      "slug": "selection-law"
+    },
+    {
+      "level": 2,
+      "text": "Shard-isolation law",
+      "slug": "shard-isolation-law"
+    },
+    {
+      "level": 2,
+      "text": "Recovery-reclaim law",
+      "slug": "recovery-reclaim-law"
+    }
+  ],
+  "proseSections": [
+    {
+      "headingSlug": "nightly-selection-disposition-and-batch-isolation-contract",
+      "headingText": "Nightly Selection Disposition and Batch Isolation Contract",
+      "level": 1,
+      "lines": [
+        "",
+        "This contract closes FE-55 for nightly autopilot selection completeness, same-window duplicate",
+        "suppression, shard isolation, and recovery-reclaim lineage.",
+        ""
+      ],
+      "plainText": "This contract closes FE 55 for nightly autopilot selection completeness, same window duplicate suppression, shard isolation, and recovery reclaim lineage.",
+      "excerpt": "This contract closes FE 55 for nightly autopilot selection completeness, same window duplicate suppression, shard isolation, and recovery reclaim lineage.",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "authoritative-surfaces",
+      "headingText": "Authoritative surfaces",
+      "level": 2,
+      "lines": [
+        "",
+        "- `schemas/nightly_batch_identity_contract.schema.json`",
+        "- `schemas/nightly_batch_run.schema.json`",
+        "- `scripts/validate_contracts.py`",
+        "- `tools/forensic_contract_guard.py`",
+        "",
+        "`NightlyBatchRun.identity_contract{...}` is the frozen batch-identity envelope.",
+        "`NightlyBatchRun.selection_entries[]` is the authoritative persisted per-candidate disposition set.",
+        "`NightlyBatchRun.shard_plan[]` is the authoritative execution-only shard ownership map.",
+        ""
+      ],
+      "plainText": "schemas/nightly batch identity contract.schema.json schemas/nightly batch run.schema.json scripts/validate contracts.py tools/forensic contract guard.py NightlyBatchRun.identity contract{...} is the frozen batch identity envelope. NightlyBatchRun.selection entries[] is the authoritative persisted per candidate disposition set. NightlyBatchRun.shard plan[] is the authoritative execution only shard ownership map.",
+      "excerpt": "schemas/nightly batch identity contract.schema.json schemas/nightly batch run.schema.json scripts/validate contracts.py tools/forensic contract guard.py NightlyBatchRun.identity c…",
+      "mentionedSchemaTokens": [
+        "nightly_batch_identity_contract.schema.json",
+        "nightly_batch_run.schema.json"
+      ],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "identity-law",
+      "headingText": "Identity law",
+      "level": 2,
+      "lines": [
+        "",
+        "The frozen nightly batch identity SHALL include:",
+        "",
+        "- scheduler tuple fields: `tenant_id`, `nightly_window_key`, `trigger_class`,",
+        "  `release_verification_manifest_ref`, `policy_snapshot_hash`, `autopilot_policy_hash`,",
+        "  `scheduler_dedupe_key`",
+        "- execution-basis fields: `schema_bundle_hash`, `code_build_id`, `environment_ref`",
+        "- candidate-universe fields: `selection_universe_hash`, `selection_universe_count`",
+        "- reclaim lineage fields: `reclaimed_predecessor_batch_run_ref_or_null`,",
+        "  `recovery_resume_state`",
+        "- typed policy fields: `identity_binding_policy`, `same_window_duplicate_policy`,",
+        "  `candidate_universe_policy`, `terminal_result_reuse_policy`,",
+        "  `active_attempt_isolation_policy`, `shard_failure_isolation_policy`,",
+        "  `cross_window_continuity_policy`, `recovery_lineage_policy`",
+        "",
+        "`identity_contract_hash` SHALL be the canonical hash of that full tuple.",
+        ""
+      ],
+      "plainText": "The frozen nightly batch identity SHALL include: scheduler tuple fields: tenant id, nightly window key, trigger class, release verification manifest ref, policy snapshot hash, autopilot policy hash, scheduler dedupe key execution basis fields: schema bundle hash, code build id, environment ref candidate universe fields: selection universe hash, selection universe count reclaim lineage fields: reclaimed predecessor batch run ref or null, recovery resume state typed policy fields: identity binding policy, same window duplicate policy, candidate universe policy, terminal result reuse policy, active attempt isolation policy, shard failure isolation policy, cross window continuity policy, recovery lineage policy identity contract hash SHALL be the canonical hash of that full tuple.",
+      "excerpt": "The frozen nightly batch identity SHALL include: scheduler tuple fields: tenant id, nightly window key, trigger class, release verification manifest ref, policy snapshot hash, aut…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "selection-law",
+      "headingText": "Selection law",
+      "level": 2,
+      "lines": [
+        "",
+        "Every candidate in the frozen nightly universe SHALL materialize exactly one persisted",
+        "`selection_entries[]` row. Omission is invalid state.",
+        "",
+        "Each row SHALL persist:",
+        "",
+        "- canonical candidate identity via `candidate_identity_hash`",
+        "- one typed `selection_disposition`",
+        "- `terminal_result_reuse_state`",
+        "- `active_attempt_resolution_state`",
+        "- durable continuation lineage through `prior_manifest_ref` and, for continuation children,",
+        "  `predecessor_selection_entry_ref_or_null`",
+        "- explicit non-execution posture through `reason_codes[]`, `workflow_item_refs[]`,",
+        "  `next_checkpoint_at`, and `outcome_bucket`",
+        "",
+        "`REUSE_EXISTING_TERMINAL_RESULT` SHALL win before new manifest allocation.",
+        "Same-window active attempts SHALL resolve to `DEFER_ACTIVE_ATTEMPT` or",
+        "`EXECUTE_CONTINUATION_CHILD`; they SHALL not silently allocate a duplicate manifest.",
+        ""
+      ],
+      "plainText": "Every candidate in the frozen nightly universe SHALL materialize exactly one persisted selection entries[] row. Omission is invalid state. Each row SHALL persist: canonical candidate identity via candidate identity hash one typed selection disposition terminal result reuse state active attempt resolution state durable continuation lineage through prior manifest ref and, for continuation children, predecessor selection entry ref or null explicit non execution posture through reason codes[], workflow item refs[], next checkpoint at, and outcome bucket REUSE EXISTING TERMINAL RESULT SHALL win before new manifest allocation. Same window active attempts SHALL resolve to DEFER ACTIVE ATTEMPT or EXECUTE CONTINUATION CHILD; they SHALL not silently allocate a duplicate manifest.",
+      "excerpt": "Every candidate in the frozen nightly universe SHALL materialize exactly one persisted selection entries[] row. Omission is invalid state. Each row SHALL persist: canonical candid…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "shard-isolation-law",
+      "headingText": "Shard-isolation law",
+      "level": 2,
+      "lines": [
+        "",
+        "Only execution-capable rows may appear in `shard_plan[].entry_refs[]`.",
+        "Reuse, defer, escalation, and skip dispositions SHALL remain off-shard with",
+        "`fairness_group_key = null` and `shard_key = null`.",
+        "",
+        "Shard failure SHALL stay explicit:",
+        "",
+        "- `FAILED_ISOLATED`, `TENANT_WIDE_BLOCKED`, and `RECLAIM_REQUIRED` shards SHALL retain",
+        "  `blocked_entry_refs[]`",
+        "- those same shard states SHALL retain `failure_reason_codes[]`",
+        "- unrelated candidates SHALL keep their own persisted `selection_disposition` and",
+        "  `outcome_bucket`; shard failure shall not erase explainability for unaffected rows",
+        ""
+      ],
+      "plainText": "Only execution capable rows may appear in shard plan[].entry refs[]. Reuse, defer, escalation, and skip dispositions SHALL remain off shard with fairness group key = null and shard key = null. Shard failure SHALL stay explicit: FAILED ISOLATED, TENANT WIDE BLOCKED, and RECLAIM REQUIRED shards SHALL retain blocked entry refs[] those same shard states SHALL retain failure reason codes[] unrelated candidates SHALL keep their own persisted selection disposition and outcome bucket; shard failure shall not erase explainability for unaffected rows",
+      "excerpt": "Only execution capable rows may appear in shard plan[].entry refs[]. Reuse, defer, escalation, and skip dispositions SHALL remain off shard with fairness group key = null and shar…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "recovery-reclaim-law",
+      "headingText": "Recovery-reclaim law",
+      "level": 2,
+      "lines": [
+        "",
+        "`RECOVERY_RECLAIM_WINDOW` batches SHALL retain",
+        "`reclaimed_predecessor_batch_run_ref_or_null` plus an explicit",
+        "`recovery_resume_state` proving whether successor work resumed predecessor shards or reused",
+        "predecessor selection under lawful resharing.",
+        "",
+        "Non-recovery triggers SHALL keep predecessor linkage null and",
+        "`recovery_resume_state = NOT_APPLICABLE`.",
+        ""
+      ],
+      "plainText": "RECOVERY RECLAIM WINDOW batches SHALL retain reclaimed predecessor batch run ref or null plus an explicit recovery resume state proving whether successor work resumed predecessor shards or reused predecessor selection under lawful resharing. Non recovery triggers SHALL keep predecessor linkage null and recovery resume state = NOT APPLICABLE.",
+      "excerpt": "RECOVERY RECLAIM WINDOW batches SHALL retain reclaimed predecessor batch run ref or null plus an explicit recovery resume state proving whether successor work resumed predecessor…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    }
+  ],
+  "schemaIdentityOrNull": null,
+  "schemaFields": [],
+  "samplePointers": [],
+  "sampleIdentityOrNull": null,
+  "bindingIdentityOrNull": null,
+  "validatorIdentityOrNull": null,
+  "driftIdentityOrNull": null,
+  "headerStrip": {
+    "kind": "PROSE",
+    "badgeLabel": "Authoritative Algorithm Corpus",
+    "metricPairs": [
+      {
+        "label": "Headings",
+        "value": "6"
+      },
+      {
+        "label": "Schemas",
+        "value": "2"
+      },
+      {
+        "label": "Tasks",
+        "value": "0"
+      }
+    ]
+  },
+  "relationships": {
+    "schemas": [
+      {
+        "artifactSlug": "schema--nightly_batch_identity_contract",
+        "title": "Nightly Batch Identity Contract",
+        "kind": "SCHEMA",
+        "authorityLevel": "AUTHORITATIVE",
+        "sectionRef": "SCHEMAS",
+        "headingSlugOrNull": null,
+        "reason": "source truth stack includes this schema"
+      },
+      {
+        "artifactSlug": "schema--nightly_batch_run",
+        "title": "Nightly Batch Run",
+        "kind": "SCHEMA",
+        "authorityLevel": "AUTHORITATIVE",
+        "sectionRef": "SCHEMAS",
+        "headingSlugOrNull": null,
+        "reason": "source truth stack includes this schema"
+      }
+    ],
+    "samples": [],
+    "bindings": [
+      {
+        "artifactSlug": "binding--typescript--authority_and_access",
+        "title": "TYPESCRIPT · Authority & Access",
+        "kind": "BINDING",
+        "authorityLevel": "GENERATED_COMPANION",
+        "sectionRef": "SUPPORT_DOCS",
+        "headingSlugOrNull": null,
+        "reason": "source truth stack includes this binding family"
+      },
+      {
+        "artifactSlug": "binding--python--authority_and_access",
+        "title": "PYTHON · Authority & Access",
+        "kind": "BINDING",
+        "authorityLevel": "GENERATED_COMPANION",
+        "sectionRef": "SUPPORT_DOCS",
+        "headingSlugOrNull": null,
+        "reason": "source truth stack includes this binding family"
+      },
+      {
+        "artifactSlug": "binding--swift--authority_and_access",
+        "title": "SWIFT · Authority & Access",
+        "kind": "BINDING",
+        "authorityLevel": "GENERATED_COMPANION",
+        "sectionRef": "SUPPORT_DOCS",
+        "headingSlugOrNull": null,
+        "reason": "source truth stack includes this binding family"
+      },
+      {
+        "artifactSlug": "binding--typescript--decisioning_and_nightly",
+        "title": "TYPESCRIPT · Decisioning & Nightly",
+        "kind": "BINDING",
+        "authorityLevel": "GENERATED_COMPANION",
+        "sectionRef": "SUPPORT_DOCS",
+        "headingSlugOrNull": null,
+        "reason": "source truth stack includes this binding family"
+      },
+      {
+        "artifactSlug": "binding--python--decisioning_and_nightly",
+        "title": "PYTHON · Decisioning & Nightly",
+        "kind": "BINDING",
+        "authorityLevel": "GENERATED_COMPANION",
+        "sectionRef": "SUPPORT_DOCS",
+        "headingSlugOrNull": null,
+        "reason": "source truth stack includes this binding family"
+      },
+      {
+        "artifactSlug": "binding--swift--decisioning_and_nightly",
+        "title": "SWIFT · Decisioning & Nightly",
+        "kind": "BINDING",
+        "authorityLevel": "GENERATED_COMPANION",
+        "sectionRef": "SUPPORT_DOCS",
+        "headingSlugOrNull": null,
+        "reason": "source truth stack includes this binding family"
+      }
+    ],
+    "validators": [
+      {
+        "artifactSlug": "validator--validate_contracts",
+        "title": "validate_contracts.py",
+        "kind": "VALIDATOR",
+        "authorityLevel": "AUTHORITATIVE",
+        "sectionRef": "VALIDATORS",
+        "headingSlugOrNull": null,
+        "reason": "validator entrypoint participates in this artifact lineage"
+      },
+      {
+        "artifactSlug": "validator--forensic_contract_guard",
+        "title": "forensic_contract_guard.py",
+        "kind": "VALIDATOR",
+        "authorityLevel": "AUTHORITATIVE",
+        "sectionRef": "VALIDATORS",
+        "headingSlugOrNull": null,
+        "reason": "validator entrypoint participates in this artifact lineage"
+      }
+    ],
+    "docs": [],
+    "tasks": []
+  },
+  "sourceTruthStack": {
+    "file": [
+      "Algorithm/nightly_selection_disposition_and_batch_isolation_contract.md"
+    ],
+    "headings": [
+      "Nightly Selection Disposition and Batch Isolation Contract",
+      "Authoritative surfaces",
+      "Identity law",
+      "Selection law",
+      "Shard-isolation law",
+      "Recovery-reclaim law"
+    ],
+    "schemaRefs": [
+      "nightly_batch_identity_contract.schema.json",
+      "nightly_batch_run.schema.json"
+    ],
+    "sampleRefs": [],
+    "bindingRefs": [
+      "TYPESCRIPT:AUTHORITY_AND_ACCESS",
+      "PYTHON:AUTHORITY_AND_ACCESS",
+      "SWIFT:AUTHORITY_AND_ACCESS",
+      "TYPESCRIPT:DECISIONING_AND_NIGHTLY",
+      "PYTHON:DECISIONING_AND_NIGHTLY",
+      "SWIFT:DECISIONING_AND_NIGHTLY"
+    ],
+    "validatorRefs": [
+      "validate_contracts.py",
+      "forensic_contract_guard.py"
+    ],
+    "driftRefs": [],
+    "taskRefs": []
+  },
+  "fieldCrosslinks": [],
+  "taskRefs": []
+}

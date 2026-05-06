@@ -1,0 +1,407 @@
+{
+  "basisStatement": "Queue transport is rebuildable delivery fabric only. Durable outbox, inbox, interaction, and audit truth remain authoritative.",
+  "deadLetterPostureChip": "Dead letter is policy, not convention",
+  "families": [
+    {
+      "deadLetterPostureChip": "safe replay",
+      "displayName": "Stage work",
+      "familyRef": "STAGE_WORK",
+      "notes": [
+        "Competing consumers may scale horizontally only across distinct manifest stage order domains.",
+        "Stage packets point at persisted work definitions; they never carry large execution payloads inline."
+      ],
+      "orderingScopeBadge": "manifest ordered",
+      "orderingScopeRef": "MANIFEST_STAGE_DOMAIN",
+      "orderingSummary": "manifest stage: HASH(manifest_ref, 'POST_SEAL_STAGE', stage_code)",
+      "producerFamilies": [
+        "RUN_ENGINE",
+        "MANIFEST_STAGE_ORCHESTRATOR",
+        "NIGHTLY_AUTOPILOT"
+      ],
+      "queueRef": "queue.stage-work",
+      "queueRoutingKey": "worker.stage.execute",
+      "railLabel": "STAGE",
+      "retryBudgetClass": "STAGE_WORK_BOUNDED_EXPONENTIAL",
+      "retrySummary": "Stage work bounded exponential: deterministic backoff with explicit dead-letter posture once budget or economic gate is exhausted.",
+      "stageNodes": [
+        {
+          "accessibleLabel": "stage work outbox packet references durable outbox truth and stays opaque",
+          "detail": "Outbox publication stays coordinated with durable command or interaction state so transport never becomes the legal record.",
+          "stageRef": "OUTBOX",
+          "summary": "Transactional outbox emits only refs, hashes, and policy lineage.",
+          "title": "Outbox anchor",
+          "tone": "indigo"
+        },
+        {
+          "accessibleLabel": "stage work queue packet references durable record and preserves one order domain only",
+          "detail": "Queue transport keeps ordering local to one declared domain key and never serializes unrelated work globally.",
+          "stageRef": "QUEUE",
+          "summary": "Broker packets stay small, rebuildable, and never substitute for durable truth.",
+          "title": "Queue fabric",
+          "tone": "indigo"
+        },
+        {
+          "accessibleLabel": "stage work claim lease fences stale workers with visibility timeout reclaim",
+          "detail": "Claim fencing prevents a stale worker from acking or dead-lettering after visibility expiry and successor reclaim.",
+          "stageRef": "CLAIM",
+          "summary": "Leases are explicit, fenced, and reclaimable after timeout.",
+          "title": "Claim lease",
+          "tone": "indigo"
+        },
+        {
+          "accessibleLabel": "stage work worker persists effect proof before ack",
+          "detail": "Workers persist effect proof or reconcile failure posture before ack so duplicate delivery remains safe.",
+          "stageRef": "WORKER",
+          "summary": "Consumers are idempotent and treat broker delivery as at-least-once transport.",
+          "title": "Worker execution",
+          "tone": "indigo"
+        },
+        {
+          "accessibleLabel": "stage work inbox gate deduplicates packet delivery before mutation",
+          "detail": "Transactional inbox truth captures duplicate packet, duplicate meaning, and source continuity before any state transition.",
+          "stageRef": "INBOX",
+          "summary": "Inbox truth owns duplicate suppression and safe replay posture.",
+          "title": "Inbox gate",
+          "tone": "indigo"
+        },
+        {
+          "accessibleLabel": "stage work audit evidence links queue delay retry lineage and dead letter posture",
+          "detail": "Audit evidence and telemetry explain backlog, redrive, and rebuild posture from persisted refs and reason codes rather than packet memory.",
+          "stageRef": "AUDIT",
+          "summary": "Append-only audit and metrics stay typed, correlated, and redaction-safe.",
+          "title": "Audit trail",
+          "tone": "evergreen"
+        }
+      ],
+      "workerClassRef": "STAGE_RUNNER"
+    },
+    {
+      "deadLetterPostureChip": "reconcile then retry",
+      "displayName": "Authority transmit",
+      "familyRef": "AUTHORITY_TRANSMIT",
+      "notes": [
+        "Queue packets never infer resend legality; they carry the persisted legality state already decided by authority interaction truth.",
+        "Fresh authority mutation sends must fail closed when send-time revalidation detects lineage, token, or duplicate-bucket drift."
+      ],
+      "orderingScopeBadge": "authority ordered",
+      "orderingScopeRef": "AUTHORITY_TRANSMIT_DOMAIN",
+      "orderingSummary": "authority transmit: HASH(tenant_id, client_id, period_ref, operation_family, ordered(runtime_scope))",
+      "producerFamilies": [
+        "AUTHORITY_INTERACTION_PROTOCOL",
+        "CONTROLLED_AUTHORITY_GATEWAY"
+      ],
+      "queueRef": "queue.authority-transmit",
+      "queueRoutingKey": "authority.transmit",
+      "railLabel": "AUTHORITY",
+      "retryBudgetClass": "AUTHORITY_TRANSMIT_IDEMPOTENT_RECOVERY",
+      "retrySummary": "Authority transmit with legality gate: deterministic backoff only while send-time legality, binding lineage, and duplicate-bucket truth remain clear.",
+      "stageNodes": [
+        {
+          "accessibleLabel": "authority transmit outbox packet references durable outbox truth and stays opaque",
+          "detail": "Outbox publication stays coordinated with durable command or interaction state so transport never becomes the legal record.",
+          "stageRef": "OUTBOX",
+          "summary": "Transactional outbox emits only refs, hashes, and policy lineage.",
+          "title": "Outbox anchor",
+          "tone": "evergreen"
+        },
+        {
+          "accessibleLabel": "authority transmit queue packet references interaction record and uses resend legality queued unassessed",
+          "detail": "Queued authority sends remain subordinate to persisted resend legality and must revalidate immediately before transmit.",
+          "stageRef": "QUEUE",
+          "summary": "Broker packets stay small, rebuildable, and never substitute for durable truth.",
+          "title": "Queue fabric",
+          "tone": "bronze"
+        },
+        {
+          "accessibleLabel": "authority transmit claim lease fences stale workers with visibility timeout reclaim",
+          "detail": "Claim fencing prevents a stale worker from acking or dead-lettering after visibility expiry and successor reclaim.",
+          "stageRef": "CLAIM",
+          "summary": "Leases are explicit, fenced, and reclaimable after timeout.",
+          "title": "Claim lease",
+          "tone": "bronze"
+        },
+        {
+          "accessibleLabel": "authority transmit worker revalidates binding lineage and send legality before side effects",
+          "detail": "Authority workers fail closed on send-time revalidation drift and may recover only from persisted idempotent lineage.",
+          "stageRef": "WORKER",
+          "summary": "Consumers are idempotent and treat broker delivery as at-least-once transport.",
+          "title": "Worker execution",
+          "tone": "danger"
+        },
+        {
+          "accessibleLabel": "authority transmit inbox gate deduplicates packet delivery before mutation",
+          "detail": "Transactional inbox truth captures duplicate packet, duplicate meaning, and source continuity before any state transition.",
+          "stageRef": "INBOX",
+          "summary": "Inbox truth owns duplicate suppression and safe replay posture.",
+          "title": "Inbox gate",
+          "tone": "evergreen"
+        },
+        {
+          "accessibleLabel": "authority transmit audit evidence links queue delay retry lineage and dead letter posture",
+          "detail": "Audit evidence and telemetry explain backlog, redrive, and rebuild posture from persisted refs and reason codes rather than packet memory.",
+          "stageRef": "AUDIT",
+          "summary": "Append-only audit and metrics stay typed, correlated, and redaction-safe.",
+          "title": "Audit trail",
+          "tone": "evergreen"
+        }
+      ],
+      "workerClassRef": "AUTHORITY_GATEWAY_TRANSMITTER"
+    },
+    {
+      "deadLetterPostureChip": "operator review",
+      "displayName": "Reconciliation follow-up",
+      "familyRef": "RECONCILIATION_FOLLOW_UP",
+      "notes": [
+        "Read-only follow-up remains distinct from outbound mutation sends even when it targets the same authority interaction lineage.",
+        "Dead-letter investigation must preserve canonical ingress receipt, interaction, and audit refs without replaying live queue history."
+      ],
+      "orderingScopeBadge": "interaction ordered",
+      "orderingScopeRef": "AUTHORITY_RECONCILIATION_DOMAIN",
+      "orderingSummary": "authority recon: HASH(authority_interaction_ref, duplicate_meaning_key)",
+      "producerFamilies": [
+        "AUTHORITY_INTERACTION_PROTOCOL",
+        "AUTHORITY_INGRESS_CHECKPOINT"
+      ],
+      "queueRef": "queue.reconciliation-follow-up",
+      "queueRoutingKey": "authority.reconciliation.follow-up",
+      "railLabel": "RECON",
+      "retryBudgetClass": "RECONCILIATION_FOLLOW_UP_GATED",
+      "retrySummary": "Reconciliation follow-up gated: deterministic backoff with explicit dead-letter posture once budget or economic gate is exhausted.",
+      "stageNodes": [
+        {
+          "accessibleLabel": "reconciliation follow-up outbox packet references durable outbox truth and stays opaque",
+          "detail": "Outbox publication stays coordinated with durable command or interaction state so transport never becomes the legal record.",
+          "stageRef": "OUTBOX",
+          "summary": "Transactional outbox emits only refs, hashes, and policy lineage.",
+          "title": "Outbox anchor",
+          "tone": "evergreen"
+        },
+        {
+          "accessibleLabel": "reconciliation follow-up queue packet references durable record and preserves one order domain only",
+          "detail": "Queue transport keeps ordering local to one declared domain key and never serializes unrelated work globally.",
+          "stageRef": "QUEUE",
+          "summary": "Broker packets stay small, rebuildable, and never substitute for durable truth.",
+          "title": "Queue fabric",
+          "tone": "indigo"
+        },
+        {
+          "accessibleLabel": "reconciliation follow-up claim lease fences stale workers with visibility timeout reclaim",
+          "detail": "Claim fencing prevents a stale worker from acking or dead-lettering after visibility expiry and successor reclaim.",
+          "stageRef": "CLAIM",
+          "summary": "Leases are explicit, fenced, and reclaimable after timeout.",
+          "title": "Claim lease",
+          "tone": "indigo"
+        },
+        {
+          "accessibleLabel": "reconciliation follow-up worker persists effect proof before ack",
+          "detail": "Workers persist effect proof or reconcile failure posture before ack so duplicate delivery remains safe.",
+          "stageRef": "WORKER",
+          "summary": "Consumers are idempotent and treat broker delivery as at-least-once transport.",
+          "title": "Worker execution",
+          "tone": "evergreen"
+        },
+        {
+          "accessibleLabel": "reconciliation follow-up inbox gate deduplicates packet delivery before mutation",
+          "detail": "Transactional inbox truth captures duplicate packet, duplicate meaning, and source continuity before any state transition.",
+          "stageRef": "INBOX",
+          "summary": "Inbox truth owns duplicate suppression and safe replay posture.",
+          "title": "Inbox gate",
+          "tone": "evergreen"
+        },
+        {
+          "accessibleLabel": "reconciliation follow-up audit evidence links queue delay retry lineage and dead letter posture",
+          "detail": "Audit evidence and telemetry explain backlog, redrive, and rebuild posture from persisted refs and reason codes rather than packet memory.",
+          "stageRef": "AUDIT",
+          "summary": "Append-only audit and metrics stay typed, correlated, and redaction-safe.",
+          "title": "Audit trail",
+          "tone": "evergreen"
+        }
+      ],
+      "workerClassRef": "AUTHORITY_RECONCILIATION_WORKER"
+    },
+    {
+      "deadLetterPostureChip": "rebuild then retry",
+      "displayName": "Projection refresh",
+      "familyRef": "PROJECTION_REFRESH",
+      "notes": [
+        "Projection queues remain disposable; rebuildability is a first-class requirement, not an operational afterthought.",
+        "Read-model refresh packets carry only snapshot refs, projection family refs, and integrity hashes."
+      ],
+      "orderingScopeBadge": "projection ordered",
+      "orderingScopeRef": "PROJECTION_MANIFEST_DOMAIN",
+      "orderingSummary": "projection: HASH(manifest_ref, projection_family_ref)",
+      "producerFamilies": [
+        "RUN_ENGINE",
+        "READ_MODEL_PROJECTOR",
+        "STREAM_REBASE"
+      ],
+      "queueRef": "queue.projection-refresh",
+      "queueRoutingKey": "projection.refresh",
+      "railLabel": "PROJECTION",
+      "retryBudgetClass": "PROJECTION_REFRESH_REBUILDABLE",
+      "retrySummary": "Projection refresh rebuildable: rebuildable workers gate retry on fresh upstream truth rather than blind broker redrive.",
+      "stageNodes": [
+        {
+          "accessibleLabel": "projection refresh outbox packet references durable outbox truth and stays opaque",
+          "detail": "Outbox publication stays coordinated with durable command or interaction state so transport never becomes the legal record.",
+          "stageRef": "OUTBOX",
+          "summary": "Transactional outbox emits only refs, hashes, and policy lineage.",
+          "title": "Outbox anchor",
+          "tone": "indigo"
+        },
+        {
+          "accessibleLabel": "projection refresh queue packet references durable record and preserves one order domain only",
+          "detail": "Queue transport keeps ordering local to one declared domain key and never serializes unrelated work globally.",
+          "stageRef": "QUEUE",
+          "summary": "Broker packets stay small, rebuildable, and never substitute for durable truth.",
+          "title": "Queue fabric",
+          "tone": "indigo"
+        },
+        {
+          "accessibleLabel": "projection refresh claim lease fences stale workers with visibility timeout reclaim",
+          "detail": "Claim fencing prevents a stale worker from acking or dead-lettering after visibility expiry and successor reclaim.",
+          "stageRef": "CLAIM",
+          "summary": "Leases are explicit, fenced, and reclaimable after timeout.",
+          "title": "Claim lease",
+          "tone": "indigo"
+        },
+        {
+          "accessibleLabel": "projection refresh worker persists effect proof before ack",
+          "detail": "Workers persist effect proof or reconcile failure posture before ack so duplicate delivery remains safe.",
+          "stageRef": "WORKER",
+          "summary": "Consumers are idempotent and treat broker delivery as at-least-once transport.",
+          "title": "Worker execution",
+          "tone": "indigo"
+        },
+        {
+          "accessibleLabel": "projection refresh inbox gate deduplicates packet delivery before mutation",
+          "detail": "Transactional inbox truth captures duplicate packet, duplicate meaning, and source continuity before any state transition.",
+          "stageRef": "INBOX",
+          "summary": "Inbox truth owns duplicate suppression and safe replay posture.",
+          "title": "Inbox gate",
+          "tone": "indigo"
+        },
+        {
+          "accessibleLabel": "projection refresh audit evidence links queue delay retry lineage and dead letter posture",
+          "detail": "Audit evidence and telemetry explain backlog, redrive, and rebuild posture from persisted refs and reason codes rather than packet memory.",
+          "stageRef": "AUDIT",
+          "summary": "Append-only audit and metrics stay typed, correlated, and redaction-safe.",
+          "title": "Audit trail",
+          "tone": "evergreen"
+        }
+      ],
+      "workerClassRef": "READ_MODEL_PROJECTOR"
+    },
+    {
+      "deadLetterPostureChip": "rebuild then retry",
+      "displayName": "Recovery job",
+      "familyRef": "RECOVERY_JOB",
+      "notes": [
+        "Recovery job packets are coordination artifacts only; they point back to checkpoint and audit truth.",
+        "A recovery queue may rehydrate worker visibility, but it may not authorize fresh legal mutation by itself."
+      ],
+      "orderingScopeBadge": "recovery ordered",
+      "orderingScopeRef": "ATTEMPT_RECOVERY_DOMAIN",
+      "orderingSummary": "recovery: HASH(attempt_lineage_ref, job_class_ref)",
+      "producerFamilies": [
+        "RECOVERY_RECLAIM",
+        "RESTORE_DRILL",
+        "QUEUE_REBUILD"
+      ],
+      "queueRef": "queue.recovery-job",
+      "queueRoutingKey": "runtime.recovery",
+      "railLabel": "RECOVERY",
+      "retryBudgetClass": "RECOVERY_JOB_REBUILDABLE",
+      "retrySummary": "Recovery job rebuildable: rebuildable workers gate retry on fresh upstream truth rather than blind broker redrive.",
+      "stageNodes": [
+        {
+          "accessibleLabel": "recovery job outbox packet references durable outbox truth and stays opaque",
+          "detail": "Outbox publication stays coordinated with durable command or interaction state so transport never becomes the legal record.",
+          "stageRef": "OUTBOX",
+          "summary": "Transactional outbox emits only refs, hashes, and policy lineage.",
+          "title": "Outbox anchor",
+          "tone": "evergreen"
+        },
+        {
+          "accessibleLabel": "recovery job queue packet references durable record and preserves one order domain only",
+          "detail": "Queue transport keeps ordering local to one declared domain key and never serializes unrelated work globally.",
+          "stageRef": "QUEUE",
+          "summary": "Broker packets stay small, rebuildable, and never substitute for durable truth.",
+          "title": "Queue fabric",
+          "tone": "indigo"
+        },
+        {
+          "accessibleLabel": "recovery job claim lease fences stale workers with visibility timeout reclaim",
+          "detail": "Claim fencing prevents a stale worker from acking or dead-lettering after visibility expiry and successor reclaim.",
+          "stageRef": "CLAIM",
+          "summary": "Leases are explicit, fenced, and reclaimable after timeout.",
+          "title": "Claim lease",
+          "tone": "indigo"
+        },
+        {
+          "accessibleLabel": "recovery job worker persists effect proof before ack",
+          "detail": "Workers persist effect proof or reconcile failure posture before ack so duplicate delivery remains safe.",
+          "stageRef": "WORKER",
+          "summary": "Consumers are idempotent and treat broker delivery as at-least-once transport.",
+          "title": "Worker execution",
+          "tone": "evergreen"
+        },
+        {
+          "accessibleLabel": "recovery job inbox gate deduplicates packet delivery before mutation",
+          "detail": "Transactional inbox truth captures duplicate packet, duplicate meaning, and source continuity before any state transition.",
+          "stageRef": "INBOX",
+          "summary": "Inbox truth owns duplicate suppression and safe replay posture.",
+          "title": "Inbox gate",
+          "tone": "evergreen"
+        },
+        {
+          "accessibleLabel": "recovery job audit evidence links queue delay retry lineage and dead letter posture",
+          "detail": "Audit evidence and telemetry explain backlog, redrive, and rebuild posture from persisted refs and reason codes rather than packet memory.",
+          "stageRef": "AUDIT",
+          "summary": "Append-only audit and metrics stay typed, correlated, and redaction-safe.",
+          "title": "Audit trail",
+          "tone": "evergreen"
+        }
+      ],
+      "workerClassRef": "RECOVERY_COORDINATOR"
+    }
+  ],
+  "payloadSafetyStatement": "Packets render refs, hashes, routing keys, and policy lineage only. No declaration text, credential material, upload bytes, or authority tokens are shown anywhere in the atlas.",
+  "routeId": "queue-fabric-atlas",
+  "selectedFamilyRef": "AUTHORITY_TRANSMIT",
+  "selectedStageRef": "QUEUE",
+  "stages": [
+    {
+      "stageRef": "OUTBOX",
+      "label": "OUTBOX",
+      "summary": "Durable command publication anchor."
+    },
+    {
+      "stageRef": "QUEUE",
+      "label": "QUEUE",
+      "summary": "Disposable broker fabric."
+    },
+    {
+      "stageRef": "CLAIM",
+      "label": "CLAIM",
+      "summary": "Lease and visibility fence."
+    },
+    {
+      "stageRef": "WORKER",
+      "label": "WORKER",
+      "summary": "Idempotent consumer execution."
+    },
+    {
+      "stageRef": "INBOX",
+      "label": "INBOX",
+      "summary": "Durable dedupe and effect proof."
+    },
+    {
+      "stageRef": "AUDIT",
+      "label": "AUDIT",
+      "summary": "Typed lineage, delay, and redrive evidence."
+    }
+  ],
+  "subtitle": "Dispatch loom for worker packets, retries, stale reclaim, and dead-letter posture across stage, authority, projection, and recovery families.",
+  "title": "Taxat Queue Fabric Atlas"
+}

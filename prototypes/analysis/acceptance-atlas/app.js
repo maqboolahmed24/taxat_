@@ -36,7 +36,9 @@ function createElement(tag, className, text) {
 }
 
 function setMotionMode() {
-  const mode = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "reduce" : "standard";
+  const mode = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ? "reduce"
+    : "standard";
   document.documentElement.dataset.motion = mode;
   motionMode.textContent = mode;
 }
@@ -109,7 +111,10 @@ function renderPhaseSpine() {
     button.type = "button";
     button.dataset.phaseId = unit.phase_id;
     button.dataset.testid = `phase-spine-${unit.execution_unit_id}`;
-    if (unit.phase_id === state.phase || (state.phase === "all" && unit.current_state === "active")) {
+    if (
+      unit.phase_id === state.phase ||
+      (state.phase === "all" && unit.current_state === "active")
+    ) {
       button.classList.add("active");
     }
 
@@ -117,12 +122,14 @@ function renderPhaseSpine() {
     const title = createElement(
       "p",
       "",
-      unit.wave_id ? `${unit.wave_id} · ${unit.task_count} tasks` : `${unit.first_task_id} · ${unit.task_count} task`
+      unit.wave_id
+        ? `${unit.wave_id} · ${unit.task_count} tasks`
+        : `${unit.first_task_id} · ${unit.task_count} task`,
     );
     const meta = createElement(
       "p",
       "spine-meta",
-      `${unit.protocol_mode} · ${unit.current_state} · ${unit.current_claimable_task_ids.length} claimable`
+      `${unit.protocol_mode} · ${unit.current_state} · ${unit.current_claimable_task_ids.length} claimable`,
     );
     button.append(phaseLabel, title, meta);
     button.addEventListener("click", () => {
@@ -220,18 +227,20 @@ function renderTaskList(tasks) {
       createElement(
         "span",
         "task-meta",
-        `${task.phase} · ${task.protocol_mode}${task.track ? ` · ${task.track}` : ""}`
-      )
+        `${task.phase} · ${task.protocol_mode}${task.track ? ` · ${task.track}` : ""}`,
+      ),
     );
 
-    const coverage = buildTagRow(task.blueprint_group_ids.map((groupId) => groupId.replaceAll("_", " ")));
+    const coverage = buildTagRow(
+      task.blueprint_group_ids.map((groupId) => groupId.replaceAll("_", " ")),
+    );
     const vectors = buildTagRow(task.test_vector_refs.slice(0, 3), "code-chip");
     const gates = createElement("div", "task-title");
     gates.append(
       buildTagRow(task.release_gate_refs.slice(0, 3), "code-chip"),
       task.blocking_gap_refs.length
         ? buildTagRow(task.blocking_gap_refs.slice(0, 2), "gap-chip")
-        : createElement("span", "task-meta", "No typed gap")
+        : createElement("span", "task-meta", "No typed gap"),
     );
 
     button.append(title, coverage, vectors, gates);
@@ -276,7 +285,7 @@ function renderInspector() {
   summaryCard.append(
     createElement("h3", "", "Definition of done"),
     createElement("p", "", task.definition_of_done_summary),
-    buildTagRow(task.blueprint_family_refs.slice(0, 10), "code-chip")
+    buildTagRow(task.blueprint_family_refs.slice(0, 10), "code-chip"),
   );
 
   const validatorCard = createElement("section", "inspector-card");
@@ -296,21 +305,17 @@ function renderInspector() {
     createElement("h3", "", "Blueprint and release posture"),
     buildTagRow(task.test_vector_refs, "code-chip"),
     buildTagRow(task.release_gate_refs, "code-chip"),
-    buildTagRow(task.evidence_artifact_refs, "tag")
+    buildTagRow(task.evidence_artifact_refs, "tag"),
   );
 
   const gapCard = createElement("section", "inspector-card");
   gapCard.dataset.testid = "typed-gap-state";
   gapCard.append(createElement("h3", "", "Typed gap state"));
   if (task.blocking_gap_refs.length) {
-    gapCard.append(
-      createElement(
-        "p",
-        "",
-        task.blocking_gap_refs.join(", ")
-      )
+    gapCard.append(createElement("p", "", task.blocking_gap_refs.join(", ")));
+    buildTagRow(task.blocking_gap_refs, "gap-chip").childNodes.forEach((node) =>
+      gapCard.append(node),
     );
-    buildTagRow(task.blocking_gap_refs, "gap-chip").childNodes.forEach((node) => gapCard.append(node));
   } else {
     gapCard.append(createElement("p", "", "No typed gap is registered for this task."));
   }

@@ -4,12 +4,8 @@ import path from "node:path";
 
 import { expect, test, type Page } from "@playwright/test";
 
-import {
-  createRunContext,
-} from "../../../../automation/provisioning/src/core/run_context.js";
-import {
-  DEVELOPER_HUB_PROVIDER_ID,
-} from "../../../../automation/provisioning/src/providers/hmrc/flows/developer_hub_shared.js";
+import { createRunContext } from "../../../../automation/provisioning/src/core/run_context.js";
+import { DEVELOPER_HUB_PROVIDER_ID } from "../../../../automation/provisioning/src/providers/hmrc/flows/developer_hub_shared.js";
 import {
   exportClientCredentialsToVault,
   HMRC_CLIENT_EXPORT_FLOW_ID,
@@ -23,8 +19,7 @@ import {
 const CANONICAL_APPLICATION_NAME = "Taxat Sandbox Income Tax";
 
 function fixtureEntryUrls(scenario: string): SandboxApplicationEntryUrls {
-  const base =
-    `/automation/provisioning/tests/fixtures/hmrc_developer_hub_portal.html?scenario=${scenario}`;
+  const base = `/automation/provisioning/tests/fixtures/hmrc_developer_hub_portal.html?scenario=${scenario}`;
   return {
     applications: `${base}&screen=applications`,
   };
@@ -168,9 +163,7 @@ test("credential-lineage ledger renders safe-copy inspection without exposing ra
     "/automation/provisioning/report_viewer/index.html?fixture=./data/sample_run.json&page=credential-lineage-ledger",
   );
 
-  await expect(
-    page.getByRole("navigation", { name: "Application partitions" }),
-  ).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Application partitions" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Identifiers" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Bindings" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Secret lineage" })).toBeVisible();

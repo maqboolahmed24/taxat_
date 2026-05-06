@@ -3,11 +3,7 @@ export const controlAndAuditStoreLedgerRoute = {
   title: "Control and Audit Store Ledger",
   purpose:
     "Render a premium twin-ledger governance map for the transactional control store, append-only audit store, and restore-readiness strip without imitating a DBA metrics console.",
-  focusOrder: [
-    "postgres-store-rail",
-    "postgres-ledger-canvas",
-    "postgres-ledger-inspector",
-  ],
+  focusOrder: ["postgres-store-rail", "postgres-ledger-canvas", "postgres-ledger-inspector"],
   sections: [
     "Transactional Control Truth",
     "Append-Only Audit Evidence",

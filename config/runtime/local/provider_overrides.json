@@ -1,0 +1,104 @@
+{
+  "contract_version": "LOCAL_PROVIDER_OVERRIDES_V1",
+  "policy_id": "local_provider_overrides",
+  "basis_statement": "Local runtime binds durable and disposable substrates to loopback-only local services or host-process gates while keeping live provider credentials outside compose and outside committed files.",
+  "allowed_bootstrap_profile_refs": ["local", "devcontainer", "local-provisioning"],
+  "runtime_profiles": {
+    "local": {
+      "environment_ref": "env_local_authoring",
+      "provider_environment_ref": "NONE",
+      "safe_for_live_providers": false
+    },
+    "devcontainer": {
+      "environment_ref": "env_local_authoring",
+      "provider_environment_ref": "NONE",
+      "safe_for_live_providers": false
+    },
+    "local-provisioning": {
+      "environment_ref": "env_local_provisioning_workstation",
+      "provider_environment_ref": "sandbox",
+      "safe_for_live_providers": true
+    }
+  },
+  "overrides": [
+    {
+      "override_ref": "CONTROL_STORE_LOCAL_DSN",
+      "service_ref": "CONTROL_STORE",
+      "runtime_env_key": "TAXAT_LOCAL_CONTROL_STORE_DSN",
+      "environment_refs": ["env_local_authoring", "env_local_provisioning_workstation"],
+      "provider_status": "PROVIDER_OVERRIDE_APPLIED",
+      "value_template": "postgresql://taxat_runtime:${TAXAT_LOCAL_CONTROL_STORE_PASSWORD}@127.0.0.1:5432/taxat_control",
+      "secret_strategy": "PASSWORD_FROM_LOCAL_SECRET_HANDLE_OR_DEV_PLACEHOLDER",
+      "feature_flag_ref_or_null": null,
+      "notes": [
+        "Passwords remain local-only values or secret-handle metadata and never enter committed compose files.",
+        "Control-store DSN remains loopback-only."
+      ]
+    },
+    {
+      "override_ref": "AUDIT_STORE_LOCAL_DSN",
+      "service_ref": "AUDIT_STORE",
+      "runtime_env_key": "TAXAT_LOCAL_AUDIT_STORE_DSN",
+      "environment_refs": ["env_local_authoring", "env_local_provisioning_workstation"],
+      "provider_status": "PROVIDER_OVERRIDE_APPLIED",
+      "value_template": "postgresql://taxat_audit_writer:${TAXAT_LOCAL_AUDIT_STORE_PASSWORD}@127.0.0.1:5432/taxat_audit",
+      "secret_strategy": "PASSWORD_FROM_LOCAL_SECRET_HANDLE_OR_DEV_PLACEHOLDER",
+      "feature_flag_ref_or_null": null,
+      "notes": [
+        "Audit-store credentials remain separate from control-store credentials even though both databases live in one local PostgreSQL cluster."
+      ]
+    },
+    {
+      "override_ref": "OBJECT_STORAGE_LOCAL_ENDPOINT",
+      "service_ref": "OBJECT_STORAGE",
+      "runtime_env_key": "TAXAT_LOCAL_OBJECT_STORAGE_ENDPOINT",
+      "environment_refs": ["env_local_authoring", "env_local_provisioning_workstation"],
+      "provider_status": "PROVIDER_LOCAL_EMULATION_ADOPTED",
+      "value_template": "http://127.0.0.1:9000",
+      "secret_strategy": "MINIO_DEV_ONLY_ACCESS_KEY_AND_SECRET_FROM_LOCAL_ENV",
+      "feature_flag_ref_or_null": null,
+      "notes": [
+        "MinIO is an explicit S3-compatible local emulation layer, not a silent production-provider alias."
+      ]
+    },
+    {
+      "override_ref": "QUEUE_LOCAL_URI",
+      "service_ref": "QUEUE",
+      "runtime_env_key": "TAXAT_LOCAL_QUEUE_BROKER_URI",
+      "environment_refs": ["env_local_authoring", "env_local_provisioning_workstation"],
+      "provider_status": "PROVIDER_LOCAL_EMULATION_ADOPTED",
+      "value_template": "amqp://taxat_local:${TAXAT_LOCAL_QUEUE_PASSWORD}@127.0.0.1:5672/taxat-local",
+      "secret_strategy": "LOCAL_ONLY_BROKER_PASSWORD",
+      "feature_flag_ref_or_null": null,
+      "notes": [
+        "Queue transport remains disposable and local-only. Passwords stay in env injection, not in checked-in compose definitions."
+      ]
+    },
+    {
+      "override_ref": "CACHE_LOCAL_URI",
+      "service_ref": "CACHE",
+      "runtime_env_key": "TAXAT_LOCAL_CACHE_RESUME_URI",
+      "environment_refs": ["env_local_authoring", "env_local_provisioning_workstation"],
+      "provider_status": "PROVIDER_LOCAL_EMULATION_ADOPTED",
+      "value_template": "redis://127.0.0.1:6379/0",
+      "secret_strategy": "NO_SECRET_REQUIRED",
+      "feature_flag_ref_or_null": null,
+      "notes": [
+        "Local Redis is disposable acceleration only and may be purged independently of durable stores."
+      ]
+    },
+    {
+      "override_ref": "OPTIONAL_LOCAL_OTLP_ENDPOINT",
+      "service_ref": "APP",
+      "runtime_env_key": "TAXAT_LOCAL_OTLP_EXPORTER_ENDPOINT",
+      "environment_refs": ["env_local_authoring", "env_local_provisioning_workstation"],
+      "provider_status": "NOT_SELECTED",
+      "value_template": "http://127.0.0.1:4318",
+      "secret_strategy": "NO_SECRET_REQUIRED",
+      "feature_flag_ref_or_null": "feature.local.optional-otel",
+      "notes": [
+        "Optional compatibility adapter only. Disabled by default so local telemetry does not become a hidden startup dependency."
+      ]
+    }
+  ]
+}

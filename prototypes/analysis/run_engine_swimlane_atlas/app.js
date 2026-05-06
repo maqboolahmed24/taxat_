@@ -133,7 +133,9 @@ function renderPhaseRail(phases) {
 
 function handlePhaseRailKeydown(event, phases) {
   const buttons = [...phaseRail.querySelectorAll(".phase-button")];
-  const currentIndex = buttons.findIndex((button) => button.dataset.phaseId === state.selectedPhaseId);
+  const currentIndex = buttons.findIndex(
+    (button) => button.dataset.phaseId === state.selectedPhaseId,
+  );
   if (currentIndex === -1) {
     return;
   }

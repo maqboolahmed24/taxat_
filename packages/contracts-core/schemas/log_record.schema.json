@@ -1,0 +1,304 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/log_record.schema.json",
+  "title": "LogRecord",
+  "description": "Structured application log contract for runtime, security, and privacy events. This contract freezes immutable record identity, retention/access posture, and structured correlation while preventing obvious secret-style keys from entering general log fields.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "log_record_id",
+    "timestamp",
+    "severity",
+    "log_family",
+    "access_tier",
+    "retention_class",
+    "service_name",
+    "environment_ref",
+    "resource_ref",
+    "event_code",
+    "correlation_context",
+    "message_template",
+    "structured_fields"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "LogRecord"
+    },
+    "log_record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "TRACE",
+        "DEBUG",
+        "INFO",
+        "WARN",
+        "ERROR",
+        "FATAL"
+      ]
+    },
+    "log_family": {
+      "type": "string",
+      "enum": [
+        "RUNTIME",
+        "SESSION_SECURITY",
+        "ACCESS_CONTROL",
+        "PRIVACY_RETENTION",
+        "AUTHORITY_EDGE"
+      ]
+    },
+    "access_tier": {
+      "type": "string",
+      "enum": [
+        "STANDARD_OPERATIONS",
+        "SECURITY_RESTRICTED",
+        "PRIVACY_RESTRICTED"
+      ]
+    },
+    "retention_class": {
+      "type": "string",
+      "minLength": 1
+    },
+    "service_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resource_ref": {
+      "$ref": "./telemetry_resource.schema.json#/$defs/resourceRef"
+    },
+    "event_code": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "correlation_context": {
+      "$ref": "./telemetry_resource.schema.json#/$defs/correlationContext"
+    },
+    "message_template": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240,
+      "pattern": "^[^\\n\\r]+$"
+    },
+    "structured_fields": {
+      "type": "object",
+      "propertyNames": {
+        "not": {
+          "pattern": "([Pp][Aa][Ss][Ss](word|wd)?|[Ss][Ee][Cc][Rr][Ee][Tt]|[Tt][Oo][Kk][Ee][Nn]|[Aa][Uu][Tt][Hh](orization)?|[Cc][Oo][Oo][Kk][Ii][Ee]|[Rr][Ee][Ff][Rr][Ee][Ss][Hh][-_]?[Tt][Oo][Kk][Ee][Nn]|[Aa][Cc][Cc][Ee][Ss][Ss][-_]?[Tt][Oo][Kk][Ee][Nn]|[Aa][Pp][Ii][-_]?[Kk][Ee][Yy]|[Ss][Ee][Tt][-_]?[Cc][Oo][Oo][Kk][Ii][Ee]|[Bb][Ee][Aa][Rr][Ee][Rr])"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "./telemetry_resource.schema.json#/$defs/attributeValue"
+      }
+    }
+  },
+  "allOf": [
+    {
+      "properties": {
+        "correlation_context": {
+          "type": "object",
+          "properties": {
+            "service_name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "environment_ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "service_name",
+            "environment_ref"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "correlation_context": {
+            "type": "object",
+            "properties": {
+              "span_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "span_id"
+            ]
+          }
+        },
+        "required": [
+          "correlation_context"
+        ]
+      },
+      "then": {
+        "properties": {
+          "correlation_context": {
+            "type": "object",
+            "properties": {
+              "trace_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "trace_id"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "log_family": {
+            "enum": [
+              "SESSION_SECURITY",
+              "ACCESS_CONTROL",
+              "AUTHORITY_EDGE"
+            ]
+          }
+        },
+        "required": [
+          "log_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "access_tier": {
+            "const": "SECURITY_RESTRICTED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "log_family": {
+            "const": "PRIVACY_RETENTION"
+          }
+        },
+        "required": [
+          "log_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "access_tier": {
+            "const": "PRIVACY_RESTRICTED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "log_family": {
+            "const": "RUNTIME"
+          }
+        },
+        "required": [
+          "log_family"
+        ]
+      },
+      "then": {
+        "properties": {
+          "access_tier": {
+            "const": "STANDARD_OPERATIONS"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "severity": {
+            "enum": [
+              "WARN",
+              "ERROR",
+              "FATAL"
+            ]
+          }
+        },
+        "required": [
+          "severity"
+        ]
+      },
+      "then": {
+        "properties": {
+          "structured_fields": {
+            "minProperties": 1
+          },
+          "correlation_context": {
+            "type": "object",
+            "anyOf": [
+              {
+                "required": [
+                  "manifest_id"
+                ]
+              },
+              {
+                "required": [
+                  "submission_record_id"
+                ]
+              },
+              {
+                "required": [
+                  "authority_operation_id"
+                ]
+              },
+              {
+                "required": [
+                  "workflow_item_id"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "severity": {
+            "enum": [
+              "ERROR",
+              "FATAL"
+            ]
+          }
+        },
+        "required": [
+          "severity"
+        ]
+      },
+      "then": {
+        "properties": {
+          "correlation_context": {
+            "type": "object",
+            "properties": {
+              "error_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "error_id"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

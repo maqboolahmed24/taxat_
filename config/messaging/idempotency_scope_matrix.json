@@ -1,0 +1,94 @@
+{
+  "contract_version": "1.0",
+  "matrix_id": "idempotency_scope_matrix",
+  "basis_statement": "Producer duplicate meaning, consumer dedupe, and authority-side exact-send identity use separate durable scopes. Packet ids and broker delivery counters never become legal truth.",
+  "scope_rows": [
+    {
+      "scope_ref": "NORTHBOUND_COMMAND",
+      "display_name": "Northbound command meaning",
+      "producer_duplicate_tuple": ["tenant_id", "actor_session_ref", "command_type", "target_ref", "payload_hash"],
+      "consumer_dedupe_tuple": ["command_receipt_ref", "request_hash", "idempotency_key"],
+      "authority_side_tuple": [],
+      "collision_rule": "BODY_COLLISION when one idempotency key is observed with a different command body hash.",
+      "recovery_posture": "Safe retries return the original durable command receipt and never create a second logical command.",
+      "notes": [
+        "Northbound duplicate scope binds actor or session, target, and payload meaning.",
+        "Consumer dedupe reuses the persisted command receipt rather than transport counters."
+      ]
+    },
+    {
+      "scope_ref": "STAGE_TASK",
+      "display_name": "Stage task execution meaning",
+      "producer_duplicate_tuple": ["manifest_ref", "stage_code", "command_receipt_ref", "precondition_hash"],
+      "consumer_dedupe_tuple": ["source_record_ref", "duplicate_meaning_key", "request_hash"],
+      "authority_side_tuple": [],
+      "collision_rule": "IDENTITY_NAMESPACE_COLLISION when the same stage idempotency key appears under a different stage code, manifest, or precondition hash.",
+      "recovery_posture": "Duplicate dispatch reuses the same durable worker claim or completed result.",
+      "notes": [
+        "Stage packets may be replayed; stage mutation may not.",
+        "Worker-local memory never defines legal completion."
+      ]
+    },
+    {
+      "scope_ref": "ARTIFACT_EVENT",
+      "display_name": "Immutable artifact-event meaning",
+      "producer_duplicate_tuple": ["tenant_id", "object_version_ref", "event_type", "event_id_or_sequencer"],
+      "consumer_dedupe_tuple": ["source_record_ref", "duplicate_meaning_key", "delivery_dedupe_key"],
+      "authority_side_tuple": [],
+      "collision_rule": "BODY_COLLISION when one immutable object-version meaning resolves to different payload hashes.",
+      "recovery_posture": "Rebuild from immutable object-version receipts and inbox truth, not provider event ordering.",
+      "notes": [
+        "Immutable object identity is the dedupe spine.",
+        "Signed URLs and inline blob bytes are never part of the duplicate tuple."
+      ]
+    },
+    {
+      "scope_ref": "AUTHORITY_REQUEST",
+      "display_name": "Authority request meaning",
+      "producer_duplicate_tuple": [
+        "identity_namespace_hash",
+        "tenant_id",
+        "client_id",
+        "attempt_lineage_manifest_id",
+        "business_partition_refs",
+        "normalized_obligation_ref",
+        "normalized_basis_type",
+        "http_method",
+        "canonical_path",
+        "canonical_query",
+        "request_body_hash",
+        "access_binding_hash"
+      ],
+      "consumer_dedupe_tuple": ["authority_interaction_ref", "request_hash", "idempotency_key"],
+      "authority_side_tuple": [
+        "authority_name",
+        "authority_product_profile",
+        "provider_environment",
+        "authority_scope",
+        "operation_family",
+        "canonical_path",
+        "binding_lineage_ref",
+        "attempt_lineage_manifest_id"
+      ],
+      "collision_rule": "BODY_COLLISION blocks transmit on payload drift; IDENTITY_NAMESPACE_COLLISION blocks transmit when a namespace tuple changes under one idempotency or request hash.",
+      "recovery_posture": "Transport replay may reuse duplicate meaning and idempotency only when the exact sealed request meaning is unchanged.",
+      "notes": [
+        "Request hash remains the exact-send identity and changes on token-binding or header-profile drift.",
+        "Idempotency follows duplicate meaning and survives lawful token rotation within one frozen lineage."
+      ]
+    },
+    {
+      "scope_ref": "AUTHORITY_INGRESS",
+      "display_name": "Authority ingress dedupe meaning",
+      "producer_duplicate_tuple": ["provider_delivery_ref", "canonical_ingress_receipt_ref", "delivery_dedupe_key"],
+      "consumer_dedupe_tuple": ["source_record_ref", "duplicate_meaning_key", "request_hash", "idempotency_key"],
+      "authority_side_tuple": ["authority_reference", "request_hash", "idempotency_key"],
+      "collision_rule": "IDENTITY_NAMESPACE_COLLISION requires quarantine when one ingress payload resolves to competing request or authority identities.",
+      "recovery_posture": "Restore resumes from canonical ingress receipts and reconciliation packets rather than nearest-recent request heuristics.",
+      "notes": [
+        "Authenticated ingress proof precedes normalization.",
+        "Missing or stale source-record continuity blocks mutation and routes to quarantine."
+      ]
+    }
+  ]
+}

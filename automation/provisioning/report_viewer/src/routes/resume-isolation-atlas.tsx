@@ -3,11 +3,7 @@ export const resumeIsolationAtlasRoute = {
   title: "Resume Isolation Atlas",
   purpose:
     "Render a premium continuity atlas for cache partition identity, route-bound resume envelopes, TTL or purge law, and local-versus-shared storage boundaries without drifting into a cache-performance dashboard.",
-  focusOrder: [
-    "resume-family-rail",
-    "resume-isolation-canvas",
-    "resume-isolation-inspector",
-  ],
+  focusOrder: ["resume-family-rail", "resume-isolation-canvas", "resume-isolation-inspector"],
   sections: ["Partition Identity", "Resume Binding", "Invalidation / Rebase"],
   palette: {
     background: "#F5F6F4",

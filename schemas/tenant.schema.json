@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/tenant.schema.json",
+  "title": "Tenant",
+  "description": "Durable tenant register record for the control plane. The schema keeps policy-profile identity, retention defaults, and explicit disable posture queryable instead of inferring tenant availability from runtime configuration only.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "tenant_id",
+    "name",
+    "policy_profile_id",
+    "default_retention_profile_id",
+    "lifecycle_state",
+    "disabled_at",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "Tenant"
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_profile_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "default_retention_profile_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": ["ACTIVE", "DISABLED"]
+    },
+    "disabled_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "ACTIVE"
+          }
+        },
+        "required": ["lifecycle_state"]
+      },
+      "then": {
+        "properties": {
+          "disabled_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "DISABLED"
+          }
+        },
+        "required": ["lifecycle_state"]
+      },
+      "then": {
+        "properties": {
+          "disabled_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

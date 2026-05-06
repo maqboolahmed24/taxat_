@@ -1,0 +1,559 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/governance_access_simulation.schema.json",
+  "title": "GovernanceAccessSimulation",
+  "description": "Non-mutating governance access and mutation-hazard preview contract. This schema freezes the policy snapshot, proposed tuple, nested reusable authorization decision, ordered authority-chain explanation, and simulator posture used by the control-plane simulator.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "simulation_id",
+    "tenant_id",
+    "policy_snapshot_hash",
+    "principal_context_ref",
+    "governance_target_ref",
+    "resource_class",
+    "action_family",
+    "requested_scope",
+    "requested_partition_scope_refs",
+    "authorization_decision",
+    "authority_layer_boundary",
+    "authority_chain_layers",
+    "simulator_posture",
+    "mutation_hazard",
+    "mutation_basis_contract",
+    "simulated_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "GovernanceAccessSimulation"
+    },
+    "simulation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_snapshot_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "principal_context_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "governance_target_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "resource_class": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_family": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requested_scope": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "enum": [
+            "year_end",
+            "quarterly_update",
+            "estimate_only"
+          ]
+        }
+      ],
+      "items": {
+        "type": "string",
+        "enum": [
+          "year_end",
+          "quarterly_update",
+          "estimate_only",
+          "prepare_submission",
+          "submit",
+          "amendment_intent",
+          "amendment_submit"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "requested_partition_scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "authorization_decision": {
+      "$ref": "./authorization_decision.schema.json"
+    },
+    "authority_layer_boundary": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/authority_layer_boundary_contract.schema.json"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "binding_scope_class": {
+              "const": "GOVERNANCE_ACCESS_SIMULATION"
+            }
+          }
+        }
+      ]
+    },
+    "authority_chain_layers": {
+      "$ref": "#/$defs/authorityChainLayerStack"
+    },
+    "simulator_posture": {
+      "$ref": "#/$defs/simulatorPosture"
+    },
+    "mutation_hazard": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/mutationHazard"
+        }
+      ]
+    },
+    "mutation_basis_contract": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "https://taxat.dev/schemas/governance_mutation_basis_contract.schema.json"
+        }
+      ]
+    },
+    "simulated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "chainLayerOutcome": {
+      "type": "string",
+      "enum": [
+        "ALLOW",
+        "ALLOW_MASKED",
+        "REQUIRE_STEP_UP",
+        "REQUIRE_APPROVAL",
+        "DENY",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "simulatorPosture": {
+      "type": "string",
+      "enum": [
+        "READ_ONLY_DECISION",
+        "ADVISORY_ONLY",
+        "APPROVAL_GATED",
+        "BOUNDED_SAFE"
+      ]
+    },
+    "authorityChainLayerBase": {
+      "type": "object",
+      "required": [
+        "layer_code",
+        "layer_outcome",
+        "reason_codes"
+      ],
+      "properties": {
+        "layer_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "layer_outcome": {
+          "$ref": "#/$defs/chainLayerOutcome"
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "sessionAuthnLayer": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/authorityChainLayerBase"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "layer_code": {
+              "const": "SESSION_AUTHN_POSTURE"
+            }
+          }
+        }
+      ]
+    },
+    "tenantOperationalAuthorityLayer": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/authorityChainLayerBase"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "layer_code": {
+              "const": "TENANT_OPERATIONAL_AUTHORITY"
+            }
+          }
+        }
+      ]
+    },
+    "clientDelegationCoverageLayer": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/authorityChainLayerBase"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "layer_code": {
+              "const": "CLIENT_DELEGATION_COVERAGE"
+            }
+          }
+        }
+      ]
+    },
+    "externalAuthorityLinkReadinessLayer": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/authorityChainLayerBase"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "layer_code": {
+              "const": "EXTERNAL_AUTHORITY_LINK_READINESS"
+            }
+          }
+        }
+      ]
+    },
+    "authorityOfRecordOutcomeLayer": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/authorityChainLayerBase"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "layer_code": {
+              "const": "AUTHORITY_OF_RECORD_OUTCOME"
+            }
+          }
+        }
+      ]
+    },
+    "authorityChainLayerStack": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 5,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/sessionAuthnLayer"
+        },
+        {
+          "$ref": "#/$defs/tenantOperationalAuthorityLayer"
+        },
+        {
+          "$ref": "#/$defs/clientDelegationCoverageLayer"
+        },
+        {
+          "$ref": "#/$defs/externalAuthorityLinkReadinessLayer"
+        }
+      ],
+      "items": {
+        "$ref": "#/$defs/authorityOfRecordOutcomeLayer"
+      }
+    },
+    "mutationHazard": {
+      "$ref": "https://taxat.dev/schemas/governance_mutation_hazard_contract.schema.json"
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "mutation_hazard": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "mutation_hazard"
+        ]
+      },
+      "then": {
+        "properties": {
+          "simulator_posture": {
+            "const": "READ_ONLY_DECISION"
+          },
+          "mutation_basis_contract": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mutation_hazard": {
+            "type": "object",
+            "properties": {
+              "simulation_confidence_score": {
+                "maximum": 79
+              }
+            },
+            "required": [
+              "simulation_confidence_score"
+            ]
+          }
+        },
+        "required": [
+          "mutation_hazard"
+        ]
+      },
+      "then": {
+        "properties": {
+          "mutation_basis_contract": {
+            "$ref": "https://taxat.dev/schemas/governance_mutation_basis_contract.schema.json"
+          },
+          "simulator_posture": {
+            "const": "ADVISORY_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mutation_hazard": {
+            "type": "object",
+            "properties": {
+              "predictability_score": {
+                "maximum": 74
+              }
+            },
+            "required": [
+              "predictability_score"
+            ]
+          }
+        },
+        "required": [
+          "mutation_hazard"
+        ]
+      },
+      "then": {
+        "properties": {
+          "mutation_basis_contract": {
+            "$ref": "https://taxat.dev/schemas/governance_mutation_basis_contract.schema.json"
+          },
+          "simulator_posture": {
+            "const": "ADVISORY_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mutation_hazard": {
+            "type": "object",
+            "properties": {
+              "bounded_safe_mutation": {
+                "const": 1
+              },
+              "simulation_confidence_score": {
+                "minimum": 80
+              },
+              "predictability_score": {
+                "minimum": 75
+              }
+            },
+            "required": [
+              "bounded_safe_mutation",
+              "simulation_confidence_score",
+              "predictability_score"
+            ]
+          }
+        },
+        "required": [
+          "mutation_hazard"
+        ]
+      },
+      "then": {
+        "properties": {
+          "mutation_basis_contract": {
+            "$ref": "https://taxat.dev/schemas/governance_mutation_basis_contract.schema.json"
+          },
+          "simulator_posture": {
+            "const": "BOUNDED_SAFE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mutation_hazard": {
+            "type": "object",
+            "properties": {
+              "bounded_safe_mutation": {
+                "const": 0
+              },
+              "simulation_confidence_score": {
+                "minimum": 80
+              },
+              "predictability_score": {
+                "minimum": 75
+              }
+            },
+            "required": [
+              "bounded_safe_mutation",
+              "simulation_confidence_score",
+              "predictability_score"
+            ]
+          }
+        },
+        "required": [
+          "mutation_hazard"
+        ]
+      },
+      "then": {
+        "properties": {
+          "mutation_basis_contract": {
+            "$ref": "https://taxat.dev/schemas/governance_mutation_basis_contract.schema.json"
+          },
+          "simulator_posture": {
+            "const": "APPROVAL_GATED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "simulator_posture": {
+            "const": "READ_ONLY_DECISION"
+          }
+        },
+        "required": [
+          "simulator_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "mutation_basis_contract": {
+            "type": "null"
+          },
+          "mutation_hazard": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "simulator_posture": {
+            "const": "BOUNDED_SAFE"
+          }
+        },
+        "required": [
+          "simulator_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "mutation_basis_contract": {
+            "$ref": "https://taxat.dev/schemas/governance_mutation_basis_contract.schema.json"
+          },
+          "mutation_hazard": {
+            "type": "object",
+            "properties": {
+              "bounded_safe_mutation": {
+                "const": 1
+              }
+            },
+            "required": [
+              "bounded_safe_mutation"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "simulator_posture": {
+            "const": "APPROVAL_GATED"
+          }
+        },
+        "required": [
+          "simulator_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "mutation_basis_contract": {
+            "$ref": "https://taxat.dev/schemas/governance_mutation_basis_contract.schema.json"
+          },
+          "mutation_hazard": {
+            "type": "object",
+            "properties": {
+              "bounded_safe_mutation": {
+                "const": 0
+              }
+            },
+            "required": [
+              "bounded_safe_mutation"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "simulator_posture": {
+            "const": "ADVISORY_ONLY"
+          }
+        },
+        "required": [
+          "simulator_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "mutation_basis_contract": {
+            "$ref": "https://taxat.dev/schemas/governance_mutation_basis_contract.schema.json"
+          },
+          "mutation_hazard": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  ]
+}

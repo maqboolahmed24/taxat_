@@ -1,0 +1,132 @@
+{
+  "contract_version": "WORKER_QUEUE_CATALOG_V1",
+  "catalog_id": "worker_queue_catalog",
+  "basis_statement": "Queue families partition dispatch law by durable worker concern so broker transport never degenerates into one giant truth-substituting queue.",
+  "queue_family_rows": [
+    {
+      "queue_family_ref": "STAGE_WORK",
+      "display_name": "Stage work",
+      "rail_label": "STAGE",
+      "queue_ref": "queue.stage-work",
+      "routing_key": "worker.stage.execute",
+      "lawful_producer_families": [
+        "RUN_ENGINE",
+        "MANIFEST_STAGE_ORCHESTRATOR",
+        "NIGHTLY_AUTOPILOT"
+      ],
+      "consumer_worker_class_ref": "STAGE_RUNNER",
+      "ordering_scope_ref": "MANIFEST_STAGE_DOMAIN",
+      "ordering_basis_statement": "Ordering is lawful only within one manifest and stage code.",
+      "retry_budget_class": "STAGE_WORK_BOUNDED_EXPONENTIAL",
+      "dead_letter_queue_ref": "dlq.stage-work",
+      "dead_letter_posture": "Replay only from durable workset or outbox truth after bounded retries.",
+      "notes": [
+        "Competing consumers may scale horizontally only across distinct manifest stage order domains.",
+        "Stage packets point at persisted work definitions; they never carry large execution payloads inline."
+      ]
+    },
+    {
+      "queue_family_ref": "AUTHORITY_TRANSMIT",
+      "display_name": "Authority transmit",
+      "rail_label": "AUTHORITY",
+      "queue_ref": "queue.authority-transmit",
+      "routing_key": "authority.transmit",
+      "lawful_producer_families": [
+        "AUTHORITY_INTERACTION_PROTOCOL",
+        "CONTROLLED_AUTHORITY_GATEWAY"
+      ],
+      "consumer_worker_class_ref": "AUTHORITY_GATEWAY_TRANSMITTER",
+      "ordering_scope_ref": "AUTHORITY_TRANSMIT_DOMAIN",
+      "ordering_basis_statement": "Ordering is lawful only within one tenant, client, period, operation family, and frozen runtime scope.",
+      "retry_budget_class": "AUTHORITY_TRANSMIT_IDEMPOTENT_RECOVERY",
+      "dead_letter_queue_ref": "dlq.authority-transmit",
+      "dead_letter_posture": "Dead-letter blocks live resend until persisted resend-legality and send-time revalidation truth permit it.",
+      "notes": [
+        "Queue packets never infer resend legality; they carry the persisted legality state already decided by authority interaction truth.",
+        "Fresh authority mutation sends must fail closed when send-time revalidation detects lineage, token, or duplicate-bucket drift."
+      ]
+    },
+    {
+      "queue_family_ref": "RECONCILIATION_FOLLOW_UP",
+      "display_name": "Reconciliation follow-up",
+      "rail_label": "RECON",
+      "queue_ref": "queue.reconciliation-follow-up",
+      "routing_key": "authority.reconciliation.follow-up",
+      "lawful_producer_families": [
+        "AUTHORITY_INTERACTION_PROTOCOL",
+        "AUTHORITY_INGRESS_CHECKPOINT"
+      ],
+      "consumer_worker_class_ref": "AUTHORITY_RECONCILIATION_WORKER",
+      "ordering_scope_ref": "AUTHORITY_RECONCILIATION_DOMAIN",
+      "ordering_basis_statement": "Ordering is lawful only within one authority interaction and duplicate-meaning bucket.",
+      "retry_budget_class": "RECONCILIATION_FOLLOW_UP_GATED",
+      "dead_letter_queue_ref": "dlq.reconciliation-follow-up",
+      "dead_letter_posture": "Escalate to review when bounded read-only follow-up cannot resolve persisted ambiguity.",
+      "notes": [
+        "Read-only follow-up remains distinct from outbound mutation sends even when it targets the same authority interaction lineage.",
+        "Dead-letter investigation must preserve canonical ingress receipt, interaction, and audit refs without replaying live queue history."
+      ]
+    },
+    {
+      "queue_family_ref": "PROJECTION_REFRESH",
+      "display_name": "Projection refresh",
+      "rail_label": "PROJECTION",
+      "queue_ref": "queue.projection-refresh",
+      "routing_key": "projection.refresh",
+      "lawful_producer_families": [
+        "RUN_ENGINE",
+        "READ_MODEL_PROJECTOR",
+        "STREAM_REBASE"
+      ],
+      "consumer_worker_class_ref": "READ_MODEL_PROJECTOR",
+      "ordering_scope_ref": "PROJECTION_MANIFEST_DOMAIN",
+      "ordering_basis_statement": "Ordering is lawful only within one manifest and projection family.",
+      "retry_budget_class": "PROJECTION_REFRESH_REBUILDABLE",
+      "dead_letter_queue_ref": "dlq.projection-refresh",
+      "dead_letter_posture": "Rebuild projections from persisted manifests, receipts, and audit truth rather than replaying queue memory.",
+      "notes": [
+        "Projection queues remain disposable; rebuildability is a first-class requirement, not an operational afterthought.",
+        "Read-model refresh packets carry only snapshot refs, projection family refs, and integrity hashes."
+      ]
+    },
+    {
+      "queue_family_ref": "RECOVERY_JOB",
+      "display_name": "Recovery job",
+      "rail_label": "RECOVERY",
+      "queue_ref": "queue.recovery-job",
+      "routing_key": "runtime.recovery",
+      "lawful_producer_families": [
+        "RECOVERY_RECLAIM",
+        "RESTORE_DRILL",
+        "QUEUE_REBUILD"
+      ],
+      "consumer_worker_class_ref": "RECOVERY_COORDINATOR",
+      "ordering_scope_ref": "ATTEMPT_RECOVERY_DOMAIN",
+      "ordering_basis_statement": "Ordering is lawful only within one attempt lineage and recovery job class.",
+      "retry_budget_class": "RECOVERY_JOB_REBUILDABLE",
+      "dead_letter_queue_ref": "dlq.recovery-job",
+      "dead_letter_posture": "Recovery jobs rebuild delivery fabric from durable checkpoints and never treat prior queue state as ground truth.",
+      "notes": [
+        "Recovery job packets are coordination artifacts only; they point back to checkpoint and audit truth.",
+        "A recovery queue may rehydrate worker visibility, but it may not authorize fresh legal mutation by itself."
+      ]
+    }
+  ],
+  "source_lineage": [
+    {
+      "rationale": "Topology and truth-boundary rule for queue as delivery fabric only.",
+      "source_file": "Algorithm/deployment_and_resilience_contract.md",
+      "source_heading_or_logical_block": "## 1. Runtime topology"
+    },
+    {
+      "rationale": "Transactional outbox, inbox, order-domain, and competing-consumer worker rules.",
+      "source_file": "Algorithm/core_engine.md",
+      "source_heading_or_logical_block": "Concurrency and modernization rules for all remaining phases"
+    },
+    {
+      "rationale": "Persisted resend legality and send-time revalidation for authority dispatch.",
+      "source_file": "Algorithm/authority_interaction_protocol.md",
+      "source_heading_or_logical_block": "Send-time revalidation rule"
+    }
+  ]
+}

@@ -1,0 +1,329 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/authority_layer_boundary_contract.schema.json",
+  "title": "AuthorityLayerBoundaryContract",
+  "description": "Shared authority-layer separation contract. This schema freezes the active principal class, tenant-permission posture, client-delegation posture, imported-delegation freshness, authority-link posture, exceptional-authority posture, human-gate resolution state, and the explicit prohibitions that keep internal permission, delegation, authority-link readiness, approval, and authority-of-record truth as separate layers.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "binding_scope_class",
+    "integration_capability",
+    "active_principal_class",
+    "tenant_permission_state",
+    "client_delegation_state",
+    "delegation_basis",
+    "delegation_freshness_state",
+    "authority_link_state",
+    "exceptional_authority_state",
+    "human_gate_requirement",
+    "human_gate_resolution_state",
+    "authority_truth_precedence_policy",
+    "tenant_permission_substitution_policy",
+    "link_delegation_independence_policy",
+    "exceptional_scope_policy",
+    "service_human_gate_satisfaction_permitted",
+    "exceptional_authority_may_substitute_for_delegation",
+    "exceptional_authority_may_override_authority_truth",
+    "exceptional_authority_may_widen_client_scope",
+    "exceptional_authority_may_widen_partition_scope"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "AUTHORITY_LAYER_BOUNDARY_V1"
+    },
+    "binding_scope_class": {
+      "type": "string",
+      "enum": [
+        "AUTHORIZATION_DECISION",
+        "GOVERNANCE_ACCESS_SIMULATION",
+        "AUTHORITY_BINDING",
+        "AUTHORITY_OPERATION",
+        "AUTHORITY_REQUEST_ENVELOPE"
+      ]
+    },
+    "integration_capability": {
+      "type": "string",
+      "enum": [
+        "INTERNAL_ONLY",
+        "AUTHORITY_INTEGRATED"
+      ]
+    },
+    "active_principal_class": {
+      "type": "string",
+      "enum": [
+        "HUMAN",
+        "SERVICE",
+        "EXTERNAL"
+      ]
+    },
+    "tenant_permission_state": {
+      "type": "string",
+      "enum": [
+        "SATISFIED",
+        "MASKED",
+        "DENIED"
+      ]
+    },
+    "client_delegation_state": {
+      "type": "string",
+      "enum": [
+        "NOT_REQUIRED",
+        "SATISFIED",
+        "LIMITED",
+        "MISSING",
+        "EXPIRED"
+      ]
+    },
+    "delegation_basis": {
+      "type": "string",
+      "enum": [
+        "SELF_ACTING",
+        "CLIENT_GRANTED",
+        "SELF_ASSESSMENT_IMPORTED",
+        "DIGITAL_HANDSHAKE",
+        "TENANT_INTERNAL",
+        "SYSTEM_ASSIGNED"
+      ]
+    },
+    "delegation_freshness_state": {
+      "type": "string",
+      "enum": [
+        "NOT_APPLICABLE",
+        "CURRENT",
+        "REVALIDATION_REQUIRED"
+      ]
+    },
+    "authority_link_state": {
+      "type": "string",
+      "enum": [
+        "NOT_REQUIRED",
+        "UNLINKED",
+        "LINK_INITIATED",
+        "AUTHORISED_ACTIVE",
+        "AUTHORISED_LIMITED",
+        "TOKEN_INVALID",
+        "REVOKED",
+        "EXPIRED",
+        "SUPERSEDED"
+      ]
+    },
+    "exceptional_authority_state": {
+      "type": "string",
+      "enum": [
+        "NOT_APPLICABLE",
+        "BOUNDED_INTERNAL_EXCEPTION"
+      ]
+    },
+    "human_gate_requirement": {
+      "type": "string",
+      "enum": [
+        "NOT_REQUIRED",
+        "REQUIRE_STEP_UP",
+        "REQUIRE_APPROVAL",
+        "REQUIRE_STEP_UP_AND_APPROVAL"
+      ]
+    },
+    "human_gate_resolution_state": {
+      "type": "string",
+      "enum": [
+        "NOT_REQUIRED",
+        "PENDING_EVIDENCE",
+        "EVIDENCE_FROZEN"
+      ]
+    },
+    "authority_truth_precedence_policy": {
+      "const": "EXTERNAL_TRUTH_SUPERSEDES_INTERNAL_EXCEPTION"
+    },
+    "tenant_permission_substitution_policy": {
+      "const": "INTERNAL_PERMISSION_NEVER_SUFFICIENT_FOR_AUTHORITY_MUTATION"
+    },
+    "link_delegation_independence_policy": {
+      "const": "AUTHORITY_LINK_NEVER_PROVES_CLIENT_DELEGATION"
+    },
+    "exceptional_scope_policy": {
+      "const": "EXCEPTION_BOUND_TO_APPROVED_ACTION_CLIENT_AND_PARTITIONS"
+    },
+    "service_human_gate_satisfaction_permitted": {
+      "const": false
+    },
+    "exceptional_authority_may_substitute_for_delegation": {
+      "const": false
+    },
+    "exceptional_authority_may_override_authority_truth": {
+      "const": false
+    },
+    "exceptional_authority_may_widen_client_scope": {
+      "const": false
+    },
+    "exceptional_authority_may_widen_partition_scope": {
+      "const": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "human_gate_requirement": {
+            "const": "NOT_REQUIRED"
+          }
+        },
+        "required": [
+          "human_gate_requirement"
+        ]
+      },
+      "then": {
+        "properties": {
+          "human_gate_resolution_state": {
+            "const": "NOT_REQUIRED"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "human_gate_resolution_state": {
+            "enum": [
+              "PENDING_EVIDENCE",
+              "EVIDENCE_FROZEN"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "active_principal_class": {
+            "const": "SERVICE"
+          }
+        },
+        "required": [
+          "active_principal_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "human_gate_resolution_state": {
+            "enum": [
+              "NOT_REQUIRED",
+              "PENDING_EVIDENCE"
+            ]
+          },
+          "delegation_basis": {
+            "enum": [
+              "TENANT_INTERNAL",
+              "SYSTEM_ASSIGNED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "client_delegation_state": {
+            "const": "NOT_REQUIRED"
+          }
+        },
+        "required": [
+          "client_delegation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "delegation_basis": {
+            "enum": [
+              "SELF_ACTING",
+              "TENANT_INTERNAL",
+              "SYSTEM_ASSIGNED"
+            ]
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "delegation_basis": {
+            "enum": [
+              "CLIENT_GRANTED",
+              "SELF_ASSESSMENT_IMPORTED",
+              "DIGITAL_HANDSHAKE"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "delegation_basis": {
+            "enum": [
+              "SELF_ASSESSMENT_IMPORTED",
+              "DIGITAL_HANDSHAKE"
+            ]
+          }
+        },
+        "required": [
+          "delegation_basis"
+        ]
+      },
+      "then": {
+        "properties": {
+          "delegation_freshness_state": {
+            "enum": [
+              "CURRENT",
+              "REVALIDATION_REQUIRED"
+            ]
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "delegation_freshness_state": {
+            "const": "NOT_APPLICABLE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "integration_capability": {
+            "const": "INTERNAL_ONLY"
+          }
+        },
+        "required": [
+          "integration_capability"
+        ]
+      },
+      "then": {
+        "properties": {
+          "client_delegation_state": {
+            "const": "NOT_REQUIRED"
+          },
+          "authority_link_state": {
+            "const": "NOT_REQUIRED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "exceptional_authority_state": {
+            "const": "BOUNDED_INTERNAL_EXCEPTION"
+          }
+        },
+        "required": [
+          "exceptional_authority_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "human_gate_resolution_state": {
+            "const": "EVIDENCE_FROZEN"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

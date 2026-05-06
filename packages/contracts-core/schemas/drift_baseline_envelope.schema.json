@@ -1,0 +1,355 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/drift_baseline_envelope.schema.json",
+  "title": "DriftBaselineEnvelope",
+  "description": "Immutable exact-scope baseline-selection artifact for drift and amendment workflows.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "baseline_envelope_id",
+    "manifest_id",
+    "client_id",
+    "period",
+    "baseline_ref",
+    "baseline_manifest_id",
+    "baseline_type",
+    "baseline_scope_refs",
+    "baseline_basis_ref",
+    "authority_basis_refs",
+    "baseline_submission_state",
+    "truth_origin",
+    "baseline_effective_at",
+    "temporal_propagation_event_ref_or_null",
+    "selection_reason_codes",
+    "selection_contract",
+    "frozen_hash",
+    "supersedes_baseline_frozen_hash_or_null",
+    "superseded_by_baseline_envelope_id",
+    "superseded_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "DriftBaselineEnvelope"
+    },
+    "baseline_envelope_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "client_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "period": {
+      "type": "string",
+      "minLength": 1
+    },
+    "baseline_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "baseline_manifest_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "baseline_type": {
+      "type": "string",
+      "enum": [
+        "WORKING",
+        "FILED",
+        "AMENDED",
+        "AUTHORITY_CORRECTED",
+        "OUT_OF_BAND"
+      ]
+    },
+    "baseline_scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "baseline_basis_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "authority_basis_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "baseline_submission_state": {
+      "type": "string",
+      "enum": [
+        "WORKING",
+        "FILED_CONFIRMED",
+        "AMEND_CONFIRMED",
+        "AUTHORITY_CORRECTED",
+        "UNKNOWN",
+        "OUT_OF_BAND_UNRECONCILED"
+      ]
+    },
+    "truth_origin": {
+      "type": "string",
+      "minLength": 1
+    },
+    "baseline_effective_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "temporal_propagation_event_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "selection_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "selection_contract": {
+      "$ref": "https://taxat.dev/schemas/baseline_selection_contract.schema.json"
+    },
+    "frozen_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "supersedes_baseline_frozen_hash_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "superseded_by_baseline_envelope_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "superseded_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "baseline_type": {
+            "const": "WORKING"
+          }
+        },
+        "required": [
+          "baseline_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "baseline_submission_state": {
+            "const": "WORKING"
+          },
+          "baseline_manifest_id": {
+            "type": "null"
+          },
+          "authority_basis_refs": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "baseline_type": {
+            "const": "FILED"
+          }
+        },
+        "required": [
+          "baseline_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "baseline_submission_state": {
+            "const": "FILED_CONFIRMED"
+          },
+          "baseline_manifest_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "baseline_type": {
+            "const": "AMENDED"
+          }
+        },
+        "required": [
+          "baseline_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "baseline_submission_state": {
+            "const": "AMEND_CONFIRMED"
+          },
+          "baseline_manifest_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "baseline_type": {
+            "const": "AUTHORITY_CORRECTED"
+          }
+        },
+        "required": [
+          "baseline_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "baseline_submission_state": {
+            "const": "AUTHORITY_CORRECTED"
+          },
+          "authority_basis_refs": {
+            "minItems": 1
+          },
+          "temporal_propagation_event_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "baseline_type": {
+            "const": "OUT_OF_BAND"
+          }
+        },
+        "required": [
+          "baseline_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "baseline_submission_state": {
+            "const": "OUT_OF_BAND_UNRECONCILED"
+          },
+          "baseline_manifest_id": {
+            "type": "null"
+          },
+          "authority_basis_refs": {
+            "minItems": 1
+          },
+          "temporal_propagation_event_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "supersedes_baseline_frozen_hash_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "supersedes_baseline_frozen_hash_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "supersedes_baseline_frozen_hash_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "superseded_by_baseline_envelope_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "superseded_by_baseline_envelope_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "superseded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "superseded_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "superseded_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "superseded_by_baseline_envelope_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

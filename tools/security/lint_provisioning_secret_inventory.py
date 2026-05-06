@@ -116,28 +116,19 @@ def main() -> int:
     )
 
     known_namespaces = {
-        row["secret_namespace_ref"]
-        for row in namespace_plan.get("secret_namespace_rows", [])
+        row["secret_namespace_ref"] for row in namespace_plan.get("secret_namespace_rows", [])
     }
-    known_channel_ids = {
-        row["channel_id"] for row in channels.get("channel_definitions", [])
-    }
-    known_forbidden_ids = {
-        row["location_id"] for row in forbidden.get("location_definitions", [])
-    }
+    known_channel_ids = {row["channel_id"] for row in channels.get("channel_definitions", [])}
+    known_forbidden_ids = {row["location_id"] for row in forbidden.get("location_definitions", [])}
     minimum_forbidden = set(forbidden.get("minimum_global_forbidden_location_ids", []))
-    rotation_by_id = {
-        row["sequence_id"]: row for row in rotation.get("rotation_sequences", [])
-    }
+    rotation_by_id = {row["sequence_id"]: row for row in rotation.get("rotation_sequences", [])}
     schema_map_by_class = {
         row["secret_class_id"]: row for row in schema_map.get("schema_mappings", [])
     }
     channel_binding_by_class = {
         row["secret_class_id"]: row for row in channels.get("secret_class_bindings", [])
     }
-    redaction_rule_ids = {
-        row["rule_id"] for row in redaction.get("pattern_rules", [])
-    }
+    redaction_rule_ids = {row["rule_id"] for row in redaction.get("pattern_rules", [])}
 
     ensure(
         minimum_forbidden == MINIMUM_STATIC_FORBIDDEN,
@@ -258,7 +249,8 @@ def main() -> int:
             )
             if row["secret_version_required"]:
                 ensure(
-                    schema_entry.get("schema_path") == "Algorithm/schemas/secret_version.schema.json",
+                    schema_entry.get("schema_path")
+                    == "Algorithm/schemas/secret_version.schema.json",
                     f"{class_id}: versioned secrets must map to Algorithm/schemas/secret_version.schema.json.",
                     errors,
                 )
@@ -281,7 +273,8 @@ def main() -> int:
         )
         if binding is not None:
             ensure(
-                set(binding.get("allowed_channel_ids", [])) == set(row["allowed_capture_channel_ids"]),
+                set(binding.get("allowed_channel_ids", []))
+                == set(row["allowed_capture_channel_ids"]),
                 f"{class_id}: inventory channels differ from provider_credential_capture_channels.json.",
                 errors,
             )
@@ -352,13 +345,17 @@ def main() -> int:
             "bootstrap contract rows must carry environment_id.",
             errors,
         )
-        unknown_seed_namespaces = sorted(set(row.get("secret_namespace_refs", [])) - known_namespaces)
+        unknown_seed_namespaces = sorted(
+            set(row.get("secret_namespace_refs", [])) - known_namespaces
+        )
         ensure(
             not unknown_seed_namespaces,
             f"{env_id}: bootstrap contract references unknown namespaces {unknown_seed_namespaces}.",
             errors,
         )
-        unknown_seed_classes = sorted(set(row.get("permitted_secret_class_ids", [])) - known_class_ids)
+        unknown_seed_classes = sorted(
+            set(row.get("permitted_secret_class_ids", [])) - known_class_ids
+        )
         ensure(
             not unknown_seed_classes,
             f"{env_id}: bootstrap contract references unknown secret classes {unknown_seed_classes}.",
@@ -366,7 +363,11 @@ def main() -> int:
         )
         seen_seeded_classes.update(row.get("permitted_secret_class_ids", []))
 
-        if env_id in {"env_ci_ephemeral_validation", "env_ephemeral_review_preview", "env_local_authoring"}:
+        if env_id in {
+            "env_ci_ephemeral_validation",
+            "env_ephemeral_review_preview",
+            "env_local_authoring",
+        }:
             ensure(
                 row.get("raw_secret_delivery_allowed") is False,
                 f"{env_id}: non-provider-trusted environments must not permit raw secret delivery.",
@@ -376,7 +377,8 @@ def main() -> int:
     missing_seed_coverage = sorted(
         class_id
         for class_id in known_class_ids
-        if class_id != "manual_checkpoint_secret_entry_artifact_ref" and class_id not in seen_seeded_classes
+        if class_id != "manual_checkpoint_secret_entry_artifact_ref"
+        and class_id not in seen_seeded_classes
     )
     ensure(
         not missing_seed_coverage,
@@ -391,7 +393,9 @@ def main() -> int:
         except re.error as exc:
             errors.append(f"Redaction rule {rule['rule_id']} has invalid regex: {exc}")
 
-    for class_id, required_rule_ids in redaction.get("required_rule_ids_for_inventory_classes", {}).items():
+    for class_id, required_rule_ids in redaction.get(
+        "required_rule_ids_for_inventory_classes", {}
+    ).items():
         ensure(
             class_id in known_class_ids,
             f"Redaction rules reference unknown secret class {class_id}.",

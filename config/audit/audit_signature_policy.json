@@ -1,0 +1,71 @@
+{
+  "contract_version": "AUDIT_SIGNATURE_POLICY_V1",
+  "policy_id": "audit_signature_policy",
+  "basis_statement": "Signature posture varies by audit family, but any reserved signature ref must appear at append time so later signing outcomes never mutate prior evidence.",
+  "pending_reference_policy": "rows may retain a signature_ref that points to a pending batch reservation until signing completes or fails",
+  "signature_rows": [
+    {
+      "family_ref": "AUTH",
+      "signature_profile": "OPTIONAL_BATCH",
+      "batch_bucket_granularity": "HOUR",
+      "requires_preallocated_signature_ref": true,
+      "failure_follow_up_policy": "record batch failure in side metadata without rewriting the row",
+      "notes": ["Authority and authn evidence may be batch-signed when provider posture requires it."]
+    },
+    {
+      "family_ref": "WORKFLOW",
+      "signature_profile": "NONE",
+      "batch_bucket_granularity": "HOUR",
+      "requires_preallocated_signature_ref": false,
+      "failure_follow_up_policy": "no signing path for workflow family rows",
+      "notes": ["Workflow continuity relies on the hash chain and append-only store rather than batch signing."]
+    },
+    {
+      "family_ref": "CONFIG",
+      "signature_profile": "OPTIONAL_BATCH",
+      "batch_bucket_granularity": "HOUR",
+      "requires_preallocated_signature_ref": true,
+      "failure_follow_up_policy": "record failure as batch metadata only",
+      "notes": ["Schema and config evidence may adopt batch signatures when a regulated deployment requires it."]
+    },
+    {
+      "family_ref": "RETENTION",
+      "signature_profile": "OPTIONAL_BATCH",
+      "batch_bucket_granularity": "HOUR",
+      "requires_preallocated_signature_ref": true,
+      "failure_follow_up_policy": "record failure as side metadata without mutating prior rows",
+      "notes": ["Retention-limited audit proof can reserve signatures without blocking append."]
+    },
+    {
+      "family_ref": "FAILURE",
+      "signature_profile": "OPTIONAL_BATCH",
+      "batch_bucket_granularity": "HOUR",
+      "requires_preallocated_signature_ref": true,
+      "failure_follow_up_policy": "record failure as side metadata without mutating prior rows",
+      "notes": ["Failure evidence may be batch-signed for investigations and external scrutiny packs."]
+    },
+    {
+      "family_ref": "RELEASE",
+      "signature_profile": "REQUIRED_BATCH",
+      "batch_bucket_granularity": "HOUR",
+      "requires_preallocated_signature_ref": true,
+      "failure_follow_up_policy": "append row first, then surface batch failure in immutable follow-up metadata",
+      "notes": ["Release and recovery events must reserve a batch signature reference before append."]
+    },
+    {
+      "family_ref": "SECURITY",
+      "signature_profile": "REQUIRED_BATCH",
+      "batch_bucket_granularity": "HOUR",
+      "requires_preallocated_signature_ref": true,
+      "failure_follow_up_policy": "append row first, then surface batch failure in immutable follow-up metadata",
+      "notes": ["Security overrides and secret governance rows require deterministic batch signing posture."]
+    }
+  ],
+  "source_lineage": [
+    {
+      "source_file": "Algorithm/audit_and_provenance.md",
+      "source_heading_or_logical_block": "signature continuity",
+      "rationale": "Explains that signature outcomes must not rewrite prior audit evidence."
+    }
+  ]
+}

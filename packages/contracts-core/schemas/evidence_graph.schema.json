@@ -1,0 +1,1283 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/evidence_graph.schema.json",
+  "title": "EvidenceGraph",
+  "description": "Manifest-scoped provenance-graph artifact. This schema freezes graph lifecycle, query-level lineage boundaries, limitation notes, and graph-quality metrics for one evidence graph.",
+  "type": "object",
+  "required": [
+    "graph_id",
+    "manifest_id",
+    "manifest_refs",
+    "partition_contract",
+    "execution_mode_boundary_contract",
+    "graph_version",
+    "lifecycle_state",
+    "nodes_ref",
+    "edges_ref",
+    "critical_paths_ref",
+    "primary_path_ref",
+    "path_ranking_basis",
+    "lineage_boundaries",
+    "limitation_notes",
+    "retention_limited_explainability_contract",
+    "confidence_summary",
+    "supersession_summary",
+    "quality",
+    "built_at",
+    "build_scope",
+    "target_assessments",
+    "proof_bundle_refs",
+    "integrity_summary",
+    "graph_hash"
+  ],
+  "properties": {
+    "graph_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "partition_contract": {
+      "$ref": "./provenance_partition_contract.schema.json"
+    },
+    "execution_mode_boundary_contract": {
+      "$ref": "https://taxat.dev/schemas/execution_mode_boundary_contract.schema.json"
+    },
+    "graph_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "NOT_BUILT",
+        "BUILDING",
+        "BUILT",
+        "LIMITED",
+        "STALE",
+        "REBUILD_REQUIRED",
+        "SUPERSEDED"
+      ]
+    },
+    "nodes_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "edges_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "critical_paths_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "primary_path_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "path_ranking_basis": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/rankingBasisItem"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "lineage_boundaries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/lineageBoundary"
+      },
+      "default": []
+    },
+    "limitation_notes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/limitationNote"
+      },
+      "default": []
+    },
+    "retention_limited_explainability_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/retention_limited_explainability_contract.schema.json"
+        },
+        {
+          "properties": {
+            "boundary_scope": {
+              "const": "EVIDENCE_GRAPH"
+            },
+            "surface_role": {
+              "const": "GRAPH_EXPLANATION_INDEX"
+            },
+            "surface_specific_binding_policy": {
+              "const": "EVIDENCE_GRAPH_RETAINS_LIMITATION_NOTES_AND_TARGET_EXPLANATION_POSTURE"
+            }
+          }
+        }
+      ]
+    },
+    "confidence_summary": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "primary_path_weakest_support_confidence",
+        "weighted_path_confidence",
+        "admissible_critical_path_count",
+        "limited_critical_path_count"
+      ],
+      "properties": {
+        "primary_path_weakest_support_confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "weighted_path_confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "admissible_critical_path_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "limited_critical_path_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "supersession_summary": {
+      "type": "object",
+      "required": [
+        "supersedes_graph_ref",
+        "superseded_by_graph_ref",
+        "lineage_reason"
+      ],
+      "properties": {
+        "supersedes_graph_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "superseded_by_graph_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "lineage_reason": {
+          "type": "string",
+          "enum": [
+            "NONE",
+            "CONTINUATION",
+            "REPLAY",
+            "RECOVERY",
+            "SUPERSESSION"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "quality": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "graph_quality_score",
+        "critical_path_coverage",
+        "critical_retention_limited_count",
+        "critical_evidence_erased_count",
+        "inferred_critical_path_ratio",
+        "proof_bundle_coverage",
+        "unsupported_critical_target_count",
+        "contradicted_critical_target_count",
+        "stale_critical_target_count",
+        "replay_failure_target_count"
+      ],
+      "properties": {
+        "graph_quality_score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "critical_path_coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "critical_retention_limited_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "critical_evidence_erased_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "inferred_critical_path_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "proof_bundle_coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "unsupported_critical_target_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "contradicted_critical_target_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "stale_critical_target_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "replay_failure_target_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "built_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "build_scope": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "proof_bundle_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "graph_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_assessments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/targetAssessment"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "integrity_summary": {
+      "type": "object",
+      "required": [
+        "unsupported_critical_target_count",
+        "contradicted_critical_target_count",
+        "stale_critical_target_count",
+        "open_critical_target_count",
+        "replay_failure_target_count",
+        "missing_proof_bundle_target_count",
+        "explanation_failure_count",
+        "rebuild_required"
+      ],
+      "properties": {
+        "unsupported_critical_target_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "contradicted_critical_target_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "stale_critical_target_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "open_critical_target_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "replay_failure_target_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "missing_proof_bundle_target_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "explanation_failure_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rebuild_required": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "rankingBasisItem": {
+      "type": "object",
+      "required": [
+        "criterion",
+        "rank_order",
+        "basis_value"
+      ],
+      "properties": {
+        "criterion": {
+          "type": "string",
+          "enum": [
+            "CONTRADICTION_FREE",
+            "LEGAL_STATE_PREREQUISITES",
+            "WEAKEST_SEGMENT_CONFIDENCE",
+            "UNRESOLVED_LIMITATION_COUNT",
+            "STALE_SEGMENT_COUNT",
+            "RETENTION_TOMBSTONE_COUNT",
+            "HOP_COUNT",
+            "LEXICAL_PATH_ID"
+          ]
+        },
+        "rank_order": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 7
+        },
+        "basis_value": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "lineageBoundary": {
+      "type": "object",
+      "required": [
+        "boundary_id",
+        "boundary_edge_ref",
+        "from_manifest_id",
+        "to_manifest_id",
+        "relation",
+        "exposed_in_path_refs",
+        "decisive_in_path_refs",
+        "tenant_id",
+        "client_id",
+        "partition_scope_refs",
+        "period_scope_ref_or_null"
+      ],
+      "properties": {
+        "boundary_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "boundary_edge_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "from_manifest_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "to_manifest_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "relation": {
+          "type": "string",
+          "enum": [
+            "ED_CONTINUES",
+            "ED_REPLAYS",
+            "ED_RECOVERS",
+            "ED_SUPERSEDES"
+          ]
+        },
+        "exposed_in_path_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "decisive_in_path_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "tenant_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "client_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "partition_scope_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "period_scope_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "limitationNote": {
+      "type": "object",
+      "required": [
+        "note_id",
+        "limitation_code",
+        "note_class",
+        "affected_refs"
+      ],
+      "properties": {
+        "note_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "limitation_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "note_class": {
+          "type": "string",
+          "enum": [
+            "RETENTION",
+            "PRIVACY",
+            "MASKING",
+            "MISSING_SUPPORT",
+            "AUTHORITY_LIMIT",
+            "SUPERSESSION"
+          ]
+        },
+        "affected_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "targetAssessment": {
+      "type": "object",
+      "required": [
+        "target_ref",
+        "target_class",
+        "filing_critical",
+        "support_state",
+        "admissibility_state",
+        "closure_state",
+        "proof_closure_contract",
+        "primary_path_ref",
+        "proof_bundle_ref",
+        "rejected_path_refs",
+        "replayable",
+        "explanation_status",
+        "contradiction_refs",
+        "stale_reason_codes",
+        "staleness_dependency_refs",
+        "temporal_propagation_event_refs",
+        "closure_failure_reason_codes",
+        "last_validated_at"
+      ],
+      "properties": {
+        "target_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_class": {
+          "type": "string",
+          "enum": [
+            "FIGURE",
+            "TOTAL",
+            "FILING_FIELD",
+            "DECISION",
+            "LEGAL_STATE"
+          ]
+        },
+        "filing_critical": {
+          "type": "boolean"
+        },
+        "support_state": {
+          "type": "string",
+          "enum": [
+            "SUPPORTED",
+            "PARTIALLY_SUPPORTED",
+            "UNSUPPORTED",
+            "CONTRADICTED",
+            "STALE"
+          ]
+        },
+        "admissibility_state": {
+          "type": "string",
+          "enum": [
+            "ADMISSIBLE",
+            "LIMITED",
+            "INADMISSIBLE"
+          ]
+        },
+        "closure_state": {
+          "type": "string",
+          "enum": [
+            "CLOSED",
+            "OPEN"
+          ]
+        },
+        "proof_closure_contract": {
+          "$ref": "./proof_closure_contract.schema.json"
+        },
+        "primary_path_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "proof_bundle_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "rejected_path_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "replayable": {
+          "type": "boolean"
+        },
+        "explanation_status": {
+          "type": "string",
+          "enum": [
+            "AVAILABLE",
+            "LIMITED",
+            "FAILED"
+          ]
+        },
+        "contradiction_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "stale_reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "staleness_dependency_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "temporal_propagation_event_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "closure_failure_reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "last_validated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "support_state": {
+                "const": "SUPPORTED"
+              }
+            },
+            "required": [
+              "support_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "admissibility_state": {
+                "const": "ADMISSIBLE"
+              },
+              "closure_state": {
+                "const": "CLOSED"
+              },
+              "primary_path_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "proof_bundle_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "replayable": {
+                "const": true
+              },
+              "proof_closure_contract": {
+                "properties": {
+                  "support_closed": {
+                    "const": true
+                  },
+                  "authority_closed": {
+                    "const": true
+                  },
+                  "contradiction_isolated": {
+                    "const": true
+                  },
+                  "replay_closed": {
+                    "const": true
+                  },
+                  "silent_limitation_ambiguity_present": {
+                    "const": false
+                  },
+                  "current_decisive_anchor_present": {
+                    "const": true
+                  },
+                  "staleness_invalidated": {
+                    "const": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "support_state": {
+                "const": "PARTIALLY_SUPPORTED"
+              }
+            },
+            "required": [
+              "support_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "admissibility_state": {
+                "const": "LIMITED"
+              },
+              "closure_state": {
+                "const": "CLOSED"
+              },
+              "primary_path_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "proof_bundle_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "replayable": {
+                "const": true
+              },
+              "proof_closure_contract": {
+                "properties": {
+                  "support_closed": {
+                    "const": true
+                  },
+                  "authority_closed": {
+                    "const": true
+                  },
+                  "contradiction_isolated": {
+                    "const": true
+                  },
+                  "replay_closed": {
+                    "const": true
+                  },
+                  "silent_limitation_ambiguity_present": {
+                    "const": false
+                  },
+                  "current_decisive_anchor_present": {
+                    "const": true
+                  },
+                  "staleness_invalidated": {
+                    "const": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "support_state": {
+                "const": "UNSUPPORTED"
+              }
+            },
+            "required": [
+              "support_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "closure_state": {
+                "const": "OPEN"
+              },
+              "primary_path_ref": {
+                "type": "null"
+              },
+              "proof_bundle_ref": {
+                "type": "null"
+              },
+              "rejected_path_refs": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "support_state": {
+                "const": "CONTRADICTED"
+              }
+            },
+            "required": [
+              "support_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "closure_state": {
+                "const": "OPEN"
+              },
+              "primary_path_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "proof_bundle_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "contradiction_refs": {
+                "minItems": 1
+              },
+              "proof_closure_contract": {
+                "properties": {
+                  "contradiction_isolated": {
+                    "const": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "contradiction_refs": {
+                "minItems": 1
+              }
+            },
+            "required": [
+              "contradiction_refs"
+            ]
+          },
+          "then": {
+            "properties": {
+              "support_state": {
+                "const": "CONTRADICTED"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "support_state": {
+                "const": "STALE"
+              }
+            },
+            "required": [
+              "support_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "closure_state": {
+                "const": "OPEN"
+              },
+              "primary_path_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "proof_bundle_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "stale_reason_codes": {
+                "minItems": 1
+              },
+              "staleness_dependency_refs": {
+                "minItems": 1
+              },
+              "proof_closure_contract": {
+                "properties": {
+                  "staleness_invalidated": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "stale_reason_codes": {
+                "minItems": 1
+              }
+            },
+            "required": [
+              "stale_reason_codes"
+            ]
+          },
+          "then": {
+            "properties": {
+              "support_state": {
+                "const": "STALE"
+              },
+              "staleness_dependency_refs": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "stale_reason_codes": {
+                "maxItems": 0
+              }
+            },
+            "required": [
+              "stale_reason_codes"
+            ]
+          },
+          "then": {
+            "properties": {
+              "staleness_dependency_refs": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "proof_bundle_ref": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "proof_bundle_ref"
+            ]
+          },
+          "then": {
+            "properties": {
+              "support_state": {
+                "enum": [
+                  "SUPPORTED",
+                  "PARTIALLY_SUPPORTED",
+                  "CONTRADICTED",
+                  "STALE"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "BUILT",
+              "LIMITED",
+              "STALE",
+              "REBUILD_REQUIRED",
+              "SUPERSEDED"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "nodes_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "edges_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "critical_paths_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "primary_path_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path_ranking_basis": {
+            "minItems": 1
+          },
+          "confidence_summary": {
+            "type": "object"
+          },
+          "quality": {
+            "type": "object"
+          },
+          "build_scope": {
+            "minItems": 1
+          },
+          "integrity_summary": {
+            "type": "object"
+          },
+          "built_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "integrity_summary": {
+            "properties": {
+              "rebuild_required": {
+                "const": true
+              }
+            },
+            "required": [
+              "rebuild_required"
+            ]
+          }
+        },
+        "required": [
+          "integrity_summary"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "LIMITED",
+              "STALE",
+              "REBUILD_REQUIRED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "REBUILD_REQUIRED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "integrity_summary": {
+            "properties": {
+              "rebuild_required": {
+                "const": true
+              }
+            },
+            "required": [
+              "rebuild_required"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "BUILT"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "limitation_notes": {
+            "maxItems": 0
+          },
+          "quality": {
+            "type": "object",
+            "properties": {
+              "critical_retention_limited_count": {
+                "const": 0
+              },
+              "critical_evidence_erased_count": {
+                "const": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "LIMITED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "limitation_notes": {
+            "minItems": 1
+          },
+          "quality": {
+            "type": "object",
+            "anyOf": [
+              {
+                "properties": {
+                  "critical_retention_limited_count": {
+                    "minimum": 1
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "critical_evidence_erased_count": {
+                    "minimum": 1
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "quality": {
+            "anyOf": [
+              {
+                "properties": {
+                  "critical_retention_limited_count": {
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "critical_retention_limited_count"
+                ]
+              },
+              {
+                "properties": {
+                  "critical_evidence_erased_count": {
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "critical_evidence_erased_count"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "quality"
+        ]
+      },
+      "then": {
+        "properties": {
+          "limitation_notes": {
+            "minItems": 1
+          },
+          "lifecycle_state": {
+            "enum": [
+              "LIMITED",
+              "STALE",
+              "REBUILD_REQUIRED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "SUPERSEDED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "supersession_summary": {
+            "properties": {
+              "superseded_by_graph_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "lineage_reason": {
+                "const": "SUPERSESSION"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "manifest_refs": {
+            "minItems": 2
+          }
+        },
+        "required": [
+          "manifest_refs"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lineage_boundaries": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lineage_boundaries": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "lineage_boundaries"
+        ]
+      },
+      "then": {
+        "properties": {
+          "manifest_refs": {
+            "minItems": 2
+          }
+        }
+      }
+    }
+  ]
+}

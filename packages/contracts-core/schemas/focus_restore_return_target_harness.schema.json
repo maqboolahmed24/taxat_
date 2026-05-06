@@ -1,0 +1,542 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/focus_restore_return_target_harness.schema.json",
+  "title": "FocusRestoreReturnTargetHarness",
+  "description": "Deterministic focus-restoration and return-target regression harness. This schema freezes the keyboard-first navigation cases, browser/native identifier parity, explicit invoker and fallback anchors, live-update focus-lock assertions, and lawful fallback targets used to prove that close, back, help handoff, stale recovery, responsive restack, and secondary-window dismissal restore focus to the narrowest lawful target instead of generic shell roots or stale anchors.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "harness_id",
+    "deterministic_seed",
+    "suite_profile",
+    "run_mode",
+    "modality_policy",
+    "identifier_policy",
+    "return_target_policy",
+    "fallback_order_policy",
+    "live_update_focus_policy",
+    "help_handoff_policy",
+    "cases"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "FOCUS_RESTORE_RETURN_TARGET_HARNESS_V1"
+    },
+    "harness_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deterministic_seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "suite_profile": {
+      "const": "KEYBOARD_FIRST_RETURN_TARGET_AND_FALLBACK_MATRIX"
+    },
+    "run_mode": {
+      "const": "DETERMINISTIC_SEEDED_ENUMERATION"
+    },
+    "modality_policy": {
+      "const": "KEYBOARD_FIRST_WITH_POINTER_AND_ASSISTIVE_PARITY"
+    },
+    "identifier_policy": {
+      "const": "DATA_TESTID_AND_ACCESSIBILITY_IDENTIFIER_MIRROR_SERIALIZED_ANCHORS"
+    },
+    "return_target_policy": {
+      "const": "SERIALIZED_INVOKER_OR_NARROWEST_LAWFUL_FALLBACK"
+    },
+    "fallback_order_policy": {
+      "const": "REMAP_WITHIN_OBJECT_THEN_OBJECT_SUMMARY_THEN_PARENT_RETURN_THEN_NARROWEST_LIST"
+    },
+    "live_update_focus_policy": {
+      "const": "NEVER_STEAL_ACTIVE_COMPOSER_PICKER_OR_COMPARE_FOCUS"
+    },
+    "help_handoff_policy": {
+      "const": "HELP_HANDOFF_RETURNS_TO_SERIALIZED_SOURCE_ANCHOR"
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/harnessCase"
+      },
+      "minItems": 7,
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "surfaceType": {
+      "type": "string",
+      "enum": [
+        "LowNoiseExperienceFrame",
+        "WorkspaceSnapshot",
+        "ClientPortalWorkspace",
+        "TenantGovernanceSnapshot",
+        "NativeOperatorSecondaryWindowScene"
+      ]
+    },
+    "focusScope": {
+      "type": "string",
+      "enum": [
+        "MANIFEST_SUPPORT_REGION",
+        "WORKSPACE_DETAIL_ROUTE",
+        "CLIENT_PORTAL_CONTEXTUAL_ROUTE",
+        "GOVERNANCE_SUPPORT_ROUTE",
+        "NATIVE_SECONDARY_WINDOW"
+      ]
+    },
+    "triggerAction": {
+      "type": "string",
+      "enum": [
+        "CLOSE_SUPPORT_REGION",
+        "BACK_NAVIGATION",
+        "HELP_HANDOFF_RETURN",
+        "STALE_REBASE_RECOVERY",
+        "LIVE_UPDATE_DURING_ACTIVE_INPUT",
+        "RESPONSIVE_RESTACK",
+        "SECONDARY_WINDOW_CLOSE"
+      ]
+    },
+    "modality": {
+      "type": "string",
+      "enum": [
+        "KEYBOARD_ONLY",
+        "POINTER_BASELINE",
+        "ASSISTIVE_TECH"
+      ]
+    },
+    "objectLossState": {
+      "type": "string",
+      "enum": [
+        "EXACT_TARGET_VISIBLE",
+        "EXACT_TARGET_STALE_SAME_OBJECT_LAWFUL",
+        "OBJECT_STALE_PARENT_LAWFUL",
+        "PARENT_STALE_NARROW_LIST_LAWFUL"
+      ]
+    },
+    "supportSurfaceKind": {
+      "type": "string",
+      "enum": [
+        "TRAILING_INSPECTOR",
+        "DETAIL_DRAWER",
+        "CONTEXTUAL_DETAIL",
+        "HELP_ROUTE",
+        "SECONDARY_COMPARE_WINDOW"
+      ]
+    },
+    "activeFocusLockKind": {
+      "type": "string",
+      "enum": [
+        "COMPOSER",
+        "PICKER",
+        "COMPARE_CONTROL"
+      ]
+    },
+    "expectedTargetKind": {
+      "type": "string",
+      "enum": [
+        "INVOKER",
+        "OBJECT_SUMMARY",
+        "PARENT_RETURN",
+        "NARROWEST_SURVIVING_LIST"
+      ]
+    },
+    "restorationDisposition": {
+      "type": "string",
+      "enum": [
+        "EXACT_FOCUS",
+        "REMAPPED_FOCUS",
+        "OBJECT_SUMMARY",
+        "PARENT_RETURN",
+        "INVALIDATED"
+      ]
+    },
+    "stateSnapshot": {
+      "type": "object",
+      "required": [
+        "route_or_scene_ref",
+        "canonical_object_ref_or_null",
+        "active_focus_anchor_ref_or_null",
+        "return_route_or_scene_ref_or_null",
+        "return_focus_anchor_ref_or_null",
+        "fallback_route_or_scene_ref_or_null",
+        "fallback_focus_anchor_ref_or_null",
+        "focus_restoration_disposition_or_null",
+        "focus_restoration_reason_code_or_null",
+        "browser_active_identifier_or_null",
+        "browser_return_identifier_or_null",
+        "native_active_identifier_or_null",
+        "native_return_identifier_or_null",
+        "active_focus_lock_ref_or_null"
+      ],
+      "properties": {
+        "route_or_scene_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "canonical_object_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "active_focus_anchor_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "return_route_or_scene_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "return_focus_anchor_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "fallback_route_or_scene_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "fallback_focus_anchor_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "focus_restoration_disposition_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "focus_restoration_reason_code_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "browser_active_identifier_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "browser_return_identifier_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "native_active_identifier_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "native_return_identifier_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "active_focus_lock_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "harnessCase": {
+      "type": "object",
+      "required": [
+        "case_id",
+        "surface_type",
+        "focus_scope",
+        "trigger_action",
+        "covered_modalities",
+        "object_loss_state",
+        "support_surface_kind_or_null",
+        "active_focus_lock_kind_or_null",
+        "expected_target_kind",
+        "expected_focus_restoration_disposition",
+        "pre_state",
+        "post_state"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "surface_type": {
+          "$ref": "#/$defs/surfaceType"
+        },
+        "focus_scope": {
+          "$ref": "#/$defs/focusScope"
+        },
+        "trigger_action": {
+          "$ref": "#/$defs/triggerAction"
+        },
+        "covered_modalities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/modality"
+          },
+          "contains": {
+            "const": "KEYBOARD_ONLY"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "object_loss_state": {
+          "$ref": "#/$defs/objectLossState"
+        },
+        "support_surface_kind_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "active_focus_lock_kind_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "expected_target_kind": {
+          "$ref": "#/$defs/expectedTargetKind"
+        },
+        "expected_focus_restoration_disposition": {
+          "$ref": "#/$defs/restorationDisposition"
+        },
+        "pre_state": {
+          "$ref": "#/$defs/stateSnapshot"
+        },
+        "post_state": {
+          "$ref": "#/$defs/stateSnapshot"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "support_surface_kind_or_null": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "support_surface_kind_or_null"
+            ]
+          },
+          "then": {
+            "properties": {
+              "support_surface_kind_or_null": {
+                "$ref": "#/$defs/supportSurfaceKind"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "active_focus_lock_kind_or_null": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "active_focus_lock_kind_or_null"
+            ]
+          },
+          "then": {
+            "properties": {
+              "active_focus_lock_kind_or_null": {
+                "$ref": "#/$defs/activeFocusLockKind"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "trigger_action": {
+                "const": "HELP_HANDOFF_RETURN"
+              }
+            },
+            "required": [
+              "trigger_action"
+            ]
+          },
+          "then": {
+            "properties": {
+              "support_surface_kind_or_null": {
+                "const": "HELP_ROUTE"
+              },
+              "expected_target_kind": {
+                "const": "PARENT_RETURN"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "trigger_action": {
+                "const": "LIVE_UPDATE_DURING_ACTIVE_INPUT"
+              }
+            },
+            "required": [
+              "trigger_action"
+            ]
+          },
+          "then": {
+            "properties": {
+              "active_focus_lock_kind_or_null": {
+                "$ref": "#/$defs/activeFocusLockKind"
+              },
+              "expected_target_kind": {
+                "const": "INVOKER"
+              },
+              "expected_focus_restoration_disposition": {
+                "const": "EXACT_FOCUS"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "trigger_action": {
+                "const": "SECONDARY_WINDOW_CLOSE"
+              }
+            },
+            "required": [
+              "trigger_action"
+            ]
+          },
+          "then": {
+            "properties": {
+              "surface_type": {
+                "const": "NativeOperatorSecondaryWindowScene"
+              },
+              "focus_scope": {
+                "const": "NATIVE_SECONDARY_WINDOW"
+              },
+              "support_surface_kind_or_null": {
+                "const": "SECONDARY_COMPARE_WINDOW"
+              },
+              "expected_target_kind": {
+                "const": "PARENT_RETURN"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "object_loss_state": {
+                "const": "EXACT_TARGET_VISIBLE"
+              }
+            },
+            "required": [
+              "object_loss_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "expected_target_kind": {
+                "enum": [
+                  "INVOKER",
+                  "PARENT_RETURN"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "object_loss_state": {
+                "const": "EXACT_TARGET_STALE_SAME_OBJECT_LAWFUL"
+              }
+            },
+            "required": [
+              "object_loss_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "expected_target_kind": {
+                "enum": [
+                  "OBJECT_SUMMARY",
+                  "PARENT_RETURN"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "object_loss_state": {
+                "const": "PARENT_STALE_NARROW_LIST_LAWFUL"
+              }
+            },
+            "required": [
+              "object_loss_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "expected_target_kind": {
+                "const": "NARROWEST_SURVIVING_LIST"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "expected_target_kind": {
+                "const": "OBJECT_SUMMARY"
+              }
+            },
+            "required": [
+              "expected_target_kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "expected_focus_restoration_disposition": {
+                "const": "OBJECT_SUMMARY"
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

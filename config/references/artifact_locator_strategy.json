@@ -1,0 +1,164 @@
+{
+  "$schema": "./artifact_locator_strategy.schema.json",
+  "contract_version": "1.0",
+  "strategy_id": "artifact_locator_strategy",
+  "basis_statement": "Locators stay opaque and family-specific. Durable refs survive moves and copy-on-publish, while delivery handles require invocation-time context and route-bound security checks.",
+  "source_lineage": [
+    {
+      "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+      "source_heading_or_logical_block": "Current-vs-history artifact defaults",
+      "rationale": "The customer experience contract freezes how current and historical artifacts expose preview and download surfaces."
+    },
+    {
+      "source_file": "Algorithm/collaboration_workspace_contract.md",
+      "source_heading_or_logical_block": "Artifact selection and attachment delivery",
+      "rationale": "Workspace attachments distinguish current artifact, historical artifact, storage backing, and download affordance."
+    },
+    {
+      "source_file": "Algorithm/provenance_graph_semantics.md",
+      "source_heading_or_logical_block": "Path traversal and durable references",
+      "rationale": "Provenance graph traversal requires durable refs that survive derivative publication and replay."
+    },
+    {
+      "source_file": "config/object_storage/object_key_naming_contract.json",
+      "source_heading_or_logical_block": "Object key families",
+      "rationale": "Storage namespaces are internal object-store concerns and must not leak into durable API or UI locators."
+    },
+    {
+      "source_file": "config/cache/cache_partition_key_contract.json",
+      "source_heading_or_logical_block": "Route and object cache dimensions",
+      "rationale": "Cache identity law already binds route, object, and delivery context separately."
+    }
+  ],
+  "locator_rows": [
+    {
+      "locator_family_ref": "REFERENCE",
+      "shape": "OPAQUE_BRANDED_STRING",
+      "durability_posture": "DURABLE",
+      "resolution_context": "CONTROL_STORE_LOOKUP_REQUIRED",
+      "human_readability_posture": "SHORT_HINTS_ALLOWED_IF_NON_SECRET",
+      "move_or_copy_behavior": "REF_REMAINS_STABLE_WHILE_NEW_TARGETS_OR_STORAGE_HANDLES_MAY_BE_MINTED",
+      "forbidden_content": ["direct signed URLs", "raw bearer tokens", "mutable breadcrumb labels"],
+      "lawful_examples": ["artifact_ref", "content_ref", "raw_payload_ref"],
+      "notes": [
+        "Durable refs are the long-lived contract surface for lineage and object identity.",
+        "A move, promote, or rehydrate operation may keep the same durable ref while storage or delivery state changes."
+      ]
+    },
+    {
+      "locator_family_ref": "TARGET_REF",
+      "shape": "OPAQUE_BRANDED_STRING",
+      "durability_posture": "DURABLE",
+      "resolution_context": "EXPERIENCE_SELECTION_LOOKUP_REQUIRED",
+      "human_readability_posture": "SHORT_HINTS_ALLOWED_IF_NON_SECRET",
+      "move_or_copy_behavior": "NEW_TARGET_REF_REQUIRED_FOR_NEW_CUSTOMER_SAFE_DERIVATIVE",
+      "forbidden_content": [
+        "provider bucket names",
+        "render-cache keys",
+        "temporary signed handles"
+      ],
+      "lawful_examples": [
+        "preview_target_ref",
+        "target_ref",
+        "default_download_target_ref_or_null"
+      ],
+      "notes": [
+        "Targets express what should be shown or exported, not how bytes are fetched.",
+        "A historical artifact can retain a distinct lawful target set without replacing current defaults."
+      ]
+    },
+    {
+      "locator_family_ref": "STORAGE_REF",
+      "shape": "OPAQUE_BRANDED_STRING",
+      "durability_posture": "INTERNAL_ONLY_DURABLE",
+      "resolution_context": "OBJECT_STORE_AND_CONTROL_LINEAGE_REQUIRED",
+      "human_readability_posture": "PREFIX_ONLY_NO_CUSTOMER_HINTS",
+      "move_or_copy_behavior": "CAN_SURVIVE_RESUME_AND_REBASE_BUT_MUST_NOT_BECOME_DELIVERY_TRUTH",
+      "forbidden_content": [
+        "bucket hostnames",
+        "signed query parameters",
+        "cross-tenant display labels"
+      ],
+      "lawful_examples": [
+        "storage.upload-staging.session-2026-04-23",
+        "storage.retained-evidence.manifest-2026-q2.v3"
+      ],
+      "notes": [
+        "A resumable upload keeps the same `storage_ref` even when request version drifts.",
+        "Storage continuity does not imply current preview/download legality."
+      ]
+    },
+    {
+      "locator_family_ref": "DELIVERY_BINDING",
+      "shape": "OPAQUE_REF_PLUS_CONTEXT_HASH",
+      "durability_posture": "INVOCATION_ONLY",
+      "resolution_context": "ACCESS_ROUTE_TARGET_AND_OBJECT_CONTEXT_REQUIRED",
+      "human_readability_posture": "OPAQUE_ONLY",
+      "move_or_copy_behavior": "MUST_BE_RECALCULATED_WHEN_ROUTE_ACCESS_MASKING_OR_TARGET_CHANGES",
+      "forbidden_content": ["signed download URLs", "raw storage refs", "bearer tokens"],
+      "lawful_examples": [
+        "download_ref plus delivery_binding_hash",
+        "preview target plus delivery_binding_hash"
+      ],
+      "notes": [
+        "Delivery handles are disposable and must be rebound when the route, target, or access slice changes.",
+        "They exist to prevent stale tabs and broadened reuse."
+      ]
+    },
+    {
+      "locator_family_ref": "ROUTE_TOKEN",
+      "shape": "OPAQUE_PATH_OR_SCENE_TOKEN",
+      "durability_posture": "SESSION_SCOPED",
+      "resolution_context": "SHELL_RESTORATION_AND_CACHE_PARTITION_CONTEXT_REQUIRED",
+      "human_readability_posture": "PATH_OR_SCENE_HINTS_ALLOWED_WITHOUT_HOST_OR_SECRET_DATA",
+      "move_or_copy_behavior": "ROUTE_TOKEN_CHANGES_WHEN_SHELL_FAMILY_OR_OBJECT_SCOPE_CHANGES",
+      "forbidden_content": [
+        "absolute URLs",
+        "tenant or client query hints",
+        "signed query parameters"
+      ],
+      "lawful_examples": [
+        "/manifests/{manifest_id}",
+        "scene:native_primary_work_item_scene:{item_id}"
+      ],
+      "notes": [
+        "Route tokens participate in delivery binding and cache partitioning but never become durable artifact truth.",
+        "Browser restoration may serialize route patterns or scene tokens, not full URLs."
+      ]
+    }
+  ],
+  "selection_rules": [
+    {
+      "rule_ref": "current_artifact_defaults_only",
+      "statement": "Default preview, download, and print targets must resolve from the current artifact only.",
+      "notes": [
+        "Historical artifacts may have their own lawful targets, but only after explicit selection.",
+        "No fallback may infer a customer-visible target from `storage_ref`."
+      ]
+    },
+    {
+      "rule_ref": "history_is_explicit_not_ambient",
+      "statement": "Historical artifact targets remain selectable state, not ambient global defaults.",
+      "notes": [
+        "Current and historical artifact meaning must stay visible in UI and API contracts.",
+        "Explicit history selection prevents stale target drift."
+      ]
+    },
+    {
+      "rule_ref": "customer_safe_derivative_requires_new_target",
+      "statement": "A customer-safe derivative published from an internal-only source must mint a new target and a new delivery binding.",
+      "notes": [
+        "The derivative may retain lineage to the source artifact ref.",
+        "The derivative must never expose the source storage namespace."
+      ]
+    },
+    {
+      "rule_ref": "copy_on_publish_preserves_lineage",
+      "statement": "Copy-on-publish may mint new storage and target families while preserving upstream durable artifact refs for lineage.",
+      "notes": [
+        "Control truth decides which derivative is current.",
+        "Storage moves do not rewrite historical provenance."
+      ]
+    }
+  ]
+}

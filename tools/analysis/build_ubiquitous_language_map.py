@@ -365,7 +365,11 @@ def parse_glossary_terms() -> list[dict[str, Any]]:
         title = match.group(1).strip()
         definition_parts = [match.group(2).strip()]
         index += 1
-        while index < len(lines) and not lines[index].startswith("**") and not lines[index].startswith("## "):
+        while (
+            index < len(lines)
+            and not lines[index].startswith("**")
+            and not lines[index].startswith("## ")
+        ):
             if lines[index].strip():
                 definition_parts.append(lines[index].strip())
             index += 1
@@ -403,16 +407,28 @@ def detect_contract_names(tokens: Iterable[str], canonical_term: str) -> list[st
             names.add(token)
         elif re.fullmatch(r"[A-Z][A-Za-z0-9]+", token):
             names.add(token)
-        elif token.endswith("_contract") or token.endswith("_harness") or token.endswith("_snapshot"):
+        elif (
+            token.endswith("_contract") or token.endswith("_harness") or token.endswith("_snapshot")
+        ):
             names.add(token)
-    if canonical_term.endswith(" Contract") or canonical_term.endswith(" Harness") or canonical_term.endswith(" Snapshot"):
+    if (
+        canonical_term.endswith(" Contract")
+        or canonical_term.endswith(" Harness")
+        or canonical_term.endswith(" Snapshot")
+    ):
         names.add(pascalize(canonical_term))
-    if canonical_term.endswith(" Item") or canonical_term.endswith(" Fact") or canonical_term.endswith(" Record"):
+    if (
+        canonical_term.endswith(" Item")
+        or canonical_term.endswith(" Fact")
+        or canonical_term.endswith(" Record")
+    ):
         names.add(pascalize(canonical_term))
     return dedupe_sorted(names)
 
 
-def infer_term_category(section: str, canonical_term: str, definition: str, *, explicit_domain: str | None = None) -> str:
+def infer_term_category(
+    section: str, canonical_term: str, definition: str, *, explicit_domain: str | None = None
+) -> str:
     if explicit_domain:
         return DOMAIN_TO_TERM_CATEGORY.get(explicit_domain, explicit_domain)
 
@@ -423,17 +439,53 @@ def infer_term_category(section: str, canonical_term: str, definition: str, *, e
         return "governance"
     if any(token in normalized_term for token in ["portal", "customer safe", "upload session"]):
         return "portal"
-    if any(token in normalized_term for token in ["collaboration", "queue", "workflow", "work item"]):
-        return "collaboration" if "collaboration" in normalized_term or "queue" in normalized_term else "workflow"
-    if any(token in normalized_term for token in ["shell", "route", "focus", "workspace", "view guard", "surface embodiment"]):
+    if any(
+        token in normalized_term for token in ["collaboration", "queue", "workflow", "work item"]
+    ):
+        return (
+            "collaboration"
+            if "collaboration" in normalized_term or "queue" in normalized_term
+            else "workflow"
+        )
+    if any(
+        token in normalized_term
+        for token in ["shell", "route", "focus", "workspace", "view guard", "surface embodiment"]
+    ):
         return "shell_route"
-    if any(token in normalized_term for token in ["lineage", "continuation", "replay", "manifest", "execution mode"]):
+    if any(
+        token in normalized_term
+        for token in ["lineage", "continuation", "replay", "manifest", "execution mode"]
+    ):
         return "lineage"
-    if any(token in normalized_term for token in ["evidence", "canonical fact", "candidate fact", "source", "derived value", "proof", "path"]):
+    if any(
+        token in normalized_term
+        for token in [
+            "evidence",
+            "canonical fact",
+            "candidate fact",
+            "source",
+            "derived value",
+            "proof",
+            "path",
+        ]
+    ):
         return "evidence"
-    if any(token in normalized_term for token in ["audit", "stream", "recorded at", "traceability", "forensic"]):
+    if any(
+        token in normalized_term
+        for token in ["audit", "stream", "recorded at", "traceability", "forensic"]
+    ):
         return "observability"
-    if any(token in normalized_term for token in ["state transition", "schema reader", "sandbox coverage", "nightly", "backfill", "release"]):
+    if any(
+        token in normalized_term
+        for token in [
+            "state transition",
+            "schema reader",
+            "sandbox coverage",
+            "nightly",
+            "backfill",
+            "release",
+        ]
+    ):
         return "release"
     return GLOSSARY_SECTION_CATEGORY.get(section, "core_engine")
 
@@ -453,7 +505,22 @@ def infer_drift_risk(canonical_term: str, definition: str, category: str) -> str
     normalized = normalize_phrase(canonical_term)
     if normalized in HIGH_RISK_TERMS:
         return "high"
-    if any(token in normalized for token in ["authority", "visibility", "customer safe", "route", "shell", "manifest", "replay", "recovery", "constraint", "gate", "override"]):
+    if any(
+        token in normalized
+        for token in [
+            "authority",
+            "visibility",
+            "customer safe",
+            "route",
+            "shell",
+            "manifest",
+            "replay",
+            "recovery",
+            "constraint",
+            "gate",
+            "override",
+        ]
+    ):
         return "high"
     if category in {"authority", "shell_route", "evidence", "lineage", "governance", "release"}:
         return "high"
@@ -475,7 +542,9 @@ def build_initial_term(title: str, definition: str, section: str, line_number: i
         definition=definition,
         source_heading_or_logical_block=section,
         visibility_or_audience_notes=infer_visibility_notes(definition, canonical_term),
-        drift_risk_level=infer_drift_risk(canonical_term, definition, infer_term_category(section, canonical_term, definition)),
+        drift_risk_level=infer_drift_risk(
+            canonical_term, definition, infer_term_category(section, canonical_term, definition)
+        ),
     )
     term.authoritative_source_refs.add(line_ref(GLOSSARY_PATH, line_number, canonical_term))
     term.traceability.append(
@@ -493,24 +562,30 @@ def build_initial_term(title: str, definition: str, section: str, line_number: i
 
     definition_tokens = re.findall(r"`([^`]+)`", definition)
     term.machine_field_names.update(
-        token
-        for token in definition_tokens
-        if re.fullmatch(r"[a-z][a-z0-9_\[\]]*", token)
+        token for token in definition_tokens if re.fullmatch(r"[a-z][a-z0-9_\[\]]*", token)
     )
     term.canonical_contract_names.update(
         token
         for token in definition_tokens
-        if re.fullmatch(r"[A-Z][A-Za-z0-9]+", token) or token.endswith(".json") or token.endswith(".md")
+        if re.fullmatch(r"[A-Z][A-Za-z0-9]+", token)
+        or token.endswith(".json")
+        or token.endswith(".md")
     )
 
     if canonical_term == "Work Item / Workflow Item":
         term.allowed_aliases.update(["Work Item", "Workflow Item", "WorkflowItem"])
-        term.notes.append("User-facing copy may say 'work item'; persisted object semantics remain `WorkflowItem`.")
+        term.notes.append(
+            "User-facing copy may say 'work item'; persisted object semantics remain `WorkflowItem`."
+        )
     if canonical_term == "Trust Score Band / Cap Band":
         term.allowed_aliases.update(["Trust Score Band", "Cap Band", "Trust Cap Band"])
-        term.notes.append("This glossary entry intentionally preserves both score-derived and capped trust bands without collapsing them.")
+        term.notes.append(
+            "This glossary entry intentionally preserves both score-derived and capped trust bands without collapsing them."
+        )
     if canonical_term == "Constraint Traceability Register":
-        term.notes.append("This is the live machine-readable constraint register, not a historical findings ledger.")
+        term.notes.append(
+            "This is the live machine-readable constraint register, not a historical findings ledger."
+        )
     return term
 
 
@@ -527,13 +602,19 @@ def extract_safe_aliases(canonical_term: str, title_tokens: Iterable[str]) -> li
             aliases.add(token)
         elif re.fullmatch(r"[a-z][a-z0-9_]+", token):
             aliases.add(token)
-    if canonical_term.endswith(" Contract") or canonical_term.endswith(" Harness") or canonical_term.endswith(" Snapshot"):
+    if (
+        canonical_term.endswith(" Contract")
+        or canonical_term.endswith(" Harness")
+        or canonical_term.endswith(" Snapshot")
+    ):
         aliases.add(pascalize(canonical_term))
     return dedupe_sorted(aliases)
 
 
 def append_traceability(term: TermRecord, source_file: str, block: str, rationale: str) -> None:
-    record = TraceabilityRecord(source_file=source_file, source_heading_or_logical_block=block, rationale=rationale)
+    record = TraceabilityRecord(
+        source_file=source_file, source_heading_or_logical_block=block, rationale=rationale
+    )
     if record.to_dict() not in [item.to_dict() for item in term.traceability]:
         term.traceability.append(record)
 
@@ -557,9 +638,17 @@ def ensure_term(terms: dict[str, TermRecord], canonical_term: str, **kwargs: Any
             term.definition = value
         elif key == "term_category" and value:
             term.term_category = value
-        elif key == "source_heading_or_logical_block" and value and not term.source_heading_or_logical_block:
+        elif (
+            key == "source_heading_or_logical_block"
+            and value
+            and not term.source_heading_or_logical_block
+        ):
             term.source_heading_or_logical_block = value
-        elif key == "visibility_or_audience_notes" and value and not term.visibility_or_audience_notes:
+        elif (
+            key == "visibility_or_audience_notes"
+            and value
+            and not term.visibility_or_audience_notes
+        ):
             term.visibility_or_audience_notes = value
         elif key == "drift_risk_level" and value:
             term.drift_risk_level = value
@@ -570,7 +659,9 @@ def extract_markdown_heading_anchor(path: str, heading_text: str) -> str:
     return f"{path}#{slugify(heading_text)}"
 
 
-def add_readme_shared_spine_terms(terms: dict[str, TermRecord], cross_rows: dict[str, list[dict[str, Any]]]) -> dict[str, list[str]]:
+def add_readme_shared_spine_terms(
+    terms: dict[str, TermRecord], cross_rows: dict[str, list[dict[str, Any]]]
+) -> dict[str, list[str]]:
     section = extract_heading_section(ROOT / README_PATH, "Shared Spine Vocabulary")
     lines = [line.strip() for line in section.splitlines() if line.strip().startswith("- ")]
     shared_spine = {
@@ -632,7 +723,9 @@ def add_readme_shared_spine_terms(terms: dict[str, TermRecord], cross_rows: dict
     native_term.authoritative_source_refs.add(readme_anchor)
     native_term.allowed_aliases.update(["NATIVE_OPERATOR", "Native Operator"])
     native_term.machine_field_names.add("surface_embodiment")
-    append_traceability(native_term, README_PATH, readme_block, "Shared-spine native embodiment marker.")
+    append_traceability(
+        native_term, README_PATH, readme_block, "Shared-spine native embodiment marker."
+    )
 
     for field_name in shared_spine["shared_fields"]:
         if field_name == "dominance_contract":
@@ -640,7 +733,9 @@ def add_readme_shared_spine_terms(terms: dict[str, TermRecord], cross_rows: dict
             definition = "Shared route-stability metadata field in the README spine vocabulary. It binds dominant-question and action posture across route-visible shells."
         else:
             canonical_term = field_name.replace("_", " ").title().replace("Ref", "Ref")
-            definition = f"Shared-spine field named in README Shared Spine Vocabulary: `{field_name}`."
+            definition = (
+                f"Shared-spine field named in README Shared Spine Vocabulary: `{field_name}`."
+            )
         term = ensure_term(
             terms,
             canonical_term,
@@ -653,13 +748,17 @@ def add_readme_shared_spine_terms(terms: dict[str, TermRecord], cross_rows: dict
         term.authoritative_source_refs.add(readme_anchor)
         term.machine_field_names.add(field_name)
         term.allowed_aliases.add(field_name)
-        append_traceability(term, README_PATH, readme_block, "Shared-spine route or workspace field from README.")
+        append_traceability(
+            term, README_PATH, readme_block, "Shared-spine route or workspace field from README."
+        )
 
     for read_model in shared_spine["read_models"]:
         term = ensure_term(
             terms,
             read_model,
-            term_category=infer_term_category(readme_block, read_model, "", explicit_domain="frontend_shell"),
+            term_category=infer_term_category(
+                readme_block, read_model, "", explicit_domain="frontend_shell"
+            ),
             definition="Authoritative route-visible read model named in README Shared Spine Vocabulary.",
             source_heading_or_logical_block=readme_block,
             drift_risk_level="high",
@@ -667,17 +766,23 @@ def add_readme_shared_spine_terms(terms: dict[str, TermRecord], cross_rows: dict
         term.authoritative_source_refs.add(readme_anchor)
         term.allowed_aliases.add(read_model)
         term.canonical_contract_names.add(read_model)
-        append_traceability(term, README_PATH, readme_block, "README-owned route-visible read model.")
+        append_traceability(
+            term, README_PATH, readme_block, "README-owned route-visible read model."
+        )
         enrich_from_cross_reference(term, cross_rows)
 
     for interaction_layer in dedupe_sorted(shared_spine["interaction_layers"]):
         canonical_term = interaction_layer
         if interaction_layer == "InteractionLayerFoundationContract":
-            definition = "Shared root contract for portal, operator, and governance interaction layers."
+            definition = (
+                "Shared root contract for portal, operator, and governance interaction layers."
+            )
         else:
             readable_name = re.sub(r"([a-z])([A-Z])", r"\1 \2", interaction_layer)
             canonical_term = readable_name
-            definition = "Shared interaction-layer contract named in README Shared Spine Vocabulary."
+            definition = (
+                "Shared interaction-layer contract named in README Shared Spine Vocabulary."
+            )
         term = ensure_term(
             terms,
             canonical_term,
@@ -704,7 +809,9 @@ def add_readme_shared_spine_terms(terms: dict[str, TermRecord], cross_rows: dict
     )
     visibility_term.authoritative_source_refs.add(readme_anchor)
     visibility_term.allowed_aliases.update(shared_spine["visibility_vocab"])
-    append_traceability(visibility_term, README_PATH, readme_block, "README visibility-boundary vocabulary.")
+    append_traceability(
+        visibility_term, README_PATH, readme_block, "README visibility-boundary vocabulary."
+    )
 
     return shared_spine
 
@@ -718,7 +825,9 @@ def extract_section_text_between(text: str, start_heading: str, end_heading_pref
     return section
 
 
-def add_source_taxonomy_terms(terms: dict[str, TermRecord], cross_rows: dict[str, list[dict[str, Any]]]) -> None:
+def add_source_taxonomy_terms(
+    terms: dict[str, TermRecord], cross_rows: dict[str, list[dict[str, Any]]]
+) -> None:
     text = (ROOT / SOURCE_TAXONOMY_PATH).read_text()
     core_objects_block = extract_section_text_between(text, "## 4.2 Core objects", r"\n## 4\.3 ")
     canonical_term_map = {
@@ -730,7 +839,9 @@ def add_source_taxonomy_terms(terms: dict[str, TermRecord], cross_rows: dict[str
         "InferenceRecord": "Inference Record",
         "GovernanceArtifact": "Governance Artifact",
     }
-    for match in re.finditer(r"\*\*(.+?)\*\*\n(.+?)(?=\n\n\*\*|\n## |\Z)", core_objects_block, flags=re.S):
+    for match in re.finditer(
+        r"\*\*(.+?)\*\*\n(.+?)(?=\n\n\*\*|\n## |\Z)", core_objects_block, flags=re.S
+    ):
         raw_term = match.group(1).strip()
         canonical_term = canonical_term_map.get(raw_term, raw_term)
         definition = flatten_text(match.group(2))
@@ -740,16 +851,32 @@ def add_source_taxonomy_terms(terms: dict[str, TermRecord], cross_rows: dict[str
             term_category="evidence",
             definition=definition,
             source_heading_or_logical_block="4.2 Core objects",
-            drift_risk_level="high" if canonical_term in {"SourceRecord", "EvidenceItem", "CandidateFact", "CanonicalFact", "DerivedValue"} else "medium",
+            drift_risk_level="high"
+            if canonical_term
+            in {"SourceRecord", "EvidenceItem", "CandidateFact", "CanonicalFact", "DerivedValue"}
+            else "medium",
         )
-        term.authoritative_source_refs.add(extract_markdown_heading_anchor(SOURCE_TAXONOMY_PATH, "4.2 Core objects"))
+        term.authoritative_source_refs.add(
+            extract_markdown_heading_anchor(SOURCE_TAXONOMY_PATH, "4.2 Core objects")
+        )
         term.allowed_aliases.update([canonical_term, raw_term])
         term.canonical_contract_names.add(raw_term)
-        append_traceability(term, SOURCE_TAXONOMY_PATH, "4.2 Core objects", "Canonical source/evidence taxonomy core object.")
+        append_traceability(
+            term,
+            SOURCE_TAXONOMY_PATH,
+            "4.2 Core objects",
+            "Canonical source/evidence taxonomy core object.",
+        )
         enrich_from_cross_reference(term, cross_rows)
 
-    source_classes_block = extract_section_text_between(text, "## 4.3 Source classes by origin", r"\n## 4\.4 ")
-    for match in re.finditer(r"###\s+Class [A-Z] - `([^`]+)`\n\n(.+?)(?=\n\n### |\n## |\Z)", source_classes_block, flags=re.S):
+    source_classes_block = extract_section_text_between(
+        text, "## 4.3 Source classes by origin", r"\n## 4\.4 "
+    )
+    for match in re.finditer(
+        r"###\s+Class [A-Z] - `([^`]+)`\n\n(.+?)(?=\n\n### |\n## |\Z)",
+        source_classes_block,
+        flags=re.S,
+    ):
         canonical_term = match.group(1).strip()
         definition = flatten_text(match.group(2).split("\n\nUse for:", maxsplit=1)[0])
         term = ensure_term(
@@ -760,16 +887,27 @@ def add_source_taxonomy_terms(terms: dict[str, TermRecord], cross_rows: dict[str
             source_heading_or_logical_block="4.3 Source classes by origin",
             drift_risk_level="high",
         )
-        term.authoritative_source_refs.add(extract_markdown_heading_anchor(SOURCE_TAXONOMY_PATH, "4-3-source-classes-by-origin"))
+        term.authoritative_source_refs.add(
+            extract_markdown_heading_anchor(SOURCE_TAXONOMY_PATH, "4-3-source-classes-by-origin")
+        )
         term.allowed_aliases.update([canonical_term, canonical_term.replace("_", " ").title()])
         term.canonical_contract_names.add(canonical_term)
-        append_traceability(term, SOURCE_TAXONOMY_PATH, "4.3 Source classes by origin", "Closed source_class vocabulary from taxonomy.")
+        append_traceability(
+            term,
+            SOURCE_TAXONOMY_PATH,
+            "4.3 Source classes by origin",
+            "Closed source_class vocabulary from taxonomy.",
+        )
 
 
-def add_authority_model_terms(terms: dict[str, TermRecord], cross_rows: dict[str, list[dict[str, Any]]]) -> None:
+def add_authority_model_terms(
+    terms: dict[str, TermRecord], cross_rows: dict[str, list[dict[str, Any]]]
+) -> None:
     text = (ROOT / ACTOR_AUTHORITY_MODEL_PATH).read_text()
     core_concepts_block = extract_section_text_between(text, "## 3.2 Core concepts", r"\n## 3\.3 ")
-    for match in re.finditer(r"\*\*(.+?)\*\*\n(.+?)(?=\n\n\*\*|\n## |\n### |\Z)", core_concepts_block, flags=re.S):
+    for match in re.finditer(
+        r"\*\*(.+?)\*\*\n(.+?)(?=\n\n\*\*|\n## |\n### |\Z)", core_concepts_block, flags=re.S
+    ):
         canonical_term = match.group(1).strip()
         definition = flatten_text(match.group(2))
         term = ensure_term(
@@ -780,13 +918,19 @@ def add_authority_model_terms(terms: dict[str, TermRecord], cross_rows: dict[str
             source_heading_or_logical_block="3.2 Core concepts",
             drift_risk_level="high",
         )
-        term.authoritative_source_refs.add(extract_markdown_heading_anchor(ACTOR_AUTHORITY_MODEL_PATH, "3-2-core-concepts"))
+        term.authoritative_source_refs.add(
+            extract_markdown_heading_anchor(ACTOR_AUTHORITY_MODEL_PATH, "3-2-core-concepts")
+        )
         term.allowed_aliases.add(canonical_term)
         term.canonical_contract_names.add(pascalize(canonical_term))
-        append_traceability(term, ACTOR_AUTHORITY_MODEL_PATH, "3.2 Core concepts", "Core authority-model concept.")
+        append_traceability(
+            term, ACTOR_AUTHORITY_MODEL_PATH, "3.2 Core concepts", "Core authority-model concept."
+        )
         enrich_from_cross_reference(term, cross_rows)
 
-    for match in re.finditer(r"###\s+Layer \d+ - (.+?)\n\n(.+?)(?=\n\n### |\n## |\Z)", text, flags=re.S):
+    for match in re.finditer(
+        r"###\s+Layer \d+ - (.+?)\n\n(.+?)(?=\n\n### |\n## |\Z)", text, flags=re.S
+    ):
         canonical_term = match.group(1).strip()
         definition = flatten_text(match.group(2))
         term = ensure_term(
@@ -797,9 +941,16 @@ def add_authority_model_terms(terms: dict[str, TermRecord], cross_rows: dict[str
             source_heading_or_logical_block="3.4 Authority layers",
             drift_risk_level="high",
         )
-        term.authoritative_source_refs.add(extract_markdown_heading_anchor(ACTOR_AUTHORITY_MODEL_PATH, "3-4-authority-layers"))
+        term.authoritative_source_refs.add(
+            extract_markdown_heading_anchor(ACTOR_AUTHORITY_MODEL_PATH, "3-4-authority-layers")
+        )
         term.allowed_aliases.add(canonical_term)
-        append_traceability(term, ACTOR_AUTHORITY_MODEL_PATH, "3.4 Authority layers", "Explicit authority layer in actor/authority model.")
+        append_traceability(
+            term,
+            ACTOR_AUTHORITY_MODEL_PATH,
+            "3.4 Authority layers",
+            "Explicit authority layer in actor/authority model.",
+        )
 
 
 def add_execution_mode_terms(terms: dict[str, TermRecord]) -> None:
@@ -813,14 +964,23 @@ def add_execution_mode_terms(terms: dict[str, TermRecord]) -> None:
     )
     compliance.authoritative_source_refs.update(
         [
-            extract_markdown_heading_anchor(ARCHITECTURE_GUARDRAILS_PATH, "2-execution-context-propagation"),
+            extract_markdown_heading_anchor(
+                ARCHITECTURE_GUARDRAILS_PATH, "2-execution-context-propagation"
+            ),
             MANIFEST_CONTRACT_PATH,
             REPLAY_CONTRACT_PATH,
         ]
     )
     compliance.allowed_aliases.update(["COMPLIANCE", "execution_mode = COMPLIANCE"])
-    compliance.machine_field_names.update(["execution_mode", "analysis_only", "non_compliance_config_refs[]", "counterfactual_basis"])
-    append_traceability(compliance, ARCHITECTURE_GUARDRAILS_PATH, "2. Execution-context propagation", "Closed execution-mode vocabulary.")
+    compliance.machine_field_names.update(
+        ["execution_mode", "analysis_only", "non_compliance_config_refs[]", "counterfactual_basis"]
+    )
+    append_traceability(
+        compliance,
+        ARCHITECTURE_GUARDRAILS_PATH,
+        "2. Execution-context propagation",
+        "Closed execution-mode vocabulary.",
+    )
     append_traceability(compliance, MANIFEST_CONTRACT_PATH, "mode rules", "Manifest mode contract.")
 
     analysis = ensure_term(
@@ -833,16 +993,27 @@ def add_execution_mode_terms(terms: dict[str, TermRecord]) -> None:
     )
     analysis.authoritative_source_refs.update(
         [
-            extract_markdown_heading_anchor(ARCHITECTURE_GUARDRAILS_PATH, "2-execution-context-propagation"),
+            extract_markdown_heading_anchor(
+                ARCHITECTURE_GUARDRAILS_PATH, "2-execution-context-propagation"
+            ),
             MANIFEST_CONTRACT_PATH,
             REPLAY_CONTRACT_PATH,
         ]
     )
-    analysis.allowed_aliases.update(["ANALYSIS", "execution_mode = ANALYSIS", "COUNTERFACTUAL_ANALYSIS"])
+    analysis.allowed_aliases.update(
+        ["ANALYSIS", "execution_mode = ANALYSIS", "COUNTERFACTUAL_ANALYSIS"]
+    )
     analysis.machine_field_names.update(["execution_mode", "analysis_only", "counterfactual_basis"])
     analysis.prohibited_aliases.add("live-ready analysis")
-    append_traceability(analysis, ARCHITECTURE_GUARDRAILS_PATH, "2. Execution-context propagation", "Closed execution-mode vocabulary.")
-    append_traceability(analysis, REPLAY_CONTRACT_PATH, "COUNTERFACTUAL_ANALYSIS", "Replay contract analysis mode.")
+    append_traceability(
+        analysis,
+        ARCHITECTURE_GUARDRAILS_PATH,
+        "2. Execution-context propagation",
+        "Closed execution-mode vocabulary.",
+    )
+    append_traceability(
+        analysis, REPLAY_CONTRACT_PATH, "COUNTERFACTUAL_ANALYSIS", "Replay contract analysis mode."
+    )
 
 
 def add_boundary_terms(terms: dict[str, TermRecord]) -> None:
@@ -872,11 +1043,20 @@ def add_boundary_terms(terms: dict[str, TermRecord]) -> None:
             source_heading_or_logical_block=block,
             drift_risk_level="high",
         )
-        term.authoritative_source_refs.add(extract_markdown_heading_anchor(BOUNDARY_PATH, "2-system-boundary-what-happens-inside-the-engine-and-what-stays-outside"))
-        append_traceability(term, BOUNDARY_PATH, block, "Explicit invention/system boundary vocabulary.")
+        term.authoritative_source_refs.add(
+            extract_markdown_heading_anchor(
+                BOUNDARY_PATH,
+                "2-system-boundary-what-happens-inside-the-engine-and-what-stays-outside",
+            )
+        )
+        append_traceability(
+            term, BOUNDARY_PATH, block, "Explicit invention/system boundary vocabulary."
+        )
 
 
-def enrich_from_cross_reference(term: TermRecord, cross_rows: dict[str, list[dict[str, Any]]]) -> None:
+def enrich_from_cross_reference(
+    term: TermRecord, cross_rows: dict[str, list[dict[str, Any]]]
+) -> None:
     keys = {normalize_key(term.canonical_term)}
     keys.update(normalize_key(alias) for alias in term.allowed_aliases)
     matched_rows: list[dict[str, Any]] = []
@@ -922,11 +1102,39 @@ def build_related_terms(terms: dict[str, TermRecord]) -> None:
                 alias_lookup[key].append(term.term_id)
 
     manual_clusters = [
-        ["TERM_SOURCE_RECORD", "TERM_EVIDENCE_ITEM", "TERM_CANDIDATE_FACT", "TERM_CANONICAL_FACT", "TERM_DERIVED_VALUE"],
-        ["TERM_RUN_MANIFEST", "TERM_CONTINUATION_BASIS", "TERM_MANIFEST_BRANCH_DECISION", "TERM_REPLAY", "TERM_RECOVERY"],
-        ["TERM_SHELL_FAMILY", "TERM_ROUTE_CONTEXT", "TERM_OBJECT_ANCHOR_REF", "TERM_VIEW_GUARD_REF", "TERM_WORKSPACE_VERSION"],
-        ["TERM_AUTHORITY_OF_RECORD", "TERM_AUTHORITY_ACKNOWLEDGEMENT", "TERM_AUTHORITY_REFERENCE", "TERM_AUTHORITY_LAYER_BOUNDARY"],
-        ["TERM_OVERRIDE", "TERM_GATE", "TERM_FAILURE_RESOLUTION_CONTRACT", "TERM_STATE_TRANSITION_CONTRACT"],
+        [
+            "TERM_SOURCE_RECORD",
+            "TERM_EVIDENCE_ITEM",
+            "TERM_CANDIDATE_FACT",
+            "TERM_CANONICAL_FACT",
+            "TERM_DERIVED_VALUE",
+        ],
+        [
+            "TERM_RUN_MANIFEST",
+            "TERM_CONTINUATION_BASIS",
+            "TERM_MANIFEST_BRANCH_DECISION",
+            "TERM_REPLAY",
+            "TERM_RECOVERY",
+        ],
+        [
+            "TERM_SHELL_FAMILY",
+            "TERM_ROUTE_CONTEXT",
+            "TERM_OBJECT_ANCHOR_REF",
+            "TERM_VIEW_GUARD_REF",
+            "TERM_WORKSPACE_VERSION",
+        ],
+        [
+            "TERM_AUTHORITY_OF_RECORD",
+            "TERM_AUTHORITY_ACKNOWLEDGEMENT",
+            "TERM_AUTHORITY_REFERENCE",
+            "TERM_AUTHORITY_LAYER_BOUNDARY",
+        ],
+        [
+            "TERM_OVERRIDE",
+            "TERM_GATE",
+            "TERM_FAILURE_RESOLUTION_CONTRACT",
+            "TERM_STATE_TRANSITION_CONTRACT",
+        ],
     ]
     for cluster in manual_clusters:
         existing = [term_id for term_id in cluster if term_id in terms]
@@ -934,20 +1142,31 @@ def build_related_terms(terms: dict[str, TermRecord]) -> None:
             terms[term_id].related_terms.update(other for other in existing if other != term_id)
 
     for term in by_id:
-        searchable = normalize_phrase(" ".join([term.definition, " ".join(term.notes), term.visibility_or_audience_notes]))
+        searchable = normalize_phrase(
+            " ".join([term.definition, " ".join(term.notes), term.visibility_or_audience_notes])
+        )
         for phrase, term_ids in alias_lookup.items():
             if phrase == normalize_phrase(term.canonical_term):
                 continue
             if phrase and phrase in searchable:
-                term.related_terms.update(other_id for other_id in term_ids if other_id != term.term_id)
+                term.related_terms.update(
+                    other_id for other_id in term_ids if other_id != term.term_id
+                )
         term.related_terms = set(sorted(term.related_terms)[:12])
 
 
-def build_alias_conflicts(terms: dict[str, TermRecord]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def build_alias_conflicts(
+    terms: dict[str, TermRecord],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     alias_map: dict[str, set[str]] = defaultdict(set)
     display_map: dict[str, set[str]] = defaultdict(set)
     for term in terms.values():
-        aliases = {term.canonical_term, *term.allowed_aliases, *term.machine_field_names, *term.canonical_contract_names}
+        aliases = {
+            term.canonical_term,
+            *term.allowed_aliases,
+            *term.machine_field_names,
+            *term.canonical_contract_names,
+        }
         for alias in aliases:
             key = normalize_phrase(alias)
             if not key:
@@ -983,7 +1202,9 @@ def build_alias_conflicts(terms: dict[str, TermRecord]) -> tuple[list[dict[str, 
     return collisions, sorted(prohibited_rules, key=lambda rule: rule["alias"])
 
 
-def build_field_map(terms: dict[str, TermRecord]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def build_field_map(
+    terms: dict[str, TermRecord],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     field_map: dict[str, list[TermRecord]] = defaultdict(list)
     for term in terms.values():
         for field_name in term.machine_field_names:
@@ -1001,7 +1222,9 @@ def build_field_map(terms: dict[str, TermRecord]) -> tuple[list[dict[str, Any]],
                     "rationale": "The same machine token is reused by multiple glossary concepts and must be qualified by object or contract context.",
                 }
             )
-        primary_term = sorted(linked_terms, key=lambda term: (term.drift_risk_level != "high", term.canonical_term))[0]
+        primary_term = sorted(
+            linked_terms, key=lambda term: (term.drift_risk_level != "high", term.canonical_term)
+        )[0]
         field_rows.append(
             {
                 "field_name": field_name,
@@ -1015,11 +1238,16 @@ def build_field_map(terms: dict[str, TermRecord]) -> tuple[list[dict[str, Any]],
     return field_rows, ambiguous_rows
 
 
-def validate_glossary_coverage(glossary_entries: list[dict[str, Any]], terms: dict[str, TermRecord]) -> list[str]:
+def validate_glossary_coverage(
+    glossary_entries: list[dict[str, Any]], terms: dict[str, TermRecord]
+) -> list[str]:
     failures: list[str] = []
     coverage_counter: Counter[str] = Counter()
     aliases_by_term = {
-        term_id: {normalize_phrase(term.canonical_term), *(normalize_phrase(alias) for alias in term.allowed_aliases)}
+        term_id: {
+            normalize_phrase(term.canonical_term),
+            *(normalize_phrase(alias) for alias in term.allowed_aliases),
+        }
         for term_id, term in terms.items()
     }
     for entry in glossary_entries:
@@ -1028,18 +1256,28 @@ def validate_glossary_coverage(glossary_entries: list[dict[str, Any]], terms: di
         normalized = normalize_phrase(canonical_term)
         matches = [term_id for term_id, aliases in aliases_by_term.items() if normalized in aliases]
         if len(matches) != 1:
-            failures.append(f"Glossary term `{title}` resolved to {len(matches)} normalized entries.")
+            failures.append(
+                f"Glossary term `{title}` resolved to {len(matches)} normalized entries."
+            )
         else:
             coverage_counter[matches[0]] += 1
     duplicate_canonical_hits = [term_id for term_id, count in coverage_counter.items() if count > 1]
     if duplicate_canonical_hits:
-        failures.append(f"Glossary coverage produced duplicate canonical hits: {sorted(duplicate_canonical_hits)}")
+        failures.append(
+            f"Glossary coverage produced duplicate canonical hits: {sorted(duplicate_canonical_hits)}"
+        )
     return failures
 
 
-def validate_shared_spine_fields(shared_spine: dict[str, list[str]], terms: dict[str, TermRecord]) -> list[str]:
-    present_fields = {field_name for term in terms.values() for field_name in term.machine_field_names}
-    missing = sorted(field for field in shared_spine["shared_fields"] if field not in present_fields)
+def validate_shared_spine_fields(
+    shared_spine: dict[str, list[str]], terms: dict[str, TermRecord]
+) -> list[str]:
+    present_fields = {
+        field_name for term in terms.values() for field_name in term.machine_field_names
+    }
+    missing = sorted(
+        field for field in shared_spine["shared_fields"] if field not in present_fields
+    )
     return missing
 
 
@@ -1067,7 +1305,9 @@ def write_csv(terms: list[TermRecord]) -> None:
             payload = term.to_dict()
             writer.writerow(
                 {
-                    key: " | ".join(payload[key]) if isinstance(payload[key], list) else payload[key]
+                    key: " | ".join(payload[key])
+                    if isinstance(payload[key], list)
+                    else payload[key]
                     for key in fieldnames
                 }
             )
@@ -1191,9 +1431,7 @@ def build_drift_doc(
         ]
     )
     for ambiguity in field_ambiguities[:20]:
-        lines.append(
-            f"| `{ambiguity['field_name']}` | {', '.join(ambiguity['canonical_terms'])} |"
-        )
+        lines.append(f"| `{ambiguity['field_name']}` | {', '.join(ambiguity['canonical_terms'])} |")
 
     return "\n".join(lines) + "\n"
 
@@ -1205,7 +1443,9 @@ def main() -> int:
     terms: dict[str, TermRecord] = {}
     glossary_entries = parse_glossary_terms()
     for entry in glossary_entries:
-        term = build_initial_term(entry["title"], entry["definition"], entry["section"], entry["line_number"])
+        term = build_initial_term(
+            entry["title"], entry["definition"], entry["section"], entry["line_number"]
+        )
         terms[term.term_id] = term
         enrich_from_cross_reference(term, cross_rows)
 
@@ -1221,11 +1461,18 @@ def main() -> int:
             if path in domain_map:
                 term.source_domain_families.add(domain_map[path])
         if term.term_category == "core_engine" and term.source_domain_families:
-            preferred = sorted(term.source_domain_families, key=lambda value: DOMAIN_TO_TERM_CATEGORY.get(value, value))[0]
+            preferred = sorted(
+                term.source_domain_families,
+                key=lambda value: DOMAIN_TO_TERM_CATEGORY.get(value, value),
+            )[0]
             term.term_category = DOMAIN_TO_TERM_CATEGORY.get(preferred, term.term_category)
         if not term.visibility_or_audience_notes:
-            term.visibility_or_audience_notes = infer_visibility_notes(term.definition, term.canonical_term)
-        term.drift_risk_level = infer_drift_risk(term.canonical_term, term.definition, term.term_category)
+            term.visibility_or_audience_notes = infer_visibility_notes(
+                term.definition, term.canonical_term
+            )
+        term.drift_risk_level = infer_drift_risk(
+            term.canonical_term, term.definition, term.term_category
+        )
         term.allowed_aliases = set(dedupe_sorted(term.allowed_aliases))
         term.machine_field_names = set(dedupe_sorted(term.machine_field_names))
         term.canonical_contract_names = set(dedupe_sorted(term.canonical_contract_names))
@@ -1244,8 +1491,12 @@ def main() -> int:
             "summary": {
                 "generated_from_task": "pc_0004",
                 "term_count": len(term_rows),
-                "category_counts": dict(sorted(Counter(term.term_category for term in term_rows).items())),
-                "drift_risk_counts": dict(sorted(Counter(term.drift_risk_level for term in term_rows).items())),
+                "category_counts": dict(
+                    sorted(Counter(term.term_category for term in term_rows).items())
+                ),
+                "drift_risk_counts": dict(
+                    sorted(Counter(term.drift_risk_level for term in term_rows).items())
+                ),
                 "glossary_seed_count": len(glossary_entries),
                 "shared_spine_field_count": len(shared_spine["shared_fields"]),
                 "shared_spine_missing_fields": shared_spine_missing_fields,
@@ -1276,7 +1527,14 @@ def main() -> int:
         },
     )
     GLOSSARY_DOC_PATH.write_text(
-        build_summary_doc(term_rows, shared_spine, glossary_coverage_failures, shared_spine_missing_fields, alias_conflicts, field_ambiguities)
+        build_summary_doc(
+            term_rows,
+            shared_spine,
+            glossary_coverage_failures,
+            shared_spine_missing_fields,
+            alias_conflicts,
+            field_ambiguities,
+        )
     )
     DRIFT_DOC_PATH.write_text(build_drift_doc(prohibited_rules, alias_conflicts, field_ambiguities))
 

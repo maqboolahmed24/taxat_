@@ -8,10 +8,7 @@ import {
   assertProviderFlowAllowed,
   createDefaultProviderRegistry,
 } from "../../../core/provider_registry.js";
-import {
-  rankSelectors,
-  type SelectorManifest,
-} from "../../../core/selector_contract.js";
+import { rankSelectors, type SelectorManifest } from "../../../core/selector_contract.js";
 import type { RunContext } from "../../../core/run_context.js";
 import {
   createPendingStep,
@@ -298,9 +295,7 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
-function normalizeSourceRefs(
-  sourceRefs: readonly AuthorityProviderSourceRef[],
-): SourceRef[] {
+function normalizeSourceRefs(sourceRefs: readonly AuthorityProviderSourceRef[]): SourceRef[] {
   return sourceRefs.map((sourceRef) => ({
     source: sourceRef.source_ref ?? sourceRef.source_file ?? sourceRef.url ?? "unknown-source",
     rationale: sourceRef.rationale,
@@ -393,9 +388,11 @@ function getEnvironmentRequired(
   return environment;
 }
 
-function redirectPlanRationale(
-  callbackProfileRef: string,
-): { slotIndex: number | null; decision: RedirectInventoryRow["registration_decision"]; rationale: string } {
+function redirectPlanRationale(callbackProfileRef: string): {
+  slotIndex: number | null;
+  decision: RedirectInventoryRow["registration_decision"];
+  rationale: string;
+} {
   switch (callbackProfileRef) {
     case "cb_sandbox_web":
       return {
@@ -507,9 +504,7 @@ export function validateRegisteredRedirectUri(
   }
 
   if (connectionMethod === "WEB_APP_VIA_SERVER" && parsed.protocol !== "https:") {
-    throw new Error(
-      `WEB_APP_VIA_SERVER callbacks must remain HTTPS redirects: ${redirectUri}`,
-    );
+    throw new Error(`WEB_APP_VIA_SERVER callbacks must remain HTTPS redirects: ${redirectUri}`);
   }
 
   if (connectionMethod === "WEB_APP_VIA_SERVER" && parsed.hostname === "localhost") {
@@ -532,9 +527,7 @@ export function validateConfiguredRedirectRows(
   const configuredRows = rows.filter((row) => row.registration_decision === "CONFIGURE_NOW");
 
   if (configuredRows.length > maxRedirectUris) {
-    throw new Error(
-      `Redirect inventory exceeds HMRC's ${maxRedirectUris}-URI limit.`,
-    );
+    throw new Error(`Redirect inventory exceeds HMRC's ${maxRedirectUris}-URI limit.`);
   }
 
   const normalized = configuredRows.map((row) => normalizeRedirectUri(row.redirect_uri));
@@ -550,7 +543,11 @@ export function validateConfiguredRedirectRows(
 function buildRedirectRows(
   authorityCatalog: AuthorityProviderProfileCatalog,
   environmentCatalog: EnvironmentCatalog,
-): { configuredRows: RedirectInventoryRow[]; disallowedRows: RedirectInventoryRow[]; typedGaps: string[] } {
+): {
+  configuredRows: RedirectInventoryRow[];
+  disallowedRows: RedirectInventoryRow[];
+  typedGaps: string[];
+} {
   const configuredRows = CONFIGURED_CALLBACK_REFS.map((callbackProfileRef) => {
     const callbackProfile = getCallbackProfileRequired(authorityCatalog, callbackProfileRef);
     const environmentRef = callbackProfile.environment_refs[0];
@@ -621,12 +618,10 @@ function buildRedirectRows(
   };
 }
 
-function deriveScopeSet(
-  baseline: RequiredApiSetBaseline,
-): ScopeSetRow {
-  const scopes = uniqueStrings(
-    baseline.required_now.flatMap((api) => api.oauth_scopes),
-  ).sort((left, right) => left.localeCompare(right));
+function deriveScopeSet(baseline: RequiredApiSetBaseline): ScopeSetRow {
+  const scopes = uniqueStrings(baseline.required_now.flatMap((api) => api.oauth_scopes)).sort(
+    (left, right) => left.localeCompare(right),
+  );
 
   if (scopes.length === 0) {
     throw new Error("Required API baseline did not yield any OAuth scopes.");
@@ -667,10 +662,7 @@ function buildOperationBindings(
       }));
 
       if (existing) {
-        existing.required_api_keys = uniqueStrings([
-          ...existing.required_api_keys,
-          api.api_key,
-        ]);
+        existing.required_api_keys = uniqueStrings([...existing.required_api_keys, api.api_key]);
         existing.source_refs = [
           ...existing.source_refs,
           ...currentSourceRefs.filter(
@@ -689,9 +681,7 @@ function buildOperationBindings(
         operation_family_ref: operationFamilyRef,
         required_api_keys: [api.api_key],
         scope_set_ref: SCOPE_SET_REF,
-        allowed_callback_profile_refs: configuredRows.map(
-          (row) => row.callback_profile_ref,
-        ),
+        allowed_callback_profile_refs: configuredRows.map((row) => row.callback_profile_ref),
         requested_by_default_for_current_slice: true,
         token_exchange_owner:
           "deployable_northbound_api_session_gateway_or_controlled_authority_gateway",
@@ -726,8 +716,7 @@ function buildCallbackBindings(
       row.connection_method === "DESKTOP_APP_VIA_SERVER"
         ? "Native macOS app opens the system browser and receives the return on the environment-bound loopback path."
         : "Browser shells start the HMRC journey, but the callback lands on the gateway-owned HTTPS redirect endpoint.",
-    authorization_endpoint_runtime:
-      HMRC_OBSERVED_ENDPOINT_BASELINE.authorization_endpoint_runtime,
+    authorization_endpoint_runtime: HMRC_OBSERVED_ENDPOINT_BASELINE.authorization_endpoint_runtime,
     token_endpoint_runtime: HMRC_OBSERVED_ENDPOINT_BASELINE.token_endpoint_runtime,
     redirect_uri_reuse_rule: "EXACT_REDIRECT_URI_REUSED_AT_TOKEN_EXCHANGE",
     post_authorization_return_strategy:
@@ -743,8 +732,7 @@ function buildCallbackBindings(
           "Sandbox authorisation and token endpoints, redirect URI reuse rule, and installed-application localhost guidance.",
       },
       {
-        source:
-          "https://developer.service.hmrc.gov.uk/api-documentation/docs/reference-guide",
+        source: "https://developer.service.hmrc.gov.uk/api-documentation/docs/reference-guide",
         rationale:
           "HMRC redirect URI budget, HTTPS rule for web callbacks, and fragment/IP-address prohibitions.",
       },
@@ -868,8 +856,7 @@ function buildSandboxOAuthProfile(
     provider_environment_target: "sandbox",
     verified_on: HMRC_OBSERVED_ENDPOINT_BASELINE.verified_on,
     requires_live_revalidation_before_runtime_use: true,
-    authorization_endpoint_runtime:
-      HMRC_OBSERVED_ENDPOINT_BASELINE.authorization_endpoint_runtime,
+    authorization_endpoint_runtime: HMRC_OBSERVED_ENDPOINT_BASELINE.authorization_endpoint_runtime,
     token_endpoint_runtime: HMRC_OBSERVED_ENDPOINT_BASELINE.token_endpoint_runtime,
     refresh_endpoint_runtime: HMRC_OBSERVED_ENDPOINT_BASELINE.refresh_endpoint_runtime,
     sandbox_api_base_url: HMRC_OBSERVED_ENDPOINT_BASELINE.sandbox_api_base_url,
@@ -886,8 +873,7 @@ function buildSandboxOAuthProfile(
         "Require PKCE for DESKTOP_APP_VIA_SERVER and keep it enabled for browser-originated flows when the gateway initiates the authorisation request.",
     },
     token_exchange: {
-      owner_system:
-        "deployable_northbound_api_session_gateway_or_controlled_authority_gateway",
+      owner_system: "deployable_northbound_api_session_gateway_or_controlled_authority_gateway",
       raw_token_storage_boundary: "SECRETS_MANAGER_OR_TOKEN_VAULT",
       browser_is_never_system_of_record: true,
       redirect_uri_reuse_rule: "EXACT_REDIRECT_URI_REUSED_AT_TOKEN_EXCHANGE",
@@ -958,8 +944,7 @@ async function readRedirectUriInputs(
   for (let index = 0; index < count; index += 1) {
     const slot = slotLocators.nth(index);
     const input = slot.getByRole("textbox").first();
-    const slotLabel =
-      (await slot.getAttribute("data-slot-label")) ?? `Redirect URI ${index + 1}`;
+    const slotLabel = (await slot.getAttribute("data-slot-label")) ?? `Redirect URI ${index + 1}`;
     rows.push({
       slotLabel,
       locator: input,
@@ -1185,9 +1170,7 @@ export async function configureRedirectUrisAndScopes(
           ]
         : []),
       ...(diff.stale.length > 0
-        ? [
-            `Stale redirect URIs were removed during reconciliation: ${diff.stale.join(", ")}.`,
-          ]
+        ? [`Stale redirect URIs were removed during reconciliation: ${diff.stale.join(", ")}.`]
         : []),
     ],
     evidenceRefs,
@@ -1204,10 +1187,7 @@ export async function configureRedirectUrisAndScopes(
     disallowedRows,
     redirectInventory.typed_gaps,
   );
-  const oauthProfile = buildSandboxOAuthProfile(
-    redirectInventory,
-    scopeBindingMatrix,
-  );
+  const oauthProfile = buildSandboxOAuthProfile(redirectInventory, scopeBindingMatrix);
 
   applicationRecord.portal_state.last_safe_page_url = options.page.url();
   applicationRecord.portal_state.last_completed_step_id =

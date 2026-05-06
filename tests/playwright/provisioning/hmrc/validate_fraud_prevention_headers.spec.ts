@@ -4,16 +4,12 @@ import path from "node:path";
 
 import { expect, test } from "@playwright/test";
 
-import {
-  createFixtureFphValidatorClient,
-} from "../../../../automation/provisioning/src/providers/hmrc/clients/fph_validator_client.js";
+import { createFixtureFphValidatorClient } from "../../../../automation/provisioning/src/providers/hmrc/clients/fph_validator_client.js";
 import {
   HMRC_FPH_VALIDATION_FLOW_ID,
   validateFraudPreventionHeaders,
 } from "../../../../automation/provisioning/src/providers/hmrc/flows/validate_fraud_prevention_headers.js";
-import {
-  createRunContext,
-} from "../../../../automation/provisioning/src/core/run_context.js";
+import { createRunContext } from "../../../../automation/provisioning/src/core/run_context.js";
 
 function fixtureRunContext() {
   return createRunContext({

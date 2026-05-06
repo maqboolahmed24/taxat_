@@ -16,18 +16,10 @@ import {
   type RetryDeadLetterPolicy,
 } from "../../../../infra/messaging/bootstrap/provision_queue_or_broker_for_outbox_inbox_and_worker_coordination.js";
 
-const repoRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "..",
-  "..",
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
 
 async function readJson<T>(segments: string[]): Promise<T> {
-  return JSON.parse(
-    await readFile(path.join(repoRoot, ...segments), "utf8"),
-  ) as T;
+  return JSON.parse(await readFile(path.join(repoRoot, ...segments), "utf8")) as T;
 }
 
 test("checked-in retry, ordering, and dedupe policies match the builder", async () => {
@@ -65,9 +57,7 @@ test("retry and dedupe law stays fail-closed for authority ingress and broker re
     (row) => row.policy_ref === "retry.authority_callback_normalization",
   );
   expect(authorityIngressRetry?.dead_letter_mode).toBe("MANUAL_REVIEW_REQUIRED");
-  expect(authorityIngressRetry?.redrive_gate).toContain(
-    "canonical ingress receipt",
-  );
+  expect(authorityIngressRetry?.redrive_gate).toContain("canonical ingress receipt");
 
   const authorityIngressOrdering = orderingPolicy.policy_rows.find(
     (row) => row.policy_ref === "ordering.authority_ingress_delivery",
@@ -79,12 +69,8 @@ test("retry and dedupe law stays fail-closed for authority ingress and broker re
   const authorityIngressDedupe = dedupePolicy.policy_rows.find(
     (row) => row.policy_ref === "dedupe.authority_delivery_identity",
   );
-  expect(authorityIngressDedupe?.window_posture).toContain(
-    "DURABLE_LEDGER_REQUIRED",
-  );
-  expect(authorityIngressDedupe?.mutation_gate).toContain(
-    "Legal-state mutation is blocked",
-  );
+  expect(authorityIngressDedupe?.window_posture).toContain("DURABLE_LEDGER_REQUIRED");
+  expect(authorityIngressDedupe?.mutation_gate).toContain("Legal-state mutation is blocked");
 
   const restoreRetry = retryPolicy.policy_rows.find(
     (row) => row.policy_ref === "retry.restore_rebuild",
@@ -102,7 +88,5 @@ test("retry and dedupe law stays fail-closed for authority ingress and broker re
   const restoreDedupe = dedupePolicy.policy_rows.find(
     (row) => row.policy_ref === "dedupe.restore_checkpoint_identity",
   );
-  expect(restoreDedupe?.replay_protection).toMatch(
-    /RecoveryCheckpoint/i,
-  );
+  expect(restoreDedupe?.replay_protection).toMatch(/RecoveryCheckpoint/i);
 });

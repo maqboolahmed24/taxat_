@@ -1,0 +1,305 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/collaboration_queue_projection_contract.schema.json",
+  "title": "CollaborationQueueProjectionContract",
+  "description": "Shared collaboration queue-projection contract. This schema freezes split lane unread counts, workspace module badge mirrors, canonical inbox sort basis, focus-safe deferred reorder or removal posture, and notification lane targeting so inbox rows, workspace drawers, stream events, and notifications stay queue-consistent under live updates, reconnect, and rebase.",
+  "type": "object",
+  "required": [
+    "projection_scope",
+    "basis_hash",
+    "routing_contract",
+    "latest_change_lane_or_null",
+    "customer_unread_count",
+    "internal_unread_count_or_null",
+    "customer_activity_module_badge_count",
+    "internal_activity_module_badge_count_or_null",
+    "canonical_sort_key",
+    "focus_continuity_state",
+    "filter_membership_state",
+    "notification_target_module_code_or_null"
+  ],
+  "properties": {
+    "projection_scope": {
+      "type": "string",
+      "enum": [
+        "WORK_INBOX_ROW",
+        "WORKSPACE_QUEUE_PROJECTION",
+        "WORKSPACE_STREAM_EVENT",
+        "WORK_ITEM_NOTIFICATION"
+      ]
+    },
+    "basis_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "routing_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/collaboration_routing_contract.schema.json"
+        }
+      ]
+    },
+    "latest_change_lane_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "CUSTOMER_VISIBLE",
+        "INTERNAL_ONLY",
+        "MIXED_VISIBLE",
+        null
+      ]
+    },
+    "customer_unread_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "internal_unread_count_or_null": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "customer_activity_module_badge_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "internal_activity_module_badge_count_or_null": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "canonical_sort_key": {
+      "type": "object",
+      "required": [
+        "collaboration_priority_score",
+        "escalation_rank",
+        "effective_due_at_or_null",
+        "resolution_confidence_score",
+        "queue_entered_at",
+        "item_id"
+      ],
+      "properties": {
+        "collaboration_priority_score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "escalation_rank": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "effective_due_at_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "resolution_confidence_score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "queue_entered_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "item_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "focus_continuity_state": {
+      "type": "string",
+      "enum": [
+        "STABLE",
+        "PENDING_REORDER_UNTIL_FOCUS_EXIT",
+        "PENDING_REMOVAL_UNTIL_FOCUS_EXIT"
+      ]
+    },
+    "filter_membership_state": {
+      "type": "string",
+      "enum": [
+        "IN_ACTIVE_FILTER_SET",
+        "FILTER_EXIT_PENDING_FOCUS_RELEASE",
+        "OUT_OF_FILTER_SET"
+      ]
+    },
+    "notification_target_module_code_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "CUSTOMER_ACTIVITY",
+        "INTERNAL_ACTIVITY",
+        null
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "internal_unread_count_or_null": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "internal_unread_count_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "internal_activity_module_badge_count_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "internal_activity_module_badge_count_or_null": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "internal_activity_module_badge_count_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "internal_unread_count_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "latest_change_lane_or_null": {
+            "const": "CUSTOMER_VISIBLE"
+          }
+        },
+        "required": [
+          "latest_change_lane_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "notification_target_module_code_or_null": {
+            "const": "CUSTOMER_ACTIVITY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "latest_change_lane_or_null": {
+            "const": "INTERNAL_ONLY"
+          }
+        },
+        "required": [
+          "latest_change_lane_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "notification_target_module_code_or_null": {
+            "const": "INTERNAL_ACTIVITY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "latest_change_lane_or_null": {
+            "enum": [
+              "MIXED_VISIBLE",
+              null
+            ]
+          }
+        },
+        "required": [
+          "latest_change_lane_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "notification_target_module_code_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "focus_continuity_state": {
+            "const": "PENDING_REORDER_UNTIL_FOCUS_EXIT"
+          }
+        },
+        "required": [
+          "focus_continuity_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "filter_membership_state": {
+            "const": "IN_ACTIVE_FILTER_SET"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "focus_continuity_state": {
+            "const": "PENDING_REMOVAL_UNTIL_FOCUS_EXIT"
+          }
+        },
+        "required": [
+          "focus_continuity_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "filter_membership_state": {
+            "const": "FILTER_EXIT_PENDING_FOCUS_RELEASE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "filter_membership_state": {
+            "const": "OUT_OF_FILTER_SET"
+          }
+        },
+        "required": [
+          "filter_membership_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "focus_continuity_state": {
+            "const": "STABLE"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

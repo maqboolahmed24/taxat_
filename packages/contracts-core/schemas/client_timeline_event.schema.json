@@ -1,0 +1,232 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/client_timeline_event.schema.json",
+  "title": "ClientTimelineEvent",
+  "description": "Client-visible activity-timeline event contract for the portal. This contract freezes the plain-language activity vocabulary allowed in the customer timeline together with explicit authority-truth posture so reassuring copy cannot outrun unresolved authority state.",
+  "type": "object",
+  "required": [
+    "event_id",
+    "artifact_type",
+    "tenant_id",
+    "client_id",
+    "manifest_id",
+    "event_kind",
+    "headline",
+    "detail_ref",
+    "occurred_at",
+    "visible_to_client",
+    "related_object_ref",
+    "language_contract",
+    "authority_truth_contract",
+    "authority_truth_state",
+    "customer_safe_projection"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_type": {
+      "const": "ClientTimelineEvent"
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "client_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "event_kind": {
+      "type": "string",
+      "enum": [
+        "UPLOAD_RECEIVED",
+        "UPLOAD_REJECTED",
+        "APPROVAL_READY",
+        "APPROVAL_SIGNED",
+        "ONBOARDING_STEP_COMPLETED",
+        "SUBMISSION_SENT",
+        "STATUS_UPDATED"
+      ]
+    },
+    "headline": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "detail_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "visible_to_client": {
+      "const": true
+    },
+    "related_object_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "language_contract": {
+      "$ref": "https://taxat.dev/schemas/portal_language_contract.schema.json"
+    },
+    "authority_truth_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/authority_truth_contract.schema.json"
+        },
+        {
+          "properties": {
+            "boundary_scope": {
+              "const": "CLIENT_TIMELINE_EVENT"
+            },
+            "truth_surface_role": {
+              "const": "CUSTOMER_SAFE_STATUS_PROJECTION"
+            },
+            "surface_specific_binding_policy": {
+              "const": "TIMELINE_IS_CUSTOMER_SAFE_AND_EXPLICIT_ABOUT_AUTHORITY_STATE"
+            }
+          }
+        }
+      ]
+    },
+    "authority_truth_state": {
+      "type": "string",
+      "enum": [
+        "NOT_APPLICABLE",
+        "NOT_REQUESTED",
+        "UNKNOWN",
+        "PENDING_ACK",
+        "PARTIAL_ACK",
+        "CONFIRMED",
+        "REJECTED",
+        "OUT_OF_BAND"
+      ]
+    },
+    "customer_safe_projection": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/customer_safe_projection_contract.schema.json"
+        },
+        {
+          "properties": {
+            "boundary_scope": {
+              "const": "CLIENT_TIMELINE_EVENT"
+            },
+            "projection_audience": {
+              "const": "CLIENT_PORTAL"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "event_kind": {
+            "const": "UPLOAD_REJECTED"
+          }
+        },
+        "required": [
+          "event_kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "detail_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_kind": {
+            "enum": [
+              "UPLOAD_RECEIVED",
+              "UPLOAD_REJECTED",
+              "APPROVAL_READY",
+              "APPROVAL_SIGNED",
+              "ONBOARDING_STEP_COMPLETED"
+            ]
+          }
+        },
+        "required": [
+          "event_kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "related_object_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_kind": {
+            "const": "SUBMISSION_SENT"
+          }
+        },
+        "required": [
+          "event_kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "authority_truth_state": {
+            "const": "PENDING_ACK"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_kind": {
+            "enum": [
+              "UPLOAD_RECEIVED",
+              "UPLOAD_REJECTED",
+              "APPROVAL_READY",
+              "APPROVAL_SIGNED",
+              "ONBOARDING_STEP_COMPLETED"
+            ]
+          }
+        },
+        "required": [
+          "event_kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "authority_truth_state": {
+            "const": "NOT_APPLICABLE"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

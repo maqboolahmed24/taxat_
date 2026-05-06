@@ -93,7 +93,9 @@ def main() -> int:
 
     row_ids = [row["boundary_requirement_id"] for row in actual_rows]
     if row_ids != sorted(row_ids):
-        fail("Boundary requirement rows are not sorted deterministically by boundary_requirement_id.")
+        fail(
+            "Boundary requirement rows are not sorted deterministically by boundary_requirement_id."
+        )
     if len(row_ids) != len(set(row_ids)):
         fail("Duplicate boundary_requirement_id values detected.")
 
@@ -101,8 +103,12 @@ def main() -> int:
     if len(capability_names) != len(set(capability_names)):
         fail("Duplicate capability_name values detected.")
 
-    expected_inside = {row.capability_name for row in expected_builder_rows if row.zone == "inside_core_engine"}
-    actual_inside = {row["capability_name"] for row in actual_rows if row["zone"] == "inside_core_engine"}
+    expected_inside = {
+        row.capability_name for row in expected_builder_rows if row.zone == "inside_core_engine"
+    }
+    actual_inside = {
+        row["capability_name"] for row in actual_rows if row["zone"] == "inside_core_engine"
+    }
     if actual_inside != expected_inside:
         fail(
             "Inside-core capability coverage drifted. "
@@ -112,7 +118,9 @@ def main() -> int:
     expected_outside = {
         row.capability_name for row in expected_builder_rows if row.zone != "inside_core_engine"
     }
-    actual_outside = {row["capability_name"] for row in actual_rows if row["zone"] != "inside_core_engine"}
+    actual_outside = {
+        row["capability_name"] for row in actual_rows if row["zone"] != "inside_core_engine"
+    }
     if actual_outside != expected_outside:
         fail(
             "Outside-core capability coverage drifted. "
@@ -127,7 +135,9 @@ def main() -> int:
     for row in actual_rows:
         for field_name in REQUIRED_FIELDS:
             if field_name not in row:
-                fail(f"Row {row.get('boundary_requirement_id')} is missing required field `{field_name}`.")
+                fail(
+                    f"Row {row.get('boundary_requirement_id')} is missing required field `{field_name}`."
+                )
         if row["zone"] not in builder.VALID_ZONES:
             fail(f"Unexpected zone `{row['zone']}` for {row['boundary_requirement_id']}.")
         if not row["authoritative_source_refs"]:
@@ -141,11 +151,15 @@ def main() -> int:
         if not row["produced_outputs_or_artifacts"]:
             fail(f"{row['boundary_requirement_id']} has no produced_outputs_or_artifacts.")
         if not row["forbidden_shortcuts_or_false_equivalences"]:
-            fail(f"{row['boundary_requirement_id']} has no forbidden_shortcuts_or_false_equivalences.")
+            fail(
+                f"{row['boundary_requirement_id']} has no forbidden_shortcuts_or_false_equivalences."
+            )
         if not row["downstream_phase_implications"]:
             fail(f"{row['boundary_requirement_id']} has no downstream_phase_implications.")
         if len(row["lawful_engine_relationship"].strip()) < 24:
-            fail(f"{row['boundary_requirement_id']} has an underspecified lawful_engine_relationship.")
+            fail(
+                f"{row['boundary_requirement_id']} has an underspecified lawful_engine_relationship."
+            )
         if row["capability_name"] in MUST_NOT_BE_CORE and row["zone"] == "inside_core_engine":
             fail(
                 f"{row['boundary_requirement_id']} misclassified `{row['capability_name']}` as inside_core_engine."
@@ -153,7 +167,9 @@ def main() -> int:
 
     csv_rows = list(csv.DictReader(builder.BOUNDARY_CAPABILITY_MATRIX_CSV_PATH.open()))
     if len(csv_rows) != len(actual_rows):
-        fail("boundary_capability_matrix.csv row count does not match system_boundary_requirements.jsonl.")
+        fail(
+            "boundary_capability_matrix.csv row count does not match system_boundary_requirements.jsonl."
+        )
 
     csv_ids = [row["boundary_requirement_id"] for row in csv_rows]
     if csv_ids != row_ids:
@@ -162,7 +178,9 @@ def main() -> int:
     expected_register = builder.build_out_of_scope_register(expected_builder_rows)
     actual_register = load_json(builder.OUT_OF_SCOPE_REGISTER_PATH)
     if actual_register != expected_register:
-        fail("out_of_scope_but_adjacent_functions.json drifted from the canonical non-core register.")
+        fail(
+            "out_of_scope_but_adjacent_functions.json drifted from the canonical non-core register."
+        )
 
     non_core_rows = [row for row in actual_rows if row["zone"] != "inside_core_engine"]
     if len(actual_register["rows"]) != len(non_core_rows):

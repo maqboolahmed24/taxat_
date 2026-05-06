@@ -3,11 +3,7 @@ export const storageBucketTopologyBoardRoute = {
   title: "Storage Bucket Topology Board",
   purpose:
     "Render a premium object-storage atlas for bucket purpose zones, lifecycle law, event-route posture, and quarantine isolation without collapsing into a cloud-operations console.",
-  focusOrder: [
-    "storage-bucket-rail",
-    "storage-topology-canvas",
-    "storage-topology-inspector",
-  ],
+  focusOrder: ["storage-bucket-rail", "storage-topology-canvas", "storage-topology-inspector"],
   sections: [
     "Upload Intake",
     "Retained Evidence",

@@ -34,7 +34,9 @@ RELATIONSHIP_DIAGRAM_PATH = DIAGRAMS_ANALYSIS_DIR / "08_entity_artifact_relation
 DATA_MODEL_PATH = ALGORITHM_DIR / "data_model.md"
 STATE_MACHINES_PATH = ALGORITHM_DIR / "state_machines.md"
 CANONICAL_TAXONOMY_PATH = ALGORITHM_DIR / "canonical_source_and_evidence_taxonomy.md"
-AUTHORITY_TRUTH_PATH = ALGORITHM_DIR / "authority_truth_and_internal_projection_separation_contract.md"
+AUTHORITY_TRUTH_PATH = (
+    ALGORITHM_DIR / "authority_truth_and_internal_projection_separation_contract.md"
+)
 AUDIT_PROVENANCE_PATH = ALGORITHM_DIR / "audit_and_provenance.md"
 PROVENANCE_SEMANTICS_PATH = ALGORITHM_DIR / "provenance_graph_semantics.md"
 RETENTION_PRIVACY_PATH = ALGORITHM_DIR / "retention_and_privacy.md"
@@ -501,11 +503,32 @@ MANUAL_PROSE_OWNER_MAP = {
     "AuthorityTruthContract": [AUTHORITY_TRUTH_PATH],
     "CustomerSafeProjectionContract": [FRONTEND_LAW_PATH, PORTAL_PATH, COLLABORATION_PATH],
     "PortalLanguageContract": [FRONTEND_LAW_PATH, PORTAL_PATH],
-    "FocusRestoreReturnTargetHarness": [FRONTEND_LAW_PATH, PORTAL_PATH, COLLABORATION_PATH, GOVERNANCE_PATH],
-    "SemanticAccessibilityRegressionPack": [FRONTEND_LAW_PATH, PORTAL_PATH, COLLABORATION_PATH, GOVERNANCE_PATH],
+    "FocusRestoreReturnTargetHarness": [
+        FRONTEND_LAW_PATH,
+        PORTAL_PATH,
+        COLLABORATION_PATH,
+        GOVERNANCE_PATH,
+    ],
+    "SemanticAccessibilityRegressionPack": [
+        FRONTEND_LAW_PATH,
+        PORTAL_PATH,
+        COLLABORATION_PATH,
+        GOVERNANCE_PATH,
+    ],
     "ShellContinuityFuzzHarness": [LOW_NOISE_PATH, FRONTEND_LAW_PATH],
-    "CrossDeviceContinuityContract": [LOW_NOISE_PATH, PORTAL_PATH, COLLABORATION_PATH, GOVERNANCE_PATH],
-    "CacheIsolationContract": [FRONTEND_LAW_PATH, LOW_NOISE_PATH, PORTAL_PATH, COLLABORATION_PATH, GOVERNANCE_PATH],
+    "CrossDeviceContinuityContract": [
+        LOW_NOISE_PATH,
+        PORTAL_PATH,
+        COLLABORATION_PATH,
+        GOVERNANCE_PATH,
+    ],
+    "CacheIsolationContract": [
+        FRONTEND_LAW_PATH,
+        LOW_NOISE_PATH,
+        PORTAL_PATH,
+        COLLABORATION_PATH,
+        GOVERNANCE_PATH,
+    ],
     "RetentionLimitedExplainabilityContract": [RETENTION_PRIVACY_PATH],
     "ProvenancePartitionContract": [AUDIT_PROVENANCE_PATH, PROVENANCE_SEMANTICS_PATH],
     "ProofClosureContract": [AUDIT_PROVENANCE_PATH, PROVENANCE_SEMANTICS_PATH],
@@ -671,7 +694,9 @@ def parse_data_model_entries() -> tuple[list[ObjectSourceEntry], list[dict[str, 
                 body_text="\n\n".join(entry.body_text for entry in source_entries),
                 source_path=primary.source_path,
                 source_kind=primary.source_kind,
-                source_refs=ordered_unique(ref for entry in source_entries for ref in entry.source_refs),
+                source_refs=ordered_unique(
+                    ref for entry in source_entries for ref in entry.source_refs
+                ),
             )
         )
         if len(source_entries) > 1:
@@ -691,7 +716,9 @@ def parse_data_model_entries() -> tuple[list[ObjectSourceEntry], list[dict[str, 
 
 
 def parse_state_machine_map() -> dict[str, dict[str, Any]]:
-    mapping: dict[str, dict[str, Any]] = defaultdict(lambda: {"state_fields": [], "source_refs": []})
+    mapping: dict[str, dict[str, Any]] = defaultdict(
+        lambda: {"state_fields": [], "source_refs": []}
+    )
     for line_number, line in enumerate(STATE_MACHINES_PATH.read_text().splitlines(), start=1):
         if not line.startswith("## "):
             continue
@@ -700,7 +727,11 @@ def parse_state_machine_map() -> dict[str, dict[str, Any]]:
             row["state_fields"] = ordered_unique(list(row["state_fields"]) + [state_field])
             row["source_refs"] = ordered_unique(
                 list(row["source_refs"])
-                + [line_ref(repo_rel(STATE_MACHINES_PATH), line_number, f"{object_name}.{state_field}")]
+                + [
+                    line_ref(
+                        repo_rel(STATE_MACHINES_PATH), line_number, f"{object_name}.{state_field}"
+                    )
+                ]
             )
     return dict(mapping)
 
@@ -754,21 +785,36 @@ def classify_object_kind(
         return MANUAL_DOC_ONLY_OBJECTS[object_name]["object_kind"]
     if object_name in CONTROL_CONTRACT_NAMES or object_name.endswith("Contract"):
         return "control_contract"
-    if object_name in ENVELOPE_NAMES or object_name.endswith("Envelope") or object_name.endswith("Receipt"):
+    if (
+        object_name in ENVELOPE_NAMES
+        or object_name.endswith("Envelope")
+        or object_name.endswith("Receipt")
+    ):
         return "envelope"
     if object_name in REGRESSION_OR_HARNESS_TITLES:
         return "control_contract"
     if object_name in READ_MODEL_AUDIENCE_OVERRIDES:
         if object_name.endswith(PROJECTION_SUFFIXES):
             return "projection"
-        if object_name in {"ClientTimelineEvent", "WorkInboxDelta", "ExperienceDelta", "ExperienceStreamEvent", "WorkspaceStreamEvent", "WorkspaceCursor", "ExperienceCursor"}:
+        if object_name in {
+            "ClientTimelineEvent",
+            "WorkInboxDelta",
+            "ExperienceDelta",
+            "ExperienceStreamEvent",
+            "WorkspaceStreamEvent",
+            "WorkspaceCursor",
+            "ExperienceCursor",
+        }:
             return "projection"
         return "read_model"
     if entry and ("shell_family" in field_blob and "object_anchor_ref" in field_blob):
         return "read_model"
     if object_name.endswith(PROJECTION_SUFFIXES):
         return "projection"
-    if object_name.endswith(READ_MODEL_SUFFIXES) and object_name not in {"Snapshot", "TwinStateSnapshot"}:
+    if object_name.endswith(READ_MODEL_SUFFIXES) and object_name not in {
+        "Snapshot",
+        "TwinStateSnapshot",
+    }:
         return "read_model"
     if entry and entry.section_heading == "Mutable operational entities (state)":
         return "mutable_entity"
@@ -819,16 +865,28 @@ def infer_visibility_classes(object_name: str, object_kind: str, body_text: str)
     classes.extend(MANUAL_DOC_ONLY_OBJECTS.get(object_name, {}).get("audiences", []))
     if object_kind not in {"read_model", "projection"}:
         classes.append(INTERNAL_AUDIENCE)
-    if any(token in object_name for token in ("Authority", "Submission", "Filing")) or "authority" in lower_text:
+    if (
+        any(token in object_name for token in ("Authority", "Submission", "Filing"))
+        or "authority" in lower_text
+    ):
         classes.append(AUTHORITY_AUDIENCE)
-    if any(token in object_name for token in ("Audit", "Proof", "Provenance", "Enquiry", "Failure", "Error")):
+    if any(
+        token in object_name
+        for token in ("Audit", "Proof", "Provenance", "Enquiry", "Failure", "Error")
+    ):
         classes.append(AUDIT_AUDIENCE)
-    if "visibility_class" in lower_text or "customer_safe_projection" in lower_text or "customer-safe" in lower_text:
+    if (
+        "visibility_class" in lower_text
+        or "customer_safe_projection" in lower_text
+        or "customer-safe" in lower_text
+    ):
         classes.append(PORTAL_AUDIENCE)
     return ordered_unique(classes or [INTERNAL_AUDIENCE])
 
 
-def infer_retention_policy(object_name: str, object_kind: str, body_text: str, field_tokens: list[str]) -> str:
+def infer_retention_policy(
+    object_name: str, object_kind: str, body_text: str, field_tokens: list[str]
+) -> str:
     lower_text = body_text.lower()
     lower_fields = " ".join(field_tokens).lower()
     if object_name in {"RetentionTag", "ArtifactRetention", "ErasureProof"}:
@@ -839,7 +897,11 @@ def infer_retention_policy(object_name: str, object_kind: str, body_text: str, f
         return "contract_reference_and_governance_policy"
     if object_kind == "schema_bundle":
         return "schema_registry_and_compatibility_policy"
-    if "retention_tag" in lower_fields or "retention_class" in lower_fields or "retention" in lower_text:
+    if (
+        "retention_tag" in lower_fields
+        or "retention_class" in lower_fields
+        or "retention" in lower_text
+    ):
         return "retention_tag_governed"
     if object_name in APPEND_ONLY_EVIDENCE_NAMES:
         return "append_only_evidence_and_lineage_preservation"
@@ -872,13 +934,25 @@ def infer_lifecycle_coverage(
     state_machine_map: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
     explicit_state_fields = state_machine_map.get(object_name, {}).get("state_fields", [])
-    state_fields = [token for token in field_tokens if any(key in token for key in ("state", "classification", "posture", "readiness"))]
-    primary_state = infer_primary_state_field(object_name, field_tokens, state_machine_map, object_kind)
+    state_fields = [
+        token
+        for token in field_tokens
+        if any(key in token for key in ("state", "classification", "posture", "readiness"))
+    ]
+    primary_state = infer_primary_state_field(
+        object_name, field_tokens, state_machine_map, object_kind
+    )
     if explicit_state_fields:
         coverage = "explicit"
     elif primary_state:
         coverage = "inferred"
-    elif object_kind in {"control_contract", "envelope", "schema_bundle", "read_model", "projection"}:
+    elif object_kind in {
+        "control_contract",
+        "envelope",
+        "schema_bundle",
+        "read_model",
+        "projection",
+    }:
         coverage = "intentionally_not_lifecycle"
     else:
         coverage = "absent"
@@ -901,7 +975,14 @@ def infer_lineage_fields(field_tokens: list[str]) -> list[str]:
             or token.endswith("_id")
             or "lineage" in token
             or "supersed" in token
-            or token in {"manifest_id", "root_manifest_id", "parent_manifest_id", "state_changed_at", "created_at"}
+            or token
+            in {
+                "manifest_id",
+                "root_manifest_id",
+                "parent_manifest_id",
+                "state_changed_at",
+                "created_at",
+            }
         )
     )
 
@@ -951,7 +1032,11 @@ def infer_schema_role(schema_title: str, object_row: dict[str, Any] | None) -> s
         return "regression_harness"
     if schema_title.endswith("Contract") or schema_title in CONTROL_CONTRACT_NAMES:
         return "control_contract"
-    if schema_title.endswith("Envelope") or schema_title.endswith("Receipt") or schema_title in ENVELOPE_NAMES:
+    if (
+        schema_title.endswith("Envelope")
+        or schema_title.endswith("Receipt")
+        or schema_title in ENVELOPE_NAMES
+    ):
         return "transport_envelope"
     if object_row is None:
         return "ambiguous"
@@ -982,13 +1067,49 @@ def derive_boundary_family(row: dict[str, Any]) -> str:
 
 
 def infer_projection_role(object_name: str) -> str:
-    if object_name in {"LowNoiseExperienceFrame", "ContextBarState", "DecisionSummaryState", "ActionStripState", "DetailDrawerState"}:
+    if object_name in {
+        "LowNoiseExperienceFrame",
+        "ContextBarState",
+        "DecisionSummaryState",
+        "ActionStripState",
+        "DetailDrawerState",
+    }:
         return "calm_shell_projection"
-    if object_name in {"ClientPortalWorkspace", "CustomerRequestListSnapshot", "ClientDocumentRequest", "ClientUploadSession", "ClientApprovalPack", "ClientOnboardingJourney", "ClientTimelineEvent", "PortalHelpRequest"}:
+    if object_name in {
+        "ClientPortalWorkspace",
+        "CustomerRequestListSnapshot",
+        "ClientDocumentRequest",
+        "ClientUploadSession",
+        "ClientApprovalPack",
+        "ClientOnboardingJourney",
+        "ClientTimelineEvent",
+        "PortalHelpRequest",
+    }:
         return "customer_safe_projection"
-    if object_name in {"WorkspaceSnapshot", "WorkspaceStreamEvent", "WorkspaceCursor", "WorkInboxSnapshot", "WorkInboxDelta", "CollaborationActivitySlice", "CollaborationAttachmentSlice", "WorkspaceDelta"}:
+    if object_name in {
+        "WorkspaceSnapshot",
+        "WorkspaceStreamEvent",
+        "WorkspaceCursor",
+        "WorkInboxSnapshot",
+        "WorkInboxDelta",
+        "CollaborationActivitySlice",
+        "CollaborationAttachmentSlice",
+        "WorkspaceDelta",
+    }:
         return "workspace_or_queue_projection"
-    if object_name in {"TenantGovernanceSnapshot", "GovernancePolicySnapshot", "PrincipalAccessView", "RoleTemplateMatrix", "GovernanceAccessSimulation", "AuthorityLinkInventoryItem", "RetentionGovernanceFrame", "AuditInvestigationFrame", "GovernanceRiskLedger", "TenantConfigWorkspace", "PendingChangeQueue"}:
+    if object_name in {
+        "TenantGovernanceSnapshot",
+        "GovernancePolicySnapshot",
+        "PrincipalAccessView",
+        "RoleTemplateMatrix",
+        "GovernanceAccessSimulation",
+        "AuthorityLinkInventoryItem",
+        "RetentionGovernanceFrame",
+        "AuditInvestigationFrame",
+        "GovernanceRiskLedger",
+        "TenantConfigWorkspace",
+        "PendingChangeQueue",
+    }:
         return "governance_projection"
     return "derived_projection"
 
@@ -1005,28 +1126,37 @@ def read_model_projection_rows(object_rows: list[dict[str, Any]]) -> list[dict[s
     object_map = {row["object_name"]: row for row in object_rows}
     for object_name in sorted(seen_names):
         row = object_map.get(object_name)
-        source_refs = row["authoritative_source_refs"] if row else ordered_unique(
-            ref
-            for path in MANUAL_DOC_ONLY_OBJECTS[object_name]["source_docs"]
-            for ref in collect_doc_refs([object_name]).get(object_name, [])
+        source_refs = (
+            row["authoritative_source_refs"]
+            if row
+            else ordered_unique(
+                ref
+                for path in MANUAL_DOC_ONLY_OBJECTS[object_name]["source_docs"]
+                for ref in collect_doc_refs([object_name]).get(object_name, [])
+            )
         )
         rows.append(
             {
                 "object_name": object_name,
                 "object_id_or_null": row["object_id"] if row else None,
-                "object_kind": row["object_kind"] if row else MANUAL_DOC_ONLY_OBJECTS[object_name]["object_kind"],
+                "object_kind": row["object_kind"]
+                if row
+                else MANUAL_DOC_ONLY_OBJECTS[object_name]["object_kind"],
                 "projection_role": infer_projection_role(object_name),
                 "audience_classes": READ_MODEL_AUDIENCE_OVERRIDES.get(
                     object_name, MANUAL_DOC_ONLY_OBJECTS.get(object_name, {}).get("audiences", [])
                 ),
                 "shell_families": READ_MODEL_SHELL_OVERRIDES.get(
-                    object_name, MANUAL_DOC_ONLY_OBJECTS.get(object_name, {}).get("shell_families", [])
+                    object_name,
+                    MANUAL_DOC_ONLY_OBJECTS.get(object_name, {}).get("shell_families", []),
                 ),
                 "truth_class": row["truth_class"] if row else "projection_only",
                 "schema_path_or_paths": row["schema_path_or_paths"] if row else [],
                 "authoritative_source_refs": source_refs,
                 "source_status": "cataloged" if row else "doc_only_gap",
-                "notes": row["notes"] if row else ["GAP_DOC_ONLY_READ_MODEL_WITHOUT_DATA_MODEL_ROW"],
+                "notes": row["notes"]
+                if row
+                else ["GAP_DOC_ONLY_READ_MODEL_WITHOUT_DATA_MODEL_ROW"],
             }
         )
     return rows
@@ -1112,7 +1242,8 @@ def ambiguous_rows(
                 }
             )
         elif object_row["object_name"] not in schema_titles and not any(
-            Path(path).stem.replace(".schema", "") == snake_case(object_row["object_name"]) for path in map(Path, object_row["schema_path_or_paths"])
+            Path(path).stem.replace(".schema", "") == snake_case(object_row["object_name"])
+            for path in map(Path, object_row["schema_path_or_paths"])
         ):
             rows.append(
                 {
@@ -1132,7 +1263,9 @@ def build_outputs() -> dict[str, Any]:
     schema_index = parse_schema_index()
     raw_entries = module_builder.parse_module_headings()
     step_rows, phase_map = module_builder.load_swimlane_data()
-    module_records, _helper_rows, _run_bindings = module_builder.build_module_records(raw_entries, step_rows, phase_map)
+    module_records, _helper_rows, _run_bindings = module_builder.build_module_records(
+        raw_entries, step_rows, phase_map
+    )
 
     producer_map: dict[str, set[str]] = defaultdict(set)
     consumer_map: dict[str, set[str]] = defaultdict(set)
@@ -1144,7 +1277,12 @@ def build_outputs() -> dict[str, Any]:
         if record.purity_class in {"state_mutator", "artifact_persister", "mixed"}:
             produced_objects |= set(record.related_artifacts)
             consumed_objects |= set(record.related_artifacts)
-        elif record.purity_class in {"projection_builder", "deterministic_builder", "external_transport", "event_emitter"}:
+        elif record.purity_class in {
+            "projection_builder",
+            "deterministic_builder",
+            "external_transport",
+            "event_emitter",
+        }:
             produced_objects |= set(record.output_objects)
             consumed_objects |= set(record.input_objects)
         elif record.purity_class == "pure_transform":
@@ -1173,8 +1311,7 @@ def build_outputs() -> dict[str, Any]:
         field_tokens = split_field_tokens(field_blob)
         schema_paths = [repo_rel(path) for path in schema_index.get(object_name, [])]
         source_refs = ordered_unique(
-            (entry.source_refs if entry else [])
-            + doc_refs_map.get(object_name, [])
+            (entry.source_refs if entry else []) + doc_refs_map.get(object_name, [])
         )
         if not source_refs and object_name in MANUAL_DOC_ONLY_OBJECTS:
             source_refs = [
@@ -1185,7 +1322,9 @@ def build_outputs() -> dict[str, Any]:
         truth_class = infer_truth_class(object_name, object_kind, body_text)
         write_authority_class = infer_write_authority_class(object_name, object_kind, truth_class)
         visibility_classes = infer_visibility_classes(object_name, object_kind, body_text)
-        lifecycle_row = infer_lifecycle_coverage(object_name, object_kind, field_tokens, state_machine_map)
+        lifecycle_row = infer_lifecycle_coverage(
+            object_name, object_kind, field_tokens, state_machine_map
+        )
         source_file = (
             repo_rel(entry.source_path)
             if entry
@@ -1202,7 +1341,9 @@ def build_outputs() -> dict[str, Any]:
             notes.append("SCHEMA_OR_CONTRACT_SURFACE_WITHOUT_DATA_MODEL_ENTRY")
         if len(schema_paths) == 0:
             notes.append("GAP_NO_DIRECT_SCHEMA")
-        if object_name in {note.get("object_name") for note in duplicate_notes if "object_name" in note}:
+        if object_name in {
+            note.get("object_name") for note in duplicate_notes if "object_name" in note
+        }:
             notes.append("CONFLICT_DUPLICATE_DATA_MODEL_DEFINITION")
         object_rows.append(
             {
@@ -1215,7 +1356,9 @@ def build_outputs() -> dict[str, Any]:
                 "truth_class": truth_class,
                 "write_authority_class": write_authority_class,
                 "visibility_classes": visibility_classes,
-                "retention_class_or_policy": infer_retention_policy(object_name, object_kind, body_text, field_tokens),
+                "retention_class_or_policy": infer_retention_policy(
+                    object_name, object_kind, body_text, field_tokens
+                ),
                 "lineage_anchor_fields": infer_lineage_fields(field_tokens),
                 "key_identity_fields": infer_identity_fields(field_tokens),
                 "produced_by_modules": sorted(producer_map.get(object_name, set())),
@@ -1242,20 +1385,41 @@ def build_outputs() -> dict[str, Any]:
             "coverage_class": infer_lifecycle_coverage(
                 row["object_name"],
                 row["object_kind"],
-                split_field_tokens(object_source_map.get(row["object_name"], ObjectSourceEntry("", 0, "", "", "", DATA_MODEL_PATH, "", [])).field_blob if row["object_name"] in object_source_map else ""),
+                split_field_tokens(
+                    object_source_map.get(
+                        row["object_name"],
+                        ObjectSourceEntry("", 0, "", "", "", DATA_MODEL_PATH, "", []),
+                    ).field_blob
+                    if row["object_name"] in object_source_map
+                    else ""
+                ),
                 state_machine_map,
             )["coverage_class"],
             "primary_state_field_or_null": row["primary_state_field_or_null"],
             "state_fields": infer_lifecycle_coverage(
                 row["object_name"],
                 row["object_kind"],
-                split_field_tokens(object_source_map.get(row["object_name"], ObjectSourceEntry("", 0, "", "", "", DATA_MODEL_PATH, "", [])).field_blob if row["object_name"] in object_source_map else ""),
+                split_field_tokens(
+                    object_source_map.get(
+                        row["object_name"],
+                        ObjectSourceEntry("", 0, "", "", "", DATA_MODEL_PATH, "", []),
+                    ).field_blob
+                    if row["object_name"] in object_source_map
+                    else ""
+                ),
                 state_machine_map,
             )["state_fields"],
             "state_machine_refs": infer_lifecycle_coverage(
                 row["object_name"],
                 row["object_kind"],
-                split_field_tokens(object_source_map.get(row["object_name"], ObjectSourceEntry("", 0, "", "", "", DATA_MODEL_PATH, "", [])).field_blob if row["object_name"] in object_source_map else ""),
+                split_field_tokens(
+                    object_source_map.get(
+                        row["object_name"],
+                        ObjectSourceEntry("", 0, "", "", "", DATA_MODEL_PATH, "", []),
+                    ).field_blob
+                    if row["object_name"] in object_source_map
+                    else ""
+                ),
                 state_machine_map,
             )["state_machine_refs"],
             "source_heading_or_logical_block": row["source_heading_or_logical_block"],
@@ -1286,18 +1450,34 @@ def build_outputs() -> dict[str, Any]:
         "summary": {
             "object_count": len(object_rows),
             "data_model_object_count": len(data_model_entries),
-            "doc_only_object_count": len([row for row in object_rows if "GAP_DOC_ONLY_OBJECT_WITHOUT_DATA_MODEL_ENTRY" in row["notes"]]),
-            "schema_mapped_object_count": len([row for row in object_rows if row["schema_path_or_paths"]]),
-            "object_kind_counts": dict(sorted(Counter(row["object_kind"] for row in object_rows).items())),
-            "truth_class_counts": dict(sorted(Counter(row["truth_class"] for row in object_rows).items())),
+            "doc_only_object_count": len(
+                [
+                    row
+                    for row in object_rows
+                    if "GAP_DOC_ONLY_OBJECT_WITHOUT_DATA_MODEL_ENTRY" in row["notes"]
+                ]
+            ),
+            "schema_mapped_object_count": len(
+                [row for row in object_rows if row["schema_path_or_paths"]]
+            ),
+            "object_kind_counts": dict(
+                sorted(Counter(row["object_kind"] for row in object_rows).items())
+            ),
+            "truth_class_counts": dict(
+                sorted(Counter(row["truth_class"] for row in object_rows).items())
+            ),
         },
         "objects": object_rows,
     }
     artifact_catalog = {
         "summary": {
             "artifact_like_object_count": len(artifact_rows),
-            "object_kind_counts": dict(sorted(Counter(row["object_kind"] for row in artifact_rows).items())),
-            "truth_class_counts": dict(sorted(Counter(row["truth_class"] for row in artifact_rows).items())),
+            "object_kind_counts": dict(
+                sorted(Counter(row["object_kind"] for row in artifact_rows).items())
+            ),
+            "truth_class_counts": dict(
+                sorted(Counter(row["truth_class"] for row in artifact_rows).items())
+            ),
         },
         "rows": artifact_rows,
     }
@@ -1305,10 +1485,18 @@ def build_outputs() -> dict[str, Any]:
         "summary": {
             "projection_row_count": len(projection_rows),
             "audience_counts": dict(
-                sorted(Counter(audience for row in projection_rows for audience in row["audience_classes"]).items())
+                sorted(
+                    Counter(
+                        audience for row in projection_rows for audience in row["audience_classes"]
+                    ).items()
+                )
             ),
             "shell_family_counts": dict(
-                sorted(Counter(shell for row in projection_rows for shell in row["shell_families"]).items())
+                sorted(
+                    Counter(
+                        shell for row in projection_rows for shell in row["shell_families"]
+                    ).items()
+                )
             ),
         },
         "rows": projection_rows,
@@ -1316,28 +1504,38 @@ def build_outputs() -> dict[str, Any]:
     truth_projection_boundary_map = {
         "summary": {
             "row_count": len(boundary_rows),
-            "truth_class_counts": dict(sorted(Counter(row["truth_class"] for row in boundary_rows).items())),
-            "boundary_family_counts": dict(sorted(Counter(row["boundary_family"] for row in boundary_rows).items())),
+            "truth_class_counts": dict(
+                sorted(Counter(row["truth_class"] for row in boundary_rows).items())
+            ),
+            "boundary_family_counts": dict(
+                sorted(Counter(row["boundary_family"] for row in boundary_rows).items())
+            ),
         },
         "rows": boundary_rows,
     }
     object_lifecycle_coverage = {
         "summary": {
             "row_count": len(lifecycle_rows),
-            "coverage_counts": dict(sorted(Counter(row["coverage_class"] for row in lifecycle_rows).items())),
+            "coverage_counts": dict(
+                sorted(Counter(row["coverage_class"] for row in lifecycle_rows).items())
+            ),
         },
         "rows": lifecycle_rows,
     }
     ambiguous_payload = {
         "summary": {
             "row_count": len(ambiguous),
-            "record_type_counts": dict(sorted(Counter(row["record_type"] for row in ambiguous).items())),
+            "record_type_counts": dict(
+                sorted(Counter(row["record_type"] for row in ambiguous).items())
+            ),
         },
         "rows": sorted(
             ambiguous,
             key=lambda row: (
                 row["record_type"],
-                row.get("object_name") or row.get("schema_title") or row.get("schema_paths", [""])[0],
+                row.get("object_name")
+                or row.get("schema_title")
+                or row.get("schema_paths", [""])[0],
             ),
         ),
     }
@@ -1490,7 +1688,7 @@ def write_mermaid(object_rows: list[dict[str, Any]]) -> None:
         lines.append("")
     for row in sorted(object_rows, key=lambda item: item["object_name"]):
         for related_object_id in row["related_object_ids"][:12]:
-            lines.append(f'  {row["object_id"]} --> {related_object_id}')
+            lines.append(f"  {row['object_id']} --> {related_object_id}")
     RELATIONSHIP_DIAGRAM_PATH.write_text("\n".join(lines) + "\n")
 
 
@@ -1511,9 +1709,13 @@ def main() -> int:
     summary = {
         "status": "PASS",
         "object_count": outputs["entity_catalog"]["summary"]["object_count"],
-        "artifact_like_object_count": outputs["artifact_catalog"]["summary"]["artifact_like_object_count"],
+        "artifact_like_object_count": outputs["artifact_catalog"]["summary"][
+            "artifact_like_object_count"
+        ],
         "schema_count": len(outputs["schema_matrix_rows"]),
-        "projection_row_count": outputs["read_model_projection_index"]["summary"]["projection_row_count"],
+        "projection_row_count": outputs["read_model_projection_index"]["summary"][
+            "projection_row_count"
+        ],
         "ambiguity_row_count": outputs["ambiguous_payload"]["summary"]["row_count"],
     }
     print(json.dumps(summary, indent=2, sort_keys=True))

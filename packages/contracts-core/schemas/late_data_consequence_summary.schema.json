@@ -1,0 +1,230 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/late_data_consequence_summary.schema.json",
+  "title": "LateDataConsequenceSummary",
+  "description": "Aggregate legal-consequence summary for a persisted late-data monitor result. This schema separates raw late-data detection volume from the downstream invalidation posture that trust, proof, filing, and amendment flows must obey.",
+  "type": "object",
+  "required": [
+    "summary_profile_code",
+    "true_post_baseline_event_count",
+    "pre_cutoff_preexisting_late_arrival_count",
+    "post_cutoff_discovery_pre_baseline_fact_count",
+    "authority_posting_lag_count",
+    "temporally_unproved_count",
+    "highest_legal_consequence",
+    "retroactive_impact_required",
+    "trust_invalidation_required",
+    "proof_staleness_required",
+    "amendment_reuse_invalidated",
+    "blocking_temporal_uncertainty_present",
+    "replay_lineage_policy",
+    "reason_codes"
+  ],
+  "properties": {
+    "summary_profile_code": {
+      "const": "LATE_DATA_SUMMARY_V1"
+    },
+    "true_post_baseline_event_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "pre_cutoff_preexisting_late_arrival_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "post_cutoff_discovery_pre_baseline_fact_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "authority_posting_lag_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "temporally_unproved_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "highest_legal_consequence": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "CURRENT_SCOPE_INVALIDATION",
+        "RETROACTIVE_IMPACT_REVIEW",
+        "TEMPORAL_UNCERTAINTY_BLOCK"
+      ]
+    },
+    "retroactive_impact_required": {
+      "type": "boolean"
+    },
+    "trust_invalidation_required": {
+      "type": "boolean"
+    },
+    "proof_staleness_required": {
+      "type": "boolean"
+    },
+    "amendment_reuse_invalidated": {
+      "type": "boolean"
+    },
+    "blocking_temporal_uncertainty_present": {
+      "type": "boolean"
+    },
+    "replay_lineage_policy": {
+      "const": "HISTORICAL_LINEAGE_ONLY"
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "temporally_unproved_count": {
+            "minimum": 1
+          }
+        },
+        "required": [
+          "temporally_unproved_count"
+        ]
+      },
+      "then": {
+        "properties": {
+          "highest_legal_consequence": {
+            "const": "TEMPORAL_UNCERTAINTY_BLOCK"
+          },
+          "trust_invalidation_required": {
+            "const": true
+          },
+          "proof_staleness_required": {
+            "const": true
+          },
+          "amendment_reuse_invalidated": {
+            "const": true
+          },
+          "blocking_temporal_uncertainty_present": {
+            "const": true
+          },
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "highest_legal_consequence": {
+            "const": "NONE"
+          }
+        },
+        "required": [
+          "highest_legal_consequence"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retroactive_impact_required": {
+            "const": false
+          },
+          "trust_invalidation_required": {
+            "const": false
+          },
+          "proof_staleness_required": {
+            "const": false
+          },
+          "amendment_reuse_invalidated": {
+            "const": false
+          },
+          "blocking_temporal_uncertainty_present": {
+            "const": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "retroactive_impact_required": {
+            "const": true
+          }
+        },
+        "required": [
+          "retroactive_impact_required"
+        ]
+      },
+      "then": {
+        "properties": {
+          "highest_legal_consequence": {
+            "enum": [
+              "RETROACTIVE_IMPACT_REVIEW",
+              "TEMPORAL_UNCERTAINTY_BLOCK"
+            ]
+          },
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "anyOf": [
+          {
+            "properties": {
+              "trust_invalidation_required": {
+                "const": true
+              }
+            },
+            "required": [
+              "trust_invalidation_required"
+            ]
+          },
+          {
+            "properties": {
+              "proof_staleness_required": {
+                "const": true
+              }
+            },
+            "required": [
+              "proof_staleness_required"
+            ]
+          },
+          {
+            "properties": {
+              "amendment_reuse_invalidated": {
+                "const": true
+              }
+            },
+            "required": [
+              "amendment_reuse_invalidated"
+            ]
+          },
+          {
+            "properties": {
+              "blocking_temporal_uncertainty_present": {
+                "const": true
+              }
+            },
+            "required": [
+              "blocking_temporal_uncertainty_present"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

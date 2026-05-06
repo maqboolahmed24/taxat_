@@ -1,0 +1,775 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/remediation_task.schema.json",
+  "title": "RemediationTask",
+  "description": "Owned follow-up contract for blocking or review-relevant failures. This schema freezes task type, owner, lifecycle timestamps, investigation linkage, and accepted-risk closure posture.",
+  "type": "object",
+  "required": [
+    "task_id",
+    "error_id",
+    "manifest_id",
+    "root_manifest_id",
+    "task_type",
+    "owner_type",
+    "owner_ref",
+    "failure_resolution_contract",
+    "due_at",
+    "priority",
+    "task_state",
+    "remediation_steps_ref",
+    "blocking_class",
+    "retention_class",
+    "artifact_retention_ref",
+    "workflow_item_id",
+    "superseded_by_task_id",
+    "closure_outcome",
+    "resolution_basis_ref",
+    "closure_evidence_refs",
+    "error_resolution_effect",
+    "created_at",
+    "started_at",
+    "completed_at",
+    "accepted_risk_approval_ref",
+    "investigation_ref",
+    "audit_refs",
+    "provenance_refs"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "error_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "root_manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "FIX_DATA",
+        "RESOLVE_CONFLICT",
+        "REVIEW_PARITY",
+        "APPROVE_OVERRIDE",
+        "RELINK_AUTHORITY",
+        "RETRY_AUTHORITY_OPERATION",
+        "RECONCILE_SUBMISSION_STATE",
+        "REQUEST_SUPPORTING_EVIDENCE",
+        "CHECK_RETENTION_HOLD",
+        "REPLAY_RUN",
+        "ESCALATE_SECURITY_ISSUE",
+        "OPEN_FAILURE_INVESTIGATION"
+      ]
+    },
+    "owner_type": {
+      "type": "string",
+      "enum": [
+        "SYSTEM",
+        "SERVICE_OPERATOR",
+        "REVIEWER",
+        "APPROVER",
+        "CLIENT",
+        "TENANT_ADMIN",
+        "SECURITY_OPERATOR"
+      ]
+    },
+    "owner_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "failure_resolution_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/failure_resolution_contract.schema.json"
+        },
+        {
+          "properties": {
+            "lifecycle_role": {
+              "const": "REMEDIATION_TASK"
+            },
+            "role_specific_binding_policy": {
+              "const": "TASK_CLOSURE_DECLARES_EFFECT_ON_ERROR"
+            }
+          }
+        }
+      ]
+    },
+    "due_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "LOW",
+        "NORMAL",
+        "HIGH",
+        "URGENT",
+        "CRITICAL"
+      ]
+    },
+    "task_state": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "ASSIGNED",
+        "IN_PROGRESS",
+        "WAITING",
+        "COMPLETED",
+        "CANCELLED",
+        "SUPERSEDED"
+      ]
+    },
+    "remediation_steps_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "blocking_class": {
+      "type": "string",
+      "enum": [
+        "NON_BLOCKING",
+        "BLOCKS_AUTOMATION",
+        "BLOCKS_REVIEW_PROGRESS",
+        "BLOCKS_FILING",
+        "BLOCKS_AMENDMENT",
+        "BLOCKS_ERASURE",
+        "BLOCKS_RUN",
+        "BLOCKS_AUTHORITY_CALL"
+      ]
+    },
+    "retention_class": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "regulated_record",
+        "derived_artifact",
+        "operational_log",
+        "analytics_projection",
+        "policy_governed_other",
+        null
+      ]
+    },
+    "artifact_retention_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "workflow_item_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "superseded_by_task_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "closure_outcome": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "FIX_APPLIED",
+        "CONFLICT_RESOLVED",
+        "PARITY_REVIEW_COMPLETED",
+        "OVERRIDE_APPROVED",
+        "AUTHORITY_RELINKED",
+        "AUTHORITY_RETRIED",
+        "SUBMISSION_RECONCILED",
+        "EVIDENCE_REQUESTED",
+        "HOLD_CONFIRMED",
+        "RUN_REPLAYED",
+        "SECURITY_ESCALATED",
+        "INVESTIGATION_OPENED",
+        "ACCEPTED_RISK",
+        "CANCELLED",
+        "SUPERSEDED",
+        null
+      ]
+    },
+    "resolution_basis_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "closure_evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "error_resolution_effect": {
+      "type": "string",
+      "enum": [
+        "ERROR_REMAINS_OPEN",
+        "ERROR_MOVES_TO_IN_PROGRESS",
+        "ERROR_MOVES_TO_MONITORING",
+        "ERROR_MOVES_TO_RESOLVED",
+        "ERROR_MOVES_TO_ACCEPTED_RISK",
+        "ERROR_MOVES_TO_SUPERSEDED",
+        "ERROR_MOVES_TO_CANCELLED"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "started_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "accepted_risk_approval_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "investigation_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "audit_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "provenance_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "owner_type": {
+            "const": "SYSTEM"
+          }
+        },
+        "required": [
+          "owner_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "owner_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "owner_type": {
+            "enum": [
+              "SERVICE_OPERATOR",
+              "REVIEWER",
+              "APPROVER",
+              "CLIENT",
+              "TENANT_ADMIN",
+              "SECURITY_OPERATOR"
+            ]
+          }
+        },
+        "required": [
+          "owner_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "owner_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "retention_class": {
+            "type": "string",
+            "enum": [
+              "regulated_record",
+              "derived_artifact",
+              "operational_log",
+              "analytics_projection",
+              "policy_governed_other"
+            ]
+          }
+        },
+        "required": [
+          "retention_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "artifact_retention_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "artifact_retention_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "artifact_retention_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retention_class": {
+            "type": "string",
+            "enum": [
+              "regulated_record",
+              "derived_artifact",
+              "operational_log",
+              "analytics_projection",
+              "policy_governed_other"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "task_state": {
+            "enum": [
+              "OPEN",
+              "ASSIGNED"
+            ]
+          }
+        },
+        "required": [
+          "task_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "started_at": {
+            "type": "null"
+          },
+          "completed_at": {
+            "type": "null"
+          },
+          "closure_outcome": {
+            "type": "null"
+          },
+          "resolution_basis_ref": {
+            "type": "null"
+          },
+          "closure_evidence_refs": {
+            "maxItems": 0
+          },
+          "error_resolution_effect": {
+            "const": "ERROR_REMAINS_OPEN"
+          },
+          "accepted_risk_approval_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "task_state": {
+            "enum": [
+              "IN_PROGRESS",
+              "WAITING"
+            ]
+          }
+        },
+        "required": [
+          "task_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at": {
+            "type": "null"
+          },
+          "closure_outcome": {
+            "type": "null"
+          },
+          "resolution_basis_ref": {
+            "type": "null"
+          },
+          "closure_evidence_refs": {
+            "maxItems": 0
+          },
+          "error_resolution_effect": {
+            "enum": [
+              "ERROR_REMAINS_OPEN",
+              "ERROR_MOVES_TO_IN_PROGRESS"
+            ]
+          },
+          "accepted_risk_approval_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "task_state": {
+            "const": "COMPLETED"
+          }
+        },
+        "required": [
+          "task_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closure_outcome": {
+            "type": "string",
+            "not": {
+              "enum": [
+                "CANCELLED",
+                "SUPERSEDED"
+              ]
+            }
+          },
+          "resolution_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "closure_evidence_refs": {
+            "minItems": 1
+          },
+          "error_resolution_effect": {
+            "enum": [
+              "ERROR_REMAINS_OPEN",
+              "ERROR_MOVES_TO_IN_PROGRESS",
+              "ERROR_MOVES_TO_MONITORING",
+              "ERROR_MOVES_TO_RESOLVED",
+              "ERROR_MOVES_TO_ACCEPTED_RISK"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "task_state": {
+            "const": "CANCELLED"
+          }
+        },
+        "required": [
+          "task_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "completed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closure_outcome": {
+            "const": "CANCELLED"
+          },
+          "resolution_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "closure_evidence_refs": {
+            "minItems": 1
+          },
+          "error_resolution_effect": {
+            "enum": [
+              "ERROR_REMAINS_OPEN",
+              "ERROR_MOVES_TO_CANCELLED"
+            ]
+          },
+          "accepted_risk_approval_ref": {
+            "type": "null"
+          },
+          "superseded_by_task_id": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "task_state": {
+            "const": "SUPERSEDED"
+          }
+        },
+        "required": [
+          "task_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "completed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closure_outcome": {
+            "const": "SUPERSEDED"
+          },
+          "resolution_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "closure_evidence_refs": {
+            "minItems": 1
+          },
+          "error_resolution_effect": {
+            "enum": [
+              "ERROR_REMAINS_OPEN",
+              "ERROR_MOVES_TO_SUPERSEDED"
+            ]
+          },
+          "superseded_by_task_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "accepted_risk_approval_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "task_state": {
+            "not": {
+              "const": "SUPERSEDED"
+            }
+          }
+        },
+        "required": [
+          "task_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "superseded_by_task_id": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "task_type": {
+            "const": "APPROVE_OVERRIDE"
+          }
+        },
+        "required": [
+          "task_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "owner_type": {
+            "const": "APPROVER"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "task_type": {
+            "const": "OPEN_FAILURE_INVESTIGATION"
+          }
+        },
+        "required": [
+          "task_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "investigation_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "task_type": {
+            "const": "CHECK_RETENTION_HOLD"
+          }
+        },
+        "required": [
+          "task_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "blocking_class": {
+            "const": "BLOCKS_ERASURE"
+          },
+          "retention_class": {
+            "type": "string",
+            "enum": [
+              "regulated_record",
+              "derived_artifact",
+              "operational_log",
+              "analytics_projection",
+              "policy_governed_other"
+            ]
+          },
+          "artifact_retention_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "workflow_item_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "closure_outcome": {
+            "const": "INVESTIGATION_OPENED"
+          }
+        },
+        "required": [
+          "closure_outcome"
+        ]
+      },
+      "then": {
+        "properties": {
+          "investigation_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "accepted_risk_approval_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "accepted_risk_approval_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "task_state": {
+            "const": "COMPLETED"
+          },
+          "closure_outcome": {
+            "const": "ACCEPTED_RISK"
+          },
+          "error_resolution_effect": {
+            "const": "ERROR_MOVES_TO_ACCEPTED_RISK"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "closure_outcome": {
+            "const": "ACCEPTED_RISK"
+          }
+        },
+        "required": [
+          "closure_outcome"
+        ]
+      },
+      "then": {
+        "properties": {
+          "accepted_risk_approval_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

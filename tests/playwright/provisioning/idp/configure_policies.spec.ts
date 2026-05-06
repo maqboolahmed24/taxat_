@@ -14,12 +14,9 @@ import {
   type IdpPolicyEvidenceTemplate,
 } from "../../../../automation/provisioning/src/providers/idp/flows/configure_roles_scopes_mfa_sessions.js";
 
-function fixtureEntryUrls(
-  scenario: "fresh" | "existing" | "policy-drift",
-): IdpPolicyEntryUrls {
+function fixtureEntryUrls(scenario: "fresh" | "existing" | "policy-drift"): IdpPolicyEntryUrls {
   return {
-    controlPlane:
-      `/automation/provisioning/tests/fixtures/auth0_idp_console.html?scenario=${scenario}`,
+    controlPlane: `/automation/provisioning/tests/fixtures/auth0_idp_console.html?scenario=${scenario}`,
   };
 }
 
@@ -98,7 +95,9 @@ test("fresh fixture reconciliation applies the recommended IdP policy pack and p
     expect.arrayContaining(["session.native.operator", "session.machine.runtime"]),
   );
   expect(flow.policyEvidenceRaw).not.toContain("production-operator-secret");
-  expect(flow.policyEvidenceRaw).toContain("REQUEST_ELEVATED_SCOPE_THEN_CHALLENGE_IN_POST_LOGIN_ACTION");
+  expect(flow.policyEvidenceRaw).toContain(
+    "REQUEST_ELEVATED_SCOPE_THEN_CHALLENGE_IN_POST_LOGIN_ACTION",
+  );
   expect(flow.evidenceManifestRaw).toContain(
     "Applied or adopted coarse roles and scopes while keeping delegation",
   );
@@ -118,9 +117,7 @@ test("policy drift stays explicit and blocks the flow instead of silently mutati
   );
   expect(flow.policyEvidence.drift_register.length).toBeGreaterThan(0);
   expect(flow.policyEvidence.notes).toEqual(
-    expect.arrayContaining([
-      expect.stringContaining("provider decides final Taxat legality"),
-    ]),
+    expect.arrayContaining([expect.stringContaining("provider decides final Taxat legality")]),
   );
 });
 

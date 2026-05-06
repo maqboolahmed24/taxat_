@@ -3,17 +3,8 @@ export const emailDomainReadinessBoardRoute = {
   title: "Email Domain Readiness Board",
   purpose:
     "Render a calm operational board for transactional email workspace posture, sender-domain readiness, DNS verification, and message-stream partitioning without exposing raw provider tokens or implying that email delivery is workflow truth.",
-  focusOrder: [
-    "domain-rail",
-    "readiness-canvas",
-    "readiness-inspector",
-  ],
-  sections: [
-    "Workspace",
-    "Domain Identity",
-    "DNS Records",
-    "Message Streams",
-  ],
+  focusOrder: ["domain-rail", "readiness-canvas", "readiness-inspector"],
+  sections: ["Workspace", "Domain Identity", "DNS Records", "Message Streams"],
   palette: {
     background: "#F5F6F4",
     surface: "#FFFFFF",

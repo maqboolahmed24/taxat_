@@ -16,7 +16,9 @@ DIAGRAMS_ANALYSIS_DIR = ROOT / "diagrams" / "analysis"
 
 ACTOR_AUTHORITY_PATH = ALGORITHM_DIR / "actor_and_authority_model.md"
 AUTHORITY_PROTOCOL_PATH = ALGORITHM_DIR / "authority_interaction_protocol.md"
-AUTHORITY_TRUTH_PATH = ALGORITHM_DIR / "authority_truth_and_internal_projection_separation_contract.md"
+AUTHORITY_TRUTH_PATH = (
+    ALGORITHM_DIR / "authority_truth_and_internal_projection_separation_contract.md"
+)
 CALCULATION_CONTRACT_PATH = ALGORITHM_DIR / "authority_calculation_contract.md"
 CONNECTOR_CONTRACT_PATH = ALGORITHM_DIR / "connector_delegation_contract.md"
 NORTHBOUND_CONTRACT_PATH = ALGORITHM_DIR / "northbound_api_and_session_contract.md"
@@ -34,14 +36,20 @@ AUTHORITY_RESPONSE_ENVELOPE_SCHEMA_PATH = SCHEMAS_DIR / "authority_response_enve
 AUTHORITY_INTERACTION_RECORD_SCHEMA_PATH = SCHEMAS_DIR / "authority_interaction_record.schema.json"
 AUTHORITY_INGRESS_RECEIPT_SCHEMA_PATH = SCHEMAS_DIR / "authority_ingress_receipt.schema.json"
 AUTHORITY_INGRESS_PROOF_SCHEMA_PATH = SCHEMAS_DIR / "authority_ingress_proof_contract.schema.json"
-AUTHORITY_INGRESS_CORRELATION_SCHEMA_PATH = SCHEMAS_DIR / "authority_ingress_correlation_contract.schema.json"
+AUTHORITY_INGRESS_CORRELATION_SCHEMA_PATH = (
+    SCHEMAS_DIR / "authority_ingress_correlation_contract.schema.json"
+)
 AUTHORITY_OPERATION_PROFILE_SCHEMA_PATH = SCHEMAS_DIR / "authority_operation_profile.schema.json"
-AUTHORITY_RECONCILIATION_CONTROL_SCHEMA_PATH = SCHEMAS_DIR / "authority_reconciliation_control_contract.schema.json"
+AUTHORITY_RECONCILIATION_CONTROL_SCHEMA_PATH = (
+    SCHEMAS_DIR / "authority_reconciliation_control_contract.schema.json"
+)
 AUTHORITY_TRUTH_SCHEMA_PATH = SCHEMAS_DIR / "authority_truth_contract.schema.json"
 SUBMISSION_RECORD_SCHEMA_PATH = SCHEMAS_DIR / "submission_record.schema.json"
 OBLIGATION_MIRROR_SCHEMA_PATH = SCHEMAS_DIR / "obligation_mirror.schema.json"
 
-REQUIREMENTS_DOC_PATH = DOCS_ANALYSIS_DIR / "12_authority_interaction_and_reconciliation_requirements.md"
+REQUIREMENTS_DOC_PATH = (
+    DOCS_ANALYSIS_DIR / "12_authority_interaction_and_reconciliation_requirements.md"
+)
 SEQUENCE_DOC_PATH = DOCS_ANALYSIS_DIR / "12_authority_sequence_and_boundary_matrix.md"
 EDGE_CASE_DOC_PATH = DOCS_ANALYSIS_DIR / "12_pending_duplicate_and_out_of_band_handling.md"
 MERMAID_PATH = DIAGRAMS_ANALYSIS_DIR / "12_authority_handshake_sequence.mmd"
@@ -263,7 +271,10 @@ def heading_ref(path: Path, heading_text: str, label: str | None = None) -> str:
 
 
 def module_ref_map(module_catalog: dict[str, Any]) -> dict[str, str]:
-    return {row["module_name"]: row["source_heading_or_logical_block"] for row in module_catalog["modules"]}
+    return {
+        row["module_name"]: row["source_heading_or_logical_block"]
+        for row in module_catalog["modules"]
+    }
 
 
 def find_gate_ref(gate_registry: dict[str, Any], gate_code: str) -> str:
@@ -277,57 +288,183 @@ def build_refs(module_catalog: dict[str, Any], gate_registry: dict[str, Any]) ->
     module_refs = module_ref_map(module_catalog)
     return {
         "actor_core": heading_ref(ACTOR_AUTHORITY_PATH, "3.2 Core concepts", "actor_core_concepts"),
-        "actor_layers": heading_ref(ACTOR_AUTHORITY_PATH, "3.4 Authority layers", "authority_layers"),
-        "actor_relationships": heading_ref(ACTOR_AUTHORITY_PATH, "3.5 Actor-to-authority relationships", "actor_relationships"),
-        "actor_principal_context": heading_ref(ACTOR_AUTHORITY_PATH, "3.6 Principal context schema", "principal_context"),
-        "actor_action_families": heading_ref(ACTOR_AUTHORITY_PATH, "3.8 Action families", "action_families"),
-        "actor_policy": heading_ref(ACTOR_AUTHORITY_PATH, "3.9 Policy decision model", "policy_decision_model"),
-        "actor_delegation_rules": heading_ref(ACTOR_AUTHORITY_PATH, "3.10 Delegation rules", "delegation_rules"),
-        "actor_exceptional": heading_ref(ACTOR_AUTHORITY_PATH, "Exceptional authority controls", "exceptional_authority_controls"),
-        "actor_precedence": heading_ref(ACTOR_AUTHORITY_PATH, "3.12 Authority precedence rules", "authority_precedence_rules"),
-        "actor_invariants": heading_ref(ACTOR_AUTHORITY_PATH, "3.14 Actor invariants", "actor_invariants"),
-        "protocol_boundary": heading_ref(AUTHORITY_PROTOCOL_PATH, "9.1 Boundary rule", "authority_boundary_rule"),
-        "protocol_scope": heading_ref(AUTHORITY_PROTOCOL_PATH, "9.2 Protocol scope", "authority_protocol_scope"),
-        "protocol_core_objects": heading_ref(AUTHORITY_PROTOCOL_PATH, "9.3 Core protocol objects", "authority_core_objects"),
-        "protocol_operation": heading_ref(AUTHORITY_PROTOCOL_PATH, "A. `AuthorityOperation`", "authority_operation_object"),
-        "protocol_binding": heading_ref(AUTHORITY_PROTOCOL_PATH, "B. `AuthorityBinding`", "authority_binding_object"),
-        "protocol_request_envelope": heading_ref(AUTHORITY_PROTOCOL_PATH, "C. `AuthorityRequestEnvelope`", "authority_request_envelope"),
-        "protocol_response_envelope": heading_ref(AUTHORITY_PROTOCOL_PATH, "D. `AuthorityResponseEnvelope`", "authority_response_envelope"),
-        "protocol_interaction_record": heading_ref(AUTHORITY_PROTOCOL_PATH, "E. `AuthorityInteractionRecord`", "authority_interaction_record"),
-        "protocol_operation_profiles": heading_ref(AUTHORITY_PROTOCOL_PATH, "9.4 Operation profiles", "authority_operation_profiles"),
-        "protocol_preflight": heading_ref(AUTHORITY_PROTOCOL_PATH, "9.5 Preflight sequence", "authority_preflight_sequence"),
-        "protocol_binding_rule": heading_ref(AUTHORITY_PROTOCOL_PATH, "9.6 Token and client binding rule", "token_client_binding_rule"),
-        "protocol_send_revalidation": heading_ref(AUTHORITY_PROTOCOL_PATH, "Send-time revalidation rule", "send_time_revalidation_rule"),
-        "protocol_fraud_headers": heading_ref(AUTHORITY_PROTOCOL_PATH, "9.7 Fraud-prevention header rule", "fraud_prevention_header_rule"),
-        "protocol_hashing": heading_ref(AUTHORITY_PROTOCOL_PATH, "9.8 Request hashing and idempotency", "request_hashing_and_idempotency"),
-        "protocol_idempotency": heading_ref(AUTHORITY_PROTOCOL_PATH, "Idempotency rule", "idempotency_rule"),
-        "protocol_collision": heading_ref(AUTHORITY_PROTOCOL_PATH, "Collision rule", "collision_rule"),
-        "protocol_response_classes": heading_ref(AUTHORITY_PROTOCOL_PATH, "9.9 Response classes", "response_classes"),
-        "protocol_default_normalization": heading_ref(AUTHORITY_PROTOCOL_PATH, "Default normalization rules", "default_normalization_rules"),
-        "protocol_merge": heading_ref(AUTHORITY_PROTOCOL_PATH, "9.9B Multi-source response merge protocol", "multi_source_response_merge"),
-        "protocol_ingress": heading_ref(AUTHORITY_PROTOCOL_PATH, "9.9A Inbound authority ingress protocol", "inbound_authority_ingress"),
-        "protocol_write_rules": heading_ref(AUTHORITY_PROTOCOL_PATH, "9.10 Submission-state write rules", "submission_state_write_rules"),
-        "protocol_allowed_write_rules": heading_ref(AUTHORITY_PROTOCOL_PATH, "Allowed write rules", "allowed_write_rules"),
-        "protocol_calculation": heading_ref(AUTHORITY_PROTOCOL_PATH, "9.11 Calculation handshake protocol", "calculation_handshake_protocol"),
-        "protocol_duplicates": heading_ref(AUTHORITY_PROTOCOL_PATH, "9.12 Duplicate and pending-state rules", "duplicate_and_pending_state_rules"),
-        "protocol_duplicate_handling": heading_ref(AUTHORITY_PROTOCOL_PATH, "Duplicate handling", "duplicate_handling"),
-        "protocol_reconciliation": heading_ref(AUTHORITY_PROTOCOL_PATH, "9.13 Reconciliation protocol", "reconciliation_protocol"),
-        "protocol_reconciliation_inputs": heading_ref(AUTHORITY_PROTOCOL_PATH, "Reconciliation inputs", "reconciliation_inputs"),
-        "protocol_reconciliation_outputs": heading_ref(AUTHORITY_PROTOCOL_PATH, "Reconciliation outputs", "reconciliation_outputs"),
-        "protocol_reconciliation_budget": heading_ref(AUTHORITY_PROTOCOL_PATH, "9.13A Reconciliation budget and escalation rule", "reconciliation_budget_and_escalation"),
-        "protocol_reconciliation_confidence": heading_ref(AUTHORITY_PROTOCOL_PATH, "9.13B Quantitative reconciliation confidence and ambiguity", "reconciliation_confidence_and_ambiguity"),
-        "protocol_out_of_band": heading_ref(AUTHORITY_PROTOCOL_PATH, "9.14 Out-of-band and authority-correction semantics", "out_of_band_and_corrections"),
-        "protocol_audit": heading_ref(AUTHORITY_PROTOCOL_PATH, "9.15 Audit invariants", "audit_invariants"),
+        "actor_layers": heading_ref(
+            ACTOR_AUTHORITY_PATH, "3.4 Authority layers", "authority_layers"
+        ),
+        "actor_relationships": heading_ref(
+            ACTOR_AUTHORITY_PATH, "3.5 Actor-to-authority relationships", "actor_relationships"
+        ),
+        "actor_principal_context": heading_ref(
+            ACTOR_AUTHORITY_PATH, "3.6 Principal context schema", "principal_context"
+        ),
+        "actor_action_families": heading_ref(
+            ACTOR_AUTHORITY_PATH, "3.8 Action families", "action_families"
+        ),
+        "actor_policy": heading_ref(
+            ACTOR_AUTHORITY_PATH, "3.9 Policy decision model", "policy_decision_model"
+        ),
+        "actor_delegation_rules": heading_ref(
+            ACTOR_AUTHORITY_PATH, "3.10 Delegation rules", "delegation_rules"
+        ),
+        "actor_exceptional": heading_ref(
+            ACTOR_AUTHORITY_PATH, "Exceptional authority controls", "exceptional_authority_controls"
+        ),
+        "actor_precedence": heading_ref(
+            ACTOR_AUTHORITY_PATH, "3.12 Authority precedence rules", "authority_precedence_rules"
+        ),
+        "actor_invariants": heading_ref(
+            ACTOR_AUTHORITY_PATH, "3.14 Actor invariants", "actor_invariants"
+        ),
+        "protocol_boundary": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "9.1 Boundary rule", "authority_boundary_rule"
+        ),
+        "protocol_scope": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "9.2 Protocol scope", "authority_protocol_scope"
+        ),
+        "protocol_core_objects": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "9.3 Core protocol objects", "authority_core_objects"
+        ),
+        "protocol_operation": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "A. `AuthorityOperation`", "authority_operation_object"
+        ),
+        "protocol_binding": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "B. `AuthorityBinding`", "authority_binding_object"
+        ),
+        "protocol_request_envelope": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "C. `AuthorityRequestEnvelope`", "authority_request_envelope"
+        ),
+        "protocol_response_envelope": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "D. `AuthorityResponseEnvelope`", "authority_response_envelope"
+        ),
+        "protocol_interaction_record": heading_ref(
+            AUTHORITY_PROTOCOL_PATH,
+            "E. `AuthorityInteractionRecord`",
+            "authority_interaction_record",
+        ),
+        "protocol_operation_profiles": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "9.4 Operation profiles", "authority_operation_profiles"
+        ),
+        "protocol_preflight": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "9.5 Preflight sequence", "authority_preflight_sequence"
+        ),
+        "protocol_binding_rule": heading_ref(
+            AUTHORITY_PROTOCOL_PATH,
+            "9.6 Token and client binding rule",
+            "token_client_binding_rule",
+        ),
+        "protocol_send_revalidation": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "Send-time revalidation rule", "send_time_revalidation_rule"
+        ),
+        "protocol_fraud_headers": heading_ref(
+            AUTHORITY_PROTOCOL_PATH,
+            "9.7 Fraud-prevention header rule",
+            "fraud_prevention_header_rule",
+        ),
+        "protocol_hashing": heading_ref(
+            AUTHORITY_PROTOCOL_PATH,
+            "9.8 Request hashing and idempotency",
+            "request_hashing_and_idempotency",
+        ),
+        "protocol_idempotency": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "Idempotency rule", "idempotency_rule"
+        ),
+        "protocol_collision": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "Collision rule", "collision_rule"
+        ),
+        "protocol_response_classes": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "9.9 Response classes", "response_classes"
+        ),
+        "protocol_default_normalization": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "Default normalization rules", "default_normalization_rules"
+        ),
+        "protocol_merge": heading_ref(
+            AUTHORITY_PROTOCOL_PATH,
+            "9.9B Multi-source response merge protocol",
+            "multi_source_response_merge",
+        ),
+        "protocol_ingress": heading_ref(
+            AUTHORITY_PROTOCOL_PATH,
+            "9.9A Inbound authority ingress protocol",
+            "inbound_authority_ingress",
+        ),
+        "protocol_write_rules": heading_ref(
+            AUTHORITY_PROTOCOL_PATH,
+            "9.10 Submission-state write rules",
+            "submission_state_write_rules",
+        ),
+        "protocol_allowed_write_rules": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "Allowed write rules", "allowed_write_rules"
+        ),
+        "protocol_calculation": heading_ref(
+            AUTHORITY_PROTOCOL_PATH,
+            "9.11 Calculation handshake protocol",
+            "calculation_handshake_protocol",
+        ),
+        "protocol_duplicates": heading_ref(
+            AUTHORITY_PROTOCOL_PATH,
+            "9.12 Duplicate and pending-state rules",
+            "duplicate_and_pending_state_rules",
+        ),
+        "protocol_duplicate_handling": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "Duplicate handling", "duplicate_handling"
+        ),
+        "protocol_reconciliation": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "9.13 Reconciliation protocol", "reconciliation_protocol"
+        ),
+        "protocol_reconciliation_inputs": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "Reconciliation inputs", "reconciliation_inputs"
+        ),
+        "protocol_reconciliation_outputs": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "Reconciliation outputs", "reconciliation_outputs"
+        ),
+        "protocol_reconciliation_budget": heading_ref(
+            AUTHORITY_PROTOCOL_PATH,
+            "9.13A Reconciliation budget and escalation rule",
+            "reconciliation_budget_and_escalation",
+        ),
+        "protocol_reconciliation_confidence": heading_ref(
+            AUTHORITY_PROTOCOL_PATH,
+            "9.13B Quantitative reconciliation confidence and ambiguity",
+            "reconciliation_confidence_and_ambiguity",
+        ),
+        "protocol_out_of_band": heading_ref(
+            AUTHORITY_PROTOCOL_PATH,
+            "9.14 Out-of-band and authority-correction semantics",
+            "out_of_band_and_corrections",
+        ),
+        "protocol_audit": heading_ref(
+            AUTHORITY_PROTOCOL_PATH, "9.15 Audit invariants", "audit_invariants"
+        ),
         "truth_purpose": heading_ref(AUTHORITY_TRUTH_PATH, "Purpose", "truth_projection_purpose"),
-        "truth_model": heading_ref(AUTHORITY_TRUTH_PATH, "Governing Model", "truth_projection_model"),
-        "truth_vocabulary": heading_ref(AUTHORITY_TRUTH_PATH, "State Vocabulary", "truth_projection_vocabulary"),
-        "truth_required_outcomes": heading_ref(AUTHORITY_TRUTH_PATH, "Required Outcomes", "truth_projection_required_outcomes"),
-        "truth_surface_rules": heading_ref(AUTHORITY_TRUTH_PATH, "Surface Rules", "truth_projection_surface_rules"),
-        "connector_artifacts": heading_ref(CONNECTOR_CONTRACT_PATH, "Connector and delegation artifacts", "connector_and_delegation_artifacts"),
-        "connector_persistence": heading_ref(CONNECTOR_CONTRACT_PATH, "Persistence rule", "connector_persistence_rule"),
-        "calculation_artifacts": heading_ref(CALCULATION_CONTRACT_PATH, "Calculation artifacts", "authority_calculation_artifacts"),
-        "calculation_persistence": heading_ref(CALCULATION_CONTRACT_PATH, "Persistence rule", "authority_calculation_persistence"),
-        "northbound_command_envelope": heading_ref(NORTHBOUND_CONTRACT_PATH, "3. Command envelope", "northbound_command_envelope"),
+        "truth_model": heading_ref(
+            AUTHORITY_TRUTH_PATH, "Governing Model", "truth_projection_model"
+        ),
+        "truth_vocabulary": heading_ref(
+            AUTHORITY_TRUTH_PATH, "State Vocabulary", "truth_projection_vocabulary"
+        ),
+        "truth_required_outcomes": heading_ref(
+            AUTHORITY_TRUTH_PATH, "Required Outcomes", "truth_projection_required_outcomes"
+        ),
+        "truth_surface_rules": heading_ref(
+            AUTHORITY_TRUTH_PATH, "Surface Rules", "truth_projection_surface_rules"
+        ),
+        "connector_artifacts": heading_ref(
+            CONNECTOR_CONTRACT_PATH,
+            "Connector and delegation artifacts",
+            "connector_and_delegation_artifacts",
+        ),
+        "connector_persistence": heading_ref(
+            CONNECTOR_CONTRACT_PATH, "Persistence rule", "connector_persistence_rule"
+        ),
+        "calculation_artifacts": heading_ref(
+            CALCULATION_CONTRACT_PATH, "Calculation artifacts", "authority_calculation_artifacts"
+        ),
+        "calculation_persistence": heading_ref(
+            CALCULATION_CONTRACT_PATH, "Persistence rule", "authority_calculation_persistence"
+        ),
+        "northbound_command_envelope": heading_ref(
+            NORTHBOUND_CONTRACT_PATH, "3. Command envelope", "northbound_command_envelope"
+        ),
         "module_AUTHORITY_PREFLIGHT": module_refs["AUTHORITY_PREFLIGHT"],
         "module_RESOLVE_AUTHORITY_OPERATION": module_refs["RESOLVE_AUTHORITY_OPERATION"],
         "module_RESOLVE_AUTHORITY_BINDING": module_refs["RESOLVE_AUTHORITY_BINDING"],
@@ -341,43 +478,163 @@ def build_refs(module_catalog: dict[str, Any], gate_registry: dict[str, Any]) ->
         "module_SUBMISSION_GATE": module_refs["SUBMISSION_GATE"],
         "module_SUBMIT_TO_AUTHORITY": module_refs["SUBMIT_TO_AUTHORITY"],
         "module_CHECKPOINT_AUTHORITY_INGRESS": module_refs["CHECKPOINT_AUTHORITY_INGRESS"],
-        "module_PROJECT_AUTHORITY_INGRESS_INVESTIGATION": module_refs["PROJECT_AUTHORITY_INGRESS_INVESTIGATION"],
+        "module_PROJECT_AUTHORITY_INGRESS_INVESTIGATION": module_refs[
+            "PROJECT_AUTHORITY_INGRESS_INVESTIGATION"
+        ],
         "module_NORMALIZE_AUTHORITY_RESPONSE": module_refs["NORMALIZE_AUTHORITY_RESPONSE"],
-        "module_MERGE_AUTHORITY_RESPONSE_OBSERVATION": module_refs["MERGE_AUTHORITY_RESPONSE_OBSERVATION"],
+        "module_MERGE_AUTHORITY_RESPONSE_OBSERVATION": module_refs[
+            "MERGE_AUTHORITY_RESPONSE_OBSERVATION"
+        ],
         "module_RECORD_AUTHORITY_INTERACTION": module_refs["RECORD_AUTHORITY_INTERACTION"],
-        "module_PERSIST_AUTHORITY_RECONCILIATION_CONTROL": module_refs["PERSIST_AUTHORITY_RECONCILIATION_CONTROL"],
+        "module_PERSIST_AUTHORITY_RECONCILIATION_CONTROL": module_refs[
+            "PERSIST_AUTHORITY_RECONCILIATION_CONTROL"
+        ],
         "module_RECONCILE_AUTHORITY_STATE": module_refs["RECONCILE_AUTHORITY_STATE"],
         "module_UPSERT_OBLIGATION_MIRROR": module_refs["UPSERT_OBLIGATION_MIRROR"],
-        "module_EMIT_AUTHORITY_RECONCILIATION_ANALYTICS": module_refs["EMIT_AUTHORITY_RECONCILIATION_ANALYTICS"],
+        "module_EMIT_AUTHORITY_RECONCILIATION_ANALYTICS": module_refs[
+            "EMIT_AUTHORITY_RECONCILIATION_ANALYTICS"
+        ],
         "gate_SUBMISSION_GATE": find_gate_ref(gate_registry, "SUBMISSION_GATE"),
-        "vector_TV_68": heading_ref(TEST_VECTORS_PATH, "TV-68: Delayed acknowledgement resolves unknown without duplicate resend", "TV_68"),
-        "vector_TV_69": heading_ref(TEST_VECTORS_PATH, "TV-69: Duplicate bucket changes before send abort the queued exchange", "TV_69"),
-        "vector_TV_69A": heading_ref(TEST_VECTORS_PATH, "TV-69A: Drift sentinel freezes blocked send lineage instead of logging drift loosely", "TV_69A"),
-        "vector_TV_69B": heading_ref(TEST_VECTORS_PATH, "TV-69B: Recovery and reconciliation reads reuse the same drift sentinel boundary", "TV_69B"),
-        "vector_TV_70": heading_ref(TEST_VECTORS_PATH, "TV-70: Ambiguous ingress is quarantined instead of mutating legal state", "TV_70"),
-        "vector_TV_70A": heading_ref(TEST_VECTORS_PATH, "TV-70A: Authority-reference-only ingress stays quarantined until stronger lineage proof exists", "TV_70A"),
-        "vector_TV_70B": heading_ref(TEST_VECTORS_PATH, "TV-70B: Callback, poll, and recovery duplicates collapse to one canonical ingress receipt", "TV_70B"),
-        "vector_TV_70C": heading_ref(TEST_VECTORS_PATH, "TV-70C: Callback and poll corroboration does not create a second legal-state mutation", "TV_70C"),
-        "vector_TV_70D": heading_ref(TEST_VECTORS_PATH, "TV-70D: Timeout placeholder cannot be silently replaced by later recovery evidence", "TV_70D"),
-        "vector_TV_70E": heading_ref(TEST_VECTORS_PATH, "TV-70E: Conflicting callback and poll observations force reconciliation instead of source precedence", "TV_70E"),
-        "vector_TV_70F": heading_ref(TEST_VECTORS_PATH, "TV-70F: Recovery and continuation preserve the open reconciliation budget instead of resetting it", "TV_70F"),
-        "vector_TV_70G": heading_ref(TEST_VECTORS_PATH, "TV-70G: Budget exhaustion blocks resend and opens explicit escalation ownership", "TV_70G"),
-        "vector_TV_70H": heading_ref(TEST_VECTORS_PATH, "TV-70H: Contradictory authority evidence blocks resend before budget math can reopen transport", "TV_70H"),
-        "vector_TV_70I": heading_ref(TEST_VECTORS_PATH, "TV-70I: Pending authority truth cannot render resolved workflow or client reassurance", "TV_70I"),
-        "vector_TV_70J": heading_ref(TEST_VECTORS_PATH, "TV-70J: Rejected authority truth cannot be overwritten by internal completion", "TV_70J"),
-        "vector_TV_70K": heading_ref(TEST_VECTORS_PATH, "TV-70K: Confirmed authority truth resolves downstream state only from authority evidence", "TV_70K"),
-        "vector_TV_70L": heading_ref(TEST_VECTORS_PATH, "TV-70L: Unknown and out-of-band authority outcomes stay typed and non-confirming", "TV_70L"),
-        "vector_TV_70M": heading_ref(TEST_VECTORS_PATH, "TV-70M: Late authority correction reopens previously resolved projections", "TV_70M"),
-        "vector_TV_70N": heading_ref(TEST_VECTORS_PATH, "TV-70N: Override and accepted-risk posture remain internal annotations only", "TV_70N"),
-        "vector_TV_70O": heading_ref(TEST_VECTORS_PATH, "TV-70O: Async authority observations must retain persisted ingress proof", "TV_70O"),
-        "vector_TV_70P": heading_ref(TEST_VECTORS_PATH, "TV-70P: Weak or unbound ingress proof cannot drive settlement or mirror mutation", "TV_70P"),
-        "vector_TV_70Q": heading_ref(TEST_VECTORS_PATH, "TV-70Q: Quarantined ingress remains explainable from persisted payload and correlation evidence", "TV_70Q"),
-        "vector_TV_70R": heading_ref(TEST_VECTORS_PATH, "TV-70R: Unbound ingress distinguishes missing provider keys from no-match posture", "TV_70R"),
-        "vector_TV_70S": heading_ref(TEST_VECTORS_PATH, "TV-70S: Duplicate-suppressed ingress investigation points back to the canonical receipt", "TV_70S"),
-        "vector_TV_70T": heading_ref(TEST_VECTORS_PATH, "TV-70T: Restore and replay reuse the grouped reconciliation control contract", "TV_70T"),
-        "vector_TV_70U": heading_ref(TEST_VECTORS_PATH, "TV-70U: Escalation handoff preserves owner, workflow, evidence, and due time", "TV_70U"),
-        "vector_TV_70V": heading_ref(TEST_VECTORS_PATH, "TV-70V: Reconciliation analytics derive only from durable control contracts", "TV_70V"),
-        "vector_TV_79P": heading_ref(TEST_VECTORS_PATH, "TV-79P: Authority preflight invariant blocks live send before transport mutation", "TV_79P"),
+        "vector_TV_68": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-68: Delayed acknowledgement resolves unknown without duplicate resend",
+            "TV_68",
+        ),
+        "vector_TV_69": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-69: Duplicate bucket changes before send abort the queued exchange",
+            "TV_69",
+        ),
+        "vector_TV_69A": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-69A: Drift sentinel freezes blocked send lineage instead of logging drift loosely",
+            "TV_69A",
+        ),
+        "vector_TV_69B": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-69B: Recovery and reconciliation reads reuse the same drift sentinel boundary",
+            "TV_69B",
+        ),
+        "vector_TV_70": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70: Ambiguous ingress is quarantined instead of mutating legal state",
+            "TV_70",
+        ),
+        "vector_TV_70A": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70A: Authority-reference-only ingress stays quarantined until stronger lineage proof exists",
+            "TV_70A",
+        ),
+        "vector_TV_70B": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70B: Callback, poll, and recovery duplicates collapse to one canonical ingress receipt",
+            "TV_70B",
+        ),
+        "vector_TV_70C": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70C: Callback and poll corroboration does not create a second legal-state mutation",
+            "TV_70C",
+        ),
+        "vector_TV_70D": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70D: Timeout placeholder cannot be silently replaced by later recovery evidence",
+            "TV_70D",
+        ),
+        "vector_TV_70E": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70E: Conflicting callback and poll observations force reconciliation instead of source precedence",
+            "TV_70E",
+        ),
+        "vector_TV_70F": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70F: Recovery and continuation preserve the open reconciliation budget instead of resetting it",
+            "TV_70F",
+        ),
+        "vector_TV_70G": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70G: Budget exhaustion blocks resend and opens explicit escalation ownership",
+            "TV_70G",
+        ),
+        "vector_TV_70H": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70H: Contradictory authority evidence blocks resend before budget math can reopen transport",
+            "TV_70H",
+        ),
+        "vector_TV_70I": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70I: Pending authority truth cannot render resolved workflow or client reassurance",
+            "TV_70I",
+        ),
+        "vector_TV_70J": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70J: Rejected authority truth cannot be overwritten by internal completion",
+            "TV_70J",
+        ),
+        "vector_TV_70K": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70K: Confirmed authority truth resolves downstream state only from authority evidence",
+            "TV_70K",
+        ),
+        "vector_TV_70L": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70L: Unknown and out-of-band authority outcomes stay typed and non-confirming",
+            "TV_70L",
+        ),
+        "vector_TV_70M": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70M: Late authority correction reopens previously resolved projections",
+            "TV_70M",
+        ),
+        "vector_TV_70N": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70N: Override and accepted-risk posture remain internal annotations only",
+            "TV_70N",
+        ),
+        "vector_TV_70O": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70O: Async authority observations must retain persisted ingress proof",
+            "TV_70O",
+        ),
+        "vector_TV_70P": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70P: Weak or unbound ingress proof cannot drive settlement or mirror mutation",
+            "TV_70P",
+        ),
+        "vector_TV_70Q": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70Q: Quarantined ingress remains explainable from persisted payload and correlation evidence",
+            "TV_70Q",
+        ),
+        "vector_TV_70R": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70R: Unbound ingress distinguishes missing provider keys from no-match posture",
+            "TV_70R",
+        ),
+        "vector_TV_70S": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70S: Duplicate-suppressed ingress investigation points back to the canonical receipt",
+            "TV_70S",
+        ),
+        "vector_TV_70T": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70T: Restore and replay reuse the grouped reconciliation control contract",
+            "TV_70T",
+        ),
+        "vector_TV_70U": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70U: Escalation handoff preserves owner, workflow, evidence, and due time",
+            "TV_70U",
+        ),
+        "vector_TV_70V": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-70V: Reconciliation analytics derive only from durable control contracts",
+            "TV_70V",
+        ),
+        "vector_TV_79P": heading_ref(
+            TEST_VECTORS_PATH,
+            "TV-79P: Authority preflight invariant blocks live send before transport mutation",
+            "TV_79P",
+        ),
     }
 
 
@@ -629,7 +886,11 @@ def build_submission_state_write_rules() -> list[dict[str, Any]]:
         {
             "rule_id": "WRITE_PENDING_ACK_ONLY_FROM_ACCEPTED_OR_PROFILED_RETRYABLE_OUTCOME",
             "allowed_states": ["PENDING_ACK"],
-            "trigger_classes": ["ACK_ACCEPTED_PENDING", "ACK_RETRYABLE_FAILURE", "RECONCILED_STILL_PENDING"],
+            "trigger_classes": [
+                "ACK_ACCEPTED_PENDING",
+                "ACK_RETRYABLE_FAILURE",
+                "RECONCILED_STILL_PENDING",
+            ],
             "protected_surfaces": ["SubmissionRecord", "ObligationMirror"],
             "prohibitions": [
                 "Pending posture must stay explicit and non-confirming.",
@@ -684,7 +945,12 @@ def build_submission_state_write_rules() -> list[dict[str, Any]]:
             "rule_id": "FORBID_INTERNAL_OPTIMISTIC_CONFIRMATION",
             "allowed_states": [],
             "trigger_classes": ["ALL"],
-            "protected_surfaces": ["SubmissionRecord", "ObligationMirror", "WorkflowItem", "ClientTimelineEvent"],
+            "protected_surfaces": [
+                "SubmissionRecord",
+                "ObligationMirror",
+                "WorkflowItem",
+                "ClientTimelineEvent",
+            ],
             "prohibitions": [
                 "The protocol may never infer confirmation from dispatch alone, UI completion, workflow closure, override, or accepted-risk posture.",
             ],
@@ -692,7 +958,9 @@ def build_submission_state_write_rules() -> list[dict[str, Any]]:
     ]
 
 
-def build_operation_records(refs: dict[str, str], operation_families: list[str]) -> list[dict[str, Any]]:
+def build_operation_records(
+    refs: dict[str, str], operation_families: list[str]
+) -> list[dict[str, Any]]:
     operation_specs: dict[str, dict[str, Any]] = {
         "AUTH_READ_REFERENCE": {
             "protocol_family": "authority_read",
@@ -1242,7 +1510,12 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
             "module_name": "AUTHORITY_PREFLIGHT",
             "applies_to_families": ["ALL"],
             "description": "Re-authorize the action, check manifest state, and require a live authority-safe control posture before any canonical request work begins.",
-            "artifacts_read": ["PrincipalContext", "AuthorizationDecision", "RunManifest", "AuthorityOperationProfile"],
+            "artifacts_read": [
+                "PrincipalContext",
+                "AuthorizationDecision",
+                "RunManifest",
+                "AuthorityOperationProfile",
+            ],
             "artifacts_written": ["AuthorityBinding", "AuthorityOperationProfile"],
             "blocking_conditions": [
                 "authorization deny",
@@ -1252,7 +1525,11 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
                 "token/client mismatch",
             ],
             "replay_rule": "The preflight result is a fail-closed control boundary and must not be downgraded to a transport error.",
-            "source_refs": [refs["protocol_preflight"], refs["module_AUTHORITY_PREFLIGHT"], refs["vector_TV_79P"]],
+            "source_refs": [
+                refs["protocol_preflight"],
+                refs["module_AUTHORITY_PREFLIGHT"],
+                refs["vector_TV_79P"],
+            ],
         },
         {
             "step_index": 2,
@@ -1263,7 +1540,10 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
             "description": "Freeze AuthorityOperation with requested_scope[], runtime_scope[], attempt lineage, provider contract, and executable partition scope.",
             "artifacts_read": ["AuthorityOperationProfile", "AuthorizationDecision"],
             "artifacts_written": ["AuthorityOperation"],
-            "blocking_conditions": ["runtime scope illegal for family", "missing target obligation or basis where required"],
+            "blocking_conditions": [
+                "runtime scope illegal for family",
+                "missing target obligation or basis where required",
+            ],
             "replay_rule": "Replay must reuse the sealed operation rather than re-deriving scope meaning from ambient caller context.",
             "source_refs": [refs["protocol_operation"], refs["module_RESOLVE_AUTHORITY_OPERATION"]],
         },
@@ -1274,7 +1554,12 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
             "module_name": "RESOLVE_AUTHORITY_BINDING",
             "applies_to_families": ["ALL"],
             "description": "Resolve one concrete connector, delegation, authority-link, and token lineage that exactly matches the operation tuple.",
-            "artifacts_read": ["ConnectorBinding", "DelegationGrant", "AuthorityLink", "ExceptionalAuthorityGrant"],
+            "artifacts_read": [
+                "ConnectorBinding",
+                "DelegationGrant",
+                "AuthorityLink",
+                "ExceptionalAuthorityGrant",
+            ],
             "artifacts_written": ["AuthorityBinding"],
             "blocking_conditions": [
                 "ambiguous token binding",
@@ -1283,7 +1568,11 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
                 "provider environment drift",
             ],
             "replay_rule": "Later send-time logic may refresh only token version or validation timestamps inside the same binding_lineage_ref.",
-            "source_refs": [refs["protocol_binding"], refs["module_RESOLVE_AUTHORITY_BINDING"], refs["connector_artifacts"]],
+            "source_refs": [
+                refs["protocol_binding"],
+                refs["module_RESOLVE_AUTHORITY_BINDING"],
+                refs["connector_artifacts"],
+            ],
         },
         {
             "step_index": 4,
@@ -1294,9 +1583,15 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
             "description": "Render canonical path, query, payload bytes, and header profile refs from the frozen operation and binding.",
             "artifacts_read": ["AuthorityOperation", "AuthorityBinding"],
             "artifacts_written": ["canonical_request_material"],
-            "blocking_conditions": ["projection masking would alter canonical bytes", "provider contract missing route material"],
+            "blocking_conditions": [
+                "projection masking would alter canonical bytes",
+                "provider contract missing route material",
+            ],
             "replay_rule": "Canonical bytes are the only valid basis for request hashing and duplicate identity.",
-            "source_refs": [refs["protocol_request_envelope"], refs["module_CANONICALIZE_AUTHORITY_REQUEST"]],
+            "source_refs": [
+                refs["protocol_request_envelope"],
+                refs["module_CANONICALIZE_AUTHORITY_REQUEST"],
+            ],
         },
         {
             "step_index": 5,
@@ -1305,11 +1600,19 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
             "module_name": "DERIVE_AUTHORITY_REQUEST_HASHES",
             "applies_to_families": ["ALL"],
             "description": "Compute request_body_hash, identity_namespace_hash, duplicate_meaning_key, request_hash, and idempotency_key.",
-            "artifacts_read": ["canonical_request_material", "AuthorityBinding", "AuthorityOperation"],
+            "artifacts_read": [
+                "canonical_request_material",
+                "AuthorityBinding",
+                "AuthorityOperation",
+            ],
             "artifacts_written": ["AuthorityRequestIdentityContract"],
             "blocking_conditions": ["body collision", "identity namespace collision"],
             "replay_rule": "request_hash remains the exact packet identity while duplicate_meaning_key remains the resend-vs-reconcile bucket.",
-            "source_refs": [refs["protocol_hashing"], refs["protocol_collision"], refs["module_DERIVE_AUTHORITY_REQUEST_HASHES"]],
+            "source_refs": [
+                refs["protocol_hashing"],
+                refs["protocol_collision"],
+                refs["module_DERIVE_AUTHORITY_REQUEST_HASHES"],
+            ],
         },
         {
             "step_index": 6,
@@ -1318,11 +1621,22 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
             "module_name": "BUILD_AUTHORITY_REQUEST_ENVELOPE",
             "applies_to_families": ["ALL"],
             "description": "Create AuthorityRequestEnvelope and grouped request_identity_contract only after identity completion and human-gate satisfaction.",
-            "artifacts_read": ["AuthorityOperation", "AuthorityBinding", "AuthorityRequestIdentityContract"],
+            "artifacts_read": [
+                "AuthorityOperation",
+                "AuthorityBinding",
+                "AuthorityRequestIdentityContract",
+            ],
             "artifacts_written": ["AuthorityRequestEnvelope"],
-            "blocking_conditions": ["missing approval", "missing step-up evidence", "missing fraud-header profile"],
+            "blocking_conditions": [
+                "missing approval",
+                "missing step-up evidence",
+                "missing fraud-header profile",
+            ],
             "replay_rule": "Downstream recovery reuses request_identity_contract instead of rebuilding it from top-level envelope fields.",
-            "source_refs": [refs["protocol_request_envelope"], refs["module_BUILD_AUTHORITY_REQUEST_ENVELOPE"]],
+            "source_refs": [
+                refs["protocol_request_envelope"],
+                refs["module_BUILD_AUTHORITY_REQUEST_ENVELOPE"],
+            ],
         },
         {
             "step_index": 7,
@@ -1365,7 +1679,12 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
                 "binding-lineage change",
             ],
             "replay_rule": "Duplicate suppression uses persisted meaning identity, not recomputed heuristics.",
-            "source_refs": [refs["protocol_duplicates"], refs["protocol_duplicate_handling"], refs["module_EXISTING_SUBMISSIONS"], refs["vector_TV_69"]],
+            "source_refs": [
+                refs["protocol_duplicates"],
+                refs["protocol_duplicate_handling"],
+                refs["module_EXISTING_SUBMISSIONS"],
+                refs["vector_TV_69"],
+            ],
         },
         {
             "step_index": 9,
@@ -1380,7 +1699,12 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
                 "AUTH_SUBMIT_POST_FINALISATION_AMENDMENT",
             ],
             "description": "Block malformed, duplicate, pending, amendment-ineligible, or legally unsafe sends before transport mutation.",
-            "artifacts_read": ["SubmissionRecord", "AuthorityInteractionRecord", "AuthorityRequestEnvelope", "AuthorityLink"],
+            "artifacts_read": [
+                "SubmissionRecord",
+                "AuthorityInteractionRecord",
+                "AuthorityRequestEnvelope",
+                "AuthorityLink",
+            ],
             "artifacts_written": ["GateDecisionRecord"],
             "blocking_conditions": [
                 "duplicate occupancy",
@@ -1405,7 +1729,11 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
                 "AUTH_SUBMIT_POST_FINALISATION_AMENDMENT",
             ],
             "description": "Take the exclusive send claim and re-check binding lineage, duplicate truth, approvals, and provider contract immediately before bytes leave the process.",
-            "artifacts_read": ["AuthorityBinding", "AuthorityInteractionRecord", "SubmissionRecord"],
+            "artifacts_read": [
+                "AuthorityBinding",
+                "AuthorityInteractionRecord",
+                "SubmissionRecord",
+            ],
             "artifacts_written": ["binding_drift_sentinel_contract", "send_revalidation_state"],
             "blocking_conditions": [
                 "newer stronger truth",
@@ -1414,7 +1742,12 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
                 "approval drift",
             ],
             "replay_rule": "The drift sentinel boundary is reused before RECONCILIATION_POLL and RECOVERY_READ as well.",
-            "source_refs": [refs["protocol_send_revalidation"], refs["module_SUBMIT_TO_AUTHORITY"], refs["vector_TV_69A"], refs["vector_TV_69B"]],
+            "source_refs": [
+                refs["protocol_send_revalidation"],
+                refs["module_SUBMIT_TO_AUTHORITY"],
+                refs["vector_TV_69A"],
+                refs["vector_TV_69B"],
+            ],
         },
         {
             "step_index": 11,
@@ -1436,11 +1769,29 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
             "module_name": "CHECKPOINT_AUTHORITY_INGRESS",
             "applies_to_families": ["ALL"],
             "description": "Authenticate callback, poll, inbox, or recovery payloads, dedupe them, and persist AuthorityIngressReceipt before any legal-state mutation.",
-            "artifacts_read": ["provider payload", "AuthorityRequestEnvelope", "AuthorityInteractionRecord"],
-            "artifacts_written": ["AuthorityIngressReceipt", "AuthorityIngressProofContract", "AuthorityIngressCorrelationContract"],
-            "blocking_conditions": ["failed channel authentication", "weak authority-reference-only match", "ambiguous multi-match", "unbound payload"],
+            "artifacts_read": [
+                "provider payload",
+                "AuthorityRequestEnvelope",
+                "AuthorityInteractionRecord",
+            ],
+            "artifacts_written": [
+                "AuthorityIngressReceipt",
+                "AuthorityIngressProofContract",
+                "AuthorityIngressCorrelationContract",
+            ],
+            "blocking_conditions": [
+                "failed channel authentication",
+                "weak authority-reference-only match",
+                "ambiguous multi-match",
+                "unbound payload",
+            ],
             "replay_rule": "Duplicate deliveries point back to one canonical ingress receipt and cannot create a second mutation opportunity.",
-            "source_refs": [refs["protocol_ingress"], refs["module_CHECKPOINT_AUTHORITY_INGRESS"], refs["vector_TV_70"], refs["vector_TV_70B"]],
+            "source_refs": [
+                refs["protocol_ingress"],
+                refs["module_CHECKPOINT_AUTHORITY_INGRESS"],
+                refs["vector_TV_70"],
+                refs["vector_TV_70B"],
+            ],
         },
         {
             "step_index": 13,
@@ -1449,11 +1800,20 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
             "module_name": "PROJECT_AUTHORITY_INGRESS_INVESTIGATION",
             "applies_to_families": ["ALL"],
             "description": "Build a read-only investigation snapshot for quarantined or duplicate-suppressed ingress without mutating legal truth.",
-            "artifacts_read": ["AuthorityIngressReceipt", "AuthorityIngressProofContract", "AuthorityIngressCorrelationContract"],
+            "artifacts_read": [
+                "AuthorityIngressReceipt",
+                "AuthorityIngressProofContract",
+                "AuthorityIngressCorrelationContract",
+            ],
             "artifacts_written": ["AuthorityIngressInvestigationSnapshot"],
             "blocking_conditions": [],
             "replay_rule": "Investigation snapshots are explainability-only surfaces and cannot bind legal state.",
-            "source_refs": [refs["protocol_ingress"], refs["module_PROJECT_AUTHORITY_INGRESS_INVESTIGATION"], refs["vector_TV_70Q"], refs["vector_TV_70S"]],
+            "source_refs": [
+                refs["protocol_ingress"],
+                refs["module_PROJECT_AUTHORITY_INGRESS_INVESTIGATION"],
+                refs["vector_TV_70Q"],
+                refs["vector_TV_70S"],
+            ],
         },
         {
             "step_index": 14,
@@ -1462,11 +1822,24 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
             "module_name": "NORMALIZE_AUTHORITY_RESPONSE",
             "applies_to_families": ["ALL"],
             "description": "Normalize inline and async provider observations into protocol response classes with explicit correlation and legal-effect posture.",
-            "artifacts_read": ["AuthorityResponseEnvelope", "AuthorityIngressReceipt", "SubmissionRecord"],
+            "artifacts_read": [
+                "AuthorityResponseEnvelope",
+                "AuthorityIngressReceipt",
+                "SubmissionRecord",
+            ],
             "artifacts_written": ["normalized AuthorityResponseEnvelope", "SubmissionRecord"],
-            "blocking_conditions": ["unknown response class", "weak or unbound async ingress", "timeout placeholder treated as success"],
+            "blocking_conditions": [
+                "unknown response class",
+                "weak or unbound async ingress",
+                "timeout placeholder treated as success",
+            ],
             "replay_rule": "Async observations must retain ingress_receipt_ref and authority_ingress_proof_contract.",
-            "source_refs": [refs["protocol_response_classes"], refs["module_NORMALIZE_AUTHORITY_RESPONSE"], refs["vector_TV_70O"], refs["vector_TV_70P"]],
+            "source_refs": [
+                refs["protocol_response_classes"],
+                refs["module_NORMALIZE_AUTHORITY_RESPONSE"],
+                refs["vector_TV_70O"],
+                refs["vector_TV_70P"],
+            ],
         },
         {
             "step_index": 15,
@@ -1477,9 +1850,18 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
             "description": "Append every normalized response to history, classify its derivation posture, and update active meaning only when legally admissible.",
             "artifacts_read": ["AuthorityInteractionRecord", "AuthorityResponseEnvelope"],
             "artifacts_written": ["AuthorityInteractionRecord"],
-            "blocking_conditions": ["conflicting observation requires reconciliation", "timeout supersession requires reconciliation"],
+            "blocking_conditions": [
+                "conflicting observation requires reconciliation",
+                "timeout supersession requires reconciliation",
+            ],
             "replay_rule": "active_response_id means the current admissible meaning, not the freshest raw arrival.",
-            "source_refs": [refs["protocol_merge"], refs["module_MERGE_AUTHORITY_RESPONSE_OBSERVATION"], refs["vector_TV_70C"], refs["vector_TV_70D"], refs["vector_TV_70E"]],
+            "source_refs": [
+                refs["protocol_merge"],
+                refs["module_MERGE_AUTHORITY_RESPONSE_OBSERVATION"],
+                refs["vector_TV_70C"],
+                refs["vector_TV_70D"],
+                refs["vector_TV_70E"],
+            ],
         },
         {
             "step_index": 16,
@@ -1488,11 +1870,19 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
             "module_name": "RECORD_AUTHORITY_INTERACTION",
             "applies_to_families": ["ALL"],
             "description": "Persist the runtime ledger linking operation, request, responses, submission lineage, drift sentinel, and reconciliation posture.",
-            "artifacts_read": ["AuthorityOperation", "AuthorityRequestEnvelope", "AuthorityResponseEnvelope", "SubmissionRecord"],
+            "artifacts_read": [
+                "AuthorityOperation",
+                "AuthorityRequestEnvelope",
+                "AuthorityResponseEnvelope",
+                "SubmissionRecord",
+            ],
             "artifacts_written": ["AuthorityInteractionRecord"],
             "blocking_conditions": [],
             "replay_rule": "Runtime ledger fields, not queue-local memory, govern resend legality and meaning resolution.",
-            "source_refs": [refs["protocol_interaction_record"], refs["module_RECORD_AUTHORITY_INTERACTION"]],
+            "source_refs": [
+                refs["protocol_interaction_record"],
+                refs["module_RECORD_AUTHORITY_INTERACTION"],
+            ],
         },
         {
             "step_index": 17,
@@ -1509,10 +1899,18 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
             ],
             "description": "Persist grouped reconciliation budget, resend legality, deadline, escalation ownership, and analytics outcome class.",
             "artifacts_read": ["AuthorityInteractionRecord"],
-            "artifacts_written": ["AuthorityInteractionRecord", "AuthorityReconciliationControlContract"],
+            "artifacts_written": [
+                "AuthorityInteractionRecord",
+                "AuthorityReconciliationControlContract",
+            ],
             "blocking_conditions": [],
             "replay_rule": "Recovery must reuse the grouped reconciliation control contract instead of rebuilding budget state from timers or retry logs.",
-            "source_refs": [refs["protocol_reconciliation_budget"], refs["module_PERSIST_AUTHORITY_RECONCILIATION_CONTROL"], refs["vector_TV_70T"], refs["vector_TV_70U"]],
+            "source_refs": [
+                refs["protocol_reconciliation_budget"],
+                refs["module_PERSIST_AUTHORITY_RECONCILIATION_CONTROL"],
+                refs["vector_TV_70T"],
+                refs["vector_TV_70U"],
+            ],
         },
         {
             "step_index": 18,
@@ -1537,7 +1935,11 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
                 "CLOSED_NO_RESEND",
             ],
             "replay_rule": "Recovery never proves legal truth by itself; reconcile the authority state before emitting a resolved outcome.",
-            "source_refs": [refs["module_RECOVER_SUBMISSION_ATTEMPT"], refs["protocol_reconciliation_budget"], refs["vector_TV_70F"]],
+            "source_refs": [
+                refs["module_RECOVER_SUBMISSION_ATTEMPT"],
+                refs["protocol_reconciliation_budget"],
+                refs["vector_TV_70F"],
+            ],
         },
         {
             "step_index": 19,
@@ -1554,8 +1956,17 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
                 "AUTH_RECONCILE_STATUS",
             ],
             "description": "Resolve pending, unknown, out-of-band, and conflicting states from authenticated evidence, preserved response history, and quantitative thresholds.",
-            "artifacts_read": ["SubmissionRecord", "ObligationMirror", "AuthorityInteractionRecord", "AuthorityResponseEnvelope"],
-            "artifacts_written": ["SubmissionRecord", "ObligationMirror", "authority_state_summary"],
+            "artifacts_read": [
+                "SubmissionRecord",
+                "ObligationMirror",
+                "AuthorityInteractionRecord",
+                "AuthorityResponseEnvelope",
+            ],
+            "artifacts_written": [
+                "SubmissionRecord",
+                "ObligationMirror",
+                "authority_state_summary",
+            ],
             "blocking_conditions": [
                 "open ambiguous ingress",
                 "open body collision",
@@ -1563,7 +1974,13 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
                 "confidence below threshold",
             ],
             "replay_rule": "Reconciliation can confirm only from validated authority evidence and must preserve current_submission_ref versus last_confirmed_submission_ref.",
-            "source_refs": [refs["protocol_reconciliation"], refs["protocol_reconciliation_confidence"], refs["module_RECONCILE_AUTHORITY_STATE"], refs["vector_TV_70G"], refs["vector_TV_70H"]],
+            "source_refs": [
+                refs["protocol_reconciliation"],
+                refs["protocol_reconciliation_confidence"],
+                refs["module_RECONCILE_AUTHORITY_STATE"],
+                refs["vector_TV_70G"],
+                refs["vector_TV_70H"],
+            ],
         },
         {
             "step_index": 20,
@@ -1582,7 +1999,11 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
             "artifacts_written": ["ObligationMirror"],
             "blocking_conditions": [],
             "replay_rule": "The mirror is subordinate to SubmissionRecord and reopens on late authority corrections.",
-            "source_refs": [refs["module_UPSERT_OBLIGATION_MIRROR"], refs["truth_surface_rules"], refs["vector_TV_70M"]],
+            "source_refs": [
+                refs["module_UPSERT_OBLIGATION_MIRROR"],
+                refs["truth_surface_rules"],
+                refs["vector_TV_70M"],
+            ],
         },
         {
             "step_index": 21,
@@ -1591,11 +2012,18 @@ def build_sequence_steps(refs: dict[str, str]) -> list[dict[str, Any]]:
             "module_name": "EMIT_AUTHORITY_RECONCILIATION_ANALYTICS",
             "applies_to_families": ["AUTH_RECONCILE_STATUS"],
             "description": "Emit replay-safe tuning and escalation analytics only from persisted reconciliation control contracts.",
-            "artifacts_read": ["AuthorityInteractionRecord", "AuthorityReconciliationControlContract"],
+            "artifacts_read": [
+                "AuthorityInteractionRecord",
+                "AuthorityReconciliationControlContract",
+            ],
             "artifacts_written": ["AuthorityReconciliationAnalyticsSnapshot"],
             "blocking_conditions": [],
             "replay_rule": "Retry-worker and broker telemetry may help debugging but are not the authoritative budget source.",
-            "source_refs": [refs["module_EMIT_AUTHORITY_RECONCILIATION_ANALYTICS"], refs["protocol_reconciliation_budget"], refs["vector_TV_70V"]],
+            "source_refs": [
+                refs["module_EMIT_AUTHORITY_RECONCILIATION_ANALYTICS"],
+                refs["protocol_reconciliation_budget"],
+                refs["vector_TV_70V"],
+            ],
         },
     ]
     return rows
@@ -1713,7 +2141,9 @@ def build_response_registry(
             "default_submission_state_or_null": "CONFIRMED",
             "retry_class_floor": "NO_RETRY",
             "merge_behavior": "admissible meaning may become active_response_id",
-            "notes": ["Success may still require reconciliation when it supersedes a timeout placeholder or conflicts with stronger authority evidence."],
+            "notes": [
+                "Success may still require reconciliation when it supersedes a timeout placeholder or conflicts with stronger authority evidence."
+            ],
         },
         "ACK_ACCEPTED_PENDING": {
             "correlation_statuses": ["BOUND"],
@@ -1731,7 +2161,9 @@ def build_response_registry(
             "default_submission_state_or_null": "REJECTED",
             "retry_class_floor": "REBUILD_THEN_RETRY",
             "merge_behavior": "admissible terminal rejection when bound to exact lineage",
-            "notes": ["Payload or business validation rejection remains authority evidence and must retain authority_evidence_ref."],
+            "notes": [
+                "Payload or business validation rejection remains authority evidence and must retain authority_evidence_ref."
+            ],
         },
         "ACK_REJECTED_AUTH": {
             "correlation_statuses": ["BOUND"],
@@ -1740,7 +2172,9 @@ def build_response_registry(
             "default_submission_state_or_null": None,
             "retry_class_floor": "HUMAN_REVIEW_THEN_RETRY",
             "merge_behavior": "high-severity audit and no legal progression",
-            "notes": ["Authentication or authorization rejection does not imply confirmed or rejected filing settlement."],
+            "notes": [
+                "Authentication or authorization rejection does not imply confirmed or rejected filing settlement."
+            ],
         },
         "ACK_RETRYABLE_FAILURE": {
             "correlation_statuses": ["BOUND"],
@@ -1749,7 +2183,9 @@ def build_response_registry(
             "default_submission_state_or_null": "PROFILE_DEPENDENT_PENDING_ACK_OR_UNKNOWN",
             "retry_class_floor": "SAFE_RETRY",
             "merge_behavior": "profile decides whether the immediate normalized settlement posture is pending or unknown",
-            "notes": ["Retryable failure still remains bound authority evidence and feeds reconciliation policy."],
+            "notes": [
+                "Retryable failure still remains bound authority evidence and feeds reconciliation policy."
+            ],
         },
         "ACK_TIMEOUT_OR_NO_RESOLUTION": {
             "correlation_statuses": ["UNSPECIFIED_TIMEOUT_PLACEHOLDER"],
@@ -1758,7 +2194,9 @@ def build_response_registry(
             "default_submission_state_or_null": "UNKNOWN",
             "retry_class_floor": "RECONCILE_THEN_RETRY",
             "merge_behavior": "placeholder may be superseded later but only through explicit reconciliation",
-            "notes": ["Timeout and no-body outcomes must never be normalized as synthetic success."],
+            "notes": [
+                "Timeout and no-body outcomes must never be normalized as synthetic success."
+            ],
         },
         "ACK_EXTERNAL_STATE_DISCOVERED": {
             "correlation_statuses": ["BOUND"],
@@ -1767,7 +2205,9 @@ def build_response_registry(
             "default_submission_state_or_null": "OUT_OF_BAND",
             "retry_class_floor": "NO_RETRY",
             "merge_behavior": "opens reconciliation under out-of-band posture",
-            "notes": ["External state discovery means authority truth exists outside the active packet flow."],
+            "notes": [
+                "External state discovery means authority truth exists outside the active packet flow."
+            ],
         },
         "ACK_AMBIGUOUS_CORRELATION": {
             "correlation_statuses": ["BOUND_WITH_AUTHORITY_REFERENCE_ONLY", "AMBIGUOUS", "UNBOUND"],
@@ -1800,7 +2240,10 @@ def build_response_registry(
                 "default_submission_state_or_null": spec["default_submission_state_or_null"],
                 "retry_class_floor": spec["retry_class_floor"],
                 "merge_behavior": spec["merge_behavior"],
-                "source_refs": [refs["protocol_response_classes"], refs["protocol_default_normalization"]],
+                "source_refs": [
+                    refs["protocol_response_classes"],
+                    refs["protocol_default_normalization"],
+                ],
                 "notes": spec["notes"],
             }
         )
@@ -1868,7 +2311,13 @@ def build_reconciliation_matrix(refs: dict[str, str]) -> list[dict[str, Any]]:
             "resend_legality_state": "CLOSED_NO_RESEND",
             "escalation_state": "NOT_REQUIRED",
             "customer_projection_posture": "may render confirmed only from authority-grounded evidence",
-            "source_refs": " ; ".join([refs["protocol_response_classes"], refs["protocol_reconciliation"], refs["vector_TV_70K"]]),
+            "source_refs": " ; ".join(
+                [
+                    refs["protocol_response_classes"],
+                    refs["protocol_reconciliation"],
+                    refs["vector_TV_70K"],
+                ]
+            ),
             "vector_refs": refs["vector_TV_70K"],
             "notes": "Confirmed state may not come from dispatch alone.",
         },
@@ -1883,7 +2332,13 @@ def build_reconciliation_matrix(refs: dict[str, str]) -> list[dict[str, Any]]:
             "resend_legality_state": "FOLLOW_UP_READ_ONLY",
             "escalation_state": "NOT_REQUIRED",
             "customer_projection_posture": "show pending and non-confirming",
-            "source_refs": " ; ".join([refs["protocol_default_normalization"], refs["protocol_reconciliation_budget"], refs["vector_TV_68"]]),
+            "source_refs": " ; ".join(
+                [
+                    refs["protocol_default_normalization"],
+                    refs["protocol_reconciliation_budget"],
+                    refs["vector_TV_68"],
+                ]
+            ),
             "vector_refs": refs["vector_TV_68"],
             "notes": "Bounded follow-up read is legal; blind resend is not.",
         },
@@ -1898,7 +2353,13 @@ def build_reconciliation_matrix(refs: dict[str, str]) -> list[dict[str, Any]]:
             "resend_legality_state": "IDEMPOTENT_RECOVERY_ONLY -> FOLLOW_UP_READ_ONLY",
             "escalation_state": "NOT_REQUIRED",
             "customer_projection_posture": "must stay typed and cannot reassure as resolved",
-            "source_refs": " ; ".join([refs["protocol_default_normalization"], refs["protocol_reconciliation_budget"], refs["vector_TV_70D"]]),
+            "source_refs": " ; ".join(
+                [
+                    refs["protocol_default_normalization"],
+                    refs["protocol_reconciliation_budget"],
+                    refs["vector_TV_70D"],
+                ]
+            ),
             "vector_refs": " ; ".join([refs["vector_TV_68"], refs["vector_TV_70D"]]),
             "notes": "Timeout placeholders cannot be silently replaced by later recovery evidence.",
         },
@@ -1913,7 +2374,13 @@ def build_reconciliation_matrix(refs: dict[str, str]) -> list[dict[str, Any]]:
             "resend_legality_state": "BLOCKED_BY_RECONCILIATION or CLOSED_NO_RESEND",
             "escalation_state": "NOT_REQUIRED",
             "customer_projection_posture": "must not present a duplicate as a fresh success path",
-            "source_refs": " ; ".join([refs["protocol_duplicate_handling"], refs["module_SUBMISSION_GATE"], refs["vector_TV_69"]]),
+            "source_refs": " ; ".join(
+                [
+                    refs["protocol_duplicate_handling"],
+                    refs["module_SUBMISSION_GATE"],
+                    refs["vector_TV_69"],
+                ]
+            ),
             "vector_refs": refs["vector_TV_69"],
             "notes": "Duplicate_meaning_key is the semantic bucket; request_hash remains exact packet identity.",
         },
@@ -1928,8 +2395,17 @@ def build_reconciliation_matrix(refs: dict[str, str]) -> list[dict[str, Any]]:
             "resend_legality_state": "BLOCKED_BY_RECONCILIATION",
             "escalation_state": "READY_FOR_ESCALATION",
             "customer_projection_posture": "no user-visible confirmed or rejected projection",
-            "source_refs": " ; ".join([refs["protocol_ingress"], refs["protocol_default_normalization"], refs["vector_TV_70"], refs["vector_TV_70A"]]),
-            "vector_refs": " ; ".join([refs["vector_TV_70"], refs["vector_TV_70A"], refs["vector_TV_70P"]]),
+            "source_refs": " ; ".join(
+                [
+                    refs["protocol_ingress"],
+                    refs["protocol_default_normalization"],
+                    refs["vector_TV_70"],
+                    refs["vector_TV_70A"],
+                ]
+            ),
+            "vector_refs": " ; ".join(
+                [refs["vector_TV_70"], refs["vector_TV_70A"], refs["vector_TV_70P"]]
+            ),
             "notes": "Weak or unbound ingress proof cannot drive settlement or mirror mutation.",
         },
         {
@@ -1943,7 +2419,14 @@ def build_reconciliation_matrix(refs: dict[str, str]) -> list[dict[str, Any]]:
             "resend_legality_state": "BLOCKED_BY_RECONCILIATION",
             "escalation_state": "NOT_REQUIRED",
             "customer_projection_posture": "show out-of-band or corrected truth explicitly",
-            "source_refs": " ; ".join([refs["protocol_out_of_band"], refs["truth_required_outcomes"], refs["vector_TV_70L"], refs["vector_TV_70M"]]),
+            "source_refs": " ; ".join(
+                [
+                    refs["protocol_out_of_band"],
+                    refs["truth_required_outcomes"],
+                    refs["vector_TV_70L"],
+                    refs["vector_TV_70M"],
+                ]
+            ),
             "vector_refs": " ; ".join([refs["vector_TV_70L"], refs["vector_TV_70M"]]),
             "notes": "Late authority corrections reopen downstream state instead of leaving earlier resolved projections final.",
         },
@@ -1958,7 +2441,14 @@ def build_reconciliation_matrix(refs: dict[str, str]) -> list[dict[str, Any]]:
             "resend_legality_state": "BLOCKED_BY_RECONCILIATION",
             "escalation_state": "READY_FOR_ESCALATION",
             "customer_projection_posture": "must stay typed and non-confirming",
-            "source_refs": " ; ".join([refs["protocol_merge"], refs["protocol_reconciliation_confidence"], refs["vector_TV_70E"], refs["vector_TV_70H"]]),
+            "source_refs": " ; ".join(
+                [
+                    refs["protocol_merge"],
+                    refs["protocol_reconciliation_confidence"],
+                    refs["vector_TV_70E"],
+                    refs["vector_TV_70H"],
+                ]
+            ),
             "vector_refs": " ; ".join([refs["vector_TV_70E"], refs["vector_TV_70H"]]),
             "notes": "A terminal reconciliation outcome requires confidence, ambiguity, and state-margin thresholds plus no open collision or ambiguous ingress.",
         },
@@ -1973,21 +2463,36 @@ def build_reconciliation_matrix(refs: dict[str, str]) -> list[dict[str, Any]]:
             "resend_legality_state": "BLOCKED_BY_ESCALATION",
             "escalation_state": "ESCALATED",
             "customer_projection_posture": "no resolved reassurance; handoff remains visible internally",
-            "source_refs": " ; ".join([refs["protocol_reconciliation_budget"], refs["vector_TV_70G"], refs["vector_TV_70U"]]),
+            "source_refs": " ; ".join(
+                [
+                    refs["protocol_reconciliation_budget"],
+                    refs["vector_TV_70G"],
+                    refs["vector_TV_70U"],
+                ]
+            ),
             "vector_refs": " ; ".join([refs["vector_TV_70G"], refs["vector_TV_70U"]]),
             "notes": "Recovery must reuse the persisted grouped control packet and may not reset the escalation clock.",
         },
     ]
 
 
-def build_truth_projection_map(refs: dict[str, str], truth_surface_roles: list[str], boundary_scopes: list[str]) -> dict[str, Any]:
+def build_truth_projection_map(
+    refs: dict[str, str], truth_surface_roles: list[str], boundary_scopes: list[str]
+) -> dict[str, Any]:
     surfaces = [
         {
             "boundary_scope": "AUTHORITY_INTERACTION_RECORD",
             "truth_surface_role": "AUTHORITY_RUNTIME_LEDGER",
             "artifact_name": "AuthorityInteractionRecord",
             "authoritative_source_policy": "RUNTIME_LEDGER_ONLY",
-            "allowed_authority_states": ["NOT_REQUESTED", "UNKNOWN", "PENDING_ACK", "CONFIRMED", "REJECTED", "OUT_OF_BAND"],
+            "allowed_authority_states": [
+                "NOT_REQUESTED",
+                "UNKNOWN",
+                "PENDING_ACK",
+                "CONFIRMED",
+                "REJECTED",
+                "OUT_OF_BAND",
+            ],
             "projection_rules": [
                 "Tracks active admissible meaning and response history but does not itself settle customer or workflow truth.",
                 "Carries resend legality, reconciliation budget, and escalation posture as authoritative runtime control state.",
@@ -1995,7 +2500,11 @@ def build_truth_projection_map(refs: dict[str, str], truth_surface_roles: list[s
             "forbidden_promotions": [
                 "must not be rendered as confirmed customer truth merely because a response exists",
             ],
-            "source_refs": [refs["truth_model"], refs["truth_surface_rules"], refs["protocol_interaction_record"]],
+            "source_refs": [
+                refs["truth_model"],
+                refs["truth_surface_rules"],
+                refs["protocol_interaction_record"],
+            ],
         },
         {
             "boundary_scope": "AUTHORITY_INGRESS_RECEIPT",
@@ -2017,7 +2526,13 @@ def build_truth_projection_map(refs: dict[str, str], truth_surface_roles: list[s
             "truth_surface_role": "AUTHORITY_SETTLEMENT_LEDGER",
             "artifact_name": "SubmissionRecord",
             "authoritative_source_policy": "AUTHORITY_SETTLEMENT_ONLY",
-            "allowed_authority_states": ["UNKNOWN", "PENDING_ACK", "CONFIRMED", "REJECTED", "OUT_OF_BAND"],
+            "allowed_authority_states": [
+                "UNKNOWN",
+                "PENDING_ACK",
+                "CONFIRMED",
+                "REJECTED",
+                "OUT_OF_BAND",
+            ],
             "projection_rules": [
                 "The only durable settlement ledger for one meaning.",
                 "Request-backed settlement changes require bound authority_ingress_proof_contract for async paths.",
@@ -2032,7 +2547,14 @@ def build_truth_projection_map(refs: dict[str, str], truth_surface_roles: list[s
             "truth_surface_role": "INTERNAL_OBLIGATION_MIRROR",
             "artifact_name": "ObligationMirror",
             "authoritative_source_policy": "SUBORDINATE_TO_SUBMISSION_RECORD",
-            "allowed_authority_states": ["NOT_REQUESTED", "UNKNOWN", "PENDING_ACK", "CONFIRMED", "REJECTED", "OUT_OF_BAND"],
+            "allowed_authority_states": [
+                "NOT_REQUESTED",
+                "UNKNOWN",
+                "PENDING_ACK",
+                "CONFIRMED",
+                "REJECTED",
+                "OUT_OF_BAND",
+            ],
             "projection_rules": [
                 "Keeps pending lineage, confirmed lineage, and readiness anchors distinct.",
                 "Reopens on late authority corrections instead of preserving stale resolved posture.",
@@ -2047,7 +2569,14 @@ def build_truth_projection_map(refs: dict[str, str], truth_surface_roles: list[s
             "truth_surface_role": "INTERNAL_WORKFLOW_COORDINATION",
             "artifact_name": "WorkflowItem",
             "authoritative_source_policy": "COORDINATION_ONLY",
-            "allowed_authority_states": ["NOT_APPLICABLE", "UNKNOWN", "PENDING_ACK", "CONFIRMED", "REJECTED", "OUT_OF_BAND"],
+            "allowed_authority_states": [
+                "NOT_APPLICABLE",
+                "UNKNOWN",
+                "PENDING_ACK",
+                "CONFIRMED",
+                "REJECTED",
+                "OUT_OF_BAND",
+            ],
             "projection_rules": [
                 "Coordinates escalation and human review while exposing typed authority_truth_state.",
                 "Escalation ownership and due time come from grouped reconciliation control packets.",
@@ -2055,14 +2584,25 @@ def build_truth_projection_map(refs: dict[str, str], truth_surface_roles: list[s
             "forbidden_promotions": [
                 "workflow DONE may not imply resolved authority truth while settlement remains pending, unknown, or out-of-band",
             ],
-            "source_refs": [refs["truth_surface_rules"], refs["protocol_reconciliation_budget"], refs["vector_TV_70U"]],
+            "source_refs": [
+                refs["truth_surface_rules"],
+                refs["protocol_reconciliation_budget"],
+                refs["vector_TV_70U"],
+            ],
         },
         {
             "boundary_scope": "CLIENT_TIMELINE_EVENT",
             "truth_surface_role": "CUSTOMER_SAFE_STATUS_PROJECTION",
             "artifact_name": "ClientTimelineEvent",
             "authoritative_source_policy": "CUSTOMER_SAFE_PROJECTION_ONLY",
-            "allowed_authority_states": ["NOT_APPLICABLE", "UNKNOWN", "PENDING_ACK", "CONFIRMED", "REJECTED", "OUT_OF_BAND"],
+            "allowed_authority_states": [
+                "NOT_APPLICABLE",
+                "UNKNOWN",
+                "PENDING_ACK",
+                "CONFIRMED",
+                "REJECTED",
+                "OUT_OF_BAND",
+            ],
             "projection_rules": [
                 "Customer-safe headlines must remain compatible with authority_truth_state.",
                 "Authority-neutral events keep authority_truth_state = NOT_APPLICABLE.",
@@ -2070,7 +2610,11 @@ def build_truth_projection_map(refs: dict[str, str], truth_surface_roles: list[s
             "forbidden_promotions": [
                 "cannot render pending, unknown, or out-of-band posture as resolved reassurance",
             ],
-            "source_refs": [refs["truth_surface_rules"], refs["truth_required_outcomes"], refs["vector_TV_70I"]],
+            "source_refs": [
+                refs["truth_surface_rules"],
+                refs["truth_required_outcomes"],
+                refs["vector_TV_70I"],
+            ],
         },
     ]
     return {
@@ -2139,7 +2683,10 @@ def build_unresolved_gaps(refs: dict[str, str]) -> dict[str, Any]:
             "severity": "low",
             "current_state": "The protocol requires explicit resend_control_reason_codes[] and send_revalidation_reason_codes[], but this chapter does not publish a complete machine-readable enum of those reason codes.",
             "required_closure": "Publish a dedicated authority reason-code registry covering send-time blocks, resend refusals, escalation triggers, and correction causes.",
-            "source_refs": [refs["protocol_send_revalidation"], refs["protocol_reconciliation_budget"]],
+            "source_refs": [
+                refs["protocol_send_revalidation"],
+                refs["protocol_reconciliation_budget"],
+            ],
         },
     ]
     return {
@@ -2154,7 +2701,9 @@ def build_unresolved_gaps(refs: dict[str, str]) -> dict[str, Any]:
     }
 
 
-def render_requirements_doc(operation_catalog: dict[str, Any], request_identity: dict[str, Any]) -> str:
+def render_requirements_doc(
+    operation_catalog: dict[str, Any], request_identity: dict[str, Any]
+) -> str:
     lines = [
         "# 12 Authority Interaction And Reconciliation Requirements",
         "",
@@ -2184,7 +2733,9 @@ def render_requirements_doc(operation_catalog: dict[str, Any], request_identity:
         ]
     )
     for row in operation_catalog["operation_records"]:
-        rule_text = ", ".join(f"`{rule}`" for rule in row["submission_state_write_rules"]) or "`none`"
+        rule_text = (
+            ", ".join(f"`{rule}`" for rule in row["submission_state_write_rules"]) or "`none`"
+        )
         lines.append(
             f"| `{row['operation_family']}` | `{row['protocol_family']}` | `{row['idempotency_strategy']}` | {rule_text} |"
         )
@@ -2199,14 +2750,24 @@ def render_requirements_doc(operation_catalog: dict[str, Any], request_identity:
             "",
             "## Audit Spine",
             "",
-            "- Required audit events: " + ", ".join(f"`{event}`" for event in operation_catalog["shared_requirements"]["audit_events"]) + ".",
-            "- Every authority audit event carries: " + ", ".join(f"`{field}`" for field in operation_catalog["shared_requirements"]["audit_fields"]) + ".",
+            "- Required audit events: "
+            + ", ".join(
+                f"`{event}`" for event in operation_catalog["shared_requirements"]["audit_events"]
+            )
+            + ".",
+            "- Every authority audit event carries: "
+            + ", ".join(
+                f"`{field}`" for field in operation_catalog["shared_requirements"]["audit_fields"]
+            )
+            + ".",
         ]
     )
     return "\n".join(lines)
 
 
-def render_sequence_doc(sequence_steps: list[dict[str, Any]], truth_projection: dict[str, Any]) -> str:
+def render_sequence_doc(
+    sequence_steps: list[dict[str, Any]], truth_projection: dict[str, Any]
+) -> str:
     lines = [
         "# 12 Authority Sequence And Boundary Matrix",
         "",
@@ -2283,8 +2844,12 @@ def render_edge_case_doc(
             "",
             "## Request Identity Hazards",
             "",
-            "- Collision rules: " + ", ".join(f"`{row['rule_code']}`" for row in request_identity["collision_rules"]) + ".",
-            "- Unsafe retry conditions: " + ", ".join(f"`{row}`" for row in request_identity["unsafe_retry_conditions"]) + ".",
+            "- Collision rules: "
+            + ", ".join(f"`{row['rule_code']}`" for row in request_identity["collision_rules"])
+            + ".",
+            "- Unsafe retry conditions: "
+            + ", ".join(f"`{row}`" for row in request_identity["unsafe_retry_conditions"])
+            + ".",
             "",
             "## Explicit Gaps",
             "",
@@ -2321,17 +2886,17 @@ def render_mermaid() -> str:
             '            Gateway-->>Proto: "timeout / accepted pending / retryable failure"',
             '            Auth-->>Ingress: "callback / poll / recovery payload"',
             '            Ingress->>Proto: "checkpoint ingress + normalize response"',
-            '        end',
+            "        end",
             '        Proto->>Recon: "open or continue reconciliation budget"',
             '        alt "defensible authority outcome"',
             '            Recon->>Proto: "RECONCILED_*"',
             '            Proto->>Run: "update SubmissionRecord / ObligationMirror / safe projections"',
             '        else "budget exhausted or contradictory evidence"',
             '            Recon->>Run: "escalate + block resend"',
-            '        end',
+            "        end",
             '    else "binding drift, collision, or stronger truth"',
             '        Gateway-->>Run: "blocked before send"',
-            '    end',
+            "    end",
             "",
         ]
     )
@@ -2359,8 +2924,12 @@ def build_operation_catalog(
             "core_protocol_object_count": len(core_objects),
             "operation_family_count": len(operation_records),
             "protocol_family_counts": {
-                protocol_family: sum(1 for row in operation_records if row["protocol_family"] == protocol_family)
-                for protocol_family in ordered_unique(row["protocol_family"] for row in operation_records)
+                protocol_family: sum(
+                    1 for row in operation_records if row["protocol_family"] == protocol_family
+                )
+                for protocol_family in ordered_unique(
+                    row["protocol_family"] for row in operation_records
+                )
             },
             "operation_families_covered": [row["operation_family"] for row in operation_records],
         },

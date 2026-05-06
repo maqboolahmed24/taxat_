@@ -14,7 +14,9 @@ test("overview renders the selected topology and deployable split", async ({ pag
   await expect(page.getByTestId("summary-deployables")).toContainText("2");
   await expect(page.getByTestId("summary-browser-routes")).toContainText("24");
   await expect(page.getByTestId("deployable-card-operator-web")).toContainText("Operator Web");
-  await expect(page.getByTestId("deployable-card-client-portal-web")).toContainText("Client Portal Web");
+  await expect(page.getByTestId("deployable-card-client-portal-web")).toContainText(
+    "Client Portal Web",
+  );
 });
 
 test("keyboard tab flow reaches shell pages and the verification lab", async ({ page }) => {
@@ -24,14 +26,22 @@ test("keyboard tab flow reaches shell pages and the verification lab", async ({ 
   await overviewTab.focus();
   await overviewTab.press("ArrowRight");
   await expect(page.getByRole("tab", { name: "CALM_SHELL" })).toBeFocused();
-  await expect(page.getByRole("tab", { name: "CALM_SHELL" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("tab", { name: "CALM_SHELL" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
 
   await page.getByRole("tab", { name: "CALM_SHELL" }).press("End");
   await expect(page.getByRole("tab", { name: "Verification Lab" })).toBeFocused();
-  await expect(page.getByRole("tab", { name: "Verification Lab" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("tab", { name: "Verification Lab" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
 });
 
-test("calm shell route switches preserve shell ownership while changing object context", async ({ page }) => {
+test("calm shell route switches preserve shell ownership while changing object context", async ({
+  page,
+}) => {
   await gotoAtlas(page, "#page=calm&calm=manifest");
 
   await expect(page.getByTestId("current-shell-family")).toContainText("CALM_SHELL");
@@ -40,10 +50,14 @@ test("calm shell route switches preserve shell ownership while changing object c
   await page.getByTestId("route-variant-calm-workitem").click();
   await expect(page.getByTestId("current-shell-family")).toContainText("CALM_SHELL");
   await expect(page.getByTestId("calm-object-anchor")).toContainText("work-item:REQ-184");
-  await expect(page.getByTestId("shell-continuity-live-region")).toContainText("CALM_SHELL preserved");
+  await expect(page.getByTestId("shell-continuity-live-region")).toContainText(
+    "CALM_SHELL preserved",
+  );
 });
 
-test("portal shell stays customer-safe and exposes the portal support anchors", async ({ page }) => {
+test("portal shell stays customer-safe and exposes the portal support anchors", async ({
+  page,
+}) => {
   await gotoAtlas(page, "#page=portal&portal=request-detail");
 
   await expect(page.getByTestId("current-shell-family")).toContainText("CLIENT_PORTAL_SHELL");
@@ -52,7 +66,9 @@ test("portal shell stays customer-safe and exposes the portal support anchors", 
   await expect(page.getByTestId("portal-primary-column")).toContainText("Provide requested file");
 });
 
-test("governance shell renders density anchors without changing shell meaning", async ({ page }) => {
+test("governance shell renders density anchors without changing shell meaning", async ({
+  page,
+}) => {
   await gotoAtlas(page, "#page=governance&governance=audit");
 
   await expect(page.getByTestId("current-shell-family")).toContainText("GOVERNANCE_DENSITY_SHELL");
@@ -72,7 +88,9 @@ test("closing the support panel returns focus to its opener", async ({ page }) =
   await expect(opener).toBeFocused();
 });
 
-test("stale-rebase simulation preserves object context while updating the live region", async ({ page }) => {
+test("stale-rebase simulation preserves object context while updating the live region", async ({
+  page,
+}) => {
   await gotoAtlas(page, "#page=calm&calm=manifest");
 
   await expect(page.getByTestId("calm-object-anchor")).toContainText("manifest:2026-Q1");
@@ -97,8 +115,11 @@ test.describe("reduced motion", () => {
 
 test("overview screenshot baseline", async ({ page }) => {
   await gotoAtlas(page);
-  await expect(page.getByTestId("web-shell-atlas")).toHaveScreenshot("web-shell-atlas-overview.png", {
-    animations: "disabled",
-    fullPage: true,
-  });
+  await expect(page.getByTestId("web-shell-atlas")).toHaveScreenshot(
+    "web-shell-atlas-overview.png",
+    {
+      animations: "disabled",
+      fullPage: true,
+    },
+  );
 });

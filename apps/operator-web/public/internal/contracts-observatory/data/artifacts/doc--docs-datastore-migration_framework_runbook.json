@@ -1,0 +1,407 @@
+{
+  "artifactVersion": "CONTRACT_OBSERVATORY_ARTIFACT_V1",
+  "artifactSlug": "doc--docs-datastore-migration_framework_runbook",
+  "artifactKind": "MARKDOWN",
+  "sectionRef": "SUPPORT_DOCS",
+  "authorityLevel": "SUPPORTING_REFERENCE",
+  "sourceTruthBadge": "Support Documentation",
+  "tone": "slate",
+  "title": "Migration Framework Runbook",
+  "subtitle": "docs/datastore/migration_framework_runbook.md",
+  "summary": "",
+  "canonicalPath": "docs/datastore/migration_framework_runbook.md",
+  "sourceLineage": [
+    "docs/datastore/migration_framework_runbook.md"
+  ],
+  "headingCount": 12,
+  "headings": [
+    {
+      "level": 1,
+      "text": "Migration Framework Runbook",
+      "slug": "migration-framework-runbook"
+    },
+    {
+      "level": 2,
+      "text": "Scope",
+      "slug": "scope"
+    },
+    {
+      "level": 2,
+      "text": "Baseline assets",
+      "slug": "baseline-assets"
+    },
+    {
+      "level": 2,
+      "text": "Numbering and immutability",
+      "slug": "numbering-and-immutability"
+    },
+    {
+      "level": 2,
+      "text": "Schema bundle and release binding",
+      "slug": "schema-bundle-and-release-binding"
+    },
+    {
+      "level": 2,
+      "text": "Locking posture",
+      "slug": "locking-posture"
+    },
+    {
+      "level": 2,
+      "text": "Expand / backfill / verify / contract",
+      "slug": "expand-backfill-verify-contract"
+    },
+    {
+      "level": 2,
+      "text": "Rollback classes",
+      "slug": "rollback-classes"
+    },
+    {
+      "level": 2,
+      "text": "Halt and failure handling",
+      "slug": "halt-and-failure-handling"
+    },
+    {
+      "level": 2,
+      "text": "Reader window rules",
+      "slug": "reader-window-rules"
+    },
+    {
+      "level": 2,
+      "text": "Commands",
+      "slug": "commands"
+    },
+    {
+      "level": 2,
+      "text": "Notes",
+      "slug": "notes"
+    }
+  ],
+  "proseSections": [
+    {
+      "headingSlug": "migration-framework-runbook",
+      "headingText": "Migration Framework Runbook",
+      "level": 1,
+      "lines": [
+        ""
+      ],
+      "plainText": "",
+      "excerpt": "",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "scope",
+      "headingText": "Scope",
+      "level": 2,
+      "lines": [
+        "",
+        "This runbook defines the control-store migration posture introduced by `pc_0066`.",
+        "It governs immutable SQL numbering, schema-bundle version binding, PostgreSQL singleton locking,",
+        "reader-window compatibility, resumable backfill execution, and the explicit",
+        "`expand -> backfill -> verify -> contract` chronology.",
+        ""
+      ],
+      "plainText": "This runbook defines the control store migration posture introduced by pc 0066. It governs immutable SQL numbering, schema bundle version binding, PostgreSQL singleton locking, reader window compatibility, resumable backfill execution, and the explicit expand backfill verify contract chronology.",
+      "excerpt": "This runbook defines the control store migration posture introduced by pc 0066. It governs immutable SQL numbering, schema bundle version binding, PostgreSQL singleton locking, re…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": [
+        "pc_0066"
+      ]
+    },
+    {
+      "headingSlug": "baseline-assets",
+      "headingText": "Baseline assets",
+      "level": 2,
+      "lines": [
+        "",
+        "- catalog: `config/migrations/schema_bundle_version_catalog.json`",
+        "- reader window baseline: `config/migrations/schema_reader_window_baseline.json`",
+        "- backfill policy baseline: `config/migrations/backfill_execution_policy.json`",
+        "- immutable SQL chain: `packages/control-plane-db/src/migrations`",
+        "- operator entrypoints:",
+        "  - `tools/database/plan_migration.ts`",
+        "  - `tools/database/apply_migration.ts`",
+        "  - `tools/database/run_backfill.ts`",
+        ""
+      ],
+      "plainText": "catalog: config/migrations/schema bundle version catalog.json reader window baseline: config/migrations/schema reader window baseline.json backfill policy baseline: config/migrations/backfill execution policy.json immutable SQL chain: packages/control plane db/src/migrations operator entrypoints: tools/database/plan migration.ts tools/database/apply migration.ts tools/database/run backfill.ts",
+      "excerpt": "catalog: config/migrations/schema bundle version catalog.json reader window baseline: config/migrations/schema reader window baseline.json backfill policy baseline: config/migrati…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "numbering-and-immutability",
+      "headingText": "Numbering and immutability",
+      "level": 2,
+      "lines": [
+        "",
+        "- Numbered migration files use six digits and never change after landing.",
+        "- `schema_migration_ledger.sql` is the shared object-family bootstrap that numbered migrations depend on.",
+        "- If a later version needs more DDL, add `000002_*.sql`, `000003_*.sql`, and so on.",
+        "- ORM auto-diff output is not an admissible source of truth.",
+        ""
+      ],
+      "plainText": "Numbered migration files use six digits and never change after landing. schema migration ledger.sql is the shared object family bootstrap that numbered migrations depend on. If a later version needs more DDL, add 000002 .sql, 000003 .sql, and so on. ORM auto diff output is not an admissible source of truth.",
+      "excerpt": "Numbered migration files use six digits and never change after landing. schema migration ledger.sql is the shared object family bootstrap that numbered migrations depend on. If a…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "schema-bundle-and-release-binding",
+      "headingText": "Schema bundle and release binding",
+      "level": 2,
+      "lines": [
+        "",
+        "- The current imported contracts-core schema bundle hash is computed from authoritative schema and validator hash lineage.",
+        "- `schema_bundle_version_catalog.json` binds that hash to target version `000001`.",
+        "- Release candidate identity and migration evidence must carry the same target version and schema bundle hash tuple.",
+        ""
+      ],
+      "plainText": "The current imported contracts core schema bundle hash is computed from authoritative schema and validator hash lineage. schema bundle version catalog.json binds that hash to target version 000001. Release candidate identity and migration evidence must carry the same target version and schema bundle hash tuple.",
+      "excerpt": "The current imported contracts core schema bundle hash is computed from authoritative schema and validator hash lineage. schema bundle version catalog.json binds that hash to targ…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "locking-posture",
+      "headingText": "Locking posture",
+      "level": 2,
+      "lines": [
+        "",
+        "- Default singleton execution is PostgreSQL `pg_advisory_xact_lock`.",
+        "- Lock scope is transaction-scoped so the lease releases when the migration transaction commits or rolls back.",
+        "- Session-scoped advisory locks are reserved for explicit break-glass maintenance and are not the normal runner posture.",
+        "- Structural DDL and ledger mutation must share one transaction whenever the DDL shape permits it.",
+        ""
+      ],
+      "plainText": "Default singleton execution is PostgreSQL pg advisory xact lock. Lock scope is transaction scoped so the lease releases when the migration transaction commits or rolls back. Session scoped advisory locks are reserved for explicit break glass maintenance and are not the normal runner posture. Structural DDL and ledger mutation must share one transaction whenever the DDL shape permits it.",
+      "excerpt": "Default singleton execution is PostgreSQL pg advisory xact lock. Lock scope is transaction scoped so the lease releases when the migration transaction commits or rolls back. Sessi…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "expand-backfill-verify-contract",
+      "headingText": "Expand / backfill / verify / contract",
+      "level": 2,
+      "lines": [
+        "",
+        "1. `EXPAND`",
+        "   - apply additive DDL only",
+        "   - record `SchemaMigrationLedger.phase_state = APPLYING` then `APPLIED`",
+        "   - keep the reader window open",
+        "2. `BACKFILL`",
+        "   - run through `tools/database/run_backfill.ts`",
+        "   - backfill work must be idempotent, resumable, and separately evidenced",
+        "   - do not hide backfill inside numbered SQL",
+        "3. `VERIFY`",
+        "   - prove replay, restore, reader-window, and release-admission safety",
+        "   - set `verification_ref` and only then move to `VERIFIED`",
+        "4. `CONTRACT`",
+        "   - allowed only when `contract_phase_required = true`",
+        "   - close the compatibility window explicitly before destructive cleanup",
+        "   - once closed, rollback class becomes `FAIL_FORWARD_ONLY`",
+        ""
+      ],
+      "plainText": "1. EXPAND apply additive DDL only record SchemaMigrationLedger.phase state = APPLYING then APPLIED keep the reader window open 2. BACKFILL run through tools/database/run backfill.ts backfill work must be idempotent, resumable, and separately evidenced do not hide backfill inside numbered SQL 3. VERIFY prove replay, restore, reader window, and release admission safety set verification ref and only then move to VERIFIED 4. CONTRACT allowed only when contract phase required = true close the compatibility window explicitly before destructive cleanup once closed, rollback class becomes FAIL FORWARD ONLY",
+      "excerpt": "1. EXPAND apply additive DDL only record SchemaMigrationLedger.phase state = APPLYING then APPLIED keep the reader window open 2. BACKFILL run through tools/database/run backfill.…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "rollback-classes",
+      "headingText": "Rollback classes",
+      "level": 2,
+      "lines": [
+        "",
+        "- `ROLLBACK_SAFE`",
+        "  - compatibility window still open",
+        "  - prior readers remain supported",
+        "  - destructive cleanup has not started",
+        "- `FAIL_FORWARD_ONLY`",
+        "  - compatibility window closed",
+        "  - destructive contract work started or the prior data shape is no longer safely restorable",
+        "  - compensating release lineage is now mandatory",
+        ""
+      ],
+      "plainText": "ROLLBACK SAFE compatibility window still open prior readers remain supported destructive cleanup has not started FAIL FORWARD ONLY compatibility window closed destructive contract work started or the prior data shape is no longer safely restorable compensating release lineage is now mandatory",
+      "excerpt": "ROLLBACK SAFE compatibility window still open prior readers remain supported destructive cleanup has not started FAIL FORWARD ONLY compatibility window closed destructive contract…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "halt-and-failure-handling",
+      "headingText": "Halt and failure handling",
+      "level": 2,
+      "lines": [
+        "",
+        "- `HALTED`",
+        "  - preserves the halted subphase and can later resume into the same phase family",
+        "  - allowed while keeping rollback-safe posture if the reader window remains open",
+        "- `FAILED`",
+        "  - requires a durable `failure_ref`",
+        "  - once the compatibility window has closed, failure handling must proceed through fail-forward ownership",
+        ""
+      ],
+      "plainText": "HALTED preserves the halted subphase and can later resume into the same phase family allowed while keeping rollback safe posture if the reader window remains open FAILED requires a durable failure ref once the compatibility window has closed, failure handling must proceed through fail forward ownership",
+      "excerpt": "HALTED preserves the halted subphase and can later resume into the same phase family allowed while keeping rollback safe posture if the reader window remains open FAILED requires…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "reader-window-rules",
+      "headingText": "Reader window rules",
+      "level": 2,
+      "lines": [
+        "",
+        "- writer schema hash must always be present in the supported reader set",
+        "- protected historical hashes must stay inside the supported reader set",
+        "- contract cleanup is blocked until the window closes",
+        "- replay and restore remain lawful only while a compatible recorded bundle or compatible reader exists",
+        ""
+      ],
+      "plainText": "writer schema hash must always be present in the supported reader set protected historical hashes must stay inside the supported reader set contract cleanup is blocked until the window closes replay and restore remain lawful only while a compatible recorded bundle or compatible reader exists",
+      "excerpt": "writer schema hash must always be present in the supported reader set protected historical hashes must stay inside the supported reader set contract cleanup is blocked until the w…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "commands",
+      "headingText": "Commands",
+      "level": 2,
+      "lines": [
+        "",
+        "Plan:",
+        "",
+        "```sh",
+        "node --experimental-strip-types ./tools/database/plan_migration.ts --target-version=000001",
+        "```",
+        "",
+        "Apply a phase transition:",
+        "",
+        "```sh",
+        "node --experimental-strip-types ./tools/database/apply_migration.ts \\",
+        "  --target-version=000001 \\",
+        "  --event=start_apply \\",
+        "  --run-id=ops-migration-001 \\",
+        "  --state-file=/tmp/taxat-migration-state.json",
+        "```",
+        "",
+        "Run resumable backfill:",
+        "",
+        "```sh",
+        "node --experimental-strip-types ./tools/database/run_backfill.ts \\",
+        "  --target-version=000001 \\",
+        "  --action=start \\",
+        "  --run-id=ops-backfill-001 \\",
+        "  --state-file=/tmp/taxat-migration-state.json",
+        "```",
+        ""
+      ],
+      "plainText": "Plan: Apply a phase transition: Run resumable backfill:",
+      "excerpt": "Plan: Apply a phase transition: Run resumable backfill:",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "notes",
+      "headingText": "Notes",
+      "level": 2,
+      "lines": [
+        "",
+        "- Live datastore mutation stays opt-in and environment-gated.",
+        "- The internal migration atlas is read-only and exists for inspection, not mutation.",
+        ""
+      ],
+      "plainText": "Live datastore mutation stays opt in and environment gated. The internal migration atlas is read only and exists for inspection, not mutation.",
+      "excerpt": "Live datastore mutation stays opt in and environment gated. The internal migration atlas is read only and exists for inspection, not mutation.",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    }
+  ],
+  "schemaIdentityOrNull": null,
+  "schemaFields": [],
+  "samplePointers": [],
+  "sampleIdentityOrNull": null,
+  "bindingIdentityOrNull": null,
+  "validatorIdentityOrNull": null,
+  "driftIdentityOrNull": null,
+  "headerStrip": {
+    "kind": "PROSE",
+    "badgeLabel": "Support Documentation",
+    "metricPairs": [
+      {
+        "label": "Headings",
+        "value": "12"
+      },
+      {
+        "label": "Schemas",
+        "value": "0"
+      },
+      {
+        "label": "Tasks",
+        "value": "1"
+      }
+    ]
+  },
+  "relationships": {
+    "schemas": [],
+    "samples": [],
+    "bindings": [],
+    "validators": [],
+    "docs": [],
+    "tasks": [
+      {
+        "artifactSlug": "task--PROMPT-CARDS-pc_0080",
+        "title": "pc_0080 · pc_0080",
+        "kind": "TASK_CARD",
+        "authorityLevel": "TRACEABILITY_REFERENCE",
+        "sectionRef": "SUPPORT_DOCS",
+        "headingSlugOrNull": null,
+        "reason": "roadmap card references this artifact"
+      }
+    ]
+  },
+  "sourceTruthStack": {
+    "file": [
+      "docs/datastore/migration_framework_runbook.md"
+    ],
+    "headings": [
+      "Migration Framework Runbook",
+      "Scope",
+      "Baseline assets",
+      "Numbering and immutability",
+      "Schema bundle and release binding",
+      "Locking posture",
+      "Expand / backfill / verify / contract",
+      "Rollback classes",
+      "Halt and failure handling",
+      "Reader window rules",
+      "Commands",
+      "Notes"
+    ],
+    "schemaRefs": [],
+    "sampleRefs": [],
+    "bindingRefs": [],
+    "validatorRefs": [],
+    "driftRefs": [],
+    "taskRefs": [
+      "pc_0066"
+    ]
+  },
+  "fieldCrosslinks": [],
+  "taskRefs": [
+    "pc_0066"
+  ]
+}

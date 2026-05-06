@@ -25,7 +25,9 @@ RISK_SCHEMA_PATH = ALGORITHM_DIR / "schemas" / "risk_report.schema.json"
 PARITY_SCHEMA_PATH = ALGORITHM_DIR / "schemas" / "parity_result.schema.json"
 TRUST_SCHEMA_PATH = ALGORITHM_DIR / "schemas" / "trust_summary.schema.json"
 TRUST_INPUT_BASIS_SCHEMA_PATH = ALGORITHM_DIR / "schemas" / "trust_input_basis_contract.schema.json"
-TRUST_SENSITIVITY_ALIAS_PATH = ALGORITHM_DIR / "schemas" / "trust_sensitivity_analysis_contract.schema.json"
+TRUST_SENSITIVITY_ALIAS_PATH = (
+    ALGORITHM_DIR / "schemas" / "trust_sensitivity_analysis_contract.schema.json"
+)
 TRUST_SENSITIVITY_SCHEMA_PATH = ALGORITHM_DIR / "schemas" / "trust_sensitivity_contract.schema.json"
 
 MODULE_CATALOG_PATH = DATA_ANALYSIS_DIR / "module_catalog.json"
@@ -324,7 +326,9 @@ def load_gate_index() -> dict[str, dict[str, Any]]:
     return {row["gate_code"]: row for row in payload["gates"]}
 
 
-def module_binding_rows(module_names: Iterable[str], module_index: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+def module_binding_rows(
+    module_names: Iterable[str], module_index: dict[str, dict[str, Any]]
+) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for module_name in module_names:
         row = module_index[module_name]
@@ -341,7 +345,9 @@ def module_binding_rows(module_names: Iterable[str], module_index: dict[str, dic
     return rows
 
 
-def gate_binding_rows(gate_codes: Iterable[str], gate_index: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+def gate_binding_rows(
+    gate_codes: Iterable[str], gate_index: dict[str, dict[str, Any]]
+) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for gate_code in gate_codes:
         row = gate_index[gate_code]
@@ -364,7 +370,13 @@ FORMULA_RECORD_SPECS = [
         canonical_section="8.1",
         subsection_titles=(),
         formula_family="binding_contract",
-        output_artifacts=("TrustSummary", "ComputeResult", "ForecastSet", "RiskReport", "ParityResult"),
+        output_artifacts=(
+            "TrustSummary",
+            "ComputeResult",
+            "ForecastSet",
+            "RiskReport",
+            "ParityResult",
+        ),
         output_fields=(
             "execution_mode",
             "analysis_only",
@@ -395,7 +407,11 @@ FORMULA_RECORD_SPECS = [
             "baseline_submission_state",
             "live_authority_progression_requested",
         ),
-        intermediate_terms=("trust_input_basis_contract", "trust_sensitivity_analysis_contract", "threshold_stability_state"),
+        intermediate_terms=(
+            "trust_input_basis_contract",
+            "trust_sensitivity_analysis_contract",
+            "threshold_stability_state",
+        ),
         mode_applicability="Both COMPLIANCE and ANALYSIS; artifact flags must remain internally consistent.",
         money_profile_requirements=(
             "TrustSummary must carry dereferenceable compute/parity artifacts whose money-bearing fields preserve the frozen money profile.",
@@ -404,10 +420,28 @@ FORMULA_RECORD_SPECS = [
             "Formula execution must emit schema-valid TrustSummary, ComputeResult, ForecastSet, RiskReport, and ParityResult artifacts.",
             "Artifact binding is normative current behavior, not a deferred pack repair.",
         ),
-        threshold_dependencies=("trust_input_state_enum", "score_band_enum", "cap_band_enum", "trust_band_enum", "automation_level_enum", "filing_readiness_enum"),
+        threshold_dependencies=(
+            "trust_input_state_enum",
+            "score_band_enum",
+            "cap_band_enum",
+            "trust_band_enum",
+            "automation_level_enum",
+            "filing_readiness_enum",
+        ),
         reason_code_emissions=(),
-        downstream_gate_consumers=("TRUST_GATE", "FILING_GATE", "SUBMISSION_GATE", "AMENDMENT_GATE"),
-        module_bindings=("COMPUTE_OUTCOME", "FORECAST", "SCORE_RISK", "EVALUATE_PARITY", "SYNTHESIZE_TRUST"),
+        downstream_gate_consumers=(
+            "TRUST_GATE",
+            "FILING_GATE",
+            "SUBMISSION_GATE",
+            "AMENDMENT_GATE",
+        ),
+        module_bindings=(
+            "COMPUTE_OUTCOME",
+            "FORECAST",
+            "SCORE_RISK",
+            "EVALUATE_PARITY",
+            "SYNTHESIZE_TRUST",
+        ),
         sensitivity_hooks=("trust_input_basis_contract", "trust_sensitivity_analysis_contract"),
         schema_touchpoints=(
             repo_rel(TRUST_SCHEMA_PATH),
@@ -520,7 +554,11 @@ FORMULA_RECORD_SPECS = [
             "NOT_REQUESTED and NOT_APPLICABLE facts stay out of the denominator; LIMITED and NOT_YET_MATERIALIZED facts remain in scope and degrade the score.",
             "Zero-sum domain weights, invalid error budgets, and filing-critical silent limitation ambiguity are structural failures, not soft warnings.",
         ),
-        threshold_dependencies=("data_quality_freshness_scale", "dq_structural_fail_closed_conditions", "completeness_minimum_for_trust_caps"),
+        threshold_dependencies=(
+            "data_quality_freshness_scale",
+            "dq_structural_fail_closed_conditions",
+            "completeness_minimum_for_trust_caps",
+        ),
         reason_code_emissions=(
             "DQ_CONFIDENCE_WEIGHT_INVALID",
             "PRIVACY_PROJECTION_RATIO_INVALID",
@@ -532,15 +570,25 @@ FORMULA_RECORD_SPECS = [
         ),
         downstream_gate_consumers=("DATA_QUALITY_GATE", "TRUST_GATE", "FILING_GATE"),
         module_bindings=("ASSESS_TRUST_INPUT_STATE", "SYNTHESIZE_TRUST"),
-        sensitivity_hooks=("decision_information_ratio_f", "projection_fidelity_f", "limitation_explicitness_f"),
+        sensitivity_hooks=(
+            "decision_information_ratio_f",
+            "projection_fidelity_f",
+            "limitation_explicitness_f",
+        ),
         schema_touchpoints=(repo_rel(TRUST_SCHEMA_PATH),),
-        notes=("Decision confidence and projection confidence are deliberately separated to preserve legal decisioning boundaries.",),
+        notes=(
+            "Decision confidence and projection confidence are deliberately separated to preserve legal decisioning boundaries.",
+        ),
     ),
     FormulaRecordSpec(
         formula_id="record_and_adjustment_compute",
         label="Record-Layer and Adjustment-Layer Compute",
         canonical_section="8.4",
-        subsection_titles=("Quarterly basis profile", "Year-end reportable totals", "Rule-evaluated outcome"),
+        subsection_titles=(
+            "Quarterly basis profile",
+            "Year-end reportable totals",
+            "Rule-evaluated outcome",
+        ),
         formula_family="core_formula_family",
         output_artifacts=("ComputeResult",),
         output_fields=(
@@ -589,7 +637,9 @@ FORMULA_RECORD_SPECS = [
         module_bindings=("COMPUTE_OUTCOME",),
         sensitivity_hooks=("adjustment_scope_source", "quarterly_basis", "analysis_mode_treatment"),
         schema_touchpoints=(repo_rel(COMPUTE_SCHEMA_PATH),),
-        notes=("Amendment intent and amendment submit remain year-end reporting basis rather than a new reporting-scope token.",),
+        notes=(
+            "Amendment intent and amendment submit remain year-end reporting basis rather than a new reporting-scope token.",
+        ),
     ),
     FormulaRecordSpec(
         formula_id="forecast",
@@ -608,9 +658,18 @@ FORMULA_RECORD_SPECS = [
             "forecast_profile",
             "deterministic_seed",
         ),
-        intermediate_terms=("baseline_run_rate(c)", "normalized_seasonality(h,c)", "forecast_seed", "epsilon_(h,c,s)", "point_forecast(h,c)", "simulated_forecast(h,c,s)"),
+        intermediate_terms=(
+            "baseline_run_rate(c)",
+            "normalized_seasonality(h,c)",
+            "forecast_seed",
+            "epsilon_(h,c,s)",
+            "point_forecast(h,c)",
+            "simulated_forecast(h,c,s)",
+        ),
         mode_applicability="Analysis-only; forecast artifacts must never mutate the compliance compute result in place.",
-        money_profile_requirements=("Forecast outputs round via round_money under the frozen forecast money profile.",),
+        money_profile_requirements=(
+            "Forecast outputs round via round_money under the frozen forecast money profile.",
+        ),
         determinism_rules=(
             "The point forecast uses mass-preserving seasonality and horizon-scaled trend.",
             "Monte Carlo residuals must be deterministically seeded from frozen controls; manifest_id alone must not perturb the seed.",
@@ -630,9 +689,26 @@ FORMULA_RECORD_SPECS = [
         subsection_titles=(),
         formula_family="core_formula_family",
         output_artifacts=("RiskReport", "TrustSummary"),
-        output_fields=("risk_score", "feature_scores", "flags", "unresolved_material_blocking_risk_flag", "unresolved_blocking_risk_flag"),
-        inputs=("feature_value_m", "feature_weight_m", "material_threshold_m", "blocking_threshold_m", "feature_resolved_m"),
-        intermediate_terms=("Σw_risk", "risk_score_raw", "material_risk_flag_count", "blocking_risk_flag_count"),
+        output_fields=(
+            "risk_score",
+            "feature_scores",
+            "flags",
+            "unresolved_material_blocking_risk_flag",
+            "unresolved_blocking_risk_flag",
+        ),
+        inputs=(
+            "feature_value_m",
+            "feature_weight_m",
+            "material_threshold_m",
+            "blocking_threshold_m",
+            "feature_resolved_m",
+        ),
+        intermediate_terms=(
+            "Σw_risk",
+            "risk_score_raw",
+            "material_risk_flag_count",
+            "blocking_risk_flag_count",
+        ),
         mode_applicability="Used in both modes from frozen pre-parity artifacts.",
         money_profile_requirements=(),
         determinism_rules=(
@@ -640,12 +716,24 @@ FORMULA_RECORD_SPECS = [
             "Zero-sum risk profiles fail closed with maximal risk and a blocking flag.",
         ),
         threshold_dependencies=("risk_blocking_thresholds", "risk_automation_guard_threshold"),
-        reason_code_emissions=("RISK_WEIGHT_PROFILE_INVALID", "RISK_MATERIAL_FLAG", "RISK_BLOCKING_FLAG", "TRUST_BLOCKING_RISK"),
+        reason_code_emissions=(
+            "RISK_WEIGHT_PROFILE_INVALID",
+            "RISK_MATERIAL_FLAG",
+            "RISK_BLOCKING_FLAG",
+            "TRUST_BLOCKING_RISK",
+        ),
         downstream_gate_consumers=("TRUST_GATE", "FILING_GATE"),
         module_bindings=("SCORE_RISK", "SYNTHESIZE_TRUST"),
-        sensitivity_hooks=("risk_threshold_profile_ref", "feature_weight_m", "material_threshold_m", "blocking_threshold_m"),
+        sensitivity_hooks=(
+            "risk_threshold_profile_ref",
+            "feature_weight_m",
+            "material_threshold_m",
+            "blocking_threshold_m",
+        ),
         schema_touchpoints=(repo_rel(RISK_SCHEMA_PATH), repo_rel(TRUST_SCHEMA_PATH)),
-        notes=("Trust consumes both risk_score and the unresolved blocking flags rather than score alone.",),
+        notes=(
+            "Trust consumes both risk_score and the unresolved blocking flags rather than score alone.",
+        ),
     ),
     FormulaRecordSpec(
         formula_id="parity_comparison_set_construction",
@@ -654,7 +742,14 @@ FORMULA_RECORD_SPECS = [
         subsection_titles=("Scope rules",),
         formula_family="core_formula_family",
         output_artifacts=("ParityResult",),
-        output_fields=("comparison_basis_ref", "comparison_requirement", "comparison_set_state", "ordered_field_codes", "dominant_reason_code", "reason_codes"),
+        output_fields=(
+            "comparison_basis_ref",
+            "comparison_requirement",
+            "comparison_set_state",
+            "ordered_field_codes",
+            "dominant_reason_code",
+            "reason_codes",
+        ),
         inputs=(
             "internal_value_k",
             "authority_value_k",
@@ -668,18 +763,30 @@ FORMULA_RECORD_SPECS = [
         ),
         intermediate_terms=("K", "criticality_rank", "comparison_set_state"),
         mode_applicability="Compliance parity requires canonical authority-comparable facts; analysis parity may include provisional facts only under explicit frozen analysis policy and must remain analysis_only.",
-        money_profile_requirements=("Comparison items preserve exact-decimal internal and authority values under the frozen money profile.",),
+        money_profile_requirements=(
+            "Comparison items preserve exact-decimal internal and authority values under the frozen money profile.",
+        ),
         determinism_rules=(
             "K is deduplicated by field_code and ordered by criticality rank then field_code.",
             "Invalid comparison-set construction must persist a fail-closed ParityResult rather than guessing through partial materialization.",
         ),
         threshold_dependencies=("comparison_requirement_enum", "parity_threshold_profile"),
-        reason_code_emissions=("PARITY_COMPARISON_SET_INVALID", "PARITY_NOT_COMPARABLE", "PARITY_PARTIAL_COVERAGE"),
+        reason_code_emissions=(
+            "PARITY_COMPARISON_SET_INVALID",
+            "PARITY_NOT_COMPARABLE",
+            "PARITY_PARTIAL_COVERAGE",
+        ),
         downstream_gate_consumers=("PARITY_GATE", "TRUST_GATE", "AMENDMENT_GATE"),
         module_bindings=("EVALUATE_PARITY",),
-        sensitivity_hooks=("comparison_requirement", "comparison_basis_ref", "parity_threshold_profile_ref"),
+        sensitivity_hooks=(
+            "comparison_requirement",
+            "comparison_basis_ref",
+            "parity_threshold_profile_ref",
+        ),
         schema_touchpoints=(repo_rel(PARITY_SCHEMA_PATH),),
-        notes=("Authority calculation path must be frozen before parity evaluation and reused by later filing or amendment stages.",),
+        notes=(
+            "Authority calculation path must be frozen before parity evaluation and reused by later filing or amendment stages.",
+        ),
     ),
     FormulaRecordSpec(
         formula_id="per_field_parity",
@@ -689,8 +796,24 @@ FORMULA_RECORD_SPECS = [
         formula_family="core_formula_family",
         output_artifacts=("ParityResult",),
         output_fields=("deltas",),
-        inputs=("internal_value_k", "authority_value_k", "abs_threshold_k", "rel_threshold_k", "abs_floor_k", "minimum_rel_floor"),
-        intermediate_terms=("delta_signed_k", "delta_abs_k", "effective_abs_floor_k", "delta_rel_k", "breach_abs_k", "breach_rel_k", "breach_ratio_k", "field_class_k"),
+        inputs=(
+            "internal_value_k",
+            "authority_value_k",
+            "abs_threshold_k",
+            "rel_threshold_k",
+            "abs_floor_k",
+            "minimum_rel_floor",
+        ),
+        intermediate_terms=(
+            "delta_signed_k",
+            "delta_abs_k",
+            "effective_abs_floor_k",
+            "delta_rel_k",
+            "breach_abs_k",
+            "breach_rel_k",
+            "breach_ratio_k",
+            "field_class_k",
+        ),
         mode_applicability="Applies to every frozen comparison item; numeric invalidity must stop at the per-field layer and never leak as renderer-local coercion.",
         money_profile_requirements=(
             "Money-bearing deltas are exact-decimal values computed from unrounded intermediates.",
@@ -700,13 +823,25 @@ FORMULA_RECORD_SPECS = [
             "Each fieldDelta persists threshold and floor inputs needed for exact replay.",
             "Zero-threshold breaches use the profile-defined blocking_ratio_cap rather than implicit infinity semantics.",
         ),
-        threshold_dependencies=("minimum_rel_floor", "blocking_ratio_cap", "parity_field_class_thresholds"),
+        threshold_dependencies=(
+            "minimum_rel_floor",
+            "blocking_ratio_cap",
+            "parity_field_class_thresholds",
+        ),
         reason_code_emissions=(),
         downstream_gate_consumers=("PARITY_GATE", "TRUST_GATE"),
         module_bindings=("EVALUATE_PARITY",),
-        sensitivity_hooks=("abs_threshold_k", "rel_threshold_k", "abs_floor_k", "minimum_rel_floor", "blocking_ratio_cap"),
+        sensitivity_hooks=(
+            "abs_threshold_k",
+            "rel_threshold_k",
+            "abs_floor_k",
+            "minimum_rel_floor",
+            "blocking_ratio_cap",
+        ),
         schema_touchpoints=(repo_rel(PARITY_SCHEMA_PATH),),
-        notes=("Per-field classification is a deterministic threshold surface, not a UI-only explanation layer.",),
+        notes=(
+            "Per-field classification is a deterministic threshold surface, not a UI-only explanation layer.",
+        ),
     ),
     FormulaRecordSpec(
         formula_id="aggregate_parity",
@@ -715,9 +850,29 @@ FORMULA_RECORD_SPECS = [
         subsection_titles=("Aggregate parity classification",),
         formula_family="core_formula_family",
         output_artifacts=("ParityResult", "TrustSummary"),
-        output_fields=("comparison_coverage", "weighted_parity_pressure", "parity_score", "parity_classification", "dominant_reason_code", "reason_codes"),
-        inputs=("K", "field_class_k", "criticality_weight_k", "comparison_requirement", "comparison_set_state"),
-        intermediate_terms=("Σw_required", "Σw_comparable", "comparison_coverage", "weighted_parity_pressure", "parity_score_raw", "parity_score"),
+        output_fields=(
+            "comparison_coverage",
+            "weighted_parity_pressure",
+            "parity_score",
+            "parity_classification",
+            "dominant_reason_code",
+            "reason_codes",
+        ),
+        inputs=(
+            "K",
+            "field_class_k",
+            "criticality_weight_k",
+            "comparison_requirement",
+            "comparison_set_state",
+        ),
+        intermediate_terms=(
+            "Σw_required",
+            "Σw_comparable",
+            "comparison_coverage",
+            "weighted_parity_pressure",
+            "parity_score_raw",
+            "parity_score",
+        ),
         mode_applicability="Feeds parity gating and trust synthesis in both modes.",
         money_profile_requirements=(),
         determinism_rules=(
@@ -737,9 +892,15 @@ FORMULA_RECORD_SPECS = [
         ),
         downstream_gate_consumers=("PARITY_GATE", "TRUST_GATE", "AMENDMENT_GATE", "FILING_GATE"),
         module_bindings=("EVALUATE_PARITY", "SYNTHESIZE_TRUST"),
-        sensitivity_hooks=("comparison_requirement", "comparison_coverage", "weighted_parity_pressure"),
+        sensitivity_hooks=(
+            "comparison_requirement",
+            "comparison_coverage",
+            "weighted_parity_pressure",
+        ),
         schema_touchpoints=(repo_rel(PARITY_SCHEMA_PATH), repo_rel(TRUST_SCHEMA_PATH)),
-        notes=("The NOT_REQUIRED fallback applies only when the policy explicitly marks the scope as not requiring authority comparison.",),
+        notes=(
+            "The NOT_REQUIRED fallback applies only when the policy explicitly marks the scope as not requiring authority comparison.",
+        ),
     ),
     FormulaRecordSpec(
         formula_id="evidence_graph_quality",
@@ -793,12 +954,25 @@ FORMULA_RECORD_SPECS = [
             "Fail-closed caps are explicit and severity-ordered; silent ambiguity blocks filing-capable trust regardless of rendered narrative quality.",
         ),
         threshold_dependencies=("graph_quality_fail_closed_caps", "graph_survivability_minima"),
-        reason_code_emissions=("GRAPH_LOW_COVERAGE", "GRAPH_HIGH_INFERENCE", "GRAPH_WEIGHT_PROFILE_INVALID", "TRUST_RETENTION_PENALTY"),
+        reason_code_emissions=(
+            "GRAPH_LOW_COVERAGE",
+            "GRAPH_HIGH_INFERENCE",
+            "GRAPH_WEIGHT_PROFILE_INVALID",
+            "TRUST_RETENTION_PENALTY",
+        ),
         downstream_gate_consumers=("RETENTION_EVIDENCE_GATE", "TRUST_GATE", "FILING_GATE"),
         module_bindings=("SYNTHESIZE_TRUST",),
-        sensitivity_hooks=("review_projection_ratio_e", "figure_weight_f", "submit_survivability_min", "review_survivability_min", "audit_survivability_min"),
+        sensitivity_hooks=(
+            "review_projection_ratio_e",
+            "figure_weight_f",
+            "submit_survivability_min",
+            "review_survivability_min",
+            "audit_survivability_min",
+        ),
         schema_touchpoints=(repo_rel(TRUST_SCHEMA_PATH),),
-        notes=("Projection-side reviewer fidelity is scored explicitly without mutating canonical support semantics.",),
+        notes=(
+            "Projection-side reviewer fidelity is scored explicitly without mutating canonical support semantics.",
+        ),
     ),
     FormulaRecordSpec(
         formula_id="trust_authority_uncertainty",
@@ -809,14 +983,27 @@ FORMULA_RECORD_SPECS = [
         output_artifacts=("TrustSummary", "TrustInputBasisContract"),
         output_fields=("authority_uncertainty_score",),
         inputs=("O", "src_rel_o", "corr_o", "fresh_o", "clarity_o"),
-        intermediate_terms=("w_o", "W", "p_x", "reconciliation_confidence", "external_truth_ambiguity", "authority_state_staleness_score", "authority_uncertainty_raw", "authority_uncertainty_score"),
+        intermediate_terms=(
+            "w_o",
+            "W",
+            "p_x",
+            "reconciliation_confidence",
+            "external_truth_ambiguity",
+            "authority_state_staleness_score",
+            "authority_uncertainty_raw",
+            "authority_uncertainty_score",
+        ),
         mode_applicability="Always required when trust synthesis evaluates live authority progression or baseline submission posture.",
         money_profile_requirements=(),
         determinism_rules=(
             "Authority uncertainty is quantitative and source-weighted; it may not be replaced by a prose-only heuristic.",
             "The same frozen observation set must reproduce the same uncertainty score and emitted reasons.",
         ),
-        threshold_dependencies=("authority_review_threshold", "authority_block_threshold", "authority_penalty_curve"),
+        threshold_dependencies=(
+            "authority_review_threshold",
+            "authority_block_threshold",
+            "authority_penalty_curve",
+        ),
         reason_code_emissions=(
             "TRUST_AUTHORITY_CONFIDENCE_LOW",
             "TRUST_AUTHORITY_AMBIGUITY_HIGH",
@@ -825,7 +1012,12 @@ FORMULA_RECORD_SPECS = [
         ),
         downstream_gate_consumers=("TRUST_GATE", "FILING_GATE", "AMENDMENT_GATE"),
         module_bindings=("ASSESS_TRUST_INPUT_STATE", "SYNTHESIZE_TRUST"),
-        sensitivity_hooks=("half_life_seconds(source_class(o))", "src_rel_o", "corr_o", "clarity_o"),
+        sensitivity_hooks=(
+            "half_life_seconds(source_class(o))",
+            "src_rel_o",
+            "corr_o",
+            "clarity_o",
+        ),
         schema_touchpoints=(repo_rel(TRUST_SCHEMA_PATH), repo_rel(TRUST_INPUT_BASIS_SCHEMA_PATH)),
         notes=("Authority-defined legal truth outranks UI-defined confidence.",),
     ),
@@ -833,10 +1025,19 @@ FORMULA_RECORD_SPECS = [
         formula_id="trust_input_admissibility_and_basis",
         label="Trust Input Admissibility and Basis",
         canonical_section="8.10",
-        subsection_titles=("Required trust input", "Trust-input admissibility state", "TrustInputBasisContract"),
+        subsection_titles=(
+            "Required trust input",
+            "Trust-input admissibility state",
+            "TrustInputBasisContract",
+        ),
         formula_family="core_formula_family",
         output_artifacts=("TrustSummary", "TrustInputBasisContract"),
-        output_fields=("trust_input_state", "trust_input_basis_contract", "trust_fresh_until", "blocking_dependency_refs"),
+        output_fields=(
+            "trust_input_state",
+            "trust_input_basis_contract",
+            "trust_fresh_until",
+            "blocking_dependency_refs",
+        ),
         inputs=(
             "required_trust_artifacts[]",
             "required_context_inputs[]",
@@ -882,7 +1083,13 @@ FORMULA_RECORD_SPECS = [
             "Missing, superseded, manifest-mismatched, inconsistent, or silently limited inputs fail closed with explicit reason codes.",
             "The trust_input_basis_contract freezes typed basis states and ceilings so downstream consumers cannot flatten them into a generic score.",
         ),
-        threshold_dependencies=("trust_input_state_enum", "automation_ceiling_enum", "filing_readiness_ceiling_enum", "baseline_progression_state_enum", "authority_progression_state_enum"),
+        threshold_dependencies=(
+            "trust_input_state_enum",
+            "automation_ceiling_enum",
+            "filing_readiness_ceiling_enum",
+            "baseline_progression_state_enum",
+            "authority_progression_state_enum",
+        ),
         reason_code_emissions=(
             "TRUST_INPUT_INCOMPLETE",
             "TRUST_INPUT_STALE",
@@ -891,10 +1098,22 @@ FORMULA_RECORD_SPECS = [
             "TRUST_REQUIRED_HUMAN_STEPS",
         ),
         downstream_gate_consumers=("TRUST_GATE", "FILING_GATE", "SUBMISSION_GATE"),
-        module_bindings=("VALIDATE_OVERRIDE_DEPENDENCIES", "ASSESS_TRUST_INPUT_STATE", "CHECK_TRUST_CURRENCY", "SYNTHESIZE_TRUST"),
-        sensitivity_hooks=("external_freshness_deadlines[]", "baseline_automation_ceiling", "authority_progression_state", "human_step_state"),
+        module_bindings=(
+            "VALIDATE_OVERRIDE_DEPENDENCIES",
+            "ASSESS_TRUST_INPUT_STATE",
+            "CHECK_TRUST_CURRENCY",
+            "SYNTHESIZE_TRUST",
+        ),
+        sensitivity_hooks=(
+            "external_freshness_deadlines[]",
+            "baseline_automation_ceiling",
+            "authority_progression_state",
+            "human_step_state",
+        ),
         schema_touchpoints=(repo_rel(TRUST_SCHEMA_PATH), repo_rel(TRUST_INPUT_BASIS_SCHEMA_PATH)),
-        notes=("Every non-dominant basis reason must survive into decision_constraint_codes so later surfaces do not lose the ceiling rationale.",),
+        notes=(
+            "Every non-dominant basis reason must survive into decision_constraint_codes so later surfaces do not lose the ceiling rationale.",
+        ),
     ),
     FormulaRecordSpec(
         formula_id="trust_upstream_gate_cap",
@@ -913,7 +1132,11 @@ FORMULA_RECORD_SPECS = [
             "The progression order AUTO_ELIGIBLE > NOTICE_ONLY > REVIEW_ONLY > BLOCKED is frozen and persisted.",
         ),
         threshold_dependencies=("upstream_gate_cap_enum",),
-        reason_code_emissions=("TRUST_UPSTREAM_GATE_BLOCK", "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED", "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE"),
+        reason_code_emissions=(
+            "TRUST_UPSTREAM_GATE_BLOCK",
+            "TRUST_UPSTREAM_GATE_REVIEW_REQUIRED",
+            "TRUST_UPSTREAM_GATE_NOTICE_ACTIVE",
+        ),
         downstream_gate_consumers=("TRUST_GATE", "FILING_GATE"),
         module_bindings=("SYNTHESIZE_TRUST", "TRUST_GATE"),
         sensitivity_hooks=("upstream_gate_cap",),
@@ -1033,7 +1256,12 @@ FORMULA_RECORD_SPECS = [
             "TRUST_RED",
             "TRUST_INSUFFICIENT_DATA",
         ),
-        downstream_gate_consumers=("TRUST_GATE", "FILING_GATE", "AMENDMENT_GATE", "SUBMISSION_GATE"),
+        downstream_gate_consumers=(
+            "TRUST_GATE",
+            "FILING_GATE",
+            "AMENDMENT_GATE",
+            "SUBMISSION_GATE",
+        ),
         module_bindings=("SYNTHESIZE_TRUST", "BUILD_GATE_EXPLANATION", "TRUST_GATE"),
         sensitivity_hooks=(
             "trust_green_margin",
@@ -1046,8 +1274,14 @@ FORMULA_RECORD_SPECS = [
             "edge_trigger_codes[]",
             "projected_case_results[]",
         ),
-        schema_touchpoints=(repo_rel(TRUST_SCHEMA_PATH), repo_rel(TRUST_SENSITIVITY_SCHEMA_PATH), repo_rel(TRUST_SENSITIVITY_ALIAS_PATH)),
-        notes=("Sensitivity analysis is a first-class persisted contract rather than debug-only output.",),
+        schema_touchpoints=(
+            repo_rel(TRUST_SCHEMA_PATH),
+            repo_rel(TRUST_SENSITIVITY_SCHEMA_PATH),
+            repo_rel(TRUST_SENSITIVITY_ALIAS_PATH),
+        ),
+        notes=(
+            "Sensitivity analysis is a first-class persisted contract rather than debug-only output.",
+        ),
     ),
     FormulaRecordSpec(
         formula_id="collaboration_orchestration_queue_routing",
@@ -1062,7 +1296,14 @@ FORMULA_RECORD_SPECS = [
         ),
         formula_family="secondary_formula_family",
         output_artifacts=("WorkRoutingContract", "WorkQueueHealthContract"),
-        output_fields=("assignment_efficiency_score", "ownership_confidence_score", "resolution_confidence_score", "escalation_rank", "queue_health_score", "collaboration_priority_score"),
+        output_fields=(
+            "assignment_efficiency_score",
+            "ownership_confidence_score",
+            "resolution_confidence_score",
+            "escalation_rank",
+            "queue_health_score",
+            "collaboration_priority_score",
+        ),
         inputs=(
             "effective_due_at_i",
             "queue_entered_at_i",
@@ -1112,7 +1353,12 @@ FORMULA_RECORD_SPECS = [
             "Ordering is frozen per snapshot and must not vary with websocket arrival order or local sort heuristics.",
             "Assignment and queue health reuse the same deterministic helper surface as core formulas without feeding filing trust.",
         ),
-        threshold_dependencies=("work_priority_base_map", "work_resolution_caps", "queue_health_floor", "escalation_pressure_threshold"),
+        threshold_dependencies=(
+            "work_priority_base_map",
+            "work_resolution_caps",
+            "queue_health_floor",
+            "escalation_pressure_threshold",
+        ),
         reason_code_emissions=(
             "WORK_SLA_UNBOUND",
             "WORK_OWNERSHIP_AMBIGUOUS",
@@ -1124,9 +1370,16 @@ FORMULA_RECORD_SPECS = [
         ),
         downstream_gate_consumers=(),
         module_bindings=(),
-        sensitivity_hooks=("item_age_half_life_hours(type_i)", "queue_health_floor", "reassignment_gain_threshold", "resolution_confidence_floor"),
+        sensitivity_hooks=(
+            "item_age_half_life_hours(type_i)",
+            "queue_health_floor",
+            "reassignment_gain_threshold",
+            "resolution_confidence_floor",
+        ),
         schema_touchpoints=(),
-        notes=("Secondary operational formula family; do not fold into TrustSummary trust_score semantics.",),
+        notes=(
+            "Secondary operational formula family; do not fold into TrustSummary trust_score semantics.",
+        ),
     ),
     FormulaRecordSpec(
         formula_id="trust_currency_and_recalculation",
@@ -1160,9 +1413,15 @@ FORMULA_RECORD_SPECS = [
         reason_code_emissions=("TRUST_AUTHORITY_STATE_UNRESOLVED", "TRUST_RECALCULATION_REQUIRED"),
         downstream_gate_consumers=("TRUST_GATE", "FILING_GATE", "SUBMISSION_GATE"),
         module_bindings=("CHECK_TRUST_CURRENCY",),
-        sensitivity_hooks=("authority_uncertainty_score", "late_data monitor changes", "override lifecycle changes"),
+        sensitivity_hooks=(
+            "authority_uncertainty_score",
+            "late_data monitor changes",
+            "override lifecycle changes",
+        ),
         schema_touchpoints=(repo_rel(TRUST_SCHEMA_PATH), repo_rel(TRUST_INPUT_BASIS_SCHEMA_PATH)),
-        notes=("Currency evaluation is fail-closed and lineage-sensitive rather than timestamp-only freshness checking.",),
+        notes=(
+            "Currency evaluation is fail-closed and lineage-sensitive rather than timestamp-only freshness checking.",
+        ),
     ),
     FormulaRecordSpec(
         formula_id="client_flow_reliability_and_completion",
@@ -1178,7 +1437,14 @@ FORMULA_RECORD_SPECS = [
         ),
         formula_family="secondary_formula_family",
         output_artifacts=("ClientUploadSession", "ClientApprovalPack", "ClientPortalWorkspace"),
-        output_fields=("flow_stability_score", "upload_confidence_score", "recovery_posture_score", "approval_readiness_score", "risk_weighted_friction_score", "completion_probability"),
+        output_fields=(
+            "flow_stability_score",
+            "upload_confidence_score",
+            "recovery_posture_score",
+            "approval_readiness_score",
+            "risk_weighted_friction_score",
+            "completion_probability",
+        ),
         inputs=(
             "surface_class",
             "network_posture",
@@ -1242,7 +1508,13 @@ FORMULA_RECORD_SPECS = [
             "These metrics are materialized onto governed client artifacts rather than recomputed ad hoc in renderers.",
             "Successful client continuity actions must not decrease flow_stability_score absent exogenous state changes.",
         ),
-        threshold_dependencies=("client_flow_thresholds", "upload_confidence_thresholds", "recovery_posture_mapping", "approval_readiness_thresholds", "completion_probability_thresholds"),
+        threshold_dependencies=(
+            "client_flow_thresholds",
+            "upload_confidence_thresholds",
+            "recovery_posture_mapping",
+            "approval_readiness_thresholds",
+            "completion_probability_thresholds",
+        ),
         reason_code_emissions=(
             "FLOW_STABILITY_LOW",
             "UPLOAD_CONFIDENCE_LOW",
@@ -1257,9 +1529,16 @@ FORMULA_RECORD_SPECS = [
         ),
         downstream_gate_consumers=(),
         module_bindings=(),
-        sensitivity_hooks=("portal_reliability_profile_ref", "surface_class", "network_posture", "risk_justification"),
+        sensitivity_hooks=(
+            "portal_reliability_profile_ref",
+            "surface_class",
+            "network_posture",
+            "risk_justification",
+        ),
         schema_touchpoints=(),
-        notes=("Secondary governed-client formula family; its outputs should not be mistaken for filing trust or gate semantics.",),
+        notes=(
+            "Secondary governed-client formula family; its outputs should not be mistaken for filing trust or gate semantics.",
+        ),
     ),
     FormulaRecordSpec(
         formula_id="formula_reason_code_emission",
@@ -1268,9 +1547,25 @@ FORMULA_RECORD_SPECS = [
         subsection_titles=(),
         formula_family="reason_code_contract",
         output_artifacts=("TrustSummary", "DecisionExplainabilityContract"),
-        output_fields=("reason_codes", "dominant_reason_code", "plain_summary", "decision_constraint_codes", "decision_explainability_contract"),
-        inputs=("matched thresholds", "matched caps", "freshness state", "admissibility state", "trust posture"),
-        intermediate_terms=("compressed_reason_codes", "suppressed_reason_count", "semantic_qualifiers"),
+        output_fields=(
+            "reason_codes",
+            "dominant_reason_code",
+            "plain_summary",
+            "decision_constraint_codes",
+            "decision_explainability_contract",
+        ),
+        inputs=(
+            "matched thresholds",
+            "matched caps",
+            "freshness state",
+            "admissibility state",
+            "trust posture",
+        ),
+        intermediate_terms=(
+            "compressed_reason_codes",
+            "suppressed_reason_count",
+            "semantic_qualifiers",
+        ),
         mode_applicability="Applies whenever formula outcomes materially affect trust posture, automation, or filing readiness.",
         money_profile_requirements=(),
         determinism_rules=(
@@ -1344,9 +1639,15 @@ FORMULA_RECORD_SPECS = [
         ),
         downstream_gate_consumers=("TRUST_GATE", "FILING_GATE"),
         module_bindings=("BUILD_GATE_EXPLANATION", "SYNTHESIZE_TRUST", "TRUST_GATE"),
-        sensitivity_hooks=("cap_driver_reason_codes[]", "edge_trigger_codes[]", "decision_constraint_codes[]"),
+        sensitivity_hooks=(
+            "cap_driver_reason_codes[]",
+            "edge_trigger_codes[]",
+            "decision_constraint_codes[]",
+        ),
         schema_touchpoints=(repo_rel(TRUST_SCHEMA_PATH),),
-        notes=("Reason-code emission is normative semantics, not a renderer-local narration layer.",),
+        notes=(
+            "Reason-code emission is normative semantics, not a renderer-local narration layer.",
+        ),
     ),
     FormulaRecordSpec(
         formula_id="formula_layer_summary",
@@ -1356,11 +1657,19 @@ FORMULA_RECORD_SPECS = [
         formula_family="summary_anchor",
         output_artifacts=("TrustSummary",),
         output_fields=("trust posture",),
-        inputs=("evidence quality", "compute outputs", "authority comparison", "graph defensibility", "override reliance"),
+        inputs=(
+            "evidence quality",
+            "compute outputs",
+            "authority comparison",
+            "graph defensibility",
+            "override reliance",
+        ),
         intermediate_terms=(),
         mode_applicability="Summary anchor spanning both modes.",
         money_profile_requirements=(),
-        determinism_rules=("This section is a prose summary anchor for the full formula layer and keeps the implementation package tied to the source’s one-sentence scope claim.",),
+        determinism_rules=(
+            "This section is a prose summary anchor for the full formula layer and keeps the implementation package tied to the source’s one-sentence scope claim.",
+        ),
         threshold_dependencies=(),
         reason_code_emissions=(),
         downstream_gate_consumers=("TRUST_GATE", "FILING_GATE", "AMENDMENT_GATE"),
@@ -1372,33 +1681,168 @@ FORMULA_RECORD_SPECS = [
 ]
 
 DEPENDENCY_SPECS = [
-    DependencySpec("standard_normalization_rules", "data_quality_and_completeness", "shared_helper", "Shared clamping and stable summation govern domain scoring."),
-    DependencySpec("standard_normalization_rules", "record_and_adjustment_compute", "shared_helper", "Money rounding and exact-decimal aggregation boundary rules govern compute."),
-    DependencySpec("standard_normalization_rules", "forecast", "shared_helper", "Forecast point and Monte Carlo outputs use round_money and deterministic seed handling."),
-    DependencySpec("standard_normalization_rules", "risk_scoring", "shared_helper", "round_score and clamp01 normalize risk."),
-    DependencySpec("standard_normalization_rules", "per_field_parity", "shared_helper", "Exact-decimal delta handling and minimum floors rely on normalization helpers."),
-    DependencySpec("standard_normalization_rules", "evidence_graph_quality", "shared_helper", "safe_unit and stable ordering control graph-path quality."),
-    DependencySpec("standard_normalization_rules", "trust_scoring_bands_and_readiness", "shared_helper", "clamp100, round_score, and safe_unit normalize trust synthesis."),
-    DependencySpec("standard_normalization_rules", "collaboration_orchestration_queue_routing", "shared_helper", "half_life_score, sigmoid, and min_non_null are reused by work routing."),
-    DependencySpec("standard_normalization_rules", "client_flow_reliability_and_completion", "shared_helper", "Client-flow reliability reuses shared helpers plus additional UX-specific helpers."),
-    DependencySpec("record_and_adjustment_compute", "forecast", "artifact_feed", "Forecast consumes compute baseline totals and run-rate context."),
-    DependencySpec("record_and_adjustment_compute", "parity_comparison_set_construction", "artifact_feed", "Parity comparison basis starts from frozen compute outputs."),
-    DependencySpec("record_and_adjustment_compute", "trustsummary_artifact_binding", "artifact_feed", "ComputeResult is a required TrustSummary input artifact."),
-    DependencySpec("risk_scoring", "trust_scoring_bands_and_readiness", "score_feed", "Trust uses risk_score and unresolved risk flags."),
-    DependencySpec("aggregate_parity", "trust_scoring_bands_and_readiness", "score_feed", "Trust uses parity_score and comparison requirement posture."),
-    DependencySpec("evidence_graph_quality", "trust_scoring_bands_and_readiness", "score_feed", "Trust uses graph_quality_score and retention penalty posture."),
-    DependencySpec("data_quality_and_completeness", "trust_scoring_bands_and_readiness", "score_feed", "Trust uses data_quality_score and completeness_score."),
-    DependencySpec("trust_authority_uncertainty", "trust_input_admissibility_and_basis", "state_feed", "Authority uncertainty contributes to basis ceilings."),
-    DependencySpec("trust_input_admissibility_and_basis", "trust_scoring_bands_and_readiness", "hard_ceiling", "Basis ceilings cap automation and filing readiness before score math."),
-    DependencySpec("trust_upstream_gate_cap", "trust_scoring_bands_and_readiness", "hard_ceiling", "Upstream gates cap legal progression even when the numeric score is green."),
-    DependencySpec("trust_scoring_bands_and_readiness", "formula_reason_code_emission", "reason_contract", "Trust posture generates dominant and constrained reason-code packets."),
-    DependencySpec("formula_reason_code_emission", "trustsummary_artifact_binding", "artifact_feed", "Reason codes and explainability are persisted on TrustSummary."),
-    DependencySpec("trust_scoring_bands_and_readiness", "trust_currency_and_recalculation", "currency_guard", "Trust reuse depends on the persisted trust basis and score/cap posture remaining current."),
-    DependencySpec("trust_currency_and_recalculation", "trustsummary_artifact_binding", "lifecycle_feed", "Supersession and append-only lineage update the TrustSummary lifecycle boundary."),
-    DependencySpec("aggregate_parity", "trust_upstream_gate_cap", "gate_intersection", "Parity gate posture contributes to the frozen upstream cap before trust gating."),
-    DependencySpec("data_quality_and_completeness", "trust_upstream_gate_cap", "gate_intersection", "Data-quality gate posture can force review or block before trust."),
-    DependencySpec("evidence_graph_quality", "trust_upstream_gate_cap", "gate_intersection", "Retention evidence gate posture contributes to upstream legal ceilings."),
-    DependencySpec("trust_scoring_bands_and_readiness", "formula_layer_summary", "summary", "The summary section compresses the full trust package into one scope statement."),
+    DependencySpec(
+        "standard_normalization_rules",
+        "data_quality_and_completeness",
+        "shared_helper",
+        "Shared clamping and stable summation govern domain scoring.",
+    ),
+    DependencySpec(
+        "standard_normalization_rules",
+        "record_and_adjustment_compute",
+        "shared_helper",
+        "Money rounding and exact-decimal aggregation boundary rules govern compute.",
+    ),
+    DependencySpec(
+        "standard_normalization_rules",
+        "forecast",
+        "shared_helper",
+        "Forecast point and Monte Carlo outputs use round_money and deterministic seed handling.",
+    ),
+    DependencySpec(
+        "standard_normalization_rules",
+        "risk_scoring",
+        "shared_helper",
+        "round_score and clamp01 normalize risk.",
+    ),
+    DependencySpec(
+        "standard_normalization_rules",
+        "per_field_parity",
+        "shared_helper",
+        "Exact-decimal delta handling and minimum floors rely on normalization helpers.",
+    ),
+    DependencySpec(
+        "standard_normalization_rules",
+        "evidence_graph_quality",
+        "shared_helper",
+        "safe_unit and stable ordering control graph-path quality.",
+    ),
+    DependencySpec(
+        "standard_normalization_rules",
+        "trust_scoring_bands_and_readiness",
+        "shared_helper",
+        "clamp100, round_score, and safe_unit normalize trust synthesis.",
+    ),
+    DependencySpec(
+        "standard_normalization_rules",
+        "collaboration_orchestration_queue_routing",
+        "shared_helper",
+        "half_life_score, sigmoid, and min_non_null are reused by work routing.",
+    ),
+    DependencySpec(
+        "standard_normalization_rules",
+        "client_flow_reliability_and_completion",
+        "shared_helper",
+        "Client-flow reliability reuses shared helpers plus additional UX-specific helpers.",
+    ),
+    DependencySpec(
+        "record_and_adjustment_compute",
+        "forecast",
+        "artifact_feed",
+        "Forecast consumes compute baseline totals and run-rate context.",
+    ),
+    DependencySpec(
+        "record_and_adjustment_compute",
+        "parity_comparison_set_construction",
+        "artifact_feed",
+        "Parity comparison basis starts from frozen compute outputs.",
+    ),
+    DependencySpec(
+        "record_and_adjustment_compute",
+        "trustsummary_artifact_binding",
+        "artifact_feed",
+        "ComputeResult is a required TrustSummary input artifact.",
+    ),
+    DependencySpec(
+        "risk_scoring",
+        "trust_scoring_bands_and_readiness",
+        "score_feed",
+        "Trust uses risk_score and unresolved risk flags.",
+    ),
+    DependencySpec(
+        "aggregate_parity",
+        "trust_scoring_bands_and_readiness",
+        "score_feed",
+        "Trust uses parity_score and comparison requirement posture.",
+    ),
+    DependencySpec(
+        "evidence_graph_quality",
+        "trust_scoring_bands_and_readiness",
+        "score_feed",
+        "Trust uses graph_quality_score and retention penalty posture.",
+    ),
+    DependencySpec(
+        "data_quality_and_completeness",
+        "trust_scoring_bands_and_readiness",
+        "score_feed",
+        "Trust uses data_quality_score and completeness_score.",
+    ),
+    DependencySpec(
+        "trust_authority_uncertainty",
+        "trust_input_admissibility_and_basis",
+        "state_feed",
+        "Authority uncertainty contributes to basis ceilings.",
+    ),
+    DependencySpec(
+        "trust_input_admissibility_and_basis",
+        "trust_scoring_bands_and_readiness",
+        "hard_ceiling",
+        "Basis ceilings cap automation and filing readiness before score math.",
+    ),
+    DependencySpec(
+        "trust_upstream_gate_cap",
+        "trust_scoring_bands_and_readiness",
+        "hard_ceiling",
+        "Upstream gates cap legal progression even when the numeric score is green.",
+    ),
+    DependencySpec(
+        "trust_scoring_bands_and_readiness",
+        "formula_reason_code_emission",
+        "reason_contract",
+        "Trust posture generates dominant and constrained reason-code packets.",
+    ),
+    DependencySpec(
+        "formula_reason_code_emission",
+        "trustsummary_artifact_binding",
+        "artifact_feed",
+        "Reason codes and explainability are persisted on TrustSummary.",
+    ),
+    DependencySpec(
+        "trust_scoring_bands_and_readiness",
+        "trust_currency_and_recalculation",
+        "currency_guard",
+        "Trust reuse depends on the persisted trust basis and score/cap posture remaining current.",
+    ),
+    DependencySpec(
+        "trust_currency_and_recalculation",
+        "trustsummary_artifact_binding",
+        "lifecycle_feed",
+        "Supersession and append-only lineage update the TrustSummary lifecycle boundary.",
+    ),
+    DependencySpec(
+        "aggregate_parity",
+        "trust_upstream_gate_cap",
+        "gate_intersection",
+        "Parity gate posture contributes to the frozen upstream cap before trust gating.",
+    ),
+    DependencySpec(
+        "data_quality_and_completeness",
+        "trust_upstream_gate_cap",
+        "gate_intersection",
+        "Data-quality gate posture can force review or block before trust.",
+    ),
+    DependencySpec(
+        "evidence_graph_quality",
+        "trust_upstream_gate_cap",
+        "gate_intersection",
+        "Retention evidence gate posture contributes to upstream legal ceilings.",
+    ),
+    DependencySpec(
+        "trust_scoring_bands_and_readiness",
+        "formula_layer_summary",
+        "summary",
+        "The summary section compresses the full trust package into one scope statement.",
+    ),
 ]
 
 THRESHOLD_GROUPS = [
@@ -1449,11 +1893,17 @@ THRESHOLD_GROUPS = [
     },
     {
         "threshold_id": "comparison_requirement_enum",
-        "formula_ids": ["parity_comparison_set_construction", "aggregate_parity", "trust_scoring_bands_and_readiness"],
+        "formula_ids": [
+            "parity_comparison_set_construction",
+            "aggregate_parity",
+            "trust_scoring_bands_and_readiness",
+        ],
         "kind": "enum",
         "values": ["MANDATORY", "DESIRABLE", "NOT_REQUIRED"],
         "source_refs": [line_ref(repo_rel(FORMULA_SOURCE_PATH), 441, "comparison_requirement")],
-        "notes": ["Comparison requirement determines whether missing authority basis is fail-closed or a bounded fallback."],
+        "notes": [
+            "Comparison requirement determines whether missing authority basis is fail-closed or a bounded fallback."
+        ],
     },
     {
         "threshold_id": "parity_field_class_thresholds",
@@ -1470,7 +1920,9 @@ THRESHOLD_GROUPS = [
             line_ref(repo_rel(FORMULA_SOURCE_PATH), 483, "blocking_ratio_cap"),
             line_ref(repo_rel(FORMULA_SOURCE_PATH), 499, "per_field_classification"),
         ],
-        "notes": ["Threshold-edge replay depends on persisted threshold and floor inputs per fieldDelta."],
+        "notes": [
+            "Threshold-edge replay depends on persisted threshold and floor inputs per fieldDelta."
+        ],
     },
     {
         "threshold_id": "parity_aggregate_thresholds",
@@ -1481,14 +1933,20 @@ THRESHOLD_GROUPS = [
             "material_pressure_gte": 1.0,
             "minor_pressure_gte": 0.25,
         },
-        "source_refs": [line_ref(repo_rel(FORMULA_SOURCE_PATH), 554, "aggregate_parity_classification")],
+        "source_refs": [
+            line_ref(repo_rel(FORMULA_SOURCE_PATH), 554, "aggregate_parity_classification")
+        ],
         "notes": ["Classification uses a strict precedence ladder above the raw score."],
     },
     {
         "threshold_id": "graph_survivability_minima",
         "formula_ids": ["evidence_graph_quality"],
         "kind": "named_thresholds",
-        "values": {"submit_survivability_min": 0.8, "review_survivability_min": 0.45, "audit_survivability_min": 0.15},
+        "values": {
+            "submit_survivability_min": 0.8,
+            "review_survivability_min": 0.45,
+            "audit_survivability_min": 0.15,
+        },
         "source_refs": [line_ref(repo_rel(FORMULA_SOURCE_PATH), 642, "graph_survivability_minima")],
         "notes": ["These minima drive fail-closed caps rather than advisory annotations."],
     },
@@ -1506,11 +1964,18 @@ THRESHOLD_GROUPS = [
             "stale_or_low_submit_survivability": 79,
         },
         "source_refs": [line_ref(repo_rel(FORMULA_SOURCE_PATH), 646, "graph_quality_caps")],
-        "notes": ["Graph caps are explicit legal/defensibility ceilings, not derived from raw score percentiles."],
+        "notes": [
+            "Graph caps are explicit legal/defensibility ceilings, not derived from raw score percentiles."
+        ],
     },
     {
         "threshold_id": "authority_review_threshold",
-        "formula_ids": ["trust_authority_uncertainty", "trust_input_admissibility_and_basis", "trust_scoring_bands_and_readiness", "trust_currency_and_recalculation"],
+        "formula_ids": [
+            "trust_authority_uncertainty",
+            "trust_input_admissibility_and_basis",
+            "trust_scoring_bands_and_readiness",
+            "trust_currency_and_recalculation",
+        ],
         "kind": "numeric",
         "values": {"review_limit": 35},
         "source_refs": [line_ref(repo_rel(FORMULA_SOURCE_PATH), 761, "authority_review_threshold")],
@@ -1518,7 +1983,11 @@ THRESHOLD_GROUPS = [
     },
     {
         "threshold_id": "authority_block_threshold",
-        "formula_ids": ["trust_input_admissibility_and_basis", "trust_scoring_bands_and_readiness", "trust_currency_and_recalculation"],
+        "formula_ids": [
+            "trust_input_admissibility_and_basis",
+            "trust_scoring_bands_and_readiness",
+            "trust_currency_and_recalculation",
+        ],
         "kind": "numeric",
         "values": {"block_limit": 70},
         "source_refs": [
@@ -1529,7 +1998,11 @@ THRESHOLD_GROUPS = [
     },
     {
         "threshold_id": "trust_input_state_enum",
-        "formula_ids": ["trustsummary_artifact_binding", "trust_input_admissibility_and_basis", "trust_scoring_bands_and_readiness"],
+        "formula_ids": [
+            "trustsummary_artifact_binding",
+            "trust_input_admissibility_and_basis",
+            "trust_scoring_bands_and_readiness",
+        ],
         "kind": "enum",
         "values": ["ADMISSIBLE_CURRENT", "ADMISSIBLE_STALE", "INCOMPLETE", "CONTRADICTED"],
         "source_refs": [
@@ -1540,7 +2013,11 @@ THRESHOLD_GROUPS = [
     },
     {
         "threshold_id": "upstream_gate_cap_enum",
-        "formula_ids": ["trustsummary_artifact_binding", "trust_upstream_gate_cap", "trust_scoring_bands_and_readiness"],
+        "formula_ids": [
+            "trustsummary_artifact_binding",
+            "trust_upstream_gate_cap",
+            "trust_scoring_bands_and_readiness",
+        ],
         "kind": "enum",
         "values": ["AUTO_ELIGIBLE", "NOTICE_ONLY", "REVIEW_ONLY", "BLOCKED"],
         "source_refs": [
@@ -1591,7 +2068,9 @@ THRESHOLD_GROUPS = [
         "kind": "enum",
         "values": TRUST_EDGE_TRIGGER_ENUM,
         "source_refs": [line_ref(repo_rel(FORMULA_SOURCE_PATH), 985, "edge_trigger_codes")],
-        "notes": ["These codes serialize the active threshold surface directly into the sensitivity contract."],
+        "notes": [
+            "These codes serialize the active threshold surface directly into the sensitivity contract."
+        ],
     },
     {
         "threshold_id": "trust_cap_band_rules",
@@ -1630,25 +2109,37 @@ THRESHOLD_GROUPS = [
     },
     {
         "threshold_id": "automation_level_enum",
-        "formula_ids": ["trustsummary_artifact_binding", "trust_input_admissibility_and_basis", "trust_scoring_bands_and_readiness"],
+        "formula_ids": [
+            "trustsummary_artifact_binding",
+            "trust_input_admissibility_and_basis",
+            "trust_scoring_bands_and_readiness",
+        ],
         "kind": "enum",
         "values": ["ALLOWED", "LIMITED", "BLOCKED"],
         "source_refs": [
             line_ref(repo_rel(FORMULA_SOURCE_PATH), 52, "automation_level_binding"),
             line_ref(repo_rel(FORMULA_SOURCE_PATH), 1046, "automation_level"),
         ],
-        "notes": ["automation_level is a trust-layer capability summary, not an unattended-action permit by itself."],
+        "notes": [
+            "automation_level is a trust-layer capability summary, not an unattended-action permit by itself."
+        ],
     },
     {
         "threshold_id": "filing_readiness_enum",
-        "formula_ids": ["trustsummary_artifact_binding", "trust_input_admissibility_and_basis", "trust_scoring_bands_and_readiness"],
+        "formula_ids": [
+            "trustsummary_artifact_binding",
+            "trust_input_admissibility_and_basis",
+            "trust_scoring_bands_and_readiness",
+        ],
         "kind": "enum",
         "values": ["NOT_READY", "READY_REVIEW", "READY_TO_SUBMIT"],
         "source_refs": [
             line_ref(repo_rel(FORMULA_SOURCE_PATH), 53, "filing_readiness_binding"),
             line_ref(repo_rel(FORMULA_SOURCE_PATH), 1103, "filing_readiness"),
         ],
-        "notes": ["The readiness bridge is exact and rank-preserving relative to automation_level."],
+        "notes": [
+            "The readiness bridge is exact and rank-preserving relative to automation_level."
+        ],
     },
     {
         "threshold_id": "analysis_mode_cap",
@@ -1661,7 +2152,9 @@ THRESHOLD_GROUPS = [
             "reason_code": "TRUST_ANALYSIS_MODE_CAP",
         },
         "source_refs": [line_ref(repo_rel(FORMULA_SOURCE_PATH), 1121, "analysis_mode_cap")],
-        "notes": ["ANALYSIS mode can compute trust posture but cannot publish greener machine progression."],
+        "notes": [
+            "ANALYSIS mode can compute trust posture but cannot publish greener machine progression."
+        ],
     },
     {
         "threshold_id": "amendment_freshness_caps",
@@ -1678,7 +2171,9 @@ THRESHOLD_GROUPS = [
             ],
         },
         "source_refs": [line_ref(repo_rel(FORMULA_SOURCE_PATH), 1139, "amendment_freshness_caps")],
-        "notes": ["Amendment freshness and retroactive caps are part of trust semantics, not post-hoc decoration."],
+        "notes": [
+            "Amendment freshness and retroactive caps are part of trust semantics, not post-hoc decoration."
+        ],
     },
     {
         "threshold_id": "work_priority_base_map",
@@ -1686,7 +2181,9 @@ THRESHOLD_GROUPS = [
         "kind": "ordered_scalar_map",
         "values": {"LOW": 0.15, "NORMAL": 0.35, "HIGH": 0.6, "URGENT": 0.8, "CRITICAL": 1.0},
         "source_refs": [line_ref(repo_rel(FORMULA_SOURCE_PATH), 1168, "priority_base_i")],
-        "notes": ["Operational routing still uses frozen scalars rather than UI-local sort weights."],
+        "notes": [
+            "Operational routing still uses frozen scalars rather than UI-local sort weights."
+        ],
     },
     {
         "threshold_id": "work_resolution_caps",
@@ -1697,7 +2194,9 @@ THRESHOLD_GROUPS = [
             "next_action_clarity_zero": 49,
             "unassigned_item": 69,
         },
-        "source_refs": [line_ref(repo_rel(FORMULA_SOURCE_PATH), 1234, "resolution_confidence_caps")],
+        "source_refs": [
+            line_ref(repo_rel(FORMULA_SOURCE_PATH), 1234, "resolution_confidence_caps")
+        ],
         "notes": ["Resolution confidence caps are fail-closed and deterministic."],
     },
     {
@@ -1714,7 +2213,9 @@ THRESHOLD_GROUPS = [
         "kind": "thresholds",
         "values": {"flow_stability_unstable_lt": 60},
         "source_refs": [line_ref(repo_rel(FORMULA_SOURCE_PATH), 1432, "flow_stability_threshold")],
-        "notes": ["Flow stability under 60 implies unstable mutation posture unless recovery is the only live mutation."],
+        "notes": [
+            "Flow stability under 60 implies unstable mutation posture unless recovery is the only live mutation."
+        ],
     },
     {
         "threshold_id": "upload_confidence_thresholds",
@@ -1727,8 +2228,12 @@ THRESHOLD_GROUPS = [
             "integrity_failed": 0,
             "malware_quarantined": 0,
         },
-        "source_refs": [line_ref(repo_rel(FORMULA_SOURCE_PATH), 1463, "upload_confidence_overrides")],
-        "notes": ["Upload confidence drives governed CTA eligibility, not just a visual confidence meter."],
+        "source_refs": [
+            line_ref(repo_rel(FORMULA_SOURCE_PATH), 1463, "upload_confidence_overrides")
+        ],
+        "notes": [
+            "Upload confidence drives governed CTA eligibility, not just a visual confidence meter."
+        ],
     },
     {
         "threshold_id": "recovery_posture_mapping",
@@ -1743,7 +2248,9 @@ THRESHOLD_GROUPS = [
             "SUPPORT_REQUIRED": "self-recovery unsafe",
         },
         "source_refs": [line_ref(repo_rel(FORMULA_SOURCE_PATH), 1512, "recovery_posture_mapping")],
-        "notes": ["Published recovery posture must equal the deterministic posture derived from blocker state."],
+        "notes": [
+            "Published recovery posture must equal the deterministic posture derived from blocker state."
+        ],
     },
     {
         "threshold_id": "approval_readiness_thresholds",
@@ -1754,16 +2261,24 @@ THRESHOLD_GROUPS = [
             "step_up_expired_maximum": 40,
             "superseded_or_expired": 0,
         },
-        "source_refs": [line_ref(repo_rel(FORMULA_SOURCE_PATH), 1543, "approval_readiness_overrides")],
-        "notes": ["Approval-readiness thresholds are governed control limits, not UI convenience copy."],
+        "source_refs": [
+            line_ref(repo_rel(FORMULA_SOURCE_PATH), 1543, "approval_readiness_overrides")
+        ],
+        "notes": [
+            "Approval-readiness thresholds are governed control limits, not UI convenience copy."
+        ],
     },
     {
         "threshold_id": "completion_probability_thresholds",
         "formula_ids": ["client_flow_reliability_and_completion"],
         "kind": "band_thresholds",
         "values": {"save_or_help_lt": 0.4, "review_affordance_lt": 0.7, "completion_cta_gte": 0.7},
-        "source_refs": [line_ref(repo_rel(FORMULA_SOURCE_PATH), 1596, "completion_probability_thresholds")],
-        "notes": ["Completion thresholds govern CTA posture under legal reversibility constraints."],
+        "source_refs": [
+            line_ref(repo_rel(FORMULA_SOURCE_PATH), 1596, "completion_probability_thresholds")
+        ],
+        "notes": [
+            "Completion thresholds govern CTA posture under legal reversibility constraints."
+        ],
     },
 ]
 
@@ -1780,7 +2295,10 @@ PLANNED_TEST_VECTORS = [
         "formula_ids": ["data_quality_and_completeness"],
         "coverage_status": "planned_from_source_gap",
         "scenario": "Projection-side confidence remains lower than or equal to decision-side confidence and never feeds trust scoring.",
-        "expected_reason_codes": ["PRIVACY_PROJECTION_RATIO_INVALID", "LIMITATION_SILENT_AMBIGUITY"],
+        "expected_reason_codes": [
+            "PRIVACY_PROJECTION_RATIO_INVALID",
+            "LIMITATION_SILENT_AMBIGUITY",
+        ],
     },
     {
         "planned_vector_id": "FORMULA-COMPUTE-01",
@@ -1805,7 +2323,11 @@ PLANNED_TEST_VECTORS = [
     },
     {
         "planned_vector_id": "FORMULA-PARITY-01",
-        "formula_ids": ["parity_comparison_set_construction", "per_field_parity", "aggregate_parity"],
+        "formula_ids": [
+            "parity_comparison_set_construction",
+            "per_field_parity",
+            "aggregate_parity",
+        ],
         "coverage_status": "planned_from_source_gap",
         "scenario": "Invalid comparison-set construction persists NOT_COMPARABLE with PARITY_COMPARISON_SET_INVALID and zero coverage/score.",
         "expected_reason_codes": ["PARITY_COMPARISON_SET_INVALID"],
@@ -1839,14 +2361,18 @@ def find_vector_source_refs(vector_ids: Iterable[str]) -> dict[str, str]:
     for line_number, line in enumerate(TEST_VECTORS_PATH.read_text().splitlines(), start=1):
         match = re.match(r"^##\s+(TV-[0-9A-Z]+):", line)
         if match and match.group(1) in vector_ids:
-            refs[match.group(1)] = line_ref(repo_rel(TEST_VECTORS_PATH), line_number, match.group(1))
+            refs[match.group(1)] = line_ref(
+                repo_rel(TEST_VECTORS_PATH), line_number, match.group(1)
+            )
     return refs
 
 
 def build_formula_records() -> list[dict[str, Any]]:
     _, top_blocks = parse_blocks(FORMULA_SOURCE_PATH)
     flat_blocks = flatten_blocks(top_blocks)
-    sections = {block.section_id: block for block in flat_blocks if block.level == 2 and block.section_id}
+    sections = {
+        block.section_id: block for block in flat_blocks if block.level == 2 and block.section_id
+    }
     module_index = load_module_index()
     gate_index = load_gate_index()
     records: list[dict[str, Any]] = []
@@ -1854,7 +2380,9 @@ def build_formula_records() -> list[dict[str, Any]]:
         section_block = sections[spec.canonical_section]
         scoped_blocks = [section_block]
         if spec.subsection_titles:
-            scoped_blocks = [find_subsection_block(section_block, title) for title in spec.subsection_titles]
+            scoped_blocks = [
+                find_subsection_block(section_block, title) for title in spec.subsection_titles
+            ]
         formula_symbols = extract_formula_symbols(scoped_blocks)
         extracted_reason_codes = extract_reason_codes(scoped_blocks)
         reason_codes = ordered_unique(list(spec.reason_code_emissions) + extracted_reason_codes)
@@ -1887,7 +2415,11 @@ def build_formula_records() -> list[dict[str, Any]]:
                 "source_span": {
                     "section_start_line": section_block.start_line,
                     "section_end_line": section_block.end_line,
-                    "subsection_start_lines": {block.title: block.start_line for block in scoped_blocks if block is not section_block},
+                    "subsection_start_lines": {
+                        block.title: block.start_line
+                        for block in scoped_blocks
+                        if block is not section_block
+                    },
                 },
             }
         )
@@ -1915,10 +2447,28 @@ def build_threshold_registry() -> dict[str, Any]:
             "trust_edge_trigger_enum": TRUST_EDGE_TRIGGER_ENUM,
             "trust_probe_order": TRUST_PROBE_ORDER,
             "core_threshold_group_count": sum(
-                1 for group in THRESHOLD_GROUPS if all(formula_id not in {"collaboration_orchestration_queue_routing", "client_flow_reliability_and_completion"} for formula_id in group["formula_ids"])
+                1
+                for group in THRESHOLD_GROUPS
+                if all(
+                    formula_id
+                    not in {
+                        "collaboration_orchestration_queue_routing",
+                        "client_flow_reliability_and_completion",
+                    }
+                    for formula_id in group["formula_ids"]
+                )
             ),
             "secondary_threshold_group_count": sum(
-                1 for group in THRESHOLD_GROUPS if any(formula_id in {"collaboration_orchestration_queue_routing", "client_flow_reliability_and_completion"} for formula_id in group["formula_ids"])
+                1
+                for group in THRESHOLD_GROUPS
+                if any(
+                    formula_id
+                    in {
+                        "collaboration_orchestration_queue_routing",
+                        "client_flow_reliability_and_completion",
+                    }
+                    for formula_id in group["formula_ids"]
+                )
             ),
         },
     }
@@ -1947,7 +2497,13 @@ def build_money_contract() -> dict[str, Any]:
             "representation": "canonical decimal string",
             "exact_fractional_digits": "money_profile.scale",
             "required_trailing_zeros": True,
-            "rejects": ["exponent_notation", "locale_separators", "NaN", "infinity", "trimmed_scale"],
+            "rejects": [
+                "exponent_notation",
+                "locale_separators",
+                "NaN",
+                "infinity",
+                "trimmed_scale",
+            ],
         },
         "deterministic_aggregation_rules": [
             "contribution order is deterministic and canonical before summation",
@@ -2047,7 +2603,11 @@ def build_test_vector_plan() -> dict[str, Any]:
             "formula_ids": ["trust_scoring_bands_and_readiness"],
             "coverage_status": "existing_corpus_vector",
             "scenario": "Green score with filing-critical override is capped to review.",
-            "expected_outputs": ["trust_band = AMBER", "automation_level != ALLOWED", "filing_readiness != READY_TO_SUBMIT"],
+            "expected_outputs": [
+                "trust_band = AMBER",
+                "automation_level != ALLOWED",
+                "filing_readiness != READY_TO_SUBMIT",
+            ],
             "source_ref": vector_refs["TV-55"],
         },
         {
@@ -2055,7 +2615,10 @@ def build_test_vector_plan() -> dict[str, Any]:
             "formula_ids": ["trust_scoring_bands_and_readiness"],
             "coverage_status": "existing_corpus_vector",
             "scenario": "Near-threshold trust instability forces EDGE_REVIEW.",
-            "expected_outputs": ["threshold_stability_state = EDGE_REVIEW", "TRUST_THRESHOLD_EDGE_REVIEW"],
+            "expected_outputs": [
+                "threshold_stability_state = EDGE_REVIEW",
+                "TRUST_THRESHOLD_EDGE_REVIEW",
+            ],
             "source_ref": vector_refs["TV-56"],
         },
         {
@@ -2063,15 +2626,25 @@ def build_test_vector_plan() -> dict[str, Any]:
             "formula_ids": ["trust_upstream_gate_cap", "trust_scoring_bands_and_readiness"],
             "coverage_status": "existing_corpus_vector",
             "scenario": "Upstream review cap cannot be outranked by a green trust score.",
-            "expected_outputs": ["upstream_gate_cap = REVIEW_ONLY", "cap_band = AMBER", "automation_level != ALLOWED"],
+            "expected_outputs": [
+                "upstream_gate_cap = REVIEW_ONLY",
+                "cap_band = AMBER",
+                "automation_level != ALLOWED",
+            ],
             "source_ref": vector_refs["TV-56A"],
         },
         {
             "vector_id": "TV-56B",
-            "formula_ids": ["trust_input_admissibility_and_basis", "trust_scoring_bands_and_readiness"],
+            "formula_ids": [
+                "trust_input_admissibility_and_basis",
+                "trust_scoring_bands_and_readiness",
+            ],
             "coverage_status": "existing_corpus_vector",
             "scenario": "Trust-input basis ceilings prevent stale or authority-limited inputs from masquerading as green automation.",
-            "expected_outputs": ["automation_ceiling caps final automation_level", "filing_readiness_ceiling caps final filing_readiness"],
+            "expected_outputs": [
+                "automation_ceiling caps final automation_level",
+                "filing_readiness_ceiling caps final filing_readiness",
+            ],
             "source_ref": vector_refs["TV-56B"],
         },
         {
@@ -2079,7 +2652,10 @@ def build_test_vector_plan() -> dict[str, Any]:
             "formula_ids": ["formula_reason_code_emission"],
             "coverage_status": "existing_corpus_vector",
             "scenario": "Trust explainability discloses authority and limitation posture without replay.",
-            "expected_outputs": ["compressed_reason_codes prefix of reason_codes", "semantic_qualifiers include AUTHORITY_STATE and LIMITATION_STATE"],
+            "expected_outputs": [
+                "compressed_reason_codes prefix of reason_codes",
+                "semantic_qualifiers include AUTHORITY_STATE and LIMITATION_STATE",
+            ],
             "source_ref": vector_refs["TV-56C"],
         },
         {
@@ -2087,7 +2663,11 @@ def build_test_vector_plan() -> dict[str, Any]:
             "formula_ids": ["trust_scoring_bands_and_readiness"],
             "coverage_status": "existing_corpus_vector",
             "scenario": "Trust sensitivity contract freezes score-versus-cap divergence and guard-band triggers.",
-            "expected_outputs": ["score_cap_alignment_state = CAP_STRICTER_THAN_SCORE", "cap_driver_reason_codes non-empty", "edge_trigger_codes exact"],
+            "expected_outputs": [
+                "score_cap_alignment_state = CAP_STRICTER_THAN_SCORE",
+                "cap_driver_reason_codes non-empty",
+                "edge_trigger_codes exact",
+            ],
             "source_ref": vector_refs["TV-56D"],
         },
         {
@@ -2100,10 +2680,18 @@ def build_test_vector_plan() -> dict[str, Any]:
         },
         {
             "vector_id": "TV-56F",
-            "formula_ids": ["trust_input_admissibility_and_basis", "trust_currency_and_recalculation", "trust_scoring_bands_and_readiness"],
+            "formula_ids": [
+                "trust_input_admissibility_and_basis",
+                "trust_currency_and_recalculation",
+                "trust_scoring_bands_and_readiness",
+            ],
             "coverage_status": "existing_corpus_vector",
             "scenario": "Freshness invalidation and invalid override probes fail closed.",
-            "expected_outputs": ["TRUST_INPUT_STALE", "TRUST_RECALCULATION_REQUIRED", "TRUST_OVERRIDE_INVALID"],
+            "expected_outputs": [
+                "TRUST_INPUT_STALE",
+                "TRUST_RECALCULATION_REQUIRED",
+                "TRUST_OVERRIDE_INVALID",
+            ],
             "source_ref": vector_refs["TV-56F"],
         },
         {
@@ -2111,7 +2699,11 @@ def build_test_vector_plan() -> dict[str, Any]:
             "formula_ids": ["trust_authority_uncertainty", "trust_scoring_bands_and_readiness"],
             "coverage_status": "existing_corpus_vector",
             "scenario": "Live authority review guard band forces edge review before automation.",
-            "expected_outputs": ["AUTHORITY_REVIEW_GUARD_BAND", "threshold_stability_state = EDGE_REVIEW", "automation_level != ALLOWED"],
+            "expected_outputs": [
+                "AUTHORITY_REVIEW_GUARD_BAND",
+                "threshold_stability_state = EDGE_REVIEW",
+                "automation_level != ALLOWED",
+            ],
             "source_ref": vector_refs["TV-56G"],
         },
         {
@@ -2119,15 +2711,25 @@ def build_test_vector_plan() -> dict[str, Any]:
             "formula_ids": ["trust_currency_and_recalculation"],
             "coverage_status": "existing_corpus_vector",
             "scenario": "Late data after packet preparation invalidates filing readiness.",
-            "expected_outputs": ["trust_currency_state = RECALC_REQUIRED", "FILING_GATE blocks until trust resynthesizes"],
+            "expected_outputs": [
+                "trust_currency_state = RECALC_REQUIRED",
+                "FILING_GATE blocks until trust resynthesizes",
+            ],
             "source_ref": vector_refs["TV-57"],
         },
         {
             "vector_id": "TV-58",
-            "formula_ids": ["trust_currency_and_recalculation", "aggregate_parity", "trust_scoring_bands_and_readiness"],
+            "formula_ids": [
+                "trust_currency_and_recalculation",
+                "aggregate_parity",
+                "trust_scoring_bands_and_readiness",
+            ],
             "coverage_status": "existing_corpus_vector",
             "scenario": "Authority correction reverses amendment-era trust readiness.",
-            "expected_outputs": ["prior trust summary becomes stale", "new parity/trust cycle required"],
+            "expected_outputs": [
+                "prior trust summary becomes stale",
+                "new parity/trust cycle required",
+            ],
             "source_ref": vector_refs["TV-58"],
         },
     ]
@@ -2155,22 +2757,34 @@ def build_secondary_formula_families(records: list[dict[str, Any]]) -> dict[str,
     }
 
 
-def build_registry(records: list[dict[str, Any]], dependency_rows: list[dict[str, Any]]) -> dict[str, Any]:
+def build_registry(
+    records: list[dict[str, Any]], dependency_rows: list[dict[str, Any]]
+) -> dict[str, Any]:
     covered_sections = ordered_unique(record["canonical_section"] for record in records)
-    covered_artifacts = ordered_unique(artifact for record in records for artifact in record["output_artifacts"])
-    covered_schemas = ordered_unique(schema for record in records for schema in record["schema_touchpoints"])
+    covered_artifacts = ordered_unique(
+        artifact for record in records for artifact in record["output_artifacts"]
+    )
+    covered_schemas = ordered_unique(
+        schema for record in records for schema in record["schema_touchpoints"]
+    )
     return {
         "formula_records": records,
         "dependencies": dependency_rows,
         "summary": {
             "formula_record_count": len(records),
-            "core_formula_family_count": sum(1 for row in records if row["formula_family"] == "core_formula_family"),
-            "secondary_formula_family_count": sum(1 for row in records if row["formula_family"] == "secondary_formula_family"),
+            "core_formula_family_count": sum(
+                1 for row in records if row["formula_family"] == "core_formula_family"
+            ),
+            "secondary_formula_family_count": sum(
+                1 for row in records if row["formula_family"] == "secondary_formula_family"
+            ),
             "numbered_sections_covered": covered_sections,
             "schema_backed_artifacts_covered": covered_artifacts,
             "schema_touchpoint_count": len(covered_schemas),
             "formula_symbol_count": sum(len(row["formula_symbols"]) for row in records),
-            "reason_code_count": len({code for row in records for code in row["reason_code_emissions"]}),
+            "reason_code_count": len(
+                {code for row in records for code in row["reason_code_emissions"]}
+            ),
         },
         "required_schema_artifacts": REQUIRED_SCHEMA_ARTIFACTS,
         "numbered_sections_required": REQUIRED_NUMBERED_SECTIONS,
@@ -2197,7 +2811,9 @@ def render_registry_doc(records: list[dict[str, Any]], registry: dict[str, Any])
         "| --- | --- | --- | --- | --- | --- |",
     ]
     for record in records:
-        module_names = ", ".join(binding["module_name"] for binding in record["module_bindings"]) or "n/a"
+        module_names = (
+            ", ".join(binding["module_name"] for binding in record["module_bindings"]) or "n/a"
+        )
         gates = ", ".join(record["downstream_gate_consumers"]) or "n/a"
         artifacts = ", ".join(record["output_artifacts"]) or "n/a"
         lines.append(
@@ -2234,7 +2850,9 @@ def render_registry_doc(records: list[dict[str, Any]], registry: dict[str, Any])
     return "\n".join(lines)
 
 
-def render_dependency_doc(records: list[dict[str, Any]], dependency_rows: list[dict[str, Any]]) -> str:
+def render_dependency_doc(
+    records: list[dict[str, Any]], dependency_rows: list[dict[str, Any]]
+) -> str:
     record_map = {record["formula_id"]: record for record in records}
     lines = [
         "# Formula Dependency and Execution Basis",
@@ -2253,7 +2871,9 @@ def render_dependency_doc(records: list[dict[str, Any]], dependency_rows: list[d
     lines.extend(["", "## Execution Basis", ""])
     for record in records:
         module_rows = record["module_bindings"]
-        phase_refs = ordered_unique(phase_id for module_row in module_rows for phase_id in module_row["phase_ids"])
+        phase_refs = ordered_unique(
+            phase_id for module_row in module_rows for phase_id in module_row["phase_ids"]
+        )
         lines.extend(
             [
                 f"### `{record['formula_id']}`",
@@ -2332,7 +2952,10 @@ def render_threshold_doc(thresholds: dict[str, Any], test_plan: dict[str, Any]) 
 
 
 def render_mermaid(records: list[dict[str, Any]], dependency_rows: list[dict[str, Any]]) -> str:
-    secondary_ids = {"collaboration_orchestration_queue_routing", "client_flow_reliability_and_completion"}
+    secondary_ids = {
+        "collaboration_orchestration_queue_routing",
+        "client_flow_reliability_and_completion",
+    }
     lines = [
         "flowchart LR",
         '  subgraph CORE["Core Formula Spine"]',
@@ -2341,23 +2964,37 @@ def render_mermaid(records: list[dict[str, Any]], dependency_rows: list[dict[str
         if record["formula_id"] in secondary_ids:
             continue
         lines.append(f'    {slugify(record["formula_id"])}["{record["label"]}"]')
-    lines.extend(['  end', '  subgraph SECONDARY["Secondary Families"]'])
+    lines.extend(["  end", '  subgraph SECONDARY["Secondary Families"]'])
     for record in records:
         if record["formula_id"] not in secondary_ids:
             continue
         lines.append(f'    {slugify(record["formula_id"])}["{record["label"]}"]')
-    lines.extend(['  end', '  subgraph ARTIFACTS["Schema-Backed Artifacts"]'])
+    lines.extend(["  end", '  subgraph ARTIFACTS["Schema-Backed Artifacts"]'])
     for artifact in REQUIRED_SCHEMA_ARTIFACTS:
         lines.append(f'    {slugify(artifact)}["{artifact}"]')
-    lines.extend(['  end', '  subgraph GATES["Downstream Gates"]', '    trust_gate["TRUST_GATE"]', '    filing_gate["FILING_GATE"]', '    amendment_gate["AMENDMENT_GATE"]', '    submission_gate["SUBMISSION_GATE"]', '  end'])
+    lines.extend(
+        [
+            "  end",
+            '  subgraph GATES["Downstream Gates"]',
+            '    trust_gate["TRUST_GATE"]',
+            '    filing_gate["FILING_GATE"]',
+            '    amendment_gate["AMENDMENT_GATE"]',
+            '    submission_gate["SUBMISSION_GATE"]',
+            "  end",
+        ]
+    )
     for row in dependency_rows:
-        lines.append(f"  {slugify(row['source_formula_id'])} --> {slugify(row['target_formula_id'])}")
+        lines.append(
+            f"  {slugify(row['source_formula_id'])} --> {slugify(row['target_formula_id'])}"
+        )
     for record in records:
         for artifact in record["output_artifacts"]:
             if artifact in REQUIRED_SCHEMA_ARTIFACTS:
                 lines.append(f"  {slugify(record['formula_id'])} --> {slugify(artifact)}")
         for gate_code in record["downstream_gate_consumers"]:
-            lines.append(f"  {slugify(record['formula_id'])} --> {slugify(gate_code.lower()) if gate_code not in {'TRUST_GATE','FILING_GATE','AMENDMENT_GATE','SUBMISSION_GATE'} else slugify(gate_code)}")
+            lines.append(
+                f"  {slugify(record['formula_id'])} --> {slugify(gate_code.lower()) if gate_code not in {'TRUST_GATE', 'FILING_GATE', 'AMENDMENT_GATE', 'SUBMISSION_GATE'} else slugify(gate_code)}"
+            )
     return "\n".join(lines) + "\n"
 
 
@@ -2415,7 +3052,9 @@ def main() -> int:
         "status": "PASS",
         "formula_record_count": outputs["registry"]["summary"]["formula_record_count"],
         "core_formula_family_count": outputs["registry"]["summary"]["core_formula_family_count"],
-        "secondary_formula_family_count": outputs["registry"]["summary"]["secondary_formula_family_count"],
+        "secondary_formula_family_count": outputs["registry"]["summary"][
+            "secondary_formula_family_count"
+        ],
         "reason_code_count": outputs["reason_code_map"]["summary"]["reason_code_count"],
         "threshold_group_count": outputs["thresholds"]["summary"]["group_count"],
     }

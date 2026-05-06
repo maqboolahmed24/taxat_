@@ -102,7 +102,9 @@ def main() -> int:
 
     actual_request_identity = load_json(builder.REQUEST_IDENTITY_PATH)
     if actual_request_identity != outputs["request_identity"]:
-        fail("request_identity_and_idempotency_rules.json drifted from the canonical builder output.")
+        fail(
+            "request_identity_and_idempotency_rules.json drifted from the canonical builder output."
+        )
 
     actual_reconciliation_rows = load_csv(builder.RECONCILIATION_MATRIX_PATH)
     expected_reconciliation_rows = [
@@ -113,7 +115,9 @@ def main() -> int:
 
     actual_truth_projection = load_json(builder.TRUTH_PROJECTION_PATH)
     if actual_truth_projection != outputs["truth_projection"]:
-        fail("authority_truth_vs_internal_projection_map.json drifted from the canonical builder output.")
+        fail(
+            "authority_truth_vs_internal_projection_map.json drifted from the canonical builder output."
+        )
 
     actual_response_registry = load_json(builder.RESPONSE_CLASS_PATH)
     if actual_response_registry != outputs["response_registry"]:
@@ -125,15 +129,23 @@ def main() -> int:
 
     expected_docs = outputs["docs"]
     if builder.REQUIREMENTS_DOC_PATH.read_text() != expected_docs[0] + "\n":
-        fail("12_authority_interaction_and_reconciliation_requirements.md drifted from the canonical builder render.")
+        fail(
+            "12_authority_interaction_and_reconciliation_requirements.md drifted from the canonical builder render."
+        )
     if builder.SEQUENCE_DOC_PATH.read_text() != expected_docs[1] + "\n":
-        fail("12_authority_sequence_and_boundary_matrix.md drifted from the canonical builder render.")
+        fail(
+            "12_authority_sequence_and_boundary_matrix.md drifted from the canonical builder render."
+        )
     if builder.EDGE_CASE_DOC_PATH.read_text() != expected_docs[2] + "\n":
-        fail("12_pending_duplicate_and_out_of_band_handling.md drifted from the canonical builder render.")
+        fail(
+            "12_pending_duplicate_and_out_of_band_handling.md drifted from the canonical builder render."
+        )
     if builder.MERMAID_PATH.read_text() != outputs["mermaid"]:
         fail("12_authority_handshake_sequence.mmd drifted from the canonical builder render.")
 
-    schema_operation_families = set(builder.schema_enum(builder.AUTHORITY_OPERATION_SCHEMA_PATH, "operation_family"))
+    schema_operation_families = set(
+        builder.schema_enum(builder.AUTHORITY_OPERATION_SCHEMA_PATH, "operation_family")
+    )
     actual_operation_families = {
         row["operation_family"] for row in actual_operation_catalog["operation_records"]
     }
@@ -152,9 +164,13 @@ def main() -> int:
     for row in actual_operation_catalog["core_protocol_objects"]:
         if row["object_name"] in REQUIRED_CORE_OBJECTS:
             if not row["schema_path"] or not row["prose_owner_ref"]:
-                fail(f"Core protocol object is missing schema or prose owner mapping: {row['object_name']}")
+                fail(
+                    f"Core protocol object is missing schema or prose owner mapping: {row['object_name']}"
+                )
 
-    schema_response_classes = set(builder.schema_enum(builder.AUTHORITY_RESPONSE_ENVELOPE_SCHEMA_PATH, "response_class"))
+    schema_response_classes = set(
+        builder.schema_enum(builder.AUTHORITY_RESPONSE_ENVELOPE_SCHEMA_PATH, "response_class")
+    )
     actual_response_classes = {
         row["response_class"] for row in actual_response_registry["response_classes"]
     }
@@ -195,7 +211,9 @@ def main() -> int:
     sequence_modules = {row["module_name"] for row in actual_sequence_steps}
     missing_sequence_modules = REQUIRED_SEQUENCE_MODULES - sequence_modules
     if missing_sequence_modules:
-        fail(f"Sequence ledger is missing required module seams: {sorted(missing_sequence_modules)}")
+        fail(
+            f"Sequence ledger is missing required module seams: {sorted(missing_sequence_modules)}"
+        )
 
     scenario_names = {row["scenario_name"] for row in actual_reconciliation_rows}
     missing_scenarios = REQUIRED_RECONCILIATION_SCENARIOS - scenario_names
@@ -203,14 +221,18 @@ def main() -> int:
         fail(f"Reconciliation matrix is missing required scenarios: {sorted(missing_scenarios)}")
 
     truth_projection = actual_truth_projection
-    schema_truth_roles = set(builder.schema_enum(builder.AUTHORITY_TRUTH_SCHEMA_PATH, "truth_surface_role"))
+    schema_truth_roles = set(
+        builder.schema_enum(builder.AUTHORITY_TRUTH_SCHEMA_PATH, "truth_surface_role")
+    )
     actual_truth_roles = {row["truth_surface_role"] for row in truth_projection["surfaces"]}
     if actual_truth_roles != schema_truth_roles:
         fail(
             "Truth surface coverage drifted. "
             f"Expected {sorted(schema_truth_roles)}, got {sorted(actual_truth_roles)}"
         )
-    schema_boundary_scopes = set(builder.schema_enum(builder.AUTHORITY_TRUTH_SCHEMA_PATH, "boundary_scope"))
+    schema_boundary_scopes = set(
+        builder.schema_enum(builder.AUTHORITY_TRUTH_SCHEMA_PATH, "boundary_scope")
+    )
     actual_boundary_scopes = {row["boundary_scope"] for row in truth_projection["surfaces"]}
     if actual_boundary_scopes != schema_boundary_scopes:
         fail(
@@ -218,9 +240,15 @@ def main() -> int:
             f"Expected {sorted(schema_boundary_scopes)}, got {sorted(actual_boundary_scopes)}"
         )
 
-    if actual_operation_catalog["shared_requirements"]["reconciliation_inputs"] != builder.RECONCILIATION_INPUTS:
+    if (
+        actual_operation_catalog["shared_requirements"]["reconciliation_inputs"]
+        != builder.RECONCILIATION_INPUTS
+    ):
         fail("Reconciliation inputs drifted from the canonical protocol list.")
-    if actual_operation_catalog["shared_requirements"]["reconciliation_outputs"] != builder.RECONCILIATION_OUTPUTS:
+    if (
+        actual_operation_catalog["shared_requirements"]["reconciliation_outputs"]
+        != builder.RECONCILIATION_OUTPUTS
+    ):
         fail("Reconciliation outputs drifted from the canonical protocol list.")
 
     gap_ids = {row["gap_id"] for row in actual_gaps["gaps"]}

@@ -12,11 +12,20 @@ test("tab keyboard navigation works across the atlas pages", async ({ page }) =>
   const overview = page.getByRole("tab", { name: "Overview" });
   await overview.focus();
   await page.keyboard.press("ArrowRight");
-  await expect(page.getByRole("tab", { name: "CALM_SHELL" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("tab", { name: "CALM_SHELL" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
   await page.keyboard.press("End");
-  await expect(page.getByRole("tab", { name: "Continuity Lab" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("tab", { name: "Continuity Lab" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
   await page.keyboard.press("Home");
-  await expect(page.getByRole("tab", { name: "Overview" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("tab", { name: "Overview" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
 });
 
 test("calm shell page exposes the required semantic anchors", async ({ page }) => {
@@ -50,5 +59,8 @@ test("continuity lab toggles polite and assertive live regions", async ({ page }
   await gotoAtlas(page, "#page=continuity&scenario=refresh_preserves_same_object");
   await expect(page.getByTestId("continuity-live-region")).toHaveAttribute("aria-live", "polite");
   await page.getByTestId("continuity-scenario-access_rebind_after_scope_change").click();
-  await expect(page.getByTestId("continuity-live-region")).toHaveAttribute("aria-live", "assertive");
+  await expect(page.getByTestId("continuity-live-region")).toHaveAttribute(
+    "aria-live",
+    "assertive",
+  );
 });

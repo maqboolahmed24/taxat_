@@ -1,0 +1,417 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/preseal_gate_evaluation_contract.schema.json",
+  "title": "PresealGateEvaluationContract",
+  "description": "Authoritative manifest pre-seal gate-tape contract. This schema freezes the ordered pre-seal gate chain, the one frozen execution-basis hash it ran against, the exact gate-decision ids that constitute the immutable pre-seal tape, the blocked-versus-ready seal disposition, the required_gate_order for mandatory pre-seal checks, and the rule that later post-seal gates may append but may not reinterpret the pre-seal chain.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_class",
+    "manifest_id",
+    "execution_basis_hash",
+    "access_binding_hash",
+    "authorized_scope",
+    "required_gate_codes",
+    "evaluated_gate_codes",
+    "ordered_gate_decision_ids",
+    "blocking_gate_codes",
+    "completion_state",
+    "prerequisite_materialization_state",
+    "missing_prerequisite_refs",
+    "durability_boundary",
+    "reuse_policy",
+    "post_seal_interpretation_policy"
+  ],
+  "properties": {
+    "contract_class": {
+      "const": "MANIFEST_PRESEAL_GATE_EVALUATION"
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_basis_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "access_binding_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authorized_scope": {
+      "$ref": "#/$defs/scopeArray"
+    },
+    "required_gate_codes": {
+      "$ref": "#/$defs/presealGateCodeArray"
+    },
+    "evaluated_gate_codes": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "MANIFEST_GATE",
+          "ARTIFACT_CONTRACT_GATE",
+          "INPUT_BOUNDARY_GATE",
+          "DATA_QUALITY_GATE"
+        ]
+      },
+      "default": [],
+      "maxItems": 4,
+      "uniqueItems": true
+    },
+    "ordered_gate_decision_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "maxItems": 4,
+      "uniqueItems": true
+    },
+    "blocking_gate_codes": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "MANIFEST_GATE",
+          "ARTIFACT_CONTRACT_GATE",
+          "INPUT_BOUNDARY_GATE",
+          "DATA_QUALITY_GATE"
+        ]
+      },
+      "default": [],
+      "maxItems": 4,
+      "uniqueItems": true
+    },
+    "completion_state": {
+      "type": "string",
+      "enum": [
+        "PENDING_PREREQUISITES",
+        "COMPLETE_READY_TO_SEAL",
+        "COMPLETE_BLOCKED_PRESTART"
+      ]
+    },
+    "prerequisite_materialization_state": {
+      "type": "string",
+      "enum": [
+        "AWAITING_PREREQUISITE_MATERIALIZATION",
+        "FULLY_MATERIALIZED"
+      ]
+    },
+    "missing_prerequisite_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "maxItems": 16,
+      "uniqueItems": true
+    },
+    "durability_boundary": {
+      "type": "string",
+      "enum": [
+        "NO_PERSISTED_TAPE_YET",
+        "PERSIST_PRESTART_TERMINAL_CONTEXT",
+        "ATOMIC_GATE_BATCH_AND_SEAL"
+      ]
+    },
+    "reuse_policy": {
+      "const": "REUSE_PERSISTED_PRESEAL_TAPE_ONLY"
+    },
+    "post_seal_interpretation_policy": {
+      "const": "APPEND_ONLY_POSTSEAL_CANNOT_REINTERPRET_PRESEAL"
+    }
+  },
+  "$defs": {
+    "scopeArray": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "enum": [
+            "year_end",
+            "quarterly_update",
+            "estimate_only"
+          ]
+        }
+      ],
+      "items": {
+        "type": "string",
+        "enum": [
+          "year_end",
+          "quarterly_update",
+          "estimate_only",
+          "prepare_submission",
+          "submit",
+          "amendment_intent",
+          "amendment_submit"
+        ]
+      },
+      "contains": {
+        "enum": [
+          "year_end",
+          "quarterly_update",
+          "estimate_only"
+        ]
+      },
+      "minContains": 1,
+      "maxContains": 1,
+      "minItems": 1,
+      "uniqueItems": true,
+      "allOf": [
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "amendment_intent"
+                }
+              },
+              {
+                "contains": {
+                  "const": "amendment_submit"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "estimate_only"
+                }
+              },
+              {
+                "contains": {
+                  "enum": [
+                    "prepare_submission",
+                    "submit",
+                    "amendment_intent",
+                    "amendment_submit"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "amendment_intent"
+                }
+              },
+              {
+                "contains": {
+                  "enum": [
+                    "prepare_submission",
+                    "submit"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "amendment_submit"
+                }
+              },
+              {
+                "contains": {
+                  "enum": [
+                    "prepare_submission",
+                    "submit"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "amendment_intent"
+                }
+              },
+              {
+                "not": {
+                  "contains": {
+                    "const": "year_end"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "amendment_submit"
+                }
+              },
+              {
+                "not": {
+                  "contains": {
+                    "const": "year_end"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "not": {
+            "allOf": [
+              {
+                "contains": {
+                  "const": "submit"
+                }
+              },
+              {
+                "not": {
+                  "contains": {
+                    "const": "prepare_submission"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "presealGateCodeArray": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "const": "MANIFEST_GATE"
+        },
+        {
+          "const": "ARTIFACT_CONTRACT_GATE"
+        },
+        {
+          "const": "INPUT_BOUNDARY_GATE"
+        },
+        {
+          "const": "DATA_QUALITY_GATE"
+        }
+      ],
+      "items": false,
+      "minItems": 4,
+      "maxItems": 4
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "completion_state": {
+            "const": "PENDING_PREREQUISITES"
+          }
+        },
+        "required": [
+          "completion_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "evaluated_gate_codes": {
+            "maxItems": 0
+          },
+          "ordered_gate_decision_ids": {
+            "maxItems": 0
+          },
+          "blocking_gate_codes": {
+            "maxItems": 0
+          },
+          "prerequisite_materialization_state": {
+            "const": "AWAITING_PREREQUISITE_MATERIALIZATION"
+          },
+          "missing_prerequisite_refs": {
+            "minItems": 1
+          },
+          "durability_boundary": {
+            "const": "NO_PERSISTED_TAPE_YET"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "completion_state": {
+            "const": "COMPLETE_READY_TO_SEAL"
+          }
+        },
+        "required": [
+          "completion_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "evaluated_gate_codes": {
+            "$ref": "#/$defs/presealGateCodeArray"
+          },
+          "ordered_gate_decision_ids": {
+            "minItems": 4
+          },
+          "blocking_gate_codes": {
+            "maxItems": 0
+          },
+          "prerequisite_materialization_state": {
+            "const": "FULLY_MATERIALIZED"
+          },
+          "missing_prerequisite_refs": {
+            "maxItems": 0
+          },
+          "durability_boundary": {
+            "const": "ATOMIC_GATE_BATCH_AND_SEAL"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "completion_state": {
+            "const": "COMPLETE_BLOCKED_PRESTART"
+          }
+        },
+        "required": [
+          "completion_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "evaluated_gate_codes": {
+            "$ref": "#/$defs/presealGateCodeArray"
+          },
+          "ordered_gate_decision_ids": {
+            "minItems": 4
+          },
+          "blocking_gate_codes": {
+            "minItems": 1
+          },
+          "prerequisite_materialization_state": {
+            "const": "FULLY_MATERIALIZED"
+          },
+          "missing_prerequisite_refs": {
+            "maxItems": 0
+          },
+          "durability_boundary": {
+            "const": "PERSIST_PRESTART_TERMINAL_CONTEXT"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -103,7 +103,11 @@ EXPLICIT_SOURCE_REFS = {
     "gate": [GATE_LOGIC_PATH],
 }
 EVENT_EMITTERS = {"RECORD_EVENT", "EMIT_AUDIT_EVENT", "RECORD_OBSERVABILITY"}
-ARTIFACT_PERSISTERS = {"WRITE_ARTIFACT", "PERSIST_DECISION_BUNDLE", "PERSIST_PRESTART_TERMINAL_CONTEXT"}
+ARTIFACT_PERSISTERS = {
+    "WRITE_ARTIFACT",
+    "PERSIST_DECISION_BUNDLE",
+    "PERSIST_PRESTART_TERMINAL_CONTEXT",
+}
 STATE_MUTATOR_PREFIXES = (
     "APPLY_",
     "BEGIN_",
@@ -220,7 +224,12 @@ OBJECT_OVERRIDES = {
     "COMPUTE_EXECUTION_BASIS_HASH": ["RunManifest"],
     "COMPARE_REPLAY_OUTCOMES": ["ReplayAttestation", "DecisionBundle"],
     "PERSIST_REPLAY_ATTESTATION": ["ReplayAttestation"],
-    "FINALIZE_TERMINAL_OUTCOME": ["RunManifest", "DecisionBundle", "ErrorRecord", "RemediationTask"],
+    "FINALIZE_TERMINAL_OUTCOME": [
+        "RunManifest",
+        "DecisionBundle",
+        "ErrorRecord",
+        "RemediationTask",
+    ],
     "FINALIZE_RUN_FAILURE": ["RunManifest", "ErrorRecord"],
     "PERSIST_PRESTART_TERMINAL_CONTEXT": ["Snapshot", "InputFreeze", "GateDecisionRecord"],
     "PLAN_SOURCE_COLLECTION": ["SourcePlan", "SourceCollectionRun"],
@@ -337,13 +346,31 @@ OBJECT_OVERRIDES = {
     "EXECUTE_NIGHTLY_CLIENT_ATTEMPT": ["RunManifest", "NightlyBatchRun"],
 }
 HELPER_CLASS_OVERRIDES = {
-    "BEGIN_ATOMIC_TRANSACTION": ("primitive_transaction", "Atomic transaction primitive used directly in `core_engine.md`."),
-    "COMMIT_ATOMIC_TRANSACTION": ("primitive_transaction", "Atomic transaction primitive used directly in `core_engine.md`."),
-    "ROLLBACK_ATOMIC_TRANSACTION": ("primitive_transaction", "Atomic transaction primitive used directly in `core_engine.md`."),
+    "BEGIN_ATOMIC_TRANSACTION": (
+        "primitive_transaction",
+        "Atomic transaction primitive used directly in `core_engine.md`.",
+    ),
+    "COMMIT_ATOMIC_TRANSACTION": (
+        "primitive_transaction",
+        "Atomic transaction primitive used directly in `core_engine.md`.",
+    ),
+    "ROLLBACK_ATOMIC_TRANSACTION": (
+        "primitive_transaction",
+        "Atomic transaction primitive used directly in `core_engine.md`.",
+    ),
     "HASH": ("builtin_primitive", "Deterministic hash primitive, not a named module heading."),
-    "ASSERT": ("builtin_primitive", "Assertion shorthand used in pseudocode, not a named module heading."),
-    "ERROR": ("builtin_primitive", "Error-return shorthand used in pseudocode, not a named module heading."),
-    "NOOP": ("builtin_primitive", "Explicit no-op shorthand used in pseudocode, not a named module heading."),
+    "ASSERT": (
+        "builtin_primitive",
+        "Assertion shorthand used in pseudocode, not a named module heading.",
+    ),
+    "ERROR": (
+        "builtin_primitive",
+        "Error-return shorthand used in pseudocode, not a named module heading.",
+    ),
+    "NOOP": (
+        "builtin_primitive",
+        "Explicit no-op shorthand used in pseudocode, not a named module heading.",
+    ),
 }
 
 
@@ -458,7 +485,7 @@ def ordered_unique(values: Iterable[str]) -> list[str]:
 
 
 def expand_heading_names(heading_text: str) -> list[str]:
-    without_args = heading_text.replace("(...)","")
+    without_args = heading_text.replace("(...)", "")
     parts = [part.strip() for part in without_args.split("/")]
     return [part for part in parts if re.fullmatch(r"[A-Z][A-Z0-9_]+", part)]
 
@@ -526,7 +553,11 @@ def parse_state_machine_objects() -> list[str]:
 
 def load_swimlane_data() -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]]]:
     phase_index = json.loads(SWIMLANE_PHASE_INDEX_PATH.read_text())
-    step_rows = [json.loads(line) for line in SWIMLANE_STEP_LEDGER_PATH.read_text().splitlines() if line.strip()]
+    step_rows = [
+        json.loads(line)
+        for line in SWIMLANE_STEP_LEDGER_PATH.read_text().splitlines()
+        if line.strip()
+    ]
     phase_map = {phase["phase_id"]: phase for phase in phase_index["phases"]}
     return step_rows, phase_map
 
@@ -587,7 +618,9 @@ def section_goal_text(blocks: dict[str, list[str]]) -> str:
 
 
 def extract_schema_refs(text: str) -> list[str]:
-    return ordered_unique(f"Algorithm/schemas/{stem}.schema.json" for stem in SCHEMA_RE.findall(text))
+    return ordered_unique(
+        f"Algorithm/schemas/{stem}.schema.json" for stem in SCHEMA_RE.findall(text)
+    )
 
 
 def contains_token(name: str, tokens: Iterable[str]) -> bool:
@@ -618,15 +651,22 @@ def infer_family(name: str, text: str, run_phase_bindings: list[dict[str, Any]])
         return "nightly"
     if any(token in name for token in ["REPLAY", "RECOVER", "RECOVERY", "RECLAIM", "ATTESTATION"]):
         return "replay"
-    if name in EVENT_EMITTERS or any(token in name for token in ["AUDIT", "OBSERVABILITY", "TRACE", "METRIC", "LOG_"]):
+    if name in EVENT_EMITTERS or any(
+        token in name for token in ["AUDIT", "OBSERVABILITY", "TRACE", "METRIC", "LOG_"]
+    ):
         return "observability"
     if contains_token(name, READ_MODEL_NAME_TOKENS):
         return "read_model"
-    if name.startswith("BUILD_") and (contains_token(name, EXPERIENCE_NAME_TOKENS) or name.endswith("_STATE")):
+    if name.startswith("BUILD_") and (
+        contains_token(name, EXPERIENCE_NAME_TOKENS) or name.endswith("_STATE")
+    ):
         return "experience_projection"
     if name.endswith("_GATE") or "GATE" in name:
         return "gate"
-    if any(token in name for token in ["AUTHORITY", "TRANSMIT", "SUBMISSION", "RECONCILE", "CALCULATION"]):
+    if any(
+        token in name
+        for token in ["AUTHORITY", "TRANSMIT", "SUBMISSION", "RECONCILE", "CALCULATION"]
+    ):
         return "authority"
     if any(token in name for token in ["FILING", "PACKET", "DECLARED_BASIS", "NOTICE"]):
         return "filing"
@@ -638,13 +678,47 @@ def infer_family(name: str, text: str, run_phase_bindings: list[dict[str, Any]])
         return "twin"
     if any(token in name for token in ["GRAPH", "PROVENANCE", "PROOF", "ENQUIRY"]):
         return "graph"
-    if any(token in name for token in ["COMPUTE", "FORECAST", "RISK", "PARITY", "VALIDATE", "MEASURE_COMPLETENESS", "SEED"]):
+    if any(
+        token in name
+        for token in [
+            "COMPUTE",
+            "FORECAST",
+            "RISK",
+            "PARITY",
+            "VALIDATE",
+            "MEASURE_COMPLETENESS",
+            "SEED",
+        ]
+    ):
         return "compute"
-    if any(token in name for token in ["SOURCE", "COLLECT", "WINDOW", "MISSING_SOURCES", "STALE_SOURCES", "LATE_DATA"]):
+    if any(
+        token in name
+        for token in [
+            "SOURCE",
+            "COLLECT",
+            "WINDOW",
+            "MISSING_SOURCES",
+            "STALE_SOURCES",
+            "LATE_DATA",
+        ]
+    ):
         return "collection"
-    if any(token in name for token in ["CANDIDATE", "CANONICAL", "CONFLICT", "ARTIFACT_SET", "NORMALIZATION", "EVIDENCE"]):
+    if any(
+        token in name
+        for token in [
+            "CANDIDATE",
+            "CANONICAL",
+            "CONFLICT",
+            "ARTIFACT_SET",
+            "NORMALIZATION",
+            "EVIDENCE",
+        ]
+    ):
         return "canonicalization"
-    if any(token in name for token in ["CONFIG", "FREEZE", "INPUT_SET", "SCHEMA_BUNDLE", "EXECUTION_BASIS"]):
+    if any(
+        token in name
+        for token in ["CONFIG", "FREEZE", "INPUT_SET", "SCHEMA_BUNDLE", "EXECUTION_BASIS"]
+    ):
         return "freeze"
     if any(token in name for token in ["MANIFEST", "LINEAGE", "CONTINUATION", "DECISION_BUNDLE"]):
         return "manifest"
@@ -689,14 +763,20 @@ def infer_external_boundary(name: str, text: str, family: str) -> str:
             and contains_any_whole_word(upper_text, ("AUTHORITY",))
             and any(
                 phrase in lower_text
-                for phrase in ("request envelope", "submission path", "live authority", "callback", "poll")
+                for phrase in (
+                    "request envelope",
+                    "submission path",
+                    "live authority",
+                    "callback",
+                    "poll",
+                )
             )
         )
     ):
         return "authority"
-    if contains_any_whole_word(name, EXTERNAL_BOUNDARY_TOKENS["browser_handoff"]) or contains_any_whole_word(
-        upper_text, EXTERNAL_BOUNDARY_TOKENS["browser_handoff"]
-    ):
+    if contains_any_whole_word(
+        name, EXTERNAL_BOUNDARY_TOKENS["browser_handoff"]
+    ) or contains_any_whole_word(upper_text, EXTERNAL_BOUNDARY_TOKENS["browser_handoff"]):
         return "browser_handoff"
     if contains_any_whole_word(name, EXTERNAL_BOUNDARY_TOKENS["notification"]):
         return "notification"
@@ -777,7 +857,9 @@ def infer_state_transitions(
 ) -> list[str]:
     impacts: list[str] = []
     for object_name in related_artifacts:
-        if object_name in state_machine_objects and ("lifecycle_state" in text or name.startswith(STATE_MUTATOR_PREFIXES)):
+        if object_name in state_machine_objects and (
+            "lifecycle_state" in text or name.startswith(STATE_MUTATOR_PREFIXES)
+        ):
             impacts.append(f"{object_name}.lifecycle_state")
     if name.startswith("TRANSITION_"):
         suffix = name.replace("TRANSITION_", "")
@@ -816,7 +898,11 @@ def infer_audit_emissions(name: str, text: str, known_event_codes: set[str]) -> 
         return ["Dynamic caller-supplied manifest or protocol event"]
     if name in {"EMIT_AUDIT_EVENT", "RECORD_OBSERVABILITY"}:
         return ["Audit or observability emission"]
-    found = [event_code for event_code in known_event_codes if re.search(rf"\b{re.escape(event_code)}\b", text)]
+    found = [
+        event_code
+        for event_code in known_event_codes
+        if re.search(rf"\b{re.escape(event_code)}\b", text)
+    ]
     return sorted(found)
 
 
@@ -839,11 +925,17 @@ def infer_side_effects(
     if purity == "event_emitter":
         notes.append("Emits audit or observability events without directly widening domain state.")
     if purity == "projection_builder":
-        notes.append("Builds read-side or shell projection state only; command-side truth must already exist.")
+        notes.append(
+            "Builds read-side or shell projection state only; command-side truth must already exist."
+        )
     if purity == "external_transport":
-        notes.append(f"Crosses the `{boundary}` boundary under governed transport or reconciliation rules.")
+        notes.append(
+            f"Crosses the `{boundary}` boundary under governed transport or reconciliation rules."
+        )
     if purity == "mixed":
-        notes.append("Combines durable state work with additional event, artifact, or orchestration consequences.")
+        notes.append(
+            "Combines durable state work with additional event, artifact, or orchestration consequences."
+        )
     if state_transition_impacts:
         notes.append(f"Touches lifecycle law for {', '.join(state_transition_impacts[:4])}.")
     if audit_events and purity != "event_emitter":
@@ -867,7 +959,9 @@ def security_note(family: str, boundary: str, purity: str) -> str:
     if family in {"read_model", "experience_projection"}:
         return "Must preserve customer-safe visibility, masking posture, and shell continuity without write-side side effects."
     if purity in {"artifact_persister", "state_mutator", "mixed"}:
-        return "Must fail closed and preserve immutable lineage, audit refs, and partition isolation."
+        return (
+            "Must fail closed and preserve immutable lineage, audit refs, and partition isolation."
+        )
     return "Consumes only authorized, frozen, and partition-safe inputs; no local scope widening is permitted."
 
 
@@ -876,7 +970,9 @@ def find_input_output_objects(items: Iterable[str], object_names: Iterable[str])
     return extract_objects(text, object_names, module_name="")
 
 
-def build_callsite_rows(step_rows: list[dict[str, Any]], phase_map: dict[str, dict[str, Any]]) -> tuple[list[dict[str, Any]], dict[str, list[dict[str, Any]]], list[dict[str, Any]]]:
+def build_callsite_rows(
+    step_rows: list[dict[str, Any]], phase_map: dict[str, dict[str, Any]]
+) -> tuple[list[dict[str, Any]], dict[str, list[dict[str, Any]]], list[dict[str, Any]]]:
     callsite_rows: list[dict[str, Any]] = []
     run_bindings: dict[str, list[dict[str, Any]]] = defaultdict(list)
     helper_rows: list[dict[str, Any]] = []
@@ -914,8 +1010,14 @@ def build_callsite_rows(step_rows: list[dict[str, Any]], phase_map: dict[str, di
                 "primary_lane": step["primary_lane"],
                 "statement_kind": step["statement_kind"],
                 "statement": step["statement"],
-                "classification": HELPER_CLASS_OVERRIDES.get(helper["call_name"], ("orchestrator_helper", helper.get("reason", "Helper outside modules.md")))[0],
-                "rationale": HELPER_CLASS_OVERRIDES.get(helper["call_name"], ("orchestrator_helper", helper.get("reason", "Helper outside modules.md")))[1],
+                "classification": HELPER_CLASS_OVERRIDES.get(
+                    helper["call_name"],
+                    ("orchestrator_helper", helper.get("reason", "Helper outside modules.md")),
+                )[0],
+                "rationale": HELPER_CLASS_OVERRIDES.get(
+                    helper["call_name"],
+                    ("orchestrator_helper", helper.get("reason", "Helper outside modules.md")),
+                )[1],
             }
             helper_rows.append(helper_row)
             callsite_rows.append(helper_row)
@@ -943,7 +1045,9 @@ def build_module_records(
     records: list[ModuleRecord] = []
     for module_name in sorted(grouped_entries):
         entries = grouped_entries[module_name]
-        preferred_entry = next((entry for entry in entries if entry.module_names == (module_name,)), entries[0])
+        preferred_entry = next(
+            (entry for entry in entries if entry.module_names == (module_name,)), entries[0]
+        )
         blocks = extract_labeled_blocks(line for entry in entries for line in entry.body_lines)
         goal = section_goal_text(blocks)
         inputs = compact_items(blocks.get("input", []))
@@ -973,17 +1077,23 @@ def build_module_records(
             extract_schema_refs(merged_text)
             + [object_to_schema[name] for name in related_artifacts if name in object_to_schema]
         )
-        state_impacts = infer_state_transitions(module_name, merged_text, related_artifacts, state_machine_objects)
+        state_impacts = infer_state_transitions(
+            module_name, merged_text, related_artifacts, state_machine_objects
+        )
         audit_emissions = infer_audit_emissions(module_name, merged_text, known_event_codes)
         artifact_writes = infer_artifact_writes(module_name, outputs, related_artifacts, purity)
-        stateful_side_effects = infer_side_effects(purity, boundary, related_artifacts, state_impacts, audit_emissions)
+        stateful_side_effects = infer_side_effects(
+            purity, boundary, related_artifacts, state_impacts, audit_emissions
+        )
         input_objects = ordered_unique(find_input_output_objects(inputs, object_names))
         output_objects = ordered_unique(
             find_input_output_objects(outputs, object_names)
             + [item for item in artifact_writes if item in object_names]
             + (
                 related_artifacts
-                if module_name.startswith(("BUILD_", "COMPUTE_", "DERIVE_", "ASSEMBLE_", "SUMMARIZE_", "SYNTHESIZE_"))
+                if module_name.startswith(
+                    ("BUILD_", "COMPUTE_", "DERIVE_", "ASSEMBLE_", "SUMMARIZE_", "SYNTHESIZE_")
+                )
                 else []
             )
         )
@@ -998,16 +1108,18 @@ def build_module_records(
             )
         if family in EXPLICIT_SOURCE_REFS:
             notes.append(
-                "Related bounded-domain contracts: "
-                + ", ".join(EXPLICIT_SOURCE_REFS[family])
+                "Related bounded-domain contracts: " + ", ".join(EXPLICIT_SOURCE_REFS[family])
             )
         records.append(
             ModuleRecord(
                 module_name=module_name,
                 defined_in=MODULES_PATH,
-                source_heading_or_logical_block=line_ref(MODULES_PATH, preferred_entry.line_number, preferred_entry.heading_text),
+                source_heading_or_logical_block=line_ref(
+                    MODULES_PATH, preferred_entry.line_number, preferred_entry.heading_text
+                ),
                 module_family=family,
-                semantic_role=goal or f"Named procedure `{module_name}` from the module contract catalog.",
+                semantic_role=goal
+                or f"Named procedure `{module_name}` from the module contract catalog.",
                 inputs=inputs,
                 outputs=outputs,
                 stateful_side_effects=stateful_side_effects,
@@ -1041,9 +1153,15 @@ def make_dependency_type(
     run_related: bool,
 ) -> str:
     if source.external_boundary_crossing != "none" or target.external_boundary_crossing != "none":
-        if shared_outputs or source.external_boundary_crossing == "authority" or target.external_boundary_crossing == "authority":
+        if (
+            shared_outputs
+            or source.external_boundary_crossing == "authority"
+            or target.external_boundary_crossing == "authority"
+        ):
             return "external_boundary_dependency"
-    if source.state_transition_impacts and set(source.state_transition_impacts) & set(target.state_transition_impacts):
+    if source.state_transition_impacts and set(source.state_transition_impacts) & set(
+        target.state_transition_impacts
+    ):
         return "state_transition_dependency"
     if shared_outputs:
         return "artifact_availability_dependency"
@@ -1052,7 +1170,9 @@ def make_dependency_type(
     return "parameter_data_dependency"
 
 
-def build_dependency_edges(records: list[ModuleRecord], run_bindings: dict[str, list[dict[str, Any]]]) -> list[dict[str, Any]]:
+def build_dependency_edges(
+    records: list[ModuleRecord], run_bindings: dict[str, list[dict[str, Any]]]
+) -> list[dict[str, Any]]:
     record_by_name = {record.module_name: record for record in records}
     edges: dict[tuple[str, str, str], dict[str, Any]] = {}
 
@@ -1081,9 +1201,13 @@ def build_dependency_edges(records: list[ModuleRecord], run_bindings: dict[str, 
         row = edges[key]
         row["rationales"] = ordered_unique(list(row["rationales"]) + [rationale])
         row["source_refs"] = ordered_unique(list(row["source_refs"]) + [source_ref])
-        row["shared_artifacts"] = ordered_unique(list(row["shared_artifacts"]) + list(shared_artifacts))
+        row["shared_artifacts"] = ordered_unique(
+            list(row["shared_artifacts"]) + list(shared_artifacts)
+        )
         if run_phase_context:
-            row["run_phase_contexts"] = ordered_unique(list(row["run_phase_contexts"]) + [run_phase_context])
+            row["run_phase_contexts"] = ordered_unique(
+                list(row["run_phase_contexts"]) + [run_phase_context]
+            )
 
     canonical_names = {record.module_name for record in records}
 
@@ -1100,7 +1224,9 @@ def build_dependency_edges(records: list[ModuleRecord], run_bindings: dict[str, 
     for target in records:
         text = text_by_module[target.module_name]
         for referenced in ordered_unique(
-            name for name in UPPER_CALL_RE.findall(text) if name in canonical_names and name != target.module_name
+            name
+            for name in UPPER_CALL_RE.findall(text)
+            if name in canonical_names and name != target.module_name
         ):
             source = record_by_name[referenced]
             shared = ordered_unique(set(source.output_objects) & set(target.input_objects))
@@ -1115,17 +1241,28 @@ def build_dependency_edges(records: list[ModuleRecord], run_bindings: dict[str, 
 
     # RUN_ENGINE adjacency edges.
     for module_name, bindings in run_bindings.items():
-        bindings.sort(key=lambda row: (row["ordered_index"], row["step_order"], row["source_line_start"], row["call_name"]))
+        bindings.sort(
+            key=lambda row: (
+                row["ordered_index"],
+                row["step_order"],
+                row["source_line_start"],
+                row["call_name"],
+            )
+        )
 
     phase_steps: dict[int, list[tuple[int, str, dict[str, Any]]]] = defaultdict(list)
     for module_name, bindings in run_bindings.items():
         for binding in bindings:
-            phase_steps[binding["ordered_index"]].append((binding["step_order"], module_name, binding))
+            phase_steps[binding["ordered_index"]].append(
+                (binding["step_order"], module_name, binding)
+            )
 
     for ordered_index, items in phase_steps.items():
         items.sort(key=lambda item: (item[0], item[2]["source_line_start"], item[1]))
         flattened = [(module_name, binding) for _step_order, module_name, binding in items]
-        for (upstream, upstream_binding), (downstream, downstream_binding) in zip(flattened, flattened[1:]):
+        for (upstream, upstream_binding), (downstream, downstream_binding) in zip(
+            flattened, flattened[1:]
+        ):
             source = record_by_name[upstream]
             target = record_by_name[downstream]
             shared = ordered_unique(set(source.output_objects) & set(target.input_objects))
@@ -1163,14 +1300,18 @@ def build_dependency_edges(records: list[ModuleRecord], run_bindings: dict[str, 
                 register(
                     upstream=producer.module_name,
                     downstream=consumer.module_name,
-                    dependency_type=make_dependency_type(producer, consumer, [object_name], run_related=False),
+                    dependency_type=make_dependency_type(
+                        producer, consumer, [object_name], run_related=False
+                    ),
                     rationale=f"`{producer.module_name}` produces or persists `{object_name}` consumed by `{consumer.module_name}`.",
                     source_ref=producer.source_heading_or_logical_block,
                     shared_artifacts=[object_name],
                 )
 
     rows: list[dict[str, Any]] = []
-    for index, ((upstream, downstream, dependency_type), row) in enumerate(sorted(edges.items()), start=1):
+    for index, ((upstream, downstream, dependency_type), row) in enumerate(
+        sorted(edges.items()), start=1
+    ):
         rows.append(
             {
                 "edge_id": f"E{index:04d}",
@@ -1238,7 +1379,9 @@ def build_unresolved_register(helper_rows: list[dict[str, Any]]) -> dict[str, An
     return {
         "summary": {
             "unresolved_or_primitive_call_count": len(rows),
-            "helper_classification_counts": dict(sorted(Counter(row["classification"] for row in rows).items())),
+            "helper_classification_counts": dict(
+                sorted(Counter(row["classification"] for row in rows).items())
+            ),
         },
         "rows": rows,
     }
@@ -1259,9 +1402,15 @@ def build_side_effect_matrix(records: list[ModuleRecord]) -> dict[str, Any]:
     return {
         "summary": {
             "module_count": len(records),
-            "family_counts": dict(sorted(Counter(record.module_family for record in records).items())),
-            "purity_counts": dict(sorted(Counter(record.purity_class for record in records).items())),
-            "boundary_counts": dict(sorted(Counter(record.external_boundary_crossing for record in records).items())),
+            "family_counts": dict(
+                sorted(Counter(record.module_family for record in records).items())
+            ),
+            "purity_counts": dict(
+                sorted(Counter(record.purity_class for record in records).items())
+            ),
+            "boundary_counts": dict(
+                sorted(Counter(record.external_boundary_crossing for record in records).items())
+            ),
         },
         "modules": [
             {
@@ -1283,7 +1432,10 @@ def build_side_effect_matrix(records: list[ModuleRecord]) -> dict[str, Any]:
 
 def infer_touchpoint_roles(record: ModuleRecord) -> list[str]:
     roles: list[str] = []
-    if any("validate against" in output.lower() for output in record.outputs) or "validate against" in record.semantic_role.lower():
+    if (
+        any("validate against" in output.lower() for output in record.outputs)
+        or "validate against" in record.semantic_role.lower()
+    ):
         roles.append("validate")
     if record.purity_class in {"artifact_persister", "state_mutator", "mixed"}:
         roles.append("mutate")
@@ -1325,7 +1477,12 @@ def build_schema_touchpoints(records: list[ModuleRecord]) -> dict[str, Any]:
     }
 
 
-def build_catalog_payload(raw_entries: list[RawHeadingEntry], records: list[ModuleRecord], edges: list[dict[str, Any]], helper_rows: list[dict[str, Any]]) -> dict[str, Any]:
+def build_catalog_payload(
+    raw_entries: list[RawHeadingEntry],
+    records: list[ModuleRecord],
+    edges: list[dict[str, Any]],
+    helper_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
     return {
         "summary": {
             "raw_heading_count": len(raw_entries),
@@ -1333,8 +1490,12 @@ def build_catalog_payload(raw_entries: list[RawHeadingEntry], records: list[Modu
             "run_bound_module_count": sum(1 for record in records if record.callsite_count > 0),
             "dependency_edge_count": len(edges),
             "helper_call_count": len({row["call_name"] for row in helper_rows}),
-            "family_counts": dict(sorted(Counter(record.module_family for record in records).items())),
-            "purity_counts": dict(sorted(Counter(record.purity_class for record in records).items())),
+            "family_counts": dict(
+                sorted(Counter(record.module_family for record in records).items())
+            ),
+            "purity_counts": dict(
+                sorted(Counter(record.purity_class for record in records).items())
+            ),
         },
         "raw_heading_entries": [
             {
@@ -1354,7 +1515,12 @@ def write_callsite_index(callsite_rows: list[dict[str, Any]]) -> None:
     write_jsonl(MODULE_CALLSITE_INDEX_PATH, callsite_rows)
 
 
-def write_docs(catalog: dict[str, Any], edges: list[dict[str, Any]], side_effects: dict[str, Any], schema_touchpoints: dict[str, Any]) -> None:
+def write_docs(
+    catalog: dict[str, Any],
+    edges: list[dict[str, Any]],
+    side_effects: dict[str, Any],
+    schema_touchpoints: dict[str, Any],
+) -> None:
     summary = catalog["summary"]
     records = catalog["modules"]
     edge_count = len(edges)
@@ -1389,7 +1555,10 @@ def write_docs(catalog: dict[str, Any], edges: list[dict[str, Any]], side_effect
     )
     most_connected = sorted(
         records,
-        key=lambda row: (len(row["upstream_dependencies"]) + len(row["downstream_dependents"]), row["module_name"]),
+        key=lambda row: (
+            len(row["upstream_dependencies"]) + len(row["downstream_dependents"]),
+            row["module_name"],
+        ),
         reverse=True,
     )[:20]
     for row in most_connected:
@@ -1407,10 +1576,25 @@ def write_docs(catalog: dict[str, Any], edges: list[dict[str, Any]], side_effect
     ]
     phase_map = json.loads(SWIMLANE_PHASE_INDEX_PATH.read_text())["phases"]
     for phase in phase_map:
-        phase_modules = [row for row in records if any(binding["phase_id"] == phase["phase_id"] for binding in row["run_phase_bindings"])]
+        phase_modules = [
+            row
+            for row in records
+            if any(
+                binding["phase_id"] == phase["phase_id"] for binding in row["run_phase_bindings"]
+            )
+        ]
         family_counts = Counter(module["module_family"] for module in phase_modules)
-        dominant = ", ".join(f"{family}:{count}" for family, count in family_counts.most_common(3)) or "n/a"
-        sample = ", ".join(module["module_name"] for module in sorted(phase_modules, key=lambda module: module["module_name"])[:8]) or "n/a"
+        dominant = (
+            ", ".join(f"{family}:{count}" for family, count in family_counts.most_common(3))
+            or "n/a"
+        )
+        sample = (
+            ", ".join(
+                module["module_name"]
+                for module in sorted(phase_modules, key=lambda module: module["module_name"])[:8]
+            )
+            or "n/a"
+        )
         phase_bind_lines.append(
             f"| `{phase['phase_id']}` | {len(phase_modules)} | {dominant} | {sample} |"
         )
@@ -1464,21 +1648,21 @@ def write_mermaid(records: list[ModuleRecord], edges: list[dict[str, Any]]) -> N
     for record in records:
         records_by_family[record.module_family].append(record)
     for family in FAMILY_ORDER:
-        family_records = sorted(records_by_family.get(family, []), key=lambda record: record.module_name)
+        family_records = sorted(
+            records_by_family.get(family, []), key=lambda record: record.module_name
+        )
         if not family_records:
             continue
-        lines.append(f"  subgraph {family}[\"{family}\"]")
+        lines.append(f'  subgraph {family}["{family}"]')
         for record in family_records:
             node_id = f"M_{record.module_name}"
-            lines.append(f"    {node_id}[\"{record.module_name}\"]")
+            lines.append(f'    {node_id}["{record.module_name}"]')
         lines.append("  end")
         lines.append("")
     for edge in edges:
         upstream = f"M_{edge['upstream_module']}"
         downstream = f"M_{edge['downstream_module']}"
-        lines.append(
-            f"  {upstream} -->|\"{edge['dependency_type']}\"| {downstream}"
-        )
+        lines.append(f'  {upstream} -->|"{edge["dependency_type"]}"| {downstream}')
     MODULE_GRAPH_PATH.write_text("\n".join(lines) + "\n")
 
 
@@ -1541,7 +1725,9 @@ def write_outputs(outputs: dict[str, Any]) -> None:
     json_write(SIDE_EFFECT_MATRIX_PATH, outputs["side_effects"])
     json_write(SCHEMA_TOUCHPOINTS_PATH, outputs["schema_touchpoints"])
     json_write(UNRESOLVED_CALLS_PATH, outputs["unresolved"])
-    write_docs(outputs["catalog"], outputs["edges"], outputs["side_effects"], outputs["schema_touchpoints"])
+    write_docs(
+        outputs["catalog"], outputs["edges"], outputs["side_effects"], outputs["schema_touchpoints"]
+    )
     write_mermaid(records, outputs["edges"])
 
 
@@ -1588,7 +1774,9 @@ def main() -> int:
     json_write(SIDE_EFFECT_MATRIX_PATH, outputs["side_effects"])
     json_write(SCHEMA_TOUCHPOINTS_PATH, outputs["schema_touchpoints"])
     json_write(UNRESOLVED_CALLS_PATH, outputs["unresolved"])
-    write_docs(outputs["catalog"], outputs["edges"], outputs["side_effects"], outputs["schema_touchpoints"])
+    write_docs(
+        outputs["catalog"], outputs["edges"], outputs["side_effects"], outputs["schema_touchpoints"]
+    )
     write_mermaid(records, outputs["edges"])
     summary = {
         "status": "PASS",
@@ -1596,7 +1784,9 @@ def main() -> int:
         "canonical_module_count": outputs["catalog"]["summary"]["canonical_module_count"],
         "run_bound_module_count": outputs["catalog"]["summary"]["run_bound_module_count"],
         "dependency_edge_count": outputs["catalog"]["summary"]["dependency_edge_count"],
-        "unresolved_helper_count": outputs["unresolved"]["summary"]["unresolved_or_primitive_call_count"],
+        "unresolved_helper_count": outputs["unresolved"]["summary"][
+            "unresolved_or_primitive_call_count"
+        ],
     }
     print(json.dumps(summary, indent=2, sort_keys=True))
     return 0

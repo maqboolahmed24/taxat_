@@ -1,0 +1,90 @@
+{
+  "$schema": "./time_profile.schema.json",
+  "contract_version": "1.0",
+  "profile_id": "canonical_time_profile_v1",
+  "basis_statement": "Canonical time helpers normalize instants to UTC, keep business dates calendar-safe, and separate human display formatting from replay and hash truth.",
+  "source_lineage": [
+    {
+      "source_file": "implementation_conventions.md",
+      "source_heading_or_logical_block": "timezone normalization and deterministic serialization",
+      "rationale": "Replay-safe emission requires explicit timezone handling and canonical UTC output."
+    },
+    {
+      "source_file": "replay_and_reproducibility_contract.md",
+      "source_heading_or_logical_block": "canonical time handling within deterministic outcome payloads",
+      "rationale": "Instant normalization must happen before hashes or replay evidence are emitted."
+    },
+    {
+      "source_file": "compute_parity_and_trust_formulas.md",
+      "source_heading_or_logical_block": "hours_between and exact timing formulas",
+      "rationale": "Cross-runtime duration math assumes UTC-normalized instants."
+    }
+  ],
+  "canonical_instant_shape": "YYYY-MM-DDTHH:MM:SS[.mmm]Z",
+  "business_date_shape": "YYYY-MM-DD",
+  "period_families": ["CALENDAR_MONTH", "CALENDAR_QUARTER", "TAX_YEAR"],
+  "instant_examples": [
+    {
+      "case_ref": "offset_normalizes_to_utc",
+      "label": "Offset timestamp normalizes before emission",
+      "input": "2026-04-23T10:15:00+01:00",
+      "expected": "2026-04-23T09:15:00Z"
+    },
+    {
+      "case_ref": "milliseconds_preserved",
+      "label": "Milliseconds survive when present",
+      "input": "2026-04-23T09:15:00.120+00:00",
+      "expected": "2026-04-23T09:15:00.120Z"
+    }
+  ],
+  "business_date_examples": [
+    {
+      "case_ref": "calendar_safe_date",
+      "label": "Business date remains a plain calendar day",
+      "input": "2026-04-23"
+    }
+  ],
+  "period_examples": [
+    {
+      "case_ref": "calendar_month",
+      "label": "Calendar month label",
+      "family": "CALENDAR_MONTH",
+      "input": "2026-04"
+    },
+    {
+      "case_ref": "calendar_quarter",
+      "label": "Calendar quarter label",
+      "family": "CALENDAR_QUARTER",
+      "input": "2026-Q2"
+    },
+    {
+      "case_ref": "tax_year",
+      "label": "Tax year label",
+      "family": "TAX_YEAR",
+      "input": "2026-2027"
+    }
+  ],
+  "display_example": {
+    "input": "2026-04-23T09:15:00Z",
+    "locale": "en-GB",
+    "timeZone": "Europe/London",
+    "note": "Display helpers remain explicitly locale- and zone-bound so canonical storage output never depends on ambient machine settings."
+  },
+  "forbidden_cases": [
+    {
+      "label": "Missing timezone",
+      "input": "2026-04-23T09:15:00",
+      "reason": "Canonical instants must include Z or an explicit offset."
+    },
+    {
+      "label": "Invalid calendar date",
+      "input": "2026-02-30",
+      "reason": "Business dates must be calendar-safe."
+    },
+    {
+      "label": "Malformed tax year",
+      "input": "2026-2028",
+      "reason": "Tax year labels must advance by exactly one year."
+    }
+  ]
+}

@@ -3,11 +3,7 @@ export const uploadIntakeSafetyBoardRoute = {
   title: "Upload Intake Safety Board",
   purpose:
     "Render a calm intake-safety conveyor for scan coverage, quarantine posture, and release evidence without collapsing transfer, scan, validation, and attachment confirmation into one status.",
-  focusOrder: [
-    "upload-intake-scenario-rail",
-    "upload-intake-conveyor",
-    "upload-intake-inspector",
-  ],
+  focusOrder: ["upload-intake-scenario-rail", "upload-intake-conveyor", "upload-intake-inspector"],
   sections: [
     "Received",
     "Transferred",

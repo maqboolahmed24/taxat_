@@ -7,8 +7,7 @@ export const MANUAL_CHECKPOINT_REASONS = [
   "POLICY_CONFIRMATION",
 ] as const;
 
-export type ManualCheckpointReason =
-  (typeof MANUAL_CHECKPOINT_REASONS)[number];
+export type ManualCheckpointReason = (typeof MANUAL_CHECKPOINT_REASONS)[number];
 
 export type ManualCheckpointStatus = "OPEN" | "RESUMED" | "CANCELLED";
 export type ReentryPolicy =
@@ -49,9 +48,7 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
-export function createManualCheckpoint(
-  input: ManualCheckpointInput,
-): ManualCheckpointRecord {
+export function createManualCheckpoint(input: ManualCheckpointInput): ManualCheckpointRecord {
   return {
     checkpointId: input.checkpointId,
     stepId: input.stepId,
@@ -72,9 +69,7 @@ export function resumeManualCheckpoint(
   note: string,
 ): ManualCheckpointRecord {
   if (checkpoint.status !== "OPEN") {
-    throw new Error(
-      `Checkpoint ${checkpoint.checkpointId} is not open and cannot be resumed.`,
-    );
+    throw new Error(`Checkpoint ${checkpoint.checkpointId} is not open and cannot be resumed.`);
   }
   return {
     ...checkpoint,

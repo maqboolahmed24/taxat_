@@ -1,0 +1,291 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/shell_state_taxonomy_contract.schema.json",
+  "title": "ShellStateTaxonomyContract",
+  "description": "Cross-shell empty, limitation, freshness, and recovery semantics contract. Freezes the one active empty-state taxonomy code when a shell is rendering absence or limitation, the exact settlement and recovery posture reflected into the mounted shell, the mounted-context behavior during freshening or recovery, and the shared renderer policies that forbid generic placeholders, route-wide spinner replacement, or profile-local vocabulary drift.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "current_empty_state_or_null",
+    "current_empty_surface_code_or_null",
+    "limitation_reason_codes",
+    "current_settlement_state",
+    "current_recovery_posture",
+    "mounted_context_state",
+    "generic_placeholder_policy",
+    "loading_strategy",
+    "limitation_reason_policy",
+    "stale_action_policy",
+    "recovery_navigation_policy",
+    "profile_copy_policy"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "SHELL_STATE_TAXONOMY_V1"
+    },
+    "current_empty_state_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "NOT_REQUESTED",
+        "NOT_YET_MATERIALIZED",
+        "LIMITED",
+        "NOT_APPLICABLE",
+        null
+      ]
+    },
+    "current_empty_surface_code_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "CONTEXT_BAR",
+        "DECISION_SUMMARY",
+        "DETAIL_DRAWER",
+        "STATUS_HERO",
+        "TASK_QUEUE",
+        "DOCUMENT_CENTER",
+        "APPROVAL_CENTER",
+        "STEP_WORKSPACE",
+        "SUPPORT_PANEL",
+        "LIMITATION_NOTICE",
+        "ATTENTION_SUMMARY",
+        "PRIMARY_CANVAS",
+        "TRAILING_INSPECTOR",
+        null
+      ]
+    },
+    "limitation_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "current_settlement_state": {
+      "type": "string",
+      "enum": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ]
+    },
+    "current_recovery_posture": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ]
+    },
+    "mounted_context_state": {
+      "type": "string",
+      "enum": [
+        "PRESERVED",
+        "INLINE_REFRESH",
+        "READ_ONLY_PRESERVED",
+        "INLINE_RECOVERY",
+        "SUPERSEDED"
+      ]
+    },
+    "generic_placeholder_policy": {
+      "const": "FORBID_GENERIC_EMPTY_SPINNER_WARNING"
+    },
+    "loading_strategy": {
+      "const": "INLINE_PRESERVE_PRIOR_CONTENT"
+    },
+    "limitation_reason_policy": {
+      "const": "LIMITED_REQUIRES_EXPLICIT_REASON_CODES"
+    },
+    "stale_action_policy": {
+      "const": "STALE_DEGRADED_AND_RECOVERY_REQUIRE_NO_SAFE_ACTION"
+    },
+    "recovery_navigation_policy": {
+      "const": "PRESERVE_CURRENT_OBJECT_UNLESS_SUPERSEDED"
+    },
+    "profile_copy_policy": {
+      "const": "PROFILE_COPY_MUST_MAP_TO_SHARED_TAXONOMY"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "current_empty_state_or_null": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "current_empty_state_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "current_empty_surface_code_or_null": {
+            "type": "null"
+          },
+          "limitation_reason_codes": {
+            "maxItems": 0
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "current_empty_surface_code_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "current_empty_state_or_null": {
+            "const": "LIMITED"
+          }
+        },
+        "required": [
+          "current_empty_state_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "limitation_reason_codes": {
+            "minItems": 1
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "limitation_reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "current_settlement_state": {
+            "enum": [
+              "STEADY",
+              "RECEIPT_PENDING"
+            ]
+          }
+        },
+        "required": [
+          "current_settlement_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "mounted_context_state": {
+            "const": "PRESERVED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "current_settlement_state": {
+            "const": "FRESHENING"
+          }
+        },
+        "required": [
+          "current_settlement_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "mounted_context_state": {
+            "const": "INLINE_REFRESH"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "current_settlement_state": {
+            "enum": [
+              "STALE_REVIEW_REQUIRED",
+              "DEGRADED_READ_ONLY"
+            ]
+          }
+        },
+        "required": [
+          "current_settlement_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "mounted_context_state": {
+            "const": "READ_ONLY_PRESERVED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "current_settlement_state": {
+            "const": "RECOVERY_REQUIRED"
+          },
+          "current_recovery_posture": {
+            "const": "OBJECT_SUPERSEDED"
+          }
+        },
+        "required": [
+          "current_settlement_state",
+          "current_recovery_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "mounted_context_state": {
+            "const": "SUPERSEDED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "current_settlement_state": {
+            "const": "RECOVERY_REQUIRED"
+          },
+          "current_recovery_posture": {
+            "not": {
+              "const": "OBJECT_SUPERSEDED"
+            }
+          }
+        },
+        "required": [
+          "current_settlement_state",
+          "current_recovery_posture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "mounted_context_state": {
+            "const": "INLINE_RECOVERY"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

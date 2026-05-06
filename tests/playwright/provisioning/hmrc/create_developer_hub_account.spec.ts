@@ -4,9 +4,7 @@ import path from "node:path";
 
 import { expect, test } from "@playwright/test";
 
-import {
-  createDeveloperHubAccount,
-} from "../../../../automation/provisioning/src/providers/hmrc/flows/create_developer_hub_account.js";
+import { createDeveloperHubAccount } from "../../../../automation/provisioning/src/providers/hmrc/flows/create_developer_hub_account.js";
 import {
   ensureHmrcProjectWorkspace,
   assertDeveloperHubWorkspaceRecordSanitized,
@@ -17,9 +15,7 @@ import {
   DEVELOPER_HUB_PROVIDER_ID,
   type DeveloperHubEntryUrls,
 } from "../../../../automation/provisioning/src/providers/hmrc/flows/developer_hub_shared.js";
-import {
-  createRunContext,
-} from "../../../../automation/provisioning/src/core/run_context.js";
+import { createRunContext } from "../../../../automation/provisioning/src/core/run_context.js";
 
 function fixtureEntryUrls(scenario: string): DeveloperHubEntryUrls {
   const base = `/automation/provisioning/tests/fixtures/hmrc_developer_hub_portal.html?scenario=${scenario}`;
@@ -88,9 +84,7 @@ test("fresh registration creates a sanitized workspace record and lands in Appli
   expect(result.workspaceRecord.developer_hub_account.source_disposition).toBe(
     "CREATED_DURING_RUN",
   );
-  expect(result.workspaceRecord.workspace_state.landing_status).toBe(
-    "APPLICATIONS_HOME_REACHED",
-  );
+  expect(result.workspaceRecord.workspace_state.landing_status).toBe("APPLICATIONS_HOME_REACHED");
   assertDeveloperHubWorkspaceRecordSanitized(result.workspaceRecord, [
     fixtureCredentials().password,
   ]);
@@ -127,9 +121,7 @@ test("activation checkpoint persists resumable state without leaking raw credent
   expect(workspaceRecordRaw).toContain("EMAIL_VERIFICATION_PENDING");
 });
 
-test("duplicate-account registration safely falls back to sign-in", async ({
-  page,
-}) => {
+test("duplicate-account registration safely falls back to sign-in", async ({ page }) => {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), "taxat-hmrc-devhub-duplicate-"));
   const workspaceRecordPath = path.join(rootDir, "workspace_record.json");
 
@@ -145,9 +137,7 @@ test("duplicate-account registration safely falls back to sign-in", async ({
   });
 
   expect(result.outcome).toBe("APPLICATIONS_READY");
-  expect(result.workspaceRecord.developer_hub_account.source_disposition).toBe(
-    "ADOPTED_EXISTING",
-  );
+  expect(result.workspaceRecord.developer_hub_account.source_disposition).toBe("ADOPTED_EXISTING");
   expect(result.notes.join(" ")).toContain("fell back to sign-in");
 });
 

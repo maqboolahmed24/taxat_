@@ -14,9 +14,13 @@ DOCS_ANALYSIS_DIR = ROOT / "docs" / "analysis"
 PROTOTYPE_DIR = ROOT / "prototypes" / "analysis" / "frontend_contract_atlas"
 TESTS_DIR = ROOT / "tests" / "playwright"
 
-FRONTEND_REQUIREMENTS_PATH = DOCS_ANALYSIS_DIR / "13_frontend_shell_route_and_interaction_layer_requirements.md"
+FRONTEND_REQUIREMENTS_PATH = (
+    DOCS_ANALYSIS_DIR / "13_frontend_shell_route_and_interaction_layer_requirements.md"
+)
 VISUAL_SYSTEM_PATH = DOCS_ANALYSIS_DIR / "13_visual_system_layout_and_motion_spec.md"
-VALIDATION_PLAN_PATH = DOCS_ANALYSIS_DIR / "13_playwright_accessibility_and_continuity_validation_plan.md"
+VALIDATION_PLAN_PATH = (
+    DOCS_ANALYSIS_DIR / "13_playwright_accessibility_and_continuity_validation_plan.md"
+)
 
 SHELL_ROUTE_MATRIX_PATH = DATA_ANALYSIS_DIR / "shell_route_matrix.json"
 INTERACTION_LAYER_MAP_PATH = DATA_ANALYSIS_DIR / "interaction_layer_foundation_map.json"
@@ -181,7 +185,7 @@ def unique(values: list[str]) -> list[str]:
 def normalize_markdown(text: str) -> str:
     prefix = " " * 8
     return "\n".join(
-        line[len(prefix):] if line.startswith(prefix) else line
+        line[len(prefix) :] if line.startswith(prefix) else line
         for line in dedent(text).strip().splitlines()
     )
 
@@ -205,8 +209,16 @@ ASSUMPTIONS = [
         "description": "The corpus names manifest-scoped operator surfaces without a single literal browser root path, so the atlas normalizes the primary manifest route as `/manifests/{manifest_id}` to align with the explicit workflow deep-link form.",
         "impact": "Manifest-focused route cards and the calm-shell overview use a stable browser pattern without inventing extra shell families.",
         "source_refs": [
-            ref(FRONTEND_LAW, "1.2 Same object, same shell", "Manifest-scoped objects are explicitly owned by the calm shell family."),
-            ref(COLLABORATION, "Route map", "The collaboration contract explicitly publishes `/manifests/{manifest_id}?focus=workflow:{item_id}` as a route-stable focus jump."),
+            ref(
+                FRONTEND_LAW,
+                "1.2 Same object, same shell",
+                "Manifest-scoped objects are explicitly owned by the calm shell family.",
+            ),
+            ref(
+                COLLABORATION,
+                "Route map",
+                "The collaboration contract explicitly publishes `/manifests/{manifest_id}?focus=workflow:{item_id}` as a route-stable focus jump.",
+            ),
         ],
     },
     {
@@ -214,8 +226,16 @@ ASSUMPTIONS = [
         "description": "The client portal contract enumerates the Home destination but does not require a `/portal/home` literal, so the atlas binds Home to the canonical root route `/portal`.",
         "impact": "Portal route tables and the atlas navigation keep a five-destination top-level model without creating a sixth path variant.",
         "source_refs": [
-            ref(PORTAL, "Navigation contract", "Home is one of the five permanent top-level destinations."),
-            ref(PORTAL, "Route architecture", "The route architecture distinguishes contextual detail routes from the permanent top-level navigation."),
+            ref(
+                PORTAL,
+                "Navigation contract",
+                "Home is one of the five permanent top-level destinations.",
+            ),
+            ref(
+                PORTAL,
+                "Route architecture",
+                "The route architecture distinguishes contextual detail routes from the permanent top-level navigation.",
+            ),
         ],
     },
     {
@@ -223,8 +243,16 @@ ASSUMPTIONS = [
         "description": "Retention policy, legal-hold, and erasure routes are enumerated explicitly, but their exact landmark order is less granular than the tenant/access/audit routes, so the atlas normalizes them through the shared governance reading-order law plus the named route-local workspaces.",
         "impact": "The route landmark registry stays machine-usable while clearly marking the retention-family focus order as a governed normalization rather than a verbatim copy.",
         "source_refs": [
-            ref(GOVERNANCE, "4.5 /governance/retention", "Retention routes are enumerated at the route-family level."),
-            ref(FRONTEND_LAW, "3.3 Shell-family topology", "Governance routes keep one promoted support region and a stable semantic order within the density shell."),
+            ref(
+                GOVERNANCE,
+                "4.5 /governance/retention",
+                "Retention routes are enumerated at the route-family level.",
+            ),
+            ref(
+                FRONTEND_LAW,
+                "3.3 Shell-family topology",
+                "Governance routes keep one promoted support region and a stable semantic order within the density shell.",
+            ),
         ],
     },
     {
@@ -232,8 +260,16 @@ ASSUMPTIONS = [
         "description": "Native secondary windows are deliberate support overlays rather than a fourth shell family. They do not introduce route patterns, so the atlas models them as embodiment overlays on top of calm-shell continuity law.",
         "impact": "Future native implementation work must preserve parent-bound focus return and must not let compare/audit windows drift into independent shell semantics.",
         "source_refs": [
-            ref(FRONTEND_LAW, "1.1 Canonical shell families", "Native scenes are embodiments of existing shell families rather than a new family."),
-            ref(NATIVE_BLUEPRINT, "Secondary windows", "Detached native support windows restore focus to the parent anchor and remain support-only."),
+            ref(
+                FRONTEND_LAW,
+                "1.1 Canonical shell families",
+                "Native scenes are embodiments of existing shell families rather than a new family.",
+            ),
+            ref(
+                NATIVE_BLUEPRINT,
+                "Secondary windows",
+                "Detached native support windows restore focus to the parent anchor and remain support-only.",
+            ),
         ],
     },
 ]
@@ -404,16 +440,33 @@ def build_shell_families() -> list[dict[str, Any]]:
                 "/work/items/{item_id}",
                 "/work/items/{item_id}?module={module_code}",
             ],
-            "default_surface_order": ["CONTEXT_BAR", "DECISION_SUMMARY", "ACTION_STRIP", "DETAIL_DRAWER"],
+            "default_surface_order": [
+                "CONTEXT_BAR",
+                "DECISION_SUMMARY",
+                "ACTION_STRIP",
+                "DETAIL_DRAWER",
+            ],
             "dominant_question_law": "One dominant question and one dominant lawful action stay visible at all times.",
             "promoted_support_region_law": "Only one promoted support region is mounted by default; compare and audit surfaces require explicit entry.",
             "continuity_contract": "SAME_OBJECT_SAME_SHELL_INLINE_RECOVERY",
             "selector_profile": "OPERATOR_SEMANTIC_SELECTORS_V1",
             "native_embodiment_policy": "Allowed in browser and native operator embodiments without creating a new shell family.",
             "source_refs": [
-                ref(FRONTEND_LAW, "1.1 Canonical shell families", "Defines calm shell as a canonical family."),
-                ref(LOW_NOISE, "Default visible shell", "Freezes the four-surface calm-shell layout and interaction law."),
-                ref(COLLABORATION, "3.2 Staff work item workspace", "Work item collaboration inherits the same four-surface shell."),
+                ref(
+                    FRONTEND_LAW,
+                    "1.1 Canonical shell families",
+                    "Defines calm shell as a canonical family.",
+                ),
+                ref(
+                    LOW_NOISE,
+                    "Default visible shell",
+                    "Freezes the four-surface calm-shell layout and interaction law.",
+                ),
+                ref(
+                    COLLABORATION,
+                    "3.2 Staff work item workspace",
+                    "Work item collaboration inherits the same four-surface shell.",
+                ),
             ],
         },
         {
@@ -441,8 +494,16 @@ def build_shell_families() -> list[dict[str, Any]]:
             "selector_profile": "PORTAL_SEMANTIC_SELECTORS_V1",
             "native_embodiment_policy": "Browser-first shell with the same continuity contracts when opened through a native wrapper.",
             "source_refs": [
-                ref(FRONTEND_LAW, "1.2 Same object, same shell", "Client request and approval flows are explicitly portal-owned."),
-                ref(PORTAL, "Shell continuity, support budget, and constrained layouts", "Defines the portal support-budget and continuity rules."),
+                ref(
+                    FRONTEND_LAW,
+                    "1.2 Same object, same shell",
+                    "Client request and approval flows are explicitly portal-owned.",
+                ),
+                ref(
+                    PORTAL,
+                    "Shell continuity, support budget, and constrained layouts",
+                    "Defines the portal support-budget and continuity rules.",
+                ),
                 ref(PORTAL, "Minimum semantic selectors", "Defines the portal selector profile."),
             ],
         },
@@ -475,9 +536,21 @@ def build_shell_families() -> list[dict[str, Any]]:
             "selector_profile": "GOVERNANCE_SEMANTIC_SELECTORS_V1",
             "native_embodiment_policy": "No new shell family for native admin surfaces; future native work must remain a governance-density embodiment.",
             "source_refs": [
-                ref(FRONTEND_LAW, "3.3 Shell-family topology", "Defines the governance topology and promoted-support law."),
-                ref(GOVERNANCE, "6.7 Governance interaction layer", "Defines the governance interaction layer and preserved context fields."),
-                ref(CROSS_SHELL, "GOVERNANCE_DENSITY_SHELL", "Maps the governance family to its design-token and behavior foundation."),
+                ref(
+                    FRONTEND_LAW,
+                    "3.3 Shell-family topology",
+                    "Defines the governance topology and promoted-support law.",
+                ),
+                ref(
+                    GOVERNANCE,
+                    "6.7 Governance interaction layer",
+                    "Defines the governance interaction layer and preserved context fields.",
+                ),
+                ref(
+                    CROSS_SHELL,
+                    "GOVERNANCE_DENSITY_SHELL",
+                    "Maps the governance family to its design-token and behavior foundation.",
+                ),
             ],
         },
     ]
@@ -561,9 +634,21 @@ def build_route_records() -> list[dict[str, Any]]:
                 "Collapse `DETAIL_DRAWER` inline or into a focus-preserving sheet before collapsing any primary summary or dominant action content.",
             ],
             source_refs=[
-                ref(FRONTEND_LAW, "1.2 Same object, same shell", "Manifest-scoped objects stay in the calm shell family."),
-                ref(LOW_NOISE, "Default visible shell", "Freezes the four-surface calm-shell composition."),
-                ref(LOW_NOISE, "Shell continuity, constrained layouts, and artifact handoff", "Defines same-object continuity and narrow-layout collapse."),
+                ref(
+                    FRONTEND_LAW,
+                    "1.2 Same object, same shell",
+                    "Manifest-scoped objects stay in the calm shell family.",
+                ),
+                ref(
+                    LOW_NOISE,
+                    "Default visible shell",
+                    "Freezes the four-surface calm-shell composition.",
+                ),
+                ref(
+                    LOW_NOISE,
+                    "Shell continuity, constrained layouts, and artifact handoff",
+                    "Defines same-object continuity and narrow-layout collapse.",
+                ),
             ],
             notes="ASSUMPTION_MANIFEST_WORKSPACE_ROUTE_PATTERN: the browser route is normalized from the explicit manifest focus grammar and manifest ownership law.",
         ),
@@ -573,14 +658,17 @@ def build_route_records() -> list[dict[str, Any]]:
             route_pattern="/manifests/{manifest_id}?focus=workflow:{item_id}",
             owning_object_family="RunManifest + WorkflowItem focus",
             viewer_capability_profile="OPERATOR_COLLABORATION",
-            required_stability_keys=CALM_STABILITY_KEYS + ["route_context.active_module_code", "artifact_focus_subject_ref_or_null"],
+            required_stability_keys=CALM_STABILITY_KEYS
+            + ["route_context.active_module_code", "artifact_focus_subject_ref_or_null"],
             interaction_layer_contract="OperatorInteractionLayer",
             dominant_question="What workflow issue attached to this manifest requires operator attention now?",
             dominant_action_policy="Retain the manifest-level dominant action while opening workflow context as an explicit support-mode focus, not a shell switch.",
             promoted_support_region_policy="Use the same `DETAIL_DRAWER` support budget while deep-linking the workflow module into focus.",
             landmarks=["CONTEXT_BAR", "DECISION_SUMMARY", "ACTION_STRIP", "DETAIL_DRAWER"],
             focus_order=["CONTEXT_BAR", "DECISION_SUMMARY", "ACTION_STRIP", "DETAIL_DRAWER"],
-            semantic_selector_set=LOW_NOISE_SELECTORS + COLLABORATION_SELECTORS + SHARED_CONTINUITY_SELECTORS,
+            semantic_selector_set=LOW_NOISE_SELECTORS
+            + COLLABORATION_SELECTORS
+            + SHARED_CONTINUITY_SELECTORS,
             recovery_postures=SETTLEMENT_POSTURES,
             rebase_invalidation_reasons=[
                 "focus anchor remap failure",
@@ -597,9 +685,21 @@ def build_route_records() -> list[dict[str, Any]]:
                 "On narrow layouts, retain the module focus and restoration target instead of discarding the active workflow context.",
             ],
             source_refs=[
-                ref(COLLABORATION, "Route map", "Publishes the explicit manifest-to-workflow deep link."),
-                ref(FRONTEND_LAW, "2.3 Deep-link restoration", "Defines the deep-link fallback order for same-object restoration."),
-                ref(FOCUS_RESTORE, "Fallback order", "Governs parent return and list fallback when the original focus anchor is unavailable."),
+                ref(
+                    COLLABORATION,
+                    "Route map",
+                    "Publishes the explicit manifest-to-workflow deep link.",
+                ),
+                ref(
+                    FRONTEND_LAW,
+                    "2.3 Deep-link restoration",
+                    "Defines the deep-link fallback order for same-object restoration.",
+                ),
+                ref(
+                    FOCUS_RESTORE,
+                    "Fallback order",
+                    "Governs parent return and list fallback when the original focus anchor is unavailable.",
+                ),
             ],
             notes="Uses the manifest route as the owning shell while exposing workflow context as a route-stable focus jump.",
         ),
@@ -609,14 +709,18 @@ def build_route_records() -> list[dict[str, Any]]:
             route_pattern="/work",
             owning_object_family="WorkflowItem queue",
             viewer_capability_profile="OPERATOR_COLLABORATION",
-            required_stability_keys=CALM_STABILITY_KEYS + ["active_filters", "route_context.entry_surface"],
+            required_stability_keys=CALM_STABILITY_KEYS
+            + ["active_filters", "route_context.entry_surface"],
             interaction_layer_contract="OperatorInteractionLayer",
             dominant_question="Which workflow item requires intervention next?",
             dominant_action_policy="Expose one authoritative row action per queue row after identity and triage signals; keep illegal actions omitted.",
             promoted_support_region_policy="Keep queue detail subordinate; opening an item stays inside the same SPA shell rather than spawning a new route family.",
             landmarks=["WORK_INBOX_HEADER", "FILTER_CHIPS", "WORKLIST", "ROW_ACTIONS"],
             focus_order=["WORK_INBOX_HEADER", "FILTER_CHIPS", "WORKLIST", "ROW_PRIMARY_ACTION"],
-            semantic_selector_set=LOW_NOISE_SELECTORS + COLLABORATION_SELECTORS + ["focus-anchor"] + SHARED_CONTINUITY_SELECTORS,
+            semantic_selector_set=LOW_NOISE_SELECTORS
+            + COLLABORATION_SELECTORS
+            + ["focus-anchor"]
+            + SHARED_CONTINUITY_SELECTORS,
             recovery_postures=["PRESERVED", "INLINE_RECOVERY", "REBASE_REQUIRED"],
             rebase_invalidation_reasons=[
                 "queue filter grammar drift",
@@ -633,9 +737,21 @@ def build_route_records() -> list[dict[str, Any]]:
                 "Queue -> item -> queue transitions stay inside the SPA shell at all breakpoints.",
             ],
             source_refs=[
-                ref(COLLABORATION, "3.1 Staff work inbox", "Defines queue hierarchy, filter chips, and authoritative row actions."),
-                ref(FRONTEND_LAW, "2.5 Queue and inbox continuity", "Queue continuity requires preserving the lawful filter and return state."),
-                ref(CROSS_DEVICE, "WorkItemNotification", "Cross-device continuity includes notification-driven work item restoration."),
+                ref(
+                    COLLABORATION,
+                    "3.1 Staff work inbox",
+                    "Defines queue hierarchy, filter chips, and authoritative row actions.",
+                ),
+                ref(
+                    FRONTEND_LAW,
+                    "2.5 Queue and inbox continuity",
+                    "Queue continuity requires preserving the lawful filter and return state.",
+                ),
+                ref(
+                    CROSS_DEVICE,
+                    "WorkItemNotification",
+                    "Cross-device continuity includes notification-driven work item restoration.",
+                ),
             ],
             notes="The calm shell owns the queue even when the work item body opens inside the same application shell.",
         ),
@@ -645,14 +761,25 @@ def build_route_records() -> list[dict[str, Any]]:
             route_pattern="/work/items/{item_id}",
             owning_object_family="WorkflowItem",
             viewer_capability_profile="OPERATOR_COLLABORATION",
-            required_stability_keys=CALM_STABILITY_KEYS + ["route_context.return_route_ref", "route_context.active_module_code"],
+            required_stability_keys=CALM_STABILITY_KEYS
+            + ["route_context.return_route_ref", "route_context.active_module_code"],
             interaction_layer_contract="OperatorInteractionLayer",
             dominant_question="What is the next lawful action for this workflow item?",
             dominant_action_policy="Keep the workflow decision and next step explicit in `ACTION_STRIP`, with settlement-aware feedback in `CONTEXT_BAR`.",
             promoted_support_region_policy="Use `DETAIL_DRAWER` for customer activity, internal activity, files, linked context, and audit without promoting contradictory panes.",
             landmarks=["CONTEXT_BAR", "DECISION_SUMMARY", "ACTION_STRIP", "DETAIL_DRAWER"],
-            focus_order=["CONTEXT_BAR", "DECISION_SUMMARY", "ACTION_STRIP", "MODULE_PICKER", "THREAD_HISTORY", "COMPOSER", "ATTACHMENTS"],
-            semantic_selector_set=LOW_NOISE_SELECTORS + COLLABORATION_SELECTORS + SHARED_CONTINUITY_SELECTORS,
+            focus_order=[
+                "CONTEXT_BAR",
+                "DECISION_SUMMARY",
+                "ACTION_STRIP",
+                "MODULE_PICKER",
+                "THREAD_HISTORY",
+                "COMPOSER",
+                "ATTACHMENTS",
+            ],
+            semantic_selector_set=LOW_NOISE_SELECTORS
+            + COLLABORATION_SELECTORS
+            + SHARED_CONTINUITY_SELECTORS,
             recovery_postures=SETTLEMENT_POSTURES,
             rebase_invalidation_reasons=[
                 "workflow item no longer available",
@@ -669,9 +796,21 @@ def build_route_records() -> list[dict[str, Any]]:
                 "Customer and internal activity threads never appear side by side on mobile.",
             ],
             source_refs=[
-                ref(COLLABORATION, "3.2 Staff work item workspace", "Defines the same four-surface shell and module taxonomy."),
-                ref(COLLABORATION, "11. Accessibility and responsive rules", "Defines keyboard order and breakpoint-specific module behavior."),
-                ref(LOW_NOISE, "Settlement-state contract", "Defines settlement-aware inline feedback and no-safe-action posture."),
+                ref(
+                    COLLABORATION,
+                    "3.2 Staff work item workspace",
+                    "Defines the same four-surface shell and module taxonomy.",
+                ),
+                ref(
+                    COLLABORATION,
+                    "11. Accessibility and responsive rules",
+                    "Defines keyboard order and breakpoint-specific module behavior.",
+                ),
+                ref(
+                    LOW_NOISE,
+                    "Settlement-state contract",
+                    "Defines settlement-aware inline feedback and no-safe-action posture.",
+                ),
             ],
             notes="This route is the canonical staff collaboration workspace inside the calm shell.",
         ),
@@ -681,14 +820,23 @@ def build_route_records() -> list[dict[str, Any]]:
             route_pattern="/work/items/{item_id}?module={module_code}",
             owning_object_family="WorkflowItem module focus",
             viewer_capability_profile="OPERATOR_COLLABORATION",
-            required_stability_keys=CALM_STABILITY_KEYS + ["route_context.active_module_code", "route_context.return_focus_anchor_ref"],
+            required_stability_keys=CALM_STABILITY_KEYS
+            + ["route_context.active_module_code", "route_context.return_focus_anchor_ref"],
             interaction_layer_contract="OperatorInteractionLayer",
             dominant_question="Which workflow module is in focus, and what action remains lawful from that focus?",
             dominant_action_policy="Deep-linking a module must not rewrite the dominant action; it only changes the promoted support context.",
             promoted_support_region_policy="Only the addressed module becomes the promoted support region, and it remains parent-bound to the workflow item shell.",
             landmarks=["CONTEXT_BAR", "DECISION_SUMMARY", "ACTION_STRIP", "DETAIL_DRAWER"],
-            focus_order=["CONTEXT_BAR", "DECISION_SUMMARY", "ACTION_STRIP", "MODULE_PICKER", "ACTIVE_MODULE"],
-            semantic_selector_set=LOW_NOISE_SELECTORS + COLLABORATION_SELECTORS + SHARED_CONTINUITY_SELECTORS,
+            focus_order=[
+                "CONTEXT_BAR",
+                "DECISION_SUMMARY",
+                "ACTION_STRIP",
+                "MODULE_PICKER",
+                "ACTIVE_MODULE",
+            ],
+            semantic_selector_set=LOW_NOISE_SELECTORS
+            + COLLABORATION_SELECTORS
+            + SHARED_CONTINUITY_SELECTORS,
             recovery_postures=SETTLEMENT_POSTURES,
             rebase_invalidation_reasons=[
                 "module code no longer resolves",
@@ -705,9 +853,21 @@ def build_route_records() -> list[dict[str, Any]]:
                 "Never remap a module deep link into a different route family as a responsive workaround.",
             ],
             source_refs=[
-                ref(COLLABORATION, "Route map", "Publishes the module deep-link grammar without leaving the SPA shell."),
-                ref(FRONTEND_LAW, "2.2 Stable route keys", "The route context and focus anchors remain part of the stability contract."),
-                ref(FOCUS_RESTORE, "Fallback order", "Module deep links still restore within the same governed object first."),
+                ref(
+                    COLLABORATION,
+                    "Route map",
+                    "Publishes the module deep-link grammar without leaving the SPA shell.",
+                ),
+                ref(
+                    FRONTEND_LAW,
+                    "2.2 Stable route keys",
+                    "The route context and focus anchors remain part of the stability contract.",
+                ),
+                ref(
+                    FOCUS_RESTORE,
+                    "Fallback order",
+                    "Module deep links still restore within the same governed object first.",
+                ),
             ],
             notes="Module focus is route-stable state, not a permission to mount a separate collaboration shell.",
         ),
@@ -741,9 +901,17 @@ def build_route_records() -> list[dict[str, Any]]:
                 "Stack support below the primary task rather than splitting the shell into alternate mobile-only routes.",
             ],
             source_refs=[
-                ref(PORTAL, "Navigation contract", "Defines the five-destination top-level portal navigation."),
+                ref(
+                    PORTAL,
+                    "Navigation contract",
+                    "Defines the five-destination top-level portal navigation.",
+                ),
                 ref(PORTAL, "Home", "Defines the home route reading order."),
-                ref(FRONTEND_LAW, "3.4 Responsive fallback", "Portal routes preserve semantic order before density."),
+                ref(
+                    FRONTEND_LAW,
+                    "3.4 Responsive fallback",
+                    "Portal routes preserve semantic order before density.",
+                ),
             ],
             notes="ASSUMPTION_PORTAL_HOME_CANONICAL_ROOT_ROUTE: the home route is normalized to the portal root path.",
         ),
@@ -759,8 +927,15 @@ def build_route_records() -> list[dict[str, Any]]:
             dominant_action_policy="Upload affordances are frozen as browse, drag-drop, and camera capture; status phases remain explicit and typed.",
             promoted_support_region_policy="Keep upload help and history below or behind the primary upload workspace.",
             landmarks=["DOCUMENT_INBOX", "UPLOAD_PANEL", "UPLOAD_STATUS_LIST", "DOCUMENT_HISTORY"],
-            focus_order=["DOCUMENT_INBOX", "UPLOAD_PANEL", "UPLOAD_STATUS_LIST", "DOCUMENT_HISTORY"],
-            semantic_selector_set=PORTAL_SELECTORS + ["portal-current-artifact", "portal-history-list"] + SHARED_CONTINUITY_SELECTORS,
+            focus_order=[
+                "DOCUMENT_INBOX",
+                "UPLOAD_PANEL",
+                "UPLOAD_STATUS_LIST",
+                "DOCUMENT_HISTORY",
+            ],
+            semantic_selector_set=PORTAL_SELECTORS
+            + ["portal-current-artifact", "portal-history-list"]
+            + SHARED_CONTINUITY_SELECTORS,
             recovery_postures=["PRESERVED", "INLINE_RECOVERY", "STALE_REVIEW_REQUIRED"],
             rebase_invalidation_reasons=[
                 "upload session drift",
@@ -777,9 +952,21 @@ def build_route_records() -> list[dict[str, Any]]:
                 "Keep file type and size-limit guidance visible without introducing a second promoted support panel.",
             ],
             source_refs=[
-                ref(PORTAL, "Documents", "Defines the documents route reading order and upload affordances."),
-                ref(PORTAL, "Playwright validation minimum", "Requires reconnect-safe upload session continuation."),
-                ref(FRONTEND_LAW, "2.2A Interaction-layer boundary", "Route continuity keeps the portal interaction-layer contract intact."),
+                ref(
+                    PORTAL,
+                    "Documents",
+                    "Defines the documents route reading order and upload affordances.",
+                ),
+                ref(
+                    PORTAL,
+                    "Playwright validation minimum",
+                    "Requires reconnect-safe upload session continuation.",
+                ),
+                ref(
+                    FRONTEND_LAW,
+                    "2.2A Interaction-layer boundary",
+                    "Route continuity keeps the portal interaction-layer contract intact.",
+                ),
             ],
             notes="Status phases remain `[TRANSFER, SCAN, VALIDATION, ACCEPTANCE, REJECTION, RETRY]` in user-visible order.",
         ),
@@ -795,8 +982,15 @@ def build_route_records() -> list[dict[str, Any]]:
             dominant_action_policy="The signature or sign-off action remains the only dominant action and must never target a stale pack.",
             promoted_support_region_policy="Expose change digest and declaration detail as subordinate support around the sign-off posture.",
             landmarks=["APPROVAL_SUMMARY", "CHANGE_DIGEST", "DECLARATION_PANEL", "SIGN_OFF_PANEL"],
-            focus_order=["APPROVAL_SUMMARY", "CHANGE_DIGEST", "DECLARATION_PANEL", "SIGN_OFF_PANEL"],
-            semantic_selector_set=PORTAL_SELECTORS + ["portal-request-focus"] + SHARED_CONTINUITY_SELECTORS,
+            focus_order=[
+                "APPROVAL_SUMMARY",
+                "CHANGE_DIGEST",
+                "DECLARATION_PANEL",
+                "SIGN_OFF_PANEL",
+            ],
+            semantic_selector_set=PORTAL_SELECTORS
+            + ["portal-request-focus"]
+            + SHARED_CONTINUITY_SELECTORS,
             recovery_postures=["PRESERVED", "INLINE_RECOVERY", "STALE_REVIEW_REQUIRED"],
             rebase_invalidation_reasons=[
                 "approval pack hash drift",
@@ -814,8 +1008,16 @@ def build_route_records() -> list[dict[str, Any]]:
             ],
             source_refs=[
                 ref(PORTAL, "Approvals", "Defines the approvals route reading order."),
-                ref(PORTAL, "Playwright validation minimum", "Requires stale approval rerouting before signing."),
-                ref(FRONTEND_LAW, "4.2 No contradictory writable posture", "Writable posture cannot conflict with the current legal approval state."),
+                ref(
+                    PORTAL,
+                    "Playwright validation minimum",
+                    "Requires stale approval rerouting before signing.",
+                ),
+                ref(
+                    FRONTEND_LAW,
+                    "4.2 No contradictory writable posture",
+                    "Writable posture cannot conflict with the current legal approval state.",
+                ),
             ],
             notes="Approval routes inherit the portal language contract and must stay client-safe under all recovery postures.",
         ),
@@ -825,7 +1027,8 @@ def build_route_records() -> list[dict[str, Any]]:
             route_pattern="/portal/onboarding",
             owning_object_family="Client onboarding flow",
             viewer_capability_profile="CLIENT_SAFE",
-            required_stability_keys=PORTAL_STABILITY_KEYS + ["step_id", "return_focus_anchor_ref_or_null"],
+            required_stability_keys=PORTAL_STABILITY_KEYS
+            + ["step_id", "return_focus_anchor_ref_or_null"],
             interaction_layer_contract="PortalInteractionLayer",
             dominant_question="What onboarding step must the client complete next?",
             dominant_action_policy="The stepper workspace exposes only the next lawful onboarding action and omits inactive destinations.",
@@ -850,8 +1053,16 @@ def build_route_records() -> list[dict[str, Any]]:
             ],
             source_refs=[
                 ref(PORTAL, "Onboarding", "Defines onboarding reading order."),
-                ref(PORTAL, "Navigation contract", "Top-level destinations are omitted when inactive."),
-                ref(FRONTEND_LAW, "3.1 One dominant question, one dominant action", "Each route retains a single dominant task."),
+                ref(
+                    PORTAL,
+                    "Navigation contract",
+                    "Top-level destinations are omitted when inactive.",
+                ),
+                ref(
+                    FRONTEND_LAW,
+                    "3.1 One dominant question, one dominant action",
+                    "Each route retains a single dominant task.",
+                ),
             ],
             notes="Onboarding remains a top-level route only while active and never becomes a permanent sixth portal destination.",
         ),
@@ -885,8 +1096,16 @@ def build_route_records() -> list[dict[str, Any]]:
             ],
             source_refs=[
                 ref(PORTAL, "Help", "Defines the help route reading order."),
-                ref(FRONTEND_LAW, "1.2 Same object, same shell", "Client help remains owned by the portal shell family."),
-                ref(PORTAL, "Contextual request-detail routes", "Portal detail views must avoid internal audit leakage."),
+                ref(
+                    FRONTEND_LAW,
+                    "1.2 Same object, same shell",
+                    "Client help remains owned by the portal shell family.",
+                ),
+                ref(
+                    PORTAL,
+                    "Contextual request-detail routes",
+                    "Portal detail views must avoid internal audit leakage.",
+                ),
             ],
             notes="Help is the only route where support content is allowed to dominate the shell without becoming a different shell family.",
         ),
@@ -896,7 +1115,8 @@ def build_route_records() -> list[dict[str, Any]]:
             route_pattern="/portal/requests/{item_id}",
             owning_object_family="Customer request workspace",
             viewer_capability_profile="CLIENT_SAFE",
-            required_stability_keys=PORTAL_STABILITY_KEYS + ["route_context.return_focus_anchor_ref_or_null", "focus_restoration"],
+            required_stability_keys=PORTAL_STABILITY_KEYS
+            + ["route_context.return_focus_anchor_ref_or_null", "focus_restoration"],
             interaction_layer_contract="PortalInteractionLayer",
             dominant_question="What request-specific action, artifact, or clarification should the client address next?",
             dominant_action_policy="The request detail route stays contextual: the parent tab remains active and the dominant action remains tied to the request focus, not to hidden internal state.",
@@ -920,9 +1140,21 @@ def build_route_records() -> list[dict[str, Any]]:
                 "No portal detail route is allowed to leak internal assignee, escalation, or audit posture as a compaction shortcut.",
             ],
             source_refs=[
-                ref(PORTAL, "Contextual request-detail routes", "Defines request detail as contextual, same-shell detail rather than a new top-level destination."),
-                ref(PORTAL, "Playwright validation minimum", "Requires notification deep-link restoration with preserved return path."),
-                ref(FRONTEND_LAW, "2.4 Back/return behavior", "Back navigation preserves filters, selection, and focus."),
+                ref(
+                    PORTAL,
+                    "Contextual request-detail routes",
+                    "Defines request detail as contextual, same-shell detail rather than a new top-level destination.",
+                ),
+                ref(
+                    PORTAL,
+                    "Playwright validation minimum",
+                    "Requires notification deep-link restoration with preserved return path.",
+                ),
+                ref(
+                    FRONTEND_LAW,
+                    "2.4 Back/return behavior",
+                    "Back navigation preserves filters, selection, and focus.",
+                ),
             ],
             notes="This route is contextual detail, not a sixth permanent top-level destination.",
         ),
@@ -937,8 +1169,19 @@ def build_route_records() -> list[dict[str, Any]]:
             dominant_question="Which governance risk, configuration drift, or policy task requires attention first?",
             dominant_action_policy="Promote one attention summary and worklist action at a time even when multiple structural regions are visible.",
             promoted_support_region_policy="Keep a single promoted auxiliary surface by default while preserving inventory and audit context.",
-            landmarks=["GOVERNANCE_CONTEXT_BAR", "INVENTORY_RAIL", "WORKSPACE_CANVAS", "AUDIT_SIDECAR"],
-            focus_order=["GOVERNANCE_CONTEXT_BAR", "INVENTORY_RAIL", "OVERVIEW_ATTENTION_SUMMARY", "WORKSPACE_CANVAS", "AUDIT_SIDECAR"],
+            landmarks=[
+                "GOVERNANCE_CONTEXT_BAR",
+                "INVENTORY_RAIL",
+                "WORKSPACE_CANVAS",
+                "AUDIT_SIDECAR",
+            ],
+            focus_order=[
+                "GOVERNANCE_CONTEXT_BAR",
+                "INVENTORY_RAIL",
+                "OVERVIEW_ATTENTION_SUMMARY",
+                "WORKSPACE_CANVAS",
+                "AUDIT_SIDECAR",
+            ],
             semantic_selector_set=GOVERNANCE_SELECTORS + SHARED_CONTINUITY_SELECTORS,
             recovery_postures=["PRESERVED", "INLINE_TYPED_CONTEXTUAL_RECOVERY", "REBASE_REQUIRED"],
             rebase_invalidation_reasons=[
@@ -956,9 +1199,21 @@ def build_route_records() -> list[dict[str, Any]]:
                 "Narrow layouts preserve selected object, dominant question, active filters, and promoted sidecar mode.",
             ],
             source_refs=[
-                ref(GOVERNANCE, "4.1 /governance", "Defines the overview layout and attention summary."),
-                ref(FRONTEND_LAW, "3.3 Shell-family topology", "Defines one promoted support region by default in governance routes."),
-                ref(GOVERNANCE, "8. Accessibility and responsive requirements", "Defines breakpoint-specific redocking behavior."),
+                ref(
+                    GOVERNANCE,
+                    "4.1 /governance",
+                    "Defines the overview layout and attention summary.",
+                ),
+                ref(
+                    FRONTEND_LAW,
+                    "3.3 Shell-family topology",
+                    "Defines one promoted support region by default in governance routes.",
+                ),
+                ref(
+                    GOVERNANCE,
+                    "8. Accessibility and responsive requirements",
+                    "Defines breakpoint-specific redocking behavior.",
+                ),
             ],
             notes="The overview route is the densest browser shell but still obeys one dominant question and one promoted auxiliary surface.",
         ),
@@ -968,13 +1223,30 @@ def build_route_records() -> list[dict[str, Any]]:
             route_pattern="/governance/tenant",
             owning_object_family="Tenant configuration workspace",
             viewer_capability_profile="GOVERNANCE_OPERATOR",
-            required_stability_keys=GOVERNANCE_STABILITY_KEYS + ["change_basket_ref_or_null", "approval_requirement_snapshot"],
+            required_stability_keys=GOVERNANCE_STABILITY_KEYS
+            + ["change_basket_ref_or_null", "approval_requirement_snapshot"],
             interaction_layer_contract="GovernanceInteractionLayer",
             dominant_question="What tenant configuration change is being staged, and what blast radius does it carry?",
             dominant_action_policy="Mutation is diff-first: configuration changes stage into a basket with explicit blast-radius and approval communication before submission.",
             promoted_support_region_policy="Use inline policy help and blast-radius detail as a single promoted auxiliary cluster around the main configuration workspace.",
-            landmarks=["SECTION_NAV", "CONFIG_FORM", "INLINE_POLICY_HELP", "BLAST_RADIUS_PANEL", "CHANGE_BASKET", "APPROVAL_COMPOSER", "CONFIG_HISTORY_TIMELINE"],
-            focus_order=["SECTION_NAV", "CONFIG_FORM", "INLINE_POLICY_HELP", "BLAST_RADIUS_PANEL", "CHANGE_BASKET", "APPROVAL_COMPOSER", "CONFIG_HISTORY_TIMELINE"],
+            landmarks=[
+                "SECTION_NAV",
+                "CONFIG_FORM",
+                "INLINE_POLICY_HELP",
+                "BLAST_RADIUS_PANEL",
+                "CHANGE_BASKET",
+                "APPROVAL_COMPOSER",
+                "CONFIG_HISTORY_TIMELINE",
+            ],
+            focus_order=[
+                "SECTION_NAV",
+                "CONFIG_FORM",
+                "INLINE_POLICY_HELP",
+                "BLAST_RADIUS_PANEL",
+                "CHANGE_BASKET",
+                "APPROVAL_COMPOSER",
+                "CONFIG_HISTORY_TIMELINE",
+            ],
             semantic_selector_set=GOVERNANCE_SELECTORS + SHARED_CONTINUITY_SELECTORS,
             recovery_postures=["PRESERVED", "INLINE_TYPED_CONTEXTUAL_RECOVERY", "REBASE_REQUIRED"],
             rebase_invalidation_reasons=[
@@ -992,9 +1264,21 @@ def build_route_records() -> list[dict[str, Any]]:
                 "Narrow layouts preserve change basket, approval composer, rationale text, and filters.",
             ],
             source_refs=[
-                ref(GOVERNANCE, "4.2 /governance/tenant", "Defines the tenant route semantic reading order."),
-                ref(GOVERNANCE, "9. Validation plan", "Requires blast-radius communication and approval requirements."),
-                ref(FRONTEND_LAW, "4.1 Dominant-action law", "Mutation routes still keep one dominant action and avoid contradictory writable posture."),
+                ref(
+                    GOVERNANCE,
+                    "4.2 /governance/tenant",
+                    "Defines the tenant route semantic reading order.",
+                ),
+                ref(
+                    GOVERNANCE,
+                    "9. Validation plan",
+                    "Requires blast-radius communication and approval requirements.",
+                ),
+                ref(
+                    FRONTEND_LAW,
+                    "4.1 Dominant-action law",
+                    "Mutation routes still keep one dominant action and avoid contradictory writable posture.",
+                ),
             ],
             notes="Tenant mutation routes are governed by diff-first staging and never bypass the change basket or approval composer.",
         ),
@@ -1009,8 +1293,20 @@ def build_route_records() -> list[dict[str, Any]]:
             dominant_question="Which principal's effective access posture requires review or change?",
             dominant_action_policy="Directory selection and effective access inspection drive the next action; simulation and authority chains remain support surfaces.",
             promoted_support_region_policy="Keep one promoted auxiliary surface around the principal workspace even when the simulator is available.",
-            landmarks=["PRINCIPAL_DIRECTORY", "WORKSPACE_CANVAS", "ACCESS_INSPECTOR", "AUTHORITY_CHAIN_PANEL", "POLICY_SIMULATOR"],
-            focus_order=["PRINCIPAL_DIRECTORY", "WORKSPACE_CANVAS", "ACCESS_INSPECTOR", "AUTHORITY_CHAIN_PANEL", "POLICY_SIMULATOR"],
+            landmarks=[
+                "PRINCIPAL_DIRECTORY",
+                "WORKSPACE_CANVAS",
+                "ACCESS_INSPECTOR",
+                "AUTHORITY_CHAIN_PANEL",
+                "POLICY_SIMULATOR",
+            ],
+            focus_order=[
+                "PRINCIPAL_DIRECTORY",
+                "WORKSPACE_CANVAS",
+                "ACCESS_INSPECTOR",
+                "AUTHORITY_CHAIN_PANEL",
+                "POLICY_SIMULATOR",
+            ],
             semantic_selector_set=GOVERNANCE_SELECTORS + SHARED_CONTINUITY_SELECTORS,
             recovery_postures=["PRESERVED", "INLINE_TYPED_CONTEXTUAL_RECOVERY", "REBASE_REQUIRED"],
             rebase_invalidation_reasons=[
@@ -1028,9 +1324,21 @@ def build_route_records() -> list[dict[str, Any]]:
                 "Preserve roving selection and the selected principal across breakpoint changes.",
             ],
             source_refs=[
-                ref(GOVERNANCE, "4.3 /governance/access", "Defines the access and roles route family."),
-                ref(FRONTEND_LAW, "3.3 Shell-family topology", "Governs the semantic order for governance access routes."),
-                ref(GOVERNANCE, "9. Validation plan", "Requires explaining `ALLOW_MASKED` in the access simulation flow."),
+                ref(
+                    GOVERNANCE,
+                    "4.3 /governance/access",
+                    "Defines the access and roles route family.",
+                ),
+                ref(
+                    FRONTEND_LAW,
+                    "3.3 Shell-family topology",
+                    "Governs the semantic order for governance access routes.",
+                ),
+                ref(
+                    GOVERNANCE,
+                    "9. Validation plan",
+                    "Requires explaining `ALLOW_MASKED` in the access simulation flow.",
+                ),
             ],
             notes="Access routes share the same semantic order even as principals, roles, and simulator contexts vary.",
         ),
@@ -1040,13 +1348,26 @@ def build_route_records() -> list[dict[str, Any]]:
             route_pattern="/governance/access/roles",
             owning_object_family="Role matrix workspace",
             viewer_capability_profile="GOVERNANCE_OPERATOR",
-            required_stability_keys=GOVERNANCE_STABILITY_KEYS + ["selected_role_ref_or_null", "diff_basket_ref_or_null"],
+            required_stability_keys=GOVERNANCE_STABILITY_KEYS
+            + ["selected_role_ref_or_null", "diff_basket_ref_or_null"],
             interaction_layer_contract="GovernanceInteractionLayer",
             dominant_question="What role policy or matrix change is under review?",
             dominant_action_policy="Role matrix diffs and staged changes lead the route; the authority chain and simulator remain auxiliary.",
             promoted_support_region_policy="Only one auxiliary surface is promoted while role diffs and rationale remain visible.",
-            landmarks=["PRINCIPAL_DIRECTORY", "WORKSPACE_CANVAS", "ACCESS_INSPECTOR", "AUTHORITY_CHAIN_PANEL", "POLICY_SIMULATOR"],
-            focus_order=["PRINCIPAL_DIRECTORY", "WORKSPACE_CANVAS", "ACCESS_INSPECTOR", "AUTHORITY_CHAIN_PANEL", "POLICY_SIMULATOR"],
+            landmarks=[
+                "PRINCIPAL_DIRECTORY",
+                "WORKSPACE_CANVAS",
+                "ACCESS_INSPECTOR",
+                "AUTHORITY_CHAIN_PANEL",
+                "POLICY_SIMULATOR",
+            ],
+            focus_order=[
+                "PRINCIPAL_DIRECTORY",
+                "WORKSPACE_CANVAS",
+                "ACCESS_INSPECTOR",
+                "AUTHORITY_CHAIN_PANEL",
+                "POLICY_SIMULATOR",
+            ],
             semantic_selector_set=GOVERNANCE_SELECTORS + SHARED_CONTINUITY_SELECTORS,
             recovery_postures=["PRESERVED", "INLINE_TYPED_CONTEXTUAL_RECOVERY", "REBASE_REQUIRED"],
             rebase_invalidation_reasons=[
@@ -1064,9 +1385,17 @@ def build_route_records() -> list[dict[str, Any]]:
                 "Redock the auxiliary surface before collapsing the primary matrix workspace.",
             ],
             source_refs=[
-                ref(GOVERNANCE, "4.3 /governance/access", "Roles are part of the access route family."),
+                ref(
+                    GOVERNANCE,
+                    "4.3 /governance/access",
+                    "Roles are part of the access route family.",
+                ),
                 ref(GOVERNANCE, "9. Validation plan", "Role matrix diffs must survive step-up."),
-                ref(FRONTEND_LAW, "2.2 Stable route keys", "Governance routes preserve filter chips and focus anchors as stability keys."),
+                ref(
+                    FRONTEND_LAW,
+                    "2.2 Stable route keys",
+                    "Governance routes preserve filter chips and focus anchors as stability keys.",
+                ),
             ],
             notes="ASSUMPTION_ROLE_DETAIL_WITHIN_ROLES_ROUTE_FAMILY: role detail overlays remain governed by the `/governance/access/roles` route family.",
         ),
@@ -1081,8 +1410,20 @@ def build_route_records() -> list[dict[str, Any]]:
             dominant_question="How would the current policy basis evaluate a governed access request?",
             dominant_action_policy="The simulation result and explanation lead the route; edits remain staged and contextual.",
             promoted_support_region_policy="Use a single promoted support surface to show authority chains or matrix detail around the simulator.",
-            landmarks=["PRINCIPAL_DIRECTORY", "WORKSPACE_CANVAS", "ACCESS_INSPECTOR", "AUTHORITY_CHAIN_PANEL", "POLICY_SIMULATOR"],
-            focus_order=["PRINCIPAL_DIRECTORY", "WORKSPACE_CANVAS", "ACCESS_INSPECTOR", "AUTHORITY_CHAIN_PANEL", "POLICY_SIMULATOR"],
+            landmarks=[
+                "PRINCIPAL_DIRECTORY",
+                "WORKSPACE_CANVAS",
+                "ACCESS_INSPECTOR",
+                "AUTHORITY_CHAIN_PANEL",
+                "POLICY_SIMULATOR",
+            ],
+            focus_order=[
+                "PRINCIPAL_DIRECTORY",
+                "WORKSPACE_CANVAS",
+                "ACCESS_INSPECTOR",
+                "AUTHORITY_CHAIN_PANEL",
+                "POLICY_SIMULATOR",
+            ],
             semantic_selector_set=GOVERNANCE_SELECTORS + SHARED_CONTINUITY_SELECTORS,
             recovery_postures=["PRESERVED", "INLINE_TYPED_CONTEXTUAL_RECOVERY", "REBASE_REQUIRED"],
             rebase_invalidation_reasons=[
@@ -1100,9 +1441,21 @@ def build_route_records() -> list[dict[str, Any]]:
                 "Collapse authority-chain support before the simulator core.",
             ],
             source_refs=[
-                ref(GOVERNANCE, "4.3 /governance/access", "The simulator belongs to the access route family."),
-                ref(GOVERNANCE, "9. Validation plan", "Requires typed `ALLOW_MASKED` explanation in the simulator flow."),
-                ref(CROSS_SHELL, "GOVERNANCE_DENSITY_SHELL", "The governance interaction layer defines the support-surface and selector policies."),
+                ref(
+                    GOVERNANCE,
+                    "4.3 /governance/access",
+                    "The simulator belongs to the access route family.",
+                ),
+                ref(
+                    GOVERNANCE,
+                    "9. Validation plan",
+                    "Requires typed `ALLOW_MASKED` explanation in the simulator flow.",
+                ),
+                ref(
+                    CROSS_SHELL,
+                    "GOVERNANCE_DENSITY_SHELL",
+                    "The governance interaction layer defines the support-surface and selector policies.",
+                ),
             ],
             notes="The simulator is a governance route, not a detached tool; it inherits the same selector and continuity contracts.",
         ),
@@ -1112,7 +1465,8 @@ def build_route_records() -> list[dict[str, Any]]:
             route_pattern="/governance/authority-links",
             owning_object_family="AuthorityLink workspace",
             viewer_capability_profile="GOVERNANCE_OPERATOR",
-            required_stability_keys=GOVERNANCE_STABILITY_KEYS + ["selected_authority_link_ref_or_null"],
+            required_stability_keys=GOVERNANCE_STABILITY_KEYS
+            + ["selected_authority_link_ref_or_null"],
             interaction_layer_contract="GovernanceInteractionLayer",
             dominant_question="Which authority binding or handshake posture requires intervention?",
             dominant_action_policy="Identity, binding health, and preflight readiness surface the next action; mismatch, delegation gap, and environment drift remain first-class status surfaces.",
@@ -1136,9 +1490,21 @@ def build_route_records() -> list[dict[str, Any]]:
                 "Preserve the selected authority link and current preflight checklist state across breakpoint changes.",
             ],
             source_refs=[
-                ref(GOVERNANCE, "4.4 /governance/authority-links", "Defines the authority links route and workspace module order."),
-                ref(FRONTEND_LAW, "3.3 Shell-family topology", "Governance auxiliary surfaces remain support-only by default."),
-                ref(GOVERNANCE, "9. Validation plan", "Requires mismatch, delegation gap, and environment drift to remain distinct surfaces."),
+                ref(
+                    GOVERNANCE,
+                    "4.4 /governance/authority-links",
+                    "Defines the authority links route and workspace module order.",
+                ),
+                ref(
+                    FRONTEND_LAW,
+                    "3.3 Shell-family topology",
+                    "Governance auxiliary surfaces remain support-only by default.",
+                ),
+                ref(
+                    GOVERNANCE,
+                    "9. Validation plan",
+                    "Requires mismatch, delegation gap, and environment drift to remain distinct surfaces.",
+                ),
             ],
             notes="Authority links are a governance shell route even though they visualize external-authority posture.",
         ),
@@ -1148,13 +1514,26 @@ def build_route_records() -> list[dict[str, Any]]:
             route_pattern="/governance/retention/policies",
             owning_object_family="Retention policy workspace",
             viewer_capability_profile="GOVERNANCE_OPERATOR",
-            required_stability_keys=GOVERNANCE_STABILITY_KEYS + ["selected_retention_policy_ref_or_null"],
+            required_stability_keys=GOVERNANCE_STABILITY_KEYS
+            + ["selected_retention_policy_ref_or_null"],
             interaction_layer_contract="GovernanceInteractionLayer",
             dominant_question="Which retention policy requires review or change?",
             dominant_action_policy="Policy selection and its blast radius lead the route; approvals remain explicit and staged.",
             promoted_support_region_policy="Use one promoted auxiliary surface for policy impact, diff, or approval context.",
-            landmarks=["SECTION_NAV", "RETENTION_POLICY_MATRIX", "CHANGE_BASKET", "APPROVAL_COMPOSER", "GOVERNANCE_SUPPORT_SIDECAR"],
-            focus_order=["SECTION_NAV", "RETENTION_POLICY_MATRIX", "CHANGE_BASKET", "APPROVAL_COMPOSER", "GOVERNANCE_SUPPORT_SIDECAR"],
+            landmarks=[
+                "SECTION_NAV",
+                "RETENTION_POLICY_MATRIX",
+                "CHANGE_BASKET",
+                "APPROVAL_COMPOSER",
+                "GOVERNANCE_SUPPORT_SIDECAR",
+            ],
+            focus_order=[
+                "SECTION_NAV",
+                "RETENTION_POLICY_MATRIX",
+                "CHANGE_BASKET",
+                "APPROVAL_COMPOSER",
+                "GOVERNANCE_SUPPORT_SIDECAR",
+            ],
             semantic_selector_set=GOVERNANCE_SELECTORS + SHARED_CONTINUITY_SELECTORS,
             recovery_postures=["PRESERVED", "INLINE_TYPED_CONTEXTUAL_RECOVERY", "REBASE_REQUIRED"],
             rebase_invalidation_reasons=[
@@ -1172,9 +1551,21 @@ def build_route_records() -> list[dict[str, Any]]:
                 "Keep selected policy, filters, and approval state through narrow-screen compaction.",
             ],
             source_refs=[
-                ref(GOVERNANCE, "4.5 /governance/retention", "Enumerates the retention policy route family."),
-                ref(FRONTEND_LAW, "3.3 Shell-family topology", "Shared governance topology governs support promotion."),
-                ref(GOVERNANCE, "8. Accessibility and responsive requirements", "Governance breakpoint rules preserve object selection and filters."),
+                ref(
+                    GOVERNANCE,
+                    "4.5 /governance/retention",
+                    "Enumerates the retention policy route family.",
+                ),
+                ref(
+                    FRONTEND_LAW,
+                    "3.3 Shell-family topology",
+                    "Shared governance topology governs support promotion.",
+                ),
+                ref(
+                    GOVERNANCE,
+                    "8. Accessibility and responsive requirements",
+                    "Governance breakpoint rules preserve object selection and filters.",
+                ),
             ],
             notes="ASSUMPTION_RETENTION_ROUTE_FOCUS_ORDER_NORMALIZATION applies to the retention policy landmark order.",
         ),
@@ -1189,8 +1580,20 @@ def build_route_records() -> list[dict[str, Any]]:
             dominant_question="Which legal hold requires action, review, or release?",
             dominant_action_policy="Hold selection and typed hold posture lead the route; auxiliary evidence and approval remain staged support.",
             promoted_support_region_policy="One promoted auxiliary surface around the legal-hold register and current hold workspace.",
-            landmarks=["SECTION_NAV", "LEGAL_HOLD_REGISTER", "WORKSPACE_CANVAS", "APPROVAL_COMPOSER", "GOVERNANCE_SUPPORT_SIDECAR"],
-            focus_order=["SECTION_NAV", "LEGAL_HOLD_REGISTER", "WORKSPACE_CANVAS", "APPROVAL_COMPOSER", "GOVERNANCE_SUPPORT_SIDECAR"],
+            landmarks=[
+                "SECTION_NAV",
+                "LEGAL_HOLD_REGISTER",
+                "WORKSPACE_CANVAS",
+                "APPROVAL_COMPOSER",
+                "GOVERNANCE_SUPPORT_SIDECAR",
+            ],
+            focus_order=[
+                "SECTION_NAV",
+                "LEGAL_HOLD_REGISTER",
+                "WORKSPACE_CANVAS",
+                "APPROVAL_COMPOSER",
+                "GOVERNANCE_SUPPORT_SIDECAR",
+            ],
             semantic_selector_set=GOVERNANCE_SELECTORS + SHARED_CONTINUITY_SELECTORS,
             recovery_postures=["PRESERVED", "INLINE_TYPED_CONTEXTUAL_RECOVERY", "REBASE_REQUIRED"],
             rebase_invalidation_reasons=[
@@ -1208,9 +1611,21 @@ def build_route_records() -> list[dict[str, Any]]:
                 "Collapse the sidecar before the legal-hold register or workspace body.",
             ],
             source_refs=[
-                ref(GOVERNANCE, "4.5 /governance/retention", "Enumerates legal-hold routes within the retention family."),
-                ref(GOVERNANCE, "10. Minimum semantic selectors", "Defines `legal-hold-register` as a required semantic anchor."),
-                ref(FRONTEND_LAW, "2.4 Back/return behavior", "Return behavior still preserves lawful selection and focus."),
+                ref(
+                    GOVERNANCE,
+                    "4.5 /governance/retention",
+                    "Enumerates legal-hold routes within the retention family.",
+                ),
+                ref(
+                    GOVERNANCE,
+                    "10. Minimum semantic selectors",
+                    "Defines `legal-hold-register` as a required semantic anchor.",
+                ),
+                ref(
+                    FRONTEND_LAW,
+                    "2.4 Back/return behavior",
+                    "Return behavior still preserves lawful selection and focus.",
+                ),
             ],
             notes="ASSUMPTION_RETENTION_ROUTE_FOCUS_ORDER_NORMALIZATION applies to the legal-hold route as well.",
         ),
@@ -1220,13 +1635,26 @@ def build_route_records() -> list[dict[str, Any]]:
             route_pattern="/governance/retention/erasure",
             owning_object_family="Erasure workspace",
             viewer_capability_profile="GOVERNANCE_OPERATOR",
-            required_stability_keys=GOVERNANCE_STABILITY_KEYS + ["selected_erasure_case_ref_or_null"],
+            required_stability_keys=GOVERNANCE_STABILITY_KEYS
+            + ["selected_erasure_case_ref_or_null"],
             interaction_layer_contract="GovernanceInteractionLayer",
             dominant_question="Which erasure request or exception posture needs resolution?",
             dominant_action_policy="The selected erasure case and its approval posture lead the route; blast radius and supporting context remain explicit support.",
             promoted_support_region_policy="Keep exactly one promoted auxiliary surface around the erasure workspace.",
-            landmarks=["SECTION_NAV", "ERASURE_WORKSPACE", "BLAST_RADIUS_PANEL", "APPROVAL_COMPOSER", "GOVERNANCE_SUPPORT_SIDECAR"],
-            focus_order=["SECTION_NAV", "ERASURE_WORKSPACE", "BLAST_RADIUS_PANEL", "APPROVAL_COMPOSER", "GOVERNANCE_SUPPORT_SIDECAR"],
+            landmarks=[
+                "SECTION_NAV",
+                "ERASURE_WORKSPACE",
+                "BLAST_RADIUS_PANEL",
+                "APPROVAL_COMPOSER",
+                "GOVERNANCE_SUPPORT_SIDECAR",
+            ],
+            focus_order=[
+                "SECTION_NAV",
+                "ERASURE_WORKSPACE",
+                "BLAST_RADIUS_PANEL",
+                "APPROVAL_COMPOSER",
+                "GOVERNANCE_SUPPORT_SIDECAR",
+            ],
             semantic_selector_set=GOVERNANCE_SELECTORS + SHARED_CONTINUITY_SELECTORS,
             recovery_postures=["PRESERVED", "INLINE_TYPED_CONTEXTUAL_RECOVERY", "REBASE_REQUIRED"],
             rebase_invalidation_reasons=[
@@ -1244,9 +1672,21 @@ def build_route_records() -> list[dict[str, Any]]:
                 "Collapse auxiliary surfaces before the core erasure workspace.",
             ],
             source_refs=[
-                ref(GOVERNANCE, "4.5 /governance/retention", "Enumerates the erasure route within the retention family."),
-                ref(FRONTEND_LAW, "3.1 One dominant question, one dominant action", "Even dense governance routes preserve a single dominant task."),
-                ref(GOVERNANCE, "8. Accessibility and responsive requirements", "Governance routes preserve selected object and dominant question across breakpoints."),
+                ref(
+                    GOVERNANCE,
+                    "4.5 /governance/retention",
+                    "Enumerates the erasure route within the retention family.",
+                ),
+                ref(
+                    FRONTEND_LAW,
+                    "3.1 One dominant question, one dominant action",
+                    "Even dense governance routes preserve a single dominant task.",
+                ),
+                ref(
+                    GOVERNANCE,
+                    "8. Accessibility and responsive requirements",
+                    "Governance routes preserve selected object and dominant question across breakpoints.",
+                ),
             ],
             notes="ASSUMPTION_RETENTION_ROUTE_FOCUS_ORDER_NORMALIZATION applies to the erasure route focus order.",
         ),
@@ -1256,13 +1696,24 @@ def build_route_records() -> list[dict[str, Any]]:
             route_pattern="/governance/audit",
             owning_object_family="Audit workbench",
             viewer_capability_profile="GOVERNANCE_OPERATOR",
-            required_stability_keys=GOVERNANCE_STABILITY_KEYS + ["selected_event_ref_or_null", "comparison_basis_hash_or_null"],
+            required_stability_keys=GOVERNANCE_STABILITY_KEYS
+            + ["selected_event_ref_or_null", "comparison_basis_hash_or_null"],
             interaction_layer_contract="GovernanceInteractionLayer",
             dominant_question="Which audit event, diff, or neighborhood comparison needs investigation?",
             dominant_action_policy="Audit tape selection drives the route; contextual diff and object neighborhood remain promoted support without becoming a second dominant workflow.",
             promoted_support_region_policy="One promoted auxiliary surface around the event diff inspector and sidecar.",
-            landmarks=["INVENTORY_RAIL", "WORKSPACE_CANVAS", "EVENT_DIFF_INSPECTOR", "AUDIT_SIDECAR"],
-            focus_order=["INVENTORY_RAIL", "WORKSPACE_CANVAS", "EVENT_DIFF_INSPECTOR", "AUDIT_SIDECAR"],
+            landmarks=[
+                "INVENTORY_RAIL",
+                "WORKSPACE_CANVAS",
+                "EVENT_DIFF_INSPECTOR",
+                "AUDIT_SIDECAR",
+            ],
+            focus_order=[
+                "INVENTORY_RAIL",
+                "WORKSPACE_CANVAS",
+                "EVENT_DIFF_INSPECTOR",
+                "AUDIT_SIDECAR",
+            ],
             semantic_selector_set=GOVERNANCE_SELECTORS + SHARED_CONTINUITY_SELECTORS,
             recovery_postures=["PRESERVED", "INLINE_TYPED_CONTEXTUAL_RECOVERY", "REBASE_REQUIRED"],
             rebase_invalidation_reasons=[
@@ -1280,9 +1731,21 @@ def build_route_records() -> list[dict[str, Any]]:
                 "Preserve selected event and comparison basis through breakpoint changes.",
             ],
             source_refs=[
-                ref(GOVERNANCE, "4.6 /governance/audit", "Defines the audit route semantic reading order and module order."),
-                ref(NATIVE_BLUEPRINT, "Secondary windows", "Native compare and audit windows remain parent-bound support windows."),
-                ref(FRONTEND_LAW, "2.4 Back/return behavior", "Audit return paths preserve focus and selection."),
+                ref(
+                    GOVERNANCE,
+                    "4.6 /governance/audit",
+                    "Defines the audit route semantic reading order and module order.",
+                ),
+                ref(
+                    NATIVE_BLUEPRINT,
+                    "Secondary windows",
+                    "Native compare and audit windows remain parent-bound support windows.",
+                ),
+                ref(
+                    FRONTEND_LAW,
+                    "2.4 Back/return behavior",
+                    "Audit return paths preserve focus and selection.",
+                ),
             ],
             notes="Audit routes may launch explicit compare or review windows, but those windows remain overlays on the governance shell rather than separate shells.",
         ),
@@ -1311,8 +1774,16 @@ def build_interaction_layer_foundation_map() -> dict[str, Any]:
                     "secondary_window_policy": "SUPPORT_ONLY_PARENT_BOUND_CLOSE_RETURNS_FOCUS",
                 },
                 "source_refs": [
-                    ref(CROSS_SHELL, "CALM_SHELL", "Maps calm-shell design tokens and behavior policies."),
-                    ref(LOW_NOISE, "Operator interaction layer", "Freezes operator-specific interaction policies and notification surfaces."),
+                    ref(
+                        CROSS_SHELL,
+                        "CALM_SHELL",
+                        "Maps calm-shell design tokens and behavior policies.",
+                    ),
+                    ref(
+                        LOW_NOISE,
+                        "Operator interaction layer",
+                        "Freezes operator-specific interaction policies and notification surfaces.",
+                    ),
                 ],
             },
             {
@@ -1334,8 +1805,16 @@ def build_interaction_layer_foundation_map() -> dict[str, Any]:
                     "secondary_window_policy": "NOT_APPLICABLE",
                 },
                 "source_refs": [
-                    ref(CROSS_SHELL, "CLIENT_PORTAL_SHELL", "Maps portal design tokens and behavior policies."),
-                    ref(PORTAL, "Shell continuity, support budget, and constrained layouts", "Defines the portal interaction layer and support-region law."),
+                    ref(
+                        CROSS_SHELL,
+                        "CLIENT_PORTAL_SHELL",
+                        "Maps portal design tokens and behavior policies.",
+                    ),
+                    ref(
+                        PORTAL,
+                        "Shell continuity, support budget, and constrained layouts",
+                        "Defines the portal interaction layer and support-region law.",
+                    ),
                 ],
             },
             {
@@ -1357,8 +1836,16 @@ def build_interaction_layer_foundation_map() -> dict[str, Any]:
                     "secondary_window_policy": "NOT_APPLICABLE",
                 },
                 "source_refs": [
-                    ref(CROSS_SHELL, "GOVERNANCE_DENSITY_SHELL", "Maps governance design tokens and behavior policies."),
-                    ref(GOVERNANCE, "6.7 Governance interaction layer", "Defines governance interaction-layer invariants and preserved context."),
+                    ref(
+                        CROSS_SHELL,
+                        "GOVERNANCE_DENSITY_SHELL",
+                        "Maps governance design tokens and behavior policies.",
+                    ),
+                    ref(
+                        GOVERNANCE,
+                        "6.7 Governance interaction layer",
+                        "Defines governance interaction-layer invariants and preserved context.",
+                    ),
                 ],
             },
         ],
@@ -1374,8 +1861,16 @@ def build_interaction_layer_foundation_map() -> dict[str, Any]:
                     "Mutation-capable affordances downgrade inline whenever recovery posture is non-`NONE`.",
                 ],
                 "source_refs": [
-                    ref(NATIVE_BLUEPRINT, "Primary workspace window", "Defines the primary native scene regions and calm-shell inheritance."),
-                    ref(FRONTEND_LAW, "1.1 Canonical shell families", "Native scenes are embodiments of canonical shell families."),
+                    ref(
+                        NATIVE_BLUEPRINT,
+                        "Primary workspace window",
+                        "Defines the primary native scene regions and calm-shell inheritance.",
+                    ),
+                    ref(
+                        FRONTEND_LAW,
+                        "1.1 Canonical shell families",
+                        "Native scenes are embodiments of canonical shell families.",
+                    ),
                 ],
             },
             {
@@ -1389,8 +1884,16 @@ def build_interaction_layer_foundation_map() -> dict[str, Any]:
                     "Compare, audit, Quick Look, export, filing-packet, and authority-review windows never become a fourth shell family.",
                 ],
                 "source_refs": [
-                    ref(NATIVE_BLUEPRINT, "Secondary windows", "Defines secondary native support windows and focus return."),
-                    ref(SEMANTIC_ACCESSIBILITY, "NativeOperatorSecondaryWindowScene", "Defines the semantic order for native support windows."),
+                    ref(
+                        NATIVE_BLUEPRINT,
+                        "Secondary windows",
+                        "Defines secondary native support windows and focus return.",
+                    ),
+                    ref(
+                        SEMANTIC_ACCESSIBILITY,
+                        "NativeOperatorSecondaryWindowScene",
+                        "Defines the semantic order for native support windows.",
+                    ),
                 ],
             },
         ],
@@ -1413,8 +1916,16 @@ def build_interaction_layer_foundation_map() -> dict[str, Any]:
                     "supported_invalidation_reason_codes[]",
                 ],
                 "source_refs": [
-                    ref(FRONTEND_LAW, "2.2 Stable route keys", "Defines the continuity contract fields."),
-                    ref(CROSS_DEVICE, "Cross-device continuity", "Lists the surfaces that must publish the continuity contract."),
+                    ref(
+                        FRONTEND_LAW,
+                        "2.2 Stable route keys",
+                        "Defines the continuity contract fields.",
+                    ),
+                    ref(
+                        CROSS_DEVICE,
+                        "Cross-device continuity",
+                        "Lists the surfaces that must publish the continuity contract.",
+                    ),
                 ],
             },
             {
@@ -1428,8 +1939,16 @@ def build_interaction_layer_foundation_map() -> dict[str, Any]:
                     "announced_change_kinds[]",
                 ],
                 "source_refs": [
-                    ref(FRONTEND_LAW, "2.2A Interaction-layer boundary", "Defines the semantic accessibility contract fields."),
-                    ref(SEMANTIC_ACCESSIBILITY, "Shared semantic selector and accessibility contract", "Turns semantic order and anchors into regression-grade contracts."),
+                    ref(
+                        FRONTEND_LAW,
+                        "2.2A Interaction-layer boundary",
+                        "Defines the semantic accessibility contract fields.",
+                    ),
+                    ref(
+                        SEMANTIC_ACCESSIBILITY,
+                        "Shared semantic selector and accessibility contract",
+                        "Turns semantic order and anchors into regression-grade contracts.",
+                    ),
                 ],
             },
         ],
@@ -1444,7 +1963,11 @@ def build_semantic_selector_registry(route_records: list[dict[str, Any]]) -> dic
             "purpose": "Calm shell, manifest workspace, and staff collaboration anchors.",
             "source_refs": [
                 ref(LOW_NOISE, "Minimum semantic selectors", "Defines calm-shell anchors."),
-                ref(COLLABORATION, "12. Playwright scenarios", "Adds collaboration-specific module, thread, and action anchors."),
+                ref(
+                    COLLABORATION,
+                    "12. Playwright scenarios",
+                    "Adds collaboration-specific module, thread, and action anchors.",
+                ),
             ],
         },
         "PORTAL_SEMANTIC_SELECTORS_V1": {
@@ -1453,7 +1976,11 @@ def build_semantic_selector_registry(route_records: list[dict[str, Any]]) -> dic
             "purpose": "Client-safe portal, artifact, support, and request-focus anchors.",
             "source_refs": [
                 ref(PORTAL, "Minimum semantic selectors", "Defines the portal selector profile."),
-                ref(FRONTEND_LAW, "10. Automation anchors and UI observability fencing", "Shared route-visible anchors must remain machine-observable."),
+                ref(
+                    FRONTEND_LAW,
+                    "10. Automation anchors and UI observability fencing",
+                    "Shared route-visible anchors must remain machine-observable.",
+                ),
             ],
         },
         "GOVERNANCE_SEMANTIC_SELECTORS_V1": {
@@ -1461,8 +1988,16 @@ def build_semantic_selector_registry(route_records: list[dict[str, Any]]) -> dic
             "selectors": GOVERNANCE_SELECTORS,
             "purpose": "Governance worklist, mutation, diff, sidecar, and audit anchors.",
             "source_refs": [
-                ref(GOVERNANCE, "10. Minimum semantic selectors", "Defines the governance selector profile."),
-                ref(FRONTEND_LAW, "10. Automation anchors and UI observability fencing", "Shared route-visible anchors remain required across shells."),
+                ref(
+                    GOVERNANCE,
+                    "10. Minimum semantic selectors",
+                    "Defines the governance selector profile.",
+                ),
+                ref(
+                    FRONTEND_LAW,
+                    "10. Automation anchors and UI observability fencing",
+                    "Shared route-visible anchors remain required across shells.",
+                ),
             ],
         },
     }
@@ -1499,8 +2034,16 @@ def build_semantic_selector_registry(route_records: list[dict[str, Any]]) -> dic
             "purpose": "Preserves return targets, artifact identity, notices, and focus continuity across shell families.",
             "exemplar_routes": route_index.get(selector, []),
             "source_refs": [
-                ref(FRONTEND_LAW, "10. Automation anchors and UI observability fencing", "Defines shared anchors for shell root, notices, artifacts, and return paths."),
-                ref(SEMANTIC_ACCESSIBILITY, "Shared semantic selector and accessibility contract", "Shared anchors must survive accessibility regression checks."),
+                ref(
+                    FRONTEND_LAW,
+                    "10. Automation anchors and UI observability fencing",
+                    "Defines shared anchors for shell root, notices, artifacts, and return paths.",
+                ),
+                ref(
+                    SEMANTIC_ACCESSIBILITY,
+                    "Shared semantic selector and accessibility contract",
+                    "Shared anchors must survive accessibility regression checks.",
+                ),
             ],
         }
         for selector in SHARED_CONTINUITY_SELECTORS
@@ -1536,10 +2079,21 @@ def build_continuity_recovery_matrix() -> dict[str, Any]:
             "announcement_posture": "polite",
             "focus_restore_order": FOCUS_RESTORE_ORDER,
             "invalidation_reasons": [],
-            "test_harnesses": ["shell_continuity_fuzz_harness", "semantic_accessibility_regression_pack"],
+            "test_harnesses": [
+                "shell_continuity_fuzz_harness",
+                "semantic_accessibility_regression_pack",
+            ],
             "source_refs": [
-                ref(SHELL_CONTINUITY, "Preserved outcomes", "No truth change preserves shell, route, object, and focus invariants."),
-                ref(CROSS_DEVICE, "Cross-device continuity", "Refresh-compatible shells must publish continuity contracts."),
+                ref(
+                    SHELL_CONTINUITY,
+                    "Preserved outcomes",
+                    "No truth change preserves shell, route, object, and focus invariants.",
+                ),
+                ref(
+                    CROSS_DEVICE,
+                    "Cross-device continuity",
+                    "Refresh-compatible shells must publish continuity contracts.",
+                ),
             ],
             "notes": "Refresh may replay visibility-scoped updates, but it must not remount a different shell family or silently drop focus.",
         },
@@ -1557,10 +2111,21 @@ def build_continuity_recovery_matrix() -> dict[str, Any]:
             "announcement_posture": "polite",
             "focus_restore_order": FOCUS_RESTORE_ORDER,
             "invalidation_reasons": ["stream compaction floor advance", "schema incompatibility"],
-            "test_harnesses": ["shell_continuity_fuzz_harness", "stream_resume_and_catch_up_ordering_contract"],
+            "test_harnesses": [
+                "shell_continuity_fuzz_harness",
+                "stream_resume_and_catch_up_ordering_contract",
+            ],
             "source_refs": [
-                ref(LOW_NOISE, "Manifest stream recovery and catch-up", "Calm-shell reconnect must keep focus anchor and active detail module when lawful."),
-                ref(STREAM_RESUME, "Stream scope and ordering", "Reconnect and catch-up are governed by route key, object, access binding, and compaction state."),
+                ref(
+                    LOW_NOISE,
+                    "Manifest stream recovery and catch-up",
+                    "Calm-shell reconnect must keep focus anchor and active detail module when lawful.",
+                ),
+                ref(
+                    STREAM_RESUME,
+                    "Stream scope and ordering",
+                    "Reconnect and catch-up are governed by route key, object, access binding, and compaction state.",
+                ),
             ],
             "notes": "Reconnect remains inline unless the stream basis or access binding now demands rebase or access rebind.",
         },
@@ -1568,7 +2133,11 @@ def build_continuity_recovery_matrix() -> dict[str, Any]:
             "scenario_id": "publication_or_epoch_rebase",
             "trigger": "Frame epoch drift, shell-stability drift, route-context drift, or compaction that invalidates the current surface basis.",
             "applicable_shells": ["CALM_SHELL", "CLIENT_PORTAL_SHELL", "GOVERNANCE_DENSITY_SHELL"],
-            "preserved_invariants": ["owning object family", "return path", "typed recovery reason"],
+            "preserved_invariants": [
+                "owning object family",
+                "return path",
+                "typed recovery reason",
+            ],
             "recovery_mode": "REBASE_REQUIRED",
             "announcement_posture": "assertive",
             "focus_restore_order": FOCUS_RESTORE_ORDER,
@@ -1578,10 +2147,21 @@ def build_continuity_recovery_matrix() -> dict[str, Any]:
                 "route-context drift",
                 "published frontier fell behind compaction floor",
             ],
-            "test_harnesses": ["shell_continuity_fuzz_harness", "semantic_accessibility_regression_pack"],
+            "test_harnesses": [
+                "shell_continuity_fuzz_harness",
+                "semantic_accessibility_regression_pack",
+            ],
             "source_refs": [
-                ref(LOW_NOISE, "Manifest stream recovery and catch-up", "Defines `REBASE_REQUIRED` when the frame epoch or shell basis drifts."),
-                ref(STREAM_RESUME, "Stream scope and ordering", "Compaction floor and publication frontier drive rebase decisions."),
+                ref(
+                    LOW_NOISE,
+                    "Manifest stream recovery and catch-up",
+                    "Defines `REBASE_REQUIRED` when the frame epoch or shell basis drifts.",
+                ),
+                ref(
+                    STREAM_RESUME,
+                    "Stream scope and ordering",
+                    "Compaction floor and publication frontier drive rebase decisions.",
+                ),
             ],
             "notes": "Rebase remains inline and explicit. The UI may downgrade mutation-capable actions, but it must not silently continue on stale authority.",
         },
@@ -1589,7 +2169,11 @@ def build_continuity_recovery_matrix() -> dict[str, Any]:
             "scenario_id": "access_rebind_after_scope_change",
             "trigger": "Session, access binding, masking, or schema compatibility drift.",
             "applicable_shells": ["CALM_SHELL", "CLIENT_PORTAL_SHELL", "GOVERNANCE_DENSITY_SHELL"],
-            "preserved_invariants": ["route identity", "typed failure or rebind reason", "return path"],
+            "preserved_invariants": [
+                "route identity",
+                "typed failure or rebind reason",
+                "return path",
+            ],
             "recovery_mode": "ACCESS_REBIND_REQUIRED",
             "announcement_posture": "assertive",
             "focus_restore_order": FOCUS_RESTORE_ORDER,
@@ -1599,10 +2183,21 @@ def build_continuity_recovery_matrix() -> dict[str, Any]:
                 "masking scope mismatch",
                 "schema incompatibility",
             ],
-            "test_harnesses": ["shell_continuity_fuzz_harness", "native_cache_hydration_purge_and_rebase_contract"],
+            "test_harnesses": [
+                "shell_continuity_fuzz_harness",
+                "native_cache_hydration_purge_and_rebase_contract",
+            ],
             "source_refs": [
-                ref(LOW_NOISE, "Manifest stream recovery and catch-up", "Defines `ACCESS_REBIND_REQUIRED` on session, access, masking, or schema drift."),
-                ref(CACHE_REBASE, "Hydration purge and rebase", "Hydrated cache views must block mutation-capable actions until legality is restored."),
+                ref(
+                    LOW_NOISE,
+                    "Manifest stream recovery and catch-up",
+                    "Defines `ACCESS_REBIND_REQUIRED` on session, access, masking, or schema drift.",
+                ),
+                ref(
+                    CACHE_REBASE,
+                    "Hydration purge and rebase",
+                    "Hydrated cache views must block mutation-capable actions until legality is restored.",
+                ),
             ],
             "notes": "Access rebind is fail-closed: cached content may remain readable, but mutation-capable or filing-capable actions stay blocked until the live legality basis is restored.",
         },
@@ -1610,15 +2205,30 @@ def build_continuity_recovery_matrix() -> dict[str, Any]:
             "scenario_id": "deep_link_entry_and_restore",
             "trigger": "Direct deep-link entry from browser address bar, notification, or in-app jump.",
             "applicable_shells": ["CALM_SHELL", "CLIENT_PORTAL_SHELL"],
-            "preserved_invariants": ["same object", "same shell family", "typed fallback explanation", "return target"],
+            "preserved_invariants": [
+                "same object",
+                "same shell family",
+                "typed fallback explanation",
+                "return target",
+            ],
             "recovery_mode": "PRESERVED",
             "announcement_posture": "polite",
             "focus_restore_order": FOCUS_RESTORE_ORDER,
-            "invalidation_reasons": ["focus anchor no longer exists", "target module or request detail no longer resolves"],
-            "test_harnesses": ["focus_restoration_and_return_target_harness", "cross_device_continuity_contract"],
+            "invalidation_reasons": [
+                "focus anchor no longer exists",
+                "target module or request detail no longer resolves",
+            ],
+            "test_harnesses": [
+                "focus_restoration_and_return_target_harness",
+                "cross_device_continuity_contract",
+            ],
             "source_refs": [
                 ref(FRONTEND_LAW, "2.3 Deep-link restoration", "Defines deep-link fallback order."),
-                ref(PORTAL, "Contextual request-detail routes", "Notification deep links restore request focus and return path."),
+                ref(
+                    PORTAL,
+                    "Contextual request-detail routes",
+                    "Notification deep links restore request focus and return path.",
+                ),
             ],
             "notes": "Deep links first try to restore focus inside the same object. Only then may they fall back to summary or list anchors.",
         },
@@ -1626,15 +2236,30 @@ def build_continuity_recovery_matrix() -> dict[str, Any]:
             "scenario_id": "notification_open_preserves_slice",
             "trigger": "Notification click or inbox/open-from-alert event.",
             "applicable_shells": ["CALM_SHELL", "CLIENT_PORTAL_SHELL"],
-            "preserved_invariants": ["current queue or tab slice", "explicit return path", "highlighted target"],
+            "preserved_invariants": [
+                "current queue or tab slice",
+                "explicit return path",
+                "highlighted target",
+            ],
             "recovery_mode": "PRESERVED",
             "announcement_posture": "polite",
             "focus_restore_order": FOCUS_RESTORE_ORDER,
             "invalidation_reasons": ["highlight target removed", "permission drift"],
-            "test_harnesses": ["cross_device_continuity_contract", "focus_restoration_and_return_target_harness"],
+            "test_harnesses": [
+                "cross_device_continuity_contract",
+                "focus_restoration_and_return_target_harness",
+            ],
             "source_refs": [
-                ref(FRONTEND_LAW, "2.5 Queue and inbox continuity", "Queue continuity preserves filters and target highlighting."),
-                ref(PORTAL, "Playwright validation minimum", "Notification deep links must restore request focus and return path."),
+                ref(
+                    FRONTEND_LAW,
+                    "2.5 Queue and inbox continuity",
+                    "Queue continuity preserves filters and target highlighting.",
+                ),
+                ref(
+                    PORTAL,
+                    "Playwright validation minimum",
+                    "Notification deep links must restore request focus and return path.",
+                ),
             ],
             "notes": "Alerts and notifications do not excuse shell swaps or filter loss. They just pre-focus an existing governed target.",
         },
@@ -1642,15 +2267,32 @@ def build_continuity_recovery_matrix() -> dict[str, Any]:
             "scenario_id": "narrow_screen_collapse_preserves_order",
             "trigger": "Responsive collapse from desktop to tablet or mobile.",
             "applicable_shells": ["CALM_SHELL", "CLIENT_PORTAL_SHELL", "GOVERNANCE_DENSITY_SHELL"],
-            "preserved_invariants": ["semantic order", "selected object", "dominant question", "dominant action", "focus anchor"],
+            "preserved_invariants": [
+                "semantic order",
+                "selected object",
+                "dominant question",
+                "dominant action",
+                "focus anchor",
+            ],
             "recovery_mode": "PRESERVED",
             "announcement_posture": "polite",
             "focus_restore_order": FOCUS_RESTORE_ORDER,
             "invalidation_reasons": [],
-            "test_harnesses": ["semantic_accessibility_regression_pack", "shell_continuity_fuzz_harness"],
+            "test_harnesses": [
+                "semantic_accessibility_regression_pack",
+                "shell_continuity_fuzz_harness",
+            ],
             "source_refs": [
-                ref(FRONTEND_LAW, "3.4 Responsive fallback", "Semantic order is preserved before side-by-side density."),
-                ref(GOVERNANCE, "8. Accessibility and responsive requirements", "Governance compaction preserves filters, selection, and focus anchors."),
+                ref(
+                    FRONTEND_LAW,
+                    "3.4 Responsive fallback",
+                    "Semantic order is preserved before side-by-side density.",
+                ),
+                ref(
+                    GOVERNANCE,
+                    "8. Accessibility and responsive requirements",
+                    "Governance compaction preserves filters, selection, and focus anchors.",
+                ),
             ],
             "notes": "Responsive compaction redocks support surfaces first and never introduces mobile-only alternate shell families.",
         },
@@ -1658,15 +2300,35 @@ def build_continuity_recovery_matrix() -> dict[str, Any]:
             "scenario_id": "browser_back_and_return",
             "trigger": "Browser back, route return, or explicit back control.",
             "applicable_shells": ["CALM_SHELL", "CLIENT_PORTAL_SHELL", "GOVERNANCE_DENSITY_SHELL"],
-            "preserved_invariants": ["filters", "selection", "scroll anchor", "draft state", "focus"],
+            "preserved_invariants": [
+                "filters",
+                "selection",
+                "scroll anchor",
+                "draft state",
+                "focus",
+            ],
             "recovery_mode": "PRESERVED",
             "announcement_posture": "polite",
             "focus_restore_order": FOCUS_RESTORE_ORDER,
-            "invalidation_reasons": ["return target invalidated by truth change", "permission drift"],
-            "test_harnesses": ["focus_restoration_and_return_target_harness", "semantic_accessibility_regression_pack"],
+            "invalidation_reasons": [
+                "return target invalidated by truth change",
+                "permission drift",
+            ],
+            "test_harnesses": [
+                "focus_restoration_and_return_target_harness",
+                "semantic_accessibility_regression_pack",
+            ],
             "source_refs": [
-                ref(FRONTEND_LAW, "2.4 Back/return behavior", "Back behavior preserves lawful filters, selection, drafts, and focus."),
-                ref(COLLABORATION, "Route map", "Queue -> item -> queue stays in the same SPA shell with explicit return routes."),
+                ref(
+                    FRONTEND_LAW,
+                    "2.4 Back/return behavior",
+                    "Back behavior preserves lawful filters, selection, drafts, and focus.",
+                ),
+                ref(
+                    COLLABORATION,
+                    "Route map",
+                    "Queue -> item -> queue stays in the same SPA shell with explicit return routes.",
+                ),
             ],
             "notes": "Back navigation is a governed restoration path, not just URL history replay.",
         },
@@ -1674,15 +2336,35 @@ def build_continuity_recovery_matrix() -> dict[str, Any]:
             "scenario_id": "native_scene_restoration",
             "trigger": "macOS scene restoration or cached workspace hydration on app relaunch.",
             "applicable_shells": ["CALM_SHELL"],
-            "preserved_invariants": ["same object anchor", "same dominant question", "same settlement state", "parent-bound support windows"],
+            "preserved_invariants": [
+                "same object anchor",
+                "same dominant question",
+                "same settlement state",
+                "parent-bound support windows",
+            ],
             "recovery_mode": "PRESERVED",
             "announcement_posture": "polite",
             "focus_restore_order": FOCUS_RESTORE_ORDER,
-            "invalidation_reasons": ["tenant/session/masking mismatch", "contract mismatch", "focus anchor no longer valid"],
-            "test_harnesses": ["cross_device_continuity_contract", "native_cache_hydration_purge_and_rebase_contract"],
+            "invalidation_reasons": [
+                "tenant/session/masking mismatch",
+                "contract mismatch",
+                "focus anchor no longer valid",
+            ],
+            "test_harnesses": [
+                "cross_device_continuity_contract",
+                "native_cache_hydration_purge_and_rebase_contract",
+            ],
             "source_refs": [
-                ref(NATIVE_BLUEPRINT, "State management", "Native restoration uses scenes and `NSUserActivity`."),
-                ref(CACHE_REBASE, "Hydration purge and rebase", "Mismatch requires purge and fail-closed mutation posture."),
+                ref(
+                    NATIVE_BLUEPRINT,
+                    "State management",
+                    "Native restoration uses scenes and `NSUserActivity`.",
+                ),
+                ref(
+                    CACHE_REBASE,
+                    "Hydration purge and rebase",
+                    "Mismatch requires purge and fail-closed mutation posture.",
+                ),
             ],
             "notes": "Native restoration reuses calm-shell law instead of inventing a route-less shell family with different semantics.",
         },
@@ -1690,15 +2372,30 @@ def build_continuity_recovery_matrix() -> dict[str, Any]:
             "scenario_id": "secondary_window_return",
             "trigger": "Closing a native or browser support window such as compare, audit, Quick Look, export, or packet review.",
             "applicable_shells": ["CALM_SHELL", "GOVERNANCE_DENSITY_SHELL"],
-            "preserved_invariants": ["parent object", "return focus anchor", "support-only posture"],
+            "preserved_invariants": [
+                "parent object",
+                "return focus anchor",
+                "support-only posture",
+            ],
             "recovery_mode": "PRESERVED",
             "announcement_posture": "polite",
             "focus_restore_order": FOCUS_RESTORE_ORDER,
             "invalidation_reasons": ["parent focus anchor removed", "parent object invalidated"],
-            "test_harnesses": ["semantic_accessibility_regression_pack", "focus_restoration_and_return_target_harness"],
+            "test_harnesses": [
+                "semantic_accessibility_regression_pack",
+                "focus_restoration_and_return_target_harness",
+            ],
             "source_refs": [
-                ref(SEMANTIC_REGRESSION, "SECONDARY_WINDOW_RETURN", "Secondary-window return is a mandatory regression scenario."),
-                ref(NATIVE_BLUEPRINT, "Secondary windows", "Parent-bound support windows restore focus when closed."),
+                ref(
+                    SEMANTIC_REGRESSION,
+                    "SECONDARY_WINDOW_RETURN",
+                    "Secondary-window return is a mandatory regression scenario.",
+                ),
+                ref(
+                    NATIVE_BLUEPRINT,
+                    "Secondary windows",
+                    "Parent-bound support windows restore focus when closed.",
+                ),
             ],
             "notes": "Support windows never become primary shells; closing them must restore the invoking parent context.",
         },
@@ -1706,15 +2403,28 @@ def build_continuity_recovery_matrix() -> dict[str, Any]:
             "scenario_id": "reduced_motion_semantic_equivalence",
             "trigger": "Reduced-motion preference is enabled.",
             "applicable_shells": ["CALM_SHELL", "CLIENT_PORTAL_SHELL", "GOVERNANCE_DENSITY_SHELL"],
-            "preserved_invariants": ["same meaning", "same action order", "same recovery meaning", "same focus order"],
+            "preserved_invariants": [
+                "same meaning",
+                "same action order",
+                "same recovery meaning",
+                "same focus order",
+            ],
             "recovery_mode": "PRESERVED",
             "announcement_posture": "polite",
             "focus_restore_order": FOCUS_RESTORE_ORDER,
             "invalidation_reasons": [],
             "test_harnesses": ["semantic_accessibility_regression_pack"],
             "source_refs": [
-                ref(FRONTEND_LAW, "8. Accessibility, focus, and motion", "Reduced-motion must preserve meaning with minimal or no displacement."),
-                ref(SEMANTIC_ACCESSIBILITY, "Shared semantic selector and accessibility contract", "Reduced motion cannot change semantic order or action meaning."),
+                ref(
+                    FRONTEND_LAW,
+                    "8. Accessibility, focus, and motion",
+                    "Reduced-motion must preserve meaning with minimal or no displacement.",
+                ),
+                ref(
+                    SEMANTIC_ACCESSIBILITY,
+                    "Shared semantic selector and accessibility contract",
+                    "Reduced motion cannot change semantic order or action meaning.",
+                ),
             ],
             "notes": "Spatial motion becomes opacity, highlight, or state-color transitions without changing semantic order.",
         },
@@ -1722,7 +2432,11 @@ def build_continuity_recovery_matrix() -> dict[str, Any]:
             "scenario_id": "cache_hydration_purge_and_rebase",
             "trigger": "Native or browser cache hydration on mismatched tenant, masking, or contract basis.",
             "applicable_shells": ["CALM_SHELL", "CLIENT_PORTAL_SHELL", "GOVERNANCE_DENSITY_SHELL"],
-            "preserved_invariants": ["typed failure posture", "read-only legality until live basis returns", "same return path when lawful"],
+            "preserved_invariants": [
+                "typed failure posture",
+                "read-only legality until live basis returns",
+                "same return path when lawful",
+            ],
             "recovery_mode": "ACCESS_REBIND_REQUIRED",
             "announcement_posture": "assertive",
             "focus_restore_order": FOCUS_RESTORE_ORDER,
@@ -1732,10 +2446,21 @@ def build_continuity_recovery_matrix() -> dict[str, Any]:
                 "masking mismatch",
                 "contract mismatch",
             ],
-            "test_harnesses": ["native_cache_hydration_purge_and_rebase_contract", "semantic_accessibility_regression_pack"],
+            "test_harnesses": [
+                "native_cache_hydration_purge_and_rebase_contract",
+                "semantic_accessibility_regression_pack",
+            ],
             "source_refs": [
-                ref(CACHE_REBASE, "Hydration purge and rebase", "Purges are immediate on tenant, session, masking, or contract mismatch."),
-                ref(FRONTEND_LAW, "4.2 No contradictory writable posture", "Illegal mutation must remain fail-closed during degraded or recovery posture."),
+                ref(
+                    CACHE_REBASE,
+                    "Hydration purge and rebase",
+                    "Purges are immediate on tenant, session, masking, or contract mismatch.",
+                ),
+                ref(
+                    FRONTEND_LAW,
+                    "4.2 No contradictory writable posture",
+                    "Illegal mutation must remain fail-closed during degraded or recovery posture.",
+                ),
             ],
             "notes": "Hydrated content may remain visible for continuity, but write-capable actions stay blocked until live legality is re-established.",
         },
@@ -1745,7 +2470,11 @@ def build_continuity_recovery_matrix() -> dict[str, Any]:
         "summary": {
             "scenario_count": len(scenarios),
             "shell_family_count": 3,
-            "harness_count": len(unique([harness for scenario in scenarios for harness in scenario["test_harnesses"]])),
+            "harness_count": len(
+                unique(
+                    [harness for scenario in scenarios for harness in scenario["test_harnesses"]]
+                )
+            ),
         },
         "assumptions": ASSUMPTIONS,
     }
@@ -1773,7 +2502,11 @@ def build_layout_breakpoint_contract() -> dict[str, Any]:
             "direction": "Restrained dark, typography-led, quiet surfaces, one accent family, explicit status colors only.",
             "source_refs": [
                 ref(UIUX_SKILL, "Visual philosophy", "Premium low-noise product direction."),
-                ref(FRONTEND_LAW, "3.1 One dominant question, one dominant action", "Quiet visual hierarchy serves the dominant question/action law."),
+                ref(
+                    FRONTEND_LAW,
+                    "3.1 One dominant question, one dominant action",
+                    "Quiet visual hierarchy serves the dominant question/action law.",
+                ),
             ],
         },
         "typography": {
@@ -1792,8 +2525,16 @@ def build_layout_breakpoint_contract() -> dict[str, Any]:
                 "Keep headline hierarchy sparse so the shell law reads as a contract, not marketing copy.",
             ],
             "source_refs": [
-                ref(UIUX_SKILL, "Taxat Decision Observatory", "The product language is typographic and summary-first."),
-                ref(FRONTEND_LAW, "10. Automation anchors and UI observability fencing", "Structural anchors must remain legible and stable."),
+                ref(
+                    UIUX_SKILL,
+                    "Taxat Decision Observatory",
+                    "The product language is typographic and summary-first.",
+                ),
+                ref(
+                    FRONTEND_LAW,
+                    "10. Automation anchors and UI observability fencing",
+                    "Structural anchors must remain legible and stable.",
+                ),
             ],
         },
         "grid": {
@@ -1806,8 +2547,16 @@ def build_layout_breakpoint_contract() -> dict[str, Any]:
             "chip_radius": 999,
             "inspector_width": 360,
             "source_refs": [
-                ref(UIUX_SKILL, "Default product shell", "The shell remains calm and structural rather than card-noisy."),
-                ref(CROSS_SHELL, "Shared design token and interaction layer foundation", "Density and spacing tokens remain shell-specific."),
+                ref(
+                    UIUX_SKILL,
+                    "Default product shell",
+                    "The shell remains calm and structural rather than card-noisy.",
+                ),
+                ref(
+                    CROSS_SHELL,
+                    "Shared design token and interaction layer foundation",
+                    "Density and spacing tokens remain shell-specific.",
+                ),
             ],
         },
         "motion_contract": {
@@ -1817,8 +2566,16 @@ def build_layout_breakpoint_contract() -> dict[str, Any]:
             "allowed_motion": "Opacity changes and vertical translation up to 8px.",
             "reduced_motion_policy": "Replace displacement with opacity, highlight, or color-state changes while preserving semantic meaning.",
             "source_refs": [
-                ref(FRONTEND_LAW, "8. Accessibility, focus, and motion", "Motion stays low-amplitude and semantic."),
-                ref(SEMANTIC_ACCESSIBILITY, "Shared semantic selector and accessibility contract", "Reduced motion preserves meaning and action order."),
+                ref(
+                    FRONTEND_LAW,
+                    "8. Accessibility, focus, and motion",
+                    "Motion stays low-amplitude and semantic.",
+                ),
+                ref(
+                    SEMANTIC_ACCESSIBILITY,
+                    "Shared semantic selector and accessibility contract",
+                    "Reduced motion preserves meaning and action order.",
+                ),
             ],
         },
         "shell_breakpoints": [
@@ -1848,8 +2605,16 @@ def build_layout_breakpoint_contract() -> dict[str, Any]:
                     },
                 ],
                 "source_refs": [
-                    ref(LOW_NOISE, "Shell continuity, constrained layouts, and artifact handoff", "Calm shell compacts by redocking the drawer before primary surfaces."),
-                    ref(COLLABORATION, "11. Accessibility and responsive rules", "Collaboration module behavior changes at desktop, tablet, and mobile breakpoints."),
+                    ref(
+                        LOW_NOISE,
+                        "Shell continuity, constrained layouts, and artifact handoff",
+                        "Calm shell compacts by redocking the drawer before primary surfaces.",
+                    ),
+                    ref(
+                        COLLABORATION,
+                        "11. Accessibility and responsive rules",
+                        "Collaboration module behavior changes at desktop, tablet, and mobile breakpoints.",
+                    ),
                 ],
             },
             {
@@ -1878,8 +2643,16 @@ def build_layout_breakpoint_contract() -> dict[str, Any]:
                     },
                 ],
                 "source_refs": [
-                    ref(PORTAL, "Shell continuity, support budget, and constrained layouts", "Portal support stacks below the primary task and keeps same-shell continuity."),
-                    ref(FRONTEND_LAW, "3.4 Responsive fallback", "Responsive fallback preserves semantic order before density."),
+                    ref(
+                        PORTAL,
+                        "Shell continuity, support budget, and constrained layouts",
+                        "Portal support stacks below the primary task and keeps same-shell continuity.",
+                    ),
+                    ref(
+                        FRONTEND_LAW,
+                        "3.4 Responsive fallback",
+                        "Responsive fallback preserves semantic order before density.",
+                    ),
                 ],
             },
             {
@@ -1908,8 +2681,16 @@ def build_layout_breakpoint_contract() -> dict[str, Any]:
                     },
                 ],
                 "source_refs": [
-                    ref(GOVERNANCE, "8. Accessibility and responsive requirements", "Defines the governance breakpoint rules."),
-                    ref(FRONTEND_LAW, "3.3 Shell-family topology", "Governance routes still respect one promoted support region by default."),
+                    ref(
+                        GOVERNANCE,
+                        "8. Accessibility and responsive requirements",
+                        "Defines the governance breakpoint rules.",
+                    ),
+                    ref(
+                        FRONTEND_LAW,
+                        "3.3 Shell-family topology",
+                        "Governance routes still respect one promoted support region by default.",
+                    ),
                 ],
             },
         ],
@@ -1945,16 +2726,24 @@ def build_route_focus_registry(route_records: list[dict[str, Any]]) -> dict[str,
     }
 
 
-def build_shell_route_matrix(shell_families: list[dict[str, Any]], route_records: list[dict[str, Any]]) -> dict[str, Any]:
+def build_shell_route_matrix(
+    shell_families: list[dict[str, Any]], route_records: list[dict[str, Any]]
+) -> dict[str, Any]:
     return {
         "shell_families": shell_families,
         "route_records": route_records,
         "summary": {
             "shell_family_count": len(shell_families),
             "route_count": len(route_records),
-            "calm_route_count": sum(1 for route in route_records if route["shell_family"] == "CALM_SHELL"),
-            "portal_route_count": sum(1 for route in route_records if route["shell_family"] == "CLIENT_PORTAL_SHELL"),
-            "governance_route_count": sum(1 for route in route_records if route["shell_family"] == "GOVERNANCE_DENSITY_SHELL"),
+            "calm_route_count": sum(
+                1 for route in route_records if route["shell_family"] == "CALM_SHELL"
+            ),
+            "portal_route_count": sum(
+                1 for route in route_records if route["shell_family"] == "CLIENT_PORTAL_SHELL"
+            ),
+            "governance_route_count": sum(
+                1 for route in route_records if route["shell_family"] == "GOVERNANCE_DENSITY_SHELL"
+            ),
         },
         "assumptions": ASSUMPTIONS,
     }
@@ -2069,8 +2858,7 @@ def render_frontend_requirements_doc(
         for row in interaction_layer_map["shell_foundations"]
     )
     assumption_rows = "\n".join(
-        f"- `{item['code']}`: {item['description']}"
-        for item in ASSUMPTIONS
+        f"- `{item['code']}`: {item['description']}" for item in ASSUMPTIONS
     )
     return normalize_markdown(
         f"""
@@ -2112,7 +2900,9 @@ def render_frontend_requirements_doc(
     )
 
 
-def render_visual_system_doc(layout_contract: dict[str, Any], interaction_layer_map: dict[str, Any]) -> str:
+def render_visual_system_doc(
+    layout_contract: dict[str, Any], interaction_layer_map: dict[str, Any]
+) -> str:
     color_rows = "\n".join(
         f"| `{name}` | `{value}` |"
         for name, value in layout_contract["visual_system"]["colors"].items()
@@ -2125,9 +2915,7 @@ def render_visual_system_doc(layout_contract: dict[str, Any], interaction_layer_
     for breakpoint_group in layout_contract["shell_breakpoints"]:
         rules = []
         for item in breakpoint_group["breakpoints"]:
-            rules.append(
-                f"- `{item['range']}`: {' '.join(item['rules'])}"
-            )
+            rules.append(f"- `{item['range']}`: {' '.join(item['rules'])}")
         shell_sections.append(f"### {breakpoint_group['shell_family']}\n" + "\n".join(rules))
     token_rows = "\n".join(
         f"| `{row['shell_family']}` | `{row['design_tokens']['layout_density_token']}` | `{row['design_tokens']['responsive_compaction_token']}` |"
@@ -2194,7 +2982,13 @@ def render_validation_plan_doc(
         f"| `{scenario['scenario_id']}` | {scenario['trigger']} | `{scenario['recovery_mode']}` | `{scenario['announcement_posture']}` |"
         for scenario in continuity_matrix["scenarios"]
     )
-    harnesses = unique([harness for scenario in continuity_matrix["scenarios"] for harness in scenario["test_harnesses"]])
+    harnesses = unique(
+        [
+            harness
+            for scenario in continuity_matrix["scenarios"]
+            for harness in scenario["test_harnesses"]
+        ]
+    )
     return normalize_markdown(
         f"""
         # Playwright Accessibility And Continuity Validation Plan
@@ -3733,9 +4527,14 @@ def main() -> None:
     write_json(ROUTE_FOCUS_REGISTRY_PATH, focus_registry)
     write_json(ATLAS_DATA_PATH, atlas_data)
 
-    write_text(FRONTEND_REQUIREMENTS_PATH, render_frontend_requirements_doc(shell_route_matrix, interaction_layer_map))
+    write_text(
+        FRONTEND_REQUIREMENTS_PATH,
+        render_frontend_requirements_doc(shell_route_matrix, interaction_layer_map),
+    )
     write_text(VISUAL_SYSTEM_PATH, render_visual_system_doc(layout_contract, interaction_layer_map))
-    write_text(VALIDATION_PLAN_PATH, render_validation_plan_doc(selector_registry, continuity_matrix))
+    write_text(
+        VALIDATION_PLAN_PATH, render_validation_plan_doc(selector_registry, continuity_matrix)
+    )
 
     write_text(ATLAS_INDEX_PATH, render_index_html())
     write_text(ATLAS_STYLES_PATH, render_styles_css())

@@ -38,7 +38,9 @@ def validate_outputs() -> dict[str, Any]:
 
     summary = glossary_payload["summary"]
     if summary["shared_spine_missing_fields"]:
-        fail(f"Shared-spine fields missing from glossary map: {summary['shared_spine_missing_fields']}")
+        fail(
+            f"Shared-spine fields missing from glossary map: {summary['shared_spine_missing_fields']}"
+        )
     if summary["glossary_coverage_failures"]:
         fail(f"Glossary coverage failures remain: {summary['glossary_coverage_failures']}")
 
@@ -107,7 +109,9 @@ def iter_target_files(paths: list[Path], include_suffixes: set[str]) -> list[Pat
     return discovered
 
 
-def scan_paths(payload: dict[str, Any], paths: list[Path], include_machine_readable: bool) -> list[dict[str, Any]]:
+def scan_paths(
+    payload: dict[str, Any], paths: list[Path], include_machine_readable: bool
+) -> list[dict[str, Any]]:
     include_suffixes = set(DEFAULT_SCAN_SUFFIXES)
     if include_machine_readable:
         include_suffixes.update({".json", ".yaml", ".yml", ".csv"})
@@ -121,7 +125,9 @@ def scan_paths(payload: dict[str, Any], paths: list[Path], include_machine_reada
             text = path.read_text()
         except UnicodeDecodeError:
             continue
-        scanned_text = strip_markdown_code(text) if path.suffix.lower() in DEFAULT_SCAN_SUFFIXES else text
+        scanned_text = (
+            strip_markdown_code(text) if path.suffix.lower() in DEFAULT_SCAN_SUFFIXES else text
+        )
         for line_number, line in enumerate(scanned_text.splitlines(), start=1):
             for rule, pattern in compiled_rules:
                 if not pattern.search(line):
@@ -142,8 +148,12 @@ def scan_paths(payload: dict[str, Any], paths: list[Path], include_machine_reada
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate and optionally lint the ubiquitous-language map.")
-    parser.add_argument("paths", nargs="*", help="Optional file or directory paths to scan for prohibited aliases.")
+    parser = argparse.ArgumentParser(
+        description="Validate and optionally lint the ubiquitous-language map."
+    )
+    parser.add_argument(
+        "paths", nargs="*", help="Optional file or directory paths to scan for prohibited aliases."
+    )
     parser.add_argument(
         "--include-machine-readable",
         action="store_true",
@@ -155,8 +165,13 @@ def main() -> int:
 
     findings: list[dict[str, Any]] = []
     if args.paths:
-        scan_targets = [Path(path).resolve() if not Path(path).is_absolute() else Path(path) for path in args.paths]
-        findings = scan_paths(payload, scan_targets, include_machine_readable=args.include_machine_readable)
+        scan_targets = [
+            Path(path).resolve() if not Path(path).is_absolute() else Path(path)
+            for path in args.paths
+        ]
+        findings = scan_paths(
+            payload, scan_targets, include_machine_readable=args.include_machine_readable
+        )
         if findings:
             print(json.dumps({"status": "FAIL", "findings": findings}, indent=2, sort_keys=True))
             return 1
@@ -164,7 +179,9 @@ def main() -> int:
     summary = {
         "status": "PASS",
         "term_count": payload["glossary_payload"]["summary"]["term_count"],
-        "shared_spine_field_count": payload["glossary_payload"]["summary"]["shared_spine_field_count"],
+        "shared_spine_field_count": payload["glossary_payload"]["summary"][
+            "shared_spine_field_count"
+        ],
         "prohibited_alias_rule_count": len(payload["glossary_payload"]["prohibited_alias_rules"]),
         "alias_conflict_count": len(payload["alias_payload"]["alias_conflicts"]),
         "ambiguous_field_token_count": len(payload["field_payload"]["ambiguous_field_tokens"]),

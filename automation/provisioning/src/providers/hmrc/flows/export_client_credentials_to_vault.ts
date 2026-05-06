@@ -42,10 +42,7 @@ import {
 } from "./register_sandbox_application.js";
 import type { SandboxOAuthProfile } from "./configure_redirect_uris_and_scopes.js";
 import type { HmrcSandboxProfileBindingEvidence } from "./validate_fraud_prevention_headers.js";
-import {
-  rankSelectors,
-  type SelectorManifest,
-} from "../../../core/selector_contract.js";
+import { rankSelectors, type SelectorManifest } from "../../../core/selector_contract.js";
 
 export const HMRC_CLIENT_EXPORT_FLOW_ID = "sandbox-client-credential-export";
 
@@ -57,8 +54,7 @@ export const HMRC_CLIENT_EXPORT_STEP_IDS = {
   persistArtifacts: "hmrc.devhub.client-export.persist-artifacts",
 } as const;
 
-export const HMRC_CLIENT_SECRET_POLICY_PROFILE =
-  "policy.hmrc.client-secret.rotate-90d";
+export const HMRC_CLIENT_SECRET_POLICY_PROFILE = "policy.hmrc.client-secret.rotate-90d";
 
 export type CredentialExportErrorCode =
   | "SELECTOR_DRIFT"
@@ -172,15 +168,9 @@ export interface HmrcClientCredentialRecord {
     active_secret_count: number;
     provider_limit_max_active_secrets: 5;
     taxat_overlap_limit_max_active_secrets: 2;
-    one_time_reveal_posture:
-      | "MANUAL_CHECKPOINT_REQUIRED_IF_VISIBLE"
-      | "ADOPT_EXISTING_LINEAGE";
-    capture_method:
-      | "PROVIDER_ONE_TIME_REVEAL_CAPTURE"
-      | "ADOPT_EXISTING_LINEAGE";
-    attestation_state:
-      | "ATTESTED_PENDING_RUNTIME_VERIFICATION"
-      | "ACTIVE_AND_RUNTIME_VERIFIED";
+    one_time_reveal_posture: "MANUAL_CHECKPOINT_REQUIRED_IF_VISIBLE" | "ADOPT_EXISTING_LINEAGE";
+    capture_method: "PROVIDER_ONE_TIME_REVEAL_CAPTURE" | "ADOPT_EXISTING_LINEAGE";
+    attestation_state: "ATTESTED_PENDING_RUNTIME_VERIFICATION" | "ACTIVE_AND_RUNTIME_VERIFIED";
     rotation_posture: string;
     retirement_posture: string;
   };
@@ -206,12 +196,8 @@ export interface HmrcClientVaultBinding {
   application_inventory_ref: string;
   secret_lineage_ref: string;
   capture_boundary: {
-    capture_channel_id:
-      | "PROVIDER_ONE_TIME_REVEAL_CAPTURE"
-      | "ADOPT_EXISTING_LINEAGE";
-    manual_checkpoint_policy:
-      | "MANUAL_CHECKPOINT_REQUIRED_IF_VISIBLE"
-      | "NOT_REQUIRED_FOR_ADOPTION";
+    capture_channel_id: "PROVIDER_ONE_TIME_REVEAL_CAPTURE" | "ADOPT_EXISTING_LINEAGE";
+    manual_checkpoint_policy: "MANUAL_CHECKPOINT_REQUIRED_IF_VISIBLE" | "NOT_REQUIRED_FOR_ADOPTION";
     raw_secret_persistence_policy: "EPHEMERAL_MEMORY_ONLY_UNTIL_VAULT_WRITE";
     sanitized_evidence_manifest_ref: string;
   };
@@ -248,13 +234,7 @@ export interface SecretVersionContract {
   lineage_ref: string;
   issued_at: string;
   expires_at: string | null;
-  rotation_state:
-    | "ISSUED"
-    | "ATTESTED"
-    | "ACTIVE"
-    | "ROTATING"
-    | "RETIRED"
-    | "REVOKED";
+  rotation_state: "ISSUED" | "ATTESTED" | "ACTIVE" | "ROTATING" | "RETIRED" | "REVOKED";
   last_attested_at: string | null;
   attestation_ref: string | null;
   activated_at: string | null;
@@ -284,9 +264,7 @@ export interface HmrcClientSecretLineage {
     version_row_id: string;
     secret_version_contract: SecretVersionContract;
     client_secret_fingerprint: string;
-    capture_channel_id:
-      | "PROVIDER_ONE_TIME_REVEAL_CAPTURE"
-      | "ADOPT_EXISTING_LINEAGE";
+    capture_channel_id: "PROVIDER_ONE_TIME_REVEAL_CAPTURE" | "ADOPT_EXISTING_LINEAGE";
     capture_method: string;
     manual_checkpoint_ref_or_null: string | null;
     vault_write_receipt_ref: string;
@@ -350,9 +328,7 @@ export interface ExportClientCredentialsOptions {
 }
 
 export interface ExportClientCredentialsResult {
-  outcome:
-    | "CLIENT_CREDENTIALS_EXPORTED"
-    | "MANUAL_CHECKPOINT_REQUIRED";
+  outcome: "CLIENT_CREDENTIALS_EXPORTED" | "MANUAL_CHECKPOINT_REQUIRED";
   steps: StepContract[];
   applicationInventory: HmrcClientCredentialRecord;
   vaultBinding: HmrcClientVaultBinding;
@@ -495,9 +471,7 @@ function renderNamespaceRef(
   );
 }
 
-function environmentScope(
-  environmentRef: string,
-): "sandbox" | "preprod" {
+function environmentScope(environmentRef: string): "sandbox" | "preprod" {
   return environmentRef === "env_preproduction_verification" ? "preprod" : "sandbox";
 }
 
@@ -580,19 +554,20 @@ function validateBindingProfiles(
   authorityCatalog: AuthorityProviderProfileCatalog,
 ): BindingSummaryRow[] {
   const interactiveCallbacks = oauthProfile.registered_callback_profile_refs.filter(
-    (ref) => ref === "cb_sandbox_web" ||
+    (ref) =>
+      ref === "cb_sandbox_web" ||
       ref === "cb_sandbox_desktop" ||
       ref === "cb_preprod_web" ||
       ref === "cb_preprod_desktop",
   );
 
   const validationsByProfile = new Set(
-    fraudBindingEvidence.profile_validations.map(
-      (entry) => entry.fraud_header_profile_ref,
-    ),
+    fraudBindingEvidence.profile_validations.map((entry) => entry.fraud_header_profile_ref),
   );
-  if (!validationsByProfile.has("fph_web_app_via_server") ||
-      !validationsByProfile.has("fph_desktop_app_via_server")) {
+  if (
+    !validationsByProfile.has("fph_web_app_via_server") ||
+    !validationsByProfile.has("fph_desktop_app_via_server")
+  ) {
     throw new CredentialExportError(
       "BINDING_MISMATCH",
       "Fraud-profile validation evidence is missing one of the required interactive HMRC profile refs.",
@@ -641,9 +616,7 @@ function validateBindingProfiles(
       scopes: [...oauthProfile.scopes],
       fraud_header_profile_ref: fraudRefs[0]!,
       token_binding_profile_ref: tokenRefs[0]!,
-      authority_profile_refs: uniqueSorted(
-        matchingProfiles.map((profile) => profile.profile_id),
-      ),
+      authority_profile_refs: uniqueSorted(matchingProfiles.map((profile) => profile.profile_id)),
     };
   });
 
@@ -673,9 +646,11 @@ function assertBindingConsistency(
   bindingSummary: BindingSummaryRow[],
 ): void {
   const expectedCallbacks = uniqueSorted(bindingSummary.map((row) => row.callback_profile_ref));
-  const hasPreprod = expectedCallbacks.includes("cb_preprod_web") &&
+  const hasPreprod =
+    expectedCallbacks.includes("cb_preprod_web") &&
     expectedCallbacks.includes("cb_preprod_desktop");
-  const hasSandbox = expectedCallbacks.includes("cb_sandbox_web") &&
+  const hasSandbox =
+    expectedCallbacks.includes("cb_sandbox_web") &&
     expectedCallbacks.includes("cb_sandbox_desktop");
   if (!hasSandbox || !hasPreprod) {
     throw new CredentialExportError(
@@ -719,7 +694,11 @@ export function validateVaultBindingCompleteness(
     throw new Error("Vault binding must cover the four interactive sandbox/preprod rows.");
   }
   for (const row of binding.environment_bindings) {
-    if (!row.callback_profile_ref || !row.token_binding_profile_ref || !row.fraud_header_profile_ref) {
+    if (
+      !row.callback_profile_ref ||
+      !row.token_binding_profile_ref ||
+      !row.fraud_header_profile_ref
+    ) {
       throw new Error(`Binding row ${row.binding_row_id} is missing profile refs.`);
     }
     if (!row.scopes.length || !row.authority_profile_refs.length) {
@@ -733,9 +712,7 @@ export function validateVaultBindingCompleteness(
   }
 }
 
-export function validateSecretLineageOrdering(
-  lineage: HmrcClientSecretLineage,
-): void {
+export function validateSecretLineageOrdering(lineage: HmrcClientSecretLineage): void {
   for (const row of lineage.versions) {
     const contract = row.secret_version_contract;
     const timestamps = [
@@ -748,14 +725,10 @@ export function validateSecretLineageOrdering(
     ].filter(Boolean) as string[];
     const ordered = [...timestamps].sort();
     if (timestamps.join("|") !== ordered.join("|")) {
-      throw new Error(
-        `Secret version ${contract.secret_version_id} has inverted chronology.`,
-      );
+      throw new Error(`Secret version ${contract.secret_version_id} has inverted chronology.`);
     }
     if (contract.superseded_by_secret_version_id === contract.secret_version_id) {
-      throw new Error(
-        `Secret version ${contract.secret_version_id} cannot self-supersede.`,
-      );
+      throw new Error(`Secret version ${contract.secret_version_id} cannot self-supersede.`);
     }
   }
 }
@@ -801,9 +774,7 @@ async function ensureOnCredentialsConsole(
   await getRequiredLocator(page, manifest, "credentials-heading");
 }
 
-function deriveSecretLineageFromExisting(
-  existing: HmrcClientSecretLineage,
-): {
+function deriveSecretLineageFromExisting(existing: HmrcClientSecretLineage): {
   activeVersionId: string;
   captureMethod: "ADOPT_EXISTING_LINEAGE";
   manualCheckpointRef: string | null;
@@ -862,11 +833,7 @@ function buildExistingVaultBinding(
     schema_version: "1.0",
     binding_id:
       existingBinding?.binding_id ??
-      buildRecordId(
-        "hmrc-client-vault-binding",
-        runContext.workspaceId,
-        applicationAlias,
-      ),
+      buildRecordId("hmrc-client-vault-binding", runContext.workspaceId, applicationAlias),
     provider_id: "hmrc-developer-hub",
     provider_display_name: "HMRC Developer Hub",
     run_id: runContext.runId,
@@ -880,9 +847,7 @@ function buildExistingVaultBinding(
     typed_gaps: [
       "Vault roots remain template-governed until the dedicated secrets-manager and KMS/HSM provisioning track is implemented in pc_0049.",
     ],
-    notes: [
-      "Repo-tracked output stores only vault refs, metadata refs, and attestation refs.",
-    ],
+    notes: ["Repo-tracked output stores only vault refs, metadata refs, and attestation refs."],
     last_verified_at: now,
   };
 }
@@ -897,10 +862,7 @@ function buildEnvironmentBindings(input: {
   attestationRef: string;
 }): HmrcClientVaultBinding["environment_bindings"] {
   return input.bindingSummary.map((row) => {
-    const namespaceRef = renderNamespaceRef(
-      row.environment_ref,
-      row.connection_method,
-    );
+    const namespaceRef = renderNamespaceRef(row.environment_ref, row.connection_method);
     const envScope = environmentScope(row.environment_ref);
     const connScope = connectionScope(row.connection_method);
 
@@ -915,19 +877,21 @@ function buildEnvironmentBindings(input: {
       authority_profile_refs: row.authority_profile_refs,
       scope_set_ref: row.scope_set_ref,
       scopes: row.scopes,
-      client_id_store_ref:
-        `vault://${input.clientIdPolicy.vault_namespace_pattern
-          .replace("${environment_scope}", envScope)
-          .replace("${connection_method}", connScope)}/${input.clientIdPolicy.key_naming_pattern
-          .replace("${app_ref}", input.applicationAlias)}`,
-      client_secret_store_ref:
-        `vault://${input.clientSecretPolicy.vault_namespace_pattern
-          .replace("${environment_scope}", envScope)
-          .replace("${connection_method}", connScope)}/${input.clientSecretPolicy.key_naming_pattern
-          .replace("${app_ref}", input.applicationAlias)
-          .replace("${secret_version_id}", input.activeSecretVersionId)}`,
-      client_secret_metadata_ref:
-        `vault://metadata/${namespaceRef}/hmrc/${input.applicationAlias}/client-secret/${input.activeSecretVersionId}`,
+      client_id_store_ref: `vault://${input.clientIdPolicy.vault_namespace_pattern
+        .replace("${environment_scope}", envScope)
+        .replace(
+          "${connection_method}",
+          connScope,
+        )}/${input.clientIdPolicy.key_naming_pattern.replace(
+        "${app_ref}",
+        input.applicationAlias,
+      )}`,
+      client_secret_store_ref: `vault://${input.clientSecretPolicy.vault_namespace_pattern
+        .replace("${environment_scope}", envScope)
+        .replace("${connection_method}", connScope)}/${input.clientSecretPolicy.key_naming_pattern
+        .replace("${app_ref}", input.applicationAlias)
+        .replace("${secret_version_id}", input.activeSecretVersionId)}`,
+      client_secret_metadata_ref: `vault://metadata/${namespaceRef}/hmrc/${input.applicationAlias}/client-secret/${input.activeSecretVersionId}`,
       active_secret_version_id: input.activeSecretVersionId,
       vault_write_receipt_ref: input.vaultWriteReceiptRef,
       attestation_ref: input.attestationRef,
@@ -942,39 +906,23 @@ export async function exportClientCredentialsToVault(
   const registry = createDefaultProviderRegistry();
   const manifest = await loadApplicationCredentialSelectorManifest();
   const provider = registry.getRequired(DEVELOPER_HUB_PROVIDER_ID);
-  assertProviderFlowAllowed(
-    options.runContext,
-    provider,
-    HMRC_CLIENT_EXPORT_FLOW_ID,
-  );
+  assertProviderFlowAllowed(options.runContext, provider, HMRC_CLIENT_EXPORT_FLOW_ID);
 
   const oauthProfilePath = options.oauthProfilePath ?? defaultOauthProfilePath();
   const fraudBindingEvidencePath =
     options.fraudBindingEvidencePath ?? defaultFraudBindingEvidencePath();
   const authorityCatalogPath =
-    options.authorityProviderProfileCatalogPath ??
-    defaultAuthorityProviderProfileCatalogPath();
-  const secretInventoryPath =
-    options.secretInventoryPath ?? defaultSecretInventoryPath();
+    options.authorityProviderProfileCatalogPath ?? defaultAuthorityProviderProfileCatalogPath();
+  const secretInventoryPath = options.secretInventoryPath ?? defaultSecretInventoryPath();
   options.entryUrls ?? createDefaultSandboxApplicationEntryUrls();
 
-  const applicationRecord = await loadJson<SandboxApplicationRecord>(
-    options.applicationRecordPath,
-  );
+  const applicationRecord = await loadJson<SandboxApplicationRecord>(options.applicationRecordPath);
   const oauthProfile = await loadJson<SandboxOAuthProfile>(oauthProfilePath);
-  const fraudBindingEvidence = await loadJson<HmrcSandboxProfileBindingEvidence>(
-    fraudBindingEvidencePath,
-  );
-  const authorityCatalog = await loadJson<AuthorityProviderProfileCatalog>(
-    authorityCatalogPath,
-  );
-  const secretInventory = await loadJson<ProvisioningSecretInventory>(
-    secretInventoryPath,
-  );
-  const clientIdPolicy = getRequiredSecretPolicy(
-    secretInventory,
-    "hmrc_sandbox_client_id_ref",
-  );
+  const fraudBindingEvidence =
+    await loadJson<HmrcSandboxProfileBindingEvidence>(fraudBindingEvidencePath);
+  const authorityCatalog = await loadJson<AuthorityProviderProfileCatalog>(authorityCatalogPath);
+  const secretInventory = await loadJson<ProvisioningSecretInventory>(secretInventoryPath);
+  const clientIdPolicy = getRequiredSecretPolicy(secretInventory, "hmrc_sandbox_client_id_ref");
   const clientSecretPolicy = getRequiredSecretPolicy(
     secretInventory,
     "hmrc_sandbox_client_secret_version_ref",
@@ -1035,7 +983,11 @@ export async function exportClientCredentialsToVault(
   );
   assertBindingConsistency(applicationRecord, bindingSummary);
 
-  steps[0] = transitionStep(steps[0]!, "RUNNING", "Opening the canonical sandbox application console.");
+  steps[0] = transitionStep(
+    steps[0]!,
+    "RUNNING",
+    "Opening the canonical sandbox application console.",
+  );
   await ensureOnCredentialsConsole(options.page, manifest, applicationRecord);
   steps[0] = transitionStep(
     steps[0]!,
@@ -1048,16 +1000,8 @@ export async function exportClientCredentialsToVault(
     "RUNNING",
     "Reading safe HMRC application identifiers from the credentials surface.",
   );
-  const applicationId = await readCredentialField(
-    options.page,
-    manifest,
-    "application-id-field",
-  );
-  const clientId = await readCredentialField(
-    options.page,
-    manifest,
-    "client-id-field",
-  );
+  const applicationId = await readCredentialField(options.page, manifest, "application-id-field");
+  const clientId = await readCredentialField(options.page, manifest, "client-id-field");
   steps[1] = transitionStep(
     steps[1]!,
     "SUCCEEDED",
@@ -1092,9 +1036,7 @@ export async function exportClientCredentialsToVault(
   let clientIdReceipt: VaultWriteReceipt;
   const writer =
     options.vaultWriter ??
-    (options.runContext.executionMode === "fixture"
-      ? createFixtureVaultWriter()
-      : null);
+    (options.runContext.executionMode === "fixture" ? createFixtureVaultWriter() : null);
   if (!writer) {
     throw new CredentialExportError(
       "VAULT_WRITE_FAILED",
@@ -1215,10 +1157,7 @@ export async function exportClientCredentialsToVault(
         secretLineage: emptyInventory.secretLineage,
         evidenceManifestPath,
         checkpoint: manualCheckpoint,
-        notes: [
-          ...notes,
-          "Manual checkpoint opened before any one-time secret reveal.",
-        ],
+        notes: [...notes, "Manual checkpoint opened before any one-time secret reveal."],
       };
     }
 
@@ -1322,8 +1261,7 @@ export async function exportClientCredentialsToVault(
             {
               from_secret_version_id: existingLineage.active_version_ids[0],
               to_secret_version_id: secretVersionId,
-              transition_reason:
-                "Generated new HMRC client secret during governed vault export.",
+              transition_reason: "Generated new HMRC client secret during governed vault export.",
             },
           ]
         : [],
@@ -1379,8 +1317,7 @@ export async function exportClientCredentialsToVault(
       hmrc_application_id_alias: buildApplicationIdAlias(applicationId),
       portal_environment: "SANDBOX",
       application_console_url: applicationRecord.sandbox_application.application_console_url,
-      credentials_console_url:
-        `${applicationRecord.sandbox_application.application_console_url}/credentials`,
+      credentials_console_url: `${applicationRecord.sandbox_application.application_console_url}/credentials`,
     },
     client_id_binding: {
       client_id_alias: buildClientIdAlias(applicationAlias),
@@ -1558,7 +1495,8 @@ function buildEmptyArtifacts(
           artifact_type: "SecretVersion",
           secret_version_id: emptySecretVersionId,
           secret_class: "HMRC_SANDBOX_CLIENT_SECRET_VERSION_REF",
-          store_ref: environmentBindings[0]?.client_secret_store_ref ?? "vault://pending/manual-checkpoint",
+          store_ref:
+            environmentBindings[0]?.client_secret_store_ref ?? "vault://pending/manual-checkpoint",
           key_version_ref: "pending-manual-checkpoint",
           policy_profile_ref: HMRC_CLIENT_SECRET_POLICY_PROFILE,
           lineage_ref: buildBindingLineageRef(applicationAlias),
@@ -1623,8 +1561,7 @@ function buildEmptyArtifacts(
       hmrc_application_id_alias: buildApplicationIdAlias(applicationId),
       portal_environment: "SANDBOX",
       application_console_url: applicationRecord.sandbox_application.application_console_url,
-      credentials_console_url:
-        `${applicationRecord.sandbox_application.application_console_url}/credentials`,
+      credentials_console_url: `${applicationRecord.sandbox_application.application_console_url}/credentials`,
     },
     client_id_binding: {
       client_id_alias: buildClientIdAlias(applicationAlias),
@@ -1659,12 +1596,8 @@ function buildEmptyArtifacts(
       fraudBindingEvidencePath,
       authorityCatalogPath,
     ),
-    typed_gaps: [
-      "Manual checkpoint is still open before any one-time secret reveal can occur.",
-    ],
-    notes: [
-      "Placeholder artifact exists only to freeze the lawful post-checkpoint shape.",
-    ],
+    typed_gaps: ["Manual checkpoint is still open before any one-time secret reveal can occur."],
+    notes: ["Placeholder artifact exists only to freeze the lawful post-checkpoint shape."],
     last_verified_at: nowIso(),
   };
 

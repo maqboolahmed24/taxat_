@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/user.schema.json",
+  "title": "User",
+  "description": "Durable tenant-scoped human operator record. Roles and attributes stay explicit, MFA posture remains queryable, and disable posture stays durable so session and authorization reconstruction cannot improvise actor state from transport claims.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "user_id",
+    "tenant_id",
+    "roles",
+    "attributes",
+    "mfa_state",
+    "lifecycle_state",
+    "disabled_at",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "User"
+    },
+    "user_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "attributes": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "null"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": ["string", "number", "boolean", "null"]
+            }
+          }
+        ]
+      }
+    },
+    "mfa_state": {
+      "type": "string",
+      "enum": ["NOT_ENROLLED", "ENROLLED", "REQUIRED", "SATISFIED", "LOCKED"]
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": ["ACTIVE", "DISABLED"]
+    },
+    "disabled_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "ACTIVE"
+          }
+        },
+        "required": ["lifecycle_state"]
+      },
+      "then": {
+        "properties": {
+          "disabled_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "DISABLED"
+          }
+        },
+        "required": ["lifecycle_state"]
+      },
+      "then": {
+        "properties": {
+          "disabled_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

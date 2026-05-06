@@ -1,0 +1,137 @@
+{
+  "$schema": "./delivery_binding_policy.schema.json",
+  "contract_version": "1.0",
+  "policy_id": "delivery_binding_policy",
+  "basis_statement": "Preview, print, download, and externalized delivery remain context-bound affordances. They cannot be widened from raw storage location, bare route state, or stale cache identity alone.",
+  "source_lineage": [
+    {
+      "source_file": "Algorithm/security_and_runtime_hardening_contract.md",
+      "source_heading_or_logical_block": "Delivery-binding and stale-access hardening",
+      "rationale": "Security law requires delivery reuse to stay bound to current route, access, and masking context."
+    },
+    {
+      "source_file": "Algorithm/cache_isolation_and_secure_reuse_contract.md",
+      "source_heading_or_logical_block": "Cache identity envelope",
+      "rationale": "Cache isolation already binds object, route, masking, and delivery context, which the delivery policy must reuse."
+    },
+    {
+      "source_file": "Algorithm/customer_client_portal_experience_contract.md",
+      "source_heading_or_logical_block": "Preview and export defaults",
+      "rationale": "Customer-facing preview and export affordances must always reflect the current artifact meaning."
+    },
+    {
+      "source_file": "config/edge/cache_and_delivery_binding_policy.json",
+      "source_heading_or_logical_block": "Edge cache rows",
+      "rationale": "Edge policy already distinguishes signed delivery and binding requirements for cacheable versus no-store surfaces."
+    }
+  ],
+  "binding_dimensions": [
+    "tenant_id",
+    "principal_scope_ref",
+    "session_binding_hash",
+    "access_binding_hash_or_null",
+    "masking_posture_hash_or_null",
+    "route_identity_ref",
+    "canonical_object_ref",
+    "target_ref",
+    "preview_subject_ref_or_null",
+    "visibility_partition_ref_or_null"
+  ],
+  "forbidden_content": [
+    "direct signed URLs",
+    "raw bearer tokens",
+    "raw storage paths",
+    "provider hostnames",
+    "mutable breadcrumb labels",
+    "cross-tenant hints"
+  ],
+  "delivery_rows": [
+    {
+      "affordance_ref": "PREVIEW",
+      "target_fields": ["preview_target_ref", "default_preview_target_ref_or_null"],
+      "required_context_fields": [
+        "route_identity_ref",
+        "canonical_object_ref",
+        "target_ref",
+        "delivery_binding_hash"
+      ],
+      "forbidden_shortcuts": [
+        "storage_ref as iframe or image src",
+        "reuse of stale preview handle after route change",
+        "route token without canonical object identity"
+      ],
+      "lawful_examples": [
+        "current artifact preview target plus delivery_binding_hash",
+        "selected historical preview target plus delivery_binding_hash"
+      ],
+      "notes": [
+        "Previews remain route-bound and object-bound so stale tabs cannot widen access.",
+        "Current preview defaults and explicit history preview selection remain separate states."
+      ]
+    },
+    {
+      "affordance_ref": "DOWNLOAD",
+      "target_fields": ["download_ref", "default_download_target_ref_or_null"],
+      "required_context_fields": [
+        "route_identity_ref",
+        "canonical_object_ref",
+        "target_ref",
+        "delivery_binding_hash",
+        "access_binding_hash_or_null"
+      ],
+      "forbidden_shortcuts": [
+        "storage_ref as download URL",
+        "signed URL treated as durable ref",
+        "delivery handle reused across masking posture changes"
+      ],
+      "lawful_examples": [
+        "opaque download_ref plus delivery_binding_hash",
+        "customer-safe derivative download_ref minted from a source artifact ref"
+      ],
+      "notes": [
+        "Download handles are disposable and may not masquerade as durable refs.",
+        "A download route must fail closed when its binding hash no longer matches current context."
+      ]
+    },
+    {
+      "affordance_ref": "PRINT",
+      "target_fields": ["print_target_ref", "default_print_target_ref_or_null"],
+      "required_context_fields": [
+        "route_identity_ref",
+        "canonical_object_ref",
+        "target_ref",
+        "delivery_binding_hash"
+      ],
+      "forbidden_shortcuts": [
+        "browser print of raw storage URL",
+        "reuse of preview cache key as print binding"
+      ],
+      "lawful_examples": [
+        "print target ref plus delivery binding",
+        "current artifact print target rebinding after access-step-up"
+      ],
+      "notes": [
+        "Print remains a sibling affordance to preview and download, not a fallback from either."
+      ]
+    },
+    {
+      "affordance_ref": "EXTERNALIZATION",
+      "target_fields": ["governance_target_ref", "target_ref"],
+      "required_context_fields": [
+        "route_identity_ref",
+        "canonical_object_ref",
+        "target_ref",
+        "delivery_binding_hash",
+        "visibility_partition_ref_or_null"
+      ],
+      "forbidden_shortcuts": [
+        "sharing download_ref across tenant or visibility partitions",
+        "embedding external signed URL into durable contracts"
+      ],
+      "lawful_examples": ["governed export target plus externalization-specific delivery binding"],
+      "notes": [
+        "Externalized delivery remains a governed derivative surface and may require additional visibility partitioning."
+      ]
+    }
+  ]
+}

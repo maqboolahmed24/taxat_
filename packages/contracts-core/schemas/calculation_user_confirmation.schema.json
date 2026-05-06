@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/calculation_user_confirmation.schema.json",
+  "title": "CalculationUserConfirmation",
+  "description": "Authority-calculation user-confirmation contract. This schema freezes what basis was presented to the user or agent, who confirmed or declined it, and the confirmation-state lineage required before filing or amendment submission relies on that basis.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "user_confirmation_id",
+    "calculation_id",
+    "calculation_basis_ref",
+    "manifest_id",
+    "actor_ref",
+    "actor_role",
+    "confirmation_state",
+    "presentation_ref",
+    "confirmed_basis_hash",
+    "reason_codes",
+    "confirmed_at",
+    "declined_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "CalculationUserConfirmation"
+    },
+    "user_confirmation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "calculation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "calculation_basis_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actor_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actor_role": {
+      "type": "string",
+      "enum": [
+        "PREPARER",
+        "REVIEWER",
+        "APPROVER",
+        "CLIENT_SIGNATORY",
+        "SUBJECT_SELF",
+        "SUBJECT_REPRESENTATIVE"
+      ]
+    },
+    "confirmation_state": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "CONFIRMED",
+        "DECLINED"
+      ]
+    },
+    "presentation_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "confirmed_basis_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "confirmed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "declined_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "confirmation_state": {
+            "const": "PENDING"
+          }
+        },
+        "required": [
+          "confirmation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "confirmed_basis_hash": {
+            "type": "null"
+          },
+          "confirmed_at": {
+            "type": "null"
+          },
+          "declined_at": {
+            "type": "null"
+          },
+          "reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "confirmation_state": {
+            "const": "CONFIRMED"
+          }
+        },
+        "required": [
+          "confirmation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "confirmed_basis_hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "confirmed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "declined_at": {
+            "type": "null"
+          },
+          "reason_codes": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "confirmation_state": {
+            "const": "DECLINED"
+          }
+        },
+        "required": [
+          "confirmation_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "confirmed_basis_hash": {
+            "type": "null"
+          },
+          "confirmed_at": {
+            "type": "null"
+          },
+          "declined_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reason_codes": {
+            "minItems": 1
+          }
+        },
+        "required": [
+          "reason_codes"
+        ]
+      },
+      "then": {
+        "properties": {
+          "confirmation_state": {
+            "const": "DECLINED"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

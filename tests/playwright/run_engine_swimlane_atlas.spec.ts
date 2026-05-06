@@ -22,7 +22,9 @@ test("phase selection updates inspector state", async ({ page }) => {
   await gotoAtlas(page, "P01");
   await page.getByTestId("phase-row-09").click();
   await expect(page.getByTestId("phase-row-09")).toHaveAttribute("aria-selected", "true");
-  await expect(page.getByTestId("selected-phase-detail")).toContainText("Authority context, comparison basis");
+  await expect(page.getByTestId("selected-phase-detail")).toContainText(
+    "Authority context, comparison basis",
+  );
   await expect(page.getByTestId("branch-chip").first()).toBeVisible();
 });
 
@@ -33,7 +35,9 @@ test("keyboard navigation across the sticky phase rail", async ({ page }) => {
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("ArrowDown");
   await expect(page.getByTestId("phase-row-03")).toHaveAttribute("aria-selected", "true");
-  await expect(page.getByTestId("selected-phase-detail")).toContainText("Allocate, continue, or reuse manifest context");
+  await expect(page.getByTestId("selected-phase-detail")).toContainText(
+    "Allocate, continue, or reuse manifest context",
+  );
   await page.keyboard.press("End");
   await expect(page.getByTestId("phase-row-18")).toHaveAttribute("aria-selected", "true");
 });
@@ -46,7 +50,9 @@ test("horizontal lane scrolling preserves selected phase", async ({ page }) => {
     element.scrollLeft = element.scrollWidth;
   });
   await expect(page.getByTestId("phase-row-16")).toHaveAttribute("aria-selected", "true");
-  await expect(page.getByTestId("selected-phase-detail")).toContainText("Submission enqueue, governed transmit");
+  await expect(page.getByTestId("selected-phase-detail")).toContainText(
+    "Submission enqueue, governed transmit",
+  );
   await expect(page.getByTestId("transaction-span").first()).toBeVisible();
 });
 
@@ -56,7 +62,9 @@ test.describe("reduced motion", () => {
   test("reduced-motion rendering keeps semantic state", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await gotoAtlas(page, "P13");
-    await expect(page.getByTestId("selected-phase-detail")).toContainText("Publish live read-model projections");
+    await expect(page.getByTestId("selected-phase-detail")).toContainText(
+      "Publish live read-model projections",
+    );
     await expect
       .poll(async () => page.evaluate(() => document.documentElement.dataset.motion))
       .toBe("reduce");
@@ -65,18 +73,26 @@ test.describe("reduced motion", () => {
 
 test("overview screenshot baseline", async ({ page }) => {
   await gotoAtlas(page, "P01");
-  await expect(page.getByTestId("run-engine-atlas")).toHaveScreenshot("run-engine-atlas-overview.png", {
-    animations: "disabled",
-    fullPage: true,
-  });
+  await expect(page.getByTestId("run-engine-atlas")).toHaveScreenshot(
+    "run-engine-atlas-overview.png",
+    {
+      animations: "disabled",
+      fullPage: true,
+    },
+  );
 });
 
 test("branch-heavy phase screenshot baseline", async ({ page }) => {
   await gotoAtlas(page, "P16");
   await page.getByTestId("phase-row-16").click();
-  await expect(page.getByTestId("selected-phase-detail")).toContainText("Submission enqueue, governed transmit");
-  await expect(page.getByTestId("run-engine-atlas")).toHaveScreenshot("run-engine-atlas-phase-16.png", {
-    animations: "disabled",
-    fullPage: true,
-  });
+  await expect(page.getByTestId("selected-phase-detail")).toContainText(
+    "Submission enqueue, governed transmit",
+  );
+  await expect(page.getByTestId("run-engine-atlas")).toHaveScreenshot(
+    "run-engine-atlas-phase-16.png",
+    {
+      animations: "disabled",
+      fullPage: true,
+    },
+  );
 });

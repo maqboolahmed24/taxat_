@@ -1,0 +1,1625 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/nightly_batch_run.schema.json",
+  "title": "NightlyBatchRun",
+  "description": "Tenant-scoped overnight control-plane contract. This schema freezes scheduler-window identity, portfolio selection dispositions, shard/concurrency posture, stale-batch recovery linkage, and aggregated overnight outcomes for one nightly autopilot batch.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "batch_run_id",
+    "tenant_id",
+    "execution_mode_boundary_contract",
+    "nightly_window_key",
+    "trigger_class",
+    "reclaimed_predecessor_batch_run_ref",
+    "lifecycle_state",
+    "state_transition_contract",
+    "identity_contract",
+    "scheduler_dedupe_key",
+    "scheduled_for",
+    "trigger_observed_at",
+    "initiating_principal_context_ref",
+    "policy_snapshot_hash",
+    "autopilot_policy_hash",
+    "release_verification_manifest_ref",
+    "schema_bundle_hash",
+    "schema_reader_window_contract",
+    "code_build_id",
+    "environment_ref",
+    "global_concurrency_profile",
+    "selection_universe_hash",
+    "selection_universe_count",
+    "recovery_resume_state",
+    "backlog_pressure",
+    "portfolio_tail_risk",
+    "stability_state",
+    "selection_entries",
+    "shard_plan",
+    "selected_count",
+    "execution_count",
+    "reused_result_count",
+    "deferred_count",
+    "escalated_count",
+    "skipped_count",
+    "waiting_on_authority_count",
+    "waiting_on_late_data_count",
+    "completed_count",
+    "completed_with_failures_count",
+    "failed_count",
+    "selection_started_at",
+    "selection_completed_at",
+    "started_at",
+    "last_heartbeat_at",
+    "quiesced_at",
+    "completed_at",
+    "abandoned_at",
+    "successor_batch_run_ref",
+    "operator_digest_publication_state",
+    "operator_digest_derivation_contract_or_null",
+    "operator_digest_ref",
+    "audit_refs",
+    "provenance_refs"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "NightlyBatchRun"
+    },
+    "batch_run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_mode_boundary_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/execution_mode_boundary_contract.schema.json"
+        },
+        {
+          "properties": {
+            "run_kind": {
+              "const": "NIGHTLY"
+            },
+            "execution_posture": {
+              "const": "LIVE_COMPLIANCE"
+            },
+            "legal_effect_boundary": {
+              "const": "COMPLIANCE_CAPABLE"
+            }
+          }
+        }
+      ]
+    },
+    "nightly_window_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trigger_class": {
+      "type": "string",
+      "enum": [
+        "SCHEDULED_WINDOW",
+        "MANUAL_RETRY_WINDOW",
+        "RECOVERY_RECLAIM_WINDOW"
+      ]
+    },
+    "reclaimed_predecessor_batch_run_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "ALLOCATED",
+        "SELECTING",
+        "PLANNED",
+        "RUNNING",
+        "QUIESCING",
+        "COMPLETED",
+        "COMPLETED_WITH_FAILURES",
+        "BLOCKED",
+        "FAILED",
+        "ABANDONED"
+      ]
+    },
+    "state_transition_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/state_transition_contract.schema.json"
+        },
+        {
+          "properties": {
+            "object_family": {
+              "const": "NIGHTLY_BATCH_RUN"
+            },
+            "machine_code": {
+              "const": "NIGHTLY_BATCH_RUN_LIFECYCLE_V1"
+            },
+            "state_field_name": {
+              "const": "lifecycle_state"
+            }
+          }
+        }
+      ]
+    },
+    "identity_contract": {
+      "$ref": "https://taxat.dev/schemas/nightly_batch_identity_contract.schema.json"
+    },
+    "scheduler_dedupe_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scheduled_for": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trigger_observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "initiating_principal_context_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_snapshot_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "autopilot_policy_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "release_verification_manifest_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema_bundle_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema_reader_window_contract": {
+      "$ref": "https://taxat.dev/schemas/schema_reader_window_contract.schema.json"
+    },
+    "code_build_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment_ref": {
+      "type": "string",
+      "enum": [
+        "DEV",
+        "TEST",
+        "UAT",
+        "SANDBOX",
+        "PRODUCTION"
+      ]
+    },
+    "global_concurrency_profile": {
+      "$ref": "#/$defs/globalConcurrencyProfile"
+    },
+    "selection_universe_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selection_universe_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "recovery_resume_state": {
+      "type": "string",
+      "enum": [
+        "NOT_APPLICABLE",
+        "PREDECESSOR_SELECTION_AND_SHARDS_RESUMED",
+        "PREDECESSOR_SELECTION_REUSED_RESHARDED"
+      ]
+    },
+    "backlog_pressure": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "portfolio_tail_risk": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "stability_state": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "NORMAL",
+        "SOFT_THROTTLE",
+        "HARD_THROTTLE",
+        null
+      ]
+    },
+    "selection_entries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/selectionEntry"
+      },
+      "default": []
+    },
+    "shard_plan": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/shardPlanEntry"
+      },
+      "default": []
+    },
+    "selected_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "execution_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reused_result_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "deferred_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "escalated_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "skipped_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "waiting_on_authority_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "waiting_on_late_data_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "completed_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "completed_with_failures_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "failed_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "selection_started_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "selection_completed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "started_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "last_heartbeat_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "quiesced_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "abandoned_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "successor_batch_run_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "operator_digest_publication_state": {
+      "type": "string",
+      "enum": [
+        "NOT_READY",
+        "WORKFLOW_PUBLICATION_PENDING",
+        "NOTIFICATION_PUBLICATION_PENDING",
+        "PUBLISHED_COMPLETE"
+      ]
+    },
+    "operator_digest_derivation_contract_or_null": {
+      "anyOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/operator_digest_derivation_contract.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "operator_digest_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "audit_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "provenance_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "globalConcurrencyProfile": {
+      "type": "object",
+      "required": [
+        "global_manifest_limit",
+        "per_shard_manifest_limit",
+        "authority_transmit_limit",
+        "per_client_serialization",
+        "heartbeat_interval_seconds",
+        "stale_heartbeat_after_seconds",
+        "soft_stability_rho",
+        "hard_stability_rho",
+        "retry_capacity_fraction",
+        "base_deficit_quantum_minutes"
+      ],
+      "properties": {
+        "global_manifest_limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "per_shard_manifest_limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "authority_transmit_limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "per_client_serialization": {
+          "type": "boolean"
+        },
+        "heartbeat_interval_seconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "stale_heartbeat_after_seconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "soft_stability_rho": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "hard_stability_rho": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "retry_capacity_fraction": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "base_deficit_quantum_minutes": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "selectionEntry": {
+      "type": "object",
+      "required": [
+        "entry_id",
+        "candidate_identity_hash",
+        "selection_basis_hash",
+        "client_id",
+        "period",
+        "requested_scope",
+        "selection_disposition",
+        "terminal_result_reuse_state",
+        "active_attempt_resolution_state",
+        "priority_tuple",
+        "reason_codes",
+        "manifest_ref",
+        "prior_manifest_ref",
+        "predecessor_selection_entry_ref_or_null",
+        "workflow_item_refs",
+        "next_checkpoint_at",
+        "shard_key",
+        "outcome_bucket",
+        "executed_at"
+      ],
+      "properties": {
+        "entry_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidate_identity_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "selection_basis_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "client_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "period": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requested_scope": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "year_end",
+              "quarterly_update",
+              "estimate_only",
+              "prepare_submission",
+              "submit",
+              "amendment_intent",
+              "amendment_submit"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "selection_disposition": {
+          "type": "string",
+          "enum": [
+            "EXECUTE_NEW_MANIFEST",
+            "EXECUTE_CONTINUATION_CHILD",
+            "REUSE_EXISTING_TERMINAL_RESULT",
+            "DEFER_ACTIVE_ATTEMPT",
+            "DEFER_RETRY_WINDOW",
+            "ESCALATE_ONLY",
+            "SKIP_INELIGIBLE"
+          ]
+        },
+        "terminal_result_reuse_state": {
+          "type": "string",
+          "enum": [
+            "REUSED_TERMINAL_RESULT",
+            "NO_REUSABLE_TERMINAL_RESULT",
+            "TERMINAL_RESULT_CHECKPOINT_DUE",
+            "TERMINAL_RESULT_POLICY_CHANGED",
+            "TERMINAL_RESULT_OPERATOR_ACTION_STALE"
+          ]
+        },
+        "active_attempt_resolution_state": {
+          "type": "string",
+          "enum": [
+            "NO_ACTIVE_ATTEMPT",
+            "ACTIVE_ATTEMPT_DEFERRED",
+            "STALE_ATTEMPT_RECLAIM_REQUIRED"
+          ]
+        },
+        "priority_tuple": {
+          "$ref": "#/$defs/priorityTuple"
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "manifest_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "prior_manifest_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "predecessor_selection_entry_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "workflow_item_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "next_checkpoint_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "fairness_group_key": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "shard_key": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "outcome_bucket": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "AUTO_COMPLETED",
+            "WAITING_ON_AUTHORITY",
+            "WAITING_ON_LATE_DATA",
+            "REVIEW_REQUIRED",
+            "REQUEST_CLIENT_INFO",
+            "BLOCKED_INTERNAL",
+            "FAILED_RETRYABLE",
+            "FAILED_NON_RETRYABLE",
+            "REUSED_RESULT",
+            "DEFERRED",
+            "SKIPPED",
+            null
+          ]
+        },
+        "executed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "selection_disposition": {
+                "const": "EXECUTE_NEW_MANIFEST"
+              }
+            },
+            "required": [
+              "selection_disposition"
+            ]
+          },
+          "then": {
+            "properties": {
+              "active_attempt_resolution_state": {
+                "const": "NO_ACTIVE_ATTEMPT"
+              },
+              "terminal_result_reuse_state": {
+                "enum": [
+                  "NO_REUSABLE_TERMINAL_RESULT",
+                  "TERMINAL_RESULT_CHECKPOINT_DUE",
+                  "TERMINAL_RESULT_POLICY_CHANGED",
+                  "TERMINAL_RESULT_OPERATOR_ACTION_STALE"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selection_disposition": {
+                "const": "EXECUTE_CONTINUATION_CHILD"
+              }
+            },
+            "required": [
+              "selection_disposition"
+            ]
+          },
+          "then": {
+            "properties": {
+              "prior_manifest_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "predecessor_selection_entry_ref_or_null": {
+                "type": "string",
+                "minLength": 1
+              },
+              "active_attempt_resolution_state": {
+                "const": "STALE_ATTEMPT_RECLAIM_REQUIRED"
+              },
+              "terminal_result_reuse_state": {
+                "enum": [
+                  "NO_REUSABLE_TERMINAL_RESULT",
+                  "TERMINAL_RESULT_CHECKPOINT_DUE",
+                  "TERMINAL_RESULT_POLICY_CHANGED",
+                  "TERMINAL_RESULT_OPERATOR_ACTION_STALE"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selection_disposition": {
+                "enum": [
+                  "EXECUTE_NEW_MANIFEST",
+                  "EXECUTE_CONTINUATION_CHILD"
+                ]
+              }
+            },
+            "required": [
+              "selection_disposition"
+            ]
+          },
+          "then": {
+            "required": [
+              "fairness_group_key"
+            ],
+            "properties": {
+              "fairness_group_key": {
+                "type": "string",
+                "minLength": 1
+              },
+              "shard_key": {
+                "type": "string",
+                "minLength": 1
+              },
+              "priority_tuple": {
+                "type": "object",
+                "required": [
+                  "priority_score",
+                  "expected_service_minutes",
+                  "deadline_pressure",
+                  "checkpoint_pressure",
+                  "risk_pressure",
+                  "fairness_credit",
+                  "retry_success_probability",
+                  "retry_expected_gain"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selection_disposition": {
+                "const": "REUSE_EXISTING_TERMINAL_RESULT"
+              }
+            },
+            "required": [
+              "selection_disposition"
+            ]
+          },
+          "then": {
+            "properties": {
+              "manifest_ref": {
+                "type": "null"
+              },
+              "prior_manifest_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "terminal_result_reuse_state": {
+                "const": "REUSED_TERMINAL_RESULT"
+              },
+              "active_attempt_resolution_state": {
+                "const": "NO_ACTIVE_ATTEMPT"
+              },
+              "executed_at": {
+                "type": "null"
+              },
+              "fairness_group_key": {
+                "type": "null"
+              },
+              "shard_key": {
+                "type": "null"
+              },
+              "outcome_bucket": {
+                "const": "REUSED_RESULT"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selection_disposition": {
+                "const": "DEFER_ACTIVE_ATTEMPT"
+              }
+            },
+            "required": [
+              "selection_disposition"
+            ]
+          },
+          "then": {
+            "properties": {
+              "active_attempt_resolution_state": {
+                "const": "ACTIVE_ATTEMPT_DEFERRED"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selection_disposition": {
+                "enum": [
+                  "DEFER_ACTIVE_ATTEMPT",
+                  "DEFER_RETRY_WINDOW"
+                ]
+              }
+            },
+            "required": [
+              "selection_disposition"
+            ]
+          },
+          "then": {
+            "properties": {
+              "workflow_item_refs": {
+                "minItems": 1
+              },
+              "next_checkpoint_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "executed_at": {
+                "type": "null"
+              },
+              "fairness_group_key": {
+                "type": "null"
+              },
+              "shard_key": {
+                "type": "null"
+              },
+              "outcome_bucket": {
+                "const": "DEFERRED"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selection_disposition": {
+                "const": "ESCALATE_ONLY"
+              }
+            },
+            "required": [
+              "selection_disposition"
+            ]
+          },
+          "then": {
+            "properties": {
+              "workflow_item_refs": {
+                "minItems": 1
+              },
+              "fairness_group_key": {
+                "type": "null"
+              },
+              "shard_key": {
+                "type": "null"
+              },
+              "outcome_bucket": {
+                "enum": [
+                  "REVIEW_REQUIRED",
+                  "REQUEST_CLIENT_INFO",
+                  "BLOCKED_INTERNAL"
+                ]
+              },
+              "executed_at": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selection_disposition": {
+                "const": "SKIP_INELIGIBLE"
+              }
+            },
+            "required": [
+              "selection_disposition"
+            ]
+          },
+          "then": {
+            "properties": {
+              "manifest_ref": {
+                "type": "null"
+              },
+              "executed_at": {
+                "type": "null"
+              },
+              "fairness_group_key": {
+                "type": "null"
+              },
+              "shard_key": {
+                "type": "null"
+              },
+              "outcome_bucket": {
+                "const": "SKIPPED"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome_bucket": {
+                "const": "REUSED_RESULT"
+              }
+            },
+            "required": [
+              "outcome_bucket"
+            ]
+          },
+          "then": {
+            "properties": {
+              "selection_disposition": {
+                "const": "REUSE_EXISTING_TERMINAL_RESULT"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome_bucket": {
+                "const": "DEFERRED"
+              }
+            },
+            "required": [
+              "outcome_bucket"
+            ]
+          },
+          "then": {
+            "properties": {
+              "selection_disposition": {
+                "enum": [
+                  "DEFER_ACTIVE_ATTEMPT",
+                  "DEFER_RETRY_WINDOW"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome_bucket": {
+                "const": "SKIPPED"
+              }
+            },
+            "required": [
+              "outcome_bucket"
+            ]
+          },
+          "then": {
+            "properties": {
+              "selection_disposition": {
+                "const": "SKIP_INELIGIBLE"
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false,
+      "unevaluatedProperties": false
+    },
+    "priorityTuple": {
+      "type": "object",
+      "required": [
+        "deadline_bucket",
+        "filing_state_bucket",
+        "authority_checkpoint_bucket",
+        "risk_bucket",
+        "automation_readiness_bucket",
+        "retry_ready_bucket",
+        "stable_tie_break_key"
+      ],
+      "properties": {
+        "deadline_bucket": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "filing_state_bucket": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "authority_checkpoint_bucket": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "risk_bucket": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "automation_readiness_bucket": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "retry_ready_bucket": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "priority_score": {
+          "type": "number",
+          "minimum": 0
+        },
+        "expected_service_minutes": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "deadline_pressure": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "checkpoint_pressure": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "risk_pressure": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "fairness_credit": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "retry_success_probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "retry_expected_gain": {
+          "type": "number"
+        },
+        "stable_tie_break_key": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "shardPlanEntry": {
+      "type": "object",
+      "required": [
+        "shard_key",
+        "entry_refs",
+        "max_concurrent_manifests",
+        "shard_state",
+        "blocked_entry_refs",
+        "failure_reason_codes",
+        "last_heartbeat_at",
+        "current_owner_ref"
+      ],
+      "properties": {
+        "shard_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entry_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "shard_state": {
+          "type": "string",
+          "enum": [
+            "PLANNED",
+            "RUNNING",
+            "QUIESCING",
+            "COMPLETED",
+            "FAILED_ISOLATED",
+            "TENANT_WIDE_BLOCKED",
+            "RECLAIM_REQUIRED"
+          ]
+        },
+        "blocked_entry_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "failure_reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "max_concurrent_manifests": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "last_heartbeat_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "current_owner_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "shard_state": {
+                "enum": [
+                  "FAILED_ISOLATED",
+                  "TENANT_WIDE_BLOCKED",
+                  "RECLAIM_REQUIRED"
+                ]
+              }
+            },
+            "required": [
+              "shard_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "failure_reason_codes": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "trigger_class": {
+            "const": "RECOVERY_RECLAIM_WINDOW"
+          }
+        },
+        "required": [
+          "trigger_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reclaimed_predecessor_batch_run_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "recovery_resume_state": {
+            "enum": [
+              "PREDECESSOR_SELECTION_AND_SHARDS_RESUMED",
+              "PREDECESSOR_SELECTION_REUSED_RESHARDED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reclaimed_predecessor_batch_run_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "reclaimed_predecessor_batch_run_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "trigger_class": {
+            "const": "RECOVERY_RECLAIM_WINDOW"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "trigger_class": {
+            "enum": [
+              "SCHEDULED_WINDOW",
+              "MANUAL_RETRY_WINDOW"
+            ]
+          }
+        },
+        "required": [
+          "trigger_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "recovery_resume_state": {
+            "const": "NOT_APPLICABLE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "selection_started_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "selection_started_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "SELECTING",
+              "PLANNED",
+              "RUNNING",
+              "QUIESCING",
+              "COMPLETED",
+              "COMPLETED_WITH_FAILURES",
+              "BLOCKED",
+              "FAILED",
+              "ABANDONED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "SELECTING",
+              "PLANNED",
+              "RUNNING",
+              "QUIESCING",
+              "COMPLETED",
+              "COMPLETED_WITH_FAILURES",
+              "BLOCKED",
+              "FAILED",
+              "ABANDONED"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "selection_started_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "selection_completed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "selection_completed_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "PLANNED",
+              "RUNNING",
+              "QUIESCING",
+              "COMPLETED",
+              "COMPLETED_WITH_FAILURES",
+              "BLOCKED",
+              "FAILED",
+              "ABANDONED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "quiesced_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "quiesced_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "QUIESCING",
+              "COMPLETED",
+              "COMPLETED_WITH_FAILURES"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "PLANNED",
+              "RUNNING",
+              "QUIESCING",
+              "COMPLETED",
+              "COMPLETED_WITH_FAILURES",
+              "BLOCKED",
+              "FAILED",
+              "ABANDONED"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "selection_completed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "RUNNING",
+              "QUIESCING",
+              "COMPLETED",
+              "COMPLETED_WITH_FAILURES",
+              "ABANDONED"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_heartbeat_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "QUIESCING",
+              "COMPLETED",
+              "COMPLETED_WITH_FAILURES"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "quiesced_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "COMPLETED",
+              "COMPLETED_WITH_FAILURES"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "completed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "operator_digest_publication_state": {
+            "const": "PUBLISHED_COMPLETE"
+          },
+          "operator_digest_derivation_contract_or_null": {
+            "type": "object"
+          },
+          "operator_digest_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "completed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "completed_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "COMPLETED",
+              "COMPLETED_WITH_FAILURES"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operator_digest_publication_state": {
+            "const": "PUBLISHED_COMPLETE"
+          }
+        },
+        "required": [
+          "operator_digest_publication_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "operator_digest_derivation_contract_or_null": {
+            "type": "object"
+          },
+          "operator_digest_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operator_digest_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "operator_digest_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "operator_digest_publication_state": {
+            "const": "PUBLISHED_COMPLETE"
+          },
+          "lifecycle_state": {
+            "enum": [
+              "COMPLETED",
+              "COMPLETED_WITH_FAILURES"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operator_digest_publication_state": {
+            "enum": [
+              "NOT_READY",
+              "WORKFLOW_PUBLICATION_PENDING",
+              "NOTIFICATION_PUBLICATION_PENDING"
+            ]
+          }
+        },
+        "required": [
+          "operator_digest_publication_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "operator_digest_derivation_contract_or_null": {
+            "type": "null"
+          },
+          "operator_digest_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "ABANDONED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "abandoned_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "successor_batch_run_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "abandoned_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "abandoned_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "ABANDONED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "successor_batch_run_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "successor_batch_run_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "ABANDONED"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false,
+  "unevaluatedProperties": false
+}

@@ -121,19 +121,14 @@ export async function loadDeveloperHubSelectorManifest(): Promise<SelectorManife
   };
 }
 
-export function createDeveloperHubEvidenceManifest(
-  runContext: RunContext,
-): EvidenceManifest {
+export function createDeveloperHubEvidenceManifest(runContext: RunContext): EvidenceManifest {
   return createEvidenceManifest(runContext);
 }
 
 export function buildDeveloperHubRedactionRules(
   credentials: DeveloperHubCredentials,
 ): RedactionRule[] {
-  return createDefaultRedactionRules([
-    credentials.emailAddress,
-    credentials.password,
-  ]);
+  return createDefaultRedactionRules([credentials.emailAddress, credentials.password]);
 }
 
 function escapeRegExp(value: string): string {
@@ -145,9 +140,7 @@ function normalizeBodyText(value: string | null): string {
 }
 
 async function visiblePageText(page: Page): Promise<string> {
-  return normalizeBodyText(
-    await page.evaluate(() => document.body.innerText),
-  );
+  return normalizeBodyText(await page.evaluate(() => document.body.innerText));
 }
 
 function stripHash(value: string): string {
@@ -197,10 +190,7 @@ async function isLocatorVisible(locator: Locator): Promise<boolean> {
   }
 }
 
-function getSelectorRequired(
-  manifest: SelectorManifest,
-  selectorId: string,
-): SelectorDescriptor {
+function getSelectorRequired(manifest: SelectorManifest, selectorId: string): SelectorDescriptor {
   const selector = manifest.selectors.find((candidate) => candidate.selectorId === selectorId);
   if (!selector) {
     throw new Error(`Selector manifest is missing required selector ${selectorId}.`);
@@ -256,10 +246,7 @@ export async function fillRequiredSelector(
   await (await getRequiredLocator(page, manifest, selectorId)).fill(value);
 }
 
-export async function dismissCookieBanner(
-  page: Page,
-  manifest: SelectorManifest,
-): Promise<void> {
+export async function dismissCookieBanner(page: Page, manifest: SelectorManifest): Promise<void> {
   if (await clickSelectorIfVisible(page, manifest, "cookie-reject")) {
     return;
   }
@@ -378,7 +365,14 @@ export async function detectCheckpoint(
   const explicitReason = await body.getAttribute("data-checkpoint-reason");
 
   let reason: ManualCheckpointReason | null = null;
-  if (explicitReason === "EMAIL_VERIFICATION" || explicitReason === "CAPTCHA" || explicitReason === "MFA" || explicitReason === "HUMAN_REVIEW" || explicitReason === "LEGAL_APPROVAL" || explicitReason === "POLICY_CONFIRMATION") {
+  if (
+    explicitReason === "EMAIL_VERIFICATION" ||
+    explicitReason === "CAPTCHA" ||
+    explicitReason === "MFA" ||
+    explicitReason === "HUMAN_REVIEW" ||
+    explicitReason === "LEGAL_APPROVAL" ||
+    explicitReason === "POLICY_CONFIRMATION"
+  ) {
     reason = explicitReason;
   } else {
     const text = await visiblePageText(page);
@@ -423,13 +417,9 @@ export async function detectCheckpoint(
       capturePolicy: "SUPPRESS",
     }),
     landingStatus:
-      reason === "EMAIL_VERIFICATION"
-        ? "ACTIVATION_REQUIRED"
-        : "SECURITY_INTERSTITIAL_REQUIRED",
+      reason === "EMAIL_VERIFICATION" ? "ACTIVATION_REQUIRED" : "SECURITY_INTERSTITIAL_REQUIRED",
     accountStatus:
-      reason === "EMAIL_VERIFICATION"
-        ? "ACTIVATION_PENDING"
-        : "SECURITY_REVIEW_REQUIRED",
+      reason === "EMAIL_VERIFICATION" ? "ACTIVATION_PENDING" : "SECURITY_REVIEW_REQUIRED",
   };
 }
 
@@ -463,13 +453,13 @@ export async function fileExists(filePath: string): Promise<boolean> {
 }
 
 export function sanitizeAlias(value: string): string {
-  return value.trim().replace(/\s+/g, "-").replace(/[^a-zA-Z0-9._@-]/g, "");
+  return value
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-zA-Z0-9._@-]/g, "");
 }
 
-export function buildWorkspaceRecordId(
-  runContext: RunContext,
-  accountAlias: string,
-): string {
+export function buildWorkspaceRecordId(runContext: RunContext, accountAlias: string): string {
   return `hmrc-devhub-${sanitizeAlias(runContext.workspaceId)}-${sanitizeAlias(accountAlias)}`;
 }
 

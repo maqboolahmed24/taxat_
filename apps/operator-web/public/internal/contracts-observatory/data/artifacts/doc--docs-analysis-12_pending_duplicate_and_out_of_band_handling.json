@@ -1,0 +1,198 @@
+{
+  "artifactVersion": "CONTRACT_OBSERVATORY_ARTIFACT_V1",
+  "artifactSlug": "doc--docs-analysis-12_pending_duplicate_and_out_of_band_handling",
+  "artifactKind": "MARKDOWN",
+  "sectionRef": "SUPPORT_DOCS",
+  "authorityLevel": "SUPPORTING_REFERENCE",
+  "sourceTruthBadge": "Support Documentation",
+  "tone": "slate",
+  "title": "12 Pending Duplicate And Out-Of-Band Handling",
+  "subtitle": "docs/analysis/12_pending_duplicate_and_out_of_band_handling.md",
+  "summary": "",
+  "canonicalPath": "docs/analysis/12_pending_duplicate_and_out_of_band_handling.md",
+  "sourceLineage": [
+    "docs/analysis/12_pending_duplicate_and_out_of_band_handling.md"
+  ],
+  "headingCount": 5,
+  "headings": [
+    {
+      "level": 1,
+      "text": "12 Pending Duplicate And Out-Of-Band Handling",
+      "slug": "12-pending-duplicate-and-out-of-band-handling"
+    },
+    {
+      "level": 2,
+      "text": "Response Classes",
+      "slug": "response-classes"
+    },
+    {
+      "level": 2,
+      "text": "Reconciliation Scenarios",
+      "slug": "reconciliation-scenarios"
+    },
+    {
+      "level": 2,
+      "text": "Request Identity Hazards",
+      "slug": "request-identity-hazards"
+    },
+    {
+      "level": 2,
+      "text": "Explicit Gaps",
+      "slug": "explicit-gaps"
+    }
+  ],
+  "proseSections": [
+    {
+      "headingSlug": "12-pending-duplicate-and-out-of-band-handling",
+      "headingText": "12 Pending Duplicate And Out-Of-Band Handling",
+      "level": 1,
+      "lines": [
+        ""
+      ],
+      "plainText": "",
+      "excerpt": "",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "response-classes",
+      "headingText": "Response Classes",
+      "level": 2,
+      "lines": [
+        "",
+        "| Response class | Default state | Legal effect | Retry floor |",
+        "| --- | --- | --- | --- |",
+        "| `ACK_SUCCESS` | `CONFIRMED` | `DIRECT_STATE_MUTATION` | `NO_RETRY` |",
+        "| `ACK_ACCEPTED_PENDING` | `PENDING_ACK` | `DIRECT_STATE_MUTATION` | `RECONCILE_THEN_RETRY` |",
+        "| `ACK_REJECTED_VALIDATION` | `REJECTED` | `DIRECT_STATE_MUTATION` | `REBUILD_THEN_RETRY` |",
+        "| `ACK_REJECTED_AUTH` | `none` | `DIRECT_STATE_MUTATION` | `HUMAN_REVIEW_THEN_RETRY` |",
+        "| `ACK_RETRYABLE_FAILURE` | `PROFILE_DEPENDENT_PENDING_ACK_OR_UNKNOWN` | `DIRECT_STATE_MUTATION` | `SAFE_RETRY` |",
+        "| `ACK_TIMEOUT_OR_NO_RESOLUTION` | `UNKNOWN` | `PROVISIONAL_STATE_MUTATION` | `RECONCILE_THEN_RETRY` |",
+        "| `ACK_EXTERNAL_STATE_DISCOVERED` | `OUT_OF_BAND` | `DIRECT_STATE_MUTATION` | `NO_RETRY` |",
+        "| `ACK_AMBIGUOUS_CORRELATION` | `none` | `RECONCILIATION_ONLY` | `RECONCILE_THEN_RETRY` |",
+        "| `ACK_INCONSISTENT_STATE` | `none` | `RECONCILIATION_ONLY` | `MANUAL_INTERVENTION_REQUIRED` |",
+        ""
+      ],
+      "plainText": "| Response class | Default state | Legal effect | Retry floor | | | | | | | ACK SUCCESS | CONFIRMED | DIRECT STATE MUTATION | NO RETRY | | ACK ACCEPTED PENDING | PENDING ACK | DIRECT STATE MUTATION | RECONCILE THEN RETRY | | ACK REJECTED VALIDATION | REJECTED | DIRECT STATE MUTATION | REBUILD THEN RETRY | | ACK REJECTED AUTH | none | DIRECT STATE MUTATION | HUMAN REVIEW THEN RETRY | | ACK RETRYABLE FAILURE | PROFILE DEPENDENT PENDING ACK OR UNKNOWN | DIRECT STATE MUTATION | SAFE RETRY | | ACK TIMEOUT OR NO RESOLUTION | UNKNOWN | PROVISIONAL STATE MUTATION | RECONCILE THEN RETRY | | ACK EXTERNAL STATE DISCOVERED | OUT OF BAND | DIRECT STATE MUTATION | NO RETRY | | ACK AMBIGUOUS CORRELATION | none | RECONCILIATION ONLY | RECONCILE THEN RETRY | | ACK INCONSISTENT STATE | none | RECONCILIATION ONLY | MANUAL INTERVENTION REQUIRED |",
+      "excerpt": "| Response class | Default state | Legal effect | Retry floor | | | | | | | ACK SUCCESS | CONFIRMED | DIRECT STATE MUTATION | NO RETRY | | ACK ACCEPTED PENDING | PENDING ACK | DIR…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "reconciliation-scenarios",
+      "headingText": "Reconciliation Scenarios",
+      "level": 2,
+      "lines": [
+        "",
+        "| Scenario | Result | Resend posture | Escalation |",
+        "| --- | --- | --- | --- |",
+        "| `direct_confirmed_success` | `CONFIRMED` | `CLOSED_NO_RESEND` | `NOT_REQUIRED` |",
+        "| `accepted_pending_or_retryable_follow_up` | `PENDING_ACK` | `FOLLOW_UP_READ_ONLY` | `NOT_REQUIRED` |",
+        "| `timeout_or_no_resolution_unknown` | `UNKNOWN` | `IDEMPOTENT_RECOVERY_ONLY -> FOLLOW_UP_READ_ONLY` | `NOT_REQUIRED` |",
+        "| `duplicate_or_pending_bucket_blocks_resend` | `preserve existing authority-grounded posture` | `BLOCKED_BY_RECONCILIATION or CLOSED_NO_RESEND` | `NOT_REQUIRED` |",
+        "| `ambiguous_callback_or_reference_only_ingress` | `no settlement mutation` | `BLOCKED_BY_RECONCILIATION` | `READY_FOR_ESCALATION` |",
+        "| `out_of_band_or_authority_correction_discovered` | `OUT_OF_BAND` | `BLOCKED_BY_RECONCILIATION` | `NOT_REQUIRED` |",
+        "| `conflicting_authority_evidence_requires_quantitative_reconciliation` | `remain unresolved until thresholds are met` | `BLOCKED_BY_RECONCILIATION` | `READY_FOR_ESCALATION` |",
+        "| `budget_exhausted_or_deadline_elapsed` | `PENDING_ACK or UNKNOWN` | `BLOCKED_BY_ESCALATION` | `ESCALATED` |",
+        ""
+      ],
+      "plainText": "| Scenario | Result | Resend posture | Escalation | | | | | | | direct confirmed success | CONFIRMED | CLOSED NO RESEND | NOT REQUIRED | | accepted pending or retryable follow up | PENDING ACK | FOLLOW UP READ ONLY | NOT REQUIRED | | timeout or no resolution unknown | UNKNOWN | IDEMPOTENT RECOVERY ONLY FOLLOW UP READ ONLY | NOT REQUIRED | | duplicate or pending bucket blocks resend | preserve existing authority grounded posture | BLOCKED BY RECONCILIATION or CLOSED NO RESEND | NOT REQUIRED | | ambiguous callback or reference only ingress | no settlement mutation | BLOCKED BY RECONCILIATION | READY FOR ESCALATION | | out of band or authority correction discovered | OUT OF BAND | BLOCKED BY RECONCILIATION | NOT REQUIRED | | conflicting authority evidence requires quantitative reconciliation | remain unresolved until thresholds are met | BLOCKED BY RECONCILIATION | READY FOR ESCALATION | | budget exhausted or deadline elapsed | PENDING ACK or UNKNOWN | BLOCKED BY ESCALATION | ESCALATED |",
+      "excerpt": "| Scenario | Result | Resend posture | Escalation | | | | | | | direct confirmed success | CONFIRMED | CLOSED NO RESEND | NOT REQUIRED | | accepted pending or retryable follow up…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "request-identity-hazards",
+      "headingText": "Request Identity Hazards",
+      "level": 2,
+      "lines": [
+        "",
+        "- Collision rules: `BODY_COLLISION`, `IDENTITY_NAMESPACE_COLLISION`.",
+        "- Unsafe retry conditions: `binding_lineage_ref changed`, `BODY_COLLISION open`, `IDENTITY_NAMESPACE_COLLISION open`, `duplicate bucket occupied by stronger authority truth`, `authenticated ambiguous or unbound ingress remains unresolved`, `reconciliation_budget_state in {EXHAUSTED, ESCALATED}`, `resend_legality_state in {BLOCKED_BY_RECONCILIATION, BLOCKED_BY_ESCALATION, CLOSED_NO_RESEND}`.",
+        ""
+      ],
+      "plainText": "Collision rules: BODY COLLISION, IDENTITY NAMESPACE COLLISION. Unsafe retry conditions: binding lineage ref changed, BODY COLLISION open, IDENTITY NAMESPACE COLLISION open, duplicate bucket occupied by stronger authority truth, authenticated ambiguous or unbound ingress remains unresolved, reconciliation budget state in {EXHAUSTED, ESCALATED}, resend legality state in {BLOCKED BY RECONCILIATION, BLOCKED BY ESCALATION, CLOSED NO RESEND}.",
+      "excerpt": "Collision rules: BODY COLLISION, IDENTITY NAMESPACE COLLISION. Unsafe retry conditions: binding lineage ref changed, BODY COLLISION open, IDENTITY NAMESPACE COLLISION open, duplic…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "explicit-gaps",
+      "headingText": "Explicit Gaps",
+      "level": 2,
+      "lines": [
+        "",
+        "| Gap | Area | Required closure |",
+        "| --- | --- | --- |",
+        "| `GAP-AUTH-001` | `provider_profile_instantiation` | Instantiate authority product profiles per provider/environment and bind exact provider codes to the canonical response classes. |",
+        "| `GAP-AUTH-002` | `weak_ingress_resolution` | Define the manual investigation and approval workflow for promoting quarantined ingress after stronger evidence is gathered. |",
+        "| `GAP-AUTH-003` | `quantitative_weight_policy_binding` | Bind reconciliation source-family weights to a versioned runtime policy artifact shared with the trust and authority uncertainty layers. |",
+        "| `GAP-AUTH-004` | `authority_correction_taxonomy` | Define operator, client-visible, and replay behavior for each authority correction cause before live provider support is enabled. |",
+        "| `GAP-AUTH-005` | `reason_code_registry` | Publish a dedicated authority reason-code registry covering send-time blocks, resend refusals, escalation triggers, and correction causes. |",
+        ""
+      ],
+      "plainText": "| Gap | Area | Required closure | | | | | | GAP AUTH 001 | provider profile instantiation | Instantiate authority product profiles per provider/environment and bind exact provider codes to the canonical response classes. | | GAP AUTH 002 | weak ingress resolution | Define the manual investigation and approval workflow for promoting quarantined ingress after stronger evidence is gathered. | | GAP AUTH 003 | quantitative weight policy binding | Bind reconciliation source family weights to a versioned runtime policy artifact shared with the trust and authority uncertainty layers. | | GAP AUTH 004 | authority correction taxonomy | Define operator, client visible, and replay behavior for each authority correction cause before live provider support is enabled. | | GAP AUTH 005 | reason code registry | Publish a dedicated authority reason code registry covering send time blocks, resend refusals, escalation triggers, and correction causes. |",
+      "excerpt": "| Gap | Area | Required closure | | | | | | GAP AUTH 001 | provider profile instantiation | Instantiate authority product profiles per provider/environment and bind exact provider…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    }
+  ],
+  "schemaIdentityOrNull": null,
+  "schemaFields": [],
+  "samplePointers": [],
+  "sampleIdentityOrNull": null,
+  "bindingIdentityOrNull": null,
+  "validatorIdentityOrNull": null,
+  "driftIdentityOrNull": null,
+  "headerStrip": {
+    "kind": "PROSE",
+    "badgeLabel": "Support Documentation",
+    "metricPairs": [
+      {
+        "label": "Headings",
+        "value": "5"
+      },
+      {
+        "label": "Schemas",
+        "value": "0"
+      },
+      {
+        "label": "Tasks",
+        "value": "0"
+      }
+    ]
+  },
+  "relationships": {
+    "schemas": [],
+    "samples": [],
+    "bindings": [],
+    "validators": [],
+    "docs": [],
+    "tasks": []
+  },
+  "sourceTruthStack": {
+    "file": [
+      "docs/analysis/12_pending_duplicate_and_out_of_band_handling.md"
+    ],
+    "headings": [
+      "12 Pending Duplicate And Out-Of-Band Handling",
+      "Response Classes",
+      "Reconciliation Scenarios",
+      "Request Identity Hazards",
+      "Explicit Gaps"
+    ],
+    "schemaRefs": [],
+    "sampleRefs": [],
+    "bindingRefs": [],
+    "validatorRefs": [],
+    "driftRefs": [],
+    "taskRefs": []
+  },
+  "fieldCrosslinks": [],
+  "taskRefs": []
+}

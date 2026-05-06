@@ -25,14 +25,10 @@ test("dry-run bootstrap freezes a sanitized provider-unresolved topology and sup
 
   const persisted = JSON.parse(await readFile(inventoryPath, "utf8"));
 
-  expect(result.outcome).toBe(
-    "POSTGRES_TOPOLOGY_DECLARED_PROVIDER_SELECTION_REQUIRED",
-  );
+  expect(result.outcome).toBe("POSTGRES_TOPOLOGY_DECLARED_PROVIDER_SELECTION_REQUIRED");
   expect(result.selection_status).toBe("PROVIDER_SELECTION_REQUIRED");
   expect(result.steps[0]?.status).toBe("BLOCKED_BY_POLICY");
-  expect(result.steps.slice(1).every((step) => step.status === "SUCCEEDED")).toBe(
-    true,
-  );
+  expect(result.steps.slice(1).every((step) => step.status === "SUCCEEDED")).toBe(true);
   expect(result.notes).toEqual(
     expect.arrayContaining([
       "No live provider mutation occurred.",
@@ -59,19 +55,12 @@ test("dry-run bootstrap freezes a sanitized provider-unresolved topology and sup
     existingInventoryPath: inventoryPath,
   });
 
-  expect(adopted.outcome).toBe(
-    "POSTGRES_TOPOLOGY_DECLARED_PROVIDER_SELECTION_REQUIRED",
-  );
+  expect(adopted.outcome).toBe("POSTGRES_TOPOLOGY_DECLARED_PROVIDER_SELECTION_REQUIRED");
   expect(adopted.steps[5]?.status).toBe("SKIPPED_AS_ALREADY_PRESENT");
 });
 
 test("baseline migrations freeze the control schemas, restore gates, and append-only audit guards", async () => {
-  const repoRoot = path.resolve(
-    path.dirname(fileURLToPath(import.meta.url)),
-    "..",
-    "..",
-    "..",
-  );
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
   const controlSql = await readFile(
     path.join(repoRoot, "db", "migrations", "control", "0001_bootstrap_control_store.sql"),
     "utf8",
@@ -81,29 +70,23 @@ test("baseline migrations freeze the control schemas, restore gates, and append-
     "utf8",
   );
 
-  expect(controlSql).toContain(
-    "CREATE TABLE IF NOT EXISTS meta_migration.schema_migration_ledger",
-  );
+  expect(controlSql).toContain("CREATE TABLE IF NOT EXISTS meta_migration.schema_migration_ledger");
   expect(controlSql).toContain(
     "CREATE TABLE IF NOT EXISTS restore_verification.restore_checkpoint_register",
   );
+  expect(controlSql).toContain("CREATE OR REPLACE FUNCTION control_support.current_tenant_id()");
   expect(controlSql).toContain(
-    "CREATE OR REPLACE FUNCTION control_support.current_tenant_id()",
+    "GRANT pg_control_owner TO pg_control_migrator WITH SET TRUE, INHERIT FALSE;",
   );
-  expect(controlSql).toContain("GRANT pg_control_owner TO pg_control_migrator WITH SET TRUE, INHERIT FALSE;");
 
-  expect(auditSql).toContain(
-    "CREATE TABLE IF NOT EXISTS audit_ledger.audit_event_stream",
-  );
+  expect(auditSql).toContain("CREATE TABLE IF NOT EXISTS audit_ledger.audit_event_stream");
   expect(auditSql).toContain("PARTITION BY RANGE (recorded_at)");
-  expect(auditSql).toContain(
-    "CREATE OR REPLACE FUNCTION audit_admin.guard_audit_event_insert()",
-  );
+  expect(auditSql).toContain("CREATE OR REPLACE FUNCTION audit_admin.guard_audit_event_insert()");
   expect(auditSql).toContain(
     "CREATE OR REPLACE FUNCTION audit_admin.reject_audit_event_mutation()",
   );
+  expect(auditSql).toContain("MESSAGE = 'append_only_violation:update_delete_forbidden'");
   expect(auditSql).toContain(
-    "MESSAGE = 'append_only_violation:update_delete_forbidden'",
+    "GRANT INSERT, SELECT ON audit_ledger.audit_event_stream TO pg_audit_append_writer;",
   );
-  expect(auditSql).toContain("GRANT INSERT, SELECT ON audit_ledger.audit_event_stream TO pg_audit_append_writer;");
 });

@@ -1,0 +1,604 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/upload_session_recovery_harness.schema.json",
+  "title": "UploadSessionRecoveryHarness",
+  "description": "Deterministic governed-upload recovery harness. This schema freezes reconnect, reload, rebase, duplicate-allocation, scanner-delay, attachment-confirmation, and cross-device continuation cases so resumable upload sessions preserve frozen tenant/client/request/version lineage, reuse the same storage object, and surface the lawful next action without inferring completion from byte transfer alone.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "harness_id",
+    "deterministic_seed",
+    "suite_profile",
+    "run_mode",
+    "identity_policy",
+    "resume_policy",
+    "rebase_policy",
+    "completion_policy",
+    "duplicate_policy",
+    "recovery_action_policy",
+    "cases"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "UPLOAD_SESSION_RECOVERY_HARNESS_V1"
+    },
+    "harness_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deterministic_seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "suite_profile": {
+      "const": "RESUMABLE_UPLOAD_RECONNECT_REBASE_AND_DUPLICATE_MATRIX"
+    },
+    "run_mode": {
+      "const": "DETERMINISTIC_SESSION_RECOVERY_ENUMERATION"
+    },
+    "identity_policy": {
+      "const": "FROZEN_TENANT_CLIENT_REQUEST_AND_VERSION_SCOPE"
+    },
+    "resume_policy": {
+      "const": "RESUME_EXISTING_SESSION_AND_STORAGE_REF_ONLY"
+    },
+    "rebase_policy": {
+      "const": "LIVE_REQUEST_VERSION_MAY_ADVANCE_FROZEN_VERSION_MAY_NOT"
+    },
+    "completion_policy": {
+      "const": "TRANSFER_SUCCESS_NEVER_IMPLIES_ATTACHMENT_OR_REQUEST_SATISFACTION"
+    },
+    "duplicate_policy": {
+      "const": "NO_DUPLICATE_SESSION_OR_STORAGE_REF_ON_RETRY_OR_CROSS_DEVICE_RESUME"
+    },
+    "recovery_action_policy": {
+      "const": "NEXT_ACTION_AND_RESUMABILITY_STATE_GOVERN_ALL_RECOVERY"
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/harnessCase"
+      },
+      "minItems": 7,
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "surfaceClass": {
+      "type": "string",
+      "enum": [
+        "MOBILE",
+        "BROWSER",
+        "DESKTOP"
+      ]
+    },
+    "scenarioCode": {
+      "type": "string",
+      "enum": [
+        "MOBILE_RECONNECT",
+        "BROWSER_RELOAD",
+        "STALE_REQUEST_REBASE",
+        "DUPLICATE_ALLOCATION_RETRY",
+        "CHECKSUM_OR_SCANNER_DELAY",
+        "ATTACHMENT_CONFIRMATION",
+        "CROSS_DEVICE_CONTINUATION"
+      ]
+    },
+    "completionState": {
+      "type": "string",
+      "enum": [
+        "NOT_READY_BYTES_IN_FLIGHT",
+        "NOT_READY_SCAN_OR_VALIDATION_PENDING",
+        "NOT_READY_ATTACHMENT_CONFIRMATION_PENDING",
+        "NOT_READY_STALE_RECONFIRM_REQUIRED",
+        "READY_CURRENT_REQUEST_SATISFIED"
+      ]
+    },
+    "sessionSnapshot": {
+      "type": "object",
+      "required": [
+        "upload_session_id",
+        "storage_ref",
+        "tenant_id",
+        "client_id",
+        "request_id",
+        "frozen_request_version_ref",
+        "live_request_version_ref",
+        "request_binding_state",
+        "resumability_state",
+        "attachment_state",
+        "transfer_state",
+        "integrity_state",
+        "malware_scan_state",
+        "validation_state",
+        "next_action_code",
+        "byte_count",
+        "bytes_transferred",
+        "upload_confidence_score",
+        "resume_token_ref_or_null",
+        "attached_document_ref_or_null",
+        "attachment_confirmed_at_or_null"
+      ],
+      "properties": {
+        "upload_session_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "storage_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tenant_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "client_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "frozen_request_version_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "live_request_version_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "request_binding_state": {
+          "type": "string",
+          "enum": [
+            "ORIGINAL_CURRENT",
+            "RECONFIRMED_CURRENT",
+            "RECONFIRMATION_REQUIRED",
+            "SUPERSEDED"
+          ]
+        },
+        "resumability_state": {
+          "type": "string",
+          "enum": [
+            "RESUMABLE",
+            "RESTART_REQUIRED",
+            "CLOSED"
+          ]
+        },
+        "attachment_state": {
+          "type": "string",
+          "enum": [
+            "STAGED",
+            "CONFIRMATION_REQUIRED",
+            "ATTACHED",
+            "REBIND_REQUIRED"
+          ]
+        },
+        "transfer_state": {
+          "type": "string",
+          "enum": [
+            "QUEUED",
+            "UPLOADING",
+            "SCANNING",
+            "ACCEPTED",
+            "REJECTED",
+            "FAILED"
+          ]
+        },
+        "integrity_state": {
+          "type": "string",
+          "enum": [
+            "PENDING",
+            "VERIFIED",
+            "FAILED"
+          ]
+        },
+        "malware_scan_state": {
+          "type": "string",
+          "enum": [
+            "PENDING",
+            "CLEAN",
+            "QUARANTINED"
+          ]
+        },
+        "validation_state": {
+          "type": "string",
+          "enum": [
+            "PENDING",
+            "ACCEPTED",
+            "REJECTED",
+            "REQUIRES_REPLACEMENT"
+          ]
+        },
+        "next_action_code": {
+          "type": "string",
+          "enum": [
+            "NONE",
+            "RESUME_UPLOAD",
+            "CONFIRM_ATTACHMENT",
+            "RECONFIRM_REQUEST",
+            "RETRY_UPLOAD",
+            "UPLOAD_REPLACEMENT",
+            "CONTACT_SUPPORT"
+          ]
+        },
+        "byte_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "bytes_transferred": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "upload_confidence_score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "resume_token_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "attached_document_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "attachment_confirmed_at_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "resumability_state": {
+                "const": "RESUMABLE"
+              }
+            },
+            "required": [
+              "resumability_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "resume_token_ref_or_null": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "attachment_state": {
+                "const": "ATTACHED"
+              }
+            },
+            "required": [
+              "attachment_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "attached_document_ref_or_null": {
+                "type": "string"
+              },
+              "attachment_confirmed_at_or_null": {
+                "type": "string"
+              },
+              "next_action_code": {
+                "const": "NONE"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "next_action_code": {
+                "const": "RESUME_UPLOAD"
+              }
+            },
+            "required": [
+              "next_action_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "resumability_state": {
+                "const": "RESUMABLE"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "next_action_code": {
+                "const": "CONFIRM_ATTACHMENT"
+              }
+            },
+            "required": [
+              "next_action_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "attachment_state": {
+                "const": "CONFIRMATION_REQUIRED"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "next_action_code": {
+                "const": "RECONFIRM_REQUEST"
+              }
+            },
+            "required": [
+              "next_action_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "attachment_state": {
+                "const": "REBIND_REQUIRED"
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "requestProjectionSnapshot": {
+      "type": "object",
+      "required": [
+        "request_id",
+        "request_version_ref",
+        "latest_upload_ref_or_null",
+        "current_request_upload_ref_or_null"
+      ],
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "request_version_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "latest_upload_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "current_request_upload_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "harnessCase": {
+      "type": "object",
+      "required": [
+        "case_id",
+        "scenario_code",
+        "entry_surface_class",
+        "resume_surface_class",
+        "duplicate_session_created",
+        "duplicate_storage_ref_created",
+        "expected_request_completion_state",
+        "pre_session",
+        "post_session",
+        "post_request_projection"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scenario_code": {
+          "$ref": "#/$defs/scenarioCode"
+        },
+        "entry_surface_class": {
+          "$ref": "#/$defs/surfaceClass"
+        },
+        "resume_surface_class": {
+          "$ref": "#/$defs/surfaceClass"
+        },
+        "duplicate_session_created": {
+          "const": false
+        },
+        "duplicate_storage_ref_created": {
+          "const": false
+        },
+        "expected_request_completion_state": {
+          "$ref": "#/$defs/completionState"
+        },
+        "pre_session": {
+          "$ref": "#/$defs/sessionSnapshot"
+        },
+        "post_session": {
+          "$ref": "#/$defs/sessionSnapshot"
+        },
+        "post_request_projection": {
+          "$ref": "#/$defs/requestProjectionSnapshot"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "scenario_code": {
+                "const": "MOBILE_RECONNECT"
+              }
+            },
+            "required": [
+              "scenario_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "entry_surface_class": {
+                "const": "MOBILE"
+              },
+              "resume_surface_class": {
+                "const": "MOBILE"
+              },
+              "expected_request_completion_state": {
+                "const": "NOT_READY_BYTES_IN_FLIGHT"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "scenario_code": {
+                "const": "BROWSER_RELOAD"
+              }
+            },
+            "required": [
+              "scenario_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "entry_surface_class": {
+                "const": "BROWSER"
+              },
+              "resume_surface_class": {
+                "const": "BROWSER"
+              },
+              "expected_request_completion_state": {
+                "const": "NOT_READY_SCAN_OR_VALIDATION_PENDING"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "scenario_code": {
+                "const": "STALE_REQUEST_REBASE"
+              }
+            },
+            "required": [
+              "scenario_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "expected_request_completion_state": {
+                "const": "NOT_READY_STALE_RECONFIRM_REQUIRED"
+              },
+              "post_request_projection": {
+                "properties": {
+                  "current_request_upload_ref_or_null": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "scenario_code": {
+                "const": "DUPLICATE_ALLOCATION_RETRY"
+              }
+            },
+            "required": [
+              "scenario_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "expected_request_completion_state": {
+                "const": "NOT_READY_BYTES_IN_FLIGHT"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "scenario_code": {
+                "const": "CHECKSUM_OR_SCANNER_DELAY"
+              }
+            },
+            "required": [
+              "scenario_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "expected_request_completion_state": {
+                "const": "NOT_READY_SCAN_OR_VALIDATION_PENDING"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "scenario_code": {
+                "const": "ATTACHMENT_CONFIRMATION"
+              }
+            },
+            "required": [
+              "scenario_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "expected_request_completion_state": {
+                "const": "READY_CURRENT_REQUEST_SATISFIED"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "scenario_code": {
+                "const": "CROSS_DEVICE_CONTINUATION"
+              }
+            },
+            "required": [
+              "scenario_code"
+            ]
+          },
+          "then": {
+            "properties": {
+              "expected_request_completion_state": {
+                "const": "NOT_READY_BYTES_IN_FLIGHT"
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

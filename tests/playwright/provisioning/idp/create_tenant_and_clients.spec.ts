@@ -18,8 +18,7 @@ import {
 
 function fixtureEntryUrls(scenario: "fresh" | "existing"): IdpEntryUrls {
   return {
-    controlPlane:
-      `/automation/provisioning/tests/fixtures/auth0_idp_console.html?scenario=${scenario}`,
+    controlPlane: `/automation/provisioning/tests/fixtures/auth0_idp_console.html?scenario=${scenario}`,
   };
 }
 
@@ -43,15 +42,9 @@ async function runFixtureBootstrap(
 ) {
   const rootDir = await mkdtemp(path.join(os.tmpdir(), `taxat-idp-${scenario}-`));
   const tenantRecordPath = path.join(rootDir, "idp_tenant_record.json");
-  const applicationClientCatalogPath = path.join(
-    rootDir,
-    "idp_application_client_catalog.json",
-  );
+  const applicationClientCatalogPath = path.join(rootDir, "idp_application_client_catalog.json");
   const callbackOriginMatrixPath = path.join(rootDir, "idp_callback_origin_matrix.json");
-  const machineClientInventoryPath = path.join(
-    rootDir,
-    "idp_machine_client_inventory.json",
-  );
+  const machineClientInventoryPath = path.join(rootDir, "idp_machine_client_inventory.json");
 
   const result = await createIdpTenantAndClients({
     page,
@@ -78,12 +71,11 @@ async function readPersistedArtifacts(paths: {
   applicationClientCatalogPath: string;
   machineClientInventoryPath: string;
 }) {
-  const [tenantRecordRaw, applicationCatalogRaw, machineInventoryRaw] =
-    await Promise.all([
-      readFile(paths.tenantRecordPath, "utf8"),
-      readFile(paths.applicationClientCatalogPath, "utf8"),
-      readFile(paths.machineClientInventoryPath, "utf8"),
-    ]);
+  const [tenantRecordRaw, applicationCatalogRaw, machineInventoryRaw] = await Promise.all([
+    readFile(paths.tenantRecordPath, "utf8"),
+    readFile(paths.applicationClientCatalogPath, "utf8"),
+    readFile(paths.machineClientInventoryPath, "utf8"),
+  ]);
 
   return {
     tenantRecordRaw,
@@ -202,9 +194,7 @@ test("idp topology atlas renders semantic lanes, keyboard selection, and reduced
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Provider tenant" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Interactive clients" })).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Callback and origin bindings" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Callback and origin bindings" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Machine clients" })).toBeVisible();
 
   const nodeButton = page.getByRole("button", {

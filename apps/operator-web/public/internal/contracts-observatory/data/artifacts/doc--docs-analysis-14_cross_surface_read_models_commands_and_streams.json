@@ -1,0 +1,166 @@
+{
+  "artifactVersion": "CONTRACT_OBSERVATORY_ARTIFACT_V1",
+  "artifactSlug": "doc--docs-analysis-14_cross_surface_read_models_commands_and_streams",
+  "artifactKind": "MARKDOWN",
+  "sectionRef": "SUPPORT_DOCS",
+  "authorityLevel": "SUPPORTING_REFERENCE",
+  "sourceTruthBadge": "Support Documentation",
+  "tone": "slate",
+  "title": "14 Cross-Surface Read Models Commands And Streams",
+  "subtitle": "docs/analysis/14_cross_surface_read_models_commands_and_streams.md",
+  "summary": "This matrix binds every route or scene to its governing read models, northbound read surfaces, command transport, and live update dependencies. It preserves the distinction betwee…",
+  "canonicalPath": "docs/analysis/14_cross_surface_read_models_commands_and_streams.md",
+  "sourceLineage": [
+    "docs/analysis/14_cross_surface_read_models_commands_and_streams.md"
+  ],
+  "headingCount": 3,
+  "headings": [
+    {
+      "level": 1,
+      "text": "14 Cross-Surface Read Models Commands And Streams",
+      "slug": "14-cross-surface-read-models-commands-and-streams"
+    },
+    {
+      "level": 2,
+      "text": "Shared Command Law",
+      "slug": "shared-command-law"
+    },
+    {
+      "level": 2,
+      "text": "Route / Scene Binding Matrix",
+      "slug": "route-scene-binding-matrix"
+    }
+  ],
+  "proseSections": [
+    {
+      "headingSlug": "14-cross-surface-read-models-commands-and-streams",
+      "headingText": "14 Cross-Surface Read Models Commands And Streams",
+      "level": 1,
+      "lines": [
+        "",
+        "This matrix binds every route or scene to its governing read models, northbound read surfaces, command transport, and live-update dependencies.",
+        "It preserves the distinction between exact published command enums and normalized action families inferred from route prose.",
+        ""
+      ],
+      "plainText": "This matrix binds every route or scene to its governing read models, northbound read surfaces, command transport, and live update dependencies. It preserves the distinction between exact published command enums and normalized action families inferred from route prose.",
+      "excerpt": "This matrix binds every route or scene to its governing read models, northbound read surfaces, command transport, and live update dependencies. It preserves the distinction betwee…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "shared-command-law",
+      "headingText": "Shared Command Law",
+      "level": 2,
+      "lines": [
+        "",
+        "- Default command surface: `POST /v1/commands`",
+        "- Durable receipt surface: `GET /v1/commands/{command_id}`",
+        "- Binary transfer exception: POST /v1/uploads/sessions allocates resumable upload sessions; attachment finalization still returns to POST /v1/commands.",
+        ""
+      ],
+      "plainText": "Default command surface: POST /v1/commands Durable receipt surface: GET /v1/commands/{command id} Binary transfer exception: POST /v1/uploads/sessions allocates resumable upload sessions; attachment finalization still returns to POST /v1/commands.",
+      "excerpt": "Default command surface: POST /v1/commands Durable receipt surface: GET /v1/commands/{command id} Binary transfer exception: POST /v1/uploads/sessions allocates resumable upload s…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "route-scene-binding-matrix",
+      "headingText": "Route / Scene Binding Matrix",
+      "level": 2,
+      "lines": [
+        "",
+        "| Route / Scene | Shell | Read models | Read surfaces | Commands | Command semantics | Streams / live updates |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+        "| collaboration_staff_inbox | CALM_SHELL | WorkInboxSnapshot, WorkInboxDelta | GET /v1/work-items?assignee=...&lifecycle_state=...&waiting_on=...&due_state=...&customer_projection=...<br>GET /v1/work-items/stream?resume_token=... | ASSIGN_WORK_ITEM<br>REASSIGN_WORK_ITEM<br>ESCALATE_WORK_ITEM | AUTHORITATIVE_ENUM | workspace.delta<br>notification.badge<br>heartbeat |",
+        "| collaboration_staff_workspace | CALM_SHELL | WorkspaceSnapshot, WorkspaceDelta | GET /v1/work-items/{item_id}/workspace/snapshot<br>GET /v1/work-items/{item_id}/workspace/stream?resume_token=... | ASSIGN_WORK_ITEM<br>CHANGE_WORK_ITEM_STATUS<br>SET_WORK_ITEM_DUE_DATES<br>REQUEST_CUSTOMER_INFO | AUTHORITATIVE_ENUM | workspace.snapshot<br>workspace.delta<br>notification.badge<br>heartbeat |",
+        "| collaboration_staff_customer_activity_module | CALM_SHELL | CollaborationActivitySlice, WorkspaceDelta | GET /v1/work-items/{item_id}/activity?thread=customer&before_sequence=...<br>GET /v1/work-items/{item_id}/workspace/stream?resume_token=... | ADD_CUSTOMER_COMMENT<br>REQUEST_CUSTOMER_INFO | AUTHORITATIVE_ENUM | activity.appended<br>workspace.delta |",
+        "| collaboration_staff_internal_activity_module | CALM_SHELL | CollaborationActivitySlice, WorkspaceDelta | GET /v1/work-items/{item_id}/activity?thread=internal&before_sequence=...<br>GET /v1/work-items/{item_id}/workspace/stream?resume_token=... | ADD_INTERNAL_NOTE | AUTHORITATIVE_ENUM | activity.appended<br>workspace.delta |",
+        "| collaboration_staff_files_module | CALM_SHELL | CollaborationAttachmentSlice, WorkspaceDelta | GET /v1/work-items/{item_id}/attachments?visibility=customer\\|internal<br>GET /v1/work-items/{item_id}/workspace/stream?resume_token=... | n/a | READ_ONLY_ATTACHMENT_POSTURE | workspace.delta |",
+        "| collaboration_manifest_focus_jump | CALM_SHELL | DecisionBundle, WorkspaceSnapshot, WorkspaceDelta | Manifest experience snapshot and stream surfaces from the northbound contract<br>GET /v1/work-items/{item_id}/workspace/snapshot | MANIFEST_ROUTE_LOCAL_COMMANDS<br>REQUEST_CUSTOMER_INFO | MIXED_MANIFEST_AND_COLLABORATION | manifest experience stream<br>workspace.delta |",
+        "| collaboration_customer_request_list | CLIENT_PORTAL_SHELL | CustomerRequestListSnapshot | Customer-visible request-list projection under the collaboration contract | n/a | READ_ONLY_ENTRY_SURFACE | notification.badge<br>customer-safe list refresh |",
+        "| collaboration_customer_request_detail | CLIENT_PORTAL_SHELL | WorkspaceSnapshot, CollaborationActivitySlice, CollaborationAttachmentSlice | Customer-visible request-detail projection<br>GET /v1/work-items/{item_id}/activity?thread=customer&before_sequence=... | RESPOND_TO_REQUEST_INFO<br>ADD_CUSTOMER_COMMENT | AUTHORITATIVE_ENUM | activity.appended<br>customer-safe request refresh |",
+        "| portal_home | CLIENT_PORTAL_SHELL | ClientPortalWorkspace, ClientTimelineEvent | ClientPortalWorkspace route projection (root home slice) | PORTAL_OPEN_REQUEST<br>PORTAL_OPEN_HELP_CASE | NORMALIZED_ACTION_FAMILY | role-filtered portal refresh<br>cross_device_continuity_contract |",
+        "| portal_documents | CLIENT_PORTAL_SHELL | ClientPortalWorkspace, ClientDocumentRequest, ClientUploadSession | ClientPortalWorkspace route projection (documents slice)<br>POST /v1/uploads/sessions | PORTAL_START_UPLOAD<br>PORTAL_RETRY_UPLOAD<br>PORTAL_REPLACE_DOCUMENT<br>PORTAL_ATTACH_FINALIZED_UPLOAD | NORMALIZED_ACTION_FAMILY | upload session progress<br>role-filtered portal refresh |",
+        "| portal_approvals | CLIENT_PORTAL_SHELL | ClientPortalWorkspace, ClientApprovalPack | ClientPortalWorkspace route projection (approvals slice) | PORTAL_ACCEPT_APPROVAL<br>PORTAL_DECLINE_APPROVAL<br>PORTAL_ACKNOWLEDGE_CHANGE_DIGEST | NORMALIZED_ACTION_FAMILY | approval pack refresh<br>cross_device_continuity_contract |",
+        "| portal_onboarding | CLIENT_PORTAL_SHELL | ClientPortalWorkspace, ClientOnboardingJourney | ClientPortalWorkspace route projection (onboarding slice) | PORTAL_SAVE_ONBOARDING_STEP<br>PORTAL_ADVANCE_ONBOARDING<br>PORTAL_OPEN_SUPPORT | NORMALIZED_ACTION_FAMILY | journey refresh<br>cross_device_continuity_contract |",
+        "| portal_help | CLIENT_PORTAL_SHELL | ClientPortalWorkspace, PortalHelpRequest | ClientPortalWorkspace route projection (help slice) | CLIENT_PORTAL_REQUEST_HELP | AUTHORITATIVE_ENUM | help request refresh<br>cross_device_continuity_contract |",
+        "| governance_overview | GOVERNANCE_DENSITY_SHELL | TenantGovernanceSnapshot | GET /v1/governance/tenants/{tenant_id}/overview | GOVERNANCE_OPEN_QUEUE_ITEM | NORMALIZED_ACTION_FAMILY | durable command receipts<br>governance overview refresh |",
+        "| governance_tenant | GOVERNANCE_DENSITY_SHELL | GovernancePolicySnapshot | GET /v1/governance/tenants/{tenant_id}/policy-snapshot | GOVERNANCE_STAGE_TENANT_CHANGE<br>GOVERNANCE_SUBMIT_APPROVAL | NORMALIZED_ACTION_FAMILY | durable command receipts<br>policy snapshot refresh |",
+        "| governance_access_principals | GOVERNANCE_DENSITY_SHELL | PrincipalAccessView | GET /v1/governance/tenants/{tenant_id}/principals | GOVERNANCE_STAGE_PRINCIPAL_CHANGE | NORMALIZED_ACTION_FAMILY | durable command receipts<br>principal inventory refresh |",
+        "| governance_access_roles | GOVERNANCE_DENSITY_SHELL | RoleTemplateMatrix | GET /v1/governance/tenants/{tenant_id}/roles/{role_id} | GOVERNANCE_STAGE_ROLE_CHANGE | NORMALIZED_ACTION_FAMILY | durable command receipts<br>role matrix refresh |",
+        "| governance_access_simulator | GOVERNANCE_DENSITY_SHELL | GovernanceAccessSimulation | POST /v1/governance/tenants/{tenant_id}/access-simulations | RUN_ACCESS_SIMULATION<br>COMMIT_SIMULATED_GOVERNANCE_CHANGE | NORMALIZED_ACTION_FAMILY | durable command receipts<br>simulation result refresh |",
+        "| governance_authority_links | GOVERNANCE_DENSITY_SHELL | AuthorityLinkInventoryItem | GET /v1/governance/tenants/{tenant_id}/authority-links | GOVERNANCE_REPAIR_AUTHORITY_LINK<br>GOVERNANCE_REBIND_DELEGATION | NORMALIZED_ACTION_FAMILY | durable command receipts<br>authority-link inventory refresh |",
+        "| governance_retention_policies | GOVERNANCE_DENSITY_SHELL | RetentionGovernanceFrame | GET /v1/governance/tenants/{tenant_id}/retention | GOVERNANCE_STAGE_RETENTION_POLICY_CHANGE | NORMALIZED_ACTION_FAMILY | durable command receipts<br>retention frame refresh |",
+        "| governance_retention_legal_holds | GOVERNANCE_DENSITY_SHELL | RetentionGovernanceFrame | GET /v1/governance/tenants/{tenant_id}/retention | GOVERNANCE_OPEN_LEGAL_HOLD<br>GOVERNANCE_RELEASE_LEGAL_HOLD | NORMALIZED_ACTION_FAMILY | durable command receipts<br>retention frame refresh |",
+        "| governance_retention_erasure | GOVERNANCE_DENSITY_SHELL | RetentionGovernanceFrame | GET /v1/governance/tenants/{tenant_id}/retention | GOVERNANCE_STAGE_ERASURE_DECISION<br>GOVERNANCE_APPROVE_ERASURE | NORMALIZED_ACTION_FAMILY | durable command receipts<br>retention frame refresh |",
+        "| governance_audit | GOVERNANCE_DENSITY_SHELL | AuditInvestigationFrame | GET /v1/governance/tenants/{tenant_id}/audit-investigations | GOVERNANCE_EXPORT_AUDIT_SLICE | NORMALIZED_ACTION_FAMILY | append-only event refresh<br>durable command receipts |",
+        "| native_primary_manifest_scene | CALM_SHELL | DecisionBundle, ExperienceCursor, WorkspaceSnapshot (linked focus when present) | Manifest experience snapshot<br>Manifest experience stream<br>Local cache hydration envelope | TOGGLE_SIDEBAR<br>TOGGLE_INSPECTOR<br>FOCUS_PRIMARY_CANVAS<br>OPEN_COMPARE_WINDOW<br>REFRESH_CURRENT_SCENE | LOCAL_NATIVE_COMMAND | snapshot hydration<br>stream resume<br>manifest delta application |",
+        "| native_primary_work_item_scene | CALM_SHELL | WorkspaceSnapshot, WorkspaceDelta, WorkspaceCursor | Workspace snapshot<br>Workspace stream<br>Local cache hydration envelope | TOGGLE_SIDEBAR<br>TOGGLE_INSPECTOR<br>FOCUS_SIDEBAR<br>FOCUS_PRIMARY_CANVAS<br>OPEN_AUDIT_WINDOW<br>OPEN_AUTHORITY_REVIEW_WINDOW<br>REFRESH_CURRENT_SCENE | LOCAL_NATIVE_COMMAND | snapshot hydration<br>stream resume<br>workspace delta application |",
+        "| native_secondary_compare_window | CALM_SHELL | DecisionBundle comparison slice, preview_subject_ref_or_null | Parent scene export to detached compare window<br>Local cached compare payload | FOCUS_PRIMARY_CANVAS<br>CLOSE_SECONDARY_WINDOW<br>COPY_IDENTIFIERS | LOCAL_NATIVE_COMMAND | parent scene refresh<br>detached window restore payload |",
+        "| native_secondary_audit_window | CALM_SHELL | Audit slice, preview_subject_ref_or_null | Parent scene audit export<br>Local cached audit payload | FOCUS_PRIMARY_CANVAS<br>CLOSE_SECONDARY_WINDOW<br>COPY_IDENTIFIERS | LOCAL_NATIVE_COMMAND | parent scene refresh<br>detached window restore payload |",
+        "| native_secondary_filing_packet_window | CALM_SHELL | Packet preview slice, preview_subject_ref_or_null | Parent scene packet export<br>Local cached packet payload | FOCUS_PRIMARY_CANVAS<br>CLOSE_SECONDARY_WINDOW<br>COPY_IDENTIFIERS | LOCAL_NATIVE_COMMAND | parent scene refresh<br>detached window restore payload |",
+        "| native_secondary_authority_review_window | CALM_SHELL | Authority interaction slice, preview_subject_ref_or_null | Parent scene authority review export<br>Local cached authority payload | FOCUS_PRIMARY_CANVAS<br>CLOSE_SECONDARY_WINDOW<br>COPY_IDENTIFIERS | LOCAL_NATIVE_COMMAND | parent scene refresh<br>detached window restore payload |",
+        "| native_auth_handoff_session | CALM_SHELL | Return target envelope, pending authority task binding | ASWebAuthenticationSession callback<br>Parent scene refresh after settlement | BEGIN_ASWEB_AUTH_SESSION<br>RESUME_PARENT_SCENE | LOCAL_NATIVE_AND_AUTH | auth callback<br>parent scene refresh |",
+        ""
+      ],
+      "plainText": "| Route / Scene | Shell | Read models | Read surfaces | Commands | Command semantics | Streams / live updates | | | | | | | | | | collaboration staff inbox | CALM SHELL | WorkInboxSnapshot, WorkInboxDelta | GET /v1/work items?assignee=...&lifecycle state=...&waiting on=...&due state=...&customer projection=...<br GET /v1/work items/stream?resume token=... | ASSIGN WORK ITEM<br REASSIGN WORK ITEM<br ESCALATE WORK ITEM | AUTHORITATIVE ENUM | workspace.delta<br notification.badge<br heartbeat | | collaboration staff workspace | CALM SHELL | WorkspaceSnapshot, WorkspaceDelta | GET /v1/work items/{item id}/workspace/snapshot<br GET /v1/work items/{item id}/workspace/stream?resume token=... | ASSIGN WORK ITEM<br CHANGE WORK ITEM STATUS<br SET WORK ITEM DUE DATES<br REQUEST CUSTOMER INFO | AUTHORITATIVE ENUM | workspace.snapshot<br workspace.delta<br notification.badge<br heartbeat | | collaboration staff customer activity module | CALM SHELL | CollaborationActivitySlice, WorkspaceDelta | GET /v1/work items/{item id}/activity?thread=customer&before sequence=...<br GET /v1/work items/{item id}/workspace/stream?resume token=... | ADD CUSTOMER COMMENT<br REQUEST CUSTOMER INFO | AUTHORITATIVE ENUM | activity.appended<br workspace.delta | | collaboration staff internal activity module | CALM SHELL | CollaborationActivitySlice, WorkspaceDelta | GET /v1/work items/{item id}/activity?thread=internal&before sequence=...<br GET /v1/work items/{item id}/workspace/stream?resume token=... | ADD INTERNAL NOTE | AUTHORITATIVE ENUM | activity.appended<br workspace.delta | | collaboration staff files module | CALM SHELL | CollaborationAttachmentSlice, WorkspaceDelta | GET /v1/work items/{item id}/attachments?visibility=customer\\|internal<br GET /v1/work items/{item id}/workspace/stream?resume token=... | n/a | READ ONLY ATTACHMENT POSTURE | workspace.delta | | collaboration manifest focus jump | CALM SHELL | DecisionBundle, WorkspaceSnapshot, WorkspaceDelta | Manifest experience snapshot and stream surfaces from the northbound contract<br GET /v1/work items/{item id}/workspace/snapshot | MANIFEST ROUTE LOCAL COMMANDS<br REQUEST CUSTOMER INFO | MIXED MANIFEST AND COLLABORATION | manifest experience stream<br workspace.delta | | collaboration customer request list | CLIENT PORTAL SHELL | CustomerRequestListSnapshot | Customer visible request list projection under the collaboration contract | n/a | READ ONLY ENTRY SURFACE | notification.badge<br customer safe list refresh | | collaboration customer request detail | CLIENT PORTAL SHELL | WorkspaceSnapshot, CollaborationActivitySlice, CollaborationAttachmentSlice | Customer visible request detail projection<br GET /v1/work items/{item id}/activity?thread=customer&before sequence=... | RESPOND TO REQUEST INFO<br ADD CUSTOMER COMMENT | AUTHORITATIVE ENUM | activity.appended<br customer safe request refresh | | portal home | CLIENT PORTAL SHELL | ClientPortalWorkspace, ClientTimelineEvent | ClientPortalWorkspace route projection (root home slice) | PORTAL OPEN REQUEST<br PORTAL OPEN HELP CASE | NORMALIZED ACTION FAMILY | role filtered portal refresh<br cross device continuity contract | | portal documents | CLIENT PORTAL SHELL | ClientPortalWorkspace, ClientDocumentRequest, ClientUploadSession | ClientPortalWorkspace route projection (documents slice)<br POST /v1/uploads/sessions | PORTAL START UPLOAD<br PORTAL RETRY UPLOAD<br PORTAL REPLACE DOCUMENT<br PORTAL ATTACH FINALIZED UPLOAD | NORMALIZED ACTION FAMILY | upload session progress<br role filtered portal refresh | | portal approvals | CLIENT PORTAL SHELL | ClientPortalWorkspace, ClientApprovalPack | ClientPortalWorkspace route projection (approvals slice) | PORTAL ACCEPT APPROVAL<br PORTAL DECLINE APPROVAL<br PORTAL ACKNOWLEDGE CHANGE DIGEST | NORMALIZED ACTION FAMILY | approval pack refresh<br cross device continuity contract | | portal onboarding | CLIENT PORTAL SHELL | ClientPortalWorkspace, ClientOnboardingJourney | ClientPortalWorkspace route projection (onboarding slice) | PORTAL SAVE ONBOARDING STEP<br PORTAL ADVANCE ONBOARDING<br PORTAL OPEN SUPPORT | NORMALIZED ACTION FAMILY | journey refresh<br cross device continuity contract | | portal help | CLIENT PORTAL SHELL | ClientPortalWorkspace, PortalHelpRequest | ClientPortalWorkspace route projection (help slice) | CLIENT PORTAL REQUEST HELP | AUTHORITATIVE ENUM | help request refresh<br cross device continuity contract | | governance overview | GOVERNANCE DENSITY SHELL | TenantGovernanceSnapshot | GET /v1/governance/tenants/{tenant id}/overview | GOVERNANCE OPEN QUEUE ITEM | NORMALIZED ACTION FAMILY | durable command receipts<br governance overview refresh | | governance tenant | GOVERNANCE DENSITY SHELL | GovernancePolicySnapshot | GET /v1/governance/tenants/{tenant id}/policy snapshot | GOVERNANCE STAGE TENANT CHANGE<br GOVERNANCE SUBMIT APPROVAL | NORMALIZED ACTION FAMILY | durable command receipts<br policy snapshot refresh | | governance access principals | GOVERNANCE DENSITY SHELL | PrincipalAccessView | GET /v1/governance/tenants/{tenant id}/principals | GOVERNANCE STAGE PRINCIPAL CHANGE | NORMALIZED ACTION FAMILY | durable command receipts<br principal inventory refresh | | governance access roles | GOVERNANCE DENSITY SHELL | RoleTemplateMatrix | GET /v1/governance/tenants/{tenant id}/roles/{role id} | GOVERNANCE STAGE ROLE CHANGE | NORMALIZED ACTION FAMILY | durable command receipts<br role matrix refresh | | governance access simulator | GOVERNANCE DENSITY SHELL | GovernanceAccessSimulation | POST /v1/governance/tenants/{tenant id}/access simulations | RUN ACCESS SIMULATION<br COMMIT SIMULATED GOVERNANCE CHANGE | NORMALIZED ACTION FAMILY | durable command receipts<br simulation result refresh | | governance authority links | GOVERNANCE DENSITY SHELL | AuthorityLinkInventoryItem | GET /v1/governance/tenants/{tenant id}/authority links | GOVERNANCE REPAIR AUTHORITY LINK<br GOVERNANCE REBIND DELEGATION | NORMALIZED ACTION FAMILY | durable command receipts<br authority link inventory refresh | | governance retention policies | GOVERNANCE DENSITY SHELL | RetentionGovernanceFrame | GET /v1/governance/tenants/{tenant id}/retention | GOVERNANCE STAGE RETENTION POLICY CHANGE | NORMALIZED ACTION FAMILY | durable command receipts<br retention frame refresh | | governance retention legal holds | GOVERNANCE DENSITY SHELL | RetentionGovernanceFrame | GET /v1/governance/tenants/{tenant id}/retention | GOVERNANCE OPEN LEGAL HOLD<br GOVERNANCE RELEASE LEGAL HOLD | NORMALIZED ACTION FAMILY | durable command receipts<br retention frame refresh | | governance retention erasure | GOVERNANCE DENSITY SHELL | RetentionGovernanceFrame | GET /v1/governance/tenants/{tenant id}/retention | GOVERNANCE STAGE ERASURE DECISION<br GOVERNANCE APPROVE ERASURE | NORMALIZED ACTION FAMILY | durable command receipts<br retention frame refresh | | governance audit | GOVERNANCE DENSITY SHELL | AuditInvestigationFrame | GET /v1/governance/tenants/{tenant id}/audit investigations | GOVERNANCE EXPORT AUDIT SLICE | NORMALIZED ACTION FAMILY | append only event refresh<br durable command receipts | | native primary manifest scene | CALM SHELL | DecisionBundle, ExperienceCursor, WorkspaceSnapshot (linked focus when present) | Manifest experience snapshot<br Manifest experience stream<br Local cache hydration envelope | TOGGLE SIDEBAR<br TOGGLE INSPECTOR<br FOCUS PRIMARY CANVAS<br OPEN COMPARE WINDOW<br REFRESH CURRENT SCENE | LOCAL NATIVE COMMAND | snapshot hydration<br stream resume<br manifest delta application | | native primary work item scene | CALM SHELL | WorkspaceSnapshot, WorkspaceDelta, WorkspaceCursor | Workspace snapshot<br Workspace stream<br Local cache hydration envelope | TOGGLE SIDEBAR<br TOGGLE INSPECTOR<br FOCUS SIDEBAR<br FOCUS PRIMARY CANVAS<br OPEN AUDIT WINDOW<br OPEN AUTHORITY REVIEW WINDOW<br REFRESH CURRENT SCENE | LOCAL NATIVE COMMAND | snapshot hydration<br stream resume<br workspace delta application | | native secondary compare window | CALM SHELL | DecisionBundle comparison slice, preview subject ref or null | Parent scene export to detached compare window<br Local cached compare payload | FOCUS PRIMARY CANVAS<br CLOSE SECONDARY WINDOW<br COPY IDENTIFIERS | LOCAL NATIVE COMMAND | parent scene refresh<br detached window restore payload | | native secondary audit window | CALM SHELL | Audit slice, preview subject ref or null | Parent scene audit export<br Local cached audit payload | FOCUS PRIMARY CANVAS<br CLOSE SECONDARY WINDOW<br COPY IDENTIFIERS | LOCAL NATIVE COMMAND | parent scene refresh<br detached window restore payload | | native secondary filing packet window | CALM SHELL | Packet preview slice, preview subject ref or null | Parent scene packet export<br Local cached packet payload | FOCUS PRIMARY CANVAS<br CLOSE SECONDARY WINDOW<br COPY IDENTIFIERS | LOCAL NATIVE COMMAND | parent scene refresh<br detached window restore payload | | native secondary authority review window | CALM SHELL | Authority interaction slice, preview subject ref or null | Parent scene authority review export<br Local cached authority payload | FOCUS PRIMARY CANVAS<br CLOSE SECONDARY WINDOW<br COPY IDENTIFIERS | LOCAL NATIVE COMMAND | parent scene refresh<br detached window restore payload | | native auth handoff session | CALM SHELL | Return target envelope, pending authority task binding | ASWebAuthenticationSession callback<br Parent scene refresh after settlement | BEGIN ASWEB AUTH SESSION<br RESUME PARENT SCENE | LOCAL NATIVE AND AUTH | auth callback<br parent scene refresh |",
+      "excerpt": "| Route / Scene | Shell | Read models | Read surfaces | Commands | Command semantics | Streams / live updates | | | | | | | | | | collaboration staff inbox | CALM SHELL | WorkInbo…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    }
+  ],
+  "schemaIdentityOrNull": null,
+  "schemaFields": [],
+  "samplePointers": [],
+  "sampleIdentityOrNull": null,
+  "bindingIdentityOrNull": null,
+  "validatorIdentityOrNull": null,
+  "driftIdentityOrNull": null,
+  "headerStrip": {
+    "kind": "PROSE",
+    "badgeLabel": "Support Documentation",
+    "metricPairs": [
+      {
+        "label": "Headings",
+        "value": "3"
+      },
+      {
+        "label": "Schemas",
+        "value": "0"
+      },
+      {
+        "label": "Tasks",
+        "value": "0"
+      }
+    ]
+  },
+  "relationships": {
+    "schemas": [],
+    "samples": [],
+    "bindings": [],
+    "validators": [],
+    "docs": [],
+    "tasks": []
+  },
+  "sourceTruthStack": {
+    "file": [
+      "docs/analysis/14_cross_surface_read_models_commands_and_streams.md"
+    ],
+    "headings": [
+      "14 Cross-Surface Read Models Commands And Streams",
+      "Shared Command Law",
+      "Route / Scene Binding Matrix"
+    ],
+    "schemaRefs": [],
+    "sampleRefs": [],
+    "bindingRefs": [],
+    "validatorRefs": [],
+    "driftRefs": [],
+    "taskRefs": []
+  },
+  "fieldCrosslinks": [],
+  "taskRefs": []
+}

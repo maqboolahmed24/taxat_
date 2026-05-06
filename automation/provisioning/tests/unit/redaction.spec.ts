@@ -8,10 +8,7 @@ import {
 
 test("redacts plaintext secrets, bearer tokens, and email addresses", () => {
   const rules = createDefaultRedactionRules(["client-secret-123"]);
-  const result = redactText(
-    "client-secret-123 operator@example.com Bearer abc.def",
-    rules,
-  );
+  const result = redactText("client-secret-123 operator@example.com Bearer abc.def", rules);
 
   expect(result.value).not.toContain("client-secret-123");
   expect(result.value).not.toContain("operator@example.com");

@@ -1,0 +1,727 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/telemetry_resource.schema.json",
+  "title": "TelemetryResource",
+  "description": "Shared observability resource identity carried across traces, metrics, logs, and correlated audit evidence. This contract freezes the runtime service/build/deployment tuple used to join signals safely.",
+  "type": "object",
+  "required": [
+    "resource_id",
+    "service_name",
+    "environment_ref",
+    "build_ref",
+    "deployment_identity"
+  ],
+  "properties": {
+    "resource_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "service_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "build_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deployment_identity": {
+      "type": "object",
+      "required": [
+        "deployment_ref",
+        "instance_ref",
+        "started_at"
+      ],
+      "properties": {
+        "deployment_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "instance_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "ended_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "resource_attributes": {
+      "$ref": "#/$defs/attributeMap"
+    }
+  },
+  "$defs": {
+    "resourceRef": {
+      "type": "string",
+      "minLength": 1
+    },
+    "attributeValue": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "attributeMap": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/attributeValue"
+      }
+    },
+    "correlationContext": {
+      "type": "object",
+      "properties": {
+        "tenant_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "client_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "manifest_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "root_manifest_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "parent_manifest_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "continuation_of_manifest_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "replay_of_manifest_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "nightly_batch_run_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "nightly_window_key": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "selection_disposition": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "EXECUTE_NEW_MANIFEST",
+            "EXECUTE_CONTINUATION_CHILD",
+            "REUSE_EXISTING_TERMINAL_RESULT",
+            "DEFER_ACTIVE_ATTEMPT",
+            "DEFER_RETRY_WINDOW",
+            "ESCALATE_ONLY",
+            "SKIP_INELIGIBLE",
+            null
+          ]
+        },
+        "trace_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "span_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "run_kind": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "INTERACTIVE",
+            "NIGHTLY",
+            "BACKFILL",
+            "REPLAY",
+            "REMEDIATION",
+            "AMENDMENT",
+            "MIGRATION",
+            null
+          ]
+        },
+        "mode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "COMPLIANCE",
+            "ANALYSIS",
+            null
+          ]
+        },
+        "replay_class": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "STANDARD_REPLAY",
+            "AUDIT_REPLAY",
+            "COUNTERFACTUAL_ANALYSIS",
+            null
+          ]
+        },
+        "comparison_mode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "EXACT_HASH_MATCH",
+            "COUNTERFACTUAL_DECLARED",
+            "LIMITED_HISTORICAL_COMPARISON",
+            "BASIS_INCOMPLETE",
+            "BASIS_CORRUPT",
+            null
+          ]
+        },
+        "basis_validation_state": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "VALID",
+            "RETENTION_LIMITED",
+            "MISSING_DEPENDENCY",
+            "CORRUPT",
+            "SCHEMA_INCOMPATIBLE",
+            "BUILD_UNAVAILABLE",
+            null
+          ]
+        },
+        "idempotency_key": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "access_binding_hash": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "continuation_basis": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "input_inheritance_mode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "FRESH_CHILD_COLLECTION",
+            "REPLAY_EXACT",
+            "RECOVERY_EXACT",
+            "HISTORICAL_EXPLICIT",
+            null
+          ]
+        },
+        "config_inheritance_mode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "FRESH_CHILD_RESOLUTION",
+            "REPLAY_EXACT",
+            "RECOVERY_EXACT",
+            "HISTORICAL_EXPLICIT",
+            null
+          ]
+        },
+        "gate_code": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "workflow_item_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "task_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "investigation_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "compensation_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "accepted_risk_approval_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "submission_record_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "drift_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "amendment_case_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "amendment_bundle_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "baseline_envelope_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "retroactive_impact_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "authority_operation_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "error_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "retention_class": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "service_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "environment_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "code_build_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "expected_execution_basis_hash": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "actual_execution_basis_hash": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "expected_deterministic_outcome_hash": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "actual_deterministic_outcome_hash": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "manifest_lineage_trace_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "manifest_branch_decision": {
+          "$ref": "https://taxat.dev/schemas/manifest_branch_decision_contract.schema.json"
+        },
+        "manifest_start_claim": {
+          "$ref": "https://taxat.dev/schemas/manifest_start_claim_contract.schema.json"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "span_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "span_id"
+            ]
+          },
+          "then": {
+            "properties": {
+              "trace_id": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "trace_id"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "nightly_batch_run_ref": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "nightly_batch_run_ref"
+            ]
+          },
+          "then": {
+            "properties": {
+              "nightly_window_key": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "nightly_window_key"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "nightly_window_key": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "nightly_window_key"
+            ]
+          },
+          "then": {
+            "properties": {
+              "nightly_batch_run_ref": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "nightly_batch_run_ref"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "selection_disposition": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "selection_disposition"
+            ]
+          },
+          "then": {
+            "properties": {
+              "nightly_batch_run_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "nightly_window_key": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "nightly_batch_run_ref",
+              "nightly_window_key"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "comparison_mode": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "comparison_mode"
+            ]
+          },
+          "then": {
+            "properties": {
+              "replay_class": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "replay_class"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "basis_validation_state": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "basis_validation_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "replay_class": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "replay_class"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "expected_execution_basis_hash": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "expected_execution_basis_hash"
+            ]
+          },
+          "then": {
+            "properties": {
+              "replay_class": {
+                "type": "string"
+              },
+              "actual_execution_basis_hash": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "replay_class",
+              "actual_execution_basis_hash"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "actual_execution_basis_hash": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "actual_execution_basis_hash"
+            ]
+          },
+          "then": {
+            "properties": {
+              "replay_class": {
+                "type": "string"
+              },
+              "expected_execution_basis_hash": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "replay_class",
+              "expected_execution_basis_hash"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "expected_deterministic_outcome_hash": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "expected_deterministic_outcome_hash"
+            ]
+          },
+          "then": {
+            "properties": {
+              "replay_class": {
+                "type": "string"
+              },
+              "actual_deterministic_outcome_hash": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "replay_class",
+              "actual_deterministic_outcome_hash"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "actual_deterministic_outcome_hash": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "actual_deterministic_outcome_hash"
+            ]
+          },
+          "then": {
+            "properties": {
+              "replay_class": {
+                "type": "string"
+              },
+              "expected_deterministic_outcome_hash": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "replay_class",
+              "expected_deterministic_outcome_hash"
+            ]
+          }
+        }
+      ],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

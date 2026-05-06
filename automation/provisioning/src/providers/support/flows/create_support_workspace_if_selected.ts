@@ -12,10 +12,7 @@ import {
   assertProviderFlowAllowed,
   createDefaultProviderRegistry,
 } from "../../../core/provider_registry.js";
-import {
-  assertLiveProviderGate,
-  type RunContext,
-} from "../../../core/run_context.js";
+import { assertLiveProviderGate, type RunContext } from "../../../core/run_context.js";
 import {
   createPendingStep,
   transitionStep,
@@ -42,19 +39,14 @@ export const SUPPORT_STEP_IDS = {
   persistArtifacts: "support.control-plane.persist-artifacts",
 } as const;
 
-export type SupportSelectionStatus =
-  | "NOT_SELECTED"
-  | "SELECTED_WITH_GAPS"
-  | "SELECTED";
+export type SupportSelectionStatus = "NOT_SELECTED" | "SELECTED_WITH_GAPS" | "SELECTED";
 
 export type SupportScenarioRef =
   | "contextual_request_help"
   | "general_help_route"
   | "support_acknowledgement";
 
-export type SupportSelectionOverride =
-  | "NOT_SELECTED"
-  | "SELECTED_WITH_GAPS";
+export type SupportSelectionOverride = "NOT_SELECTED" | "SELECTED_WITH_GAPS";
 
 export type SupportFlowOutcome =
   | "SUPPORT_INTEGRATION_NOT_SELECTED"
@@ -68,12 +60,8 @@ export interface SourceRef {
 
 export interface SupportSelectionProfile {
   selection_status: SupportSelectionStatus;
-  decision_status:
-    | "OPTIONAL_VENDOR_SELECTION_NOT_RESOLVED"
-    | "SELECTED_PENDING_PROCUREMENT";
-  selected_vendor_adapter_or_null:
-    | typeof SUPPORT_PROVIDER_VENDOR_ADAPTER
-    | null;
+  decision_status: "OPTIONAL_VENDOR_SELECTION_NOT_RESOLVED" | "SELECTED_PENDING_PROCUREMENT";
+  selected_vendor_adapter_or_null: typeof SUPPORT_PROVIDER_VENDOR_ADAPTER | null;
   selected_vendor_label_or_null: string | null;
   support_mode_label: "Not Selected" | "Selected with Gaps" | "Selected";
   provider_docs_urls: string[];
@@ -91,21 +79,15 @@ export interface SupportWorkspaceSelectionRecord {
   workspace_id: string;
   operator_identity_alias: string;
   selection_status: SupportSelectionStatus;
-  decision_status:
-    | "OPTIONAL_VENDOR_SELECTION_NOT_RESOLVED"
-    | "SELECTED_PENDING_PROCUREMENT";
-  selected_vendor_adapter_or_null:
-    | typeof SUPPORT_PROVIDER_VENDOR_ADAPTER
-    | null;
+  decision_status: "OPTIONAL_VENDOR_SELECTION_NOT_RESOLVED" | "SELECTED_PENDING_PROCUREMENT";
+  selected_vendor_adapter_or_null: typeof SUPPORT_PROVIDER_VENDOR_ADAPTER | null;
   selected_vendor_label_or_null: string | null;
   future_default_vendor_adapter_or_null: typeof SUPPORT_PROVIDER_VENDOR_ADAPTER;
   environment_scope: ["staging", "production"];
   first_party_truth_statement: string;
   support_channel_policy_ref: "config/support/support_channel_policy.json";
-  portal_help_mapping_ref:
-    "config/support/portal_help_to_external_ticket_mapping.json";
-  support_webhook_contract_ref:
-    "config/support/support_webhook_endpoint_contract.json";
+  portal_help_mapping_ref: "config/support/portal_help_to_external_ticket_mapping.json";
+  support_webhook_contract_ref: "config/support/support_webhook_endpoint_contract.json";
   provider_docs_urls: string[];
   source_refs: SourceRef[];
   selection_notes: string[];
@@ -120,9 +102,7 @@ export interface SupportChannelPolicyRow {
   primary_first_party_channel: string;
   recommended_channel_label: string;
   restate_required: false;
-  external_projection_state:
-    | "NOT_SELECTED"
-    | "SELECTED_PENDING_FIELD_BINDING";
+  external_projection_state: "NOT_SELECTED" | "SELECTED_PENDING_FIELD_BINDING";
   allowed_external_payload_classes: string[];
   prohibited_external_payload_classes: string[];
   source_refs: SourceRef[];
@@ -133,9 +113,7 @@ export interface SupportChannelPolicy {
   schema_version: "1.0";
   policy_id: "support_channel_policy";
   selection_status: SupportSelectionStatus;
-  selected_vendor_adapter_or_null:
-    | typeof SUPPORT_PROVIDER_VENDOR_ADAPTER
-    | null;
+  selected_vendor_adapter_or_null: typeof SUPPORT_PROVIDER_VENDOR_ADAPTER | null;
   truth_boundary_statement: string;
   channel_rows: SupportChannelPolicyRow[];
   source_refs: SourceRef[];
@@ -151,10 +129,7 @@ export interface PortalHelpFieldMappingRow {
     | "PUBLIC_COMMENT_SUMMARY"
     | "CUSTOM_FIELD"
     | "INTERNAL_ONLY_FORBIDDEN";
-  privacy_class:
-    | "CUSTOMER_SAFE_CONTEXT"
-    | "CUSTOMER_SAFE_SUMMARY"
-    | "INTERNAL_ONLY";
+  privacy_class: "CUSTOMER_SAFE_CONTEXT" | "CUSTOMER_SAFE_SUMMARY" | "INTERNAL_ONLY";
   required_when: string;
   notes: string[];
 }
@@ -162,15 +137,11 @@ export interface PortalHelpFieldMappingRow {
 export interface PortalHelpMappingScenario {
   scenario_ref: SupportScenarioRef;
   scenario_label: string;
-  activation_state:
-    | "FROZEN_NOT_ACTIVE"
-    | "SELECTED_PENDING_FIELD_BINDING";
+  activation_state: "FROZEN_NOT_ACTIVE" | "SELECTED_PENDING_FIELD_BINDING";
   required_portal_fields: string[];
   field_rows: PortalHelpFieldMappingRow[];
   prohibited_source_fields: string[];
-  mirror_back_policy:
-    | "REFERENCE_AND_STATUS_METADATA_ONLY"
-    | "NO_EXTERNAL_WRITE";
+  mirror_back_policy: "REFERENCE_AND_STATUS_METADATA_ONLY" | "NO_EXTERNAL_WRITE";
   source_refs: SourceRef[];
   notes: string[];
 }
@@ -179,9 +150,7 @@ export interface PortalHelpToExternalTicketMapping {
   schema_version: "1.0";
   mapping_id: "portal_help_to_external_ticket_mapping";
   selection_status: SupportSelectionStatus;
-  selected_vendor_adapter_or_null:
-    | typeof SUPPORT_PROVIDER_VENDOR_ADAPTER
-    | null;
+  selected_vendor_adapter_or_null: typeof SUPPORT_PROVIDER_VENDOR_ADAPTER | null;
   truth_boundary_statement: string;
   mapping_rows: PortalHelpMappingScenario[];
   source_refs: SourceRef[];
@@ -191,13 +160,9 @@ export interface PortalHelpToExternalTicketMapping {
 
 export interface SupportWebhookEndpointRow {
   environment_ref: "staging" | "production";
-  activation_state:
-    | "NOT_SELECTED"
-    | "SELECTED_PENDING_SECRET_BINDING";
+  activation_state: "NOT_SELECTED" | "SELECTED_PENDING_SECRET_BINDING";
   callback_url_ref_or_null: string | null;
-  authentication_posture:
-    | "SIGNING_SECRET_AND_BASIC_AUTH_IF_SELECTED"
-    | "NOT_ACTIVE";
+  authentication_posture: "SIGNING_SECRET_AND_BASIC_AUTH_IF_SELECTED" | "NOT_ACTIVE";
   idempotency_key_fields: string[];
   allowed_mirror_updates: string[];
   prohibited_product_truth_mutations: string[];
@@ -209,9 +174,7 @@ export interface SupportWebhookEndpointContract {
   schema_version: "1.0";
   contract_id: "support_webhook_endpoint_contract";
   selection_status: SupportSelectionStatus;
-  selected_vendor_adapter_or_null:
-    | typeof SUPPORT_PROVIDER_VENDOR_ADAPTER
-    | null;
+  selected_vendor_adapter_or_null: typeof SUPPORT_PROVIDER_VENDOR_ADAPTER | null;
   truth_boundary_statement: string;
   webhook_rows: SupportWebhookEndpointRow[];
   source_refs: SourceRef[];
@@ -222,9 +185,7 @@ export interface SupportWebhookEndpointContract {
 export interface SupportFieldMappingTemplateRow {
   scenario_ref: SupportScenarioRef;
   scenario_label: string;
-  activation_state:
-    | "FROZEN_NOT_ACTIVE"
-    | "SELECTED_PENDING_FIELD_BINDING";
+  activation_state: "FROZEN_NOT_ACTIVE" | "SELECTED_PENDING_FIELD_BINDING";
   field_rows: PortalHelpFieldMappingRow[];
   source_refs: SourceRef[];
   notes: string[];
@@ -239,9 +200,7 @@ export interface SupportFieldMappingTemplate {
   flow_id: typeof SUPPORT_FLOW_ID;
   selection_record_ref: "data/provisioning/support_workspace_selection_record.template.json";
   selection_status: SupportSelectionStatus;
-  selected_vendor_adapter_or_null:
-    | typeof SUPPORT_PROVIDER_VENDOR_ADAPTER
-    | null;
+  selected_vendor_adapter_or_null: typeof SUPPORT_PROVIDER_VENDOR_ADAPTER | null;
   scenario_rows: SupportFieldMappingTemplateRow[];
   source_refs: SourceRef[];
   typed_gaps: string[];
@@ -282,9 +241,7 @@ export interface SupportContextMappingBoardViewModel {
   support_mode_label: "Not Selected" | "Selected with Gaps" | "Selected";
   selected_vendor_label_or_null: string | null;
   environment_label: string;
-  selection_posture:
-    | "FIRST_PARTY_ONLY_UNTIL_VENDOR_SELECTION"
-    | "SELECTED_PENDING_VENDOR_BINDING";
+  selection_posture: "FIRST_PARTY_ONLY_UNTIL_VENDOR_SELECTION" | "SELECTED_PENDING_VENDOR_BINDING";
   scenarios: SupportContextBoardScenario[];
   truth_boundary_statement: string;
   notes: string[];
@@ -414,8 +371,7 @@ function supportSourceRefs(): SourceRef[] {
         "Every contextual help request must allocate a durable PortalHelpRequest and keep linked request lineage when applicable.",
     },
     {
-      source_ref:
-        "Algorithm/customer_client_portal_experience_contract.md::L197[Help]",
+      source_ref: "Algorithm/customer_client_portal_experience_contract.md::L197[Help]",
       rationale:
         "The Help route is bounded, contextual, and explicitly forbids asking the client to restate already-governed case context.",
     },
@@ -500,10 +456,8 @@ export function createRecommendedSupportWorkspaceSelectionRecord(
     environment_scope: ["staging", "production"],
     first_party_truth_statement: selectionTruthBoundary(),
     support_channel_policy_ref: "config/support/support_channel_policy.json",
-    portal_help_mapping_ref:
-      "config/support/portal_help_to_external_ticket_mapping.json",
-    support_webhook_contract_ref:
-      "config/support/support_webhook_endpoint_contract.json",
+    portal_help_mapping_ref: "config/support/portal_help_to_external_ticket_mapping.json",
+    support_webhook_contract_ref: "config/support/support_webhook_endpoint_contract.json",
     provider_docs_urls: profile.provider_docs_urls,
     source_refs: supportSourceRefs(),
     selection_notes: profile.notes,
@@ -534,9 +488,7 @@ function activationStateFor(
 function externalProjectionStateFor(
   selectionStatus: SupportSelectionStatus,
 ): "NOT_SELECTED" | "SELECTED_PENDING_FIELD_BINDING" {
-  return selectionStatus === "NOT_SELECTED"
-    ? "NOT_SELECTED"
-    : "SELECTED_PENDING_FIELD_BINDING";
+  return selectionStatus === "NOT_SELECTED" ? "NOT_SELECTED" : "SELECTED_PENDING_FIELD_BINDING";
 }
 
 export function createRecommendedSupportChannelPolicy(
@@ -558,9 +510,7 @@ export function createRecommendedSupportChannelPolicy(
         primary_first_party_channel: "PORTAL_HELP_ROUTE_WITH_LINKED_REQUEST_INFO",
         recommended_channel_label: "Portal contextual help",
         restate_required: false,
-        external_projection_state: externalProjectionStateFor(
-          profile.selection_status,
-        ),
+        external_projection_state: externalProjectionStateFor(profile.selection_status),
         allowed_external_payload_classes: [
           "CUSTOMER_SAFE_ROUTE_CONTEXT",
           "REQUEST_INFO_LINEAGE",
@@ -585,9 +535,7 @@ export function createRecommendedSupportChannelPolicy(
         primary_first_party_channel: "PORTAL_HELP_ROUTE_GENERAL",
         recommended_channel_label: "Portal general help",
         restate_required: false,
-        external_projection_state: externalProjectionStateFor(
-          profile.selection_status,
-        ),
+        external_projection_state: externalProjectionStateFor(profile.selection_status),
         allowed_external_payload_classes: [
           "CUSTOMER_SAFE_ROUTE_CONTEXT",
           "CASE_CONTEXT_SUMMARY",
@@ -611,13 +559,8 @@ export function createRecommendedSupportChannelPolicy(
         primary_first_party_channel: "PRODUCT_OWNED_ACKNOWLEDGEMENT",
         recommended_channel_label: "Portal help acknowledgement",
         restate_required: false,
-        external_projection_state: externalProjectionStateFor(
-          profile.selection_status,
-        ),
-        allowed_external_payload_classes: [
-          "HELP_REQUEST_REFERENCE",
-          "ACKNOWLEDGEMENT_METADATA",
-        ],
+        external_projection_state: externalProjectionStateFor(profile.selection_status),
+        allowed_external_payload_classes: ["HELP_REQUEST_REFERENCE", "ACKNOWLEDGEMENT_METADATA"],
         prohibited_external_payload_classes: [
           "FREE_FORM_INTERNAL_THREADING",
           "MASKED_EVIDENCE",
@@ -637,9 +580,7 @@ export function createRecommendedSupportChannelPolicy(
   };
 }
 
-function requiredPortalFieldsFor(
-  scenario: SupportScenarioRef,
-): string[] {
+function requiredPortalFieldsFor(scenario: SupportScenarioRef): string[] {
   if (scenario === "support_acknowledgement") {
     return [
       "help_request_id",
@@ -673,9 +614,7 @@ function requiredPortalFieldsFor(
   ];
 }
 
-function fieldRowsFor(
-  scenario: SupportScenarioRef,
-): PortalHelpFieldMappingRow[] {
+function fieldRowsFor(scenario: SupportScenarioRef): PortalHelpFieldMappingRow[] {
   const common: PortalHelpFieldMappingRow[] = [
     {
       source_field: "help_request_id",
@@ -900,11 +839,7 @@ export function createRecommendedSupportWebhookEndpointContract(
         profile.selection_status === "NOT_SELECTED"
           ? "NOT_ACTIVE"
           : "SIGNING_SECRET_AND_BASIC_AUTH_IF_SELECTED",
-      idempotency_key_fields: [
-        "external_ticket_id",
-        "external_event_id",
-        "help_request_id",
-      ],
+      idempotency_key_fields: ["external_ticket_id", "external_event_id", "help_request_id"],
       allowed_mirror_updates: [
         "EXTERNAL_TICKET_REFERENCE_BOUND",
         "EXTERNAL_STATUS_METADATA_SYNC",
@@ -944,8 +879,7 @@ export function createRecommendedSupportFieldMappingTemplate(
     provider_display_name: SUPPORT_PROVIDER_DISPLAY_NAME,
     run_id: runContext.runId,
     flow_id: SUPPORT_FLOW_ID,
-    selection_record_ref:
-      "data/provisioning/support_workspace_selection_record.template.json",
+    selection_record_ref: "data/provisioning/support_workspace_selection_record.template.json",
     selection_status: profile.selection_status,
     selected_vendor_adapter_or_null: profile.selected_vendor_adapter_or_null,
     scenario_rows: mapping.mapping_rows.map((row) => ({
@@ -1042,10 +976,7 @@ export function createSupportContextMappingBoardViewModel(
           "Internal-only notes, masked evidence, and authority payloads remain excluded.",
           "restate_required = false remains product law whether or not a vendor is later selected.",
         ],
-        inspector_notes: [
-          ...row.notes,
-          ...mappingScenario.notes,
-        ],
+        inspector_notes: [...row.notes, ...mappingScenario.notes],
         source_refs: row.source_refs,
       };
     }),
@@ -1074,9 +1005,7 @@ export function validateSupportWorkspaceSelectionRecord(
   }
 }
 
-export function validateSupportChannelPolicy(
-  channelPolicy: SupportChannelPolicy,
-): void {
+export function validateSupportChannelPolicy(channelPolicy: SupportChannelPolicy): void {
   if (channelPolicy.channel_rows.length !== 3) {
     throw new Error("Support channel policy must publish exactly three scenario rows.");
   }
@@ -1085,9 +1014,7 @@ export function validateSupportChannelPolicy(
   }
 }
 
-export function validatePortalHelpMapping(
-  mapping: PortalHelpToExternalTicketMapping,
-): void {
+export function validatePortalHelpMapping(mapping: PortalHelpToExternalTicketMapping): void {
   const contextual = mapping.mapping_rows.find(
     (row) => row.scenario_ref === "contextual_request_help",
   );
@@ -1128,9 +1055,7 @@ export function validateSupportWebhookEndpointContract(
   }
 }
 
-export function validateSupportFieldMappingTemplate(
-  template: SupportFieldMappingTemplate,
-): void {
+export function validateSupportFieldMappingTemplate(template: SupportFieldMappingTemplate): void {
   if (template.scenario_rows.length !== 3) {
     throw new Error("Support field mapping template must cover three canonical scenarios.");
   }
@@ -1156,10 +1081,7 @@ export function createDefaultSupportProviderEntryUrls(): SupportProviderEntryUrl
 }
 
 function evidenceManifestPathFor(selectionRecordPath: string): string {
-  return path.join(
-    path.dirname(selectionRecordPath),
-    "support_selection_evidence_manifest.json",
-  );
+  return path.join(path.dirname(selectionRecordPath), "support_selection_evidence_manifest.json");
 }
 
 async function persistJsonArtifact(filePath: string, payload: unknown): Promise<void> {
@@ -1172,9 +1094,7 @@ function locateSelector(page: Page, descriptor: SelectorDescriptor): Locator {
     case "ROLE":
       return page.getByRole(
         descriptor.value as Parameters<Page["getByRole"]>[0],
-        descriptor.accessibleName
-          ? { name: descriptor.accessibleName, exact: true }
-          : undefined,
+        descriptor.accessibleName ? { name: descriptor.accessibleName, exact: true } : undefined,
       );
     case "LABEL":
       return page.getByLabel(descriptor.value, { exact: true });
@@ -1218,13 +1138,10 @@ async function captureNoteEvidence(
   });
 }
 
-async function detectFixtureState(
-  page: Page,
-): Promise<SupportFixtureState> {
+async function detectFixtureState(page: Page): Promise<SupportFixtureState> {
   const scenario = (await page.locator("body").getAttribute("data-scenario")) ?? "not-selected";
   return {
-    selection_override:
-      scenario === "selected-with-gaps" ? "SELECTED_WITH_GAPS" : "NOT_SELECTED",
+    selection_override: scenario === "selected-with-gaps" ? "SELECTED_WITH_GAPS" : "NOT_SELECTED",
   };
 }
 
@@ -1303,8 +1220,7 @@ export async function createSupportWorkspaceIfSelected(
   );
 
   const fixtureState = await detectFixtureState(options.page);
-  const selectionOverride =
-    options.selectionOverride ?? fixtureState.selection_override;
+  const selectionOverride = options.selectionOverride ?? fixtureState.selection_override;
   const profile = resolveSelectionProfile(selectionOverride);
 
   if (profile.selection_status !== "NOT_SELECTED") {
@@ -1316,19 +1232,13 @@ export async function createSupportWorkspaceIfSelected(
     selectionOverride,
   );
   const channelPolicy = createRecommendedSupportChannelPolicy(selectionOverride);
-  const portalHelpMapping = createRecommendedPortalHelpToExternalTicketMapping(
-    selectionOverride,
-  );
-  const webhookContract = createRecommendedSupportWebhookEndpointContract(
-    selectionOverride,
-  );
+  const portalHelpMapping = createRecommendedPortalHelpToExternalTicketMapping(selectionOverride);
+  const webhookContract = createRecommendedSupportWebhookEndpointContract(selectionOverride);
   const fieldMappingTemplate = createRecommendedSupportFieldMappingTemplate(
     options.runContext,
     selectionOverride,
   );
-  const boardViewModel = createSupportContextMappingBoardViewModel(
-    selectionOverride,
-  );
+  const boardViewModel = createSupportContextMappingBoardViewModel(selectionOverride);
 
   validateSupportWorkspaceSelectionRecord(selectionRecord);
   validateSupportChannelPolicy(channelPolicy);
@@ -1337,11 +1247,7 @@ export async function createSupportWorkspaceIfSelected(
   validateSupportFieldMappingTemplate(fieldMappingTemplate);
   assertSupportArtifactsSanitized(selectionRecord, fieldMappingTemplate);
 
-  steps[1] = transitionStep(
-    steps[1]!,
-    "RUNNING",
-    "Recording explicit support-selection posture.",
-  );
+  steps[1] = transitionStep(steps[1]!, "RUNNING", "Recording explicit support-selection posture.");
   steps[1] = transitionStep(
     steps[1]!,
     "SUCCEEDED",

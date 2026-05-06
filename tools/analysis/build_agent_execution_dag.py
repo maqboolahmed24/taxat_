@@ -24,32 +24,18 @@ CHECKLIST_PATH = PROMPT_DIR / "Checklist.md"
 DEPENDENCY_REGISTER_DOC_PATH = (
     DOCS_ANALYSIS_DIR / "18_provisioning_feasibility_and_browser_automation_strategy.md"
 )
-PACKAGE_BOUNDARY_DOC_PATH = (
-    DOCS_ARCH_DIR / "monorepo-package-boundaries-and-team-ownership-map.md"
-)
+PACKAGE_BOUNDARY_DOC_PATH = DOCS_ARCH_DIR / "monorepo-package-boundaries-and-team-ownership-map.md"
 PACKAGE_TASK_MAP_PATH = DATA_ANALYSIS_DIR / "later_task_to_package_map.json"
 
 ADR_PRIMARY_STACK_PATH = DOCS_ARCH_ADR_DIR / "ADR-001-primary-implementation-stack.md"
-ADR_STORAGE_EVENTING_PATH = (
-    DOCS_ARCH_ADR_DIR / "ADR-002-storage-and-eventing-topology.md"
-)
-ADR_IDENTITY_PATH = (
-    DOCS_ARCH_ADR_DIR / "ADR-003-identity-step-up-and-session-model.md"
-)
-ADR_AUTHORITY_PATH = (
-    DOCS_ARCH_ADR_DIR / "ADR-004-authority-integration-boundary.md"
-)
-ADR_PROJECTION_PATH = (
-    DOCS_ARCH_ADR_DIR / "ADR-005-read-model-projection-strategy.md"
-)
+ADR_STORAGE_EVENTING_PATH = DOCS_ARCH_ADR_DIR / "ADR-002-storage-and-eventing-topology.md"
+ADR_IDENTITY_PATH = DOCS_ARCH_ADR_DIR / "ADR-003-identity-step-up-and-session-model.md"
+ADR_AUTHORITY_PATH = DOCS_ARCH_ADR_DIR / "ADR-004-authority-integration-boundary.md"
+ADR_PROJECTION_PATH = DOCS_ARCH_ADR_DIR / "ADR-005-read-model-projection-strategy.md"
 ADR_WEB_PATH = DOCS_ARCH_ADR_DIR / "ADR-006-web-frontend-topology.md"
 ADR_NATIVE_PATH = DOCS_ARCH_ADR_DIR / "ADR-007-native-macos-delivery-strategy.md"
-ADR_TESTING_PATH = (
-    DOCS_ARCH_ADR_DIR / "ADR-008-testing-determinism-and-replay-strategy.md"
-)
-ADR_RELEASE_PATH = (
-    DOCS_ARCH_ADR_DIR / "ADR-009-release-evidence-and-migration-strategy.md"
-)
+ADR_TESTING_PATH = DOCS_ARCH_ADR_DIR / "ADR-008-testing-determinism-and-replay-strategy.md"
+ADR_RELEASE_PATH = DOCS_ARCH_ADR_DIR / "ADR-009-release-evidence-and-migration-strategy.md"
 
 DOC_PATH = DOCS_ANALYSIS_DIR / "agent_execution_dag.md"
 DAG_PATH = DATA_ANALYSIS_DIR / "agent_execution_dag.json"
@@ -61,9 +47,7 @@ MERMAID_PATH = DIAGRAMS_ANALYSIS_DIR / "agent_execution_dag.mmd"
 
 TODAY = "2026-04-18"
 TASK_RE = re.compile(r"- \[([ X-])\] `(pc_\d+)` ([^ ]+) ")
-PARALLEL_TRACK_RE = re.compile(
-    r"phase_(\d{2})_parallel_wave_(\d{2})_track_(.+?)_(\d{3})_(.+)"
-)
+PARALLEL_TRACK_RE = re.compile(r"phase_(\d{2})_parallel_wave_(\d{2})_track_(.+?)_(\d{3})_(.+)")
 SEQUENTIAL_RE = re.compile(r"phase_(\d{2})_seq_(\d{3})_(.+)")
 HEADING_RE = re.compile(r"^(#{2,4})\s+(.*)$")
 
@@ -175,9 +159,7 @@ def md_escape(value: Any) -> str:
 def markdown_table(headers: list[str], rows: list[list[Any]]) -> str:
     header_line = "| " + " | ".join(headers) + " |"
     divider_line = "| " + " | ".join("---" for _ in headers) + " |"
-    body_lines = [
-        "| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows
-    ]
+    body_lines = ["| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows]
     return "\n".join([header_line, divider_line, *body_lines])
 
 
@@ -275,7 +257,9 @@ def build_task_package_lookup() -> dict[str, dict[str, Any]]:
     return {row["task_id"]: row for row in payload["rows"]}
 
 
-def build_citation(ref: str, source_file: str, logical_block: str, rationale: str) -> dict[str, str]:
+def build_citation(
+    ref: str, source_file: str, logical_block: str, rationale: str
+) -> dict[str, str]:
     return {
         "ref": ref,
         "source_file": source_file,
@@ -304,7 +288,9 @@ def checklist_ref(task: Task) -> dict[str, str]:
 
 
 def make_selector(task_lookup: dict[str, Task]) -> dict[str, Callable[..., list[str]]]:
-    ordered_ids = [task.task_id for task in sorted(task_lookup.values(), key=lambda item: item.order_index)]
+    ordered_ids = [
+        task.task_id for task in sorted(task_lookup.values(), key=lambda item: item.order_index)
+    ]
 
     def by_task_ids(*task_ids: str) -> list[str]:
         return [task_id for task_id in ordered_ids if task_id in set(task_ids)]
@@ -426,9 +412,7 @@ def build_protocol_edges(tasks: list[Task], blocks: list[Block]) -> dict[str, Ed
                 f"{previous_block.block_id} immediately precedes {next_block.block_id} in checklist order.",
             ),
         ]
-        rationale = (
-            f"{next_block.block_id} cannot become claimable until {previous_block.block_id} is complete under AGENT protocol gating."
-        )
+        rationale = f"{next_block.block_id} cannot become claimable until {previous_block.block_id} is complete under AGENT protocol gating."
         for source_task_id in previous_block.task_ids:
             for target_task_id in next_block.task_ids:
                 add_edge(
@@ -450,12 +434,8 @@ def build_non_protocol_rules(
     task_lookup = {task.task_id: task for task in tasks}
     select = make_selector(task_lookup)
     phase01_ids = select["by_id_range"](31, 58)
-    phase03_to_phase06_ids = [
-        task.task_id for task in tasks if 3 <= task.phase <= 6
-    ]
-    phase02_to_phase06_ids = [
-        task.task_id for task in tasks if 2 <= task.phase <= 6
-    ]
+    phase03_to_phase06_ids = [task.task_id for task in tasks if 3 <= task.phase <= 6]
+    phase02_to_phase06_ids = [task.task_id for task in tasks if 2 <= task.phase <= 6]
     phase07_ids = select["by_id_range"](392, 428)
     phase05_web_ids = select["by_phase_and_tracks"](
         5,
@@ -566,7 +546,17 @@ def build_non_protocol_rules(
             "rule_id": "storage_eventing_adr_precedes_storage_runtime_tracks",
             "source_task_id": "pc_0020",
             "target_ids": ordered_unique(
-                select["by_task_ids"]("pc_0050", "pc_0051", "pc_0052", "pc_0053", "pc_0066", "pc_0067", "pc_0069", "pc_0070", "pc_0071")
+                select["by_task_ids"](
+                    "pc_0050",
+                    "pc_0051",
+                    "pc_0052",
+                    "pc_0053",
+                    "pc_0066",
+                    "pc_0067",
+                    "pc_0069",
+                    "pc_0070",
+                    "pc_0071",
+                )
                 + select["by_tracks"](
                     "backend_manifest",
                     "backend_collection",
@@ -592,7 +582,9 @@ def build_non_protocol_rules(
             "rule_id": "identity_adr_precedes_identity_and_session_tracks",
             "source_task_id": "pc_0021",
             "target_ids": ordered_unique(
-                select["by_task_ids"]("pc_0039", "pc_0040", "pc_0237", "pc_0291", "pc_0343", "pc_0378")
+                select["by_task_ids"](
+                    "pc_0039", "pc_0040", "pc_0237", "pc_0291", "pc_0343", "pc_0378"
+                )
                 + select["by_tracks"]("backend_access", "backend_northbound")
             ),
             "edge_class": "POLICY_HARD",
@@ -611,7 +603,9 @@ def build_non_protocol_rules(
             "rule_id": "authority_adr_precedes_authority_tracks",
             "source_task_id": "pc_0022",
             "target_ids": ordered_unique(
-                select["by_task_ids"]("pc_0034", "pc_0035", "pc_0036", "pc_0037", "pc_0038", "pc_0087")
+                select["by_task_ids"](
+                    "pc_0034", "pc_0035", "pc_0036", "pc_0037", "pc_0038", "pc_0087"
+                )
                 + select["by_tracks"]("backend_authority", "testing_authority_integration")
             ),
             "edge_class": "POLICY_HARD",
@@ -675,8 +669,7 @@ def build_non_protocol_rules(
             "rule_id": "native_strategy_adr_precedes_native_tracks",
             "source_task_id": "pc_0025",
             "target_ids": ordered_unique(
-                ["pc_0059", "pc_0364", "pc_0402", "pc_0403", "pc_0426"]
-                + phase05_native_ids
+                ["pc_0059", "pc_0364", "pc_0402", "pc_0403", "pc_0426"] + phase05_native_ids
             ),
             "edge_class": "POLICY_HARD",
             "rationale": "ADR-007 fixes the signed, notarized SwiftUI-first macOS operator strategy that native scaffolds, native regressions, and native release tasks must honor.",
@@ -729,9 +722,7 @@ def build_non_protocol_rules(
         {
             "rule_id": "environment_inventory_precedes_phase01_resource_work",
             "source_task_id": "pc_0031",
-            "target_ids": ordered_unique(
-                select["by_id_range"](32, 58)
-            ),
+            "target_ids": ordered_unique(select["by_id_range"](32, 58)),
             "edge_class": "RESOURCE_HARD",
             "rationale": "Phase-01 provisioning tasks need the canonical environment, tenant, and authority-profile inventory from pc_0031 before they can target the right accounts and environments.",
             "citations": [card_ref("pc_0031")],
@@ -747,9 +738,7 @@ def build_non_protocol_rules(
         {
             "rule_id": "credential_policy_precedes_secret_capture_and_injection_tasks",
             "source_task_id": "pc_0033",
-            "target_ids": ordered_unique(
-                select["by_id_range"](34, 49) + ["pc_0057", "pc_0063"]
-            ),
+            "target_ids": ordered_unique(select["by_id_range"](34, 49) + ["pc_0057", "pc_0063"]),
             "edge_class": "POLICY_HARD",
             "rationale": "Credential capture, rotation, and secret-storage policy must exist before accounts, client secrets, CI secrets, and runtime secret-injection work proceed.",
             "citations": [card_ref("pc_0033")],
@@ -765,7 +754,17 @@ def build_non_protocol_rules(
         {
             "rule_id": "build_signing_services_precede_release_artifact_and_distribution_tasks",
             "source_task_id": "pc_0055",
-            "target_ids": ["pc_0219", "pc_0220", "pc_0222", "pc_0400", "pc_0401", "pc_0402", "pc_0424", "pc_0425", "pc_0426"],
+            "target_ids": [
+                "pc_0219",
+                "pc_0220",
+                "pc_0222",
+                "pc_0400",
+                "pc_0401",
+                "pc_0402",
+                "pc_0424",
+                "pc_0425",
+                "pc_0426",
+            ],
             "edge_class": "RESOURCE_HARD",
             "rationale": "Release-candidate artifacts, signing, notarization, and rollout evidence cannot be assembled until build-signing and attestation services exist.",
             "citations": [card_ref("pc_0055")],
@@ -900,7 +899,17 @@ def build_non_protocol_rules(
         {
             "rule_id": "streaming_abstraction_precedes_stream_and_resume_work",
             "source_task_id": "pc_0071",
-            "target_ids": ["pc_0161", "pc_0165", "pc_0235", "pc_0274", "pc_0295", "pc_0336", "pc_0339", "pc_0371", "pc_0394"],
+            "target_ids": [
+                "pc_0161",
+                "pc_0165",
+                "pc_0235",
+                "pc_0274",
+                "pc_0295",
+                "pc_0336",
+                "pc_0339",
+                "pc_0371",
+                "pc_0394",
+            ],
             "edge_class": "ARTIFACT_HARD",
             "rationale": "SSE, live update, resume, rebase, and stream-broker testing work depends on the streaming abstraction introduced in pc_0071.",
             "citations": [card_ref("pc_0071")],
@@ -908,7 +917,21 @@ def build_non_protocol_rules(
         {
             "rule_id": "upload_transfer_service_precedes_upload_flows",
             "source_task_id": "pc_0072",
-            "target_ids": ["pc_0164", "pc_0180", "pc_0181", "pc_0182", "pc_0255", "pc_0256", "pc_0263", "pc_0271", "pc_0297", "pc_0308", "pc_0338", "pc_0369", "pc_0396"],
+            "target_ids": [
+                "pc_0164",
+                "pc_0180",
+                "pc_0181",
+                "pc_0182",
+                "pc_0255",
+                "pc_0256",
+                "pc_0263",
+                "pc_0271",
+                "pc_0297",
+                "pc_0308",
+                "pc_0338",
+                "pc_0369",
+                "pc_0396",
+            ],
             "edge_class": "ARTIFACT_HARD",
             "rationale": "Upload endpoint, portal upload, native upload, and upload recovery work depends on the blob-transfer scaffold from pc_0072.",
             "citations": [card_ref("pc_0072")],
@@ -916,7 +939,15 @@ def build_non_protocol_rules(
         {
             "rule_id": "cache_isolation_library_precedes_cache_and_recovery_work",
             "source_task_id": "pc_0073",
-            "target_ids": ["pc_0203", "pc_0204", "pc_0238", "pc_0294", "pc_0309", "pc_0368", "pc_0376"],
+            "target_ids": [
+                "pc_0203",
+                "pc_0204",
+                "pc_0238",
+                "pc_0294",
+                "pc_0309",
+                "pc_0368",
+                "pc_0376",
+            ],
             "edge_class": "ARTIFACT_HARD",
             "rationale": "Cache isolation, native cache hydration, and cache-corruption regression work depends on the shared cache-partitioning and masking library from pc_0073.",
             "citations": [card_ref("pc_0073")],
@@ -924,7 +955,9 @@ def build_non_protocol_rules(
         {
             "rule_id": "telemetry_bootstrap_precedes_observability_and_security_measurement",
             "source_task_id": "pc_0075",
-            "target_ids": ordered_unique(select["by_id_range"](214, 218) + select["by_id_range"](370, 379) + ["pc_0409"]),
+            "target_ids": ordered_unique(
+                select["by_id_range"](214, 218) + select["by_id_range"](370, 379) + ["pc_0409"]
+            ),
             "edge_class": "ARTIFACT_HARD",
             "rationale": "Observability queries, performance/security suites, and later service-level dashboards depend on the telemetry bootstrap introduced in pc_0075.",
             "citations": [card_ref("pc_0075")],
@@ -932,7 +965,19 @@ def build_non_protocol_rules(
         {
             "rule_id": "audit_pipeline_precedes_audit_and_investigation_work",
             "source_task_id": "pc_0076",
-            "target_ids": ["pc_0166", "pc_0194", "pc_0214", "pc_0215", "pc_0216", "pc_0217", "pc_0218", "pc_0286", "pc_0341", "pc_0375", "pc_0409"],
+            "target_ids": [
+                "pc_0166",
+                "pc_0194",
+                "pc_0214",
+                "pc_0215",
+                "pc_0216",
+                "pc_0217",
+                "pc_0218",
+                "pc_0286",
+                "pc_0341",
+                "pc_0375",
+                "pc_0409",
+            ],
             "edge_class": "ARTIFACT_HARD",
             "rationale": "Audit-trail endpoints, investigation views, failure dashboards, and restore-audit suites depend on the append-only audit pipeline created in pc_0076.",
             "citations": [card_ref("pc_0076")],
@@ -940,7 +985,10 @@ def build_non_protocol_rules(
         {
             "rule_id": "seed_fixture_pack_precedes_acceptance_and_pilot_tracks",
             "source_task_id": "pc_0077",
-            "target_ids": ordered_unique(select["by_tracks"]("testing_release_acceptance") + ["pc_0397", "pc_0419", "pc_0420", "pc_0421", "pc_0422", "pc_0423"]),
+            "target_ids": ordered_unique(
+                select["by_tracks"]("testing_release_acceptance")
+                + ["pc_0397", "pc_0419", "pc_0420", "pc_0421", "pc_0422", "pc_0423"]
+            ),
             "edge_class": "ARTIFACT_HARD",
             "rationale": "Acceptance suites, synthetic demo fixtures, and pilot dry-run tasks depend on the canonical seed-data and domain example pack created in pc_0077.",
             "citations": [card_ref("pc_0077")],
@@ -1076,9 +1124,7 @@ def build_soft_context_edges(tasks: list[Task], hard_edges: dict[str, Edge]) -> 
         for source_task, target_task in zip(ordered_tasks, ordered_tasks[1:]):
             if (source_task.task_id, target_task.task_id) in hard_pairs:
                 continue
-            rationale = (
-                f"{source_task.task_id} and {target_task.task_id} are same-track neighbors in {track}; this is useful context and recommended reading order, but not promoted to a hard blocker."
-            )
+            rationale = f"{source_task.task_id} and {target_task.task_id} are same-track neighbors in {track}; this is useful context and recommended reading order, but not promoted to a hard blocker."
             citations = [
                 checklist_ref(source_task),
                 checklist_ref(target_task),
@@ -1112,10 +1158,7 @@ def build_unique_hard_graph(
     successors: dict[str, list[str]] = {task_id: [] for task_id in task_ids}
     predecessors: dict[str, list[str]] = {task_id: [] for task_id in task_ids}
     for source_task_id, target_task_id in sorted(
-        {
-            (edge.source_task_id, edge.target_task_id)
-            for edge in hard_edges.values()
-        },
+        {(edge.source_task_id, edge.target_task_id) for edge in hard_edges.values()},
         key=lambda pair: (task_ids.index(pair[1]), task_ids.index(pair[0])),
     ):
         successors[source_task_id].append(target_task_id)
@@ -1126,7 +1169,9 @@ def build_unique_hard_graph(
     return successors, predecessors
 
 
-def assert_acyclic(tasks: list[Task], predecessors: dict[str, list[str]], successors: dict[str, list[str]]) -> None:
+def assert_acyclic(
+    tasks: list[Task], predecessors: dict[str, list[str]], successors: dict[str, list[str]]
+) -> None:
     indegree = {task.task_id: len(predecessors[task.task_id]) for task in tasks}
     ready = [task.task_id for task in tasks if indegree[task.task_id] == 0]
     ordered: list[str] = []
@@ -1156,7 +1201,9 @@ def build_levels(tasks: list[Task], predecessors: dict[str, list[str]]) -> dict[
     levels = [
         {
             "level": level,
-            "task_ids": [task.task_id for task in sorted(grouped[level], key=lambda item: item.order_index)],
+            "task_ids": [
+                task.task_id for task in sorted(grouped[level], key=lambda item: item.order_index)
+            ],
             "task_count": len(grouped[level]),
             "protocol_block_ids": ordered_unique(
                 task.block_id for task in sorted(grouped[level], key=lambda item: item.order_index)
@@ -1264,9 +1311,7 @@ def build_eligibility_snapshot(tasks: list[Task]) -> dict[str, Any]:
         active_claimed = [first_incomplete.task_id] if first_incomplete.status == "-" else []
         claimable_unclaimed = [first_incomplete.task_id] if first_incomplete.status == " " else []
         boundary_index = first_incomplete.order_index + 1
-        blocked_boundary = (
-            tasks[boundary_index].task_id if boundary_index < len(tasks) else None
-        )
+        blocked_boundary = tasks[boundary_index].task_id if boundary_index < len(tasks) else None
         return {
             "first_incomplete_task_id": first_incomplete.task_id,
             "active_claimed_task_ids": active_claimed,
@@ -1337,7 +1382,9 @@ def build_node_rows(
                 "owner_team_id": package_row.get("owner_team_id"),
                 "owner_team_handle": package_row.get("owner_team_handle"),
                 "hard_predecessor_task_ids": predecessors[task.task_id],
-                "soft_context_predecessor_task_ids": ordered_unique(soft_predecessors[task.task_id]),
+                "soft_context_predecessor_task_ids": ordered_unique(
+                    soft_predecessors[task.task_id]
+                ),
                 "current_state": current_state,
                 "currently_unsatisfied_hard_predecessor_ids": unresolved_hard_predecessors,
             }
@@ -1393,7 +1440,9 @@ def build_dag_payload(
         "summary": {
             "task_count": len(tasks),
             "block_count": len(blocks),
-            "parallel_block_count": len([block for block in blocks if block.protocol_mode == "parallel"]),
+            "parallel_block_count": len(
+                [block for block in blocks if block.protocol_mode == "parallel"]
+            ),
             "hard_edge_count": len(hard_edges),
             "soft_context_edge_count": len(soft_edges),
             "hard_edge_class_counts": dict(sorted(hard_edge_counts.items())),
@@ -1442,7 +1491,9 @@ def build_levels_payload(
         "summary": {
             "level_count": levels_payload["summary"]["level_count"],
             "max_parallelism": levels_payload["summary"]["max_parallelism"],
-            "parallel_block_count": len([block for block in blocks if block.protocol_mode == "parallel"]),
+            "parallel_block_count": len(
+                [block for block in blocks if block.protocol_mode == "parallel"]
+            ),
         },
         "levels": levels_payload["levels"],
         "block_levels": block_levels,
@@ -1536,16 +1587,12 @@ def build_doc(
 ) -> str:
     edge_class_rows = [
         [edge_class, count]
-        for edge_class, count in sorted(
-            dag_payload["summary"]["hard_edge_class_counts"].items()
-        )
+        for edge_class, count in sorted(dag_payload["summary"]["hard_edge_class_counts"].items())
     ]
     rule_counts = Counter(edge.rule_id for edge in hard_edges.values())
     top_rule_rows = [
         [rule_id, count]
-        for rule_id, count in sorted(
-            rule_counts.items(), key=lambda item: (-item[1], item[0])
-        )[:12]
+        for rule_id, count in sorted(rule_counts.items(), key=lambda item: (-item[1], item[0]))[:12]
     ]
     wave_rows = [
         [
@@ -1562,7 +1609,11 @@ def build_doc(
         [row["order"], row["task_id"], row["phase"], row["level"]]
         for row in (
             critical_path["rows"][:12]
-            + ([{"order": "...", "task_id": "...", "phase": "...", "level": "..."}] if len(critical_path["rows"]) > 20 else [])
+            + (
+                [{"order": "...", "task_id": "...", "phase": "...", "level": "..."}]
+                if len(critical_path["rows"]) > 20
+                else []
+            )
             + critical_path["rows"][-8:]
         )
     ]

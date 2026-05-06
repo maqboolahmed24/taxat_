@@ -1,0 +1,78 @@
+{
+  "contract_version": "STREAM_REBASE_TRIGGER_MATRIX_V1",
+  "matrix_id": "stream-rebase-trigger-matrix",
+  "basis_statement": "Resume fails closed whenever epoch, compaction, route, shell, session, access, masking, or schema truth drifts away from the authoritative stream recovery contract.",
+  "trigger_rows": [
+    {
+      "trigger_ref": "EPOCH_ADVANCE",
+      "comparison_family": "EPOCH",
+      "delivery_window_state": "REBASE_REQUIRED",
+      "reason_code": "FRAME_EPOCH_ADVANCED",
+      "summary": "Frame epoch advanced, so the client must replace local frame state before consuming further events.",
+      "notes": ["Epoch seams are explicit and never stitched client-side."]
+    },
+    {
+      "trigger_ref": "HISTORY_COMPACTION",
+      "comparison_family": "COMPACTION",
+      "delivery_window_state": "REBASE_REQUIRED",
+      "reason_code": "HISTORY_COMPACTED",
+      "summary": "The requested sequence fell behind the compaction floor and now requires a fresh snapshot baseline.",
+      "notes": ["Compaction never degrades into best-effort replay heuristics."]
+    },
+    {
+      "trigger_ref": "SHELL_STABILITY_DRIFT",
+      "comparison_family": "SHELL",
+      "delivery_window_state": "REBASE_REQUIRED",
+      "reason_code": "SHELL_STABILITY_CHANGED",
+      "summary": "Shell stability token drifted, so mounted continuity is no longer trustworthy.",
+      "notes": ["Reconnect cannot silently remount into a different shell grammar."]
+    },
+    {
+      "trigger_ref": "ROUTE_CONTEXT_DRIFT",
+      "comparison_family": "ROUTE",
+      "delivery_window_state": "REBASE_REQUIRED",
+      "reason_code": "ROUTE_CONTEXT_CHANGED",
+      "summary": "Route or mounted subject drifted, so the client must rebase on a fresh route-bound snapshot.",
+      "notes": ["Raw resume tokens never authorize a different route or subject."]
+    },
+    {
+      "trigger_ref": "SESSION_BINDING_DRIFT",
+      "comparison_family": "SESSION",
+      "delivery_window_state": "ACCESS_REBIND_REQUIRED",
+      "reason_code": "SESSION_BINDING_CHANGED",
+      "summary": "Session identity or session binding drifted, so access must be rebound before replay resumes.",
+      "notes": ["Session continuity is part of the authoritative recovery tuple."]
+    },
+    {
+      "trigger_ref": "ACCESS_BINDING_DRIFT",
+      "comparison_family": "ACCESS",
+      "delivery_window_state": "ACCESS_REBIND_REQUIRED",
+      "reason_code": "ACCESS_BINDING_CHANGED",
+      "summary": "Access binding drifted and blocks further live replay until the user rebinds access.",
+      "notes": ["Visibility posture stays fail-closed."]
+    },
+    {
+      "trigger_ref": "MASKING_POSTURE_DRIFT",
+      "comparison_family": "MASKING",
+      "delivery_window_state": "ACCESS_REBIND_REQUIRED",
+      "reason_code": "MASKING_POSTURE_CHANGED",
+      "summary": "Masking posture drifted and invalidated the prior cursor bind.",
+      "notes": ["Customer-safe and staff-visible projections must not cross masking binds."]
+    },
+    {
+      "trigger_ref": "SCHEMA_COMPATIBILITY_DRIFT",
+      "comparison_family": "SCHEMA",
+      "delivery_window_state": "ACCESS_REBIND_REQUIRED",
+      "reason_code": "SCHEMA_INCOMPATIBLE",
+      "summary": "Schema or publication generation drifted enough to require a fresh recovery contract and bind.",
+      "notes": ["Mixed-generation payload sets are not lawful."]
+    }
+  ],
+  "source_lineage": [
+    {
+      "rationale": "Encodes the fail-closed resume semantics from the northbound contract and stream recovery schema into a reusable runtime matrix.",
+      "source_file": "Algorithm/northbound_api_and_session_contract.md",
+      "source_heading_or_logical_block": "stream_recovery_contract and REBASE_REQUIRED / ACCESS_REBIND_REQUIRED semantics"
+    }
+  ]
+}

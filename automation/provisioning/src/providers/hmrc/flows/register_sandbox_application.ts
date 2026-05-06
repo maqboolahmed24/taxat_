@@ -25,10 +25,7 @@ import {
   sanitizeAlias,
   waitForPortalStability,
 } from "./developer_hub_shared.js";
-import {
-  rankSelectors,
-  type SelectorManifest,
-} from "../../../core/selector_contract.js";
+import { rankSelectors, type SelectorManifest } from "../../../core/selector_contract.js";
 
 export const HMRC_SANDBOX_APP_FLOW_ID = "sandbox-app-registration";
 
@@ -202,10 +199,7 @@ export async function loadRequiredApiSetBaseline(): Promise<RequiredApiSetBaseli
   return JSON.parse(raw) as RequiredApiSetBaseline;
 }
 
-function buildApplicationRecordId(
-  runContext: RunContext,
-  applicationName: string,
-): string {
+function buildApplicationRecordId(runContext: RunContext, applicationName: string): string {
   return `hmrc-sandbox-app-${sanitizeAlias(runContext.workspaceId)}-${sanitizeAlias(
     applicationName,
   )}`;
@@ -292,10 +286,7 @@ function buildApplicationRecord(
 ): SandboxApplicationRecord {
   return {
     schema_version: "1.0",
-    application_record_id: buildApplicationRecordId(
-      options.runContext,
-      options.applicationName,
-    ),
+    application_record_id: buildApplicationRecordId(options.runContext, options.applicationName),
     provider_id: "hmrc-developer-hub",
     provider_display_name: "HMRC Developer Hub",
     workspace_id: options.runContext.workspaceId,
@@ -319,8 +310,7 @@ function buildApplicationRecord(
     },
     portal_state: {
       applications_console_url:
-        options.entryUrls?.applications ??
-        createDefaultSandboxApplicationEntryUrls().applications,
+        options.entryUrls?.applications ?? createDefaultSandboxApplicationEntryUrls().applications,
       last_safe_page_url: lastSafePageUrl,
       last_completed_step_id: lastCompletedStepId(steps),
       manual_checkpoint_open: false,
@@ -328,8 +318,7 @@ function buildApplicationRecord(
     },
     evidence_refs: [],
     console_location_refs: [
-      options.entryUrls?.applications ??
-        createDefaultSandboxApplicationEntryUrls().applications,
+      options.entryUrls?.applications ?? createDefaultSandboxApplicationEntryUrls().applications,
       lastSafePageUrl,
     ],
     notes: [
@@ -471,10 +460,7 @@ export async function registerSandboxApplication(
   );
   steps.push(detectExistingApplicationStep);
 
-  const existingApplicationLink = await findApplicationLink(
-    options.page,
-    options.applicationName,
-  );
+  const existingApplicationLink = await findApplicationLink(options.page, options.applicationName);
 
   let sourceDisposition: SandboxApplicationSourceDisposition;
   if (existingApplicationLink) {

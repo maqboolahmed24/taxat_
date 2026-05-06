@@ -1,0 +1,332 @@
+{
+  "artifactVersion": "CONTRACT_OBSERVATORY_ARTIFACT_V1",
+  "artifactSlug": "doc--Algorithm-manifest_branch_selection_contract",
+  "artifactKind": "MARKDOWN",
+  "sectionRef": "RUNTIME_CONTRACTS",
+  "authorityLevel": "AUTHORITATIVE",
+  "sourceTruthBadge": "Authoritative Algorithm Corpus",
+  "tone": "navy",
+  "title": "Manifest Branch Selection Contract",
+  "subtitle": "Algorithm/manifest_branch_selection_contract.md",
+  "summary": "",
+  "canonicalPath": "Algorithm/manifest_branch_selection_contract.md",
+  "sourceLineage": [
+    "Algorithm/manifest_branch_selection_contract.md"
+  ],
+  "headingCount": 9,
+  "headings": [
+    {
+      "level": 1,
+      "text": "Manifest Branch Selection Contract",
+      "slug": "manifest-branch-selection-contract"
+    },
+    {
+      "level": 2,
+      "text": "Purpose",
+      "slug": "purpose"
+    },
+    {
+      "level": 2,
+      "text": "Contract Boundary",
+      "slug": "contract-boundary"
+    },
+    {
+      "level": 2,
+      "text": "Branch Actions",
+      "slug": "branch-actions"
+    },
+    {
+      "level": 2,
+      "text": "Frozen Identity Inputs",
+      "slug": "frozen-identity-inputs"
+    },
+    {
+      "level": 2,
+      "text": "Typed Branch Reasons",
+      "slug": "typed-branch-reasons"
+    },
+    {
+      "level": 2,
+      "text": "Continuation Truth",
+      "slug": "continuation-truth"
+    },
+    {
+      "level": 2,
+      "text": "Explorer Truth",
+      "slug": "explorer-truth"
+    },
+    {
+      "level": 2,
+      "text": "Conformance Requirements",
+      "slug": "conformance-requirements"
+    }
+  ],
+  "proseSections": [
+    {
+      "headingSlug": "manifest-branch-selection-contract",
+      "headingText": "Manifest Branch Selection Contract",
+      "level": 1,
+      "lines": [
+        ""
+      ],
+      "plainText": "",
+      "excerpt": "",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "purpose",
+      "headingText": "Purpose",
+      "level": 2,
+      "lines": [
+        "This contract is the authoritative branch-selection model for `RunManifest` reuse, return, replay,",
+        "recovery, continuation, and fresh-child allocation. Its job is to make one branch decision durable,",
+        "typed, and later-auditable so the system never has to infer why a manifest was reused, why a child",
+        "was created, or why a terminal result was returned.",
+        ""
+      ],
+      "plainText": "This contract is the authoritative branch selection model for RunManifest reuse, return, replay, recovery, continuation, and fresh child allocation. Its job is to make one branch decision durable, typed, and later auditable so the system never has to infer why a manifest was reused, why a child was created, or why a terminal result was returned.",
+      "excerpt": "This contract is the authoritative branch selection model for RunManifest reuse, return, replay, recovery, continuation, and fresh child allocation. Its job is to make one branch…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "contract-boundary",
+      "headingText": "Contract Boundary",
+      "level": 2,
+      "lines": [
+        "Branch selection is governed by paired artifacts:",
+        "",
+        "- `ManifestBranchDecisionContract` is the manifest-local lineage snapshot embedded on",
+        "  `RunManifest`. It freezes the selected manifest's own lineage basis.",
+        "- `ManifestLineageTrace` is the request-time explorer artifact emitted for every branch-selection",
+        "  invocation. It freezes the selected branch action, candidate evaluations, mirror parity, nightly",
+        "  predecessor context, and audit/span linkage.",
+        "",
+        "Together they bind:",
+        "",
+        "- exact request identity",
+        "- selected branch action",
+        "- typed legal reason for that action",
+        "- selected manifest lineage",
+        "- prior-manifest anchor and hash at decision time",
+        "",
+        "Neither queue behavior, worker retries, read-side projections, nor later lineage repair may",
+        "reinterpret that decision after the fact. `ManifestLineageTrace` exists because bundle return and",
+        "same-manifest pre-start reuse intentionally do not rewrite the selected manifest's persisted",
+        "`continuation_basis`; those request-time outcomes still need first-class durable narration.",
+        ""
+      ],
+      "plainText": "Branch selection is governed by paired artifacts: ManifestBranchDecisionContract is the manifest local lineage snapshot embedded on RunManifest. It freezes the selected manifest's own lineage basis. ManifestLineageTrace is the request time explorer artifact emitted for every branch selection invocation. It freezes the selected branch action, candidate evaluations, mirror parity, nightly predecessor context, and audit/span linkage. Together they bind: exact request identity selected branch action typed legal reason for that action selected manifest lineage prior manifest anchor and hash at decision time Neither queue behavior, worker retries, read side projections, nor later lineage repair may reinterpret that decision after the fact. ManifestLineageTrace exists because bundle return and same manifest pre start reuse intentionally do not rewrite the selected manifest's persisted continuation basis; those request time outcomes still need first class durable narration.",
+      "excerpt": "Branch selection is governed by paired artifacts: ManifestBranchDecisionContract is the manifest local lineage snapshot embedded on RunManifest. It freezes the selected manifest's…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "branch-actions",
+      "headingText": "Branch Actions",
+      "level": 2,
+      "lines": [
+        "- `NEW_MANIFEST`: no reusable prior manifest exists for this request identity.",
+        "- `RETURN_EXISTING_BUNDLE`: the request is an exact retry against a terminal manifest, so the",
+        "  persisted decision bundle is returned.",
+        "- `REUSE_SEALED_MANIFEST`: the request is an exact retry against a still-pre-start sealed manifest,",
+        "  so the same manifest context is reused.",
+        "- `REPLAY_CHILD`: the caller explicitly requested replay and the child must preserve replay lineage.",
+        "- `RECOVERY_CHILD`: a started attempt is being recovered under the same attempt lineage.",
+        "- `CONTINUATION_CHILD`: a legally distinct post-terminal continuation is required even though the",
+        "  request remains in the same lineage family.",
+        "- `NEW_REQUEST_CHILD`: the caller changed request identity materially enough that a fresh child",
+        "  lineage is required.",
+        ""
+      ],
+      "plainText": "NEW MANIFEST: no reusable prior manifest exists for this request identity. RETURN EXISTING BUNDLE: the request is an exact retry against a terminal manifest, so the persisted decision bundle is returned. REUSE SEALED MANIFEST: the request is an exact retry against a still pre start sealed manifest, so the same manifest context is reused. REPLAY CHILD: the caller explicitly requested replay and the child must preserve replay lineage. RECOVERY CHILD: a started attempt is being recovered under the same attempt lineage. CONTINUATION CHILD: a legally distinct post terminal continuation is required even though the request remains in the same lineage family. NEW REQUEST CHILD: the caller changed request identity materially enough that a fresh child lineage is required.",
+      "excerpt": "NEW MANIFEST: no reusable prior manifest exists for this request identity. RETURN EXISTING BUNDLE: the request is an exact retry against a terminal manifest, so the persisted deci…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "frozen-identity-inputs",
+      "headingText": "Frozen Identity Inputs",
+      "level": 2,
+      "lines": [
+        "The branch-selection comparison SHALL freeze at minimum:",
+        "",
+        "- `requested_scope[]`",
+        "- `effective_scope[]`",
+        "- `access_binding_hash`",
+        "- `mode`",
+        "- `run_kind`",
+        "- `replay_class_or_null`",
+        "- `nightly_window_key_or_null`",
+        "- `selected_manifest_continuation_basis`",
+        "- `config_inheritance_mode_or_null`",
+        "- `input_inheritance_mode_or_null`",
+        "- `request_identity_hash`",
+        "",
+        "`request_identity_hash` is the replay-safe digest of the comparison vector used to decide whether",
+        "the request is the same request, the same sealed context, a replay, a recovery, a legal",
+        "continuation, or a materially new request.",
+        ""
+      ],
+      "plainText": "The branch selection comparison SHALL freeze at minimum: requested scope[] effective scope[] access binding hash mode run kind replay class or null nightly window key or null selected manifest continuation basis config inheritance mode or null input inheritance mode or null request identity hash request identity hash is the replay safe digest of the comparison vector used to decide whether the request is the same request, the same sealed context, a replay, a recovery, a legal continuation, or a materially new request.",
+      "excerpt": "The branch selection comparison SHALL freeze at minimum: requested scope[] effective scope[] access binding hash mode run kind replay class or null nightly window key or null sele…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "typed-branch-reasons",
+      "headingText": "Typed Branch Reasons",
+      "level": 2,
+      "lines": [
+        "The contract SHALL also persist one typed `branch_reason_code`:",
+        "",
+        "- `NO_PRIOR_MANIFEST`",
+        "- `TERMINAL_IDEMPOTENT_RETRY`",
+        "- `PRESTART_SEALED_CONTEXT_REUSE`",
+        "- `REPLAY_REQUESTED_EXACT`",
+        "- `STARTED_ATTEMPT_RECOVERY`",
+        "- `POST_TERMINAL_CONTINUATION_REQUIRED`",
+        "- `REQUEST_IDENTITY_CHANGED`",
+        "- `NIGHTLY_WINDOW_ADVANCED`",
+        "",
+        "The reason code is not optional explanation copy. It is the machine-checked legal basis for the",
+        "chosen branch and SHALL align with `branch_action`.",
+        ""
+      ],
+      "plainText": "The contract SHALL also persist one typed branch reason code: NO PRIOR MANIFEST TERMINAL IDEMPOTENT RETRY PRESTART SEALED CONTEXT REUSE REPLAY REQUESTED EXACT STARTED ATTEMPT RECOVERY POST TERMINAL CONTINUATION REQUIRED REQUEST IDENTITY CHANGED NIGHTLY WINDOW ADVANCED The reason code is not optional explanation copy. It is the machine checked legal basis for the chosen branch and SHALL align with branch action.",
+      "excerpt": "The contract SHALL also persist one typed branch reason code: NO PRIOR MANIFEST TERMINAL IDEMPOTENT RETRY PRESTART SEALED CONTEXT REUSE REPLAY REQUESTED EXACT STARTED ATTEMPT RECO…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "continuation-truth",
+      "headingText": "Continuation Truth",
+      "level": 2,
+      "lines": [
+        "`prior_manifest_id_or_null` and `prior_manifest_hash_at_decision_or_null` are the authoritative",
+        "comparison anchor. When a child is created, they SHALL identify the exact parent manifest and its",
+        "sealed manifest hash at the branch moment. Read-side lineage mirrors may accelerate reads, but they",
+        "shall not replace this decision artifact as branch truth.",
+        ""
+      ],
+      "plainText": "prior manifest id or null and prior manifest hash at decision or null are the authoritative comparison anchor. When a child is created, they SHALL identify the exact parent manifest and its sealed manifest hash at the branch moment. Read side lineage mirrors may accelerate reads, but they shall not replace this decision artifact as branch truth.",
+      "excerpt": "prior manifest id or null and prior manifest hash at decision or null are the authoritative comparison anchor. When a child is created, they SHALL identify the exact parent manife…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "explorer-truth",
+      "headingText": "Explorer Truth",
+      "level": 2,
+      "lines": [
+        "`ManifestLineageTrace` SHALL make the request-time branch explainable without dereferencing adjacent",
+        "manifests heuristically. It SHALL serialize:",
+        "",
+        "- `selected_branch_action` and `selected_branch_reason_code`",
+        "- the selected manifest's persisted continuation basis and selected lineage refs",
+        "- exhaustive `candidate_evaluations[]` with typed disqualifier reason codes",
+        "- `mirror_consistency_state` plus the exact mirror sources checked",
+        "- nightly predecessor batch and manifest context where applicable",
+        "- explicit audit and trace refs for the branch narrative",
+        "",
+        "Operator tooling SHALL render reuse and continuation from `ManifestLineageTrace` plus the selected",
+        "manifest's own explicit refs, not by diffing nearby manifest rows or inferring predecessor meaning",
+        "from timestamps alone.",
+        ""
+      ],
+      "plainText": "ManifestLineageTrace SHALL make the request time branch explainable without dereferencing adjacent manifests heuristically. It SHALL serialize: selected branch action and selected branch reason code the selected manifest's persisted continuation basis and selected lineage refs exhaustive candidate evaluations[] with typed disqualifier reason codes mirror consistency state plus the exact mirror sources checked nightly predecessor batch and manifest context where applicable explicit audit and trace refs for the branch narrative Operator tooling SHALL render reuse and continuation from ManifestLineageTrace plus the selected manifest's own explicit refs, not by diffing nearby manifest rows or inferring predecessor meaning from timestamps alone.",
+      "excerpt": "ManifestLineageTrace SHALL make the request time branch explainable without dereferencing adjacent manifests heuristically. It SHALL serialize: selected branch action and selected…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "conformance-requirements",
+      "headingText": "Conformance Requirements",
+      "level": 2,
+      "lines": [
+        "The validator suite SHALL reject at minimum:",
+        "",
+        "- branch decisions whose `effective_scope[]` widens beyond `requested_scope[]`",
+        "- branch decisions whose `branch_reason_code` does not match `branch_action`",
+        "- nightly continuation branches that fail to declare `NIGHTLY_WINDOW_ADVANCED`",
+        "- run manifests whose authorized executable scope diverges from",
+        "  `manifest_branch_decision.effective_scope[]`",
+        "- audit and trace payloads whose embedded branch decision can no longer explain the selected branch",
+        "- lineage traces that omit branch candidates, hide rejection reasons, lose nightly predecessor",
+        "  context, or fail to link the branch back to its audit/span narrative",
+        ""
+      ],
+      "plainText": "The validator suite SHALL reject at minimum: branch decisions whose effective scope[] widens beyond requested scope[] branch decisions whose branch reason code does not match branch action nightly continuation branches that fail to declare NIGHTLY WINDOW ADVANCED run manifests whose authorized executable scope diverges from manifest branch decision.effective scope[] audit and trace payloads whose embedded branch decision can no longer explain the selected branch lineage traces that omit branch candidates, hide rejection reasons, lose nightly predecessor context, or fail to link the branch back to its audit/span narrative",
+      "excerpt": "The validator suite SHALL reject at minimum: branch decisions whose effective scope[] widens beyond requested scope[] branch decisions whose branch reason code does not match bran…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    }
+  ],
+  "schemaIdentityOrNull": null,
+  "schemaFields": [],
+  "samplePointers": [],
+  "sampleIdentityOrNull": null,
+  "bindingIdentityOrNull": null,
+  "validatorIdentityOrNull": null,
+  "driftIdentityOrNull": null,
+  "headerStrip": {
+    "kind": "PROSE",
+    "badgeLabel": "Authoritative Algorithm Corpus",
+    "metricPairs": [
+      {
+        "label": "Headings",
+        "value": "9"
+      },
+      {
+        "label": "Schemas",
+        "value": "0"
+      },
+      {
+        "label": "Tasks",
+        "value": "0"
+      }
+    ]
+  },
+  "relationships": {
+    "schemas": [],
+    "samples": [],
+    "bindings": [],
+    "validators": [],
+    "docs": [],
+    "tasks": []
+  },
+  "sourceTruthStack": {
+    "file": [
+      "Algorithm/manifest_branch_selection_contract.md"
+    ],
+    "headings": [
+      "Manifest Branch Selection Contract",
+      "Purpose",
+      "Contract Boundary",
+      "Branch Actions",
+      "Frozen Identity Inputs",
+      "Typed Branch Reasons",
+      "Continuation Truth",
+      "Explorer Truth",
+      "Conformance Requirements"
+    ],
+    "schemaRefs": [],
+    "sampleRefs": [],
+    "bindingRefs": [],
+    "validatorRefs": [],
+    "driftRefs": [],
+    "taskRefs": []
+  },
+  "fieldCrosslinks": [],
+  "taskRefs": []
+}

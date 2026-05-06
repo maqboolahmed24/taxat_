@@ -1,0 +1,1447 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/decision_bundle.schema.json",
+  "title": "DecisionBundle",
+  "type": "object",
+  "required": [
+    "decision_bundle_id",
+    "manifest_id",
+    "artifact_type",
+    "execution_mode",
+    "analysis_only",
+    "non_compliance_config_refs",
+    "counterfactual_basis",
+    "execution_mode_boundary_contract",
+    "decision_status",
+    "workflow_item_refs",
+    "decision_reason_codes",
+    "dominant_reason_code",
+    "outcome_class",
+    "waiting_on",
+    "checkpoint_state",
+    "truth_state",
+    "truth_boundary_contract",
+    "plain_reason",
+    "decision_explainability_contract",
+    "reason_codes",
+    "next_action_codes",
+    "blocked_action_codes",
+    "actionability_state",
+    "primary_action_code",
+    "no_safe_action_reason_code",
+    "suggested_detail_surface_code",
+    "active_detail_surface_code",
+    "focus_anchor_ref",
+    "next_checkpoint_at",
+    "persisted_at",
+    "contract",
+    "primary_proof_bundle_ref"
+  ],
+  "properties": {
+    "decision_bundle_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_type": {
+      "const": "DecisionBundle"
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": [
+        "COMPLIANCE",
+        "ANALYSIS"
+      ]
+    },
+    "analysis_only": {
+      "type": "boolean"
+    },
+    "non_compliance_config_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "counterfactual_basis": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "execution_mode_boundary_contract": {
+      "$ref": "https://taxat.dev/schemas/execution_mode_boundary_contract.schema.json"
+    },
+    "decision_status": {
+      "type": "string",
+      "enum": [
+        "COMPLETED",
+        "BLOCKED",
+        "REVIEW_REQUIRED"
+      ],
+      "description": "Backward-compatible terminal posture. Use outcome_class / waiting_on / checkpoint_state to distinguish human review from authority-pending or unknown external states."
+    },
+    "decision_reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "minItems": 1,
+      "maxItems": 3
+    },
+    "dominant_reason_code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workflow_item_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "snapshot_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "compute_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "forecast_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "risk_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "parity_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "trust_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "graph_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "twin_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "filing_packet_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "submission_record_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "outcome_class": {
+      "type": "string",
+      "description": "Replay-safe UX bridge that disambiguates REVIEW_REQUIRED into a specific next-state class without changing the legal DecisionBundle.decision_status enum.",
+      "enum": [
+        "FINAL_SUCCESS",
+        "FINAL_BLOCKED",
+        "HUMAN_REVIEW",
+        "APPROVAL_PENDING",
+        "AUTHORITY_PENDING",
+        "AUTHORITY_UNKNOWN",
+        "LATE_DATA_PENDING",
+        "OUT_OF_BAND_REVIEW"
+      ]
+    },
+    "waiting_on": {
+      "type": "string",
+      "description": "Primary external or human dependency blocking straight-through progression at the moment the bundle was persisted.",
+      "enum": [
+        "NONE",
+        "HUMAN",
+        "APPROVAL",
+        "AUTHORITY",
+        "LATE_DATA"
+      ]
+    },
+    "checkpoint_state": {
+      "type": "string",
+      "description": "Shell-level checkpoint projection copied into the persisted terminal bundle so reloaded views can restore the correct next-step posture.",
+      "enum": [
+        "NONE",
+        "SOURCE_COLLECTION",
+        "PROJECTION_PENDING",
+        "HUMAN_REVIEW",
+        "APPROVAL_PENDING",
+        "AUTHORITY_PREFLIGHT",
+        "TRANSMIT_PENDING",
+        "PENDING_ACK",
+        "RECONCILIATION_PENDING",
+        "LATE_DATA_PENDING",
+        "CONFIRMED",
+        "REJECTED",
+        "UNKNOWN",
+        "OUT_OF_BAND"
+      ]
+    },
+    "truth_state": {
+      "type": "string",
+      "description": "Highest-confidence truth posture visible to the user when the bundle was persisted.",
+      "enum": [
+        "LOCAL_INTENT_ONLY",
+        "PERSISTED_INTERNAL",
+        "AUTHORITY_PENDING",
+        "AUTHORITY_CONFIRMED",
+        "AUTHORITY_REJECTED",
+        "AUTHORITY_UNKNOWN",
+        "AUTHORITY_OUT_OF_BAND"
+      ]
+    },
+    "truth_boundary_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/command_truth_boundary_contract.schema.json"
+        },
+        {
+          "properties": {
+            "artifact_role": {
+              "const": "READ_SIDE_PROJECTION"
+            },
+            "authoritative_record_families": {
+              "const": [
+                "RUN_MANIFEST",
+                "GATE_DECISION_RECORD",
+                "WORKFLOW_ITEM",
+                "AUTHORITY_INTERACTION_RECORD",
+                "AUDIT_EVENT"
+              ]
+            },
+            "observable_projection_families": {
+              "const": []
+            }
+          }
+        }
+      ]
+    },
+    "plain_reason": {
+      "type": "string",
+      "description": "Plain-language explanation of the terminal or review posture.",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "decision_explainability_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/decision_explainability_contract.schema.json"
+        },
+        {
+          "properties": {
+            "artifact_family": {
+              "const": "DECISION_BUNDLE"
+            },
+            "plain_text_field_name": {
+              "const": "plain_reason"
+            }
+          }
+        }
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "description": "Flattened high-signal reason codes copied from the decisive terminal reasons and gate chain to support queue views and notifications without replay.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "minItems": 1,
+      "maxItems": 8
+    },
+    "next_action_codes": {
+      "type": "array",
+      "description": "Minimal next legal actions that should be offered immediately after bundle reload.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true,
+      "maxItems": 3
+    },
+    "blocked_action_codes": {
+      "type": "array",
+      "description": "Actions that remain legally or procedurally blocked at bundle time.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true,
+      "maxItems": 8
+    },
+    "actionability_state": {
+      "type": "string",
+      "description": "Replay-safe shell actionability bridge. Distinguishes one available safe next action from explicit NO_SAFE_ACTION semantics so terminal reload never infers posture from null checks.",
+      "enum": [
+        "ACTION_AVAILABLE",
+        "NO_SAFE_ACTION"
+      ]
+    },
+    "primary_action_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "description": "Dominant safe next action for the terminal shell when `actionability_state = ACTION_AVAILABLE`."
+    },
+    "no_safe_action_reason_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "description": "Machine-stable reason explaining why no safe legal action is currently available."
+    },
+    "suggested_detail_surface_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Detail drawer module that should open first when the user must investigate instead of acting directly.",
+      "enum": [
+        "EVIDENCE_TIDE",
+        "PACKET_FORGE",
+        "AUTHORITY_TUNNEL",
+        "DRIFT_FIELD",
+        "FOCUS_LENS",
+        "TWIN_PANEL",
+        null
+      ]
+    },
+    "active_detail_surface_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Detail drawer module that was expanded when the bundle was persisted, copied so terminal reload can restore the same shell context.",
+      "enum": [
+        "EVIDENCE_TIDE",
+        "PACKET_FORGE",
+        "AUTHORITY_TUNNEL",
+        "DRIFT_FIELD",
+        "FOCUS_LENS",
+        "TWIN_PANEL",
+        null
+      ]
+    },
+    "focus_anchor_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "description": "Stable focused object ref inside the active detail module when terminal or review posture was persisted."
+    },
+    "next_checkpoint_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "description": "Optional next checkpoint timestamp for authority, approval, projection, or late-data follow-up."
+    },
+    "filing_case_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "description": "Current filing case projection ref copied from manifest outputs when available."
+    },
+    "amendment_case_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "description": "Current amendment case projection ref copied from manifest outputs when available."
+    },
+    "replay_attestation_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "description": "Replay-comparison artifact ref copied from the manifest when this bundle belongs to a replay child."
+    },
+    "persisted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the bundle was durably persisted for replay, reload, and queue ordering."
+    },
+    "contract": {
+      "$ref": "./schema_bundle.schema.json#/$defs/artifactContract"
+    },
+    "primary_proof_bundle_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "description": "Primary proof bundle ref copied into the bundle so filing-capable terminal posture can be explained without re-ranking graph paths on reload."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "analysis_only": {
+            "const": true
+          }
+        },
+        "required": [
+          "analysis_only"
+        ]
+      },
+      "then": {
+        "properties": {
+          "execution_mode": {
+            "const": "ANALYSIS"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "analysis_only": {
+            "const": false
+          }
+        },
+        "required": [
+          "analysis_only"
+        ]
+      },
+      "then": {
+        "properties": {
+          "execution_mode": {
+            "const": "COMPLIANCE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "counterfactual_basis": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "counterfactual_basis"
+        ]
+      },
+      "then": {
+        "properties": {
+          "execution_mode": {
+            "const": "ANALYSIS"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "focus_anchor_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "focus_anchor_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "active_detail_surface_code": {
+            "type": "string",
+            "enum": [
+              "EVIDENCE_TIDE",
+              "PACKET_FORGE",
+              "AUTHORITY_TUNNEL",
+              "DRIFT_FIELD",
+              "FOCUS_LENS",
+              "TWIN_PANEL"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "primary_proof_bundle_ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "primary_proof_bundle_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "graph_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "twin_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "twin_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "graph_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "parity_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "active_detail_surface_code": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "active_detail_surface_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "focus_anchor_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "COMPLIANCE"
+          }
+        },
+        "required": [
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "analysis_only": {
+            "const": false
+          },
+          "non_compliance_config_refs": {
+            "maxItems": 0
+          },
+          "counterfactual_basis": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "execution_mode": {
+            "const": "ANALYSIS"
+          }
+        },
+        "required": [
+          "execution_mode"
+        ]
+      },
+      "then": {
+        "properties": {
+          "analysis_only": {
+            "const": true
+          },
+          "counterfactual_basis": {
+            "type": "string",
+            "minLength": 1
+          },
+          "filing_packet_id": {
+            "type": "null"
+          },
+          "submission_record_id": {
+            "type": "null"
+          },
+          "primary_proof_bundle_ref": {
+            "type": "null"
+          },
+          "waiting_on": {
+            "not": {
+              "enum": [
+                "AUTHORITY"
+              ]
+            }
+          },
+          "outcome_class": {
+            "not": {
+              "enum": [
+                "AUTHORITY_PENDING",
+                "AUTHORITY_UNKNOWN",
+                "OUT_OF_BAND_REVIEW"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision_status": {
+            "enum": [
+              "BLOCKED",
+              "REVIEW_REQUIRED"
+            ]
+          }
+        },
+        "required": [
+          "decision_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_reason_codes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision_status": {
+            "const": "BLOCKED"
+          }
+        },
+        "required": [
+          "decision_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "outcome_class": {
+            "const": "FINAL_BLOCKED"
+          },
+          "waiting_on": {
+            "const": "NONE"
+          },
+          "checkpoint_state": {
+            "enum": [
+              "NONE",
+              "REJECTED"
+            ]
+          },
+          "truth_state": {
+            "enum": [
+              "PERSISTED_INTERNAL",
+              "AUTHORITY_REJECTED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision_status": {
+            "const": "COMPLETED"
+          }
+        },
+        "required": [
+          "decision_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "outcome_class": {
+            "const": "FINAL_SUCCESS"
+          },
+          "waiting_on": {
+            "const": "NONE"
+          },
+          "checkpoint_state": {
+            "enum": [
+              "NONE",
+              "CONFIRMED"
+            ]
+          },
+          "truth_state": {
+            "enum": [
+              "PERSISTED_INTERNAL",
+              "AUTHORITY_CONFIRMED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision_status": {
+            "const": "REVIEW_REQUIRED"
+          }
+        },
+        "required": [
+          "decision_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "outcome_class": {
+            "enum": [
+              "HUMAN_REVIEW",
+              "APPROVAL_PENDING",
+              "AUTHORITY_PENDING",
+              "AUTHORITY_UNKNOWN",
+              "LATE_DATA_PENDING",
+              "OUT_OF_BAND_REVIEW"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
+            "const": "HUMAN_REVIEW"
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "waiting_on": {
+            "const": "HUMAN"
+          },
+          "checkpoint_state": {
+            "const": "HUMAN_REVIEW"
+          },
+          "truth_state": {
+            "const": "PERSISTED_INTERNAL"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
+            "const": "APPROVAL_PENDING"
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "waiting_on": {
+            "const": "APPROVAL"
+          },
+          "checkpoint_state": {
+            "const": "APPROVAL_PENDING"
+          },
+          "truth_state": {
+            "const": "PERSISTED_INTERNAL"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
+            "enum": [
+              "AUTHORITY_PENDING",
+              "AUTHORITY_UNKNOWN",
+              "OUT_OF_BAND_REVIEW"
+            ]
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "waiting_on": {
+            "const": "AUTHORITY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
+            "const": "AUTHORITY_PENDING"
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "checkpoint_state": {
+            "enum": [
+              "TRANSMIT_PENDING",
+              "PENDING_ACK",
+              "RECONCILIATION_PENDING"
+            ]
+          },
+          "truth_state": {
+            "const": "AUTHORITY_PENDING"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
+            "const": "AUTHORITY_UNKNOWN"
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "UNKNOWN"
+          },
+          "truth_state": {
+            "const": "AUTHORITY_UNKNOWN"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
+            "const": "OUT_OF_BAND_REVIEW"
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "OUT_OF_BAND"
+          },
+          "truth_state": {
+            "const": "AUTHORITY_OUT_OF_BAND"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
+            "const": "LATE_DATA_PENDING"
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "waiting_on": {
+            "const": "LATE_DATA"
+          },
+          "checkpoint_state": {
+            "const": "LATE_DATA_PENDING"
+          },
+          "truth_state": {
+            "const": "PERSISTED_INTERNAL"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
+            "enum": [
+              "APPROVAL_PENDING",
+              "AUTHORITY_PENDING",
+              "AUTHORITY_UNKNOWN",
+              "LATE_DATA_PENDING"
+            ]
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "next_checkpoint_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "waiting_on": {
+            "const": "NONE"
+          }
+        },
+        "required": [
+          "waiting_on"
+        ]
+      },
+      "then": {
+        "properties": {
+          "next_checkpoint_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "checkpoint_state": {
+            "enum": [
+              "CONFIRMED",
+              "REJECTED",
+              "OUT_OF_BAND"
+            ]
+          }
+        },
+        "required": [
+          "checkpoint_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "CONFIRMED"
+          }
+        },
+        "required": [
+          "checkpoint_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_status": {
+            "const": "COMPLETED"
+          },
+          "outcome_class": {
+            "const": "FINAL_SUCCESS"
+          },
+          "waiting_on": {
+            "const": "NONE"
+          },
+          "truth_state": {
+            "const": "AUTHORITY_CONFIRMED"
+          },
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "REJECTED"
+          }
+        },
+        "required": [
+          "checkpoint_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_status": {
+            "const": "BLOCKED"
+          },
+          "outcome_class": {
+            "const": "FINAL_BLOCKED"
+          },
+          "waiting_on": {
+            "const": "NONE"
+          },
+          "truth_state": {
+            "const": "AUTHORITY_REJECTED"
+          },
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "UNKNOWN"
+          }
+        },
+        "required": [
+          "checkpoint_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_status": {
+            "const": "REVIEW_REQUIRED"
+          },
+          "outcome_class": {
+            "const": "AUTHORITY_UNKNOWN"
+          },
+          "waiting_on": {
+            "const": "AUTHORITY"
+          },
+          "truth_state": {
+            "const": "AUTHORITY_UNKNOWN"
+          },
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "checkpoint_state": {
+            "const": "OUT_OF_BAND"
+          }
+        },
+        "required": [
+          "checkpoint_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_status": {
+            "const": "REVIEW_REQUIRED"
+          },
+          "outcome_class": {
+            "const": "OUT_OF_BAND_REVIEW"
+          },
+          "waiting_on": {
+            "const": "AUTHORITY"
+          },
+          "truth_state": {
+            "const": "AUTHORITY_OUT_OF_BAND"
+          },
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
+            "enum": [
+              "AUTHORITY_PENDING",
+              "AUTHORITY_UNKNOWN"
+            ]
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "workflow_item_refs": {
+            "minItems": 1
+          },
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "truth_state": {
+            "const": "AUTHORITY_CONFIRMED"
+          }
+        },
+        "required": [
+          "truth_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_status": {
+            "const": "COMPLETED"
+          },
+          "outcome_class": {
+            "const": "FINAL_SUCCESS"
+          },
+          "waiting_on": {
+            "const": "NONE"
+          },
+          "checkpoint_state": {
+            "const": "CONFIRMED"
+          },
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "truth_state": {
+            "const": "AUTHORITY_REJECTED"
+          }
+        },
+        "required": [
+          "truth_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_status": {
+            "const": "BLOCKED"
+          },
+          "outcome_class": {
+            "const": "FINAL_BLOCKED"
+          },
+          "waiting_on": {
+            "const": "NONE"
+          },
+          "checkpoint_state": {
+            "const": "REJECTED"
+          },
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "truth_state": {
+            "const": "AUTHORITY_UNKNOWN"
+          }
+        },
+        "required": [
+          "truth_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_status": {
+            "const": "REVIEW_REQUIRED"
+          },
+          "outcome_class": {
+            "const": "AUTHORITY_UNKNOWN"
+          },
+          "waiting_on": {
+            "const": "AUTHORITY"
+          },
+          "checkpoint_state": {
+            "const": "UNKNOWN"
+          },
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "truth_state": {
+            "const": "AUTHORITY_OUT_OF_BAND"
+          }
+        },
+        "required": [
+          "truth_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_status": {
+            "const": "REVIEW_REQUIRED"
+          },
+          "outcome_class": {
+            "const": "OUT_OF_BAND_REVIEW"
+          },
+          "waiting_on": {
+            "const": "AUTHORITY"
+          },
+          "checkpoint_state": {
+            "const": "OUT_OF_BAND"
+          },
+          "submission_record_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome_class": {
+            "enum": [
+              "HUMAN_REVIEW",
+              "APPROVAL_PENDING",
+              "LATE_DATA_PENDING",
+              "OUT_OF_BAND_REVIEW"
+            ]
+          }
+        },
+        "required": [
+          "outcome_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "workflow_item_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "primary_action_code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "primary_action_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "actionability_state": {
+            "const": "ACTION_AVAILABLE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "no_safe_action_reason_code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "no_safe_action_reason_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "actionability_state": {
+            "const": "NO_SAFE_ACTION"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "suggested_detail_surface_code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "suggested_detail_surface_code"
+        ]
+      },
+      "then": {
+        "properties": {
+          "actionability_state": {
+            "const": "NO_SAFE_ACTION"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "actionability_state": {
+            "const": "ACTION_AVAILABLE"
+          }
+        },
+        "required": [
+          "actionability_state"
+        ]
+      },
+      "then": {
+        "required": [
+          "primary_action_code"
+        ],
+        "properties": {
+          "next_action_codes": {
+            "minItems": 1
+          },
+          "primary_action_code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "no_safe_action_reason_code": {
+            "type": "null"
+          },
+          "suggested_detail_surface_code": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "actionability_state": {
+            "const": "NO_SAFE_ACTION"
+          }
+        },
+        "required": [
+          "actionability_state"
+        ]
+      },
+      "then": {
+        "required": [
+          "no_safe_action_reason_code",
+          "suggested_detail_surface_code"
+        ],
+        "properties": {
+          "next_action_codes": {
+            "maxItems": 0
+          },
+          "primary_action_code": {
+            "type": "null"
+          },
+          "no_safe_action_reason_code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "suggested_detail_surface_code": {
+            "type": "string",
+            "enum": [
+              "EVIDENCE_TIDE",
+              "PACKET_FORGE",
+              "AUTHORITY_TUNNEL",
+              "DRIFT_FIELD",
+              "FOCUS_LENS",
+              "TWIN_PANEL"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

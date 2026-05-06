@@ -1,0 +1,103 @@
+{
+  "contract_version": "STORAGE_DELIVERY_BINDING_POLICY_V1",
+  "policy_id": "storage_delivery_binding_policy",
+  "basis_statement": "Storage objects become previewable, downloadable, or externalizable only when lifecycle state, object class, current-versus-history posture, and delivery-binding context all remain lawful together.",
+  "source_lineage": [
+    {
+      "source_file": "config/references/delivery_binding_policy.json",
+      "source_heading_or_logical_block": "delivery_rows",
+      "rationale": "Reference-level delivery binding already fixes the route, access, masking, and object identity dimensions that secure reuse must preserve."
+    },
+    {
+      "source_file": "config/object_storage/quarantine_isolation_policy.json",
+      "source_heading_or_logical_block": "rule_rows",
+      "rationale": "Quarantine law already forbids preview, download, export, and direct URL shortcuts from isolated bodies."
+    }
+  ],
+  "delivery_rows": [
+    {
+      "delivery_row_ref": "UPLOAD_SOURCE_NEVER_DELIVERED",
+      "object_class_ref": "UPLOAD_SESSION_SOURCE",
+      "lifecycle_states": ["STAGED", "SCANNING"],
+      "affordances": ["PREVIEW", "DOWNLOAD", "EXTERNALIZATION"],
+      "delivery_law": "DENY",
+      "current_history_posture": "NOT_APPLICABLE",
+      "customer_safe_derivative_required": true,
+      "drift_response": "REJECT_STALE_BINDING",
+      "signed_delivery_policy": "NO_SIGNED_URLS",
+      "notes": [
+        "Upload source bytes stay non-deliverable even after transfer settles."
+      ]
+    },
+    {
+      "delivery_row_ref": "QUARANTINE_ALWAYS_DENIES",
+      "object_class_ref": "QUARANTINED_SOURCE",
+      "lifecycle_states": ["QUARANTINED"],
+      "affordances": ["PREVIEW", "DOWNLOAD", "EXTERNALIZATION"],
+      "delivery_law": "DENY",
+      "current_history_posture": "NOT_APPLICABLE",
+      "customer_safe_derivative_required": true,
+      "drift_response": "REVOKE_EXISTING_BINDING",
+      "signed_delivery_policy": "NO_SIGNED_URLS",
+      "notes": [
+        "Quarantined bodies remain metadata-only regardless of their original publication posture."
+      ]
+    },
+    {
+      "delivery_row_ref": "RETAINED_EVIDENCE_BINDS_CURRENT_AND_HISTORY",
+      "object_class_ref": "RETAINED_EVIDENCE_CURRENT",
+      "lifecycle_states": ["PUBLISHED", "DELIVERABLE", "RETAINED"],
+      "affordances": ["PREVIEW", "DOWNLOAD"],
+      "delivery_law": "ALLOW_GOVERNED_BINDING",
+      "current_history_posture": "CURRENT_PRIMARY_HISTORY_EXPLICIT",
+      "customer_safe_derivative_required": false,
+      "drift_response": "REJECT_STALE_BINDING",
+      "signed_delivery_policy": "OPAQUE_HANDLE_ONLY",
+      "notes": [
+        "Retained evidence can be previewed or downloaded only through explicit current or historical target selection."
+      ]
+    },
+    {
+      "delivery_row_ref": "CUSTOMER_SAFE_DERIVATIVE_BINDING",
+      "object_class_ref": "CUSTOMER_SAFE_DERIVATIVE",
+      "lifecycle_states": ["PUBLISHED", "DELIVERABLE", "RETAINED"],
+      "affordances": ["PREVIEW", "DOWNLOAD"],
+      "delivery_law": "ALLOW_GOVERNED_BINDING",
+      "current_history_posture": "CURRENT_PRIMARY_HISTORY_EXPLICIT",
+      "customer_safe_derivative_required": false,
+      "drift_response": "REJECT_STALE_BINDING",
+      "signed_delivery_policy": "OPAQUE_HANDLE_ONLY",
+      "notes": [
+        "Customer-safe derivatives can be rebound without exposing their internal-only source object."
+      ]
+    },
+    {
+      "delivery_row_ref": "MASKED_EXPORT_DOWNLOAD_ONLY",
+      "object_class_ref": "MASKED_EXPORT_BUNDLE",
+      "lifecycle_states": ["PUBLISHED", "DELIVERABLE", "RETAINED"],
+      "affordances": ["DOWNLOAD", "EXTERNALIZATION"],
+      "delivery_law": "ALLOW_GOVERNED_BINDING",
+      "current_history_posture": "HISTORY_EXPLICIT_ONLY",
+      "customer_safe_derivative_required": false,
+      "drift_response": "REJECT_STALE_BINDING",
+      "signed_delivery_policy": "OPAQUE_HANDLE_ONLY",
+      "notes": [
+        "Masked exports are explicit download or governed-share surfaces and do not imply a preview route."
+      ]
+    },
+    {
+      "delivery_row_ref": "RESTRICTED_EXPORT_STEP_UP_ONLY",
+      "object_class_ref": "RESTRICTED_EXPORT_BUNDLE",
+      "lifecycle_states": ["PUBLISHED", "RETAINED"],
+      "affordances": ["DOWNLOAD"],
+      "delivery_law": "ALLOW_GOVERNED_BINDING",
+      "current_history_posture": "HISTORY_EXPLICIT_ONLY",
+      "customer_safe_derivative_required": true,
+      "drift_response": "REJECT_STALE_BINDING",
+      "signed_delivery_policy": "OPAQUE_HANDLE_ONLY",
+      "notes": [
+        "Restricted exports require a separate masked export to become customer-safe."
+      ]
+    }
+  ]
+}

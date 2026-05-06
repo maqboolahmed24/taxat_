@@ -13,12 +13,8 @@ test("renders the storage bucket topology board with semantic zones and reduced-
   await expect(
     page.getByRole("navigation", { name: "Storage buckets and purpose zones" }),
   ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Upload Intake", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Retained Evidence", exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Upload Intake", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Retained Evidence", exact: true })).toBeVisible();
   await expect(
     page.getByRole("heading", {
       name: "Derived / Export Artifacts",
@@ -53,9 +49,7 @@ test("supports keyboard selection across buckets, lifecycle rules, and event rou
 
   await expect(page.locator("#main-title")).toHaveText("Quarantine");
   await expect(page.locator("#drawer-title")).toHaveText("Quarantine");
-  await expect(page.locator("#drawer-body")).toContainText(
-    "taxat-prod-quarantine",
-  );
+  await expect(page.locator("#drawer-body")).toContainText("taxat-prod-quarantine");
   await expect(page.locator("#drawer-body")).toContainText(
     "Release uses copy/promote semantics with history retained",
   );
@@ -67,12 +61,8 @@ test("supports keyboard selection across buckets, lifecycle rules, and event rou
   await page.keyboard.press("Enter");
 
   await expect(page.locator("#main-title")).toHaveText("Restricted exports");
-  await expect(page.locator("#drawer-body")).toContainText(
-    "EXPORT_RESTRICTED_ACTIVE",
-  );
-  await expect(page.locator("#drawer-body")).toContainText(
-    "SIGNED GATEWAY ONLY OPERATOR STEP UP",
-  );
+  await expect(page.locator("#drawer-body")).toContainText("EXPORT_RESTRICTED_ACTIVE");
+  await expect(page.locator("#drawer-body")).toContainText("SIGNED GATEWAY ONLY OPERATOR STEP UP");
 
   const restrictedEvent = page.getByRole("button", {
     name: /Event route Restricted export finalized -> operator delivery attestation/i,
@@ -83,7 +73,5 @@ test("supports keyboard selection across buckets, lifecycle rules, and event rou
   await expect(page.locator("#drawer-body")).toContainText(
     "channel.export.delivery.attestation.restricted",
   );
-  await expect(page.locator("#drawer-body")).toContainText(
-    "delivery_binding_hash",
-  );
+  await expect(page.locator("#drawer-body")).toContainText("delivery_binding_hash");
 });

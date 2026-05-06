@@ -87,10 +87,14 @@ def main() -> int:
     diff = first_diff(expected_steps, actual_steps)
     if diff is not None:
         index, expected, actual = diff
-        fail(f"run_engine_step_ledger.jsonl drifted at row {index}. Expected {expected}, got {actual}")
+        fail(
+            f"run_engine_step_ledger.jsonl drifted at row {index}. Expected {expected}, got {actual}"
+        )
 
     actual_event_timeline = list(csv.DictReader(builder.EVENT_TIMELINE_PATH.open()))
-    if actual_event_timeline != [{key: str(value) for key, value in row.items()} for row in expected_event_timeline]:
+    if actual_event_timeline != [
+        {key: str(value) for key, value in row.items()} for row in expected_event_timeline
+    ]:
         fail("run_engine_event_timeline.csv drifted from the canonical phase-local audit timeline.")
 
     phase_ids = [phase["phase_id"] for phase in actual_phase_index["phases"]]
@@ -101,17 +105,15 @@ def main() -> int:
     if len(phase_names) != len(set(phase_names)):
         fail("Duplicate phase names detected in the phase index.")
 
-    all_calls = {
-        call["call_name"]: call
-        for step in actual_steps
-        for call in step["helper_calls"]
-    }
+    all_calls = {call["call_name"]: call for step in actual_steps for call in step["helper_calls"]}
     for step in actual_steps:
         for call_name in step["call_names"]:
             if call_name in step["module_calls"]:
                 continue
             if call_name not in all_calls:
-                fail(f"Call `{call_name}` was neither resolved to modules.md nor explicitly classified as a helper.")
+                fail(
+                    f"Call `{call_name}` was neither resolved to modules.md nor explicitly classified as a helper."
+                )
 
     step_event_count = sum(len(step["event_codes"]) for step in actual_steps)
     if step_event_count != actual_phase_index["summary"]["event_count"]:

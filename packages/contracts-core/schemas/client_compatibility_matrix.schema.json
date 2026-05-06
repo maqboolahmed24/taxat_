@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/client_compatibility_matrix.schema.json",
+  "title": "ClientCompatibilityMatrix",
+  "description": "Supported-client compatibility matrix. This schema freezes browser and macOS client coverage for the supported client window used in a promotion decision.",
+  "type": "object",
+  "required": [
+    "compatibility_matrix_id",
+    "candidate_environment_ref",
+    "build_artifact_ref",
+    "candidate_identity_hash",
+    "candidate_identity_contract",
+    "schema_bundle_compatibility_gate_contract",
+    "supported_client_window_ref",
+    "browser_rows",
+    "macos_rows",
+    "matrix_state",
+    "evaluated_at"
+  ],
+  "properties": {
+    "compatibility_matrix_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_environment_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "build_artifact_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_identity_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_identity_contract": {
+      "$ref": "https://taxat.dev/schemas/release_candidate_identity_contract.schema.json"
+    },
+    "schema_bundle_compatibility_gate_contract": {
+      "$ref": "https://taxat.dev/schemas/schema_bundle_compatibility_gate_contract.schema.json"
+    },
+    "supported_client_window_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "browser_rows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/matrixRow"
+      },
+      "default": []
+    },
+    "macos_rows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/matrixRow"
+      },
+      "default": []
+    },
+    "matrix_state": {
+      "type": "string",
+      "enum": [
+        "GREEN",
+        "RED"
+      ]
+    },
+    "evaluated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "matrixRow": {
+      "type": "object",
+      "required": [
+        "client_version",
+        "scenario",
+        "outcome",
+        "suite_result_ref"
+      ],
+      "properties": {
+        "client_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scenario": {
+          "type": "string",
+          "enum": [
+            "OLDEST_SUPPORTED_TO_CURRENT_SERVER",
+            "CURRENT_CLIENT_TO_ROLLBACK_SAFE_SERVER"
+          ]
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "COMPATIBLE",
+            "INCOMPATIBLE"
+          ]
+        },
+        "suite_result_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "anyOf": [
+        {
+          "properties": {
+            "browser_rows": {
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "macos_rows": {
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "if": {
+        "properties": {
+          "matrix_state": {
+            "const": "GREEN"
+          }
+        },
+        "required": [
+          "matrix_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "schema_bundle_compatibility_gate_contract": {
+            "properties": {
+              "native_client_window_state": {
+                "const": "VERIFIED_COMPATIBLE"
+              }
+            },
+            "required": [
+              "native_client_window_state"
+            ]
+          },
+          "browser_rows": {
+            "items": {
+              "$ref": "#/$defs/matrixRow",
+              "properties": {
+                "outcome": {
+                  "const": "COMPATIBLE"
+                }
+              }
+            }
+          },
+          "macos_rows": {
+            "items": {
+              "$ref": "#/$defs/matrixRow",
+              "properties": {
+                "outcome": {
+                  "const": "COMPATIBLE"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "matrix_state": {
+            "const": "RED"
+          }
+        },
+        "required": [
+          "matrix_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "schema_bundle_compatibility_gate_contract": {
+            "properties": {
+              "native_client_window_state": {
+                "const": "BLOCKED"
+              }
+            },
+            "required": [
+              "native_client_window_state"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "browser_rows": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "outcome": {
+                  "const": "INCOMPATIBLE"
+                }
+              },
+              "required": [
+                "outcome"
+              ]
+            }
+          }
+        },
+        "required": [
+          "browser_rows"
+        ]
+      },
+      "then": {
+        "properties": {
+          "matrix_state": {
+            "const": "RED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "macos_rows": {
+            "contains": {
+              "type": "object",
+              "properties": {
+                "outcome": {
+                  "const": "INCOMPATIBLE"
+                }
+              },
+              "required": [
+                "outcome"
+              ]
+            }
+          }
+        },
+        "required": [
+          "macos_rows"
+        ]
+      },
+      "then": {
+        "properties": {
+          "matrix_state": {
+            "const": "RED"
+          }
+        }
+      }
+    }
+  ]
+}

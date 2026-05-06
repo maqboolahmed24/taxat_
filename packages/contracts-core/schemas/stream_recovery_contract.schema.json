@@ -1,0 +1,242 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/stream_recovery_contract.schema.json",
+  "title": "StreamRecoveryContract",
+  "description": "Shared stream-recovery contract. This schema freezes one resumable stream scope to its route key, mounted subject, shell token, session, access-binding hash, masking-context hash, publication generation, epoch, published frontier, compaction floor, resume-binding representation, and fixed recovery policies so resume, catch-up, duplicate suppression, and rebase behavior never rely on client-side heuristics.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "stream_scope_class",
+    "route_key",
+    "subject_ref",
+    "shell_stability_token",
+    "session_ref",
+    "session_binding_hash",
+    "access_binding_hash",
+    "masking_context_hash",
+    "publication_generation",
+    "frame_epoch",
+    "last_published_sequence",
+    "compaction_floor_sequence_or_null",
+    "resume_binding_representation",
+    "resume_binding_ref_or_null",
+    "delivery_window_state",
+    "rebase_reason_code_or_null",
+    "resume_token_binding_mode",
+    "sequence_application_policy",
+    "duplicate_delivery_policy",
+    "catch_up_policy",
+    "rebase_trigger_policy"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "STREAM_RECOVERY_V1"
+    },
+    "stream_scope_class": {
+      "type": "string",
+      "enum": [
+        "MANIFEST_EXPERIENCE",
+        "WORKSPACE"
+      ]
+    },
+    "route_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "shell_stability_token": {
+      "type": "string",
+      "minLength": 1
+    },
+    "session_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "session_binding_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "access_binding_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "masking_context_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "publication_generation": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "frame_epoch": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "last_published_sequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "compaction_floor_sequence_or_null": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "resume_binding_representation": {
+      "type": "string",
+      "enum": [
+        "RAW_TOKEN",
+        "HASHED_TOKEN"
+      ]
+    },
+    "resume_binding_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "delivery_window_state": {
+      "type": "string",
+      "enum": [
+        "LIVE_RESUMABLE",
+        "REBASE_REQUIRED",
+        "ACCESS_REBIND_REQUIRED",
+        "SNAPSHOT_ONLY"
+      ]
+    },
+    "rebase_reason_code_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "FRAME_EPOCH_ADVANCED",
+        "HISTORY_COMPACTED",
+        "SHELL_STABILITY_CHANGED",
+        "ROUTE_CONTEXT_CHANGED",
+        "SESSION_BINDING_CHANGED",
+        "ACCESS_BINDING_CHANGED",
+        "MASKING_POSTURE_CHANGED",
+        "SCHEMA_INCOMPATIBLE",
+        null
+      ]
+    },
+    "resume_token_binding_mode": {
+      "const": "EXACT_ROUTE_SESSION_SCOPE_MASKING"
+    },
+    "sequence_application_policy": {
+      "const": "STRICTLY_MONOTONIC_GAP_FREE_WITHIN_EPOCH"
+    },
+    "duplicate_delivery_policy": {
+      "const": "IDEMPOTENT_BY_SCOPE_EPOCH_SEQUENCE"
+    },
+    "catch_up_policy": {
+      "const": "CATCH_UP_BEFORE_LIVE"
+    },
+    "rebase_trigger_policy": {
+      "const": "REBASE_ON_EPOCH_ADVANCE_OR_COMPACTION_OR_CONTEXT_DRIFT"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "delivery_window_state": {
+            "const": "LIVE_RESUMABLE"
+          }
+        },
+        "required": [
+          "delivery_window_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resume_binding_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "rebase_reason_code_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "delivery_window_state": {
+            "const": "REBASE_REQUIRED"
+          }
+        },
+        "required": [
+          "delivery_window_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resume_binding_ref_or_null": {
+            "type": "null"
+          },
+          "rebase_reason_code_or_null": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "delivery_window_state": {
+            "const": "ACCESS_REBIND_REQUIRED"
+          }
+        },
+        "required": [
+          "delivery_window_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resume_binding_ref_or_null": {
+            "type": "null"
+          },
+          "rebase_reason_code_or_null": {
+            "enum": [
+              "SESSION_BINDING_CHANGED",
+              "ACCESS_BINDING_CHANGED",
+              "MASKING_POSTURE_CHANGED",
+              "SCHEMA_INCOMPATIBLE"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "delivery_window_state": {
+            "const": "SNAPSHOT_ONLY"
+          }
+        },
+        "required": [
+          "delivery_window_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "resume_binding_ref_or_null": {
+            "type": "null"
+          },
+          "rebase_reason_code_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

@@ -119,7 +119,13 @@ function buildBinding(): HmrcClientVaultBinding {
       sanitized_evidence_manifest_ref: "./hmrc_client_application_inventory.evidence_manifest.json",
     },
     environment_bindings: environments.map(
-      ([environmentRef, connectionMethod, callbackProfileRef, fraudHeaderProfileRef, tokenBindingProfileRef]) => ({
+      ([
+        environmentRef,
+        connectionMethod,
+        callbackProfileRef,
+        fraudHeaderProfileRef,
+        tokenBindingProfileRef,
+      ]) => ({
         binding_row_id: `binding.${environmentRef}.${connectionMethod}`,
         environment_ref: environmentRef,
         connection_method: connectionMethod,

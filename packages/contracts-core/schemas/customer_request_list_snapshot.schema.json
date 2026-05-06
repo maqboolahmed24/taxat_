@@ -1,0 +1,644 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/customer_request_list_snapshot.schema.json",
+  "title": "CustomerRequestListSnapshot",
+  "description": "Reconnect-safe customer request queue contract for /portal/requests. This schema freezes the shared portal shell spine, customer-safe queue hierarchy, plain-language status and due posture, explicit next-action or no-safe-action rows, focus continuity, current-versus-history artifact posture, and the shared portal interaction grammar without leaking staff-only lifecycle, assignee, escalation, or audit state.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "tenant_id",
+    "client_id",
+    "shell_family",
+    "request_list_route_key",
+    "object_anchor_ref",
+    "dominant_question",
+    "language_contract",
+    "settlement_state",
+    "recovery_posture",
+    "interaction_layer",
+    "row_band_order",
+    "queue_group_order",
+    "active_filters",
+    "list_version",
+    "last_published_sequence",
+    "resume_token",
+    "cache_isolation_contract",
+    "visibility_partition",
+    "customer_safe_projection",
+    "access_binding_hash",
+    "masking_posture_fingerprint",
+    "rows",
+    "selected_item_ref_or_null",
+    "selected_focus_anchor_ref_or_null",
+    "updated_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "CustomerRequestListSnapshot"
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "client_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "shell_family": {
+      "const": "CLIENT_PORTAL_SHELL"
+    },
+    "request_list_route_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "object_anchor_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dominant_question": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "language_contract": {
+      "$ref": "https://taxat.dev/schemas/portal_language_contract.schema.json"
+    },
+    "settlement_state": {
+      "$ref": "#/$defs/settlementState"
+    },
+    "recovery_posture": {
+      "$ref": "#/$defs/recoveryPosture"
+    },
+    "interaction_layer": {
+      "$ref": "https://taxat.dev/schemas/portal_interaction_layer.schema.json"
+    },
+    "row_band_order": {
+      "const": [
+        "REQUEST_IDENTITY",
+        "STATUS_AND_DUE",
+        "REQUEST_ACTION"
+      ]
+    },
+    "queue_group_order": {
+      "const": [
+        "ACTION_REQUIRED",
+        "IN_REVIEW",
+        "WAITING_ON_US",
+        "WAITING_ON_AUTHORITY",
+        "COMPLETED"
+      ]
+    },
+    "active_filters": {
+      "$ref": "#/$defs/activeFilters"
+    },
+    "list_version": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "last_published_sequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "resume_token": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cache_isolation_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/cache_isolation_contract.schema.json"
+        },
+        {
+          "properties": {
+            "cache_scope_class": {
+              "const": "CUSTOMER_REQUEST_LIST"
+            }
+          }
+        }
+      ]
+    },
+    "visibility_partition": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/visibility_partition_contract.schema.json"
+        },
+        {
+          "properties": {
+            "partition_scope": {
+              "const": "CUSTOMER_REQUEST_LIST"
+            }
+          }
+        }
+      ]
+    },
+    "customer_safe_projection": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/customer_safe_projection_contract.schema.json"
+        },
+        {
+          "properties": {
+            "boundary_scope": {
+              "const": "CUSTOMER_REQUEST_LIST"
+            },
+            "projection_audience": {
+              "const": "CLIENT_PORTAL"
+            }
+          }
+        }
+      ]
+    },
+    "access_binding_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "masking_posture_fingerprint": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/requestRow"
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "selected_item_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "selected_focus_anchor_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "settlementState": {
+      "type": "string",
+      "enum": [
+        "STEADY",
+        "RECEIPT_PENDING",
+        "FRESHENING",
+        "STALE_REVIEW_REQUIRED",
+        "DEGRADED_READ_ONLY",
+        "RECOVERY_REQUIRED"
+      ]
+    },
+    "recoveryPosture": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "INLINE_RECONNECT",
+        "INLINE_REBASE",
+        "READ_ONLY_LIMITED",
+        "OBJECT_SUPERSEDED",
+        "ACCESS_REBIND_REQUIRED"
+      ]
+    },
+    "statusCode": {
+      "type": "string",
+      "enum": [
+        "ACTION_REQUIRED",
+        "IN_REVIEW",
+        "WAITING_ON_US",
+        "WAITING_ON_AUTHORITY",
+        "COMPLETED"
+      ]
+    },
+    "dueState": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "ON_TRACK",
+        "DUE_SOON",
+        "OVERDUE"
+      ]
+    },
+    "artifactHistoryState": {
+      "type": "string",
+      "enum": [
+        "NO_SHARED_FILES",
+        "CURRENT_ONLY",
+        "CURRENT_PLUS_HISTORY",
+        "HISTORY_ONLY",
+        "LIMITED"
+      ]
+    },
+    "activeFilters": {
+      "type": "object",
+      "required": [
+        "status_codes",
+        "due_states",
+        "unread_only",
+        "files_requested_only"
+      ],
+      "properties": {
+        "status_codes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/statusCode"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "due_states": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dueState"
+          },
+          "default": [],
+          "uniqueItems": true
+        },
+        "unread_only": {
+          "type": "boolean"
+        },
+        "files_requested_only": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "requestRow": {
+      "type": "object",
+      "required": [
+        "item_id",
+        "focus_anchor_ref",
+        "title",
+        "status_code",
+        "status_label_ref",
+        "due_state",
+        "due_at_or_null",
+        "due_label_ref_or_null",
+        "unread_count",
+        "last_staff_update_at_or_null",
+        "files_requested",
+        "primary_action_code_or_null",
+        "primary_action_label_ref_or_null",
+        "no_safe_action_reason_ref_or_null",
+        "authoritative_action",
+        "artifact_history_state",
+        "current_artifact_ref_or_null",
+        "historical_artifact_refs"
+      ],
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "focus_anchor_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 72
+        },
+        "status_code": {
+          "$ref": "#/$defs/statusCode"
+        },
+        "status_label_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48
+        },
+        "due_state": {
+          "$ref": "#/$defs/dueState"
+        },
+        "due_at_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "due_label_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^(Due .*\\d.*|Overdue .*\\d.*|No deadline yet)$"
+        },
+        "unread_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "last_staff_update_at_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "files_requested": {
+          "type": "boolean"
+        },
+        "primary_action_code_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "REPLY",
+            "UPLOAD_FILE",
+            "RESPOND_TO_REQUEST_INFO",
+            null
+          ]
+        },
+        "primary_action_label_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 36
+        },
+        "no_safe_action_reason_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "authoritative_action": {
+          "allOf": [
+            {
+              "$ref": "https://taxat.dev/schemas/action_authority_contract.schema.json"
+            },
+            {
+              "properties": {
+                "projection_scope": {
+                  "const": "CUSTOMER_REQUEST_ROW"
+                }
+              }
+            }
+          ]
+        },
+        "artifact_history_state": {
+          "$ref": "#/$defs/artifactHistoryState"
+        },
+        "current_artifact_ref_or_null": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "historical_artifact_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": [],
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "due_state": {
+                "const": "NONE"
+              }
+            },
+            "required": [
+              "due_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "due_at_or_null": {
+                "type": "null"
+              },
+              "due_label_ref_or_null": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "due_state": {
+                "enum": [
+                  "ON_TRACK",
+                  "DUE_SOON",
+                  "OVERDUE"
+                ]
+              }
+            },
+            "required": [
+              "due_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "due_label_ref_or_null": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primary_action_code_or_null": {
+                "type": "null"
+              }
+            },
+            "required": [
+              "primary_action_code_or_null"
+            ]
+          },
+          "then": {
+            "properties": {
+              "primary_action_label_ref_or_null": {
+                "type": "null"
+              },
+              "no_safe_action_reason_ref_or_null": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primary_action_code_or_null": {
+                "enum": [
+                  "REPLY",
+                  "UPLOAD_FILE",
+                  "RESPOND_TO_REQUEST_INFO"
+                ]
+              }
+            },
+            "required": [
+              "primary_action_code_or_null"
+            ]
+          },
+          "then": {
+            "properties": {
+              "primary_action_label_ref_or_null": {
+                "type": "string",
+                "minLength": 1
+              },
+              "no_safe_action_reason_ref_or_null": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "artifact_history_state": {
+                "const": "NO_SHARED_FILES"
+              }
+            },
+            "required": [
+              "artifact_history_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "current_artifact_ref_or_null": {
+                "type": "null"
+              },
+              "historical_artifact_refs": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "artifact_history_state": {
+                "const": "CURRENT_ONLY"
+              }
+            },
+            "required": [
+              "artifact_history_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "current_artifact_ref_or_null": {
+                "type": "string",
+                "minLength": 1
+              },
+              "historical_artifact_refs": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "artifact_history_state": {
+                "const": "CURRENT_PLUS_HISTORY"
+              }
+            },
+            "required": [
+              "artifact_history_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "current_artifact_ref_or_null": {
+                "type": "string",
+                "minLength": 1
+              },
+              "historical_artifact_refs": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "artifact_history_state": {
+                "const": "HISTORY_ONLY"
+              }
+            },
+            "required": [
+              "artifact_history_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "current_artifact_ref_or_null": {
+                "type": "null"
+              },
+              "historical_artifact_refs": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "selected_item_ref_or_null": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "selected_item_ref_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "selected_focus_anchor_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "selected_item_ref_or_null": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "selected_item_ref_or_null"
+        ]
+      },
+      "then": {
+        "properties": {
+          "selected_focus_anchor_ref_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

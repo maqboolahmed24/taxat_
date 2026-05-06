@@ -19,18 +19,10 @@ import {
   type QuarantineIsolationPolicy,
 } from "../../../../infra/object_storage/bootstrap/provision_buckets_for_evidence_artifacts_exports_and_quarantine.js";
 
-const repoRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "..",
-  "..",
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
 
 async function readJson<T>(segments: string[]): Promise<T> {
-  return JSON.parse(
-    await readFile(path.join(repoRoot, ...segments), "utf8"),
-  ) as T;
+  return JSON.parse(await readFile(path.join(repoRoot, ...segments), "utf8")) as T;
 }
 
 test("checked-in bucket purpose, lifecycle, event, and quarantine artifacts match the builders", async () => {
@@ -84,9 +76,7 @@ test("purpose buckets remain fully covered by lifecycle law, event routes, and q
   const lifecyclePurposeRefs = new Set(
     lifecyclePolicy.lifecycle_rows.map((row) => row.purpose_ref),
   );
-  const eventPurposeRefs = new Set(
-    eventContract.route_rows.map((row) => row.purpose_ref),
-  );
+  const eventPurposeRefs = new Set(eventContract.route_rows.map((row) => row.purpose_ref));
   purposeMatrix.purpose_rows.forEach((row) => {
     expect(lifecyclePurposeRefs.has(row.purpose_ref)).toBe(true);
     expect(eventPurposeRefs.has(row.purpose_ref)).toBe(true);
@@ -94,9 +84,7 @@ test("purpose buckets remain fully covered by lifecycle law, event routes, and q
 
   expect(
     lifecyclePolicy.lifecycle_rows.every(
-      (row) =>
-        row.duration_resolution_state ===
-        "CANONICAL_DURATION_NOT_PUBLISHED_IN_CORPUS",
+      (row) => row.duration_resolution_state === "CANONICAL_DURATION_NOT_PUBLISHED_IN_CORPUS",
     ),
   ).toBe(true);
   expect(
@@ -119,8 +107,7 @@ test("purpose buckets remain fully covered by lifecycle law, event routes, and q
   expect(
     quarantinePolicy.rule_rows.some(
       (row) =>
-        row.release_mode ===
-        "COPY_PROMOTE_WITH_NEW_CLEAN_OBJECT_VERSION_AND_HISTORY_RETAINED",
+        row.release_mode === "COPY_PROMOTE_WITH_NEW_CLEAN_OBJECT_VERSION_AND_HISTORY_RETAINED",
     ),
   ).toBe(true);
   expect(quarantinePolicy.truth_boundary_statement).toContain(

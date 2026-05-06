@@ -29,12 +29,8 @@ NATIVE_SCENE_TOPOLOGY_PATH = DATA_ANALYSIS_DIR / "native_scene_window_topology.j
 CONTINUITY_MATRIX_PATH = DATA_ANALYSIS_DIR / "continuity_recovery_matrix.json"
 
 ADR_PATH = DOCS_ARCH_ADR_DIR / "ADR-003-identity-step-up-and-session-model.md"
-COMPARISON_PATH = (
-    DOCS_ARCH_ADR_DIR / "ADR-003-identity-step-up-and-session-model-comparison.md"
-)
-SCORECARD_PATH = (
-    DOCS_ARCH_ADR_DIR / "ADR-003-identity-step-up-and-session-model-scorecard.json"
-)
+COMPARISON_PATH = DOCS_ARCH_ADR_DIR / "ADR-003-identity-step-up-and-session-model-comparison.md"
+SCORECARD_PATH = DOCS_ARCH_ADR_DIR / "ADR-003-identity-step-up-and-session-model-scorecard.json"
 SESSION_FLOW_MATRIX_PATH = DATA_ANALYSIS_DIR / "session_flow_matrix.json"
 STEP_UP_INVALIDATION_PATH = DATA_ANALYSIS_DIR / "step_up_trigger_and_invalidation_matrix.json"
 BOUNDARY_PATH = DATA_ANALYSIS_DIR / "browser_native_automation_identity_boundary.json"
@@ -111,10 +107,7 @@ def md_escape(value: Any) -> str:
 def markdown_table(headers: list[str], rows: list[list[Any]]) -> str:
     header_line = "| " + " | ".join(headers) + " |"
     divider_line = "| " + " | ".join("---" for _ in headers) + " |"
-    body_lines = [
-        "| " + " | ".join(md_escape(cell) for cell in row) + " |"
-        for row in rows
-    ]
+    body_lines = ["| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows]
     return "\n".join([header_line, divider_line, *body_lines])
 
 
@@ -131,15 +124,9 @@ def build_supporting_context() -> dict[str, Any]:
     native_topology = load_json(NATIVE_SCENE_TOPOLOGY_PATH)
     continuity_matrix = load_json(CONTINUITY_MATRIX_PATH)
 
-    dependency_keys = {
-        row["dependency_key"]: row for row in dependency_register["dependencies"]
-    }
-    credential_rows = {
-        row["credential_key"]: row for row in credentials["credential_records"]
-    }
-    continuity_rows = {
-        row["scenario_id"]: row for row in continuity_matrix["scenarios"]
-    }
+    dependency_keys = {row["dependency_key"]: row for row in dependency_register["dependencies"]}
+    credential_rows = {row["credential_key"]: row for row in credentials["credential_records"]}
+    continuity_rows = {row["scenario_id"]: row for row in continuity_matrix["scenarios"]}
 
     return {
         "dependency_count": dependency_register["dependency_count"],
@@ -151,13 +138,9 @@ def build_supporting_context() -> dict[str, Any]:
         "idp_client_dependency": dependency_keys["IDP_TENANT_AND_APPLICATION_CLIENTS"],
         "idp_policy_dependency": dependency_keys["IDP_ROLE_SCOPE_MFA_AND_SESSION_POLICIES"],
         "idp_client_secret_record": credential_rows["idp-application-client-secrets"],
-        "idp_admin_material_record": credential_rows[
-            "idp-federation-signing-and-admin-material"
-        ],
+        "idp_admin_material_record": credential_rows["idp-federation-signing-and-admin-material"],
         "deep_link_restore": continuity_rows["deep_link_entry_and_restore"],
-        "access_rebind_after_scope_change": continuity_rows[
-            "access_rebind_after_scope_change"
-        ],
+        "access_rebind_after_scope_change": continuity_rows["access_rebind_after_scope_change"],
     }
 
 
@@ -219,7 +202,9 @@ def build_criteria() -> list[dict[str, Any]]:
             "source_refs": [
                 heading_ref(NORTHBOUND_PATH, "8. Session, browser, and native-client rules"),
                 heading_ref(SECURITY_PATH, "2. Identity, session, and command trust"),
-                heading_ref(SECURITY_PATH, "4. Browser, native-client, API, and transport hardening"),
+                heading_ref(
+                    SECURITY_PATH, "4. Browser, native-client, API, and transport hardening"
+                ),
                 text_ref(
                     SECURITY_PATH,
                     "3. no browser-origin write action without authenticated session and anti-CSRF protection, and no",
@@ -237,7 +222,9 @@ def build_criteria() -> list[dict[str, Any]]:
                 heading_ref(MACOS_PATH, "7. Authentication and session strategy"),
                 heading_ref(MACOS_PATH, "8. Persistence model"),
                 heading_ref(MACOS_PATH, "11. Security and runtime posture for the desktop client"),
-                heading_ref(SECURITY_PATH, "4. Browser, native-client, API, and transport hardening"),
+                heading_ref(
+                    SECURITY_PATH, "4. Browser, native-client, API, and transport hardening"
+                ),
             ],
         },
         {
@@ -272,7 +259,9 @@ def build_criteria() -> list[dict[str, Any]]:
             "priority": "HARD_REQUIREMENT",
             "rationale": "Invite links, deep links, upload sessions, and external handoffs must preserve same-object continuity while still forcing authenticated upgrade before any sensitive mutation.",
             "source_refs": [
-                heading_ref(NORTHBOUND_PATH, "2.2 Customer/Client portal and upload-session surfaces"),
+                heading_ref(
+                    NORTHBOUND_PATH, "2.2 Customer/Client portal and upload-session surfaces"
+                ),
                 heading_ref(NORTHBOUND_PATH, "8. Session, browser, and native-client rules"),
                 heading_ref(PORTAL_PATH, "Onboarding flow"),
                 heading_ref(PORTAL_PATH, "Artifact, print, and browser-handoff rules"),
@@ -308,7 +297,9 @@ def build_criteria() -> list[dict[str, Any]]:
             "rationale": "The model should produce one explainable lineage from human or machine identity through authorization, step-up evidence, session revocation, and authority request issuance.",
             "source_refs": [
                 heading_ref(ACTOR_MODEL_PATH, "3.9 Policy decision model"),
-                heading_ref(ACTOR_MODEL_PATH, "3.15 Frontend and governance-console rendering contract"),
+                heading_ref(
+                    ACTOR_MODEL_PATH, "3.15 Frontend and governance-console rendering contract"
+                ),
                 heading_ref(SECURITY_PATH, "2. Identity, session, and command trust"),
                 heading_ref(AUTHORITY_PATH, "9.15 Audit invariants"),
             ],
@@ -534,9 +525,7 @@ def validate_inputs(criteria: list[dict[str, Any]], alternatives: list[dict[str,
             raise ValueError(f"Invalid priority: {criterion['priority']}")
     for alternative in alternatives:
         if set(alternative["criterion_scores"]) != criterion_ids:
-            raise ValueError(
-                f"{alternative['alternative_id']} does not cover every criterion"
-            )
+            raise ValueError(f"{alternative['alternative_id']} does not cover every criterion")
         for score_entry in alternative["criterion_scores"].values():
             raw_score = float(score_entry["raw_score"])
             if raw_score < 1 or raw_score > 5:
@@ -553,9 +542,7 @@ def calculate_results(
         weighted_total = 0.0
         for criterion in criteria:
             entry = alternative["criterion_scores"][criterion["criterion_id"]]
-            weighted_score = round(
-                float(entry["raw_score"]) * criterion["weight"] / 5.0, 2
-            )
+            weighted_score = round(float(entry["raw_score"]) * criterion["weight"] / 5.0, 2)
             weighted_total = round(weighted_total + weighted_score, 2)
             criterion_breakdown.append(
                 {
@@ -617,7 +604,9 @@ def build_session_flow_matrix(supporting_context: dict[str, Any]) -> dict[str, A
                 heading_ref(ACTOR_MODEL_PATH, "3.3 Actor classes"),
                 heading_ref(NORTHBOUND_PATH, "8. Session, browser, and native-client rules"),
                 heading_ref(SECURITY_PATH, "2. Identity, session, and command trust"),
-                heading_ref(SECURITY_PATH, "4. Browser, native-client, API, and transport hardening"),
+                heading_ref(
+                    SECURITY_PATH, "4. Browser, native-client, API, and transport hardening"
+                ),
             ],
         },
         {
@@ -777,7 +766,9 @@ def build_session_flow_matrix(supporting_context: dict[str, Any]) -> dict[str, A
                 "Revocation invalidates outstanding upload-session control operations.",
             ],
             "source_refs": [
-                heading_ref(NORTHBOUND_PATH, "2.2 Customer/Client portal and upload-session surfaces"),
+                heading_ref(
+                    NORTHBOUND_PATH, "2.2 Customer/Client portal and upload-session surfaces"
+                ),
                 heading_ref(PORTAL_PATH, "Secure document-upload flow"),
                 heading_ref(NORTHBOUND_PATH, "8. Session, browser, and native-client rules"),
             ],
@@ -1019,7 +1010,9 @@ def build_step_up_trigger_and_invalidation_matrix() -> dict[str, Any]:
             ],
             "source_refs": [
                 heading_ref(ACTOR_MODEL_PATH, "3.11 Non-delegable and step-up actions"),
-                heading_ref(MACOS_PATH, "10. Native UX opportunities that should replace browser habits"),
+                heading_ref(
+                    MACOS_PATH, "10. Native UX opportunities that should replace browser habits"
+                ),
                 heading_ref(MACOS_PATH, "11. Security and runtime posture for the desktop client"),
             ],
         },
@@ -1152,14 +1145,10 @@ def build_step_up_trigger_and_invalidation_matrix() -> dict[str, Any]:
             "trigger_count": len(trigger_rows),
             "invalidation_event_count": len(invalidation_events),
             "step_up_required_count": sum(
-                1
-                for row in trigger_rows
-                if row["trigger_kind"] == "STEP_UP_REQUIRED"
+                1 for row in trigger_rows if row["trigger_kind"] == "STEP_UP_REQUIRED"
             ),
             "step_up_or_approval_required_count": sum(
-                1
-                for row in trigger_rows
-                if row["trigger_kind"] == "STEP_UP_OR_APPROVAL_REQUIRED"
+                1 for row in trigger_rows if row["trigger_kind"] == "STEP_UP_OR_APPROVAL_REQUIRED"
             ),
             "upgrade_gate_count": sum(
                 1
@@ -1172,9 +1161,7 @@ def build_step_up_trigger_and_invalidation_matrix() -> dict[str, Any]:
     }
 
 
-def build_identity_boundary(
-    supporting_context: dict[str, Any]
-) -> dict[str, Any]:
+def build_identity_boundary(supporting_context: dict[str, Any]) -> dict[str, Any]:
     boundaries = [
         {
             "boundary_id": "interactive_browser_human",
@@ -1240,7 +1227,9 @@ def build_identity_boundary(
             "source_refs": [
                 heading_ref(MACOS_PATH, "7. Authentication and session strategy"),
                 heading_ref(MACOS_PATH, "11. Security and runtime posture for the desktop client"),
-                heading_ref(SECURITY_PATH, "4. Browser, native-client, API, and transport hardening"),
+                heading_ref(
+                    SECURITY_PATH, "4. Browser, native-client, API, and transport hardening"
+                ),
             ],
         },
         {
@@ -1282,7 +1271,9 @@ def build_identity_boundary(
             "can_satisfy_human_only_actions": False,
             "source_refs": [
                 heading_ref(NORTHBOUND_PATH, "8. Session, browser, and native-client rules"),
-                heading_ref(SECURITY_PATH, "4. Browser, native-client, API, and transport hardening"),
+                heading_ref(
+                    SECURITY_PATH, "4. Browser, native-client, API, and transport hardening"
+                ),
             ],
         },
         {
@@ -1298,9 +1289,7 @@ def build_identity_boundary(
                 "raw authority access or refresh tokens in browser, queue, read model, or device cache",
                 "mixed storage of IdP tenant-admin material with general application state",
             ],
-            "storage_boundary": supporting_context["idp_client_secret_record"][
-                "storage_boundary"
-            ],
+            "storage_boundary": supporting_context["idp_client_secret_record"]["storage_boundary"],
             "step_up_support": "Not applicable directly; this boundary exists to keep downstream token handling governed.",
             "can_satisfy_human_only_actions": False,
             "source_refs": [
@@ -1322,9 +1311,7 @@ def build_identity_boundary(
     }
 
 
-def build_deep_link_invite_and_resume_rules(
-    supporting_context: dict[str, Any]
-) -> dict[str, Any]:
+def build_deep_link_invite_and_resume_rules(supporting_context: dict[str, Any]) -> dict[str, Any]:
     rules = [
         {
             "rule_id": "invite_upgrade_before_sensitive_mutation",
@@ -1403,7 +1390,9 @@ def build_deep_link_invite_and_resume_rules(
             "applicable_channels": ["BROWSER", "BROWSER_OR_MOBILE_TRANSFER"],
             "fallback_or_recovery": "Request rebases preserve the same upload lineage but may require explicit reconfirmation or rebind-required posture.",
             "source_refs": [
-                heading_ref(NORTHBOUND_PATH, "2.2 Customer/Client portal and upload-session surfaces"),
+                heading_ref(
+                    NORTHBOUND_PATH, "2.2 Customer/Client portal and upload-session surfaces"
+                ),
                 heading_ref(PORTAL_PATH, "Secure document-upload flow"),
             ],
         },
@@ -1468,9 +1457,7 @@ def build_scorecard_payload(
         "coverage_summary": {
             "session_flow_count": session_matrix["summary"]["flow_count"],
             "step_up_trigger_count": step_up_matrix["summary"]["trigger_count"],
-            "invalidation_event_count": step_up_matrix["summary"][
-                "invalidation_event_count"
-            ],
+            "invalidation_event_count": step_up_matrix["summary"]["invalidation_event_count"],
             "identity_boundary_count": boundary["summary"]["boundary_count"],
             "deep_link_and_resume_rule_count": deep_link_rules["summary"]["rule_count"],
         },
@@ -1478,33 +1465,36 @@ def build_scorecard_payload(
 
 
 def build_mermaid() -> str:
-    return "\n".join(
-        [
-            "graph LR",
-            '  Browser["Browser human session"] --> IdP["OIDC / OAuth identity provider"]',
-            '  IdP --> BrowserSession["Secure `HttpOnly` same-site session + anti-CSRF"]',
-            '  BrowserSession --> Taxat["Taxat command, read, and stream surfaces"]',
-            '  Browser["Browser human session"] --> StepUp["Contained step-up checkpoint"]',
-            '  StepUp --> Rotate["Rotate challenge state"]',
-            '  Rotate --> Invalidate["Invalidate pre-step-up commands, cursors, and resume artifacts"]',
-            '  DeepLink["Invite / deep-link entry"] --> Upgrade["Upgrade to normal authenticated session"]',
-            '  Upgrade --> BrowserSession',
-            '  Upload["Governed upload session"] --> UploadBind["Frozen tenant / client / request binding"]',
-            '  UploadBind --> Taxat',
-            '  Native["Native macOS operator"] --> SystemBrowser["ASWebAuthenticationSession / system-browser flow"]',
-            '  SystemBrowser --> IdP',
-            '  IdP --> Keychain["Keychain-held product-session material"]',
-            '  Keychain --> Taxat',
-            '  Machine["Machine automation client"] --> MachineCred["Short-lived machine credential"]',
-            '  MachineCred --> Taxat',
-            '  Taxat --> Vault["Vault-held authority tokens + IdP secrets"]',
-            '  Vault --> Binding["AuthorityBinding + token-lineage revalidation"]',
-            '  Binding --> Authority["Authority gateway / HMRC"]',
-            '  Revoke["Revocation / tenant switch / binding drift"] --> Purge["Invalidate resume tokens, upload controls, caches, and future command acceptance"]',
-            '  Purge --> BrowserSession',
-            '  Purge --> Keychain',
-        ]
-    ) + "\n"
+    return (
+        "\n".join(
+            [
+                "graph LR",
+                '  Browser["Browser human session"] --> IdP["OIDC / OAuth identity provider"]',
+                '  IdP --> BrowserSession["Secure `HttpOnly` same-site session + anti-CSRF"]',
+                '  BrowserSession --> Taxat["Taxat command, read, and stream surfaces"]',
+                '  Browser["Browser human session"] --> StepUp["Contained step-up checkpoint"]',
+                '  StepUp --> Rotate["Rotate challenge state"]',
+                '  Rotate --> Invalidate["Invalidate pre-step-up commands, cursors, and resume artifacts"]',
+                '  DeepLink["Invite / deep-link entry"] --> Upgrade["Upgrade to normal authenticated session"]',
+                "  Upgrade --> BrowserSession",
+                '  Upload["Governed upload session"] --> UploadBind["Frozen tenant / client / request binding"]',
+                "  UploadBind --> Taxat",
+                '  Native["Native macOS operator"] --> SystemBrowser["ASWebAuthenticationSession / system-browser flow"]',
+                "  SystemBrowser --> IdP",
+                '  IdP --> Keychain["Keychain-held product-session material"]',
+                "  Keychain --> Taxat",
+                '  Machine["Machine automation client"] --> MachineCred["Short-lived machine credential"]',
+                "  MachineCred --> Taxat",
+                '  Taxat --> Vault["Vault-held authority tokens + IdP secrets"]',
+                '  Vault --> Binding["AuthorityBinding + token-lineage revalidation"]',
+                '  Binding --> Authority["Authority gateway / HMRC"]',
+                '  Revoke["Revocation / tenant switch / binding drift"] --> Purge["Invalidate resume tokens, upload controls, caches, and future command acceptance"]',
+                "  Purge --> BrowserSession",
+                "  Purge --> Keychain",
+            ]
+        )
+        + "\n"
+    )
 
 
 def build_adr_markdown(
@@ -1534,10 +1524,7 @@ def build_adr_markdown(
     )
     alternatives_table = markdown_table(
         ["Alternative", "Weighted Score", "Rank"],
-        [
-            [result["label"], result["weighted_total"], result["rank"]]
-            for result in results
-        ],
+        [[result["label"], result["weighted_total"], result["rank"]] for result in results],
     )
     trigger_table = markdown_table(
         ["Trigger", "Outcome", "Actors", "Invalidation / Revalidation"],
@@ -1587,14 +1574,14 @@ def build_adr_markdown(
 
 Taxat needs one declared identity and session model that spans browser operators, portal users, native macOS operators, machine automation clients, invite and deep-link entry, upload resumability, and authority-integrated send paths. The source corpus is unusually explicit: it names non-delegable actions, freezes `PrincipalContext` and `AuthorityBinding` lineage, requires anti-CSRF for browser writes, forbids raw authority credentials on native devices, and insists that step-up completion or revocation invalidate stale resumability rather than letting commands drift forward.
 
-The prior phase-00 packs already established the surrounding architecture constraints: the dependency register surfaced `{supporting_context['dependency_count']}` dependencies including explicit IdP tenant and policy setup, the shell atlas normalized `{supporting_context['route_count']}` routes across `{supporting_context['shell_family_count']}` shell families, the native topology fixed `{supporting_context['native_auth_transport']}` as the preferred auth handoff, and the continuity matrix captured `{supporting_context['continuity_scenario_count']}` recovery scenarios. ADR-003 closes the remaining gap by selecting one cross-surface model for interactive sessions, step-up, machine credentials, deep-link upgrade, and invalidation behavior.
+The prior phase-00 packs already established the surrounding architecture constraints: the dependency register surfaced `{supporting_context["dependency_count"]}` dependencies including explicit IdP tenant and policy setup, the shell atlas normalized `{supporting_context["route_count"]}` routes across `{supporting_context["shell_family_count"]}` shell families, the native topology fixed `{supporting_context["native_auth_transport"]}` as the preferred auth handoff, and the continuity matrix captured `{supporting_context["continuity_scenario_count"]}` recovery scenarios. ADR-003 closes the remaining gap by selecting one cross-surface model for interactive sessions, step-up, machine credentials, deep-link upgrade, and invalidation behavior.
 
 ## Decision
 
 Adopt a **standards-based identity model with server-mediated interactive sessions**:
 
 - Human browser sessions authenticate through an OIDC/OAuth-capable identity provider and operate through secure `HttpOnly`, same-site cookies or an equivalently protected same-origin server-mediated session posture with anti-CSRF.
-- Native macOS operators authenticate and step up through `{supporting_context['native_auth_transport']}` or an equivalent system-browser-managed flow, storing only product-session artifacts in Keychain-class storage.
+- Native macOS operators authenticate and step up through `{supporting_context["native_auth_transport"]}` or an equivalent system-browser-managed flow, storing only product-session artifacts in Keychain-class storage.
 - Machine automation clients use distinct short-lived non-browser credentials and explicit service identity; they are never interchangeable with human interactive sessions.
 - Raw authority access or refresh tokens and IdP client-secret material stay in governed vault or secret-store boundaries, never in browser storage, native device caches, queues, or read models.
 - Invite, deep-link, upload-session, and authority-owned handoff flows may preserve same-object continuity, but sensitive mutation still requires a normal authenticated session and any required fresh step-up.
@@ -1608,25 +1595,25 @@ Adopt a **standards-based identity model with server-mediated interactive sessio
 
 {trigger_table}
 
-The matrix covers `{step_up_matrix['summary']['trigger_count']}` trigger rows: `{step_up_matrix['summary']['step_up_required_count']}` explicit step-up-only trigger, `{step_up_matrix['summary']['step_up_or_approval_required_count']}` step-up-or-approval trigger families, and `{step_up_matrix['summary']['upgrade_gate_count']}` authenticated-upgrade gate for invite or deep-link entry.
+The matrix covers `{step_up_matrix["summary"]["trigger_count"]}` trigger rows: `{step_up_matrix["summary"]["step_up_required_count"]}` explicit step-up-only trigger, `{step_up_matrix["summary"]["step_up_or_approval_required_count"]}` step-up-or-approval trigger families, and `{step_up_matrix["summary"]["upgrade_gate_count"]}` authenticated-upgrade gate for invite or deep-link entry.
 
 ## Session Flows
 
 {session_table}
 
-The session matrix covers `{session_matrix['summary']['flow_count']}` governed flows and keeps browser human, portal human, native human, machine automation, invite or deep-link pre-upgrade, and upload-session transfer posture explicitly separate.
+The session matrix covers `{session_matrix["summary"]["flow_count"]}` governed flows and keeps browser human, portal human, native human, machine automation, invite or deep-link pre-upgrade, and upload-session transfer posture explicitly separate.
 
 ## Identity Boundaries
 
 {boundary_table}
 
-The boundary model uses `{boundary['summary']['boundary_count']}` explicit security boundaries so browser human, native human, machine automation, limited-context entry, embedded low-risk web content, and vault-held secret material do not collapse into one ambiguous login posture.
+The boundary model uses `{boundary["summary"]["boundary_count"]}` explicit security boundaries so browser human, native human, machine automation, limited-context entry, embedded low-risk web content, and vault-held secret material do not collapse into one ambiguous login posture.
 
 ## Alternatives Considered
 
 {alternatives_table}
 
-The winning option is **{winner['label']}** with a weighted score of `{winner['weighted_total']}`.
+The winning option is **{winner["label"]}** with a weighted score of `{winner["weighted_total"]}`.
 
 ## Why This Option Wins
 
@@ -1845,9 +1832,7 @@ def main() -> None:
                 "winner_score": results[0]["weighted_total"],
                 "session_flows": session_matrix["summary"]["flow_count"],
                 "step_up_triggers": step_up_matrix["summary"]["trigger_count"],
-                "invalidation_events": step_up_matrix["summary"][
-                    "invalidation_event_count"
-                ],
+                "invalidation_events": step_up_matrix["summary"]["invalidation_event_count"],
                 "identity_boundaries": boundary["summary"]["boundary_count"],
                 "deep_link_rules": deep_link_rules["summary"]["rule_count"],
             },

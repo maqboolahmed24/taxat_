@@ -26,9 +26,7 @@ export interface SelectorManifest {
   selectors: SelectorDescriptor[];
 }
 
-const selectorOrder = new Map(
-  SELECTOR_STRATEGY_ORDER.map((strategy, index) => [strategy, index]),
-);
+const selectorOrder = new Map(SELECTOR_STRATEGY_ORDER.map((strategy, index) => [strategy, index]));
 
 export function validateSelectorManifest(manifest: SelectorManifest): void {
   for (const selector of manifest.selectors) {
@@ -43,13 +41,10 @@ export function validateSelectorManifest(manifest: SelectorManifest): void {
   }
 }
 
-export function rankSelectors(
-  selectors: readonly SelectorDescriptor[],
-): SelectorDescriptor[] {
+export function rankSelectors(selectors: readonly SelectorDescriptor[]): SelectorDescriptor[] {
   return [...selectors].sort(
     (left, right) =>
-      (selectorOrder.get(left.strategy) ?? 999) -
-      (selectorOrder.get(right.strategy) ?? 999),
+      (selectorOrder.get(left.strategy) ?? 999) - (selectorOrder.get(right.strategy) ?? 999),
   );
 }
 

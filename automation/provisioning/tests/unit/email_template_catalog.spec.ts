@@ -19,13 +19,7 @@ import {
 } from "../../src/providers/email/flows/configure_templates_and_webhooks.js";
 import { EMAIL_PROVIDER_ID } from "../../src/providers/email/flows/create_email_account_and_sender_domain.js";
 
-const repoRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "..",
-  "..",
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
 
 async function readJson<T>(segments: string[]): Promise<T> {
   const filePath = path.join(repoRoot, ...segments);
@@ -59,19 +53,11 @@ test("checked-in template catalog, inventory, and notification atlas match the b
   ]);
   const sampleRun = await readJson<{
     notificationCopyAtlas: NotificationCopyAtlasViewModel;
-  }>([
-    "automation",
-    "provisioning",
-    "report_viewer",
-    "data",
-    "sample_run.json",
-  ]);
+  }>(["automation", "provisioning", "report_viewer", "data", "sample_run.json"]);
 
   expect(persistedCatalog).toEqual(createRecommendedEmailTemplateCatalog());
   expect(persistedInventory).toEqual(createTemplateEmailInventory(templateRunContext()));
-  expect(sampleRun.notificationCopyAtlas).toEqual(
-    createNotificationCopyAtlasViewModel(),
-  );
+  expect(sampleRun.notificationCopyAtlas).toEqual(createNotificationCopyAtlasViewModel());
 });
 
 test("every configured template stays inside the allowed customer-visible families with safe variables and explicit sender bindings", () => {
@@ -83,9 +69,7 @@ test("every configured template stays inside the allowed customer-visible famili
   validateEmailTemplateInventory(inventory, catalog, webhookContract);
 
   expect(catalog.template_records).toHaveLength(6);
-  expect(
-    new Set(catalog.template_records.map((record) => record.notification_family)),
-  ).toEqual(
+  expect(new Set(catalog.template_records.map((record) => record.notification_family))).toEqual(
     new Set([
       "REQUEST_INFO_CREATED",
       "STAFF_CUSTOMER_COMMENT_CREATED",
@@ -110,9 +94,7 @@ test("every configured template stays inside the allowed customer-visible famili
       (record) => record.sender_identity_profile_ref === "support_acknowledgement_help",
     ),
   ).toBe(true);
-  expect(
-    catalog.blocked_event_families,
-  ).toEqual(
+  expect(catalog.blocked_event_families).toEqual(
     expect.arrayContaining([
       "InternalNoteAdded",
       "WorkItemAssigned",
@@ -121,4 +103,3 @@ test("every configured template stays inside the allowed customer-visible famili
     ]),
   );
 });
-

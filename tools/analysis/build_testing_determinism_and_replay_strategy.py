@@ -27,12 +27,8 @@ RELEASE_EVIDENCE_PATH = (
 SEMANTIC_REGRESSION_PATH = (
     ALGORITHM_DIR / "semantic_selector_and_accessibility_regression_pack_contract.md"
 )
-SHELL_CONTINUITY_PATH = (
-    ALGORITHM_DIR / "shell_continuity_fuzzing_and_recovery_contract.md"
-)
-FOCUS_RESTORE_PATH = (
-    ALGORITHM_DIR / "focus_restoration_and_return_target_harness_contract.md"
-)
+SHELL_CONTINUITY_PATH = ALGORITHM_DIR / "shell_continuity_fuzzing_and_recovery_contract.md"
+FOCUS_RESTORE_PATH = ALGORITHM_DIR / "focus_restoration_and_return_target_harness_contract.md"
 UPLOAD_RECOVERY_PATH = ALGORITHM_DIR / "upload_session_recovery_harness_contract.md"
 NATIVE_CACHE_PATH = ALGORITHM_DIR / "native_cache_hydration_purge_and_rebase_contract.md"
 CACHE_ISOLATION_PATH = ALGORITHM_DIR / "cache_isolation_and_secure_reuse_contract.md"
@@ -40,14 +36,10 @@ AUTHORITY_PATH = ALGORITHM_DIR / "authority_interaction_protocol.md"
 DEPLOYMENT_PATH = ALGORITHM_DIR / "deployment_and_resilience_contract.md"
 OBSERVABILITY_PATH = ALGORITHM_DIR / "observability_and_audit_contract.md"
 ERROR_MODEL_PATH = ALGORITHM_DIR / "error_model_and_remediation_model.md"
-FAILURE_DASHBOARD_PATH = (
-    ALGORITHM_DIR / "failure_lifecycle_dashboard_and_lineage_contract.md"
-)
+FAILURE_DASHBOARD_PATH = ALGORITHM_DIR / "failure_lifecycle_dashboard_and_lineage_contract.md"
 
 REPLAY_CLASS_MATRIX_PATH = DATA_ANALYSIS_DIR / "replay_class_and_precondition_matrix.json"
-REPLAY_COMPARE_MATRIX_PATH = (
-    DATA_ANALYSIS_DIR / "replay_comparison_and_attestation_matrix.json"
-)
+REPLAY_COMPARE_MATRIX_PATH = DATA_ANALYSIS_DIR / "replay_comparison_and_attestation_matrix.json"
 RELEASE_GATE_MATRIX_PATH = (
     DATA_ANALYSIS_DIR / "release_candidate_and_compatibility_gate_matrix.json"
 )
@@ -65,14 +57,10 @@ SCORECARD_PATH = (
     DOCS_ARCH_ADR_DIR / "ADR-008-testing-determinism-and-replay-strategy-scorecard.json"
 )
 TEST_FAMILY_MATRIX_PATH = DATA_ANALYSIS_DIR / "test_family_to_constraint_matrix.json"
-FIXTURE_STRATEGY_PATH = (
-    DATA_ANALYSIS_DIR / "deterministic_fixture_and_replay_basis_strategy.json"
-)
+FIXTURE_STRATEGY_PATH = DATA_ANALYSIS_DIR / "deterministic_fixture_and_replay_basis_strategy.json"
 EDGE_MATRIX_PATH = DATA_ANALYSIS_DIR / "browser_native_authority_test_matrix.json"
 FLAKE_POLICY_PATH = DATA_ANALYSIS_DIR / "flakiness_budget_and_quarantine_rules.json"
-RELEASE_BINDING_PATH = (
-    DATA_ANALYSIS_DIR / "release_candidate_test_evidence_binding.json"
-)
+RELEASE_BINDING_PATH = DATA_ANALYSIS_DIR / "release_candidate_test_evidence_binding.json"
 TASK_TRACK_MAP_PATH = DATA_ANALYSIS_DIR / "test_suite_to_task_track_map.json"
 MERMAID_PATH = DIAGRAMS_ANALYSIS_DIR / "ADR-008-testing-determinism-replay-strategy.mmd"
 
@@ -148,9 +136,7 @@ def md_escape(value: Any) -> str:
 def markdown_table(headers: list[str], rows: list[list[Any]]) -> str:
     header_line = "| " + " | ".join(headers) + " |"
     divider_line = "| " + " | ".join("---" for _ in headers) + " |"
-    body_lines = [
-        "| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows
-    ]
+    body_lines = ["| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows]
     return "\n".join([header_line, divider_line, *body_lines])
 
 
@@ -179,26 +165,16 @@ def build_supporting_context() -> dict[str, Any]:
         "admissibility_requirement_count": release_matrix["summary"][
             "admissibility_requirement_count"
         ],
-        "release_evidence_binding_count": release_matrix["summary"][
-            "evidence_binding_count"
-        ],
+        "release_evidence_binding_count": release_matrix["summary"]["evidence_binding_count"],
         "security_release_gate_count": security_matrix["summary"]["release_gate_count"],
-        "native_automation_layer_count": native_handoff["summary"][
-            "automation_layer_count"
-        ],
-        "native_scene_scenario_count": native_handoff["summary"][
-            "native_scene_scenario_count"
-        ],
-        "authority_operation_family_count": authority_catalog["summary"][
-            "operation_family_count"
-        ],
+        "native_automation_layer_count": native_handoff["summary"]["automation_layer_count"],
+        "native_scene_scenario_count": native_handoff["summary"]["native_scene_scenario_count"],
+        "authority_operation_family_count": authority_catalog["summary"]["operation_family_count"],
         "authority_protocol_object_count": authority_catalog["summary"][
             "core_protocol_object_count"
         ],
         "authority_flow_count": authority_flow["flow_count"],
-        "browser_continuity_case_count": len(
-            web_playwright["coverage"]["continuity_scenarios"]
-        ),
+        "browser_continuity_case_count": len(web_playwright["coverage"]["continuity_scenarios"]),
         "browser_handoff_rule_count": len(web_playwright["browser_handoff_plan"]["rules"]),
     }
 
@@ -283,8 +259,14 @@ def build_criteria() -> list[dict[str, Any]]:
             "rationale": "Fast deterministic fixtures, stable seeds, and predictable acceptance harnesses need to be runnable in development without forcing full end-to-end sandboxes for every change.",
             "source_refs": [
                 heading_ref(REPLAY_PATH, "Deterministic golden-fixture boundary"),
-                heading_ref(TEST_VECTORS_PATH, "TV-44F: Deterministic golden pack freezes ordered null slots and exact-decimal strings"),
-                heading_ref(TEST_VECTORS_PATH, "TV-39P: Semantic accessibility regression pack binds every governed shell to exact selector and announcement contracts"),
+                heading_ref(
+                    TEST_VECTORS_PATH,
+                    "TV-44F: Deterministic golden pack freezes ordered null slots and exact-decimal strings",
+                ),
+                heading_ref(
+                    TEST_VECTORS_PATH,
+                    "TV-39P: Semantic accessibility regression pack binds every governed shell to exact selector and announcement contracts",
+                ),
                 heading_ref(NATIVE_CACHE_PATH, "Authoritative artifacts"),
             ],
         },
@@ -528,9 +510,7 @@ def build_scorecard(
         weighted_total = 0.0
         criterion_breakdown: list[dict[str, Any]] = []
         for criterion in criteria:
-            raw_score, note = score_map[alternative["alternative_id"]][
-                criterion["criterion_id"]
-            ]
+            raw_score, note = score_map[alternative["alternative_id"]][criterion["criterion_id"]]
             weighted_score = round(criterion["weight"] * raw_score / 5, 2)
             weighted_total += weighted_score
             criterion_breakdown.append(
@@ -626,8 +606,14 @@ def build_test_family_matrix(context: dict[str, Any]) -> dict[str, Any]:
                     heading_ref(VERIFY_GATES_PATH, "A. Schema and contract validation"),
                     heading_ref(RELEASE_EVIDENCE_PATH, "2. Contract boundary"),
                     heading_ref(RELEASE_EVIDENCE_PATH, "3. Admissibility boundary"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-77: Schema evolution preserves historical-manifest continuity through expand, backfill, and contract"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-78: Mixed-candidate release evidence is rejected before promotion"),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-77: Schema evolution preserves historical-manifest continuity through expand, backfill, and contract",
+                    ),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-78: Mixed-candidate release evidence is rejected before promotion",
+                    ),
                 ]
             ),
         },
@@ -678,9 +664,18 @@ def build_test_family_matrix(context: dict[str, Any]) -> dict[str, Any]:
                 [
                     heading_ref(VERIFY_GATES_PATH, "B. Deterministic module and formula tests"),
                     heading_ref(REPLAY_PATH, "Deterministic golden-fixture boundary"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-44F: Deterministic golden pack freezes ordered null slots and exact-decimal strings"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-44G: Deterministic golden pack freezes named lifecycle transitions"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-44H: Deterministic golden pack freezes replay hashes and cadence without jitter"),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-44F: Deterministic golden pack freezes ordered null slots and exact-decimal strings",
+                    ),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-44G: Deterministic golden pack freezes named lifecycle transitions",
+                    ),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-44H: Deterministic golden pack freezes replay hashes and cadence without jitter",
+                    ),
                 ]
             ),
         },
@@ -733,7 +728,10 @@ def build_test_family_matrix(context: dict[str, Any]) -> dict[str, Any]:
                     heading_ref(STATE_MACHINE_PATH, "6.2A `NightlyBatchRun.lifecycle_state`"),
                     heading_ref(STATE_MACHINE_PATH, "6.25 Operational release/control states"),
                     heading_ref(GATE_LOGIC_PATH, "7.1 Gate result contract"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-76E: Illegal transition tuples are rejected across every governed machine family"),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-76E: Illegal transition tuples are rejected across every governed machine family",
+                    ),
                 ]
             ),
         },
@@ -782,11 +780,22 @@ def build_test_family_matrix(context: dict[str, Any]) -> dict[str, Any]:
             ],
             "source_refs": normalize_source_refs(
                 [
-                    heading_ref(VERIFY_GATES_PATH, "D. Northbound API and operator-workspace contract tests"),
+                    heading_ref(
+                        VERIFY_GATES_PATH, "D. Northbound API and operator-workspace contract tests"
+                    ),
                     heading_ref(RELEASE_EVIDENCE_PATH, "2. Contract boundary"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-18: Duplicate command retry returns one durable receipt"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-21: Experience stream rebase rejects stale-action approval"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-80B: Green client compatibility evidence cannot coexist with a blocked native client window"),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-18: Duplicate command retry returns one durable receipt",
+                    ),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-21: Experience stream rebase rejects stale-action approval",
+                    ),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-80B: Green client compatibility evidence cannot coexist with a blocked native client window",
+                    ),
                 ]
             ),
         },
@@ -835,13 +844,21 @@ def build_test_family_matrix(context: dict[str, Any]) -> dict[str, Any]:
             ],
             "source_refs": normalize_source_refs(
                 [
-                    heading_ref(VERIFY_GATES_PATH, "D. Northbound API and operator-workspace contract tests"),
+                    heading_ref(
+                        VERIFY_GATES_PATH, "D. Northbound API and operator-workspace contract tests"
+                    ),
                     heading_ref(SEMANTIC_REGRESSION_PATH, "Authoritative artifact"),
                     heading_ref(SEMANTIC_REGRESSION_PATH, "Required rules"),
                     heading_ref(SHELL_CONTINUITY_PATH, "Required invariants"),
                     heading_ref(FOCUS_RESTORE_PATH, "Required rules"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-39P: Semantic accessibility regression pack binds every governed shell to exact selector and announcement contracts"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-39T: Reduced-motion regression cases preserve the same semantic recovery story"),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-39P: Semantic accessibility regression pack binds every governed shell to exact selector and announcement contracts",
+                    ),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-39T: Reduced-motion regression cases preserve the same semantic recovery story",
+                    ),
                 ]
             ),
         },
@@ -889,14 +906,25 @@ def build_test_family_matrix(context: dict[str, Any]) -> dict[str, Any]:
             ],
             "source_refs": normalize_source_refs(
                 [
-                    heading_ref(VERIFY_GATES_PATH, "D. Northbound API and operator-workspace contract tests"),
+                    heading_ref(
+                        VERIFY_GATES_PATH, "D. Northbound API and operator-workspace contract tests"
+                    ),
                     heading_ref(NATIVE_CACHE_PATH, "Authoritative artifacts"),
                     heading_ref(NATIVE_CACHE_PATH, "Required rules"),
                     heading_ref(NATIVE_CACHE_PATH, "Coverage requirements"),
                     heading_ref(CACHE_ISOLATION_PATH, "FE-75 Native Hydration Composition"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-39G: Native primary-scene restoration fuzz case keeps same-object continuity with typed recovery"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-39N: Native secondary-window close restores the parent scene anchor"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-39Q: Browser and native identifier mirrors cannot drift from semantic anchor refs"),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-39G: Native primary-scene restoration fuzz case keeps same-object continuity with typed recovery",
+                    ),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-39N: Native secondary-window close restores the parent scene anchor",
+                    ),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-39Q: Browser and native identifier mirrors cannot drift from semantic anchor refs",
+                    ),
                 ]
             ),
         },
@@ -944,7 +972,9 @@ def build_test_family_matrix(context: dict[str, Any]) -> dict[str, Any]:
             ],
             "source_refs": normalize_source_refs(
                 [
-                    heading_ref(VERIFY_GATES_PATH, "E. Authority and controlled-edge integration tests"),
+                    heading_ref(
+                        VERIFY_GATES_PATH, "E. Authority and controlled-edge integration tests"
+                    ),
                     heading_ref(AUTHORITY_PATH, "9.12 Duplicate and pending-state rules"),
                     heading_ref(AUTHORITY_PATH, "9.13A Reconciliation budget and escalation rule"),
                     text_ref(
@@ -953,9 +983,18 @@ def build_test_family_matrix(context: dict[str, Any]) -> dict[str, Any]:
                         "release_facing_authority_sandbox_evidence",
                     ),
                     heading_ref(RELEASE_EVIDENCE_PATH, "2. Contract boundary"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-22: Authority token rotation during pending transmit preserves subject binding"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-70: Ambiguous ingress is quarantined instead of mutating legal state"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-70G: Budget exhaustion blocks resend and opens explicit escalation ownership"),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-22: Authority token rotation during pending transmit preserves subject binding",
+                    ),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-70: Ambiguous ingress is quarantined instead of mutating legal state",
+                    ),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-70G: Budget exhaustion blocks resend and opens explicit escalation ownership",
+                    ),
                 ]
             ),
         },
@@ -1015,8 +1054,14 @@ def build_test_family_matrix(context: dict[str, Any]) -> dict[str, Any]:
                     heading_ref(REPLAY_PATH, "Replay attestation artifact"),
                     heading_ref(MANIFEST_START_PATH, "4. Recovery and reclaim"),
                     heading_ref(DEPLOYMENT_PATH, "5. Backup, restore, and DR rules"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-79A: Broker loss rebuilds authority work from durable truth instead of blind replay"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-79B: Post-restore access stays blocked until privacy and audit continuity clear"),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-79A: Broker loss rebuilds authority work from durable truth instead of blind replay",
+                    ),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-79B: Post-restore access stays blocked until privacy and audit continuity clear",
+                    ),
                 ]
             ),
         },
@@ -1069,7 +1114,10 @@ def build_test_family_matrix(context: dict[str, Any]) -> dict[str, Any]:
                     heading_ref(CACHE_ISOLATION_PATH, "Purpose"),
                     heading_ref(CACHE_ISOLATION_PATH, "Eliminated Leakage Classes"),
                     heading_ref(OBSERVABILITY_PATH, "14.9 Logging contract"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-25: Cross-tenant and cross-mask cache keys cannot bleed experience state"),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-25: Cross-tenant and cross-mask cache keys cannot bleed experience state",
+                    ),
                 ]
             ),
         },
@@ -1122,7 +1170,10 @@ def build_test_family_matrix(context: dict[str, Any]) -> dict[str, Any]:
                     heading_ref(OBSERVABILITY_PATH, "14.8 Metric contract"),
                     heading_ref(ERROR_MODEL_PATH, "13.6 Retry model"),
                     heading_ref(FAILURE_DASHBOARD_PATH, "Required Outcomes"),
-                    heading_ref(TEST_VECTORS_PATH, "TV-79C: Canary abort preserves rollback-safe posture before window closure"),
+                    heading_ref(
+                        TEST_VECTORS_PATH,
+                        "TV-79C: Canary abort preserves rollback-safe posture before window closure",
+                    ),
                 ]
             ),
         },
@@ -1134,9 +1185,7 @@ def build_test_family_matrix(context: dict[str, Any]) -> dict[str, Any]:
             "blocking_family_count": sum(1 for family in families if family["blocking"]),
             "corpus_required_family_count": 7,
             "release_gate_touch_count": len(
-                ordered_unique(
-                    gate for family in families for gate in family["release_gates"]
-                )
+                ordered_unique(gate for family in families for gate in family["release_gates"])
             ),
             "replay_precondition_count_consumed": context["replay_precondition_count"],
         },
@@ -1158,7 +1207,11 @@ def build_test_family_matrix(context: dict[str, Any]) -> dict[str, Any]:
                 "status": "open",
                 "summary": "The referenced shared operating contract for cards 0022 through 0029 is absent, so ADR-008 is grounded directly in named algorithm contracts and prior analysis outputs.",
                 "source_refs": [
-                    line_ref(ROOT / "PROMPT" / "CARDS" / "pc_0026.md", 61, "missing_shared_contract_reference")
+                    line_ref(
+                        ROOT / "PROMPT" / "CARDS" / "pc_0026.md",
+                        61,
+                        "missing_shared_contract_reference",
+                    )
                 ],
             },
         ],
@@ -1171,7 +1224,11 @@ def build_fixture_strategy(context: dict[str, Any]) -> dict[str, Any]:
             "replay_class": "STANDARD_REPLAY",
             "legal_effect_boundary": "historical_read_only",
             "what_changes": "nothing material may change; compare against exact historical basis and outcome",
-            "evidence_required": ["ReplayAttestation", "execution_basis_hash", "deterministic_outcome_hash"],
+            "evidence_required": [
+                "ReplayAttestation",
+                "execution_basis_hash",
+                "deterministic_outcome_hash",
+            ],
             "source_refs": [
                 heading_ref(REPLAY_PATH, "`STANDARD_REPLAY`"),
                 heading_ref(REPLAY_PATH, "Replay attestation artifact"),
@@ -1191,7 +1248,11 @@ def build_fixture_strategy(context: dict[str, Any]) -> dict[str, Any]:
             "replay_class": "COUNTERFACTUAL_ANALYSIS",
             "legal_effect_boundary": "analysis_only_no_authority_mutation",
             "what_changes": "declared basis drift is allowed only when labeled and compared under expected-equivalence or expected-difference posture",
-            "evidence_required": ["ReplayAttestation", "declared variance taxonomy", "comparison verdict"],
+            "evidence_required": [
+                "ReplayAttestation",
+                "declared variance taxonomy",
+                "comparison verdict",
+            ],
             "source_refs": [
                 heading_ref(REPLAY_PATH, "`COUNTERFACTUAL_ANALYSIS`"),
                 heading_ref(REPLAY_PATH, "Replay comparison contract"),
@@ -1309,9 +1370,7 @@ def build_fixture_strategy(context: dict[str, Any]) -> dict[str, Any]:
             "artifact_name": "InputFreeze",
             "role": "Captures exact input and intake lineage so replay cannot replace historical intake with fresh source reads.",
             "must_be_frozen_before": "compute and exact replay claims",
-            "source_refs": [
-                heading_ref(MANIFEST_FREEZE_PATH, "5.8 Input freeze contract")
-            ],
+            "source_refs": [heading_ref(MANIFEST_FREEZE_PATH, "5.8 Input freeze contract")],
         },
         {
             "artifact_name": "HashSet",
@@ -1323,9 +1382,7 @@ def build_fixture_strategy(context: dict[str, Any]) -> dict[str, Any]:
             "artifact_name": "preseal_gate_evaluation",
             "role": "Freezes the canonical pre-start gate tape so replay and reuse do not recompute seal posture from ambient truth.",
             "must_be_frozen_before": "manifest seal and start claim",
-            "source_refs": [
-                heading_ref(MANIFEST_FREEZE_PATH, "Pre-seal gate evaluation contract")
-            ],
+            "source_refs": [heading_ref(MANIFEST_FREEZE_PATH, "Pre-seal gate evaluation contract")],
         },
         {
             "artifact_name": "manifest_start_claim",
@@ -1522,8 +1579,14 @@ def build_edge_matrix(context: dict[str, Any]) -> dict[str, Any]:
             "evidence_artifacts": ["native scene automation suite"],
             "source_refs": [
                 heading_ref(NATIVE_CACHE_PATH, "Coverage requirements"),
-                heading_ref(TEST_VECTORS_PATH, "TV-39G: Native primary-scene restoration fuzz case keeps same-object continuity with typed recovery"),
-                heading_ref(TEST_VECTORS_PATH, "TV-39N: Native secondary-window close restores the parent scene anchor"),
+                heading_ref(
+                    TEST_VECTORS_PATH,
+                    "TV-39G: Native primary-scene restoration fuzz case keeps same-object continuity with typed recovery",
+                ),
+                heading_ref(
+                    TEST_VECTORS_PATH,
+                    "TV-39N: Native secondary-window close restores the parent scene anchor",
+                ),
             ],
         },
         {
@@ -1561,7 +1624,10 @@ def build_edge_matrix(context: dict[str, Any]) -> dict[str, Any]:
             "evidence_artifacts": ["native handoff suite", "browser handoff suite"],
             "source_refs": [
                 heading_ref(FOCUS_RESTORE_PATH, "Required rules"),
-                heading_ref(TEST_VECTORS_PATH, "TV-39K: Help handoff return restores the source anchor instead of a generic support root"),
+                heading_ref(
+                    TEST_VECTORS_PATH,
+                    "TV-39K: Help handoff return restores the source anchor instead of a generic support root",
+                ),
             ],
         },
         {
@@ -1578,7 +1644,9 @@ def build_edge_matrix(context: dict[str, Any]) -> dict[str, Any]:
             "candidate_gate": "AUTHORITY_SANDBOX",
             "evidence_artifacts": ["authority_sandbox_coverage_contract"],
             "source_refs": [
-                heading_ref(VERIFY_GATES_PATH, "E. Authority and controlled-edge integration tests"),
+                heading_ref(
+                    VERIFY_GATES_PATH, "E. Authority and controlled-edge integration tests"
+                ),
                 text_ref(
                     AUTHORITY_PATH,
                     "Release-facing authority sandbox evidence SHALL prove that same namespace isolation",
@@ -1602,7 +1670,10 @@ def build_edge_matrix(context: dict[str, Any]) -> dict[str, Any]:
             "source_refs": [
                 heading_ref(AUTHORITY_PATH, "9.6 Token and client binding rule"),
                 heading_ref(AUTHORITY_PATH, "9.7 Fraud-prevention header rule"),
-                heading_ref(TEST_VECTORS_PATH, "TV-22: Authority token rotation during pending transmit preserves subject binding"),
+                heading_ref(
+                    TEST_VECTORS_PATH,
+                    "TV-22: Authority token rotation during pending transmit preserves subject binding",
+                ),
             ],
         },
         {
@@ -1624,8 +1695,14 @@ def build_edge_matrix(context: dict[str, Any]) -> dict[str, Any]:
             ],
             "source_refs": [
                 heading_ref(AUTHORITY_PATH, "9.9A Inbound authority ingress protocol"),
-                heading_ref(TEST_VECTORS_PATH, "TV-70: Ambiguous ingress is quarantined instead of mutating legal state"),
-                heading_ref(TEST_VECTORS_PATH, "TV-70B: Callback, poll, and recovery duplicates collapse to one canonical ingress receipt"),
+                heading_ref(
+                    TEST_VECTORS_PATH,
+                    "TV-70: Ambiguous ingress is quarantined instead of mutating legal state",
+                ),
+                heading_ref(
+                    TEST_VECTORS_PATH,
+                    "TV-70B: Callback, poll, and recovery duplicates collapse to one canonical ingress receipt",
+                ),
             ],
         },
         {
@@ -1647,9 +1724,18 @@ def build_edge_matrix(context: dict[str, Any]) -> dict[str, Any]:
             ],
             "source_refs": [
                 heading_ref(AUTHORITY_PATH, "9.13A Reconciliation budget and escalation rule"),
-                heading_ref(TEST_VECTORS_PATH, "TV-70F: Recovery and continuation preserve the open reconciliation budget instead of resetting it"),
-                heading_ref(TEST_VECTORS_PATH, "TV-70G: Budget exhaustion blocks resend and opens explicit escalation ownership"),
-                heading_ref(TEST_VECTORS_PATH, "TV-70T: Restore and replay reuse the grouped reconciliation control contract"),
+                heading_ref(
+                    TEST_VECTORS_PATH,
+                    "TV-70F: Recovery and continuation preserve the open reconciliation budget instead of resetting it",
+                ),
+                heading_ref(
+                    TEST_VECTORS_PATH,
+                    "TV-70G: Budget exhaustion blocks resend and opens explicit escalation ownership",
+                ),
+                heading_ref(
+                    TEST_VECTORS_PATH,
+                    "TV-70T: Restore and replay reuse the grouped reconciliation control contract",
+                ),
             ],
         },
     ]
@@ -1663,9 +1749,7 @@ def build_edge_matrix(context: dict[str, Any]) -> dict[str, Any]:
             "authority_row_count": sum(1 for row in rows if row["domain"] == "AUTHORITY"),
             "authority_operation_family_count": context["authority_operation_family_count"],
             "native_scene_scenario_count_consumed": context["native_scene_scenario_count"],
-            "browser_continuity_case_count_consumed": context[
-                "browser_continuity_case_count"
-            ],
+            "browser_continuity_case_count_consumed": context["browser_continuity_case_count"],
         },
         "coverage_rows": rows,
         "typed_gaps_or_deferred_decisions": [
@@ -1675,7 +1759,9 @@ def build_edge_matrix(context: dict[str, Any]) -> dict[str, Any]:
                 "status": "intentional",
                 "summary": "The doctrine requires Playwright and XCUITest, but does not yet choose a hosted browser or native device execution vendor.",
                 "source_refs": [
-                    heading_ref(VERIFY_GATES_PATH, "D. Northbound API and operator-workspace contract tests"),
+                    heading_ref(
+                        VERIFY_GATES_PATH, "D. Northbound API and operator-workspace contract tests"
+                    ),
                     heading_ref(NATIVE_CACHE_PATH, "Coverage requirements"),
                 ],
             }
@@ -1822,56 +1908,52 @@ def build_flakiness_policy() -> dict[str, Any]:
         },
     ]
     global_rules = [
-            {
-                "rule_id": "blocking_green_requires_admissible_unquarantined_evidence",
-                "policy": "A blocking suite result counts only when bound to the exact candidate, current, same-scope, and serialized with quarantine posture NONE and manual waiver posture NONE.",
-                "source_refs": [
-                    heading_ref(VERIFY_GATES_PATH, "Gate admissibility rules"),
-                    heading_ref(RELEASE_EVIDENCE_PATH, "3. Admissibility boundary"),
-                ],
-            },
-            {
-                "rule_id": "reruns_must_preserve_candidate_and_scope",
-                "policy": "Any rerun used to recover from environment noise must preserve candidate identity, scope, and supporting compatibility or sandbox breadth boundaries.",
-                "source_refs": [
-                    heading_ref(VERIFY_GATES_PATH, "Gate admissibility rules"),
-                    heading_ref(RELEASE_EVIDENCE_PATH, "3. Admissibility boundary"),
-                ],
-            },
-            {
-                "rule_id": "critical_suites_cannot_be_manually_overridden",
-                "policy": "Schema compatibility, authority mutation safety, restore or DR, signed build integrity, and critical security suites cannot be manually overridden into green release posture.",
-                "source_refs": [
-                    text_ref(
-                        VERIFY_GATES_PATH,
-                        "Manual override SHALL NOT bypass failures in schema compatibility",
-                        "manual_override_cannot_bypass_critical_gates",
-                    )
-                ],
-            },
-            {
-                "rule_id": "trace_and_failure_artifacts_must_survive_triage",
-                "policy": "Flake triage keeps traces, screenshots, seeds, error objects, and correlation keys so diagnosability improves instead of being erased by reruns.",
-                "source_refs": [
-                    heading_ref(OBSERVABILITY_PATH, "14.4 Mandatory correlation keys"),
-                    heading_ref(ERROR_MODEL_PATH, "13.2 Canonical error object"),
-                ],
-            },
-        ]
+        {
+            "rule_id": "blocking_green_requires_admissible_unquarantined_evidence",
+            "policy": "A blocking suite result counts only when bound to the exact candidate, current, same-scope, and serialized with quarantine posture NONE and manual waiver posture NONE.",
+            "source_refs": [
+                heading_ref(VERIFY_GATES_PATH, "Gate admissibility rules"),
+                heading_ref(RELEASE_EVIDENCE_PATH, "3. Admissibility boundary"),
+            ],
+        },
+        {
+            "rule_id": "reruns_must_preserve_candidate_and_scope",
+            "policy": "Any rerun used to recover from environment noise must preserve candidate identity, scope, and supporting compatibility or sandbox breadth boundaries.",
+            "source_refs": [
+                heading_ref(VERIFY_GATES_PATH, "Gate admissibility rules"),
+                heading_ref(RELEASE_EVIDENCE_PATH, "3. Admissibility boundary"),
+            ],
+        },
+        {
+            "rule_id": "critical_suites_cannot_be_manually_overridden",
+            "policy": "Schema compatibility, authority mutation safety, restore or DR, signed build integrity, and critical security suites cannot be manually overridden into green release posture.",
+            "source_refs": [
+                text_ref(
+                    VERIFY_GATES_PATH,
+                    "Manual override SHALL NOT bypass failures in schema compatibility",
+                    "manual_override_cannot_bypass_critical_gates",
+                )
+            ],
+        },
+        {
+            "rule_id": "trace_and_failure_artifacts_must_survive_triage",
+            "policy": "Flake triage keeps traces, screenshots, seeds, error objects, and correlation keys so diagnosability improves instead of being erased by reruns.",
+            "source_refs": [
+                heading_ref(OBSERVABILITY_PATH, "14.4 Mandatory correlation keys"),
+                heading_ref(ERROR_MODEL_PATH, "13.2 Canonical error object"),
+            ],
+        },
+    ]
     return {
         "contract_version": TODAY,
         "summary": {
             "family_rule_count": len(family_rules),
             "global_rule_count": len(global_rules),
             "blocking_green_quarantine_allowed_count": sum(
-                1
-                for row in family_rules
-                if row["quarantine_allowed_for_blocking_green"]
+                1 for row in family_rules if row["quarantine_allowed_for_blocking_green"]
             ),
             "blocking_green_manual_waiver_allowed_count": sum(
-                1
-                for row in family_rules
-                if row["manual_waiver_allowed_for_blocking_green"]
+                1 for row in family_rules if row["manual_waiver_allowed_for_blocking_green"]
             ),
         },
         "global_rules": global_rules,
@@ -2011,7 +2093,10 @@ def build_release_candidate_binding(
         },
         {
             "gate_id": "MIGRATION_VERIFICATION",
-            "expected_suite_families": ["schema_contract_validation", "replay_recovery_and_restore"],
+            "expected_suite_families": [
+                "schema_contract_validation",
+                "replay_recovery_and_restore",
+            ],
             "required_evidence": [
                 "VerificationSuiteResult",
                 "GateAdmissibilityRecord",
@@ -2032,7 +2117,9 @@ def build_release_candidate_binding(
         },
         {
             "gate_id": "SUITE_ADMISSIBILITY",
-            "expected_suite_families": [family["family_id"] for family in family_matrix["test_families"]],
+            "expected_suite_families": [
+                family["family_id"] for family in family_matrix["test_families"]
+            ],
             "required_evidence": ["GateAdmissibilityRecord"],
             "required_hash_echoes": ["candidate_identity_hash", "compatibility_gate_hash_or_null"],
         },
@@ -2049,12 +2136,12 @@ def build_release_candidate_binding(
                 "candidate_binding": family["candidate_binding"],
                 "admissibility_policy": {
                     "retry_policy": flake_lookup[family["family_id"]]["retry_policy"],
-                    "quarantine_allowed_for_blocking_green": flake_lookup[
-                        family["family_id"]
-                    ]["quarantine_allowed_for_blocking_green"],
-                    "manual_waiver_allowed_for_blocking_green": flake_lookup[
-                        family["family_id"]
-                    ]["manual_waiver_allowed_for_blocking_green"],
+                    "quarantine_allowed_for_blocking_green": flake_lookup[family["family_id"]][
+                        "quarantine_allowed_for_blocking_green"
+                    ],
+                    "manual_waiver_allowed_for_blocking_green": flake_lookup[family["family_id"]][
+                        "manual_waiver_allowed_for_blocking_green"
+                    ],
                 },
             }
         )
@@ -2226,9 +2313,7 @@ def build_task_track_map() -> dict[str, Any]:
         "contract_version": TODAY,
         "summary": {
             "mapping_count": len(track_rows),
-            "track_count": len(
-                ordered_unique(row["primary_track"] for row in track_rows)
-            ),
+            "track_count": len(ordered_unique(row["primary_track"] for row in track_rows)),
             "anchoring_card_count": len(
                 ordered_unique(card for row in track_rows for card in row["anchoring_cards"])
             ),
@@ -2241,7 +2326,11 @@ def build_task_track_map() -> dict[str, Any]:
                 "status": "expected",
                 "summary": "The next roadmap task should extend the release-evidence side of this doctrine rather than redefining suite families from scratch.",
                 "source_refs": [
-                    line_ref(ROOT / "PROMPT" / "Checklist.md", find_line_containing(ROOT / "PROMPT" / "Checklist.md", "pc_0027"), "pc_0027_checklist_anchor")
+                    line_ref(
+                        ROOT / "PROMPT" / "Checklist.md",
+                        find_line_containing(ROOT / "PROMPT" / "Checklist.md", "pc_0027"),
+                        "pc_0027_checklist_anchor",
+                    )
                 ],
             }
         ],
@@ -2249,7 +2338,9 @@ def build_task_track_map() -> dict[str, Any]:
 
 
 def build_mermaid(family_matrix: dict[str, Any]) -> str:
-    family_lookup = {family["family_id"]: family["label"] for family in family_matrix["test_families"]}
+    family_lookup = {
+        family["family_id"]: family["label"] for family in family_matrix["test_families"]
+    }
     lines = [
         "flowchart LR",
         '    candidate["Release Candidate Identity + Compatibility Boundary"]',
@@ -2444,9 +2535,7 @@ Rollback of the strategy means reducing the portfolio to a narrower test subset,
 """
 
 
-def build_comparison_markdown(
-    scorecard: dict[str, Any], criteria: list[dict[str, Any]]
-) -> str:
+def build_comparison_markdown(scorecard: dict[str, Any], criteria: list[dict[str, Any]]) -> str:
     alt_rows = [
         [
             alt["label"],
@@ -2496,9 +2585,7 @@ def build_comparison_markdown(
             "",
             "## Weighted Criteria",
             "",
-            markdown_table(
-                ["Criterion", "Weight", "Priority", "Rationale"], criterion_rows
-            ),
+            markdown_table(["Criterion", "Weight", "Priority", "Rationale"], criterion_rows),
             "",
             "## Alternative Totals",
             "",

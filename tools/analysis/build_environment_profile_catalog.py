@@ -37,9 +37,7 @@ DATA_MODEL_PATH = ALGORITHM_DIR / "data_model.md"
 
 DEPENDENCY_REGISTER_PATH = DATA_ANALYSIS_DIR / "dependency_register.json"
 AUTHORITY_BOUNDARY_PATH = DATA_ANALYSIS_DIR / "authority_boundary_responsibility_matrix.json"
-AUTHORITY_OPERATION_MAP_PATH = (
-    DATA_ANALYSIS_DIR / "authority_operation_to_boundary_map.json"
-)
+AUTHORITY_OPERATION_MAP_PATH = DATA_ANALYSIS_DIR / "authority_operation_to_boundary_map.json"
 AUTHORITY_OPERATION_CATALOG_PATH = DATA_ANALYSIS_DIR / "authority_operation_catalog.json"
 SESSION_FLOW_MATRIX_PATH = DATA_ANALYSIS_DIR / "session_flow_matrix.json"
 RELEASE_ARTIFACT_MATRIX_PATH = DATA_ANALYSIS_DIR / "release_evidence_artifact_matrix.json"
@@ -57,15 +55,9 @@ SECRET_NAMESPACE_PATH = DATA_ANALYSIS_DIR / "environment_secret_namespace_plan.j
 TEST_USER_PLAN_PATH = DATA_ANALYSIS_DIR / "environment_test_user_and_seed_data_plan.json"
 PROVIDER_VERSION_PATH = DATA_ANALYSIS_DIR / "provider_api_version_inventory.json"
 
-DOC_CATALOG_PATH = (
-    DOCS_ANALYSIS_DIR / "31_environment_tenant_authority_profile_catalog.md"
-)
-DOC_SEPARATION_PATH = (
-    DOCS_ANALYSIS_DIR / "31_environment_promotion_and_data_separation_rules.md"
-)
-MERMAID_PATH = (
-    DIAGRAMS_ANALYSIS_DIR / "31_environment_tenant_authority_profile_topology.mmd"
-)
+DOC_CATALOG_PATH = DOCS_ANALYSIS_DIR / "31_environment_tenant_authority_profile_catalog.md"
+DOC_SEPARATION_PATH = DOCS_ANALYSIS_DIR / "31_environment_promotion_and_data_separation_rules.md"
+MERMAID_PATH = DIAGRAMS_ANALYSIS_DIR / "31_environment_tenant_authority_profile_topology.mmd"
 
 TODAY = "2026-04-18"
 CONTRACT_VERSION = "1.0"
@@ -383,9 +375,7 @@ def md_escape(value: Any) -> str:
 def markdown_table(headers: list[str], rows: list[list[Any]]) -> str:
     header_line = "| " + " | ".join(headers) + " |"
     divider_line = "| " + " | ".join("---" for _ in headers) + " |"
-    body_lines = [
-        "| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows
-    ]
+    body_lines = ["| " + " | ".join(md_escape(cell) for cell in row) + " |" for row in rows]
     return "\n".join([header_line, divider_line, *body_lines])
 
 
@@ -396,8 +386,7 @@ def normalize_environment_order(environment_ids: Iterable[str]) -> list[str]:
 
 def normalize_connection_order(connection_methods: Iterable[str]) -> list[str]:
     order = {
-        connection_method: index
-        for index, connection_method in enumerate(CONNECTION_METHOD_ORDER)
+        connection_method: index for index, connection_method in enumerate(CONNECTION_METHOD_ORDER)
     }
     return sorted(connection_methods, key=lambda item: order.get(item, 999))
 
@@ -472,7 +461,9 @@ def build_provider_api_inventory(skip_live_hmrc: bool) -> dict[str, Any]:
             "refresh_url": "https://api.service.hmrc.gov.uk/oauth/refresh",
             "oauth_scopes": ["write:self-assessment", "read:self-assessment"],
             "verified_on": TODAY,
-            "verification_status": "CURATED_SNAPSHOT_ONLY" if skip_live_hmrc else "SNAPSHOT_FALLBACK",
+            "verification_status": "CURATED_SNAPSHOT_ONLY"
+            if skip_live_hmrc
+            else "SNAPSHOT_FALLBACK",
             "requires_live_revalidation_before_runtime_use": True,
             "source_refs": [
                 external_source(
@@ -1423,7 +1414,12 @@ def build_environments(callback_profiles: list[dict[str, Any]]) -> dict[str, Any
             "disposition": "REJECTED_AS_STANDALONE",
             "environment_ref": None,
             "rationale": "ADR-007 defines the native macOS operator workspace as a deployable and session boundary across shared server environments, not a separate provider environment.",
-            "source_refs": [task_source("pc_0025", "The native macOS delivery ADR treats native as a delivery strategy and scene boundary rather than its own server environment.")],
+            "source_refs": [
+                task_source(
+                    "pc_0025",
+                    "The native macOS delivery ADR treats native as a delivery strategy and scene boundary rather than its own server environment.",
+                )
+            ],
         },
     ]
     typed_gaps = [
@@ -1451,10 +1447,14 @@ def build_environments(callback_profiles: list[dict[str, Any]]) -> dict[str, Any
         "summary": {
             "environment_count": len(environments),
             "adopted_candidate_count": sum(
-                1 for candidate in candidate_evaluations if candidate["disposition"].startswith("ADOPTED")
+                1
+                for candidate in candidate_evaluations
+                if candidate["disposition"].startswith("ADOPTED")
             ),
             "rejected_candidate_count": sum(
-                1 for candidate in candidate_evaluations if candidate["disposition"].startswith("REJECTED")
+                1
+                for candidate in candidate_evaluations
+                if candidate["disposition"].startswith("REJECTED")
             ),
             "typed_gap_count": len(typed_gaps),
         },
@@ -1489,7 +1489,12 @@ def build_secret_namespace_plan() -> dict[str, Any]:
             "rotation_owner_role": "ENGINEERING",
             "promotion_allowed": False,
             "mixing_rule": "Local provisioning secrets remain sandbox only and never promote into shared runtimes.",
-            "source_refs": [task_source("pc_0018", "Provisioning dependencies already distinguish sandbox app registration from production registration.")],
+            "source_refs": [
+                task_source(
+                    "pc_0018",
+                    "Provisioning dependencies already distinguish sandbox app registration from production registration.",
+                )
+            ],
         },
         {
             "secret_namespace_ref": "sec_ci_ephemeral",
@@ -1500,7 +1505,12 @@ def build_secret_namespace_plan() -> dict[str, Any]:
             "rotation_owner_role": "CI_SYSTEM",
             "promotion_allowed": False,
             "mixing_rule": "CI namespaces are unique per run and cannot be reused as stable callback or provider namespaces.",
-            "source_refs": [task_source("pc_0026", "Testing doctrine makes ephemeral CI evidence candidate-bound and non-promotable.")],
+            "source_refs": [
+                task_source(
+                    "pc_0026",
+                    "Testing doctrine makes ephemeral CI evidence candidate-bound and non-promotable.",
+                )
+            ],
         },
         {
             "secret_namespace_ref": "sec_ephemeral_review",
@@ -1511,7 +1521,11 @@ def build_secret_namespace_plan() -> dict[str, Any]:
             "rotation_owner_role": "CI_SYSTEM",
             "promotion_allowed": False,
             "mixing_rule": "Preview secrets cannot contain provider credentials because preview hosts are not provider-trusted.",
-            "source_refs": [task_source("pc_0018", "Ephemeral review is not suitable for provider callback truth.")],
+            "source_refs": [
+                task_source(
+                    "pc_0018", "Ephemeral review is not suitable for provider callback truth."
+                )
+            ],
         },
         {
             "secret_namespace_ref": "sec_sandbox_runtime",
@@ -1539,7 +1553,12 @@ def build_secret_namespace_plan() -> dict[str, Any]:
             "rotation_owner_role": "SECURITY_AND_AUTHORITY_OPERATIONS",
             "promotion_allowed": False,
             "mixing_rule": "Sandbox web authority secrets stay distinct from desktop, batch, and all production namespaces.",
-            "source_refs": [task_source("pc_0022", "Authority boundary ADR separates credential classes and provider environments.")],
+            "source_refs": [
+                task_source(
+                    "pc_0022",
+                    "Authority boundary ADR separates credential classes and provider environments.",
+                )
+            ],
         },
         {
             "secret_namespace_ref": "sec_sandbox_desktop_authority",
@@ -1550,7 +1569,12 @@ def build_secret_namespace_plan() -> dict[str, Any]:
             "rotation_owner_role": "SECURITY_AND_AUTHORITY_OPERATIONS",
             "promotion_allowed": False,
             "mixing_rule": "Sandbox native authority credentials use a dedicated namespace because their callback and fraud-header posture differs from web.",
-            "source_refs": [task_source("pc_0022", "Authority boundary ADR separates credential classes and callback boundaries.")],
+            "source_refs": [
+                task_source(
+                    "pc_0022",
+                    "Authority boundary ADR separates credential classes and callback boundaries.",
+                )
+            ],
         },
         {
             "secret_namespace_ref": "sec_sandbox_batch_authority",
@@ -1561,7 +1585,12 @@ def build_secret_namespace_plan() -> dict[str, Any]:
             "rotation_owner_role": "SECURITY_AND_AUTHORITY_OPERATIONS",
             "promotion_allowed": False,
             "mixing_rule": "Sandbox batch authority credentials remain distinct from interactive profiles.",
-            "source_refs": [task_source("pc_0022", "Authority boundary ADR distinguishes transport and credential boundaries for interactive versus machine flows.")],
+            "source_refs": [
+                task_source(
+                    "pc_0022",
+                    "Authority boundary ADR distinguishes transport and credential boundaries for interactive versus machine flows.",
+                )
+            ],
         },
         {
             "secret_namespace_ref": "sec_preprod_runtime",
@@ -1572,7 +1601,14 @@ def build_secret_namespace_plan() -> dict[str, Any]:
             "rotation_owner_role": "OPERATIONS",
             "promotion_allowed": False,
             "mixing_rule": "Pre-production runtime secrets remain production-like but still cannot merge with production secrets.",
-            "source_refs": [text_source(DEPLOYMENT_PATH, "deploy to pre-production with production-like secrets/network policy", "Promotion pipeline", "Pre-production requires production-like policy with separate secret domains.")],
+            "source_refs": [
+                text_source(
+                    DEPLOYMENT_PATH,
+                    "deploy to pre-production with production-like secrets/network policy",
+                    "Promotion pipeline",
+                    "Pre-production requires production-like policy with separate secret domains.",
+                )
+            ],
         },
         {
             "secret_namespace_ref": "sec_preprod_web_authority",
@@ -1583,7 +1619,12 @@ def build_secret_namespace_plan() -> dict[str, Any]:
             "rotation_owner_role": "SECURITY_AND_AUTHORITY_OPERATIONS",
             "promotion_allowed": False,
             "mixing_rule": "Pre-production web authority credentials remain sandbox-scoped and cannot share a namespace with sandbox shared-runtime or production web authority.",
-            "source_refs": [task_source("pc_0027", "Release evidence requires exact provider-profile identity per release candidate.")],
+            "source_refs": [
+                task_source(
+                    "pc_0027",
+                    "Release evidence requires exact provider-profile identity per release candidate.",
+                )
+            ],
         },
         {
             "secret_namespace_ref": "sec_preprod_desktop_authority",
@@ -1594,7 +1635,12 @@ def build_secret_namespace_plan() -> dict[str, Any]:
             "rotation_owner_role": "SECURITY_AND_AUTHORITY_OPERATIONS",
             "promotion_allowed": False,
             "mixing_rule": "Pre-production native authority credentials remain isolated from web and production.",
-            "source_refs": [task_source("pc_0025", "Native delivery keeps a distinct desktop posture that must not silently inherit web credential namespaces.")],
+            "source_refs": [
+                task_source(
+                    "pc_0025",
+                    "Native delivery keeps a distinct desktop posture that must not silently inherit web credential namespaces.",
+                )
+            ],
         },
         {
             "secret_namespace_ref": "sec_preprod_batch_authority",
@@ -1605,18 +1651,34 @@ def build_secret_namespace_plan() -> dict[str, Any]:
             "rotation_owner_role": "SECURITY_AND_AUTHORITY_OPERATIONS",
             "promotion_allowed": False,
             "mixing_rule": "Pre-production batch profiles remain distinct from interactive profiles and production batch credentials.",
-            "source_refs": [task_source("pc_0022", "Machine-driven authority flows remain a separate credential boundary.")],
+            "source_refs": [
+                task_source(
+                    "pc_0022",
+                    "Machine-driven authority flows remain a separate credential boundary.",
+                )
+            ],
         },
         {
             "secret_namespace_ref": "sec_production_runtime",
             "store_path_prefix": "kv/taxat/production/runtime",
             "environment_refs": ["env_production"],
             "provider_environment_refs": ["production"],
-            "secret_classes": ["runtime-app-secrets", "session-signing", "db-auth", "audit-attestation"],
+            "secret_classes": [
+                "runtime-app-secrets",
+                "session-signing",
+                "db-auth",
+                "audit-attestation",
+            ],
             "rotation_owner_role": "OPERATIONS",
             "promotion_allowed": True,
             "mixing_rule": "Production runtime secrets are the only live runtime namespace and never mix with sandbox or pre-production.",
-            "source_refs": [heading_source(SECURITY_PATH, "3. Secret, key, and token handling", "Production secrets remain versioned, attestable, and isolated.")],
+            "source_refs": [
+                heading_source(
+                    SECURITY_PATH,
+                    "3. Secret, key, and token handling",
+                    "Production secrets remain versioned, attestable, and isolated.",
+                )
+            ],
         },
         {
             "secret_namespace_ref": "sec_production_web_authority",
@@ -1627,7 +1689,12 @@ def build_secret_namespace_plan() -> dict[str, Any]:
             "rotation_owner_role": "SECURITY_AND_AUTHORITY_OPERATIONS",
             "promotion_allowed": True,
             "mixing_rule": "Production web authority credentials never share namespace with any sandbox, preprod, desktop, or batch credential set.",
-            "source_refs": [task_source("pc_0022", "The authority boundary ADR makes provider-environment isolation explicit.")],
+            "source_refs": [
+                task_source(
+                    "pc_0022",
+                    "The authority boundary ADR makes provider-environment isolation explicit.",
+                )
+            ],
         },
         {
             "secret_namespace_ref": "sec_production_desktop_authority",
@@ -1638,7 +1705,12 @@ def build_secret_namespace_plan() -> dict[str, Any]:
             "rotation_owner_role": "SECURITY_AND_AUTHORITY_OPERATIONS",
             "promotion_allowed": True,
             "mixing_rule": "Production desktop authority credentials remain distinct from web because the fraud-header and callback posture differ.",
-            "source_refs": [task_source("pc_0025", "Native delivery maintains a distinct desktop trust and callback posture.")],
+            "source_refs": [
+                task_source(
+                    "pc_0025",
+                    "Native delivery maintains a distinct desktop trust and callback posture.",
+                )
+            ],
         },
         {
             "secret_namespace_ref": "sec_production_batch_authority",
@@ -1649,7 +1721,12 @@ def build_secret_namespace_plan() -> dict[str, Any]:
             "rotation_owner_role": "SECURITY_AND_AUTHORITY_OPERATIONS",
             "promotion_allowed": True,
             "mixing_rule": "Production batch credentials are reserved for unattended reconciliation and never reused for interactive sends.",
-            "source_refs": [task_source("pc_0022", "Authority machine-flow credentials remain separate from interactive credentials.")],
+            "source_refs": [
+                task_source(
+                    "pc_0022",
+                    "Authority machine-flow credentials remain separate from interactive credentials.",
+                )
+            ],
         },
         {
             "secret_namespace_ref": "sec_drill_runtime",
@@ -1660,7 +1737,12 @@ def build_secret_namespace_plan() -> dict[str, Any]:
             "rotation_owner_role": "BREAK_GLASS_SECURITY",
             "promotion_allowed": False,
             "mixing_rule": "Drill runtime material remains separate from steady-state production namespaces.",
-            "source_refs": [task_source("pc_0015", "Recovery and replay governance already distinguishes drill material from steady-state runtime material.")],
+            "source_refs": [
+                task_source(
+                    "pc_0015",
+                    "Recovery and replay governance already distinguishes drill material from steady-state runtime material.",
+                )
+            ],
         },
         {
             "secret_namespace_ref": "sec_drill_restore_material",
@@ -1671,7 +1753,13 @@ def build_secret_namespace_plan() -> dict[str, Any]:
             "rotation_owner_role": "BREAK_GLASS_SECURITY",
             "promotion_allowed": False,
             "mixing_rule": "Restore-material secrets stay in a dedicated drill namespace and cannot become the steady-state production runtime namespace.",
-            "source_refs": [heading_source(DEPLOYMENT_PATH, "5. Backup, restore, and DR rules", "Restore proof and drill material remain governed separately.")],
+            "source_refs": [
+                heading_source(
+                    DEPLOYMENT_PATH,
+                    "5. Backup, restore, and DR rules",
+                    "Restore proof and drill material remain governed separately.",
+                )
+            ],
         },
     ]
     typed_gaps = [
@@ -2256,16 +2344,16 @@ def build_test_user_and_seed_data_plan() -> dict[str, Any]:
             "automation_posture": "PROHIBITED",
             "reuse_policy": "Synthetic HMRC seed data and sandbox identities are forbidden in production.",
             "retention_or_expiry": "Not applicable because production seed data is not allowed.",
-             "data_sensitivity": "PRODUCTION_DATA_PROHIBITION",
-             "source_refs": [
-                 heading_source(
-                     RELEASE_GATES_PATH,
+            "data_sensitivity": "PRODUCTION_DATA_PROHIBITION",
+            "source_refs": [
+                heading_source(
+                    RELEASE_GATES_PATH,
                     "2. Release gate",
                     "Production readiness requires exact blocking-gate evidence and forbids environment drift.",
-                 ),
-                 heading_source(
-                     SECURITY_PATH,
-                     "4. Browser, native-client, API, and transport hardening",
+                ),
+                heading_source(
+                    SECURITY_PATH,
+                    "4. Browser, native-client, API, and transport hardening",
                     "Production posture must not weaken identity or credential boundaries.",
                 ),
             ],
@@ -2300,9 +2388,7 @@ def build_test_user_and_seed_data_plan() -> dict[str, Any]:
 
 
 def build_deployable_environment_matrix(environment_catalog: dict[str, Any]) -> dict[str, Any]:
-    env_map = {
-        row["environment_id"]: row for row in environment_catalog["environment_records"]
-    }
+    env_map = {row["environment_id"]: row for row in environment_catalog["environment_records"]}
     rows = [
         {
             "deployable_id": "deployable_local_analysis_workspace",
@@ -2701,9 +2787,7 @@ def build_authority_provider_profile_catalog(
     callback_profiles: list[dict[str, Any]],
     token_binding_profiles: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    api_inventory = {
-        record["api_key"]: record for record in provider_inventory["api_records"]
-    }
+    api_inventory = {record["api_key"]: record for record in provider_inventory["api_records"]}
     callback_profiles_by_ref = {
         profile["callback_profile_ref"]: profile for profile in callback_profiles
     }
@@ -2795,21 +2879,15 @@ def build_authority_provider_profile_catalog(
                     f"profile_{env_spec['environment_short']}_{api_def['api_key']}_"
                     f"{method_detail['method_short']}"
                 )
-                callback_profile_ref = env_spec["callback_profile_ref_by_method"][
-                    connection_method
-                ]
+                callback_profile_ref = env_spec["callback_profile_ref_by_method"][connection_method]
                 token_binding_profile_ref = env_spec["token_binding_profile_ref_by_method"][
                     connection_method
                 ]
-                secret_namespace_ref = env_spec["secret_namespace_ref_by_method"][
-                    connection_method
-                ]
+                secret_namespace_ref = env_spec["secret_namespace_ref_by_method"][connection_method]
                 if callback_profile_ref not in callback_profiles_by_ref:
                     raise ValueError(f"Missing callback profile {callback_profile_ref}")
                 if token_binding_profile_ref not in token_profiles_by_ref:
-                    raise ValueError(
-                        f"Missing token binding profile {token_binding_profile_ref}"
-                    )
+                    raise ValueError(f"Missing token binding profile {token_binding_profile_ref}")
                 profiles.append(
                     {
                         "profile_id": profile_id,
@@ -2821,9 +2899,7 @@ def build_authority_provider_profile_catalog(
                         "api_base_profile": env_spec["api_base_profile"],
                         "api_version": inventory_record["current_observed_version"],
                         "schema_version": inventory_record["oas_version"],
-                        "fraud_header_profile_ref": method_detail[
-                            "fraud_header_profile_ref"
-                        ],
+                        "fraud_header_profile_ref": method_detail["fraud_header_profile_ref"],
                         "token_binding_profile_ref": token_binding_profile_ref,
                         "callback_profile_ref": callback_profile_ref,
                         "compatible_product_chain_refs": [
@@ -2901,9 +2977,7 @@ def build_authority_provider_profile_catalog(
     profile_family_summary: list[dict[str, Any]] = []
     grouped_profiles: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
     for profile in profiles:
-        grouped_profiles[(profile["environment_ref"], profile["connection_method"])].append(
-            profile
-        )
+        grouped_profiles[(profile["environment_ref"], profile["connection_method"])].append(profile)
     for (environment_ref, connection_method), group in sorted(grouped_profiles.items()):
         profile_family_summary.append(
             {
@@ -3009,17 +3083,14 @@ def validate_catalogs(
     authority_operation_catalog: dict[str, Any],
 ) -> None:
     source_operation_families = sorted(
-        record["operation_family"]
-        for record in authority_operation_catalog["operation_records"]
+        record["operation_family"] for record in authority_operation_catalog["operation_records"]
     )
     if source_operation_families != sorted(REQUIRED_OPERATION_FAMILIES):
         raise ValueError(
             "Authority operation catalog no longer matches the required operation family set"
         )
 
-    environment_ids = {
-        row["environment_id"] for row in environment_catalog["environment_records"]
-    }
+    environment_ids = {row["environment_id"] for row in environment_catalog["environment_records"]}
     callback_profile_refs = {
         profile["callback_profile_ref"] for profile in profile_catalog["callback_profiles"]
     }
@@ -3075,7 +3146,9 @@ def validate_catalogs(
                 )
 
     api_record_count = provider_inventory["summary"]["api_record_count"]
-    expected_profiles = api_record_count * len(PROFILE_ENVIRONMENT_ORDER) * len(CONNECTION_METHOD_ORDER)
+    expected_profiles = (
+        api_record_count * len(PROFILE_ENVIRONMENT_ORDER) * len(CONNECTION_METHOD_ORDER)
+    )
     if profile_catalog["summary"]["profile_count"] != expected_profiles:
         raise ValueError(
             f"Expected {expected_profiles} profiles but found {profile_catalog['summary']['profile_count']}"
@@ -3256,12 +3329,42 @@ def build_docs(
     )
 
     promotion_rows = [
-        ["Local authoring", "Local provisioning", "No promotion; separate local boundaries", "No live provider traffic, no shared secrets."],
-        ["Local provisioning", "Shared sandbox", "Provisioning and callback registration only", "Sandbox bootstrap material stays sandbox scoped."],
-        ["CI / Preview", "Shared sandbox", "Not a direct promotion path", "Ephemeral hosts cannot own provider trust."],
-        ["Shared sandbox", "Pre-production", "Candidate-bound release verification", "Preprod keeps production-like controls but still uses HMRC sandbox."],
-        ["Pre-production", "Production", "Governed release promotion", "Production gets distinct callback hosts, secret namespaces, and HMRC production credentials."],
-        ["Production", "DR drill", "No automatic promotion", "Drill environments remain separate and do not inherit live provider trust by default."],
+        [
+            "Local authoring",
+            "Local provisioning",
+            "No promotion; separate local boundaries",
+            "No live provider traffic, no shared secrets.",
+        ],
+        [
+            "Local provisioning",
+            "Shared sandbox",
+            "Provisioning and callback registration only",
+            "Sandbox bootstrap material stays sandbox scoped.",
+        ],
+        [
+            "CI / Preview",
+            "Shared sandbox",
+            "Not a direct promotion path",
+            "Ephemeral hosts cannot own provider trust.",
+        ],
+        [
+            "Shared sandbox",
+            "Pre-production",
+            "Candidate-bound release verification",
+            "Preprod keeps production-like controls but still uses HMRC sandbox.",
+        ],
+        [
+            "Pre-production",
+            "Production",
+            "Governed release promotion",
+            "Production gets distinct callback hosts, secret namespaces, and HMRC production credentials.",
+        ],
+        [
+            "Production",
+            "DR drill",
+            "No automatic promotion",
+            "Drill environments remain separate and do not inherit live provider trust by default.",
+        ],
     ]
     domain_rows = [
         [
@@ -3446,9 +3549,7 @@ def main() -> None:
         "KMS_HSM_ROOT_OF_TRUST",
         "DNS_TLS_WAF_AND_EDGE_DELIVERY",
     }
-    found_dependency_keys = {
-        row["dependency_key"] for row in dependency_register["dependencies"]
-    }
+    found_dependency_keys = {row["dependency_key"] for row in dependency_register["dependencies"]}
     missing_dependencies = required_dependency_keys - found_dependency_keys
     if missing_dependencies:
         raise ValueError(

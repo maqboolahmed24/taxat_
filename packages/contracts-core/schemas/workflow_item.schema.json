@@ -1,0 +1,1236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/workflow_item.schema.json",
+  "title": "WorkflowItem",
+  "description": "Deterministic workflow-item contract for module-planned follow-up work. This schema freezes authoritative lifecycle state, collaboration visibility, explicit authority-truth posture, customer projection, queue routing, assignment posture, quantitative collaboration scores, and stale-view versions for one actionable work item.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "item_id",
+    "tenant_id",
+    "client_id",
+    "period",
+    "type",
+    "execution_mode_boundary_contract",
+    "lifecycle_state",
+    "state_transition_contract",
+    "priority",
+    "due_at",
+    "context_refs",
+    "title",
+    "truth_boundary_contract",
+    "authority_truth_contract",
+    "collaboration_visibility",
+    "authority_truth_state",
+    "customer_status_projection",
+    "current_assignee_ref",
+    "assignment_state",
+    "escalation_target_ref",
+    "routing_queue_ref",
+    "routing_contract",
+    "waiting_on_actor",
+    "sla_policy_ref",
+    "sla_due_at",
+    "customer_due_at",
+    "due_state",
+    "queue_entered_at",
+    "last_assignment_at",
+    "waiting_since_at",
+    "reassignment_count_30d",
+    "ownership_confidence_score",
+    "assignment_efficiency_score",
+    "sla_pressure_score",
+    "escalation_pressure_score",
+    "collaboration_priority_score",
+    "resolution_confidence_score",
+    "customer_thread_ref",
+    "internal_thread_ref",
+    "staff_workspace_version",
+    "customer_workspace_version",
+    "active_request_info_ref",
+    "next_request_info_ordinal",
+    "last_customer_activity_at",
+    "last_internal_activity_at",
+    "last_customer_visible_event_ref",
+    "last_internal_event_ref",
+    "dedupe_key",
+    "closed_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "WorkflowItem"
+    },
+    "item_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "client_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "period": {
+      "type": "string",
+      "minLength": 1
+    },
+    "type": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "execution_mode_boundary_contract": {
+      "$ref": "https://taxat.dev/schemas/execution_mode_boundary_contract.schema.json"
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "IN_PROGRESS",
+        "WAITING_ON_CLIENT",
+        "WAITING_ON_AUTHORITY",
+        "BLOCKED",
+        "DONE",
+        "CANCELLED",
+        "STALE"
+      ]
+    },
+    "state_transition_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/state_transition_contract.schema.json"
+        },
+        {
+          "properties": {
+            "object_family": {
+              "const": "WORKFLOW_ITEM"
+            },
+            "machine_code": {
+              "const": "WORKFLOW_ITEM_LIFECYCLE_V1"
+            },
+            "state_field_name": {
+              "const": "lifecycle_state"
+            }
+          }
+        }
+      ]
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "LOW",
+        "NORMAL",
+        "HIGH",
+        "URGENT",
+        "CRITICAL"
+      ]
+    },
+    "due_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "context_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "truth_boundary_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/command_truth_boundary_contract.schema.json"
+        },
+        {
+          "properties": {
+            "artifact_role": {
+              "const": "COMMAND_SIDE_AUTHORITY"
+            },
+            "authoritative_record_families": {
+              "const": [
+                "RUN_MANIFEST",
+                "WORKFLOW_ITEM",
+                "AUDIT_EVENT"
+              ]
+            },
+            "observable_projection_families": {
+              "const": []
+            }
+          }
+        }
+      ]
+    },
+    "authority_truth_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/authority_truth_contract.schema.json"
+        },
+        {
+          "properties": {
+            "boundary_scope": {
+              "const": "WORKFLOW_ITEM"
+            },
+            "truth_surface_role": {
+              "const": "INTERNAL_WORKFLOW_COORDINATION"
+            },
+            "surface_specific_binding_policy": {
+              "const": "WORKFLOW_IS_COORDINATION_ONLY_WITH_EXPLICIT_AUTHORITY_STATE"
+            }
+          }
+        }
+      ]
+    },
+    "collaboration_visibility": {
+      "type": "string",
+      "enum": [
+        "INTERNAL_ONLY",
+        "CUSTOMER_SHARED"
+      ]
+    },
+    "authority_truth_state": {
+      "type": "string",
+      "enum": [
+        "NOT_APPLICABLE",
+        "NOT_REQUESTED",
+        "UNKNOWN",
+        "PENDING_ACK",
+        "PARTIAL_ACK",
+        "CONFIRMED",
+        "REJECTED",
+        "OUT_OF_BAND"
+      ]
+    },
+    "customer_status_projection": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "UNDER_REVIEW",
+        "ACTION_REQUIRED",
+        "WAITING_ON_CONFIRMATION",
+        "RESOLVED",
+        "CLOSED",
+        null
+      ]
+    },
+    "current_assignee_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "assignment_state": {
+      "type": "string",
+      "enum": [
+        "UNASSIGNED",
+        "ASSIGNED",
+        "ESCALATED"
+      ]
+    },
+    "escalation_target_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "routing_queue_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "routing_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/collaboration_routing_contract.schema.json"
+        },
+        {
+          "properties": {
+            "routing_scope": {
+              "const": "WORKFLOW_ITEM"
+            }
+          }
+        }
+      ]
+    },
+    "waiting_on_actor": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "CUSTOMER",
+        "STAFF",
+        "AUTHORITY",
+        "SYSTEM"
+      ]
+    },
+    "sla_policy_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "sla_due_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "customer_due_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "due_state": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "ON_TRACK",
+        "DUE_SOON",
+        "OVERDUE",
+        "BREACHED",
+        null
+      ]
+    },
+    "queue_entered_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_assignment_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "waiting_since_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reassignment_count_30d": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "ownership_confidence_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "assignment_efficiency_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "sla_pressure_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "escalation_pressure_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "collaboration_priority_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "resolution_confidence_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "customer_thread_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "internal_thread_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "staff_workspace_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "customer_workspace_version": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "active_request_info_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "next_request_info_ordinal": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "last_customer_activity_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "last_internal_activity_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "last_customer_visible_event_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "last_internal_event_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "dedupe_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "closed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "customer_status_projection": {
+            "type": "string",
+            "enum": [
+              "UNDER_REVIEW",
+              "ACTION_REQUIRED",
+              "WAITING_ON_CONFIRMATION",
+              "RESOLVED",
+              "CLOSED"
+            ]
+          }
+        },
+        "required": [
+          "customer_status_projection"
+        ]
+      },
+      "then": {
+        "properties": {
+          "collaboration_visibility": {
+            "const": "CUSTOMER_SHARED"
+          },
+          "customer_thread_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "customer_status_projection": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "customer_status_projection"
+        ]
+      },
+      "then": {
+        "properties": {
+          "collaboration_visibility": {
+            "const": "INTERNAL_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "collaboration_visibility": {
+            "const": "INTERNAL_ONLY"
+          }
+        },
+        "required": [
+          "collaboration_visibility"
+        ]
+      },
+      "then": {
+        "properties": {
+          "customer_status_projection": {
+            "type": "null"
+          },
+          "customer_due_at": {
+            "type": "null"
+          },
+          "customer_thread_ref": {
+            "type": "null"
+          },
+          "customer_workspace_version": {
+            "const": 0
+          },
+          "last_customer_activity_at": {
+            "type": "null"
+          },
+          "last_customer_visible_event_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "WAITING_ON_CLIENT"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "collaboration_visibility": {
+            "const": "CUSTOMER_SHARED"
+          },
+          "waiting_on_actor": {
+            "const": "CUSTOMER"
+          },
+          "active_request_info_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "customer_status_projection": {
+            "const": "ACTION_REQUIRED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "customer_status_projection": {
+            "const": "UNDER_REVIEW"
+          }
+        },
+        "required": [
+          "customer_status_projection"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "OPEN",
+              "IN_PROGRESS",
+              "BLOCKED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "customer_status_projection": {
+            "const": "ACTION_REQUIRED"
+          }
+        },
+        "required": [
+          "customer_status_projection"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "WAITING_ON_CLIENT"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "customer_status_projection": {
+            "const": "WAITING_ON_CONFIRMATION"
+          }
+        },
+        "required": [
+          "customer_status_projection"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "WAITING_ON_AUTHORITY"
+          },
+          "authority_truth_state": {
+            "enum": [
+              "UNKNOWN",
+              "PENDING_ACK",
+              "PARTIAL_ACK"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "customer_status_projection": {
+            "const": "RESOLVED"
+          }
+        },
+        "required": [
+          "customer_status_projection"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "DONE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "customer_status_projection": {
+            "const": "CLOSED"
+          }
+        },
+        "required": [
+          "customer_status_projection"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "CANCELLED",
+              "STALE"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "collaboration_visibility": {
+            "const": "CUSTOMER_SHARED"
+          }
+        },
+        "required": [
+          "collaboration_visibility"
+        ]
+      },
+      "then": {
+        "properties": {
+          "customer_status_projection": {
+            "type": "string",
+            "enum": [
+              "UNDER_REVIEW",
+              "ACTION_REQUIRED",
+              "WAITING_ON_CONFIRMATION",
+              "RESOLVED",
+              "CLOSED"
+            ]
+          },
+          "customer_thread_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "current_assignee_ref": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "current_assignee_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "assignment_state": {
+            "const": "UNASSIGNED"
+          },
+          "escalation_target_ref": {
+            "type": "null"
+          },
+          "last_assignment_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "escalation_target_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "escalation_target_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "assignment_state": {
+            "const": "ESCALATED"
+          },
+          "current_assignee_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "last_assignment_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "assignment_state": {
+            "const": "UNASSIGNED"
+          }
+        },
+        "required": [
+          "assignment_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "current_assignee_ref": {
+            "type": "null"
+          },
+          "escalation_target_ref": {
+            "type": "null"
+          },
+          "last_assignment_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "assignment_state": {
+            "const": "ASSIGNED"
+          }
+        },
+        "required": [
+          "assignment_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "current_assignee_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "escalation_target_ref": {
+            "type": "null"
+          },
+          "last_assignment_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "assignment_state": {
+            "const": "ESCALATED"
+          }
+        },
+        "required": [
+          "assignment_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "current_assignee_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "escalation_target_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "last_assignment_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "due_state": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "due_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "due_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "due_state": {
+            "type": "string",
+            "enum": [
+              "ON_TRACK",
+              "DUE_SOON",
+              "OVERDUE",
+              "BREACHED"
+            ]
+          }
+        },
+        "required": [
+          "due_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "due_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "due_at": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "due_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "due_state": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "due_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "due_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "due_state": {
+            "type": "string",
+            "enum": [
+              "ON_TRACK",
+              "DUE_SOON",
+              "OVERDUE",
+              "BREACHED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "active_request_info_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "active_request_info_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "waiting_on_actor": {
+            "const": "CUSTOMER"
+          },
+          "lifecycle_state": {
+            "const": "WAITING_ON_CLIENT"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "waiting_on_actor": {
+            "const": "CUSTOMER"
+          }
+        },
+        "required": [
+          "waiting_on_actor"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "WAITING_ON_CLIENT"
+          },
+          "active_request_info_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "waiting_on_actor": {
+            "not": {
+              "const": "CUSTOMER"
+            }
+          }
+        },
+        "required": [
+          "waiting_on_actor"
+        ]
+      },
+      "then": {
+        "properties": {
+          "active_request_info_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "closed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "closed_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "DONE",
+              "CANCELLED",
+              "STALE"
+            ]
+          },
+          "waiting_on_actor": {
+            "const": "NONE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "WAITING_ON_AUTHORITY"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "waiting_on_actor": {
+            "const": "AUTHORITY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "enum": [
+              "DONE",
+              "CANCELLED",
+              "STALE"
+            ]
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "closed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "waiting_on_actor": {
+            "const": "NONE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "not": {
+              "enum": [
+                "DONE",
+                "CANCELLED",
+                "STALE"
+              ]
+            }
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "closed_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "collaboration_visibility": {
+            "const": "CUSTOMER_SHARED"
+          },
+          "lifecycle_state": {
+            "const": "OPEN"
+          }
+        },
+        "required": [
+          "collaboration_visibility",
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "customer_status_projection": {
+            "const": "UNDER_REVIEW"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "collaboration_visibility": {
+            "const": "CUSTOMER_SHARED"
+          },
+          "lifecycle_state": {
+            "const": "IN_PROGRESS"
+          }
+        },
+        "required": [
+          "collaboration_visibility",
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "customer_status_projection": {
+            "const": "UNDER_REVIEW"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "collaboration_visibility": {
+            "const": "CUSTOMER_SHARED"
+          },
+          "lifecycle_state": {
+            "const": "BLOCKED"
+          }
+        },
+        "required": [
+          "collaboration_visibility",
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "customer_status_projection": {
+            "const": "UNDER_REVIEW"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "collaboration_visibility": {
+            "const": "CUSTOMER_SHARED"
+          },
+          "lifecycle_state": {
+            "const": "WAITING_ON_CLIENT"
+          }
+        },
+        "required": [
+          "collaboration_visibility",
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "customer_status_projection": {
+            "const": "ACTION_REQUIRED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "collaboration_visibility": {
+            "const": "CUSTOMER_SHARED"
+          },
+          "lifecycle_state": {
+            "const": "WAITING_ON_AUTHORITY"
+          }
+        },
+        "required": [
+          "collaboration_visibility",
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "customer_status_projection": {
+            "const": "WAITING_ON_CONFIRMATION"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "collaboration_visibility": {
+            "const": "CUSTOMER_SHARED"
+          },
+          "lifecycle_state": {
+            "const": "DONE"
+          }
+        },
+        "required": [
+          "collaboration_visibility",
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "customer_status_projection": {
+            "const": "RESOLVED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "collaboration_visibility": {
+            "const": "CUSTOMER_SHARED"
+          },
+          "lifecycle_state": {
+            "enum": [
+              "CANCELLED",
+              "STALE"
+            ]
+          }
+        },
+        "required": [
+          "collaboration_visibility",
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "customer_status_projection": {
+            "const": "CLOSED"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

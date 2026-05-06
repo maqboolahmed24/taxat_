@@ -1,0 +1,80 @@
+{
+  "contract_version": "LOCAL_SERVICE_BOOT_ORDER_V1",
+  "boot_order_id": "taxat_local_service_boot_order",
+  "basis_statement": "Local startup is deterministic: base services first, idempotent bootstrap helpers second, deterministic seed loading third, semantic smoke fourth, and only then may host processes start.",
+  "phases": [
+    {
+      "phase_ref": "BASE_SERVICES",
+      "order": 10,
+      "kind": "COMPOSE_SERVICES",
+      "label": "Base services",
+      "service_refs": ["CONTROL_STORE", "AUDIT_STORE", "OBJECT_STORAGE", "QUEUE", "CACHE"],
+      "compose_service_refs": ["postgres", "minio", "rabbitmq", "redis"],
+      "host_command_refs": [],
+      "completion_gate": "BASE_SERVICES_RUNNING_HEALTHY",
+      "notes": [
+        "Only the substrate services come up here; no host process may assume semantic readiness yet."
+      ]
+    },
+    {
+      "phase_ref": "BOOTSTRAP_NAMESPACE_AND_SCHEMA",
+      "order": 20,
+      "kind": "COMPOSE_BOOTSTRAP",
+      "label": "Schema and namespace bootstrap",
+      "service_refs": ["CONTROL_STORE", "AUDIT_STORE", "OBJECT_STORAGE", "QUEUE", "CACHE"],
+      "compose_service_refs": [
+        "postgres-bootstrap",
+        "minio-bootstrap",
+        "rabbitmq-bootstrap",
+        "redis-bootstrap"
+      ],
+      "host_command_refs": [],
+      "completion_gate": "BOOTSTRAP_SERVICES_EXITED_SUCCESSFULLY",
+      "notes": [
+        "Bootstrap helpers are one-shot and idempotent. They create databases, buckets, queue namespaces, and cache sentinels without opening host processes."
+      ]
+    },
+    {
+      "phase_ref": "DETERMINISTIC_SEEDING",
+      "order": 30,
+      "kind": "HOST_SCRIPT",
+      "label": "Deterministic seeding",
+      "service_refs": ["CONTROL_STORE", "AUDIT_STORE", "OBJECT_STORAGE", "QUEUE", "CACHE"],
+      "compose_service_refs": [],
+      "host_command_refs": ["scripts/local/seed_local_runtime.py"],
+      "completion_gate": "SEED_PROFILE_APPLIED",
+      "notes": [
+        "Seed loading imports only the governed synthetic fixture pack and the reviewed deterministic golden-pack basis."
+      ]
+    },
+    {
+      "phase_ref": "SEMANTIC_SMOKE_AND_VALIDATION",
+      "order": 40,
+      "kind": "HOST_SCRIPT",
+      "label": "Semantic smoke and validation",
+      "service_refs": ["CONTROL_STORE", "AUDIT_STORE", "OBJECT_STORAGE", "QUEUE", "CACHE"],
+      "compose_service_refs": [],
+      "host_command_refs": ["scripts/local/smoke_local_runtime.py"],
+      "completion_gate": "LOCAL_RUNTIME_SMOKE_PASSED",
+      "notes": [
+        "The smoke phase proves northbound receipt, queue, object-store, cache, and audit foundations while running authoritative validators by default."
+      ]
+    },
+    {
+      "phase_ref": "HOST_PROCESSES",
+      "order": 50,
+      "kind": "HOST_PROCESS_GATE",
+      "label": "Host processes",
+      "service_refs": ["APP", "WORKERS"],
+      "compose_service_refs": [],
+      "host_command_refs": [
+        "pnpm dev --filter @taxat/operator-web",
+        "pnpm dev --filter @taxat/control-plane-api"
+      ],
+      "completion_gate": "HOST_PROCESSES_MAY_START",
+      "notes": [
+        "Host processes remain outside compose for faster edit cycles, but they are still gated on semantic readiness."
+      ]
+    }
+  ]
+}

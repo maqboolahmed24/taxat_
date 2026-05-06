@@ -1,0 +1,475 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/accepted_risk_approval.schema.json",
+  "title": "AcceptedRiskApproval",
+  "description": "Bounded exception-approval contract. This schema freezes whether accepted risk is justified by explicit approval or policy basis, who or what authorized it, the scope of the exception, and its expiry or revocation posture.",
+  "type": "object",
+  "required": [
+    "accepted_risk_approval_id",
+    "error_id",
+    "manifest_id",
+    "root_manifest_id",
+    "failure_resolution_contract",
+    "decision_basis",
+    "approval_state",
+    "approver_type",
+    "approver_ref",
+    "policy_basis_ref",
+    "retention_class",
+    "artifact_retention_ref",
+    "workflow_item_id",
+    "rationale_ref",
+    "bounded_scope_refs",
+    "approved_at",
+    "expires_at",
+    "revoked_at",
+    "superseded_by_approval_id",
+    "audit_refs",
+    "provenance_refs"
+  ],
+  "properties": {
+    "accepted_risk_approval_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "error_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "root_manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "failure_resolution_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/failure_resolution_contract.schema.json"
+        },
+        {
+          "properties": {
+            "lifecycle_role": {
+              "const": "ACCEPTED_RISK_APPROVAL"
+            },
+            "role_specific_binding_policy": {
+              "const": "APPROVAL_RETAINS_SCOPE_EXPIRY_AND_AUTHORIZATION_BASIS"
+            }
+          }
+        }
+      ]
+    },
+    "decision_basis": {
+      "type": "string",
+      "enum": [
+        "EXPLICIT_APPROVAL",
+        "POLICY_BASIS"
+      ]
+    },
+    "approval_state": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "EXPIRED",
+        "REVOKED",
+        "SUPERSEDED"
+      ]
+    },
+    "approver_type": {
+      "type": "string",
+      "enum": [
+        "APPROVER",
+        "TENANT_ADMIN",
+        "SECURITY_OPERATOR",
+        "SYSTEM_POLICY"
+      ]
+    },
+    "approver_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "policy_basis_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "retention_class": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "regulated_record",
+        "derived_artifact",
+        "operational_log",
+        "analytics_projection",
+        "policy_governed_other",
+        null
+      ]
+    },
+    "artifact_retention_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "workflow_item_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "rationale_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "bounded_scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revoked_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "superseded_by_approval_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "audit_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "provenance_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "retention_class": {
+            "type": "string",
+            "enum": [
+              "regulated_record",
+              "derived_artifact",
+              "operational_log",
+              "analytics_projection",
+              "policy_governed_other"
+            ]
+          }
+        },
+        "required": [
+          "retention_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "artifact_retention_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "artifact_retention_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "artifact_retention_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retention_class": {
+            "type": "string",
+            "enum": [
+              "regulated_record",
+              "derived_artifact",
+              "operational_log",
+              "analytics_projection",
+              "policy_governed_other"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision_basis": {
+            "const": "EXPLICIT_APPROVAL"
+          }
+        },
+        "required": [
+          "decision_basis"
+        ]
+      },
+      "then": {
+        "properties": {
+          "approver_type": {
+            "enum": [
+              "APPROVER",
+              "TENANT_ADMIN",
+              "SECURITY_OPERATOR"
+            ]
+          },
+          "approver_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "policy_basis_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "approver_type": {
+            "const": "SYSTEM_POLICY"
+          }
+        },
+        "required": [
+          "approver_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_basis": {
+            "const": "POLICY_BASIS"
+          },
+          "approver_ref": {
+            "type": "null"
+          },
+          "policy_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "approver_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "approver_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_basis": {
+            "const": "EXPLICIT_APPROVAL"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "policy_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "policy_basis_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "decision_basis": {
+            "const": "POLICY_BASIS"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision_basis": {
+            "const": "POLICY_BASIS"
+          }
+        },
+        "required": [
+          "decision_basis"
+        ]
+      },
+      "then": {
+        "properties": {
+          "approver_type": {
+            "const": "SYSTEM_POLICY"
+          },
+          "approver_ref": {
+            "type": "null"
+          },
+          "policy_basis_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "approval_state": {
+            "enum": [
+              "ACTIVE",
+              "EXPIRED"
+            ]
+          }
+        },
+        "required": [
+          "approval_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "revoked_at": {
+            "type": "null"
+          },
+          "superseded_by_approval_id": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "approval_state": {
+            "const": "REVOKED"
+          }
+        },
+        "required": [
+          "approval_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "revoked_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "superseded_by_approval_id": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "revoked_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "revoked_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "approval_state": {
+            "const": "REVOKED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "approval_state": {
+            "const": "SUPERSEDED"
+          }
+        },
+        "required": [
+          "approval_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "revoked_at": {
+            "type": "null"
+          },
+          "superseded_by_approval_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "superseded_by_approval_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "superseded_by_approval_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "approval_state": {
+            "const": "SUPERSEDED"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

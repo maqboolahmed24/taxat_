@@ -1,0 +1,198 @@
+{
+  "artifactVersion": "CONTRACT_OBSERVATORY_ARTIFACT_V1",
+  "artifactSlug": "doc--docs-analysis-16_artifact_retention_erasure_and_limitations_matrix",
+  "artifactKind": "MARKDOWN",
+  "sectionRef": "SUPPORT_DOCS",
+  "authorityLevel": "SUPPORTING_REFERENCE",
+  "sourceTruthBadge": "Support Documentation",
+  "tone": "slate",
+  "title": "Artifact Retention, Erasure, and Limitations Matrix",
+  "subtitle": "docs/analysis/16_artifact_retention_erasure_and_limitations_matrix.md",
+  "summary": "",
+  "canonicalPath": "docs/analysis/16_artifact_retention_erasure_and_limitations_matrix.md",
+  "sourceLineage": [
+    "docs/analysis/16_artifact_retention_erasure_and_limitations_matrix.md"
+  ],
+  "headingCount": 4,
+  "headings": [
+    {
+      "level": 1,
+      "text": "Artifact Retention, Erasure, and Limitations Matrix",
+      "slug": "artifact-retention-erasure-and-limitations-matrix"
+    },
+    {
+      "level": 2,
+      "text": "Governed Artifact Matrix",
+      "slug": "governed-artifact-matrix"
+    },
+    {
+      "level": 2,
+      "text": "Retention-Limited Explainability",
+      "slug": "retention-limited-explainability"
+    },
+    {
+      "level": 2,
+      "text": "Restore Privacy Reconciliation States",
+      "slug": "restore-privacy-reconciliation-states"
+    }
+  ],
+  "proseSections": [
+    {
+      "headingSlug": "artifact-retention-erasure-and-limitations-matrix",
+      "headingText": "Artifact Retention, Erasure, and Limitations Matrix",
+      "level": 1,
+      "lines": [
+        ""
+      ],
+      "plainText": "",
+      "excerpt": "",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "governed-artifact-matrix",
+      "headingText": "Governed Artifact Matrix",
+      "level": 2,
+      "lines": [
+        "",
+        "| artifact_or_control_id | category | retention_tag | legal_hold_behavior | erasure_behavior | projection_allowed | replay_preservation_required | restore_reconciliation_required | source_ref |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| ActorSession | SESSION_CONTROL_OBJECT | policy_governed_other | Session audit lineage survives logout, compromise response, or administrator invalidation. | Session invalidation rotates or revokes challenge state and blocks replay of stale commands. | RUNTIME_AND_AUDIT_ONLY | no | no | Algorithm/security_and_runtime_hardening_contract.md::L36[ActorSession] |",
+        "| ApiCommandReceipt | READ_PROJECTION | derived_artifact | Receipts preserve command recovery anchors and session lineage during investigations or incident review. | Expired success projections keep the same recovery-anchor family instead of degrading into transport-only timeout markers. | OPERATOR_AND_RUNTIME_ONLY | no | no | Algorithm/northbound_api_and_session_contract.md::L48[ApiCommandReceipt] |",
+        "| ArtifactRetention | RETENTION_CONTROL_OBJECT | policy_governed_other | LEGAL_HOLD and ERASURE_PENDING states require concrete follow-up workflow refs and next checkpoints. | PSEUDONYMISED and ERASED states require durable request/action/proof linkage. | OPERATOR_AND_AUDIT_ONLY | no | yes | Algorithm/retention_and_privacy.md::L58[ArtifactRetention] |",
+        "| AuditEvent | AUDIT_AND_OBSERVABILITY | operational_log | Audit evidence remains durably queryable during legal hold and release transitions. | Payload bodies may expire, but object, reason, lineage, and audit-family minimums must survive. | OPERATOR_AND_AUDIT_ONLY | yes | yes | Algorithm/retention_limited_explainability_and_audit_sufficiency_contract.md::L61[AuditEvent] |",
+        "| AuthorityIngressReceipt | AUTHORITY_TRANSPORT | regulated_record | Authority ingress proof survives legal hold because it anchors request-lineage and duplicate suppression. | Ingress authentication and lineage proof may be minimized, but cannot be reconstructed from transient transport memory. | OPERATOR_AND_AUDIT_ONLY | yes | yes | Algorithm/security_and_runtime_hardening_contract.md::L113[AuthorityIngressReceipt] |",
+        "| AuthorityInteractionRecord | AUTHORITY_TRANSPORT | regulated_record | Authority-facing history ambiguity cannot be resolved by deletion and must remain explicit. | Deletion is blocked where it would obscure already observed authority history. | OPERATOR_AND_AUDIT_ONLY | yes | yes | Algorithm/retention_error_and_observability_contract.md::L35[AuthorityInteractionRecord] |",
+        "| CacheIsolationContract | CACHE_CONTROL_OBJECT | policy_governed_other | Hold does not widen cache reuse; the contract only controls lawful reuse and purge semantics. | Broader variants purge immediately on access or masking narrowing and must not silently survive. | OPERATOR_AND_RUNTIME_ONLY | no | no | Algorithm/cache_isolation_and_secure_reuse_contract.md::L16[CacheIsolationContract] |",
+        "| ClientPortalWorkspace | CACHE_AND_PROJECTION | analytics_projection | Portal reuse remains bound to customer-safe projection and visibility posture even under retention limitation. | Background refresh, stale tabs, or direct URLs cannot widen the reviewed slice once masking or route context drifts. | CUSTOMER_SAFE_ONLY | no | no | Algorithm/customer_client_portal_experience_contract.md::L753[ClientPortalWorkspace] |",
+        "| ClientUploadSession | UPLOAD_AND_COLLABORATION | derived_artifact | Follow-on hold or erasure decisions must preserve staged lineage and publish posture explicitly. | Staged bytes remain non-downloadable and cannot satisfy a rebased request silently. | LIMITED_EXPLICIT_ONLY | no | yes | Algorithm/northbound_api_and_session_contract.md::L59[ClientUploadSession] |",
+        "| CollaborationAttachment | UPLOAD_AND_COLLABORATION | regulated_record | Published attachment lineage and unavailable reasons remain visible during hold or quarantine review. | Quarantined or policy-limited files render as typed unavailable state rather than disappearing silently. | MASKED_OR_LIMITED_ONLY | no | yes | Algorithm/collaboration_workspace_contract.md::L851[CollaborationAttachment] |",
+        "| ConfigFreeze | AUTHORITATIVE_TRUTH | regulated_record | Legal hold blocks erasure when the config freeze remains necessary for proof preservation. | If direct payload retention narrows, explicit limitation placeholders must preserve the frozen execution basis. | OPERATOR_AND_AUDIT_ONLY | yes | yes | Algorithm/retention_and_privacy.md::L240[ConfigFreeze] |",
+        "| DecisionBundle | READ_PROJECTION | derived_artifact | Underlying legal hold preserves the truth basis that informs the bundle's visible limitation posture. | Visible confidence and explainability must degrade rather than overclaim when retained support narrows. | MASKED_OR_LIMITED_ONLY | no | yes | Algorithm/retention_and_privacy.md::L150[DecisionBundle] |",
+        "| EnquiryPack | EXPLAINABILITY_ARTIFACT | regulated_record | Legal hold and omission posture must travel with the export when relevant. | Exports must keep retention binding, omission entries, and limitation notes under retention pressure. | MASKED_OR_LIMITED_ONLY | yes | yes | Algorithm/retention_limited_explainability_and_audit_sufficiency_contract.md::L44[EnquiryPack] |",
+        "| ErasureProof | RETENTION_CONTROL_OBJECT | operational_log | Erasure proof must show when legal hold blocked or released the workflow. | Erasure can never destroy the append-only proof that request, decision basis, and execution outcome occurred. | OPERATOR_AND_AUDIT_ONLY | no | yes | Algorithm/retention_and_privacy.md::L175[ErasureProof] |",
+        "| EvidenceGraph | EXPLAINABILITY_ARTIFACT | derived_artifact | If legal hold blocks erasure, the graph must show the retained-limited posture rather than hiding it. | Expired or erased edges must remain explicit present-but-limited evidence, not broken graph absence. | LIMITED_EXPLICIT_ONLY | yes | yes | Algorithm/retention_limited_explainability_and_audit_sufficiency_contract.md::L40[EvidenceGraph] |",
+        "| GateDecisionRecordLineage | AUTHORITATIVE_TRUTH | regulated_record | Gate lineage remains on hold when needed to preserve decisive-path audibility. | Derived gate lineage may survive with explicit limitation notes even when underlying support narrows. | OPERATOR_AND_AUDIT_ONLY | yes | yes | Algorithm/retention_and_privacy.md::L248[gate_lineage] |",
+        "| HashSetExecutionBasis | AUTHORITATIVE_TRUTH | regulated_record | Any hold preserving replay basis must preserve execution-basis hash lineage. | Hashes survive payload minimization and may outlive direct content as the lawful replay placeholder. | OPERATOR_AND_AUDIT_ONLY | yes | yes | Algorithm/retention_and_privacy.md::L246[execution_basis_hash] |",
+        "| InputFreeze | AUTHORITATIVE_TRUTH | regulated_record | Legal hold preserves auditable input lineage while keeping any erasure blocker explicit. | Eligible content may be minimized or pseudonymised, but the engine must preserve hashes, lineage, and limitation notes. | LIMITED_EXPLICIT_ONLY | yes | yes | Algorithm/retention_and_privacy.md::L240[InputFreeze] |",
+        "| MaskedExportArtifact | EXPORT_AND_VIEW | derived_artifact | Export limitation posture stays explicit if hold or minimization narrows the delivered slice. | Exports inherit masking/export policy and may not bypass it through direct object-store URLs. | MASKED_ONLY | no | yes | Algorithm/retention_and_privacy.md::L208[MaskedExportArtifact] |",
+        "| NativeCacheHydrationContract | CACHE_CONTROL_OBJECT | policy_governed_other | Hold does not bypass first-paint legality or live rebase requirements. | Purges regulated local artifacts on tenant, session, masking, route, preview, or schema drift. | NATIVE_RESTORE_ONLY_WHEN_FULL_MATCH | no | no | Algorithm/native_cache_hydration_purge_and_rebase_contract.md::L14[NativeCacheHydrationContract] |",
+        "| NativeLocalArtifactSet | CACHE_AND_EXPORT | analytics_projection | Local derivatives purge with the same revocation and masking boundaries as structured cache. | NSUserActivity, preview caches, temporary exports, and search indices are purged or invalidated with cache state. | NATIVE_LOCAL_ONLY_WITH_FULL_BINDING | no | no | Algorithm/macos_native_operator_workspace_blueprint.md::L488[NativeLocalArtifactSet] |",
+        "| ProofBundle | EXPLAINABILITY_ARTIFACT | regulated_record | Hold may preserve proof-path support while keeping hold lineage explicit on the retained bundle. | A filing-capable bundle must downgrade when decisive support falls below τ_submit or any decisive limitation is silent. | LIMITED_EXPLICIT_ONLY | yes | yes | Algorithm/retention_and_privacy.md::L218[ProofBundle] |",
+        "| ReplayAttestation | AUTHORITATIVE_TRUTH | regulated_record | Replay attestation persists when required to prove historical comparison outcome. | If supporting payload narrows, replay must surface RETENTION_LIMITED explicitly instead of synthesizing a newer basis. | OPERATOR_AND_AUDIT_ONLY | yes | yes | Algorithm/retention_and_privacy.md::L250[ReplayAttestation] |",
+        "| RestorePrivacyReconciliationContract | RESTORE_CONTROL_OBJECT | policy_governed_other | Blocked legal hold, proof preservation, and authority ambiguity states remain explicit legal posture, not notes. | Restore-time resurrected erased data opens compensating re-erasure workflow before reopen. | RUNTIME_AND_AUDIT_ONLY | yes | yes | Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[RestorePrivacyReconciliationContract] |",
+        "| RetentionTag | RETENTION_CONTROL_OBJECT | policy_governed_other | Canonical legal-hold state, hold ref, and change chronology live here. | Carries erasure_eligibility, erasure_reason_codes, limitation behavior, proof preservation basis, and authority ambiguity blockers. | OPERATOR_AND_AUDIT_ONLY | no | yes | Algorithm/retention_and_privacy.md::L13[RetentionTag] |",
+        "| RunManifest | AUTHORITATIVE_TRUTH | regulated_record | Legal hold may block erasure and must remain visibly queryable via the canonical retention tag. | Payload minimization may remove direct content, but manifest lineage and RETENTION_LIMITED placeholders must survive without rewriting basis hashes. | LIMITED_EXPLICIT_ONLY | yes | yes | Algorithm/retention_and_privacy.md::L240[RunManifest] |",
+        "| SecretVersion | SECRET_CONTROL_OBJECT | policy_governed_other | Secret rotation chronology remains auditable even across retirement or revocation. | Rotation fails closed if attestation or version binding is unknown; retired and revoked chronology remains serialized. | RUNTIME_AND_AUDIT_ONLY | no | yes | Algorithm/security_and_runtime_hardening_contract.md::L67[SecretVersion] |",
+        "| SubmissionRecord | AUTHORITY_TRANSPORT | regulated_record | Submission history remains preserved when required for legal-state audit and replay-safe recovery. | Restore or queue recovery cannot blindly replay mutations from transport artifacts alone. | OPERATOR_AND_AUDIT_ONLY | yes | yes | Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L113[SubmissionRecord] |",
+        "| TelemetryLogTrace | AUDIT_AND_OBSERVABILITY | operational_log | Logs and traces preserve correlation lineage but remain subordinate to audit proof. | Diagnostic logging must not reintroduce personal or authority-secret data that policy would otherwise hide. | OPERATOR_ONLY_MINIMIZED | no | yes | Algorithm/retention_error_and_observability_contract.md::L141[TelemetryLogTrace] |",
+        "| UploadRequestBindingContract | UPLOAD_AND_COLLABORATION | policy_governed_other | Binding posture survives so upload rebase decisions remain auditable during legal or retention review. | Rebases and supersession surface as typed states rather than silent rebinding. | OPERATOR_AND_AUDIT_ONLY | no | yes | Algorithm/northbound_api_and_session_contract.md::L206[UploadRequestBindingContract] |",
+        "| WorkInboxSnapshot | CACHE_AND_PROJECTION | analytics_projection | Snapshot visibility remains subordinate to upstream truth and retention posture. | Caches rebuild from durable truth; broader variants purge immediately on visibility or masking narrowing. | MASKED_OR_LIMITED_ONLY | no | no | Algorithm/collaboration_workspace_contract.md::L2163[WorkInboxSnapshot] |",
+        "| WorkspaceSnapshot | CACHE_AND_PROJECTION | analytics_projection | Workspace reads surface retention-limited or quarantined state explicitly rather than masking it as absence. | Cached workspace posture is rebuildable from durable truth and must rebase rather than infer missed transitions. | MASKED_OR_LIMITED_ONLY | no | no | Algorithm/northbound_api_and_session_contract.md::L50[WorkspaceSnapshot] |",
+        ""
+      ],
+      "plainText": "| artifact or control id | category | retention tag | legal hold behavior | erasure behavior | projection allowed | replay preservation required | restore reconciliation required | source ref | | | | | | | | | | | | ActorSession | SESSION CONTROL OBJECT | policy governed other | Session audit lineage survives logout, compromise response, or administrator invalidation. | Session invalidation rotates or revokes challenge state and blocks replay of stale commands. | RUNTIME AND AUDIT ONLY | no | no | Algorithm/security and runtime hardening contract.md::L36[ActorSession] | | ApiCommandReceipt | READ PROJECTION | derived artifact | Receipts preserve command recovery anchors and session lineage during investigations or incident review. | Expired success projections keep the same recovery anchor family instead of degrading into transport only timeout markers. | OPERATOR AND RUNTIME ONLY | no | no | Algorithm/northbound api and session contract.md::L48[ApiCommandReceipt] | | ArtifactRetention | RETENTION CONTROL OBJECT | policy governed other | LEGAL HOLD and ERASURE PENDING states require concrete follow up workflow refs and next checkpoints. | PSEUDONYMISED and ERASED states require durable request/action/proof linkage. | OPERATOR AND AUDIT ONLY | no | yes | Algorithm/retention and privacy.md::L58[ArtifactRetention] | | AuditEvent | AUDIT AND OBSERVABILITY | operational log | Audit evidence remains durably queryable during legal hold and release transitions. | Payload bodies may expire, but object, reason, lineage, and audit family minimums must survive. | OPERATOR AND AUDIT ONLY | yes | yes | Algorithm/retention limited explainability and audit sufficiency contract.md::L61[AuditEvent] | | AuthorityIngressReceipt | AUTHORITY TRANSPORT | regulated record | Authority ingress proof survives legal hold because it anchors request lineage and duplicate suppression. | Ingress authentication and lineage proof may be minimized, but cannot be reconstructed from transient transport memory. | OPERATOR AND AUDIT ONLY | yes | yes | Algorithm/security and runtime hardening contract.md::L113[AuthorityIngressReceipt] | | AuthorityInteractionRecord | AUTHORITY TRANSPORT | regulated record | Authority facing history ambiguity cannot be resolved by deletion and must remain explicit. | Deletion is blocked where it would obscure already observed authority history. | OPERATOR AND AUDIT ONLY | yes | yes | Algorithm/retention error and observability contract.md::L35[AuthorityInteractionRecord] | | CacheIsolationContract | CACHE CONTROL OBJECT | policy governed other | Hold does not widen cache reuse; the contract only controls lawful reuse and purge semantics. | Broader variants purge immediately on access or masking narrowing and must not silently survive. | OPERATOR AND RUNTIME ONLY | no | no | Algorithm/cache isolation and secure reuse contract.md::L16[CacheIsolationContract] | | ClientPortalWorkspace | CACHE AND PROJECTION | analytics projection | Portal reuse remains bound to customer safe projection and visibility posture even under retention limitation. | Background refresh, stale tabs, or direct URLs cannot widen the reviewed slice once masking or route context drifts. | CUSTOMER SAFE ONLY | no | no | Algorithm/customer client portal experience contract.md::L753[ClientPortalWorkspace] | | ClientUploadSession | UPLOAD AND COLLABORATION | derived artifact | Follow on hold or erasure decisions must preserve staged lineage and publish posture explicitly. | Staged bytes remain non downloadable and cannot satisfy a rebased request silently. | LIMITED EXPLICIT ONLY | no | yes | Algorithm/northbound api and session contract.md::L59[ClientUploadSession] | | CollaborationAttachment | UPLOAD AND COLLABORATION | regulated record | Published attachment lineage and unavailable reasons remain visible during hold or quarantine review. | Quarantined or policy limited files render as typed unavailable state rather than disappearing silently. | MASKED OR LIMITED ONLY | no | yes | Algorithm/collaboration workspace contract.md::L851[CollaborationAttachment] | | ConfigFreeze | AUTHORITATIVE TRUTH | regulated record | Legal hold blocks erasure when the config freeze remains necessary for proof preservation. | If direct payload retention narrows, explicit limitation placeholders must preserve the frozen execution basis. | OPERATOR AND AUDIT ONLY | yes | yes | Algorithm/retention and privacy.md::L240[ConfigFreeze] | | DecisionBundle | READ PROJECTION | derived artifact | Underlying legal hold preserves the truth basis that informs the bundle's visible limitation posture. | Visible confidence and explainability must degrade rather than overclaim when retained support narrows. | MASKED OR LIMITED ONLY | no | yes | Algorithm/retention and privacy.md::L150[DecisionBundle] | | EnquiryPack | EXPLAINABILITY ARTIFACT | regulated record | Legal hold and omission posture must travel with the export when relevant. | Exports must keep retention binding, omission entries, and limitation notes under retention pressure. | MASKED OR LIMITED ONLY | yes | yes | Algorithm/retention limited explainability and audit sufficiency contract.md::L44[EnquiryPack] | | ErasureProof | RETENTION CONTROL OBJECT | operational log | Erasure proof must show when legal hold blocked or released the workflow. | Erasure can never destroy the append only proof that request, decision basis, and execution outcome occurred. | OPERATOR AND AUDIT ONLY | no | yes | Algorithm/retention and privacy.md::L175[ErasureProof] | | EvidenceGraph | EXPLAINABILITY ARTIFACT | derived artifact | If legal hold blocks erasure, the graph must show the retained limited posture rather than hiding it. | Expired or erased edges must remain explicit present but limited evidence, not broken graph absence. | LIMITED EXPLICIT ONLY | yes | yes | Algorithm/retention limited explainability and audit sufficiency contract.md::L40[EvidenceGraph] | | GateDecisionRecordLineage | AUTHORITATIVE TRUTH | regulated record | Gate lineage remains on hold when needed to preserve decisive path audibility. | Derived gate lineage may survive with explicit limitation notes even when underlying support narrows. | OPERATOR AND AUDIT ONLY | yes | yes | Algorithm/retention and privacy.md::L248[gate lineage] | | HashSetExecutionBasis | AUTHORITATIVE TRUTH | regulated record | Any hold preserving replay basis must preserve execution basis hash lineage. | Hashes survive payload minimization and may outlive direct content as the lawful replay placeholder. | OPERATOR AND AUDIT ONLY | yes | yes | Algorithm/retention and privacy.md::L246[execution basis hash] | | InputFreeze | AUTHORITATIVE TRUTH | regulated record | Legal hold preserves auditable input lineage while keeping any erasure blocker explicit. | Eligible content may be minimized or pseudonymised, but the engine must preserve hashes, lineage, and limitation notes. | LIMITED EXPLICIT ONLY | yes | yes | Algorithm/retention and privacy.md::L240[InputFreeze] | | MaskedExportArtifact | EXPORT AND VIEW | derived artifact | Export limitation posture stays explicit if hold or minimization narrows the delivered slice. | Exports inherit masking/export policy and may not bypass it through direct object store URLs. | MASKED ONLY | no | yes | Algorithm/retention and privacy.md::L208[MaskedExportArtifact] | | NativeCacheHydrationContract | CACHE CONTROL OBJECT | policy governed other | Hold does not bypass first paint legality or live rebase requirements. | Purges regulated local artifacts on tenant, session, masking, route, preview, or schema drift. | NATIVE RESTORE ONLY WHEN FULL MATCH | no | no | Algorithm/native cache hydration purge and rebase contract.md::L14[NativeCacheHydrationContract] | | NativeLocalArtifactSet | CACHE AND EXPORT | analytics projection | Local derivatives purge with the same revocation and masking boundaries as structured cache. | NSUserActivity, preview caches, temporary exports, and search indices are purged or invalidated with cache state. | NATIVE LOCAL ONLY WITH FULL BINDING | no | no | Algorithm/macos native operator workspace blueprint.md::L488[NativeLocalArtifactSet] | | ProofBundle | EXPLAINABILITY ARTIFACT | regulated record | Hold may preserve proof path support while keeping hold lineage explicit on the retained bundle. | A filing capable bundle must downgrade when decisive support falls below τ submit or any decisive limitation is silent. | LIMITED EXPLICIT ONLY | yes | yes | Algorithm/retention and privacy.md::L218[ProofBundle] | | ReplayAttestation | AUTHORITATIVE TRUTH | regulated record | Replay attestation persists when required to prove historical comparison outcome. | If supporting payload narrows, replay must surface RETENTION LIMITED explicitly instead of synthesizing a newer basis. | OPERATOR AND AUDIT ONLY | yes | yes | Algorithm/retention and privacy.md::L250[ReplayAttestation] | | RestorePrivacyReconciliationContract | RESTORE CONTROL OBJECT | policy governed other | Blocked legal hold, proof preservation, and authority ambiguity states remain explicit legal posture, not notes. | Restore time resurrected erased data opens compensating re erasure workflow before reopen. | RUNTIME AND AUDIT ONLY | yes | yes | Algorithm/recovery tier checkpoint and fail forward governance contract.md::L86[RestorePrivacyReconciliationContract] | | RetentionTag | RETENTION CONTROL OBJECT | policy governed other | Canonical legal hold state, hold ref, and change chronology live here. | Carries erasure eligibility, erasure reason codes, limitation behavior, proof preservation basis, and authority ambiguity blockers. | OPERATOR AND AUDIT ONLY | no | yes | Algorithm/retention and privacy.md::L13[RetentionTag] | | RunManifest | AUTHORITATIVE TRUTH | regulated record | Legal hold may block erasure and must remain visibly queryable via the canonical retention tag. | Payload minimization may remove direct content, but manifest lineage and RETENTION LIMITED placeholders must survive without rewriting basis hashes. | LIMITED EXPLICIT ONLY | yes | yes | Algorithm/retention and privacy.md::L240[RunManifest] | | SecretVersion | SECRET CONTROL OBJECT | policy governed other | Secret rotation chronology remains auditable even across retirement or revocation. | Rotation fails closed if attestation or version binding is unknown; retired and revoked chronology remains serialized. | RUNTIME AND AUDIT ONLY | no | yes | Algorithm/security and runtime hardening contract.md::L67[SecretVersion] | | SubmissionRecord | AUTHORITY TRANSPORT | regulated record | Submission history remains preserved when required for legal state audit and replay safe recovery. | Restore or queue recovery cannot blindly replay mutations from transport artifacts alone. | OPERATOR AND AUDIT ONLY | yes | yes | Algorithm/recovery tier checkpoint and fail forward governance contract.md::L113[SubmissionRecord] | | TelemetryLogTrace | AUDIT AND OBSERVABILITY | operational log | Logs and traces preserve correlation lineage but remain subordinate to audit proof. | Diagnostic logging must not reintroduce personal or authority secret data that policy would otherwise hide. | OPERATOR ONLY MINIMIZED | no | yes | Algorithm/retention error and observability contract.md::L141[TelemetryLogTrace] | | UploadRequestBindingContract | UPLOAD AND COLLABORATION | policy governed other | Binding posture survives so upload rebase decisions remain auditable during legal or retention review. | Rebases and supersession surface as typed states rather than silent rebinding. | OPERATOR AND AUDIT ONLY | no | yes | Algorithm/northbound api and session contract.md::L206[UploadRequestBindingContract] | | WorkInboxSnapshot | CACHE AND PROJECTION | analytics projection | Snapshot visibility remains subordinate to upstream truth and retention posture. | Caches rebuild from durable truth; broader variants purge immediately on visibility or masking narrowing. | MASKED OR LIMITED ONLY | no | no | Algorithm/collaboration workspace contract.md::L2163[WorkInboxSnapshot] | | WorkspaceSnapshot | CACHE AND PROJECTION | analytics projection | Workspace reads surface retention limited or quarantined state explicitly rather than masking it as absence. | Cached workspace posture is rebuildable from durable truth and must rebase rather than infer missed transitions. | MASKED OR LIMITED ONLY | no | no | Algorithm/northbound api and session contract.md::L50[WorkspaceSnapshot] |",
+      "excerpt": "| artifact or control id | category | retention tag | legal hold behavior | erasure behavior | projection allowed | replay preservation required | restore reconciliation required…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "retention-limited-explainability",
+      "headingText": "Retention-Limited Explainability",
+      "level": 2,
+      "lines": [
+        "",
+        "| artifact_or_control_id | boundary_scope | surface_role | survivability_or_fidelity_formula | source_ref |",
+        "| --- | --- | --- | --- | --- |",
+        "| EXPLAINABILITY_SCOPE_PROOF_BUNDLE | PROOF_BUNDLE | FILING_PROOF_ARTIFACT | AVAILABLE_ONLY_WHEN_FULL_DECISIVE_RENDERABILITY_SURVIVES | Algorithm/retention_limited_explainability_and_audit_sufficiency_contract.md::L12[PROOF_BUNDLE] |",
+        "| EXPLAINABILITY_SCOPE_EVIDENCE_GRAPH | EVIDENCE_GRAPH | GRAPH_EXPLANATION_INDEX | LIMITATIONS_AND_OMISSIONS_MUST_BE_EXPLICIT_NOT_NEGATIVE_ABSENCE | Algorithm/retention_limited_explainability_and_audit_sufficiency_contract.md::L12[EVIDENCE_GRAPH] |",
+        "| EXPLAINABILITY_SCOPE_ENQUIRY_PACK | ENQUIRY_PACK | SCRUTINY_EXPORT_PACK | RETENTION_LIMITED_TRUTH_REMAINS_PRESENT_BUT_LIMITED | Algorithm/retention_limited_explainability_and_audit_sufficiency_contract.md::L12[ENQUIRY_PACK] |",
+        "| EXPLAINABILITY_SCOPE_AUDIT_EVENT | AUDIT_EVENT | AUDIT_RECONSTRUCTION_EVIDENCE | POST_EXPIRY_AUDIT_MUST_RETAIN_OBJECT_REASON_AND_LINEAGE_MINIMUM | Algorithm/retention_limited_explainability_and_audit_sufficiency_contract.md::L12[AUDIT_EVENT] |",
+        ""
+      ],
+      "plainText": "| artifact or control id | boundary scope | surface role | survivability or fidelity formula | source ref | | | | | | | | EXPLAINABILITY SCOPE PROOF BUNDLE | PROOF BUNDLE | FILING PROOF ARTIFACT | AVAILABLE ONLY WHEN FULL DECISIVE RENDERABILITY SURVIVES | Algorithm/retention limited explainability and audit sufficiency contract.md::L12[PROOF BUNDLE] | | EXPLAINABILITY SCOPE EVIDENCE GRAPH | EVIDENCE GRAPH | GRAPH EXPLANATION INDEX | LIMITATIONS AND OMISSIONS MUST BE EXPLICIT NOT NEGATIVE ABSENCE | Algorithm/retention limited explainability and audit sufficiency contract.md::L12[EVIDENCE GRAPH] | | EXPLAINABILITY SCOPE ENQUIRY PACK | ENQUIRY PACK | SCRUTINY EXPORT PACK | RETENTION LIMITED TRUTH REMAINS PRESENT BUT LIMITED | Algorithm/retention limited explainability and audit sufficiency contract.md::L12[ENQUIRY PACK] | | EXPLAINABILITY SCOPE AUDIT EVENT | AUDIT EVENT | AUDIT RECONSTRUCTION EVIDENCE | POST EXPIRY AUDIT MUST RETAIN OBJECT REASON AND LINEAGE MINIMUM | Algorithm/retention limited explainability and audit sufficiency contract.md::L12[AUDIT EVENT] |",
+      "excerpt": "| artifact or control id | boundary scope | surface role | survivability or fidelity formula | source ref | | | | | | | | EXPLAINABILITY SCOPE PROOF BUNDLE | PROOF BUNDLE | FILING…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "restore-privacy-reconciliation-states",
+      "headingText": "Restore Privacy Reconciliation States",
+      "level": 2,
+      "lines": [
+        "",
+        "| privacy_reconciliation_state | reopen_access_state | compensating_re_erasure_state | source_ref |",
+        "| --- | --- | --- | --- |",
+        "| PENDING_RECONCILIATION | BLOCKED | NOT_REQUIRED | Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[PENDING_RECONCILIATION] |",
+        "| RECONCILED_NO_COMPENSATION_REQUIRED | READY_FOR_REOPEN | NOT_REQUIRED | Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[RECONCILED_NO_COMPENSATION_REQUIRED] |",
+        "| COMPENSATING_RE_ERASURE_REQUIRED | BLOCKED | REQUIRED_PENDING | Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[COMPENSATING_RE_ERASURE_REQUIRED] |",
+        "| COMPENSATING_RE_ERASURE_IN_PROGRESS | LIMITED | IN_PROGRESS | Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[COMPENSATING_RE_ERASURE_IN_PROGRESS] |",
+        "| RECONCILED_WITH_COMPENSATING_RE_ERASURE | READY_FOR_REOPEN | COMPLETED | Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[RECONCILED_WITH_COMPENSATING_RE_ERASURE] |",
+        "| BLOCKED_LEGAL_HOLD | LIMITED | BLOCKED | Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[BLOCKED_LEGAL_HOLD] |",
+        "| BLOCKED_PROOF_PRESERVATION | LIMITED | BLOCKED | Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[BLOCKED_PROOF_PRESERVATION] |",
+        "| BLOCKED_AUTHORITY_AMBIGUITY | LIMITED | BLOCKED | Algorithm/recovery_tier_checkpoint_and_fail_forward_governance_contract.md::L86[BLOCKED_AUTHORITY_AMBIGUITY] |",
+        ""
+      ],
+      "plainText": "| privacy reconciliation state | reopen access state | compensating re erasure state | source ref | | | | | | | PENDING RECONCILIATION | BLOCKED | NOT REQUIRED | Algorithm/recovery tier checkpoint and fail forward governance contract.md::L86[PENDING RECONCILIATION] | | RECONCILED NO COMPENSATION REQUIRED | READY FOR REOPEN | NOT REQUIRED | Algorithm/recovery tier checkpoint and fail forward governance contract.md::L86[RECONCILED NO COMPENSATION REQUIRED] | | COMPENSATING RE ERASURE REQUIRED | BLOCKED | REQUIRED PENDING | Algorithm/recovery tier checkpoint and fail forward governance contract.md::L86[COMPENSATING RE ERASURE REQUIRED] | | COMPENSATING RE ERASURE IN PROGRESS | LIMITED | IN PROGRESS | Algorithm/recovery tier checkpoint and fail forward governance contract.md::L86[COMPENSATING RE ERASURE IN PROGRESS] | | RECONCILED WITH COMPENSATING RE ERASURE | READY FOR REOPEN | COMPLETED | Algorithm/recovery tier checkpoint and fail forward governance contract.md::L86[RECONCILED WITH COMPENSATING RE ERASURE] | | BLOCKED LEGAL HOLD | LIMITED | BLOCKED | Algorithm/recovery tier checkpoint and fail forward governance contract.md::L86[BLOCKED LEGAL HOLD] | | BLOCKED PROOF PRESERVATION | LIMITED | BLOCKED | Algorithm/recovery tier checkpoint and fail forward governance contract.md::L86[BLOCKED PROOF PRESERVATION] | | BLOCKED AUTHORITY AMBIGUITY | LIMITED | BLOCKED | Algorithm/recovery tier checkpoint and fail forward governance contract.md::L86[BLOCKED AUTHORITY AMBIGUITY] |",
+      "excerpt": "| privacy reconciliation state | reopen access state | compensating re erasure state | source ref | | | | | | | PENDING RECONCILIATION | BLOCKED | NOT REQUIRED | Algorithm/recover…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    }
+  ],
+  "schemaIdentityOrNull": null,
+  "schemaFields": [],
+  "samplePointers": [],
+  "sampleIdentityOrNull": null,
+  "bindingIdentityOrNull": null,
+  "validatorIdentityOrNull": null,
+  "driftIdentityOrNull": null,
+  "headerStrip": {
+    "kind": "PROSE",
+    "badgeLabel": "Support Documentation",
+    "metricPairs": [
+      {
+        "label": "Headings",
+        "value": "4"
+      },
+      {
+        "label": "Schemas",
+        "value": "0"
+      },
+      {
+        "label": "Tasks",
+        "value": "0"
+      }
+    ]
+  },
+  "relationships": {
+    "schemas": [],
+    "samples": [],
+    "bindings": [],
+    "validators": [],
+    "docs": [],
+    "tasks": []
+  },
+  "sourceTruthStack": {
+    "file": [
+      "docs/analysis/16_artifact_retention_erasure_and_limitations_matrix.md"
+    ],
+    "headings": [
+      "Artifact Retention, Erasure, and Limitations Matrix",
+      "Governed Artifact Matrix",
+      "Retention-Limited Explainability",
+      "Restore Privacy Reconciliation States"
+    ],
+    "schemaRefs": [],
+    "sampleRefs": [],
+    "bindingRefs": [],
+    "validatorRefs": [],
+    "driftRefs": [],
+    "taskRefs": []
+  },
+  "fieldCrosslinks": [],
+  "taskRefs": []
+}

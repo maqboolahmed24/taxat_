@@ -1,0 +1,259 @@
+{
+  "artifactVersion": "CONTRACT_OBSERVATORY_ARTIFACT_V1",
+  "artifactSlug": "doc--docs-messaging-outbox_inbox_and_idempotency_runbook",
+  "artifactKind": "MARKDOWN",
+  "sectionRef": "SUPPORT_DOCS",
+  "authorityLevel": "SUPPORTING_REFERENCE",
+  "sourceTruthBadge": "Support Documentation",
+  "tone": "slate",
+  "title": "Outbox, Inbox, and Idempotency Runbook",
+  "subtitle": "docs/messaging/outbox_inbox_and_idempotency_runbook.md",
+  "summary": "",
+  "canonicalPath": "docs/messaging/outbox_inbox_and_idempotency_runbook.md",
+  "sourceLineage": [
+    "docs/messaging/outbox_inbox_and_idempotency_runbook.md"
+  ],
+  "headingCount": 8,
+  "headings": [
+    {
+      "level": 1,
+      "text": "Outbox, Inbox, and Idempotency Runbook",
+      "slug": "outbox-inbox-and-idempotency-runbook"
+    },
+    {
+      "level": 2,
+      "text": "Purpose",
+      "slug": "purpose"
+    },
+    {
+      "level": 2,
+      "text": "Core Rules",
+      "slug": "core-rules"
+    },
+    {
+      "level": 2,
+      "text": "Identity Posture",
+      "slug": "identity-posture"
+    },
+    {
+      "level": 2,
+      "text": "Source-Record Continuity",
+      "slug": "source-record-continuity"
+    },
+    {
+      "level": 2,
+      "text": "Retry and Dead-Letter Posture",
+      "slug": "retry-and-dead-letter-posture"
+    },
+    {
+      "level": 2,
+      "text": "Redaction Posture",
+      "slug": "redaction-posture"
+    },
+    {
+      "level": 2,
+      "text": "Restore and Recovery",
+      "slug": "restore-and-recovery"
+    }
+  ],
+  "proseSections": [
+    {
+      "headingSlug": "outbox-inbox-and-idempotency-runbook",
+      "headingText": "Outbox, Inbox, and Idempotency Runbook",
+      "level": 1,
+      "lines": [
+        ""
+      ],
+      "plainText": "",
+      "excerpt": "",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "purpose",
+      "headingText": "Purpose",
+      "level": 2,
+      "lines": [
+        "",
+        "The shared messaging foundation keeps packets as transport-only evidence. Durable source records,",
+        "transactional outbox rows, transactional inbox rows, and downstream ledgers remain the legal truth.",
+        ""
+      ],
+      "plainText": "The shared messaging foundation keeps packets as transport only evidence. Durable source records, transactional outbox rows, transactional inbox rows, and downstream ledgers remain the legal truth.",
+      "excerpt": "The shared messaging foundation keeps packets as transport only evidence. Durable source records, transactional outbox rows, transactional inbox rows, and downstream ledgers remai…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "core-rules",
+      "headingText": "Core Rules",
+      "level": 2,
+      "lines": [
+        "",
+        "1. Persist the source record before publishing any packet.",
+        "2. Freeze `duplicate_meaning_key`, `request_hash`, and `idempotency_key` on the outbox-side source truth.",
+        "3. Treat broker delivery as rebuildable transport. Packet ids, delivery counters, and queue history are never authoritative truth.",
+        "4. Run durable inbox dedupe and source-record continuity checks before any mutation.",
+        "5. Dead-letter or quarantine after safe retries are exhausted. Do not loop blindly.",
+        ""
+      ],
+      "plainText": "1. Persist the source record before publishing any packet. 2. Freeze duplicate meaning key, request hash, and idempotency key on the outbox side source truth. 3. Treat broker delivery as rebuildable transport. Packet ids, delivery counters, and queue history are never authoritative truth. 4. Run durable inbox dedupe and source record continuity checks before any mutation. 5. Dead letter or quarantine after safe retries are exhausted. Do not loop blindly.",
+      "excerpt": "1. Persist the source record before publishing any packet. 2. Freeze duplicate meaning key, request hash, and idempotency key on the outbox side source truth. 3. Treat broker deli…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "identity-posture",
+      "headingText": "Identity Posture",
+      "level": 2,
+      "lines": [
+        "",
+        "- `duplicate_meaning_key`: retry and reconciliation bucket for the same business meaning.",
+        "- `request_hash`: exact sealed-send identity.",
+        "- `idempotency_key`: durable duplicate-meaning identity that survives lawful resend of the same meaning.",
+        "",
+        "Authority traffic keeps those concepts separate on purpose. Lawful token rotation within one frozen",
+        "binding lineage may change `request_hash` while preserving `duplicate_meaning_key` and",
+        "`idempotency_key`.",
+        ""
+      ],
+      "plainText": "duplicate meaning key: retry and reconciliation bucket for the same business meaning. request hash: exact sealed send identity. idempotency key: durable duplicate meaning identity that survives lawful resend of the same meaning. Authority traffic keeps those concepts separate on purpose. Lawful token rotation within one frozen binding lineage may change request hash while preserving duplicate meaning key and idempotency key.",
+      "excerpt": "duplicate meaning key: retry and reconciliation bucket for the same business meaning. request hash: exact sealed send identity. idempotency key: durable duplicate meaning identity…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "source-record-continuity",
+      "headingText": "Source-Record Continuity",
+      "level": 2,
+      "lines": [
+        "",
+        "Inbox delivery is mutation-safe only when the referenced source record is still present and current.",
+        "",
+        "- `CURRENT`: continue through claim, side effect, and acknowledgement.",
+        "- `STALE`: quarantine and require operator review or explicit replay from current truth.",
+        "- `MISSING`: quarantine immediately. Do not infer truth from broker payload alone.",
+        ""
+      ],
+      "plainText": "Inbox delivery is mutation safe only when the referenced source record is still present and current. CURRENT: continue through claim, side effect, and acknowledgement. STALE: quarantine and require operator review or explicit replay from current truth. MISSING: quarantine immediately. Do not infer truth from broker payload alone.",
+      "excerpt": "Inbox delivery is mutation safe only when the referenced source record is still present and current. CURRENT: continue through claim, side effect, and acknowledgement. STALE: quar…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "retry-and-dead-letter-posture",
+      "headingText": "Retry and Dead-Letter Posture",
+      "level": 2,
+      "lines": [
+        "",
+        "- Commands and worker-stage packets dead-letter after bounded safe retries.",
+        "- Authority request and ingress packets quarantine after bounded safe retries because legal meaning or correlation may have drifted.",
+        "- Redrive is lawful only when the same durable meaning still holds.",
+        ""
+      ],
+      "plainText": "Commands and worker stage packets dead letter after bounded safe retries. Authority request and ingress packets quarantine after bounded safe retries because legal meaning or correlation may have drifted. Redrive is lawful only when the same durable meaning still holds.",
+      "excerpt": "Commands and worker stage packets dead letter after bounded safe retries. Authority request and ingress packets quarantine after bounded safe retries because legal meaning or corr…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "redaction-posture",
+      "headingText": "Redaction Posture",
+      "level": 2,
+      "lines": [
+        "",
+        "Packets, inbox rows, and observability traces may carry refs, hashes, reason codes, and safe routing",
+        "hints. They may not carry:",
+        "",
+        "- raw secrets or token values",
+        "- plaintext authority request or callback bodies",
+        "- signed URLs or inline blob content used as durable truth",
+        "- customer plaintext copied out of protected ledgers",
+        ""
+      ],
+      "plainText": "Packets, inbox rows, and observability traces may carry refs, hashes, reason codes, and safe routing hints. They may not carry: raw secrets or token values plaintext authority request or callback bodies signed URLs or inline blob content used as durable truth customer plaintext copied out of protected ledgers",
+      "excerpt": "Packets, inbox rows, and observability traces may carry refs, hashes, reason codes, and safe routing hints. They may not carry: raw secrets or token values plaintext authority req…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "restore-and-recovery",
+      "headingText": "Restore and Recovery",
+      "level": 2,
+      "lines": [
+        "",
+        "Recovery rebuilds outstanding work from durable source, outbox, inbox, ingress, interaction, and",
+        "submission truth. Do not rebuild legal state by replaying broker history.",
+        ""
+      ],
+      "plainText": "Recovery rebuilds outstanding work from durable source, outbox, inbox, ingress, interaction, and submission truth. Do not rebuild legal state by replaying broker history.",
+      "excerpt": "Recovery rebuilds outstanding work from durable source, outbox, inbox, ingress, interaction, and submission truth. Do not rebuild legal state by replaying broker history.",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    }
+  ],
+  "schemaIdentityOrNull": null,
+  "schemaFields": [],
+  "samplePointers": [],
+  "sampleIdentityOrNull": null,
+  "bindingIdentityOrNull": null,
+  "validatorIdentityOrNull": null,
+  "driftIdentityOrNull": null,
+  "headerStrip": {
+    "kind": "PROSE",
+    "badgeLabel": "Support Documentation",
+    "metricPairs": [
+      {
+        "label": "Headings",
+        "value": "8"
+      },
+      {
+        "label": "Schemas",
+        "value": "0"
+      },
+      {
+        "label": "Tasks",
+        "value": "0"
+      }
+    ]
+  },
+  "relationships": {
+    "schemas": [],
+    "samples": [],
+    "bindings": [],
+    "validators": [],
+    "docs": [],
+    "tasks": []
+  },
+  "sourceTruthStack": {
+    "file": [
+      "docs/messaging/outbox_inbox_and_idempotency_runbook.md"
+    ],
+    "headings": [
+      "Outbox, Inbox, and Idempotency Runbook",
+      "Purpose",
+      "Core Rules",
+      "Identity Posture",
+      "Source-Record Continuity",
+      "Retry and Dead-Letter Posture",
+      "Redaction Posture",
+      "Restore and Recovery"
+    ],
+    "schemaRefs": [],
+    "sampleRefs": [],
+    "bindingRefs": [],
+    "validatorRefs": [],
+    "driftRefs": [],
+    "taskRefs": []
+  },
+  "fieldCrosslinks": [],
+  "taskRefs": []
+}

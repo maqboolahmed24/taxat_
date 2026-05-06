@@ -1,0 +1,254 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/source_domain_declaration.schema.json",
+  "title": "SourceDomainDeclaration",
+  "description": "Explicit per-source-domain omission or non-collected posture declaration used by InputFreeze arrays.",
+  "type": "object",
+  "required": [
+    "declaration_id",
+    "manifest_id",
+    "artifact_type",
+    "source_plan_ref",
+    "collection_boundary_ref",
+    "source_domain",
+    "source_class",
+    "partition_scope_refs",
+    "runtime_scope_refs",
+    "declaration_kind",
+    "boundary_disposition",
+    "late_data_policy_ref",
+    "reason_code",
+    "evidence_refs",
+    "declaration_hash",
+    "produced_at",
+    "contract"
+  ],
+  "properties": {
+    "declaration_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_type": {
+      "const": "SourceDomainDeclaration"
+    },
+    "source_plan_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "collection_boundary_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_class": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "AUTHORITY_ACKNOWLEDGEMENT",
+        "AUTHORITY_REFERENCE",
+        "INSTITUTIONAL_FEED",
+        "BOOKS_OF_ENTRY",
+        "DOCUMENTARY_EVIDENCE",
+        "DECLARED_ASSERTION",
+        "DETERMINISTIC_DERIVATION",
+        "PROBABILISTIC_INFERENCE",
+        "GOVERNANCE_ARTIFACT",
+        null
+      ]
+    },
+    "partition_scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "runtime_scope_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "declaration_kind": {
+      "type": "string",
+      "enum": [
+        "EXCLUDED_BY_POLICY",
+        "NO_DATA_CONFIRMED_AT_CUTOFF",
+        "MISSING_AT_CUTOFF",
+        "STALE_AT_CUTOFF"
+      ]
+    },
+    "boundary_disposition": {
+      "type": "string",
+      "enum": [
+        "EXCLUDED_BY_POLICY",
+        "NO_DATA_CONFIRMED_AT_CUTOFF",
+        "MISSING_AT_CUTOFF",
+        "STALE_AT_CUTOFF"
+      ]
+    },
+    "late_data_policy_ref": {
+      "type": "string",
+      "enum": [
+        "EXCLUDE_LATE",
+        "SPAWN_CHILD_MANIFEST",
+        "REVIEW_IF_LATE"
+      ]
+    },
+    "reason_code": {
+      "type": "string",
+      "enum": [
+        "POLICY_EXCLUDED",
+        "CLIENT_DECLARED_EXCLUSION",
+        "EMPTY_RESPONSE_CONFIRMED",
+        "NO_DATA_BOUNDARY_DISPOSITION",
+        "NO_BOUNDARY_DISPOSITION",
+        "NO_DATA_CONFIRMATION_MISSING",
+        "MISSING_AT_CUTOFF",
+        "STALE_AT_CUTOFF",
+        "SCHEMA_DRIFT",
+        "REVISION_DRIFT",
+        "FRESHNESS_POLICY_VIOLATION"
+      ]
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "declaration_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "produced_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "contract": {
+      "$ref": "https://taxat.dev/schemas/schema_bundle.schema.json#/$defs/artifactContract"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "declaration_kind": {
+            "const": "EXCLUDED_BY_POLICY"
+          }
+        },
+        "required": [
+          "declaration_kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "boundary_disposition": {
+            "const": "EXCLUDED_BY_POLICY"
+          },
+          "reason_code": {
+            "enum": [
+              "POLICY_EXCLUDED",
+              "CLIENT_DECLARED_EXCLUSION"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "declaration_kind": {
+            "const": "NO_DATA_CONFIRMED_AT_CUTOFF"
+          }
+        },
+        "required": [
+          "declaration_kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "boundary_disposition": {
+            "const": "NO_DATA_CONFIRMED_AT_CUTOFF"
+          },
+          "reason_code": {
+            "enum": [
+              "EMPTY_RESPONSE_CONFIRMED",
+              "NO_DATA_BOUNDARY_DISPOSITION"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "declaration_kind": {
+            "const": "MISSING_AT_CUTOFF"
+          }
+        },
+        "required": [
+          "declaration_kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "boundary_disposition": {
+            "const": "MISSING_AT_CUTOFF"
+          },
+          "reason_code": {
+            "enum": [
+              "NO_BOUNDARY_DISPOSITION",
+              "NO_DATA_CONFIRMATION_MISSING",
+              "MISSING_AT_CUTOFF"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "declaration_kind": {
+            "const": "STALE_AT_CUTOFF"
+          }
+        },
+        "required": [
+          "declaration_kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "boundary_disposition": {
+            "const": "STALE_AT_CUTOFF"
+          },
+          "reason_code": {
+            "enum": [
+              "STALE_AT_CUTOFF",
+              "SCHEMA_DRIFT",
+              "REVISION_DRIFT",
+              "FRESHNESS_POLICY_VIOLATION"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

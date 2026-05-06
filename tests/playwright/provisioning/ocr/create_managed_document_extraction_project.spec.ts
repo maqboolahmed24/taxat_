@@ -39,9 +39,7 @@ async function runFixtureFlow(
     typeof createManagedDocumentExtractionProjectOrRecordSelfHostDecision
   >[0]["page"],
 ) {
-  const rootDir = await mkdtemp(
-    path.join(os.tmpdir(), "taxat-document-extraction-"),
-  );
+  const rootDir = await mkdtemp(path.join(os.tmpdir(), "taxat-document-extraction-"));
   const providerInventoryPath = path.join(
     rootDir,
     "document_extraction_provider_inventory.template.json",
@@ -51,21 +49,19 @@ async function runFixtureFlow(
     "document_extraction_selection_record.template.json",
   );
 
-  const result =
-    await createManagedDocumentExtractionProjectOrRecordSelfHostDecision({
-      page,
-      runContext: fixtureRunContext(),
-      providerInventoryPath,
-      selectionRecordPath,
-      entryUrls: fixtureEntryUrls(),
-    });
+  const result = await createManagedDocumentExtractionProjectOrRecordSelfHostDecision({
+    page,
+    runContext: fixtureRunContext(),
+    providerInventoryPath,
+    selectionRecordPath,
+    entryUrls: fixtureEntryUrls(),
+  });
 
-  const [providerInventoryRaw, selectionRecordRaw, evidenceManifestRaw] =
-    await Promise.all([
-      readFile(providerInventoryPath, "utf8"),
-      readFile(selectionRecordPath, "utf8"),
-      readFile(result.evidenceManifestPath, "utf8"),
-    ]);
+  const [providerInventoryRaw, selectionRecordRaw, evidenceManifestRaw] = await Promise.all([
+    readFile(providerInventoryPath, "utf8"),
+    readFile(selectionRecordPath, "utf8"),
+    readFile(result.evidenceManifestPath, "utf8"),
+  ]);
 
   return {
     result,
@@ -75,9 +71,7 @@ async function runFixtureFlow(
   };
 }
 
-function expectSuccessStatuses(
-  result: CreateManagedDocumentExtractionProjectResult,
-) {
+function expectSuccessStatuses(result: CreateManagedDocumentExtractionProjectResult) {
   expect(result.steps.map((step) => step.status)).toEqual([
     "SUCCEEDED",
     "SUCCEEDED",
@@ -93,13 +87,9 @@ test("fixture OCR flow records self-host decision required and persists sanitize
 }) => {
   const flow = await runFixtureFlow(page);
 
-  expect(flow.result.outcome).toBe(
-    "DOCUMENT_EXTRACTION_SELF_HOST_DECISION_REQUIRED",
-  );
+  expect(flow.result.outcome).toBe("DOCUMENT_EXTRACTION_SELF_HOST_DECISION_REQUIRED");
   expectSuccessStatuses(flow.result);
-  expect(flow.result.selectionRecord.selection_status).toBe(
-    "SELF_HOST_DECISION_REQUIRED",
-  );
+  expect(flow.result.selectionRecord.selection_status).toBe("SELF_HOST_DECISION_REQUIRED");
   expect(flow.result.selectionRecord.managed_default_status).toBe(
     "BLOCKED_BY_PLATFORM_PROVIDER_SELECTION",
   );
@@ -125,15 +115,9 @@ test("document extraction governance board renders the evidence atelier layout, 
     page.getByRole("navigation", { name: "Document extraction profiles" }),
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Source Artifact" })).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Normalized Extraction" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Candidate-Fact Boundary" }),
-  ).toBeVisible();
-  await expect(page.locator("#run-status")).toHaveText(
-    "Self-host decision required",
-  );
+  await expect(page.getByRole("heading", { name: "Normalized Extraction" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Candidate-Fact Boundary" })).toBeVisible();
+  await expect(page.locator("#run-status")).toHaveText("Self-host decision required");
   await expect(page.locator("#drawer-title")).toHaveText("EXPENSE RECEIPT");
 
   await page
@@ -145,9 +129,7 @@ test("document extraction governance board renders the evidence atelier layout, 
   await expect(
     page
       .locator("#step-list")
-      .getByText(
-        "upload object version -> extraction run -> evidence item -> candidate facts",
-      )
+      .getByText("upload object version -> extraction run -> evidence item -> candidate facts")
       .first(),
   ).toBeVisible();
   await expect(

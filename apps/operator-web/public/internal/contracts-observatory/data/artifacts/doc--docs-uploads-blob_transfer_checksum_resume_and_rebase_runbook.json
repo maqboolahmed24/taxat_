@@ -1,0 +1,355 @@
+{
+  "artifactVersion": "CONTRACT_OBSERVATORY_ARTIFACT_V1",
+  "artifactSlug": "doc--docs-uploads-blob_transfer_checksum_resume_and_rebase_runbook",
+  "artifactKind": "MARKDOWN",
+  "sectionRef": "SUPPORT_DOCS",
+  "authorityLevel": "SUPPORTING_REFERENCE",
+  "sourceTruthBadge": "Support Documentation",
+  "tone": "slate",
+  "title": "Blob Transfer, Checksum, Resume, And Rebase Runbook",
+  "subtitle": "docs/uploads/blob_transfer_checksum_resume_and_rebase_runbook.md",
+  "summary": "",
+  "canonicalPath": "docs/uploads/blob_transfer_checksum_resume_and_rebase_runbook.md",
+  "sourceLineage": [
+    "docs/uploads/blob_transfer_checksum_resume_and_rebase_runbook.md"
+  ],
+  "headingCount": 11,
+  "headings": [
+    {
+      "level": 1,
+      "text": "Blob Transfer, Checksum, Resume, And Rebase Runbook",
+      "slug": "blob-transfer-checksum-resume-and-rebase-runbook"
+    },
+    {
+      "level": 2,
+      "text": "Purpose",
+      "slug": "purpose"
+    },
+    {
+      "level": 2,
+      "text": "Canonical flow",
+      "slug": "canonical-flow"
+    },
+    {
+      "level": 2,
+      "text": "Endpoint composition",
+      "slug": "endpoint-composition"
+    },
+    {
+      "level": 3,
+      "text": "`POST /v1/uploads/sessions`",
+      "slug": "post-v1-uploads-sessions"
+    },
+    {
+      "level": 3,
+      "text": "`PUT /v1/uploads/sessions/{upload_session_id}/blob`",
+      "slug": "put-v1-uploads-sessions-upload-session-id-blob"
+    },
+    {
+      "level": 3,
+      "text": "`GET /v1/uploads/sessions/{upload_session_id}`",
+      "slug": "get-v1-uploads-sessions-upload-session-id"
+    },
+    {
+      "level": 2,
+      "text": "Rebase rules",
+      "slug": "rebase-rules"
+    },
+    {
+      "level": 2,
+      "text": "Completion boundary rules",
+      "slug": "completion-boundary-rules"
+    },
+    {
+      "level": 2,
+      "text": "Recovery matrix",
+      "slug": "recovery-matrix"
+    },
+    {
+      "level": 2,
+      "text": "Operational notes",
+      "slug": "operational-notes"
+    }
+  ],
+  "proseSections": [
+    {
+      "headingSlug": "blob-transfer-checksum-resume-and-rebase-runbook",
+      "headingText": "Blob Transfer, Checksum, Resume, And Rebase Runbook",
+      "level": 1,
+      "lines": [
+        ""
+      ],
+      "plainText": "",
+      "excerpt": "",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "purpose",
+      "headingText": "Purpose",
+      "level": 2,
+      "lines": [
+        "",
+        "This runbook defines how later northbound upload endpoints compose the governed upload-transfer",
+        "scaffold from `packages/domain-kernel/src/uploads`.",
+        "",
+        "The key rule is stable throughout every endpoint:",
+        "",
+        "- byte transfer is not attachment truth",
+        "- attachment truth is not current-request satisfaction",
+        "- reconnect, duplicate retry, reload, and cross-device continuation always reuse the same",
+        "  `upload_session_id` and `storage_ref` while the session remains lawful",
+        ""
+      ],
+      "plainText": "This runbook defines how later northbound upload endpoints compose the governed upload transfer scaffold from packages/domain kernel/src/uploads. The key rule is stable throughout every endpoint: byte transfer is not attachment truth attachment truth is not current request satisfaction reconnect, duplicate retry, reload, and cross device continuation always reuse the same upload session id and storage ref while the session remains lawful",
+      "excerpt": "This runbook defines how later northbound upload endpoints compose the governed upload transfer scaffold from packages/domain kernel/src/uploads. The key rule is stable throughout…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "canonical-flow",
+      "headingText": "Canonical flow",
+      "level": 2,
+      "lines": [
+        "",
+        "1. Allocate the session with `allocateUploadTransferSession(...)`.",
+        "2. Persist the returned frozen `upload_request_binding_contract`, `storage_ref`, and",
+        "   `resume_token_ref` with the durable upload-session record.",
+        "3. On every blob append, call `appendUploadTransferChunk(...)` with the current contiguous offset.",
+        "4. After the final chunk window is present, call `closeUploadTransfer(...)`.",
+        "5. Publish scanner and validation outcomes with `recordUploadMalwareScanVerdict(...)` and",
+        "   `recordUploadValidationOutcome(...)`.",
+        "6. Re-evaluate completion posture with `refreshUploadCompletionBoundary(...)`.",
+        "7. Only after a separate attachment confirmation command succeeds should the runtime call",
+        "   `confirmUploadAttachment(...)`.",
+        ""
+      ],
+      "plainText": "1. Allocate the session with allocateUploadTransferSession(...). 2. Persist the returned frozen upload request binding contract, storage ref, and resume token ref with the durable upload session record. 3. On every blob append, call appendUploadTransferChunk(...) with the current contiguous offset. 4. After the final chunk window is present, call closeUploadTransfer(...). 5. Publish scanner and validation outcomes with recordUploadMalwareScanVerdict(...) and recordUploadValidationOutcome(...). 6. Re evaluate completion posture with refreshUploadCompletionBoundary(...). 7. Only after a separate attachment confirmation command succeeds should the runtime call confirmUploadAttachment(...).",
+      "excerpt": "1. Allocate the session with allocateUploadTransferSession(...). 2. Persist the returned frozen upload request binding contract, storage ref, and resume token ref with the durable…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "endpoint-composition",
+      "headingText": "Endpoint composition",
+      "level": 2,
+      "lines": [
+        ""
+      ],
+      "plainText": "",
+      "excerpt": "",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "post-v1-uploads-sessions",
+      "headingText": "`POST /v1/uploads/sessions`",
+      "level": 3,
+      "lines": [
+        "",
+        "- Validate tenant, client, request, and request version before allocation.",
+        "- Reject stale or cross-scope request identities rather than mutating an existing session.",
+        "- Return the frozen `request_version_ref`, grouped `upload_request_binding_contract`,",
+        "  `storage_ref`, `resume_token_ref`, `resumability_state`, and `next_action_code`.",
+        "- If the caller retried an allocation for the same lawful session, return the existing session",
+        "  instead of minting a second session or second storage object.",
+        ""
+      ],
+      "plainText": "Validate tenant, client, request, and request version before allocation. Reject stale or cross scope request identities rather than mutating an existing session. Return the frozen request version ref, grouped upload request binding contract, storage ref, resume token ref, resumability state, and next action code. If the caller retried an allocation for the same lawful session, return the existing session instead of minting a second session or second storage object.",
+      "excerpt": "Validate tenant, client, request, and request version before allocation. Reject stale or cross scope request identities rather than mutating an existing session. Return the frozen…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "put-v1-uploads-sessions-upload-session-id-blob",
+      "headingText": "`PUT /v1/uploads/sessions/{upload_session_id}/blob`",
+      "level": 3,
+      "lines": [
+        "",
+        "- Read the governed session and offset tracker first.",
+        "- Accept bytes only at the contiguous resume offset or as a duplicate replay of an already",
+        "  verified chunk window.",
+        "- Verify the supplied chunk digest against the configured catalog before marking the chunk as",
+        "  durable.",
+        "- Never infer attachment, request satisfaction, or currentness from a full byte count.",
+        ""
+      ],
+      "plainText": "Read the governed session and offset tracker first. Accept bytes only at the contiguous resume offset or as a duplicate replay of an already verified chunk window. Verify the supplied chunk digest against the configured catalog before marking the chunk as durable. Never infer attachment, request satisfaction, or currentness from a full byte count.",
+      "excerpt": "Read the governed session and offset tracker first. Accept bytes only at the contiguous resume offset or as a duplicate replay of an already verified chunk window. Verify the supp…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "get-v1-uploads-sessions-upload-session-id",
+      "headingText": "`GET /v1/uploads/sessions/{upload_session_id}`",
+      "level": 3,
+      "lines": [
+        "",
+        "- Preserve the original frozen `tenant_id`, `client_id`, `request_id`, and `request_version_ref`.",
+        "- Publish the grouped `upload_request_binding_contract` with the current live request version.",
+        "- Keep `request_binding_state`, `resumability_state`, `attachment_state`, `next_action_code`,",
+        "  `integrity_state`, `malware_scan_state`, and `validation_state` separate.",
+        "- If the live request rebased, show that drift through the grouped contract and",
+        "  `request_binding_state` rather than silently rewriting the session.",
+        ""
+      ],
+      "plainText": "Preserve the original frozen tenant id, client id, request id, and request version ref. Publish the grouped upload request binding contract with the current live request version. Keep request binding state, resumability state, attachment state, next action code, integrity state, malware scan state, and validation state separate. If the live request rebased, show that drift through the grouped contract and request binding state rather than silently rewriting the session.",
+      "excerpt": "Preserve the original frozen tenant id, client id, request id, and request version ref. Publish the grouped upload request binding contract with the current live request version.…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "rebase-rules",
+      "headingText": "Rebase rules",
+      "level": 2,
+      "lines": [
+        "",
+        "- `rebaseUploadRequestBinding(...)` keeps the same `upload_session_id` and `storage_ref`.",
+        "- In-flight rebases preserve `attachment_state = STAGED`.",
+        "- Accepted stale uploads must surface `attachment_state = REBIND_REQUIRED` and",
+        "  `next_action_code = RECONFIRM_REQUEST` until an explicit reconfirmation command lands.",
+        "- `SUPERSEDED` means the prior bytes stay historical only; they do not satisfy the current request.",
+        ""
+      ],
+      "plainText": "rebaseUploadRequestBinding(...) keeps the same upload session id and storage ref. In flight rebases preserve attachment state = STAGED. Accepted stale uploads must surface attachment state = REBIND REQUIRED and next action code = RECONFIRM REQUEST until an explicit reconfirmation command lands. SUPERSEDED means the prior bytes stay historical only; they do not satisfy the current request.",
+      "excerpt": "rebaseUploadRequestBinding(...) keeps the same upload session id and storage ref. In flight rebases preserve attachment state = STAGED. Accepted stale uploads must surface attachm…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "completion-boundary-rules",
+      "headingText": "Completion boundary rules",
+      "level": 2,
+      "lines": [
+        "",
+        "- `closeUploadTransfer(...)` verifies transfer integrity and moves the session into scan posture.",
+        "- `recordUploadMalwareScanVerdict(...)` and `recordUploadValidationOutcome(...)` decide whether the",
+        "  uploaded bytes are acceptable evidence, replacement-only, or rejected.",
+        "- `confirmUploadAttachment(...)` is the first point where attachment truth may become `ATTACHED`.",
+        "- `assessUploadCompletionBoundary(...)` is the single authority for mapping byte, checksum, scan,",
+        "  validation, attachment, and request-binding posture into `next_action_code`.",
+        ""
+      ],
+      "plainText": "closeUploadTransfer(...) verifies transfer integrity and moves the session into scan posture. recordUploadMalwareScanVerdict(...) and recordUploadValidationOutcome(...) decide whether the uploaded bytes are acceptable evidence, replacement only, or rejected. confirmUploadAttachment(...) is the first point where attachment truth may become ATTACHED. assessUploadCompletionBoundary(...) is the single authority for mapping byte, checksum, scan, validation, attachment, and request binding posture into next action code.",
+      "excerpt": "closeUploadTransfer(...) verifies transfer integrity and moves the session into scan posture. recordUploadMalwareScanVerdict(...) and recordUploadValidationOutcome(...) decide whe…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "recovery-matrix",
+      "headingText": "Recovery matrix",
+      "level": 2,
+      "lines": [
+        "",
+        "The deterministic harness must always cover:",
+        "",
+        "- `MOBILE_RECONNECT`",
+        "- `BROWSER_RELOAD`",
+        "- `STALE_REQUEST_REBASE`",
+        "- `DUPLICATE_ALLOCATION_RETRY`",
+        "- `CHECKSUM_OR_SCANNER_DELAY`",
+        "- `ATTACHMENT_CONFIRMATION`",
+        "- `CROSS_DEVICE_CONTINUATION`",
+        "",
+        "Use `createUploadRecoveryHarnessCase(...)` and `createUploadSessionRecoveryHarness(...)` to render",
+        "those scenarios into a typed regression pack.",
+        ""
+      ],
+      "plainText": "The deterministic harness must always cover: MOBILE RECONNECT BROWSER RELOAD STALE REQUEST REBASE DUPLICATE ALLOCATION RETRY CHECKSUM OR SCANNER DELAY ATTACHMENT CONFIRMATION CROSS DEVICE CONTINUATION Use createUploadRecoveryHarnessCase(...) and createUploadSessionRecoveryHarness(...) to render those scenarios into a typed regression pack.",
+      "excerpt": "The deterministic harness must always cover: MOBILE RECONNECT BROWSER RELOAD STALE REQUEST REBASE DUPLICATE ALLOCATION RETRY CHECKSUM OR SCANNER DELAY ATTACHMENT CONFIRMATION CROS…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "operational-notes",
+      "headingText": "Operational notes",
+      "level": 2,
+      "lines": [
+        "",
+        "- The checksum catalog is intentionally vendor-neutral. The recommended profile is",
+        "  `SHA256_CHUNK_HEX_V1`, but the runtime stays free to negotiate other profiles later.",
+        "- The scaffold never exposes raw object URLs, signed URLs, or temporary provider handles as",
+        "  product truth.",
+        "- Storage lineage stays subordinate to the governed upload session and the upload-session source",
+        "  object in the storage lifecycle boundary.",
+        "- Later portal routes should treat `latest_upload_ref_or_null` as history and",
+        "  `current_request_upload_ref_or_null` as current-request satisfaction only.",
+        ""
+      ],
+      "plainText": "The checksum catalog is intentionally vendor neutral. The recommended profile is SHA256 CHUNK HEX V1, but the runtime stays free to negotiate other profiles later. The scaffold never exposes raw object URLs, signed URLs, or temporary provider handles as product truth. Storage lineage stays subordinate to the governed upload session and the upload session source object in the storage lifecycle boundary. Later portal routes should treat latest upload ref or null as history and current request upload ref or null as current request satisfaction only.",
+      "excerpt": "The checksum catalog is intentionally vendor neutral. The recommended profile is SHA256 CHUNK HEX V1, but the runtime stays free to negotiate other profiles later. The scaffold ne…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    }
+  ],
+  "schemaIdentityOrNull": null,
+  "schemaFields": [],
+  "samplePointers": [],
+  "sampleIdentityOrNull": null,
+  "bindingIdentityOrNull": null,
+  "validatorIdentityOrNull": null,
+  "driftIdentityOrNull": null,
+  "headerStrip": {
+    "kind": "PROSE",
+    "badgeLabel": "Support Documentation",
+    "metricPairs": [
+      {
+        "label": "Headings",
+        "value": "11"
+      },
+      {
+        "label": "Schemas",
+        "value": "0"
+      },
+      {
+        "label": "Tasks",
+        "value": "0"
+      }
+    ]
+  },
+  "relationships": {
+    "schemas": [],
+    "samples": [],
+    "bindings": [],
+    "validators": [],
+    "docs": [],
+    "tasks": []
+  },
+  "sourceTruthStack": {
+    "file": [
+      "docs/uploads/blob_transfer_checksum_resume_and_rebase_runbook.md"
+    ],
+    "headings": [
+      "Blob Transfer, Checksum, Resume, And Rebase Runbook",
+      "Purpose",
+      "Canonical flow",
+      "Endpoint composition",
+      "`POST /v1/uploads/sessions`",
+      "`PUT /v1/uploads/sessions/{upload_session_id}/blob`",
+      "`GET /v1/uploads/sessions/{upload_session_id}`",
+      "Rebase rules",
+      "Completion boundary rules",
+      "Recovery matrix",
+      "Operational notes"
+    ],
+    "schemaRefs": [],
+    "sampleRefs": [],
+    "bindingRefs": [],
+    "validatorRefs": [],
+    "driftRefs": [],
+    "taskRefs": []
+  },
+  "fieldCrosslinks": [],
+  "taskRefs": []
+}

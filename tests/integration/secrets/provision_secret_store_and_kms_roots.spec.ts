@@ -24,14 +24,10 @@ test("dry-run bootstrap freezes sanitized topology and fails closed when provide
 
   const persisted = JSON.parse(await readFile(inventoryPath, "utf8"));
 
-  expect(result.outcome).toBe(
-    "SECRET_ROOT_TOPOLOGY_DECLARED_PROVIDER_SELECTION_REQUIRED",
-  );
+  expect(result.outcome).toBe("SECRET_ROOT_TOPOLOGY_DECLARED_PROVIDER_SELECTION_REQUIRED");
   expect(result.selection_status).toBe("PROVIDER_SELECTION_REQUIRED");
   expect(result.steps[0]?.status).toBe("BLOCKED_BY_POLICY");
-  expect(result.steps.slice(1).every((step) => step.status === "SUCCEEDED")).toBe(
-    true,
-  );
+  expect(result.steps.slice(1).every((step) => step.status === "SUCCEEDED")).toBe(true);
   expect(result.notes).toEqual(
     expect.arrayContaining([
       "No live provider mutation occurred.",

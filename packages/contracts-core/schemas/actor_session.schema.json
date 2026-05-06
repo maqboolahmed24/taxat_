@@ -1,0 +1,464 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/actor_session.schema.json",
+  "title": "ActorSession",
+  "description": "Authenticated product-session contract. This schema freezes session lineage, principal class, client embodiment, anti-CSRF or device binding posture, step-up state, and explicit revocation semantics so browser, native, and automation sessions are governed consistently.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "session_id",
+    "tenant_id",
+    "principal_ref",
+    "principal_class",
+    "session_client_class",
+    "authn_level",
+    "step_up_state",
+    "session_binding_hash",
+    "csrf_ref",
+    "device_binding_state",
+    "issued_at",
+    "expires_at",
+    "revoked_at",
+    "revocation_reason",
+    "step_up_completed_at",
+    "last_seen_at"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "ActorSession"
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "principal_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "principal_class": {
+      "type": "string",
+      "enum": [
+        "HUMAN",
+        "SERVICE",
+        "EXTERNAL"
+      ]
+    },
+    "session_client_class": {
+      "type": "string",
+      "enum": [
+        "BROWSER",
+        "NATIVE",
+        "AUTOMATION"
+      ]
+    },
+    "authn_level": {
+      "type": "string",
+      "enum": [
+        "BASIC",
+        "MFA",
+        "STEP_UP"
+      ]
+    },
+    "step_up_state": {
+      "type": "string",
+      "enum": [
+        "NOT_REQUIRED",
+        "REQUIRED_PENDING",
+        "SATISFIED",
+        "EXPIRED"
+      ]
+    },
+    "session_binding_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "csrf_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "device_binding_state": {
+      "type": "string",
+      "enum": [
+        "NOT_APPLICABLE",
+        "BOUND",
+        "UNVERIFIED",
+        "INVALIDATED"
+      ]
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revoked_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "revocation_reason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "step_up_completed_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "last_seen_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "csrf_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "csrf_ref"
+        ]
+      },
+      "then": {
+        "properties": {
+          "session_client_class": {
+            "const": "BROWSER"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "device_binding_state": {
+            "enum": [
+              "BOUND",
+              "UNVERIFIED",
+              "INVALIDATED"
+            ]
+          }
+        },
+        "required": [
+          "device_binding_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "session_client_class": {
+            "const": "NATIVE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "session_client_class": {
+            "const": "BROWSER"
+          }
+        },
+        "required": [
+          "session_client_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "csrf_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "device_binding_state": {
+            "const": "NOT_APPLICABLE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "session_client_class": {
+            "const": "NATIVE"
+          }
+        },
+        "required": [
+          "session_client_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "csrf_ref": {
+            "type": "null"
+          },
+          "device_binding_state": {
+            "enum": [
+              "BOUND",
+              "UNVERIFIED",
+              "INVALIDATED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "session_client_class": {
+            "const": "AUTOMATION"
+          }
+        },
+        "required": [
+          "session_client_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "csrf_ref": {
+            "type": "null"
+          },
+          "device_binding_state": {
+            "const": "NOT_APPLICABLE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "session_client_class": {
+            "enum": [
+              "BROWSER",
+              "NATIVE"
+            ]
+          }
+        },
+        "required": [
+          "session_client_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "principal_class": {
+            "const": "HUMAN"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "principal_class": {
+            "const": "SERVICE"
+          }
+        },
+        "required": [
+          "principal_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "session_client_class": {
+            "const": "AUTOMATION"
+          },
+          "authn_level": {
+            "const": "BASIC"
+          },
+          "step_up_state": {
+            "const": "NOT_REQUIRED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "device_binding_state": {
+            "const": "INVALIDATED"
+          }
+        },
+        "required": [
+          "device_binding_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "revoked_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "step_up_state": {
+            "const": "SATISFIED"
+          }
+        },
+        "required": [
+          "step_up_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "authn_level": {
+            "const": "STEP_UP"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "authn_level": {
+            "const": "STEP_UP"
+          }
+        },
+        "required": [
+          "authn_level"
+        ]
+      },
+      "then": {
+        "properties": {
+          "step_up_state": {
+            "const": "SATISFIED"
+          },
+          "step_up_completed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "step_up_state": {
+            "enum": [
+              "NOT_REQUIRED",
+              "REQUIRED_PENDING"
+            ]
+          }
+        },
+        "required": [
+          "step_up_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "step_up_completed_at": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "step_up_state": {
+            "enum": [
+              "SATISFIED",
+              "EXPIRED"
+            ]
+          }
+        },
+        "required": [
+          "step_up_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "step_up_completed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "revocation_reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "revocation_reason"
+        ]
+      },
+      "then": {
+        "properties": {
+          "revoked_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "revoked_at": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "revoked_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "revocation_reason": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "revoked_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "revoked_at"
+        ]
+      },
+      "then": {
+        "properties": {
+          "revocation_reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,464 @@
+{
+  "basisStatement": "Packets remain transport-only evidence derived from durable source truth. Duplicate meaning, request hash, idempotency, retry posture, and quarantine posture live on persisted outbox and inbox records rather than on broker-local delivery history.",
+  "envelopeBadge": "PACKET V1",
+  "families": [
+    {
+      "alerts": [
+        {
+          "label": "Collision rule",
+          "text": "BODY_COLLISION when one idempotency key is observed with a different command body hash."
+        },
+        {
+          "label": "Recovery posture",
+          "text": "Safe retries return the original durable command receipt and never create a second logical command."
+        },
+        {
+          "label": "Terminal posture",
+          "text": "Dead-letter the packet and return the original durable command receipt rather than accepting a second command mutation."
+        },
+        {
+          "label": "Redrive gate",
+          "text": "Redrive is lawful only when the same command receipt, actor/session binding, and payload hash still match current truth."
+        }
+      ],
+      "channels": [
+        "channel.api.command.accepted"
+      ],
+      "collisionRule": "BODY_COLLISION when one idempotency key is observed with a different command body hash.",
+      "displayName": "Northbound command packet",
+      "duplicateScopeRef": "NORTHBOUND_COMMAND",
+      "exampleIdentity": {
+        "duplicate_meaning_key": "ff9305a891505a3edee77b1c1f3fe56473626b25e0e0ae23b0d1ca7c1fee511c",
+        "idempotency_key": "48ee5af4232c3d88bfa8599a5ccf357d545ee4b19319e3f1160c74f058f7572f",
+        "note": "A fresh packet id must not mint a fresh semantic meaning.",
+        "packet_id": "packet.command.case-2026-04-23.01",
+        "request_hash": "98d5147cdb17705699b2cf7e42e4dd9245353588e3319b506d68524b9f6da134",
+        "source_record_ref": "command.receipt.case-2026-04-23"
+      },
+      "familyRef": "NORTHBOUND_COMMAND",
+      "laneCards": [
+        {
+          "accessible_label": "Packet lane node PRODUCER durable source record",
+          "label": "Durable source record",
+          "lane_ref": "PRODUCER",
+          "overline": "PRODUCER",
+          "summary": "ApiCommandReceipt is already persisted before any packet exists."
+        },
+        {
+          "accessible_label": "Packet lane node OUTBOX transactional outbox seal",
+          "label": "Transactional outbox seal",
+          "lane_ref": "OUTBOX",
+          "overline": "OUTBOX",
+          "summary": "duplicate_meaning_key, request_hash, idempotency_key freeze on durable truth before publication."
+        },
+        {
+          "accessible_label": "Packet lane node BROKER transport packet handoff",
+          "label": "Transport packet handoff",
+          "lane_ref": "BROKER",
+          "overline": "BROKER",
+          "summary": "HTTP acceptance may emit a packet, but request identity remains bound to the receipt and command journal."
+        },
+        {
+          "accessible_label": "Packet lane node INBOX durable inbox gate",
+          "label": "Durable inbox gate",
+          "lane_ref": "INBOX",
+          "overline": "INBOX",
+          "summary": "Consumer dedupe happens before mutation. Safe retries stop after 3 attempts."
+        },
+        {
+          "accessible_label": "Packet lane node LEDGER truth-side mutation or quarantine",
+          "label": "Truth-side mutation or quarantine",
+          "lane_ref": "LEDGER",
+          "overline": "LEDGER",
+          "summary": "Dead-letter the packet and return the original durable command receipt rather than accepting a second command mutation."
+        }
+      ],
+      "notes": [
+        "Safe retries with the same sealed command meaning must reuse duplicate meaning and idempotency even if a fresh packet id is issued.",
+        "Command packets may not become the durable legal source of operator intent.",
+        "Northbound duplicate scope binds actor or session, target, and payload meaning.",
+        "Consumer dedupe reuses the persisted command receipt rather than transport counters."
+      ],
+      "railLabel": "COMMAND",
+      "redactionSummary": "EVENT_ENVELOPE_CORE: OPAQUE_REFS_AND_HASHES_ONLY / OBSERVABILITY_TRACE: REFERENTIAL_ONLY",
+      "retrySummary": "DEAD_LETTER_QUEUE_REQUIRED after 3 safe attempts",
+      "tone": "teal",
+      "truthAnchor": "ApiCommandReceipt plus append-only command log"
+    },
+    {
+      "alerts": [
+        {
+          "label": "Collision rule",
+          "text": "IDENTITY_NAMESPACE_COLLISION when the same stage idempotency key appears under a different stage code, manifest, or precondition hash."
+        },
+        {
+          "label": "Recovery posture",
+          "text": "Duplicate dispatch reuses the same durable worker claim or completed result."
+        },
+        {
+          "label": "Terminal posture",
+          "text": "Dead-letter after repeated safe retries and surface operator repair on the durable stage receipt."
+        },
+        {
+          "label": "Redrive gate",
+          "text": "Redrive requires the same manifest, stage code, command receipt, and precondition hash."
+        }
+      ],
+      "channels": [
+        "channel.manifest.stage.dispatch"
+      ],
+      "collisionRule": "IDENTITY_NAMESPACE_COLLISION when the same stage idempotency key appears under a different stage code, manifest, or precondition hash.",
+      "displayName": "Manifest stage task packet",
+      "duplicateScopeRef": "STAGE_TASK",
+      "exampleIdentity": {
+        "duplicate_meaning_key": "e29be1ec636b428448f11230d5a0e8fd5bd3ae7b5750a08f7607120586d40af5",
+        "idempotency_key": "69650e34533eb5f6280b5bc855a0997a479246fd622bb47d37ded1e4337069a1",
+        "note": "A fresh packet id must not mint a fresh semantic meaning.",
+        "packet_id": "packet.stage.case-2026-04-23.01",
+        "request_hash": "a42ffd2bcb5c94ec54a4db77d18ff2fa4255516be47cd2de977ecf14fc13bafe",
+        "source_record_ref": "dispatch.stage.case-2026-04-23.compute-obligations"
+      },
+      "familyRef": "STAGE_TASK",
+      "laneCards": [
+        {
+          "accessible_label": "Packet lane node PRODUCER durable source record",
+          "label": "Durable source record",
+          "lane_ref": "PRODUCER",
+          "overline": "PRODUCER",
+          "summary": "ManifestStageDispatchReceipt is already persisted before any packet exists."
+        },
+        {
+          "accessible_label": "Packet lane node OUTBOX transactional outbox seal",
+          "label": "Transactional outbox seal",
+          "lane_ref": "OUTBOX",
+          "overline": "OUTBOX",
+          "summary": "duplicate_meaning_key, request_hash, idempotency_key freeze on durable truth before publication."
+        },
+        {
+          "accessible_label": "Packet lane node BROKER transport packet handoff",
+          "label": "Transport packet handoff",
+          "lane_ref": "BROKER",
+          "overline": "BROKER",
+          "summary": "Workers claim stage work from durable receipts; broker redelivery only replays the same stage claim."
+        },
+        {
+          "accessible_label": "Packet lane node INBOX durable inbox gate",
+          "label": "Durable inbox gate",
+          "lane_ref": "INBOX",
+          "overline": "INBOX",
+          "summary": "Consumer dedupe happens before mutation. Safe retries stop after 4 attempts."
+        },
+        {
+          "accessible_label": "Packet lane node LEDGER truth-side mutation or quarantine",
+          "label": "Truth-side mutation or quarantine",
+          "lane_ref": "LEDGER",
+          "overline": "LEDGER",
+          "summary": "Dead-letter after repeated safe retries and surface operator repair on the durable stage receipt."
+        }
+      ],
+      "notes": [
+        "A duplicate stage packet may only reuse the same durable execution claim or surface a finished result.",
+        "Balanced reduction and frozen inputs still bind the worker after publication.",
+        "Stage packets may be replayed; stage mutation may not.",
+        "Worker-local memory never defines legal completion."
+      ],
+      "railLabel": "STAGE",
+      "redactionSummary": "EVENT_ENVELOPE_CORE: OPAQUE_REFS_AND_HASHES_ONLY / OBSERVABILITY_TRACE: REFERENTIAL_ONLY",
+      "retrySummary": "DEAD_LETTER_QUEUE_REQUIRED after 4 safe attempts",
+      "tone": "bronze",
+      "truthAnchor": "Manifest stage receipt and durable execution claim ledger"
+    },
+    {
+      "alerts": [
+        {
+          "label": "Collision rule",
+          "text": "BODY_COLLISION when one immutable object-version meaning resolves to different payload hashes."
+        },
+        {
+          "label": "Recovery posture",
+          "text": "Rebuild from immutable object-version receipts and inbox truth, not provider event ordering."
+        },
+        {
+          "label": "Terminal posture",
+          "text": "Dead-letter the packet and keep immutable object-version processing status explicit on the durable ledger."
+        },
+        {
+          "label": "Redrive gate",
+          "text": "Redrive requires the same immutable object version, event identity, and safety posture to remain valid."
+        }
+      ],
+      "channels": [
+        "channel.upload.scan.request",
+        "channel.preview.registration"
+      ],
+      "collisionRule": "BODY_COLLISION when one immutable object-version meaning resolves to different payload hashes.",
+      "displayName": "Artifact processing packet",
+      "duplicateScopeRef": "ARTIFACT_EVENT",
+      "exampleIdentity": {
+        "duplicate_meaning_key": "3a2a76fe37ab798247a7f3157e182c5a1543bdaf2f4834f8aee2930bbf592d92",
+        "idempotency_key": "b5d5016dc11e0d6dc499e1c6759d3c2187ba94e52d3148630f40f7da06221e71",
+        "note": "A fresh packet id must not mint a fresh semantic meaning.",
+        "packet_id": "packet.artifact.case-2026-04-23.01",
+        "request_hash": "33ea0fc9a1c1db61e4a6c0bcbe0e5fc8ad8c5d0db1e3ba6d68c6b0a485d70761",
+        "source_record_ref": "receipt.object-event.case-2026-04-23.0001"
+      },
+      "familyRef": "ARTIFACT_EVENT",
+      "laneCards": [
+        {
+          "accessible_label": "Packet lane node PRODUCER durable source record",
+          "label": "Durable source record",
+          "lane_ref": "PRODUCER",
+          "overline": "PRODUCER",
+          "summary": "ImmutableObjectVersionEventReceipt is already persisted before any packet exists."
+        },
+        {
+          "accessible_label": "Packet lane node OUTBOX transactional outbox seal",
+          "label": "Transactional outbox seal",
+          "lane_ref": "OUTBOX",
+          "overline": "OUTBOX",
+          "summary": "duplicate_meaning_key, request_hash, idempotency_key freeze on durable truth before publication."
+        },
+        {
+          "accessible_label": "Packet lane node BROKER transport packet handoff",
+          "label": "Transport packet handoff",
+          "lane_ref": "BROKER",
+          "overline": "BROKER",
+          "summary": "Object-store notifications are at-least-once transport hints and must collapse onto one immutable object-version ledger row."
+        },
+        {
+          "accessible_label": "Packet lane node INBOX durable inbox gate",
+          "label": "Durable inbox gate",
+          "lane_ref": "INBOX",
+          "overline": "INBOX",
+          "summary": "Consumer dedupe happens before mutation. Safe retries stop after 4 attempts."
+        },
+        {
+          "accessible_label": "Packet lane node LEDGER truth-side mutation or quarantine",
+          "label": "Truth-side mutation or quarantine",
+          "lane_ref": "LEDGER",
+          "overline": "LEDGER",
+          "summary": "Dead-letter the packet and keep immutable object-version processing status explicit on the durable ledger."
+        }
+      ],
+      "notes": [
+        "Packet redelivery never licenses a second scan, preview, or evidence-binding mutation for the same immutable object version.",
+        "If the broker disappears, restore replays durable object-version and inbox truth rather than provider event history.",
+        "Immutable object identity is the dedupe spine.",
+        "Signed URLs and inline blob bytes are never part of the duplicate tuple."
+      ],
+      "railLabel": "ARTIFACT",
+      "redactionSummary": "EVENT_ENVELOPE_CORE: OPAQUE_REFS_AND_HASHES_ONLY / OBSERVABILITY_TRACE: REFERENTIAL_ONLY",
+      "retrySummary": "DEAD_LETTER_QUEUE_REQUIRED after 4 safe attempts",
+      "tone": "olive",
+      "truthAnchor": "Object-version receipt plus artifact processing ledger"
+    },
+    {
+      "alerts": [
+        {
+          "label": "Collision rule",
+          "text": "BODY_COLLISION blocks transmit on payload drift; IDENTITY_NAMESPACE_COLLISION blocks transmit when a namespace tuple changes under one idempotency or request hash."
+        },
+        {
+          "label": "Recovery posture",
+          "text": "Transport replay may reuse duplicate meaning and idempotency only when the exact sealed request meaning is unchanged."
+        },
+        {
+          "label": "Terminal posture",
+          "text": "Quarantine the packet after repeated safe retries so operator review can inspect request identity, token lineage, and stronger external truth."
+        },
+        {
+          "label": "Redrive gate",
+          "text": "Re-drive requires binding-lineage revalidation, duplicate-truth revalidation, and the same duplicate meaning bucket to remain lawful."
+        }
+      ],
+      "channels": [
+        "channel.authority.transmit.dispatch",
+        "channel.authority.reconciliation.poll"
+      ],
+      "collisionRule": "BODY_COLLISION blocks transmit on payload drift; IDENTITY_NAMESPACE_COLLISION blocks transmit when a namespace tuple changes under one idempotency or request hash.",
+      "displayName": "Authority request packet",
+      "duplicateScopeRef": "AUTHORITY_REQUEST",
+      "exampleIdentity": {
+        "duplicate_meaning_key": "b01f6d89cf5fe7d20e90d3a96912ec032661c6c81c2032acb8b34418fa6251d7",
+        "idempotency_key": "78d60dceee83ffad3e66b9568513a842c1bbdc9a80fcfdcb9636a8cc61f98a2a",
+        "note": "Token rotation can change request_hash while leaving duplicate meaning and idempotency stable.",
+        "packet_id": "packet.authority.case-2026-04-23.01",
+        "request_hash": "7c828c170220de8c9e50c13a2b6460f78f441e5e379af2164cc597004085bbfd",
+        "source_record_ref": "authority.request.case-2026-04-23"
+      },
+      "familyRef": "AUTHORITY_REQUEST",
+      "laneCards": [
+        {
+          "accessible_label": "Packet lane node PRODUCER durable source record",
+          "label": "Durable source record",
+          "lane_ref": "PRODUCER",
+          "overline": "PRODUCER",
+          "summary": "AuthorityRequestEnvelope is already persisted before any packet exists."
+        },
+        {
+          "accessible_label": "Packet lane node OUTBOX transactional outbox seal",
+          "label": "Transactional outbox seal",
+          "lane_ref": "OUTBOX",
+          "overline": "OUTBOX",
+          "summary": "duplicate_meaning_key, request_hash, idempotency_key, identity_namespace_hash, access_binding_hash freeze on durable truth before publication."
+        },
+        {
+          "accessible_label": "Packet lane node BROKER transport packet handoff",
+          "label": "Transport packet handoff",
+          "lane_ref": "BROKER",
+          "overline": "BROKER",
+          "summary": "Transport retries reuse duplicate meaning from the sealed request identity; request hash still proves the exact send basis."
+        },
+        {
+          "accessible_label": "Packet lane node INBOX durable inbox gate",
+          "label": "Durable inbox gate",
+          "lane_ref": "INBOX",
+          "overline": "INBOX",
+          "summary": "Consumer dedupe happens before mutation. Safe retries stop after 3 attempts."
+        },
+        {
+          "accessible_label": "Packet lane node LEDGER truth-side mutation or quarantine",
+          "label": "Truth-side mutation or quarantine",
+          "lane_ref": "LEDGER",
+          "overline": "LEDGER",
+          "summary": "Quarantine the packet after repeated safe retries so operator review can inspect request identity, token lineage, and stronger external truth."
+        }
+      ],
+      "notes": [
+        "Lawful token rotation within the same frozen binding lineage preserves duplicate meaning and idempotency while changing request hash.",
+        "A namespace collision is a hard block even when payload bytes match.",
+        "Request hash remains the exact-send identity and changes on token-binding or header-profile drift.",
+        "Idempotency follows duplicate meaning and survives lawful token rotation within one frozen lineage."
+      ],
+      "railLabel": "AUTHORITY",
+      "redactionSummary": "EVENT_ENVELOPE_CORE: OPAQUE_REFS_AND_HASHES_ONLY / OBSERVABILITY_TRACE: REFERENTIAL_ONLY / DEAD_LETTER_AND_QUARANTINE: INVESTIGATION_METADATA_ONLY",
+      "retrySummary": "QUARANTINE_INBOX_REQUIRED after 3 safe attempts",
+      "tone": "plum",
+      "truthAnchor": "AuthorityRequestEnvelope and AuthorityInteractionRecord"
+    },
+    {
+      "alerts": [
+        {
+          "label": "Collision rule",
+          "text": "IDENTITY_NAMESPACE_COLLISION requires quarantine when one ingress payload resolves to competing request or authority identities."
+        },
+        {
+          "label": "Recovery posture",
+          "text": "Restore resumes from canonical ingress receipts and reconciliation packets rather than nearest-recent request heuristics."
+        },
+        {
+          "label": "Terminal posture",
+          "text": "Quarantine ambiguous or drifted ingress instead of applying a speculative state transition."
+        },
+        {
+          "label": "Redrive gate",
+          "text": "Re-drive requires the same canonical ingress receipt, authenticated channel proof, and source-record continuity."
+        }
+      ],
+      "channels": [
+        "channel.authority.callback.ingress"
+      ],
+      "collisionRule": "IDENTITY_NAMESPACE_COLLISION requires quarantine when one ingress payload resolves to competing request or authority identities.",
+      "displayName": "Authority ingress packet",
+      "duplicateScopeRef": "AUTHORITY_INGRESS",
+      "exampleIdentity": {
+        "duplicate_meaning_key": "db5037c76f1aa2ba68779dfb7bd07b5ce44c4212f74584972465ee4bd1b3aaa5",
+        "idempotency_key": "0b462eecddaea08ea35a13eb5fbbd5f3c7db6da21d6ae191154ad3036257a02f",
+        "note": "A fresh packet id must not mint a fresh semantic meaning.",
+        "packet_id": "packet.ingress.case-2026-04-23.01",
+        "request_hash": "85c2a969d12af7758062ca3371b71dc24d516229935ea1c9177a52a76ed243e5",
+        "source_record_ref": "ingress.receipt.hmrc.case-2026-04-23"
+      },
+      "familyRef": "AUTHORITY_INGRESS",
+      "laneCards": [
+        {
+          "accessible_label": "Packet lane node PRODUCER durable source record",
+          "label": "Durable source record",
+          "lane_ref": "PRODUCER",
+          "overline": "PRODUCER",
+          "summary": "AuthorityIngressReceipt is already persisted before any packet exists."
+        },
+        {
+          "accessible_label": "Packet lane node OUTBOX transactional outbox seal",
+          "label": "Transactional outbox seal",
+          "lane_ref": "OUTBOX",
+          "overline": "OUTBOX",
+          "summary": "duplicate_meaning_key, request_hash, idempotency_key, delivery_dedupe_key freeze on durable truth before publication."
+        },
+        {
+          "accessible_label": "Packet lane node BROKER transport packet handoff",
+          "label": "Transport packet handoff",
+          "lane_ref": "BROKER",
+          "overline": "BROKER",
+          "summary": "Callbacks and recovery observations enter through authenticated ingress receipts before they can influence settlement truth."
+        },
+        {
+          "accessible_label": "Packet lane node INBOX durable inbox gate",
+          "label": "Durable inbox gate",
+          "lane_ref": "INBOX",
+          "overline": "INBOX",
+          "summary": "Consumer dedupe happens before mutation. Safe retries stop after 2 attempts."
+        },
+        {
+          "accessible_label": "Packet lane node LEDGER truth-side mutation or quarantine",
+          "label": "Truth-side mutation or quarantine",
+          "lane_ref": "LEDGER",
+          "overline": "LEDGER",
+          "summary": "Quarantine ambiguous or drifted ingress instead of applying a speculative state transition."
+        }
+      ],
+      "notes": [
+        "Missing or stale source-record continuity on inbox arrival must quarantine before any mutation.",
+        "Authenticated ingress proof and canonical ingress receipt refs survive restore and duplicate delivery.",
+        "Authenticated ingress proof precedes normalization.",
+        "Missing or stale source-record continuity blocks mutation and routes to quarantine."
+      ],
+      "railLabel": "INGRESS",
+      "redactionSummary": "EVENT_ENVELOPE_CORE: OPAQUE_REFS_AND_HASHES_ONLY / OBSERVABILITY_TRACE: REFERENTIAL_ONLY / DEAD_LETTER_AND_QUARANTINE: INVESTIGATION_METADATA_ONLY",
+      "retrySummary": "QUARANTINE_INBOX_REQUIRED after 2 safe attempts",
+      "tone": "scarlet",
+      "truthAnchor": "AuthorityIngressReceipt plus normalized response ledger"
+    }
+  ],
+  "generationBasis": {
+    "emittedAtBasis": "CONFIG_DRIVEN_STATIC_ATLAS",
+    "inputHashes": {
+      "event_envelope_catalog": "86d9b77d0def1c73adb3975ce0bc65355b941f11d465806597366c74748b47e5",
+      "idempotency_scope_matrix": "577bd8b9f3e25201cb120a8d2c7573c4ce3037187c42344c8d24afb559450481",
+      "message_redaction_policy": "ff65c47ed6737e126330ef56e62c1ddc5889a3b9cb86c13382d198c3d417231b",
+      "retry_and_dead_letter_policy": "306bc2fdff59336b3dea233ddc211371333ee9e2231b05f3313d9d90f0fa4b0e"
+    }
+  },
+  "lanes": [
+    {
+      "label": "PRODUCER",
+      "lane_ref": "PRODUCER",
+      "summary": "Durable source truth is persisted before transport publication exists."
+    },
+    {
+      "label": "OUTBOX",
+      "lane_ref": "OUTBOX",
+      "summary": "Exact identity freezes in a transactional outbox record."
+    },
+    {
+      "label": "BROKER",
+      "lane_ref": "BROKER",
+      "summary": "Transport-only handoff. Packet ids are evidence, not truth."
+    },
+    {
+      "label": "INBOX",
+      "lane_ref": "INBOX",
+      "summary": "Durable dedupe and continuity checks run before mutation."
+    },
+    {
+      "label": "LEDGER",
+      "lane_ref": "LEDGER",
+      "summary": "Apply one mutation, or dead-letter and quarantine explicitly."
+    }
+  ],
+  "routeId": "event-envelope-atlas",
+  "selectedFamilyRef": "AUTHORITY_REQUEST",
+  "selectedLaneRef": "INBOX",
+  "subtitle": "One packet lane for commands, worker tasks, artifact events, and authority traffic, with durable duplicate meaning and inbox truth ahead of any mutation.",
+  "title": "Taxat Event Envelope Atlas"
+}

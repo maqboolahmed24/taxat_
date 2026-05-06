@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/artifact_affordance_contract.schema.json",
+  "title": "ArtifactAffordanceContract",
+  "description": "Shared summary-first artifact affordance contract. This schema freezes the one visible primary artifact slot, the required current-vs-history posture label, explicit secondary-history disclosure, and the default preview/download/print targets so portal, collaboration, and native preview surfaces cannot let historical, superseded, rejected, expired, or quarantined artifacts masquerade as the default current target.",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "affordance_scope",
+    "primary_slot_policy",
+    "primary_subject_role",
+    "visible_primary_subject_ref_or_null",
+    "header_posture",
+    "history_affordance_state",
+    "preview_open_policy",
+    "default_preview_target_ref_or_null",
+    "default_download_target_ref_or_null",
+    "default_print_target_ref_or_null",
+    "label_visibility_policy",
+    "invocation_validation_policy"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "ARTIFACT_AFFORDANCE_V1"
+    },
+    "affordance_scope": {
+      "type": "string",
+      "enum": [
+        "CLIENT_DOCUMENT_REQUEST",
+        "CLIENT_APPROVAL_PACK",
+        "COLLABORATION_CUSTOMER_REQUEST",
+        "COLLABORATION_ATTACHMENT_SLICE",
+        "NATIVE_SECONDARY_WINDOW"
+      ]
+    },
+    "primary_slot_policy": {
+      "const": "CURRENT_PRIMARY_HISTORY_EXPLICIT"
+    },
+    "primary_subject_role": {
+      "type": "string",
+      "enum": [
+        "NO_CURRENT_ARTIFACT",
+        "CURRENT_ARTIFACT",
+        "CURRENT_REQUEST_UPLOAD",
+        "APPROVAL_PACK",
+        "HISTORICAL_CONTEXT"
+      ]
+    },
+    "visible_primary_subject_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "header_posture": {
+      "type": "string",
+      "enum": [
+        "CURRENT",
+        "CURRENT_WITH_HISTORY",
+        "AWAITING_CURRENT_REPLACEMENT",
+        "HISTORICAL",
+        "SUPERSEDED",
+        "REJECTED",
+        "EXPIRED",
+        "QUARANTINED"
+      ]
+    },
+    "history_affordance_state": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "EXPLICIT_SECONDARY",
+        "EXPLICIT_SECONDARY_LIMITED",
+        "HIDDEN_UNTIL_REQUESTED"
+      ]
+    },
+    "preview_open_policy": {
+      "type": "string",
+      "enum": [
+        "CURRENT_SUMMARY_FIRST_ONLY",
+        "CURRENT_SUMMARY_FIRST_THEN_HISTORY_ON_DEMAND"
+      ]
+    },
+    "default_preview_target_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "default_download_target_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "default_print_target_ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "label_visibility_policy": {
+      "const": "EXPLICIT_POSTURE_LABELS_REQUIRED"
+    },
+    "invocation_validation_policy": {
+      "const": "VISIBLE_PRIMARY_AND_DEFAULT_TARGETS_MUST_MATCH_GOVERNED_POSTURE"
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "primary_subject_role": {
+            "const": "NO_CURRENT_ARTIFACT"
+          }
+        },
+        "required": [
+          "primary_subject_role"
+        ]
+      },
+      "then": {
+        "properties": {
+          "visible_primary_subject_ref_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "history_affordance_state": {
+            "const": "NONE"
+          }
+        },
+        "required": [
+          "history_affordance_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "preview_open_policy": {
+            "const": "CURRENT_SUMMARY_FIRST_ONLY"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "history_affordance_state": {
+            "enum": [
+              "EXPLICIT_SECONDARY",
+              "EXPLICIT_SECONDARY_LIMITED",
+              "HIDDEN_UNTIL_REQUESTED"
+            ]
+          }
+        },
+        "required": [
+          "history_affordance_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "preview_open_policy": {
+            "const": "CURRENT_SUMMARY_FIRST_THEN_HISTORY_ON_DEMAND"
+          }
+        }
+      }
+    }
+  ]
+}

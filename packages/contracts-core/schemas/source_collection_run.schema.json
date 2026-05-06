@@ -1,0 +1,336 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taxat.dev/schemas/source_collection_run.schema.json",
+  "title": "SourceCollectionRun",
+  "description": "Governed source-collection execution contract. This schema freezes collection lifecycle, named transition lineage, source-window anchor, partial-gap identity, and typed failure or abandonment reasons for one manifest-bound collection run.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "collection_run_id",
+    "manifest_id",
+    "lifecycle_state",
+    "state_transition_contract",
+    "source_window_ref",
+    "fetch_audit_refs",
+    "partial_gap_refs",
+    "failure_reason_code_or_null",
+    "abandoned_reason_code_or_null",
+    "started_at_or_null",
+    "completed_at_or_null",
+    "state_changed_at",
+    "audit_refs",
+    "provenance_refs"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "SourceCollectionRun"
+    },
+    "collection_run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "NOT_STARTED",
+        "FETCHING",
+        "FETCHED",
+        "PARTIAL",
+        "FAILED",
+        "ABANDONED"
+      ]
+    },
+    "state_transition_contract": {
+      "allOf": [
+        {
+          "$ref": "https://taxat.dev/schemas/state_transition_contract.schema.json"
+        },
+        {
+          "properties": {
+            "object_family": {
+              "const": "SOURCE_COLLECTION_RUN"
+            },
+            "machine_code": {
+              "const": "SOURCE_COLLECTION_RUN_LIFECYCLE_V1"
+            },
+            "state_field_name": {
+              "const": "lifecycle_state"
+            }
+          }
+        }
+      ]
+    },
+    "source_window_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fetch_audit_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "partial_gap_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    },
+    "failure_reason_code_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "abandoned_reason_code_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "started_at_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "completed_at_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "state_changed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "audit_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "provenance_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": [],
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "NOT_STARTED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "started_at_or_null": {
+            "type": "null"
+          },
+          "completed_at_or_null": {
+            "type": "null"
+          },
+          "partial_gap_refs": {
+            "maxItems": 0
+          },
+          "failure_reason_code_or_null": {
+            "type": "null"
+          },
+          "abandoned_reason_code_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "FETCHING"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "started_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at_or_null": {
+            "type": "null"
+          },
+          "partial_gap_refs": {
+            "maxItems": 0
+          },
+          "failure_reason_code_or_null": {
+            "type": "null"
+          },
+          "abandoned_reason_code_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "FETCHED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "started_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "partial_gap_refs": {
+            "maxItems": 0
+          },
+          "failure_reason_code_or_null": {
+            "type": "null"
+          },
+          "abandoned_reason_code_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "PARTIAL"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "started_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "partial_gap_refs": {
+            "minItems": 1
+          },
+          "failure_reason_code_or_null": {
+            "type": "null"
+          },
+          "abandoned_reason_code_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "FAILED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "started_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "failure_reason_code_or_null": {
+            "type": "string",
+            "minLength": 1
+          },
+          "abandoned_reason_code_or_null": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "ABANDONED"
+          }
+        },
+        "required": [
+          "lifecycle_state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "started_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at_or_null": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "failure_reason_code_or_null": {
+            "type": "null"
+          },
+          "abandoned_reason_code_or_null": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

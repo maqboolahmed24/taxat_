@@ -1,0 +1,316 @@
+{
+  "contract_version": "NORTHBOUND_STALE_GUARD_PROFILE_MATRIX_V1",
+  "matrix_id": "northbound-stale-guard-profile-matrix",
+  "basis_statement": "Stale-guard evaluation is explicit and profile-driven so route continuity, workspace concurrency, portal route versions, and governance simulation bases are checked the same way across every northbound command handler.",
+  "stale_guard_profiles": [
+    {
+      "profile_code": "MANIFEST_RENDER_FRAME",
+      "route_scope_class": "MANIFEST_EXPERIENCE",
+      "requires_live_freshness": true,
+      "invalidates_on_visibility_shift": true,
+      "guard_rows": [
+        {
+          "command_binding": "if_match_decision_bundle_hash",
+          "stale_guard_family": "DECISION_BUNDLE_HASH",
+          "route_component": "decision_bundle_hash_or_null",
+          "value_kind": "string",
+          "mismatch_problem_code": "VIEW_STALE",
+          "recovery_ref_family": "DECISION_BUNDLE"
+        },
+        {
+          "command_binding": "if_match_shell_stability_token",
+          "stale_guard_family": "SHELL_STABILITY_TOKEN",
+          "route_component": "shell_stability_token_or_null",
+          "value_kind": "string",
+          "mismatch_problem_code": "REBASE_REQUIRED",
+          "recovery_ref_family": "DECISION_BUNDLE"
+        },
+        {
+          "command_binding": "if_match_frame_epoch",
+          "stale_guard_family": "FRAME_EPOCH",
+          "route_component": "frame_epoch_or_null",
+          "value_kind": "integer",
+          "mismatch_problem_code": "REBASE_REQUIRED",
+          "recovery_ref_family": "MANIFEST_RESUME"
+        }
+      ],
+      "notes": [
+        "Manifest render-frame commands stay anchored to the current decision bundle and grouped route generation."
+      ]
+    },
+    {
+      "profile_code": "MANIFEST_APPROVAL_PACK_REVIEW",
+      "route_scope_class": "MANIFEST_EXPERIENCE",
+      "requires_live_freshness": true,
+      "invalidates_on_visibility_shift": false,
+      "guard_rows": [
+        {
+          "command_binding": "if_match_decision_bundle_hash",
+          "stale_guard_family": "DECISION_BUNDLE_HASH",
+          "route_component": "decision_bundle_hash_or_null",
+          "value_kind": "string",
+          "mismatch_problem_code": "VIEW_STALE",
+          "recovery_ref_family": "DECISION_BUNDLE"
+        },
+        {
+          "command_binding": "if_match_shell_stability_token",
+          "stale_guard_family": "SHELL_STABILITY_TOKEN",
+          "route_component": "shell_stability_token_or_null",
+          "value_kind": "string",
+          "mismatch_problem_code": "REBASE_REQUIRED",
+          "recovery_ref_family": "DECISION_BUNDLE"
+        },
+        {
+          "command_binding": "if_match_frame_epoch",
+          "stale_guard_family": "FRAME_EPOCH",
+          "route_component": "frame_epoch_or_null",
+          "value_kind": "integer",
+          "mismatch_problem_code": "REBASE_REQUIRED",
+          "recovery_ref_family": "MANIFEST_RESUME"
+        },
+        {
+          "command_binding": "if_match_approval_pack_hash",
+          "stale_guard_family": "APPROVAL_PACK_HASH",
+          "route_component": "view_guard_ref_or_null",
+          "value_kind": "string",
+          "mismatch_problem_code": "VIEW_STALE",
+          "recovery_ref_family": "APPROVAL_PACK"
+        }
+      ],
+      "notes": [
+        "Approval-pack review adds the exact pack hash on top of the render-frame guard spine."
+      ]
+    },
+    {
+      "profile_code": "WORK_ITEM_STATE_MUTATION",
+      "route_scope_class": "WORKSPACE",
+      "requires_live_freshness": true,
+      "invalidates_on_visibility_shift": true,
+      "guard_rows": [
+        {
+          "command_binding": "if_match_work_item_version",
+          "stale_guard_family": "WORK_ITEM_VERSION",
+          "route_component": "work_item_version_or_null",
+          "value_kind": "integer",
+          "mismatch_problem_code": "VIEW_STALE",
+          "recovery_ref_family": "WORKSPACE_SNAPSHOT"
+        },
+        {
+          "command_binding": "if_match_shell_stability_token",
+          "stale_guard_family": "SHELL_STABILITY_TOKEN",
+          "route_component": "shell_stability_token_or_null",
+          "value_kind": "string",
+          "mismatch_problem_code": "REBASE_REQUIRED",
+          "recovery_ref_family": "WORKSPACE_SNAPSHOT"
+        }
+      ],
+      "notes": [
+        "State-changing collaboration mutations bind the current workspace version and shell continuity."
+      ]
+    },
+    {
+      "profile_code": "WORK_ITEM_INTERNAL_APPEND",
+      "route_scope_class": "WORKSPACE",
+      "requires_live_freshness": true,
+      "invalidates_on_visibility_shift": false,
+      "guard_rows": [
+        {
+          "command_binding": "if_match_work_item_version",
+          "stale_guard_family": "WORK_ITEM_VERSION",
+          "route_component": "work_item_version_or_null",
+          "value_kind": "integer",
+          "mismatch_problem_code": "VIEW_STALE",
+          "recovery_ref_family": "WORKSPACE_SNAPSHOT"
+        },
+        {
+          "command_binding": "if_match_shell_stability_token",
+          "stale_guard_family": "SHELL_STABILITY_TOKEN",
+          "route_component": "shell_stability_token_or_null",
+          "value_kind": "string",
+          "mismatch_problem_code": "REBASE_REQUIRED",
+          "recovery_ref_family": "WORKSPACE_SNAPSHOT"
+        },
+        {
+          "command_binding": "if_match_internal_head_sequence",
+          "stale_guard_family": "INTERNAL_THREAD_HEAD",
+          "route_component": "internal_thread_head_or_null",
+          "value_kind": "integer",
+          "mismatch_problem_code": "VIEW_STALE",
+          "recovery_ref_family": "WORKSPACE_SNAPSHOT"
+        }
+      ],
+      "notes": [
+        "Internal append commands keep the internal thread head separate from customer-visible activity."
+      ]
+    },
+    {
+      "profile_code": "WORK_ITEM_CUSTOMER_APPEND",
+      "route_scope_class": "WORKSPACE",
+      "requires_live_freshness": true,
+      "invalidates_on_visibility_shift": true,
+      "guard_rows": [
+        {
+          "command_binding": "if_match_work_item_version",
+          "stale_guard_family": "WORK_ITEM_VERSION",
+          "route_component": "work_item_version_or_null",
+          "value_kind": "integer",
+          "mismatch_problem_code": "VIEW_STALE",
+          "recovery_ref_family": "WORKSPACE_SNAPSHOT"
+        },
+        {
+          "command_binding": "if_match_customer_head_sequence",
+          "stale_guard_family": "CUSTOMER_THREAD_HEAD",
+          "route_component": "customer_thread_head_or_null",
+          "value_kind": "integer",
+          "mismatch_problem_code": "VIEW_STALE",
+          "recovery_ref_family": "WORKSPACE_SNAPSHOT"
+        },
+        {
+          "command_binding": "if_match_shell_stability_token",
+          "stale_guard_family": "SHELL_STABILITY_TOKEN",
+          "route_component": "shell_stability_token_or_null",
+          "value_kind": "string",
+          "mismatch_problem_code": "REBASE_REQUIRED",
+          "recovery_ref_family": "WORKSPACE_SNAPSHOT"
+        }
+      ],
+      "notes": [
+        "Customer append commands pin the customer lane head sequence."
+      ]
+    },
+    {
+      "profile_code": "WORK_ITEM_REQUEST_RESPONSE",
+      "route_scope_class": "WORKSPACE",
+      "requires_live_freshness": true,
+      "invalidates_on_visibility_shift": true,
+      "guard_rows": [
+        {
+          "command_binding": "if_match_work_item_version",
+          "stale_guard_family": "WORK_ITEM_VERSION",
+          "route_component": "work_item_version_or_null",
+          "value_kind": "integer",
+          "mismatch_problem_code": "VIEW_STALE",
+          "recovery_ref_family": "WORKSPACE_SNAPSHOT"
+        },
+        {
+          "command_binding": "if_match_customer_head_sequence",
+          "stale_guard_family": "CUSTOMER_THREAD_HEAD",
+          "route_component": "customer_thread_head_or_null",
+          "value_kind": "integer",
+          "mismatch_problem_code": "VIEW_STALE",
+          "recovery_ref_family": "WORKSPACE_SNAPSHOT"
+        },
+        {
+          "command_binding": "if_match_request_state_version",
+          "stale_guard_family": "REQUEST_STATE_VERSION",
+          "route_component": "request_state_version_or_null",
+          "value_kind": "integer",
+          "mismatch_problem_code": "VIEW_STALE",
+          "recovery_ref_family": "WORKSPACE_SNAPSHOT"
+        },
+        {
+          "command_binding": "if_match_shell_stability_token",
+          "stale_guard_family": "SHELL_STABILITY_TOKEN",
+          "route_component": "shell_stability_token_or_null",
+          "value_kind": "string",
+          "mismatch_problem_code": "REBASE_REQUIRED",
+          "recovery_ref_family": "WORKSPACE_SNAPSHOT"
+        }
+      ],
+      "notes": [
+        "Request-info responses add the current durable request-state version to the normal customer append guard spine."
+      ]
+    },
+    {
+      "profile_code": "CLIENT_PORTAL_ROUTE_MUTATION",
+      "route_scope_class": "CLIENT_PORTAL_ROUTE",
+      "requires_live_freshness": true,
+      "invalidates_on_visibility_shift": true,
+      "guard_rows": [
+        {
+          "command_binding": "if_match_client_portal_workspace_version",
+          "stale_guard_family": "CLIENT_PORTAL_WORKSPACE_VERSION",
+          "route_component": "client_portal_workspace_version_or_null",
+          "value_kind": "integer",
+          "mismatch_problem_code": "VIEW_STALE",
+          "recovery_ref_family": "CLIENT_PORTAL_WORKSPACE"
+        }
+      ],
+      "notes": [
+        "Portal route mutations stay bound to the exact customer-visible workspace version unless a stricter object-level guard replaces it."
+      ]
+    },
+    {
+      "profile_code": "GOVERNANCE_POLICY_MUTATION",
+      "route_scope_class": "GOVERNANCE_ROUTE",
+      "requires_live_freshness": true,
+      "invalidates_on_visibility_shift": true,
+      "guard_rows": [
+        {
+          "command_binding": "if_match_policy_snapshot_hash",
+          "stale_guard_family": "POLICY_SNAPSHOT_HASH",
+          "route_component": "policy_snapshot_hash_or_null",
+          "value_kind": "string",
+          "mismatch_problem_code": "VIEW_STALE",
+          "recovery_ref_family": "POLICY_SNAPSHOT"
+        }
+      ],
+      "notes": [
+        "Governance commands always bind to the current policy snapshot even when no simulation basis is reused."
+      ]
+    },
+    {
+      "profile_code": "GOVERNANCE_SIMULATION_COMMIT",
+      "route_scope_class": "GOVERNANCE_ROUTE",
+      "requires_live_freshness": true,
+      "invalidates_on_visibility_shift": true,
+      "guard_rows": [
+        {
+          "command_binding": "if_match_policy_snapshot_hash",
+          "stale_guard_family": "POLICY_SNAPSHOT_HASH",
+          "route_component": "policy_snapshot_hash_or_null",
+          "value_kind": "string",
+          "mismatch_problem_code": "VIEW_STALE",
+          "recovery_ref_family": "POLICY_SNAPSHOT"
+        },
+        {
+          "command_binding": "if_match_dependency_topology_hash",
+          "stale_guard_family": "DEPENDENCY_TOPOLOGY_HASH",
+          "route_component": "dependency_topology_hash_or_null",
+          "value_kind": "string",
+          "mismatch_problem_code": "VIEW_STALE",
+          "recovery_ref_family": "POLICY_SNAPSHOT"
+        },
+        {
+          "command_binding": "simulation_basis_hash",
+          "stale_guard_family": "SIMULATION_BASIS_HASH",
+          "route_component": "simulation_basis_hash_or_null",
+          "value_kind": "string",
+          "mismatch_problem_code": "VIEW_STALE",
+          "recovery_ref_family": "POLICY_SNAPSHOT"
+        },
+        {
+          "command_binding": "mutation_basis_contract_hash",
+          "stale_guard_family": "MUTATION_BASIS_CONTRACT_HASH",
+          "route_component": "mutation_basis_contract_hash_or_null",
+          "value_kind": "string",
+          "mismatch_problem_code": "VIEW_STALE",
+          "recovery_ref_family": "POLICY_SNAPSHOT"
+        }
+      ],
+      "notes": [
+        "Simulation-backed governance writes compare the policy snapshot, reviewed topology, reviewed simulation basis, and reviewed mutation basis contract hash as one coherent stale bundle."
+      ]
+    }
+  ],
+  "source_lineage": [
+    {
+      "source_file": "Algorithm/northbound_api_and_session_contract.md",
+      "source_ref": "section_6_concurrency_and_stale_view_rules"
+    },
+    {
+      "source_file": "Algorithm/schemas/route_stability_contract.schema.json",
+      "source_ref": "guard_vector_components"
+    }
+  ]
+}

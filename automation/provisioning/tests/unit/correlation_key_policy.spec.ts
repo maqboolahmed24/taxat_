@@ -14,13 +14,7 @@ import {
   type TelemetrySignalAtlasViewModel,
 } from "../../../../infra/observability/bootstrap/provision_otel_collection_and_backends.js";
 
-const repoRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "..",
-  "..",
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
 
 async function readJson<T>(segments: string[]): Promise<T> {
   return JSON.parse(await readFile(path.join(repoRoot, ...segments), "utf8")) as T;
@@ -39,19 +33,11 @@ test("checked-in correlation policy, inventory, and atlas payload match the buil
   ]);
   const sampleRun = await readJson<{
     telemetrySignalAtlas: TelemetrySignalAtlasViewModel;
-  }>([
-    "automation",
-    "provisioning",
-    "report_viewer",
-    "data",
-    "sample_run.json",
-  ]);
+  }>(["automation", "provisioning", "report_viewer", "data", "sample_run.json"]);
 
   expect(persistedPolicy).toEqual(createCorrelationKeyPolicy());
   expect(persistedInventory).toEqual(createObservabilityInventoryTemplate());
-  expect(sampleRun.telemetrySignalAtlas).toEqual(
-    createTelemetrySignalAtlasViewModel(),
-  );
+  expect(sampleRun.telemetrySignalAtlas).toEqual(createTelemetrySignalAtlasViewModel());
 });
 
 test("correlation policy keeps shared resource identity and durable join anchors for every signal family", () => {
@@ -71,9 +57,7 @@ test("correlation policy keeps shared resource identity and durable join anchors
     ]),
   );
 
-  const traceRow = policy.signal_rows.find(
-    (row) => row.signal_family_ref === "TRACES",
-  );
+  const traceRow = policy.signal_rows.find((row) => row.signal_family_ref === "TRACES");
   expect(traceRow?.mandatory_keys).toEqual(
     expect.arrayContaining([
       "trace_id",
@@ -87,9 +71,7 @@ test("correlation policy keeps shared resource identity and durable join anchors
     ]),
   );
 
-  const securityRow = policy.signal_rows.find(
-    (row) => row.signal_family_ref === "SECURITY",
-  );
+  const securityRow = policy.signal_rows.find((row) => row.signal_family_ref === "SECURITY");
   expect(securityRow?.mandatory_keys).toEqual(
     expect.arrayContaining([
       "authority_binding_ref",
@@ -98,15 +80,10 @@ test("correlation policy keeps shared resource identity and durable join anchors
     ]),
   );
   expect(securityRow?.audit_join_anchor_types).toEqual(
-    expect.arrayContaining([
-      "approval audit evidence",
-      "AuthorityBindingMismatchDetected",
-    ]),
+    expect.arrayContaining(["approval audit evidence", "AuthorityBindingMismatchDetected"]),
   );
 
-  const auditLinkRow = policy.signal_rows.find(
-    (row) => row.signal_family_ref === "AUDIT_LINKS",
-  );
+  const auditLinkRow = policy.signal_rows.find((row) => row.signal_family_ref === "AUDIT_LINKS");
   expect(auditLinkRow?.mandatory_keys).toEqual(
     expect.arrayContaining([
       "trace_id",

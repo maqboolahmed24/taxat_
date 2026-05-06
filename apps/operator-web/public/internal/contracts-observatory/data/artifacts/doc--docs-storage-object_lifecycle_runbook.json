@@ -1,0 +1,229 @@
+{
+  "artifactVersion": "CONTRACT_OBSERVATORY_ARTIFACT_V1",
+  "artifactSlug": "doc--docs-storage-object_lifecycle_runbook",
+  "artifactKind": "MARKDOWN",
+  "sectionRef": "SUPPORT_DOCS",
+  "authorityLevel": "SUPPORTING_REFERENCE",
+  "sourceTruthBadge": "Support Documentation",
+  "tone": "slate",
+  "title": "Object Lifecycle Runbook",
+  "subtitle": "docs/storage/object_lifecycle_runbook.md",
+  "summary": "",
+  "canonicalPath": "docs/storage/object_lifecycle_runbook.md",
+  "sourceLineage": [
+    "docs/storage/object_lifecycle_runbook.md"
+  ],
+  "headingCount": 7,
+  "headings": [
+    {
+      "level": 1,
+      "text": "Object Lifecycle Runbook",
+      "slug": "object-lifecycle-runbook"
+    },
+    {
+      "level": 2,
+      "text": "Purpose",
+      "slug": "purpose"
+    },
+    {
+      "level": 2,
+      "text": "Core flow",
+      "slug": "core-flow"
+    },
+    {
+      "level": 2,
+      "text": "Quarantine",
+      "slug": "quarantine"
+    },
+    {
+      "level": 2,
+      "text": "Customer-safe delivery",
+      "slug": "customer-safe-delivery"
+    },
+    {
+      "level": 2,
+      "text": "Retention and erasure",
+      "slug": "retention-and-erasure"
+    },
+    {
+      "level": 2,
+      "text": "Operator checklist",
+      "slug": "operator-checklist"
+    }
+  ],
+  "proseSections": [
+    {
+      "headingSlug": "object-lifecycle-runbook",
+      "headingText": "Object Lifecycle Runbook",
+      "level": 1,
+      "lines": [
+        ""
+      ],
+      "plainText": "",
+      "excerpt": "",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "purpose",
+      "headingText": "Purpose",
+      "level": 2,
+      "lines": [
+        "",
+        "The storage boundary in `packages/domain-kernel/src/storage` is the only shared runtime that may turn staged bytes into published, deliverable, quarantined, retained, or erased objects.",
+        "Raw bucket location is never enough on its own.",
+        ""
+      ],
+      "plainText": "The storage boundary in packages/domain kernel/src/storage is the only shared runtime that may turn staged bytes into published, deliverable, quarantined, retained, or erased objects. Raw bucket location is never enough on its own.",
+      "excerpt": "The storage boundary in packages/domain kernel/src/storage is the only shared runtime that may turn staged bytes into published, deliverable, quarantined, retained, or erased obje…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "core-flow",
+      "headingText": "Core flow",
+      "level": 2,
+      "lines": [
+        "",
+        "1. Stage bytes with `stageObject`.",
+        "2. Preserve the same `storage_ref` across reconnect or request rebase with `resumeObject`.",
+        "3. Move into `SCANNING` with `startScan`.",
+        "4. Publish only after clean verdict and explicit retention hook attachment with `publishObject` or `completeScan(...clean: true)`.",
+        "5. Mint customer-facing delivery only with `bindDelivery`, never from `storage_ref`.",
+        ""
+      ],
+      "plainText": "1. Stage bytes with stageObject. 2. Preserve the same storage ref across reconnect or request rebase with resumeObject. 3. Move into SCANNING with startScan. 4. Publish only after clean verdict and explicit retention hook attachment with publishObject or completeScan(...clean: true). 5. Mint customer facing delivery only with bindDelivery, never from storage ref.",
+      "excerpt": "1. Stage bytes with stageObject. 2. Preserve the same storage ref across reconnect or request rebase with resumeObject. 3. Move into SCANNING with startScan. 4. Publish only after…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "quarantine",
+      "headingText": "Quarantine",
+      "level": 2,
+      "lines": [
+        "",
+        "- Use `quarantineObject` for malicious verdicts or late re-scan revocation.",
+        "- Quarantine clears preview and download handles immediately.",
+        "- False-positive release does not mutate quarantine in place; it creates a clean successor object boundary.",
+        ""
+      ],
+      "plainText": "Use quarantineObject for malicious verdicts or late re scan revocation. Quarantine clears preview and download handles immediately. False positive release does not mutate quarantine in place; it creates a clean successor object boundary.",
+      "excerpt": "Use quarantineObject for malicious verdicts or late re scan revocation. Quarantine clears preview and download handles immediately. False positive release does not mutate quaranti…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "customer-safe-delivery",
+      "headingText": "Customer-safe delivery",
+      "level": 2,
+      "lines": [
+        "",
+        "- Internal-only source objects can require a separate derivative with `publishCustomerSafeDerivative`.",
+        "- `bindDelivery` computes a fresh `delivery_binding_hash` from route, access, masking, and target context.",
+        "- Reuse must be checked with `assertDeliveryCurrent`; drifted route or session context fails closed.",
+        ""
+      ],
+      "plainText": "Internal only source objects can require a separate derivative with publishCustomerSafeDerivative. bindDelivery computes a fresh delivery binding hash from route, access, masking, and target context. Reuse must be checked with assertDeliveryCurrent; drifted route or session context fails closed.",
+      "excerpt": "Internal only source objects can require a separate derivative with publishCustomerSafeDerivative. bindDelivery computes a fresh delivery binding hash from route, access, masking,…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "retention-and-erasure",
+      "headingText": "Retention and erasure",
+      "level": 2,
+      "lines": [
+        "",
+        "- Every stage or transition that matters attaches `RetentionTag` and `ArtifactRetention` lineage through `applyRetentionHook`.",
+        "- Legal-hold posture lives on `ArtifactRetention`, not on provider lock metadata alone.",
+        "- `requestErasure` downgrades to limited posture when current artifact refs still point at the object.",
+        "- `eraseObject` is the only shared path that moves an object into `ERASED`.",
+        ""
+      ],
+      "plainText": "Every stage or transition that matters attaches RetentionTag and ArtifactRetention lineage through applyRetentionHook. Legal hold posture lives on ArtifactRetention, not on provider lock metadata alone. requestErasure downgrades to limited posture when current artifact refs still point at the object. eraseObject is the only shared path that moves an object into ERASED.",
+      "excerpt": "Every stage or transition that matters attaches RetentionTag and ArtifactRetention lineage through applyRetentionHook. Legal hold posture lives on ArtifactRetention, not on provid…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "operator-checklist",
+      "headingText": "Operator checklist",
+      "level": 2,
+      "lines": [
+        "",
+        "- Do not expose raw provider URLs, signed URLs, or object-store paths as durable product truth.",
+        "- Do not bypass quarantine by editing object metadata in place.",
+        "- Do not treat a clean scan as permission to skip publication or delivery binding.",
+        "- Do not delete or erase a current-view object without checking `currentArtifactRefs`.",
+        ""
+      ],
+      "plainText": "Do not expose raw provider URLs, signed URLs, or object store paths as durable product truth. Do not bypass quarantine by editing object metadata in place. Do not treat a clean scan as permission to skip publication or delivery binding. Do not delete or erase a current view object without checking currentArtifactRefs.",
+      "excerpt": "Do not expose raw provider URLs, signed URLs, or object store paths as durable product truth. Do not bypass quarantine by editing object metadata in place. Do not treat a clean sc…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    }
+  ],
+  "schemaIdentityOrNull": null,
+  "schemaFields": [],
+  "samplePointers": [],
+  "sampleIdentityOrNull": null,
+  "bindingIdentityOrNull": null,
+  "validatorIdentityOrNull": null,
+  "driftIdentityOrNull": null,
+  "headerStrip": {
+    "kind": "PROSE",
+    "badgeLabel": "Support Documentation",
+    "metricPairs": [
+      {
+        "label": "Headings",
+        "value": "7"
+      },
+      {
+        "label": "Schemas",
+        "value": "0"
+      },
+      {
+        "label": "Tasks",
+        "value": "0"
+      }
+    ]
+  },
+  "relationships": {
+    "schemas": [],
+    "samples": [],
+    "bindings": [],
+    "validators": [],
+    "docs": [],
+    "tasks": []
+  },
+  "sourceTruthStack": {
+    "file": [
+      "docs/storage/object_lifecycle_runbook.md"
+    ],
+    "headings": [
+      "Object Lifecycle Runbook",
+      "Purpose",
+      "Core flow",
+      "Quarantine",
+      "Customer-safe delivery",
+      "Retention and erasure",
+      "Operator checklist"
+    ],
+    "schemaRefs": [],
+    "sampleRefs": [],
+    "bindingRefs": [],
+    "validatorRefs": [],
+    "driftRefs": [],
+    "taskRefs": []
+  },
+  "fieldCrosslinks": [],
+  "taskRefs": []
+}

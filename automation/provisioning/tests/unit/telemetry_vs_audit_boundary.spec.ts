@@ -10,13 +10,7 @@ import {
   type TelemetryVsAuditBoundary,
 } from "../../src/providers/monitoring/flows/create_error_monitoring_workspace.js";
 
-const repoRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "..",
-  "..",
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
 
 async function readJson<T>(segments: string[]): Promise<T> {
   const filePath = path.join(repoRoot, ...segments);
@@ -38,12 +32,8 @@ test("telemetry boundary keeps audit truth first-party only and preserves mandat
 
   validateTelemetryVsAuditBoundary(boundary);
 
-  const vendorVisible = new Set(
-    boundary.vendor_visible_families.map((row) => row.family_ref),
-  );
-  const firstPartyOnly = new Set(
-    boundary.first_party_only_families.map((row) => row.family_ref),
-  );
+  const vendorVisible = new Set(boundary.vendor_visible_families.map((row) => row.family_ref));
+  const firstPartyOnly = new Set(boundary.first_party_only_families.map((row) => row.family_ref));
 
   expect(vendorVisible.has("AUDIT_EVENTS")).toBe(false);
   expect(vendorVisible.has("PRIVACY_ACTION_LEDGER")).toBe(false);

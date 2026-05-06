@@ -1,0 +1,230 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "manual_checkpoint_policy",
+  "truth_boundary_statement": "Manual checkpoints are lawful pauses, not bypass candidates. The smoke matrix captures masked evidence, emits a typed outcome, and waits for explicit human verification before any future continuation.",
+  "reason_rows": [
+    {
+      "reason_code": "CAPTCHA",
+      "reason_family": "ANTI_BOT",
+      "default_summary": "Anti-bot or CAPTCHA challenge detected.",
+      "detection_cues": [
+        "captcha",
+        "verify you are human",
+        "security challenge"
+      ],
+      "required_capture_modes": [
+        "MASKED",
+        "HASH_ONLY",
+        "REFERENCE_ONLY"
+      ],
+      "outcome_code": "MANUAL_CHECKPOINT_REQUIRED",
+      "resume_rule": "Require operator completion, re-read the page identity, and confirm session continuity before any later action.",
+      "forbidden_actions": [
+        "BYPASS_PROVIDER_CHALLENGE",
+        "PERSIST_RAW_CHALLENGE_RESPONSE",
+        "REPLAY_STALE_PRE_CHALLENGE_MUTATION"
+      ],
+      "notes": [
+        "CAPTCHA is provider-controlled and remains strictly non-delegable."
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::manual-step-up-and-secret-handling",
+          "rationale": "Manual checkpoints must pause lawfully, capture masked evidence only, and never bypass a provider challenge."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::durable-operational-evidence",
+          "rationale": "Manual checkpoints require durable, typed evidence rather than ephemeral chat memory or free-form notes."
+        }
+      ]
+    },
+    {
+      "reason_code": "MFA_REQUIRED",
+      "reason_family": "IDENTITY_STEP_UP",
+      "default_summary": "A provider MFA or one-time-code challenge is active.",
+      "detection_cues": [
+        "two-step verification",
+        "authenticator app",
+        "one-time code"
+      ],
+      "required_capture_modes": [
+        "MASKED",
+        "HASH_ONLY",
+        "REFERENCE_ONLY"
+      ],
+      "outcome_code": "MANUAL_CHECKPOINT_REQUIRED",
+      "resume_rule": "Pause, capture the masked checkpoint state, and resume only after a fresh route and session revalidation.",
+      "forbidden_actions": [
+        "STORE_ONE_TIME_CODE",
+        "STORE_PROVIDER_SESSION_COOKIE",
+        "REUSE_STALE_SESSION"
+      ],
+      "notes": [
+        "MFA completion does not authorize stale pre-checkpoint actions."
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::manual-step-up-and-secret-handling",
+          "rationale": "Manual checkpoints must pause lawfully, capture masked evidence only, and never bypass a provider challenge."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::durable-operational-evidence",
+          "rationale": "Manual checkpoints require durable, typed evidence rather than ephemeral chat memory or free-form notes."
+        }
+      ]
+    },
+    {
+      "reason_code": "STEP_UP_REQUIRED",
+      "reason_family": "IDENTITY_STEP_UP",
+      "default_summary": "The provider requires higher-assurance identity for this path.",
+      "detection_cues": [
+        "step-up",
+        "verify your identity",
+        "security key"
+      ],
+      "required_capture_modes": [
+        "MASKED",
+        "HASH_ONLY",
+        "REFERENCE_ONLY"
+      ],
+      "outcome_code": "MANUAL_CHECKPOINT_REQUIRED",
+      "resume_rule": "Resume only after re-reading the exact post-step-up route and proving the same smoke target remains selected.",
+      "forbidden_actions": [
+        "ASSUME_STEP_UP_COMPLETED",
+        "SKIP_ROUTE_REVALIDATION",
+        "REPLAY_MUTATION_FROM_PRE_STEP_UP_STATE"
+      ],
+      "notes": [
+        "Higher-assurance flows remain explicit in the smoke matrix."
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::manual-step-up-and-secret-handling",
+          "rationale": "Manual checkpoints must pause lawfully, capture masked evidence only, and never bypass a provider challenge."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::durable-operational-evidence",
+          "rationale": "Manual checkpoints require durable, typed evidence rather than ephemeral chat memory or free-form notes."
+        }
+      ]
+    },
+    {
+      "reason_code": "EMAIL_OR_DOMAIN_VERIFICATION_REQUIRED",
+      "reason_family": "VERIFICATION",
+      "default_summary": "Email or domain verification is pending before the control plane can proceed.",
+      "detection_cues": [
+        "verify domain",
+        "check your email",
+        "pending dns"
+      ],
+      "required_capture_modes": [
+        "MASKED",
+        "HASH_ONLY",
+        "REFERENCE_ONLY"
+      ],
+      "outcome_code": "MANUAL_CHECKPOINT_REQUIRED",
+      "resume_rule": "Wait for provider-side verification to settle, then re-run the same non-destructive smoke assertion.",
+      "forbidden_actions": [
+        "FAKE_PROVIDER_VERIFICATION",
+        "MARK_READY_WITHOUT_PROVIDER_EVIDENCE",
+        "PERSIST_RAW_PROVIDER_MAILBOX_COPY"
+      ],
+      "notes": [
+        "This reason covers DNS or mailbox verification pauses."
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::manual-step-up-and-secret-handling",
+          "rationale": "Manual checkpoints must pause lawfully, capture masked evidence only, and never bypass a provider challenge."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::durable-operational-evidence",
+          "rationale": "Manual checkpoints require durable, typed evidence rather than ephemeral chat memory or free-form notes."
+        }
+      ]
+    },
+    {
+      "reason_code": "SUSPICIOUS_LOGIN_REVIEW",
+      "reason_family": "VERIFICATION",
+      "default_summary": "The provider flagged the session for suspicious-login review.",
+      "detection_cues": [
+        "suspicious login",
+        "confirm this was you",
+        "review activity"
+      ],
+      "required_capture_modes": [
+        "MASKED",
+        "HASH_ONLY",
+        "REFERENCE_ONLY"
+      ],
+      "outcome_code": "MANUAL_CHECKPOINT_REQUIRED",
+      "resume_rule": "Require operator review and a new session before any later smoke action resumes.",
+      "forbidden_actions": [
+        "PERSIST_RAW_DEVICE_LIST",
+        "REUSE_REJECTED_SESSION",
+        "ASSUME_REVIEW_RESOLVED"
+      ],
+      "notes": [
+        "Suspicious-login screens remain explicit, never silently skipped."
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::manual-step-up-and-secret-handling",
+          "rationale": "Manual checkpoints must pause lawfully, capture masked evidence only, and never bypass a provider challenge."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::durable-operational-evidence",
+          "rationale": "Manual checkpoints require durable, typed evidence rather than ephemeral chat memory or free-form notes."
+        }
+      ]
+    },
+    {
+      "reason_code": "OPERATOR_APPROVAL_REQUIRED",
+      "reason_family": "HUMAN_APPROVAL",
+      "default_summary": "A provider or release boundary requires explicit operator approval.",
+      "detection_cues": [
+        "approval required",
+        "confirm publish",
+        "release approval"
+      ],
+      "required_capture_modes": [
+        "REFERENCE_ONLY",
+        "MASKED"
+      ],
+      "outcome_code": "MANUAL_CHECKPOINT_REQUIRED",
+      "resume_rule": "Keep the smoke row open, capture the safe approval reference, and resume only during an approved window.",
+      "forbidden_actions": [
+        "SELF_APPROVE",
+        "PERSIST_RAW_APPROVAL_SESSION",
+        "EXECUTE_OUTSIDE_RELEASE_WINDOW"
+      ],
+      "notes": [
+        "Approval-gated release paths remain disabled unless explicitly opened."
+      ],
+      "source_refs": [
+        {
+          "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::manual-step-up-and-secret-handling",
+          "rationale": "Manual checkpoints must pause lawfully, capture masked evidence only, and never bypass a provider challenge."
+        },
+        {
+          "source_ref": "Algorithm/observability_and_audit_contract.md::durable-operational-evidence",
+          "rationale": "Manual checkpoints require durable, typed evidence rather than ephemeral chat memory or free-form notes."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Every manual checkpoint emits the same typed outcome code but preserves its reason family and resume rule.",
+    "The smoke matrix never stores raw challenge answers, cookies, mailbox contents, or live browser storage."
+  ],
+  "source_refs": [
+    {
+      "source_ref": "Algorithm/security_and_runtime_hardening_contract.md::manual-step-up-and-secret-handling",
+      "rationale": "Manual checkpoints must pause lawfully, capture masked evidence only, and never bypass a provider challenge."
+    },
+    {
+      "source_ref": "Algorithm/observability_and_audit_contract.md::durable-operational-evidence",
+      "rationale": "Manual checkpoints require durable, typed evidence rather than ephemeral chat memory or free-form notes."
+    }
+  ]
+}

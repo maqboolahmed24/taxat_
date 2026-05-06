@@ -74,26 +74,189 @@ ENFORCEMENT_FILES = {
     "Algorithm/requirements-dev.txt",
 }
 PROMPT_SPECIAL_FILES = {
-    "PROMPT/AGENT.md": {"prompt_subtype": "agent_protocol", "referenced_primary_objects": ["task_claim_protocol"]},
-    "PROMPT/Checklist.md": {"prompt_subtype": "task_board", "referenced_primary_objects": ["task_checklist"]},
+    "PROMPT/AGENT.md": {
+        "prompt_subtype": "agent_protocol",
+        "referenced_primary_objects": ["task_claim_protocol"],
+    },
+    "PROMPT/Checklist.md": {
+        "prompt_subtype": "task_board",
+        "referenced_primary_objects": ["task_checklist"],
+    },
 }
 DOMAIN_KEYWORDS = {
-    "engine": {"engine", "module", "modules", "data", "model", "state", "states", "gate", "gates", "parity", "trust", "decision", "twin", "formula", "formulas", "invariant", "invariants"},
-    "manifest_replay": {"manifest", "replay", "reproducibility", "config", "freeze", "continuation", "branch", "child", "reuse", "nightly", "late", "retroactive", "input", "baseline"},
-    "evidence_provenance": {"evidence", "provenance", "canonical", "candidate", "conflict", "snapshot", "source", "proof", "graph", "filing", "enquiry"},
-    "authority": {"authority", "delegation", "oauth", "hmrc", "obligation", "submission", "fraud", "correction", "ingress", "binding"},
-    "workflow": {"workflow", "failure", "remediation", "error", "compensation", "resolution", "notice", "queue", "assignment", "work_item", "work_item_notification"},
-    "governance": {"governance", "policy", "tenant", "role", "blast", "risk", "principal", "access", "retention_governance", "investigation"},
-    "frontend_shell": {"frontend", "shell", "route", "interaction", "focus", "semantic", "selector", "accessibility", "continuity", "return", "low", "noise", "design", "stream"},
-    "portal": {"portal", "client", "customer", "upload", "approval", "onboarding", "timeline", "document", "help", "language"},
-    "collaboration": {"collaboration", "workspace", "thread", "attachment", "participant", "activity", "inbox"},
-    "security_runtime": {"security", "runtime", "session", "auth", "authorization", "secret", "cors", "csrf", "transport"},
+    "engine": {
+        "engine",
+        "module",
+        "modules",
+        "data",
+        "model",
+        "state",
+        "states",
+        "gate",
+        "gates",
+        "parity",
+        "trust",
+        "decision",
+        "twin",
+        "formula",
+        "formulas",
+        "invariant",
+        "invariants",
+    },
+    "manifest_replay": {
+        "manifest",
+        "replay",
+        "reproducibility",
+        "config",
+        "freeze",
+        "continuation",
+        "branch",
+        "child",
+        "reuse",
+        "nightly",
+        "late",
+        "retroactive",
+        "input",
+        "baseline",
+    },
+    "evidence_provenance": {
+        "evidence",
+        "provenance",
+        "canonical",
+        "candidate",
+        "conflict",
+        "snapshot",
+        "source",
+        "proof",
+        "graph",
+        "filing",
+        "enquiry",
+    },
+    "authority": {
+        "authority",
+        "delegation",
+        "oauth",
+        "hmrc",
+        "obligation",
+        "submission",
+        "fraud",
+        "correction",
+        "ingress",
+        "binding",
+    },
+    "workflow": {
+        "workflow",
+        "failure",
+        "remediation",
+        "error",
+        "compensation",
+        "resolution",
+        "notice",
+        "queue",
+        "assignment",
+        "work_item",
+        "work_item_notification",
+    },
+    "governance": {
+        "governance",
+        "policy",
+        "tenant",
+        "role",
+        "blast",
+        "risk",
+        "principal",
+        "access",
+        "retention_governance",
+        "investigation",
+    },
+    "frontend_shell": {
+        "frontend",
+        "shell",
+        "route",
+        "interaction",
+        "focus",
+        "semantic",
+        "selector",
+        "accessibility",
+        "continuity",
+        "return",
+        "low",
+        "noise",
+        "design",
+        "stream",
+    },
+    "portal": {
+        "portal",
+        "client",
+        "customer",
+        "upload",
+        "approval",
+        "onboarding",
+        "timeline",
+        "document",
+        "help",
+        "language",
+    },
+    "collaboration": {
+        "collaboration",
+        "workspace",
+        "thread",
+        "attachment",
+        "participant",
+        "activity",
+        "inbox",
+    },
+    "security_runtime": {
+        "security",
+        "runtime",
+        "session",
+        "auth",
+        "authorization",
+        "secret",
+        "cors",
+        "csrf",
+        "transport",
+    },
     "retention_privacy": {"retention", "privacy", "erasure", "hold", "expiry", "explainability"},
     "observability": {"observability", "audit", "trace", "metric", "metrics", "log", "telemetry"},
-    "validation": {"validate", "validation", "verification", "vector", "vectors", "constraint", "coverage", "integrity", "forensic", "schema", "sample", "guard"},
+    "validation": {
+        "validate",
+        "validation",
+        "verification",
+        "vector",
+        "vectors",
+        "constraint",
+        "coverage",
+        "integrity",
+        "forensic",
+        "schema",
+        "sample",
+        "guard",
+    },
     "prompting": {"prompt", "agent", "checklist", "card", "cards"},
-    "release_resilience": {"deployment", "release", "resilience", "recovery", "restore", "checkpoint", "canary", "migration", "compatibility", "candidate", "promotion"},
-    "api_transport": {"api", "northbound", "command", "commands", "etag", "stream", "problem", "receipt"},
+    "release_resilience": {
+        "deployment",
+        "release",
+        "resilience",
+        "recovery",
+        "restore",
+        "checkpoint",
+        "canary",
+        "migration",
+        "compatibility",
+        "candidate",
+        "promotion",
+    },
+    "api_transport": {
+        "api",
+        "northbound",
+        "command",
+        "commands",
+        "etag",
+        "stream",
+        "problem",
+        "receipt",
+    },
     "archive_packaging": {"archive", "residue", "macosx", "finder", "packaging"},
     "coherence": {"coherence", "glossary", "reference", "requirements", "overview", "conventions"},
 }
@@ -192,7 +355,9 @@ def build_schema_infos() -> tuple[dict[str, SchemaInfo], dict[str, list[str]]]:
             related_samples=sorted(sample_paths_by_stem.get(stem, [])),
             search_terms=search_terms,
         )
-    return schema_infos, {stem: sorted(paths) for stem, paths in sorted(sample_paths_by_stem.items())}
+    return schema_infos, {
+        stem: sorted(paths) for stem, paths in sorted(sample_paths_by_stem.items())
+    }
 
 
 def parse_markdown(path: Path) -> tuple[str | None, list[dict[str, Any]]]:
@@ -320,7 +485,9 @@ def score_domains(text_fragments: list[str]) -> tuple[str, list[str]]:
     return primary, sorted(set(secondary))
 
 
-def domain_for_row(relative_path: str, title: str | None, headings: list[dict[str, Any]], authority_level: str) -> tuple[str, list[str]]:
+def domain_for_row(
+    relative_path: str, title: str | None, headings: list[dict[str, Any]], authority_level: str
+) -> tuple[str, list[str]]:
     if relative_path.startswith("PROMPT/"):
         return "prompting", []
     if authority_level == "historical_closure":
@@ -331,9 +498,16 @@ def domain_for_row(relative_path: str, title: str | None, headings: list[dict[st
         return "coherence", ["validation"]
     if authority_level == "enforcement":
         if relative_path.startswith("Algorithm/schemas/"):
-            stem = Path(relative_path).name.replace(".schema.json", "").replace("sample_", "").replace(".json", "")
+            stem = (
+                Path(relative_path)
+                .name.replace(".schema.json", "")
+                .replace("sample_", "")
+                .replace(".json", "")
+            )
             primary, secondary = score_domains([stem])
-            return primary if primary != "coherence" else "validation", sorted(set(secondary + ["validation"]))
+            return primary if primary != "coherence" else "validation", sorted(
+                set(secondary + ["validation"])
+            )
         return "validation", []
     if relative_path in {
         "Algorithm/core_engine.md",
@@ -435,11 +609,15 @@ def domain_for_row(relative_path: str, title: str | None, headings: list[dict[st
     }:
         return "release_resilience", ["validation"]
 
-    title_fragments = [Path(relative_path).stem, title or ""] + [heading["heading_text"] for heading in headings[:12]]
+    title_fragments = [Path(relative_path).stem, title or ""] + [
+        heading["heading_text"] for heading in headings[:12]
+    ]
     return score_domains(title_fragments)
 
 
-def discover_related_schemas_for_markdown(text: str, schema_infos: dict[str, SchemaInfo]) -> list[str]:
+def discover_related_schemas_for_markdown(
+    text: str, schema_infos: dict[str, SchemaInfo]
+) -> list[str]:
     normalized = normalize_text(text)
     matches = []
     for info in schema_infos.values():
@@ -453,9 +631,17 @@ def discover_related_schemas_for_markdown(text: str, schema_infos: dict[str, Sch
 def discover_related_scripts(text: str) -> list[str]:
     normalized = normalize_text(text)
     script_matches = []
-    if "validate contracts" in normalized or "validate_contracts" in normalized or "self test" in normalized:
+    if (
+        "validate contracts" in normalized
+        or "validate_contracts" in normalized
+        or "self test" in normalized
+    ):
         script_matches.append(CANONICAL_SCRIPT_FILES[0])
-    if "forensic contract guard" in normalized or "forensic guard" in normalized or "forensic_contract_guard" in normalized:
+    if (
+        "forensic contract guard" in normalized
+        or "forensic guard" in normalized
+        or "forensic_contract_guard" in normalized
+    ):
         script_matches.append(CANONICAL_SCRIPT_FILES[1])
     return sorted(set(script_matches))
 
@@ -482,15 +668,21 @@ def build_primary_objects(
     if relative_path.endswith(".py"):
         return [Path(relative_path).stem]
 
-    object_names = [Path(schema_path).name[: -len(".schema.json")] for schema_path in related_schema_files]
+    object_names = [
+        Path(schema_path).name[: -len(".schema.json")] for schema_path in related_schema_files
+    ]
     if not object_names:
         source = title or Path(relative_path).stem.replace("_", " ")
         object_names = [slugify(source).replace("-", "_")]
-    heading_names = [slugify(heading["heading_text"]).replace("-", "_") for heading in headings[1:4]]
+    heading_names = [
+        slugify(heading["heading_text"]).replace("-", "_") for heading in headings[1:4]
+    ]
     return sorted(set(object_names + heading_names[:3]))
 
 
-def build_prompt_relations(checklist_card_paths: set[str], card_paths: set[str]) -> dict[str, list[str]]:
+def build_prompt_relations(
+    checklist_card_paths: set[str], card_paths: set[str]
+) -> dict[str, list[str]]:
     relations: dict[str, list[str]] = {}
     for path in sorted(card_paths):
         relations[path] = ["checklist_card_entry"] if path in checklist_card_paths else []
@@ -514,7 +706,9 @@ def build_taxonomy(schema_infos: dict[str, SchemaInfo]) -> dict[str, Any]:
             "historical_closure_files": sorted(HISTORICAL_CLOSURE_FILES),
             "enforcement_files": sorted(ENFORCEMENT_FILES),
         },
-        "domain_keyword_rules": {domain: sorted(keywords) for domain, keywords in sorted(DOMAIN_KEYWORDS.items())},
+        "domain_keyword_rules": {
+            domain: sorted(keywords) for domain, keywords in sorted(DOMAIN_KEYWORDS.items())
+        },
         "schema_inventory_baseline": {
             "schema_count": len(schema_infos),
             "sample_count": sum(len(info.related_samples) for info in schema_infos.values()),
@@ -542,7 +736,9 @@ def build_inventory() -> dict[str, Any]:
         for line in checklist_entries
     }
     card_paths = {repo_rel(path) for path in (PROMPT_DIR / "CARDS").glob("pc_*.md")}
-    prompt_relations = build_prompt_relations(checklist_card_paths=checklist_card_paths, card_paths=card_paths)
+    prompt_relations = build_prompt_relations(
+        checklist_card_paths=checklist_card_paths, card_paths=card_paths
+    )
 
     inventory_rows: list[dict[str, Any]] = []
     heading_rows: list[dict[str, Any]] = []
@@ -617,7 +813,10 @@ def build_inventory() -> dict[str, Any]:
                 inventory_notes = [prompt_meta.get("prompt_subtype", "prompt_scaffold_file")]
                 if repo_rel(file_path) in prompt_relations:
                     inventory_notes.extend(prompt_relations[repo_rel(file_path)])
-                if repo_rel(file_path).startswith("PROMPT/CARDS/") and repo_rel(file_path) not in checklist_card_paths:
+                if (
+                    repo_rel(file_path).startswith("PROMPT/CARDS/")
+                    and repo_rel(file_path) not in checklist_card_paths
+                ):
                     prompt_relation_gaps.append(
                         {
                             "path": repo_rel(file_path),
@@ -656,7 +855,9 @@ def build_inventory() -> dict[str, Any]:
                         }
                         for heading in headings
                     )
-                    related_schema_files = discover_related_schemas_for_markdown(file_text, schema_infos)
+                    related_schema_files = discover_related_schemas_for_markdown(
+                        file_text, schema_infos
+                    )
                     related_sample_files = sorted(
                         {
                             sample_path
@@ -681,7 +882,9 @@ def build_inventory() -> dict[str, Any]:
                 elif file_path.name.startswith("sample_") and file_path.suffix == ".json":
                     schema_stem = file_path.name[len("sample_") : -len(".json")]
                     title_or_schema_id = schema_stem
-                    related_schema_files = [schema_infos[schema_stem].path] if schema_stem in schema_infos else []
+                    related_schema_files = (
+                        [schema_infos[schema_stem].path] if schema_stem in schema_infos else []
+                    )
                     related_sample_files = []
                     related_script_files = [CANONICAL_SCRIPT_FILES[0]]
                     inventory_notes = ["schema_sample_payload"]
@@ -766,7 +969,9 @@ def build_inventory() -> dict[str, Any]:
                 )
 
     inventory_rows.sort(key=lambda row: row["path"])
-    heading_rows.sort(key=lambda row: (row["path"], row["line_number"], row["heading_level"], row["heading_text"]))
+    heading_rows.sort(
+        key=lambda row: (row["path"], row["line_number"], row["heading_level"], row["heading_text"])
+    )
 
     for heading_row in heading_rows:
         owner = next(row for row in inventory_rows if row["path"] == heading_row["path"])
@@ -887,9 +1092,13 @@ def write_outputs(payload: dict[str, Any]) -> None:
                     "size_bytes": row["size_bytes"],
                     "authority_level": row["authority_level"],
                     "domain_family": row["domain_family"],
-                    "secondary_domain_families": json.dumps(row["secondary_domain_families"], sort_keys=True),
+                    "secondary_domain_families": json.dumps(
+                        row["secondary_domain_families"], sort_keys=True
+                    ),
                     "title_or_schema_id": row["title_or_schema_id"] or "",
-                    "referenced_primary_objects": json.dumps(row["referenced_primary_objects"], sort_keys=True),
+                    "referenced_primary_objects": json.dumps(
+                        row["referenced_primary_objects"], sort_keys=True
+                    ),
                     "related_schema_files": json.dumps(row["related_schema_files"], sort_keys=True),
                     "related_sample_files": json.dumps(row["related_sample_files"], sort_keys=True),
                     "related_script_files": json.dumps(row["related_script_files"], sort_keys=True),
@@ -976,7 +1185,7 @@ def write_outputs(payload: dict[str, Any]) -> None:
                 f"### `{authority}`",
                 "",
                 f"- Count: `{len(rows)}`",
-                f"- Representative paths: {', '.join(f'`{row['path']}`' for row in rows[:8])}",
+                f"- Representative paths: {', '.join(f'`{row["path"]}`' for row in rows[:8])}",
                 "",
             ]
         )
@@ -989,7 +1198,7 @@ def write_outputs(payload: dict[str, Any]) -> None:
                 f"### `{domain}`",
                 "",
                 f"- Count: `{len(rows)}`",
-                f"- Representative paths: {', '.join(f'`{row['path']}`' for row in rows[:8])}",
+                f"- Representative paths: {', '.join(f'`{row["path"]}`' for row in rows[:8])}",
                 "",
             ]
         )
@@ -1004,7 +1213,9 @@ def main() -> int:
         "row_count": payload["inventory_manifest"]["row_count"],
         "heading_row_count": payload["inventory_manifest"]["heading_row_count"],
         "schema_count": len(payload["schema_sample_inventory"]["schemas"]),
-        "schemas_without_prose_owner": payload["orphan_payload"]["summary"]["schemas_with_no_obvious_prose_owner"],
+        "schemas_without_prose_owner": payload["orphan_payload"]["summary"][
+            "schemas_with_no_obvious_prose_owner"
+        ],
         "samples_without_schema": payload["orphan_payload"]["summary"]["samples_with_no_schema"],
     }
     print(json.dumps(summary, indent=2, sort_keys=True))

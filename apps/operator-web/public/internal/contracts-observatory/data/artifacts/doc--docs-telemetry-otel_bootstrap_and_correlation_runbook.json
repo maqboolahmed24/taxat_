@@ -1,0 +1,377 @@
+{
+  "artifactVersion": "CONTRACT_OBSERVATORY_ARTIFACT_V1",
+  "artifactSlug": "doc--docs-telemetry-otel_bootstrap_and_correlation_runbook",
+  "artifactKind": "MARKDOWN",
+  "sectionRef": "SUPPORT_DOCS",
+  "authorityLevel": "SUPPORTING_REFERENCE",
+  "sourceTruthBadge": "Support Documentation",
+  "tone": "slate",
+  "title": "OpenTelemetry Bootstrap And Correlation Runbook",
+  "subtitle": "docs/telemetry/otel_bootstrap_and_correlation_runbook.md",
+  "summary": "",
+  "canonicalPath": "docs/telemetry/otel_bootstrap_and_correlation_runbook.md",
+  "sourceLineage": [
+    "docs/telemetry/otel_bootstrap_and_correlation_runbook.md"
+  ],
+  "headingCount": 11,
+  "headings": [
+    {
+      "level": 1,
+      "text": "OpenTelemetry Bootstrap And Correlation Runbook",
+      "slug": "opentelemetry-bootstrap-and-correlation-runbook"
+    },
+    {
+      "level": 2,
+      "text": "Purpose",
+      "slug": "purpose"
+    },
+    {
+      "level": 2,
+      "text": "Boundary",
+      "slug": "boundary"
+    },
+    {
+      "level": 2,
+      "text": "Bootstrap flow",
+      "slug": "bootstrap-flow"
+    },
+    {
+      "level": 2,
+      "text": "Resource identity",
+      "slug": "resource-identity"
+    },
+    {
+      "level": 2,
+      "text": "Correlation rules",
+      "slug": "correlation-rules"
+    },
+    {
+      "level": 2,
+      "text": "Sampling rules",
+      "slug": "sampling-rules"
+    },
+    {
+      "level": 2,
+      "text": "Logging rules",
+      "slug": "logging-rules"
+    },
+    {
+      "level": 2,
+      "text": "Client-surface rules",
+      "slug": "client-surface-rules"
+    },
+    {
+      "level": 2,
+      "text": "Boundary-specific notes",
+      "slug": "boundary-specific-notes"
+    },
+    {
+      "level": 2,
+      "text": "Operator surface",
+      "slug": "operator-surface"
+    }
+  ],
+  "proseSections": [
+    {
+      "headingSlug": "opentelemetry-bootstrap-and-correlation-runbook",
+      "headingText": "OpenTelemetry Bootstrap And Correlation Runbook",
+      "level": 1,
+      "lines": [
+        ""
+      ],
+      "plainText": "",
+      "excerpt": "",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "purpose",
+      "headingText": "Purpose",
+      "level": 2,
+      "lines": [
+        "",
+        "`packages/telemetry` is the governed application-runtime seam for traces, metrics, logs, HTTP propagation, queue propagation, stream publication, upload continuation, and client-surface telemetry.",
+        "It exists so later services do not invent their own correlation shape, redaction rules, or sampling posture.",
+        ""
+      ],
+      "plainText": "packages/telemetry is the governed application runtime seam for traces, metrics, logs, HTTP propagation, queue propagation, stream publication, upload continuation, and client surface telemetry. It exists so later services do not invent their own correlation shape, redaction rules, or sampling posture.",
+      "excerpt": "packages/telemetry is the governed application runtime seam for traces, metrics, logs, HTTP propagation, queue propagation, stream publication, upload continuation, and client sur…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "boundary",
+      "headingText": "Boundary",
+      "level": 2,
+      "lines": [
+        "",
+        "- Telemetry is operational explanation.",
+        "- Audit remains append-only proof.",
+        "- Shared correlation keys make traces, metrics, logs, and audit joinable.",
+        "- No runtime path may treat inbound transport baggage or trace headers as authoritative business truth.",
+        ""
+      ],
+      "plainText": "Telemetry is operational explanation. Audit remains append only proof. Shared correlation keys make traces, metrics, logs, and audit joinable. No runtime path may treat inbound transport baggage or trace headers as authoritative business truth.",
+      "excerpt": "Telemetry is operational explanation. Audit remains append only proof. Shared correlation keys make traces, metrics, logs, and audit joinable. No runtime path may treat inbound tr…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "bootstrap-flow",
+      "headingText": "Bootstrap flow",
+      "level": 2,
+      "lines": [
+        "",
+        "1. Load `config/telemetry/telemetry_signal_catalog.json`.",
+        "   This declares the signal families and the explicit telemetry-versus-audit boundary.",
+        "2. Load `config/telemetry/correlation_key_matrix.json`.",
+        "   This declares the canonical correlation contract, mandatory resource attributes, and the per-boundary retained/redacted keys.",
+        "3. Load `config/telemetry/sampling_class_policy.json`.",
+        "   This maps span codes, metric families, and log families to retention and sampling posture.",
+        "4. Load `config/telemetry/log_redaction_policy.json`.",
+        "   This makes secret, token, copied-UI, DOM, screenshot, and payload leakage structurally impossible in the shared adapter.",
+        "5. Build one canonical `TelemetryResource`.",
+        "   Every later trace, metric, and log record points at that resource id.",
+        "6. Register propagators once.",
+        "   Use W3C `traceparent` for transport continuity plus the bounded internal correlation carrier only for trusted internal service and message boundaries.",
+        ""
+      ],
+      "plainText": "1. Load config/telemetry/telemetry signal catalog.json. This declares the signal families and the explicit telemetry versus audit boundary. 2. Load config/telemetry/correlation key matrix.json. This declares the canonical correlation contract, mandatory resource attributes, and the per boundary retained/redacted keys. 3. Load config/telemetry/sampling class policy.json. This maps span codes, metric families, and log families to retention and sampling posture. 4. Load config/telemetry/log redaction policy.json. This makes secret, token, copied UI, DOM, screenshot, and payload leakage structurally impossible in the shared adapter. 5. Build one canonical TelemetryResource. Every later trace, metric, and log record points at that resource id. 6. Register propagators once. Use W3C traceparent for transport continuity plus the bounded internal correlation carrier only for trusted internal service and message boundaries.",
+      "excerpt": "1. Load config/telemetry/telemetry signal catalog.json. This declares the signal families and the explicit telemetry versus audit boundary. 2. Load config/telemetry/correlation ke…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "resource-identity",
+      "headingText": "Resource identity",
+      "level": 2,
+      "lines": [
+        "",
+        "Every resource must include:",
+        "",
+        "- `service.name`",
+        "- `service.namespace`",
+        "- `deployment.environment.name`",
+        "- `service.instance.id`",
+        "- `taxat.release.candidate_hash`",
+        "- `taxat.build.artifact_digest`",
+        "- `taxat.schema.bundle_hash`",
+        "- `taxat.workspace.id`",
+        "",
+        "These attributes freeze the build/deployment tuple used to join runtime signals safely.",
+        ""
+      ],
+      "plainText": "Every resource must include: service.name service.namespace deployment.environment.name service.instance.id taxat.release.candidate hash taxat.build.artifact digest taxat.schema.bundle hash taxat.workspace.id These attributes freeze the build/deployment tuple used to join runtime signals safely.",
+      "excerpt": "Every resource must include: service.name service.namespace deployment.environment.name service.instance.id taxat.release.candidate hash taxat.build.artifact digest taxat.schema.b…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "correlation-rules",
+      "headingText": "Correlation rules",
+      "level": 2,
+      "lines": [
+        "",
+        "- `tenant_id`, `trace_id`, `service_name`, `environment_ref`, and `code_build_id` are mandatory on the shared correlation spine.",
+        "- `manifest_id`, `submission_record_id`, `authority_operation_id`, and `workflow_item_id` are the primary audit join anchors when applicable.",
+        "- Public HTTP ingress may contribute transport trace continuity only.",
+        "- Internal HTTP, queue, stream, and upload continuation may carry the bounded internal correlation carrier.",
+        "- Authoritative business lineage always comes from server-authored context, not from public headers or browser-authored baggage.",
+        ""
+      ],
+      "plainText": "tenant id, trace id, service name, environment ref, and code build id are mandatory on the shared correlation spine. manifest id, submission record id, authority operation id, and workflow item id are the primary audit join anchors when applicable. Public HTTP ingress may contribute transport trace continuity only. Internal HTTP, queue, stream, and upload continuation may carry the bounded internal correlation carrier. Authoritative business lineage always comes from server authored context, not from public headers or browser authored baggage.",
+      "excerpt": "tenant id, trace id, service name, environment ref, and code build id are mandatory on the shared correlation spine. manifest id, submission record id, authority operation id, and…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "sampling-rules",
+      "headingText": "Sampling rules",
+      "level": 2,
+      "lines": [
+        "",
+        "- `MANDATORY_FORENSIC`:",
+        "  authority, filing, amendment, retention, and erasure spans.",
+        "- `DETERMINISTIC_RETAIN`:",
+        "  run-root and lineage-decision spans.",
+        "- `SAMPLED_OPERATIONAL`:",
+        "  general operational spans such as source collection, compute, parity, trust, and snapshot build.",
+        "- `CLIENT_LOW_NOISE`:",
+        "  browser-owned route/module/posture/timing telemetry only.",
+        "",
+        "Sampling may reduce operational trace volume.",
+        "It never removes mandatory audit evidence.",
+        ""
+      ],
+      "plainText": "MANDATORY FORENSIC: authority, filing, amendment, retention, and erasure spans. DETERMINISTIC RETAIN: run root and lineage decision spans. SAMPLED OPERATIONAL: general operational spans such as source collection, compute, parity, trust, and snapshot build. CLIENT LOW NOISE: browser owned route/module/posture/timing telemetry only. Sampling may reduce operational trace volume. It never removes mandatory audit evidence.",
+      "excerpt": "MANDATORY FORENSIC: authority, filing, amendment, retention, and erasure spans. DETERMINISTIC RETAIN: run root and lineage decision spans. SAMPLED OPERATIONAL: general operational…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "logging-rules",
+      "headingText": "Logging rules",
+      "level": 2,
+      "lines": [
+        "",
+        "- Logs are schema-aligned and structured.",
+        "- Warning-or-higher logs require structured fields.",
+        "- Error and fatal logs require `error_id`.",
+        "- Session, access-control, authority-edge, and privacy/retention logs use tighter access tiers than generic runtime logs.",
+        "- Raw secrets, tokens, cookies, masked values, copied UI text, DOM snapshots, screenshots, clipboard contents, and document text remain forbidden.",
+        ""
+      ],
+      "plainText": "Logs are schema aligned and structured. Warning or higher logs require structured fields. Error and fatal logs require error id. Session, access control, authority edge, and privacy/retention logs use tighter access tiers than generic runtime logs. Raw secrets, tokens, cookies, masked values, copied UI text, DOM snapshots, screenshots, clipboard contents, and document text remain forbidden.",
+      "excerpt": "Logs are schema aligned and structured. Warning or higher logs require structured fields. Error and fatal logs require error id. Session, access control, authority edge, and priva…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "client-surface-rules",
+      "headingText": "Client-surface rules",
+      "level": 2,
+      "lines": [
+        "",
+        "Allowed client-side fields:",
+        "",
+        "- `shell_family`",
+        "- `route_family`",
+        "- `module_code`",
+        "- `posture_code`",
+        "- `action_code`",
+        "- `recovery_outcome`",
+        "- `performance_bucket_ms`",
+        "- `accessibility_pref`",
+        "- `opaque_object_ref`",
+        "- `error_code`",
+        "- `error_id`",
+        "",
+        "Forbidden client-side fields include:",
+        "",
+        "- copied UI text",
+        "- document filenames",
+        "- clipboard contents",
+        "- DOM snapshots",
+        "- screenshot payloads",
+        "- declaration or evidence text",
+        "- keystroke streams",
+        "",
+        "If a capture mode cannot prove redaction for a regulated surface, disable it on that surface.",
+        ""
+      ],
+      "plainText": "Allowed client side fields: shell family route family module code posture code action code recovery outcome performance bucket ms accessibility pref opaque object ref error code error id Forbidden client side fields include: copied UI text document filenames clipboard contents DOM snapshots screenshot payloads declaration or evidence text keystroke streams If a capture mode cannot prove redaction for a regulated surface, disable it on that surface.",
+      "excerpt": "Allowed client side fields: shell family route family module code posture code action code recovery outcome performance bucket ms accessibility pref opaque object ref error code e…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "boundary-specific-notes",
+      "headingText": "Boundary-specific notes",
+      "level": 2,
+      "lines": [
+        "",
+        "- Queue and upload continuation propagation may preserve hashed transport refs plus safe workflow/session/storage refs only.",
+        "- Stream publication may correlate through hashed resume bindings only.",
+        "- Client surfaces may correlate to server telemetry, but they never widen visibility or disclosure rights.",
+        ""
+      ],
+      "plainText": "Queue and upload continuation propagation may preserve hashed transport refs plus safe workflow/session/storage refs only. Stream publication may correlate through hashed resume bindings only. Client surfaces may correlate to server telemetry, but they never widen visibility or disclosure rights.",
+      "excerpt": "Queue and upload continuation propagation may preserve hashed transport refs plus safe workflow/session/storage refs only. Stream publication may correlate through hashed resume b…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    },
+    {
+      "headingSlug": "operator-surface",
+      "headingText": "Operator surface",
+      "level": 2,
+      "lines": [
+        "",
+        "`apps/operator-web/public/internal/telemetry-correlation-atlas` is a read-only explanatory viewer.",
+        "It shows:",
+        "",
+        "- the root correlation contract",
+        "- the signal-family rails",
+        "- the HTTP, queue, stream, and client propagation boundaries",
+        "- the redacted versus retained keys",
+        "- the explicit audit join boundary",
+        "",
+        "It is not a live telemetry or vendor-backend control plane.",
+        ""
+      ],
+      "plainText": "apps/operator web/public/internal/telemetry correlation atlas is a read only explanatory viewer. It shows: the root correlation contract the signal family rails the HTTP, queue, stream, and client propagation boundaries the redacted versus retained keys the explicit audit join boundary It is not a live telemetry or vendor backend control plane.",
+      "excerpt": "apps/operator web/public/internal/telemetry correlation atlas is a read only explanatory viewer. It shows: the root correlation contract the signal family rails the HTTP, queue, s…",
+      "mentionedSchemaTokens": [],
+      "mentionedSampleTokens": [],
+      "mentionedTaskIds": []
+    }
+  ],
+  "schemaIdentityOrNull": null,
+  "schemaFields": [],
+  "samplePointers": [],
+  "sampleIdentityOrNull": null,
+  "bindingIdentityOrNull": null,
+  "validatorIdentityOrNull": null,
+  "driftIdentityOrNull": null,
+  "headerStrip": {
+    "kind": "PROSE",
+    "badgeLabel": "Support Documentation",
+    "metricPairs": [
+      {
+        "label": "Headings",
+        "value": "11"
+      },
+      {
+        "label": "Schemas",
+        "value": "0"
+      },
+      {
+        "label": "Tasks",
+        "value": "0"
+      }
+    ]
+  },
+  "relationships": {
+    "schemas": [],
+    "samples": [],
+    "bindings": [],
+    "validators": [],
+    "docs": [],
+    "tasks": []
+  },
+  "sourceTruthStack": {
+    "file": [
+      "docs/telemetry/otel_bootstrap_and_correlation_runbook.md"
+    ],
+    "headings": [
+      "OpenTelemetry Bootstrap And Correlation Runbook",
+      "Purpose",
+      "Boundary",
+      "Bootstrap flow",
+      "Resource identity",
+      "Correlation rules",
+      "Sampling rules",
+      "Logging rules",
+      "Client-surface rules",
+      "Boundary-specific notes",
+      "Operator surface"
+    ],
+    "schemaRefs": [],
+    "sampleRefs": [],
+    "bindingRefs": [],
+    "validatorRefs": [],
+    "driftRefs": [],
+    "taskRefs": []
+  },
+  "fieldCrosslinks": [],
+  "taskRefs": []
+}
